@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <script type="text/javascript" src="../oui/oui.js"></script>
+</head>
+<body>
+base.js demo
+</body>
+</html>
+<script type="text/javascript">
+    
+console.log(new Date().getTime());
+
+//常规格式化
+console.log('abc'.format(20));
+
+var str = '你好:{0}，这是用{0}写的一个仿C#的{1}函数';
+
+console.log(str.format(['JS', 'format']));
+console.log(str.format('JS', 'format'));
+
+console.log("{0}{{正则{0:F5}{{表达式}}{1:F4}".format(123.5, 12.5))
+
+console.log("{0}{{正则{0:F5}{{表达式}}{1:0D12}".format(123.5, 2))
+
+console.log("{0:00:00:00}".format(1234567));
+
+console.log("{0:0000年00月00日 00:00:00}".format(20160824172215));
+
+console.log("{0:0000年00月00日}".format(20160824));
+
+console.log("0DF5: {0:0DF5}".format(1234567));
+console.log("0000: {0:0000}".format(2));
+
+console.log('<tr lang="{{id:{0},pid:{1},level:{2}}}">'.format([1, 2, 0]));
+
+
+console.log(new Date().getTime());
+
+//增加了字面量对象参数，这个字面量对象参数必须放在参数的第1个位置，如果加了字面量对象参数，则数字参数索引必须从1开始
+
+var data = { id: 123, name: '张三', obj: { num: 321, con: { val: 'acc' } } };
+var s = 'Id:{id}, Val:{obj.con.val3|asd}, Code:{1}, Name:{name}'.format(data, 'Test');
+console.log(s);
+var s = 'Id:{id}, Val:{obj.con.val3|12}, Code:{1}, Name:{name}'.format(data, 'Test');
+console.log(s);
+var s = 'Id:{id}, Val:{obj.con.val|ABC}, Code:{1}, Num:{obj.num}, Name:{name}'.format(data, 'Test');
+console.log(s);
+
+var s = 'lang="{{id:{obj.id},pid:{obj.pid},level:{obj.level}}}"'.format({ obj: { id: 12, pid: 1, level: 1 } });
+console.log(s);
+var s = 'lang="{{id:{id},pid:{pid},level:{level}}}"'.format({ id: 12, pid: 1, level: 1 });
+console.log(s);
+var s = 'lang="{{id:{id},pid:{pid},level:{level|0}}}"'.format({ id: 12, pid: 0 });
+console.log(s);
+
+
+//增加 String.format 方法
+var str = '{0:D4},{1}';
+console.log(String.format(str, 20, 'abc'));
+console.log(String.format(str, 20, 'abc'));
+
+console.log(new Date().getTime());
+
+console.log('D4: {0:D4}'.format(20));
+console.log('D4: {0:D4}'.format('20'));
+//连接符分隔数字
+console.log('-344: {0:-344}'.format(13612345678));
+//连接符分隔字符串
+console.log('-349: {0:-349}'.format('13612345678'));
+//连接符分隔字符串
+console.log('-34: {0:-34}'.format('13612345678'));
+console.log('-4: {0:-4}'.format('057412345678'));
+console.log('S4: {0:S4}'.format('1234567890123456789'));
+
+//冒号分隔十六进制数字字符串
+console.log(':2: {0::2}'.format('A2D3F4B6C1D2'));
+
+//空格分隔数字
+var num = 330201198601011100;
+console.log('S684: {0:S684}'.format(num));
+
+//空格分隔数字字符串
+console.log('S683: {0:S683}'.format('330201198601015261'));
+
+console.log('D4: ', String.format('{0:D4}', 0x10));
+
+console.log('G4: {0:G3}'.format(20234.512));
+console.log(String.format('[20234.15] E8: {0:e8}', 20234.15));
+
+console.log('F3：{0:F3}'.format(1.2345));
+console.log('R3：{0:R3}'.format(1.2345));
+console.log('C3：{0:C3}'.format(1234567.25));
+console.log('C2：{0:C2}'.format(1234567));
+console.log('C：{0:C}'.format(1234567));
+console.log('N3：{0:N3}'.format(1234567.55555));
+console.log('X：{0:X5}'.format(-250));
+
+console.log('0xF3：{0:F3}'.format(0xFA));
+console.log('0xF3：{0:R3}'.format(0xFA));
+console.log('0xC3：{0:C3}'.format(0xFA));
+console.log('0xC2：{0:C2}'.format(0xFA));
+console.log('0xC：{0:C}'.format(0xFA));
+console.log('0xN3：{0:N3}'.format(0xFA));
+console.log('0xX：{0:X5}'.format(0xFA));
+console.log('0xD：{0:D4}'.format(0xFA));
+
+console.log('{{0}}：{0}%'.format(0.2512345.mul(100).round(3)));
+console.log('P：{0:P}'.format(0.2512345));
+console.log('%3：{0:%3}'.format(0.25123456));
+
+console.log(new Date().getTime());
+
+console.log('Start: ', new Date().getTime());
+var d = new Date();
+console.log(d.format());
+console.log(d.format(''));
+console.log(d.format('yyyy-MM-dd HH:mm:ss'));
+console.log(d.format('yyyy-MM-dd HH:mm:ss.fff'));
+console.log(d.format('yyyy-M-d H:m:s'));
+console.log(d.format('yyyy/M/d h:m:s'));
+console.log(d.format('yyyy/MM/dd HH:mm:ss'));
+console.log(d.format('yyyy/MM/dd HH:mm:ss.fff'));
+console.log(d.format('yyyyMMddHHmmssfff'));
+console.log(d.format('yyyyMMddHHmmss'));
+console.log(d.format('yyyy-MM-dd'));
+console.log(d.format('yyyyMMdd'));
+console.log(d.format('HH:mm:ss'));
+console.log(d.format('MM/dd/yyyy HH:mm:ss'));
+console.log(d.format('yyyy年MM月dd日 HH:mm:ss'));
+console.log(d.format('yyyy年MM月dd日 HH时mm分ss秒'));
+console.log(d.format('timestamp'));
+
+console.log('2018-06-23 22:12:15'.toDate().format('yyyy年MM月dd日 hh:mm:ss'));
+console.log('2018-6-23 22:12:15'.toDate().format('yyyy年MM月dd日 HH:mm:ss'));
+console.log('2018-6-13 0:12:15'.toDate().format('yyyy年MM月dd日 hh:mm:ss'));
+console.log('End: ', new Date().getTime());
+
+
+var d1 = '2018-06-23 22:12:15.123'.toDate();
+var ts = d1.format('timestamp', 10);
+console.log('时间戳：', ts);
+
+console.log('toDate: ', ts.toDate());
+
+console.log(new Date().getTime().toString().substr(0, 10));
+
+console.log(ts.toDate().format('yyyy/MM/dd HH:mm:ss.fff'));
+
+console.log('2018-06-23 22:12:15'.toDate() - '2018-06-21 22:12:15'.toDate());
+
+console.log('2018-06-23 22:12:15', 'compareTo', '2018-06-22 22:12:15', ':', '2018-06-23 22:12:15'.toDate().compareTo('2018-06-22 22:12:15'.toDate()));
+
+console.log(Date.compare);
+
+console.log('2018-06-23 22:12:15', 'compare', '2018-06-24 22:12:15', ':', Date.compare('2018-06-23 22:12:15'.toDate(), '2018-06-24 22:12:15'.toDate()));
+
+console.log(Date);
+
+console.log('2018-06-23 22:12:15'.toDate('yyyy年MM月dd日 HH:mm:ss'));
+console.log('1529763135'.toDate('yyyy年MM月dd日 HH:mm:ss'));
+var ts = 1529763135;
+console.log(ts.toDate('yyyy年MM月dd日 HH:mm:ss'));
+
+var num = '123.5'.toNumber();
+console.log(typeof num);
+
+console.log('true.toNumber(): ', true.toNumber());
+
+console.log('(2 > 1).toNumber(): ', (2 > 1).toNumber());
+
+console.log(typeof 'true'.toNumber());
+
+console.log('hello'.startWith('h'));
+console.log('hello'.endWith('o'));
+
+console.log('HTMLJAVACSS'.separate('\r\n', 4));
+
+console.log('123-456--789--1234'.clean('--'));
+console.log('123-456-789-12 34'.clean());
+console.log('123- 456--789--12 34'.clear());
+
+console.log('ABC123ACC'.replaceAll(123, 'BBB'));
+console.log(' ABC123ACC '.trimEnd());
+console.log(' ABC123ACC '.trim());
+console.log('-11'.compareTo('-12'));
+
+//console.log('AA'.equals('AA'));
+
+var dt1 = '2018-06-25 8:22:40.523'.toDate(), dt2 = '2018-06-23 8:22:35.400'.toDate();
+var ts = dt1.timeSpan(dt2);
+
+console.log('timeSpan: ', ts);
+console.log('timeSpan typeof: ', typeof ts);
+
+ts = ts.add(5, 'seconds').add(2, 'hours');
+console.log(ts);
+console.log(ts.show());
+console.log(ts.show('en'));
+console.log(ts.show('time'));
+console.log(ts.show('{days}天{hours}小时{minutes}分钟'));
+console.log(ts.show('days天hours小时minutes分钟'));
+console.log(ts.show('days天 hours:minutes:seconds'));
+console.log('{0:N0} '.format(ts.ticks))
+
+var d = '2018-06-25 8:22:40.523'.toDate().add(1, 'days').addDays(2).addMonths(1).format();
+console.log(d);
+
+var num = '123.12345ab'.toNumber('abc', true, 3);
+console.log('1: ', num, typeof num);
+var num = '123.12345ab'.toNumber(0, 3);
+console.log('11: ', num, typeof num);
+var num = '123.12345ab'.toNumber(0, 0);
+console.log('12: ', num, typeof num);
+var num = '123.12345ab'.toNumber('0.0');
+console.log('13: ', num, typeof num);
+var num = '123.12345ab'.toNumber('0.00');
+console.log('14: ', num, typeof num);
+var num = '123.12345ab'.toNumber('0');
+console.log('15: ', num, typeof num);
+var num = '123.12345ab'.toNumber(0.0001);
+console.log('16: ', num, typeof num);
+var num = '123.12345ab'.toNumber(0, true);
+console.log('2: ', num, typeof num);
+var num = '123.12345ab'.toNumber(0, false);
+console.log('3: ', num, typeof num);
+var num = '123.12345ab'.toNumber(0);
+console.log('4: ', num, typeof num);
+var num = '123.12345ab'.toNumber(0, true, -3);
+console.log('5: ', num, typeof num);
+var num = '123.12345ab'.toNumber(true, 3);
+console.log('6: ', num, typeof num);
+var num = '123.12345ab'.toNumber(true, 0);
+console.log('7: ', num, typeof num);
+var num = '123.12345ab'.toNumber(true);
+console.log('8: ', num, typeof num);
+
+console.log('1234 isDecimal: ', '1234'.isDecimal());
+console.log('1234 isInt: ', '1234'.isInt());
+console.log('1234. isDecimal: ', OUI.isDecimal('1234.'));
+console.log('1234.25 isFloat: ', '1234.25'.isFloat());
+var num = 1234.25;
+console.log(num.isFloat());
+
+var ids = '   ,,1,|||-2.35,,,4,3,3  ,0,5,';
+console.log(ids.toArray(',|', 'int', false, true));
+
+var ids = 'abc,acc,asd,';
+console.log(ids.toArray(',|', false, true));
+
+
+var dt = new Date();
+console.log('getDateList: ', dt.getDateList(7));
+
+console.log(['timestamp', 'time', 'tick', 'ts'].indexOf('time') >= 0);
+
+var arrKey = [];
+console.log('arrKey: ', arrKey);
+for (var k in arrKey) {
+    console.log('kk: ', k);
+}
+
+
+
+</script>

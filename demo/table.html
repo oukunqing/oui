@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title></title>
+    <style type="text/css">
+        body{font-size:12px; font-family: Arial;}
+        .tblist{border-collapse:collapse;}
+        .tblist td{border:solid 1px #ccc; padding:5px;}
+
+        .green{background:#008000;}
+
+        /*
+        .table-tree-expand{display:inline-block;
+            width:0;
+            height:0;
+            padding:0;
+            margin:0;
+            border-left:5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 6px solid #999;
+            margin-right:3px;
+        }
+        .table-tree-collapse{display:inline-block;
+            width:0;
+            height:0;
+            padding:0;
+            margin:0;
+            border-top: 5px solid transparent;
+            border-left: 6px solid #666;
+            border-bottom: 5px solid transparent; 
+            margin-right:3px;
+        }
+
+
+        
+        .expand{display:inline-block;
+            width:0;
+            height:0;
+            padding:0;
+            margin:0;
+            border-left:5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 6px solid #999;
+            margin-right:3px;
+            margin-left:0 !important;
+        }
+        .collapse{display:inline-block;
+            width:0;
+            height:0;
+            padding:0;
+            margin:0;
+            border-top: 5px solid transparent;
+            border-left: 6px solid #666;
+            border-bottom: 5px solid transparent; 
+            margin-right:3px;
+            margin-left:0 !important;
+        }
+        */
+    </style>
+    <script type="text/javascript" src="../oui/oui.js"></script>
+    <script type="text/javascript" src="../oui/oui.table.js"></script>
+</head>
+<body>
+层级：<input type="text" id="txtLevel" style="width:50px;" />
+<button onclick="toggleLevel(false);">按层级展开</button>
+<button onclick="toggleLevel(true);">按层级收缩</button>
+ID:<input type="text" id="txtId" style="width:50px;" />
+<button onclick="toggle(false);">按ID展开</button>
+<button onclick="toggle(true);">按ID收缩</button>
+<button onclick="remove();">按ID删除</button>
+
+<button onclick="toggleAll(false);">全部展开</button>
+<button onclick="toggleAll(true);">全部收缩</button>
+
+<button onclick="select();">按ID选中行</button>
+<br /><br />
+
+<table id="tblist" class="tblist"></table>
+<br />
+<table id="tblist1" class="tblist"></table>
+</body>
+</html>
+<script type="text/javascript">
+    var headData = [
+        {
+            rowData:{
+                style:{background:'#005eac'}
+            }, cellData: ['表头11', '表头12', '表头13', '表头14', '表头15', '表头16']
+        },
+        {
+            rowData:{
+                style:{background:'#005eac'}
+            }, cellData: ['表头21', '表头22', '表头23', '表头24', '表头25', '表头26']
+        },
+        ['表头31', '表头33', '表头33', '表头34', '表头35', '表头36']
+    ];
+        
+    var bodyData = [        
+        {
+            rowData:{ attr:{ id: 1, class:'tr-1'}, event:{click:function(){alert(this.id);}}}, treeData:{id:1, pid:0}, cellData:[
+                {content:'单元格11', style:{color:'#f00'}}, {content:'单元格12'}, {content:'单元格13'}, {content:'单元格14'}, {content:'单元格15'}, {content:'单元格16'}
+            ]
+        },
+        {
+            rowData: {}, treeData:{id:2, pid:1}, cellData:[
+                {content:'单元格21', style:'color:#00f;'}, {content:'单元格22'}, {content:'单元格23'}, {content:'单元格24'}, {content:'单元格25'}, {content:'单元格26'}
+            ]
+        }
+    ];
+
+    
+    var tb = new OUI.Table({
+        table: 'tblist',                //表格（对象 或 Id 或 null)，为null则自动创建表格对象（可以不设置）
+        parent: document.body,          //表格父节点，默认为 document.body （可以不设置）
+        headData: headData,             //初始化时要创建的表格头部数据（可以不设置），数据格式参考示例说明
+        bodyData: null,                 //初始化时要创建的表格主体数据（可以不设置），数据格式参考示例说明
+        showTree: true,                 //是否显示树形结构，boolean值： true | false, 默认为false（可以不设置）
+        treeCellIndex: 0,               //要显示树形结构的列索引，从0开始，默认为0（可以不设置）
+        trigger: {                      //树形收缩/展开触发器，若cell和row同时设置了不同的事件，可能会有事件冒泡
+            cell: ['click', 'toggle'],  //点击列触发事件，数组或字符串，第1个元素为事件：(click, dblclick)，第2个元素为动作： (toggle, expand, collapse)
+            //row: 'click'                //点击行触发事件，数组或字符串，第1个元素为事件：(click, dblclick)，第2个元素为动作： (toggle, expand, collapse)
+        },
+        treeOptions:{                   //树形结构参数
+            spaceWidth: 16,             //树形每一层之间的缩进距离，单位为px，默认为16px（可以不设置）
+            /*className: {                //树形结构箭头图标样式
+                expand: 'expand',       //节点展开时的样式
+                collapse: 'collapse'    //节点收缩时的样式
+            },
+            */
+            //className: ['expand', 'collapse'] //可以数组形式，第1个元素为节点展开的样式
+        } 
+    });
+
+    tb.createBody(bodyData);
+
+    window.setTimeout(function(){
+        var bodyData = [
+            {
+                rowData:{ attribute:{ id:1, class:'tr-1'}, event:{click:function(){alert(this.id);}}}, treeData:{id:1, pid:0}, cellData:[
+                    {content:'单元格11', style:{color:'#f00'}}, {content:'单元格12'}, {content:'单元格13'}, {content:'单元格14'}, {content:'单元格15'}, {content:'单元格16'}
+                ]
+            },
+            {
+                rowData: {}, treeData:{id:2, pid:1}, cellData:[
+                    {content:'单元格21', style:'color:#00f;'}, {content:'单元格22'}, {content:'单元格23'}, {content:'单元格24'}, {content:'单元格25'}, {content:'单元格26'}
+                ]
+            },
+            {
+                rowData: {}, treeData:{id:4, pid:2}, cellData:[
+                    {content:'单元格41'}, {content:'单元格42'}, {content:'单元格43'}, {content:'单元格44'}, {content:'单元格45'}, {content:'单元格46'}
+                ]
+            },
+            {
+                rowData: {}, treeData:{id:3, pid:1}, cellData:[
+                    {content:'单元格31'}, {content:'单元格32'}, {content:'单元格33'}, {content:'单元格34'}, {content:'单元格35'}, {content:'单元格36'}
+                ]
+            },
+            {
+                rowData: {}, treeData:{id:5, pid:2}, cellData:[
+                    {content:'单元格51'}, {content:'单元格52'}, {content:'单元格53'}, {content:'单元格54'}, {content:'单元格55'}, {content:'单元格56'}
+                ]
+            },
+            {
+                rowData: {}, treeData:{id:6, pid:4}, cellData:[
+                    {content:'单元格61'}, {content:'单元格62'}, {content:'单元格63'}, {content:'单元格64'}, {content:'单元格65'}, {content:'单元格66'}
+                ]
+            },
+            {
+                rowData: {}, treeData:{id:7, pid:2}, cellData:[
+                    {content:'单元格71'}, {content:'单元格72'}, {content:'单元格73'}, {content:'单元格74'}, {content:'单元格75'}, {content:'单元格76'}
+                ]
+            },
+            {
+                rowData: {}, treeData:{id:8, pid:2}, cellData:[
+                    {content:'单元格81'}, {content:'单元格82'}, {content:'单元格83'}, {content:'单元格84'}, {content:'单元格85'}, {content:'单元格86'}
+                ]
+            },
+            {
+                rowData: {}, treeData:{id:9, pid:3}, cellData:[
+                    {content:'单元格91'}, {content:'单元格92'}, {content:'单元格93'}, {content:'单元格94'}, {content:'单元格95'}, {content:'单元格96'}
+                ]
+            }
+        ];
+        tb.append(bodyData);
+    }, 1000);
+
+    window.setTimeout(function(){
+        var appendData = [
+            {
+                rowData: {}, treeData:{id:18, pid:2}, cellData:[
+                    {content:'单元格181'}, {content:'单元格182'}, {content:'单元格183'}, {content:'单元格184'}, {content:'单元格185'}, {content:'单元格186'}
+                ]
+            },
+            {
+                rowData: {}, treeData:{id:19, pid:3}, cellData:[
+                    {content:'单元格191'}, {content:'单元格192'}, {content:'单元格193'}, {content:'单元格194'}, {content:'单元格195'}, {content:'单元格196'}
+                ]
+            }
+        ];
+        tb.createBody(appendData);
+    }, 1100);
+
+
+    window.setTimeout(function(){
+        var appendData =  ['单元格101', '单元格103', '单元格103', '单元格104', '单元格105', '单元格106'];
+        tb.append(appendData);
+    }, 1200);
+
+    window.setTimeout(function(){
+        var appendData = [
+            {
+                rowData: {}, treeData:{id:28, pid:6}, cellData:[
+                    {content:'单元格281'}, {content:'单元格282'}, {content:'单元格283'}, {content:'单元格284'}, {content:'单元格285'}, {content:'单元格286'}
+                ]
+            },
+            {
+                rowData: {}, treeData:{id:29, pid:4}, cellData:[
+                    {content:'单元格291'}, {content:'单元格292'}, {content:'单元格293'}, {content:'单元格294'}, {content:'单元格295'}, {content:'单元格296'}
+                ]
+            },
+            {
+                rowData: {}, treeData:{id:30, pid:28}, cellData:[
+                    {content:'单元格301'}, {content:'单元格302'}, {content:'单元格303'}, {content:'单元格304'}, {content:'单元格305'}, {content:'单元格306'}
+                ]
+            },
+            {
+                rowData: {}, treeData:{id:31, pid:40}, cellData:[
+                    {content:'单元格311'}, {content:'单元格312'}, {content:'单元格313'}, {content:'单元格314'}, {content:'单元格315'}, {content:'单元格316'}
+                ]
+            }
+        ];
+        tb.append(appendData);
+    }, 1300);
+
+
+    window.setTimeout(function(){
+        var appendData = [
+            {
+                rowData: {}, treeData:{id:32, pid:40}, cellData:[
+                    {content:'单元格321'}, {content:'单元格322'}, {content:'单元格323'}, {content:'单元格324'}, {content:'单元格325'}, {content:'单元格326'}
+                ]
+            }
+        ];
+        tb.append(appendData);
+    }, 1400);
+
+
+    window.setTimeout(function(){
+        var appendData = [
+            {
+                rowData: {}, treeData:{id:33, pid:41}, cellData:[
+                    {content:'单元格331'}, {content:'单元格332'}, {content:'单元格333'}, {content:'单元格334'}, {content:'单元格335'}, {content:'单元格336'}
+                ]
+            },
+            {
+                rowData: {}, treeData:{id:34, pid:29}, cellData:[
+                    {content:'单元格341'}, {content:'单元格342'}, {content:'单元格343'}, {content:'单元格344'}, {content:'单元格345'}, {content:'单元格346'}
+                ]
+            },
+            {
+                rowData: {}, treeData:{id:35, pid:7}, cellData:[
+                    {content:'单元格351'}, {content:'单元格352'}, {content:'单元格353'}, {content:'单元格354'}, {content:'单元格355'}, {content:'单元格356'}
+                ]
+            }
+        ];
+        tb.append(appendData);
+    }, 1500);
+
+    window.setTimeout(function(){
+        tb.tree.collapse(6);
+    }, 2000);
+
+    function toggle(collapse){
+        var id = document.getElementById('txtId').value;
+        tb.tree.toggle(id, collapse);
+    }
+
+    function toggleLevel(collapse){
+        var level = parseInt(document.getElementById('txtLevel').value, 10);
+        if(!isNaN(level)){
+            tb.tree.toggleLevel(level, collapse);
+        }
+    }
+
+
+    function toggleAll(collapse){
+        tb.tree.toggleAll(collapse);
+    }
+
+    function remove(){
+        var id = document.getElementById('txtId').value;
+        tb.tree.remove(id);
+    }
+    
+    function select(){
+        var id = document.getElementById('txtId').value;
+        tb.tree.select(id);
+    }
+
+    
+    OUI.loadJsScript('../oui/oui.pagination.js',  function(){
+        console.log('oui.pagination.js');
+        console.log('oui: ', OUI);
+    });
+
+
+    OUI.loadJsScript('../oui/oui.crc.js',  function(){
+        console.log('异步加载JS文件完成：');
+
+        //console.log(OUI.strToByte('AB你好'));
+        //console.log(OUI.strToHexChar('AB  你 好'));
+        //console.log(OUI.strToHexByte('AB 你    好'));
+        var crc = new OUI.CRC();
+        for(var k in crc){
+            console.log('k: ', k);
+        }
+        console.log(new OUI.CRC().toCRC16('AB你好'));
+
+        console.log(new OUI.CRC().toModbusCRC16('AB  你 好'));
+    });
+        console.log('table-tree: ', tb.tree);
+    
+</script>

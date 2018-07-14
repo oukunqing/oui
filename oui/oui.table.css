@@ -1,0 +1,21 @@
+.table-tree-expand{display:inline-block;
+    width:0;
+    height:0;
+    padding:0;
+    margin:0;
+    border-left:5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6px solid #000;
+    margin-right:3px;
+}
+
+.table-tree-collapse{display:inline-block;
+    width:0;
+    height:0;
+    padding:0;
+    margin:0;
+    border-top: 5px solid transparent;
+    border-left: 6px solid #000;
+    border-bottom: 5px solid transparent; 
+    margin-right:3px;
+}
