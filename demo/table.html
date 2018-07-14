@@ -268,7 +268,8 @@ ID:<input type="text" id="txtId" style="width:50px;" />
     }, 1500);
 
     window.setTimeout(function(){
-        tb.tree.collapse(6);
+        console.log('tb.tree: ', tb.tree);
+        tb.getTree().collapse(6);
     }, 2000);
 
     function toggle(collapse){
@@ -319,6 +320,12 @@ ID:<input type="text" id="txtId" style="width:50px;" />
 
         console.log(new OUI.CRC().toModbusCRC16('AB  你 好'));
     });
-        console.log('table-tree: ', tb.tree);
+
+        for(var k in tb){
+            console.log('tk: ', k);
+        }
     
+        for(var k in tb.tree){
+            console.log('ttk: ', k);
+        }
 </script>

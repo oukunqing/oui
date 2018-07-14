@@ -184,20 +184,10 @@ var OUI = function() {
             return pos >= 0 && withoutExtension ? name.substr(0, pos) : name;
         },
         createElement = function(nodeName, parent, func) {
-            try {
-                var element = doc.createElement(nodeName);
-                try {
-
-                    $.isFunction(func) && func(element);
-                    isElement(parent) && parent.appendChild(element);
-                } catch (e) {
-
-                    console.log('没有找到文件s');
-                }
-                return element;
-            } catch (e) {
-                console.log('没有找到文件');
-            }
+            var element = doc.createElement(nodeName);
+            $.isFunction(func) && func(element);
+            isElement(parent) && parent.appendChild(element);
+            return element;
         },
         setAttribute = function(element, attributes, exempt) {
             if (!exempt && (!isElement(element) || !$.isObject(attributes))) { return false; }
