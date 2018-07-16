@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <script type="text/javascript" src="../oui/oui.js"></script>
+    <script type="text/javascript" src="../oui/oui.pagination.js"></script>
+</head>
+<body>
+<div id="p1"></div>
+<div id="p2"></div>
+</body>
+</html>
+<script type="text/javascript">
+
+   var p1 = new OUI.Pagination({
+        element: document.getElementById('p1'),
+        dataCount: 90,
+        markCount: 10,
+        pageIndex: 1,
+        pageStart: 1,
+        markType: 'symbol',
+        callback: function(pageIndex){
+            console.log('p2-callback: ', pageIndex);
+            p1.paging(pageIndex);
+        }
+    });
+
+   console.log('p1: ', p1);
+/*
+   var p2 = new OUI.Pagination({
+        element: document.getElementById('p2'),
+        dataCount: 100,
+        pageIndex: 0,
+        pageStart: 0,
+        markType: 'chinese',
+        callback: function(pageIndex){
+            console.log('p1-callback: ', pageIndex);
+        }
+    });
+   console.log('p2: ', p2);
+   */
+</script>

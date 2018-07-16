@@ -56,7 +56,7 @@
             if (!isDyadicArray(datas)) {
                 datas = [datas];
             }
-            if (!tableOptions.showTree || $.isUndefined(trees)) {
+            if (!that.options.showTree || $.isUndefined(trees)) {
                 for (var i in datas) {
                     var row = container.insertRow(rowIndex + Number(i));
                     insertCell(that, row, datas[i]);
@@ -87,8 +87,8 @@
         },
         insertCell = function (that, row, data) {
             var isArray = $.isArray(data),
-                showTree = tableOptions.showTree,
-                treeCellIndex = tableOptions.treeCellIndex || 0,
+                showTree = that.options.showTree,
+                treeCellIndex = that.options.treeCellIndex || 0,
                 cellData = isArray ? data : data.cellData || data.cell || data.cells,
                 rowData = data.rowData || data.row,
                 treeData = data.treeData || data.tree,
@@ -98,12 +98,12 @@
                 isTree = showTree && $.isObject(treeData) && !$.isEmpty(treeData),
                 id = isTree ? treeData.id : '',
                 func = function (obj, action) {
-                    //treeClass.toggle(this.getAttribute('tid'));
+                    //that.tree.toggle(this.getAttribute('tid'));
                     //需要给相关的tr td 和 图标 设置 tid 属性
-                    treeClass[action || 'toggle'](obj.getAttribute('tid'));
+                    that.tree[action || 'toggle'](obj.getAttribute('tid'));
                     $.stopBubble();
                 },
-                trigger = tableOptions.trigger,
+                trigger = that.options.trigger,
                 set = function () {
 
                 };
@@ -120,8 +120,8 @@
                     //row.setAttribute('tree', '{{id:{id},pid:{pid},level:{level}}}'.format(treeData));
                     row.setAttribute('tree', '{id:' + treeData.id + ',pid:' + treeData.pid + ',level:' + treeData.level + '}');
                     //设置tr创建记录，通过id找tr位置时要用到
-                    setTreeFlag(treeClass, id, false);
-                    content = buildSwitch(treeClass, id, treeData.level) + content;
+                    setTreeFlag(that.tree, id, false);
+                    content = buildSwitch(that.tree, id, treeData.level) + content;
                     //临时测试用
                     content += ' [ id: ' + treeData.id + ', pid: ' + treeData.pid + ', level: ' + treeData.level + ' ]';
                     cell.innerHTML = content;
@@ -184,11 +184,11 @@
         },
         getRowCount = function (that, trees, pid, rowCount) {
             for (var i in trees) {
-                if (!hasTreeFlag(treeClass, trees[i])) {
+                if (!hasTreeFlag(that.tree, trees[i])) {
                     break;
                 }
                 rowCount++;
-                var childs = getChildIds(treeClass, trees[i]);
+                var childs = getChildIds(that.tree, trees[i]);
                 if ($.isArray(childs)) {
                     getRowCount(that, childs, trees[i], rowCount);
                 }
@@ -196,9 +196,9 @@
             return rowCount;
         },
         findRowIndex = function (that, container, pid) {
-            var childs = getChildIds(treeClass, pid), len = childs.length;
+            var childs = getChildIds(that.tree, pid), len = childs.length;
             var tr = doc.getElementById(buildId(pid)), rowCount = 0, idx = -1;
-            var headRows = container.tagName === 'TBODY' ? getTHeadRows(table) : 0;
+            var headRows = container.tagName === 'TBODY' ? getTHeadRows(that.table) : 0;
             if (len > 0 && tr != null) {
                 var id = 0, realPid = 0;
                 //找到父节点下的最后一个有效的直系子节点所在的行
@@ -216,13 +216,15 @@
 
                 if (realPid > 0) {
                     //再递归查找最后一个子节点所占的总行数
-                    var trees = getChildIds(treeClass, realPid);
+                    var trees = getChildIds(that.tree, realPid);
                     rowCount = getRowCount(that, trees, realPid, 0);
                 }
             }
             return rowCount + (idx < 0 ? container.rows.length : idx + 1);
-        },
-        tableOptions = {
+        };
+
+    function Table(options) {
+        var that = this, op = $.extend({
             table: null,
             parent: doc.body,
             showTree: false,
@@ -234,23 +236,23 @@
             headData: [],
             bodyData: [],
             treeOptions: {}
-        },
-        table = null,
-        treeClass = null;
+        }, options), trigger = op.trigger;
 
-    function Table(options) {
-        var that = this, op = $.extend(tableOptions, options), trigger = op.trigger;
-        that.tree = treeClass = new TableTree(op.showTree, op.treeOptions || {});
-        that.table = table = op.table;
-        if (!$.isElement(table, 'TABLE')) {
-            if (isString(table)) {
-                that.table = table = doc.getElementById(table);
+        that.options = op;
+        that.table = op.table;
+        if (op.showTree) {
+            that.tree = new TableTree(op.showTree, op.treeOptions || {});
+        }
+
+        if (!$.isElement(that.table, 'TABLE')) {
+            if (isString(that.table)) {
+                that.table = doc.getElementById(that.table);
             } else {
-                that.table = table = doc.createElement('TABLE');
-                op.parent.appendChild(table);
+                that.table = doc.createElement('TABLE');
+                op.parent.appendChild(that.table);
             }
         }
-        if (table === null) {
+        if (that.table === null) {
             return false;
         }
 
@@ -271,19 +273,16 @@
     }
 
     Table.prototype = {
-        getOptions: function () { return tableOptions; },
-        getTable: function () { return this.table = table, table; },
-        getTree: function () { return this.tree = treeClass, treeClass; },
         createHead: function (headData) {
-            createRow(this, getContainer(table, true), headData);
+            createRow(this, getContainer(this.table, true), headData);
         },
         createBody: function (bodyData) {
             if (bodyData.length === 0) {
                 return false;
             }
-            var that = this, container = getContainer(table, false), isAppend = container.rows.length > 0;
-            if (tableOptions.showTree) {
-                var ds = treeClass.initial(bodyData);
+            var that = this, container = getContainer(that.table, false), isAppend = container.rows.length > 0;
+            if (that.options.showTree) {
+                var ds = that.tree.initial(bodyData);
                 createRow(that, container, ds.datas, ds.trees, ds.pids, isAppend);
             } else {
                 createRow(that, container, bodyData);
@@ -300,13 +299,13 @@
             }
         },
         deleteRow: function (rowIndex) {
-            if (table.rows.length > rowIndex) {
-                table.deleteRow(rowIndex);
+            if (this.table.rows.length > rowIndex) {
+                this.table.deleteRow(rowIndex);
             }
         },
         clearRow: function (keepRows) {
-            for (var i = table.rows.length - 1; i >= keepRows; i--) {
-                table.deleteRow(i);
+            for (var i = this.table.rows.length - 1; i >= keepRows; i--) {
+                this.table.deleteRow(i);
             }
         },
         getRow: function (ids) {
@@ -325,35 +324,32 @@
         }
     };
 
-    var isTreeUse = false,
-        treeOptions = {
+    function TableTree(isTree, options) {
+        if ($.isUndefined(options.className) || $.isEmpty(options.className)) {
+            $.loadLinkStyle($.getFilePath(thisFilePath) + $.getFileName(thisFilePath, true) + '.css');
+        }
+        var that = this;
+        that.options = $.extend({
             spaceWidth: 16,
             className: {
                 expand: 'table-tree-expand',
                 collapse: 'table-tree-collapse'
             }
-        },
-        treeDatas = {},
-        treeFlags = {},
-        treeCache = {},
-        treeIndex = {};
+        }, options);
 
-    function TableTree(isTree, options) {
-        if ($.isUndefined(options.className) || $.isEmpty(options.className)) {
-            $.loadLinkStyle($.getFilePath(thisFilePath) + $.getFileName(thisFilePath, true) + '.css');
-        }
+        $.extend(that.options, {
+            treeDatas: {}, treeFlags: {}, treeCache: {}, treeIndex: {}
+        });
 
-        $.extend(treeOptions, options);
-
-        var className = treeOptions.className;
+        var className = that.options.className;
         if ($.isArray(className)) {
-            treeOptions.className = {
+            that.options.className = {
                 expand: className[0],
                 collapse: className[1] || ''
             };
         }
 
-        isTreeUse = $.isBoolean(isTree) ? isTree : false;
+        that.enabled = $.isBoolean(isTree) ? isTree : false;
     }
 
     var buildKey = function (id) {
@@ -372,17 +368,17 @@
             return data;
         },
         hasParent = function (that, key) {
-            return !$.isUndefined(treeDatas[key]);
+            return !$.isUndefined(that.options.treeDatas[key]);
         },
         getChildIds = function (that, pid) {
             var pkey = buildKey(pid);
-            return treeIndex[pkey] || [];
+            return that.options.treeIndex[pkey] || [];
         },
         setLevel = function (that, data, pkey, hasParent) {
             if (!hasParent) {
                 data.level = 0, data.pid = 0;
             } else {
-                var pdata = treeDatas[pkey];
+                var pdata = that.options.treeDatas[pkey];
                 if (pdata && pdata.treeData && $.isInteger(pdata.treeData.level)) {
                     data.level = parseInt(1 + pdata.treeData.level, 10);
                 }
@@ -391,19 +387,19 @@
         setTreeFlag = function (that, id, isDel) {
             var key = 'm_' + id;
             if (isDel) {
-                if (!$.isUndefined(treeFlags[key])) {
-                    delete treeFlags[key];
+                if (!$.isUndefined(that.options.treeFlags[key])) {
+                    delete that.options.treeFlags[key];
                 }
             } else {
-                treeFlags[key] = 1;
+                that.options.treeFlags[key] = 1;
             }
         },
         hasTreeFlag = function (that, id) {
             var key = 'm_' + id;
-            return !$.isUndefined(treeFlags[key]);
+            return !$.isUndefined(that.options.treeFlags[key]);
         },
         isExist = function (that, key) {
-            return !$.isUndefined(treeDatas[key]);
+            return !$.isUndefined(that.options.treeDatas[key]);
         },
         getRowIds = function (that, trees, collapse, rows) {
             for (var i in trees) {
@@ -415,7 +411,7 @@
 
                 //展开时需要屏蔽之前被收缩的子节点
                 if (!isCollapse(that, id) || collapse) {
-                    var childs = treeIndex[buildKey(id)];
+                    var childs = that.options.treeIndex[buildKey(id)];
                     if ($.isArray(childs)) {
                         getRowIds(that, childs, collapse, rows);
                     }
@@ -435,7 +431,7 @@
         },
         buildSwitch = function (that, id, len) {
             var a = '<a id="{0}" tid="{1}" expand="1" class="{2}" href="#" style="cursor:pointer;margin-left:{3}px !important;"></a>'.format(
-                buildSwitchId(id), id, treeOptions.className.expand, buildSpace(len, treeOptions.spaceWidth)
+                buildSwitchId(id), id, that.options.className.expand, buildSpace(len, that.options.spaceWidth)
             );
             return a;
         },
@@ -444,25 +440,25 @@
                 return false;
             }
             obj.setAttribute('expand', collapse ? 0 : 1);
-            obj.className = treeOptions.className[collapse ? 'collapse' : 'expand'];
+            obj.className = that.options.className[collapse ? 'collapse' : 'expand'];
             //obj.innerHTML = collapse ? ' ++ ' : ' -- ';
         },
         setCollapse = function (that, pid, ids, collapse) {
             var key = buildKey(pid);
             if (collapse) {
-                treeCache[key] = [];
+                that.options.treeCache[key] = [];
                 for (var i in ids) {
-                    treeCache[key].push(ids[i]);
+                    that.options.treeCache[key].push(ids[i]);
                 }
             } else {
-                if (!$.isUndefined(treeCache[key])) {
-                    delete treeCache[key];
+                if (!$.isUndefined(that.options.treeCache[key])) {
+                    delete that.options.treeCache[key];
                 }
             }
         },
         isCollapse = function (that, id) {
             var key = buildKey(id);
-            return !$.isUndefined(treeCache[key]);
+            return !$.isUndefined(that.options.treeCache[key]);
         },
         quickSort = function (arr, key) {
             if (0 === arr.length) {
@@ -476,12 +472,9 @@
         };
 
     TableTree.prototype = {
-        getOptions: function () {
-            return treeOptions;
-        },
         initial: function (bodyData) {
             var that = this;
-            if (!isTreeUse) {
+            if (!that.enabled) {
                 return { datas: bodyData, trees: null };
             }
 
@@ -502,7 +495,7 @@
                     var key = buildKey(treeData.id);
                     //检测是否已存在相同的ID，防止重复创建
                     if (!isExist(that, key)) {
-                        treeDatas[key] = dr;
+                        that.options.treeDatas[key] = dr;
                         setKeyValue(keys, key, treeData.id);
                         arr.push({ level: treeData.level || i, data: dr });
                     }
@@ -522,7 +515,7 @@
                         pids.push(treeData.pid || 0);
                     }
                     setKeyValue(trees, pkey, treeData.id);
-                    setKeyValue(treeIndex, pkey, treeData.id);
+                    setKeyValue(that.options.treeIndex, pkey, treeData.id);
                     trees[key] = [];
                 }
                 datas.push(dr);
@@ -533,9 +526,9 @@
             return { datas: datas, trees: trees, pids: pids };
         },
         expandParent: function (id) {
-            var key = buildKey(id), data = treeDatas[key];
+            var key = buildKey(id), data = this.options.treeDatas[key];
             if (data && data.treeData) {
-                var pid = data.treeData.pid || 0, pkey = buildKey(pid), pdata = treeDatas[pkey];
+                var pid = data.treeData.pid || 0, pkey = buildKey(pid), pdata = this.options.treeDatas[pkey];
                 if (pdata) {
                     var btnSwitch = doc.getElementById(buildSwitchId(pid));
                     if (btnSwitch !== null && btnSwitch.getAttribute('expand') === '0') {
@@ -584,8 +577,8 @@
             //按层级展开时，收缩的层级+1
             level = (level < 0 ? 0 : level) + (collapse ? 0 : 1);
 
-            for (var i in treeDatas) {
-                var dr = treeDatas[i].treeData || {}, id = dr.id;
+            for (var i in this.options.treeDatas) {
+                var dr = this.options.treeDatas[i].treeData || {}, id = dr.id;
                 var obj = doc.getElementById(buildId(id)), btnSwitch = doc.getElementById(buildSwitchId(id));
                 if (obj !== null) {
                     obj.style.display = dr.level <= level ? '' : 'none';
@@ -607,8 +600,8 @@
             this.toggleLevel(level, false);
         },
         toggleAll: function (collapse) {
-            for (var i in treeDatas) {
-                var dr = treeDatas[i].treeData || {}, id = dr.id;
+            for (var i in this.options.treeDatas) {
+                var dr = this.options.treeDatas[i].treeData || {}, id = dr.id;
                 var obj = doc.getElementById(buildId(id)), btnSwitch = doc.getElementById(buildSwitchId(id));
                 if (obj !== null) {
                     obj.style.display = collapse && dr.level > 0 ? 'none' : '';

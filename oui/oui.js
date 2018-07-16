@@ -7,37 +7,37 @@
 */
 
 // OUI
-var OUI = function() {
+var OUI = function () {
     'use strict';
 
     var version = '1.0.0',
-        isUndefined = function(o) { return typeof o === 'undefined'; },
-        isString = function(s, nonempty) { return typeof s === 'string' && (nonempty ? s.trim() !== '' : true); },
-        isNumber = function(n) { return typeof n === 'number'; },
-        checkNumber = function(n, min, max) {
+        isUndefined = function (o) { return typeof o === 'undefined'; },
+        isString = function (s, nonempty) { return typeof s === 'string' && (nonempty ? s.trim() !== '' : true); },
+        isNumber = function (n) { return typeof n === 'number'; },
+        checkNumber = function (n, min, max) {
             var isNum = isNumber(n), isMin = isNumber(min), isMax = isNumber(max);
             return isNum ? (isMin && isMax ? n >= min && n <= max : (isMin ? n >= min : isMax ? n <= max : true)) : false;
         },
-        isFunction = function(f) { return typeof f === 'function' && typeof f.nodeType !== 'number'; },
-        isObject = function(o) { return o !== null && typeof o === 'object'; },
-        isArray = Array.isArray || function(a) { return Object.prototype.toString.call(a) === '[object Array]'; },
-        isBoolean = function(b, dv) { return typeof b === 'boolean' ? b : typeof dv === 'boolean' ? dv : false; },
-        isNumeric = function(o) { return /^[-+]?(\d+)([.][\d]{0,})?$/.test(o); },
-        isDecimal = function(o) { return /^[-+]?(\d+)([.][\d]{0,})$/.test(o); },
-        isInteger = function(o) { return /^[-+]?(\d+)$/.test(o); },
-        toDecimal = function(s, defaultValue, decimalLen) {
+        isFunction = function (f) { return typeof f === 'function' && typeof f.nodeType !== 'number'; },
+        isObject = function (o) { return o !== null && typeof o === 'object'; },
+        isArray = Array.isArray || function (a) { return Object.prototype.toString.call(a) === '[object Array]'; },
+        isBoolean = function (b, dv) { return typeof b === 'boolean' ? b : typeof dv === 'boolean' ? dv : false; },
+        isNumeric = function (o) { return /^[-+]?(\d+)([.][\d]{0,})?$/.test(o); },
+        isDecimal = function (o) { return /^[-+]?(\d+)([.][\d]{0,})$/.test(o); },
+        isInteger = function (o) { return /^[-+]?(\d+)$/.test(o); },
+        toDecimal = function (s, defaultValue, decimalLen) {
             var v = parseFloat(s, 10);
             v = !isNaN(v) && $.isInteger(decimalLen) ? v.round(Math.abs(decimalLen)) : v;
             return !isNaN(v) ? v : Number(defaultValue) || 0;
         },
-        toInteger = function(s, defaultValue) {
+        toInteger = function (s, defaultValue) {
             var v = parseInt(s, 10);
             return !isNaN(v) ? v : Number(defaultValue) || 0;
         },
-        isNull = function(o) { return o === null; },
-        isProperty = function(o, property) { return o.hasOwnProperty(property) && (property in o); },
-        trim = function(s) { return s.replace(/(^[\s]*)|([\s]*$)/g, ''); },
-        extend = function(destination, source, deepCopy) {
+        isNull = function (o) { return o === null; },
+        isProperty = function (o, property) { return o.hasOwnProperty(property) && (property in o); },
+        trim = function (s) { return s.replace(/(^[\s]*)|([\s]*$)/g, ''); },
+        extend = function (destination, source, deepCopy) {
             for (var property in source) {
                 destination[property] = source[property];
             }
@@ -48,21 +48,21 @@ var OUI = function() {
             isObject: isObject, isArray: isArray, isBoolean: isBoolean, isNull: isNull,
             isProperty: isProperty, trim: trim, extend: extend, version: version,
             isNumeric: isNumeric, isDecimal: isDecimal, isInteger: isInteger, isFloat: isDecimal, isInt: isInteger,
-            isRegexp: function(o) { return isObject(o) || isFunction(o) ? ('' + o).indexOf('/') == 0 : false; },
-            isNullOrUndefined: function(o) { return isUndefined(o) || isNull(o); },
-            isEmpty: function(o) {
+            isRegexp: function (o) { return isObject(o) || isFunction(o) ? ('' + o).indexOf('/') == 0 : false; },
+            isNullOrUndefined: function (o) { return isUndefined(o) || isNull(o); },
+            isEmpty: function (o) {
                 if (isUndefined(o) || null === o) { return true; }
                 else if (isString(o)) { return '' === trim(o); }
                 else if (isArray(o)) { return 0 === o.length; }
                 else if (isObject(o)) { for (var name in o) { return false; } return true; }
                 return false;
             },
-            toJsonString: function(o) { return JSON.stringify(o); },
-            toJson: function(s) { return JSON.parse(s); },
-            toEncode: function(s) { return encodeURIComponent(s); },
+            toJsonString: function (o) { return JSON.stringify(o); },
+            toJson: function (s) { return JSON.parse(s); },
+            toEncode: function (s) { return encodeURIComponent(s); },
             toDecimal: toDecimal, toFloat: toDecimal, checkNumber: checkNumber,
             toInteger: toInteger, toInt: toInteger,
-            quickSort: function(arr, key) {
+            quickSort: function (arr, key) {
                 if (0 === arr.length) { return []; }
                 var left = [], right = [], pivot = arr[0], c = arr.length;
                 for (var i = 1; i < c; i++) {
@@ -76,11 +76,11 @@ var OUI = function() {
 }();
 
 // Dictionary
-!function($) {
+!function ($) {
     'use strict';
 
     function Dictionary() {
-        var get = function(data) {
+        var get = function (data) {
             var obj = { keys: [], values: [] };
             for (var k in data) {
                 obj.keys.push(k), obj.values.push(data[k]);
@@ -89,13 +89,13 @@ var OUI = function() {
         }, _ = this;
 
         _.data = {}, _.keys = [], _.values = [];
-        _.add = function(key, value) {
+        _.add = function (key, value) {
             if (!$.isUndefined(key) && !_.contains(key)) {
                 var val = !$.isUndefined(value) ? value : null;
                 _.data[key] = val, _.keys.push(key), _.values.push(val);
             }
             return _;
-        }, _.remove = function(keys) {
+        }, _.remove = function (keys) {
             var arr = $.isArray(keys) ? keys : [keys];
             for (var i in arr) {
                 var key = arr[i];
@@ -106,18 +106,18 @@ var OUI = function() {
             var obj = get(_.data);
             _.keys = obj.keys, _.values = obj.values;
             return _;
-        }, _.clear = function() {
+        }, _.clear = function () {
             return _.data = {}, _.keys = [], _.values = [], _;
-        }, _.contains = function(key, isAdd, value) {
+        }, _.contains = function (key, isAdd, value) {
             //return !$.isUndefined(_.data[key]);
             if ($.isUndefined(_.data[key])) {
                 if (isAdd) { _.add(key, value); }
                 return false;
             }
             return true;
-        }, _.count = function() {
+        }, _.count = function () {
             return _.keys.length;
-        }, _.getValue = function(key, defaultValue) {
+        }, _.getValue = function (key, defaultValue) {
             return !$.isUndefined(_.data[key]) ? _.data[key] : defaultValue;
         };
     }
@@ -132,15 +132,15 @@ var OUI = function() {
 }(OUI);
 
 // Web
-!function($) {
+!function ($) {
     'use strict';
 
-    var doc = function() { try { return document } catch (e) { return null } }(),
+    var doc = function () { try { return document } catch (e) { return null } }(),
         head = doc ? doc.getElementsByTagName('head')[0] : null,
-        redirect = function(url) {
+        redirect = function (url) {
             $.isString(url, true) ? location.href = url : null;
         },
-        getQueryString = function(url, name) {
+        getQueryString = function (url, name) {
             var str = $.isString(url) ? url : location.href, params = str.substr(str.indexOf('?')), obj = {};
             if (params.indexOf('?') >= 0) {
                 var arr = params.substr(1).split('&'), c = arr.length;
@@ -153,21 +153,21 @@ var OUI = function() {
             }
             return !$.isUndefined(name) ? obj[name] : obj;
         },
-        isDebug = function(key) {
+        isDebug = function (key) {
             try { return !$.isUndefined(getQueryString()[key || 'debug']) } catch (e) { return false; }
         },
-        isElement = function(element, tagName) {
+        isElement = function (element, tagName) {
             var b = $.isObject(element) && $.isNumber(element.nodeType) && $.isString(element.tagName);
             return b && $.isString(tagName) ? element.tagName === tagName : b;
         },
-        getLocationPath = function() {
+        getLocationPath = function () {
             return location.href.substring(0, location.href.lastIndexOf('/') + 1);
         },
-        getScriptFilePath = function() {
+        getScriptFilePath = function () {
             var elements = doc.getElementsByTagName('script'), len = elements.length;
             return elements[len - 1].src;
         },
-        getFilePath = function(fullPath, currentPath) {
+        getFilePath = function (fullPath, currentPath) {
             var pos = fullPath.lastIndexOf('/'), prefix = currentPath || getLocationPath();
             if (pos >= 0) {
                 var path = fullPath.substr(0, pos + 1);
@@ -178,18 +178,18 @@ var OUI = function() {
             }
             return '';
         },
-        getFileName = function(filePath, withoutExtension) {
+        getFileName = function (filePath, withoutExtension) {
             var pos = filePath.lastIndexOf('/'), path = pos > 0 ? filePath.substr(pos + 1) : filePath;
             var name = path.split('?')[0], pos = name.lastIndexOf('.');
             return pos >= 0 && withoutExtension ? name.substr(0, pos) : name;
         },
-        createElement = function(nodeName, parent, func) {
+        createElement = function (nodeName, parent, func) {
             var element = doc.createElement(nodeName);
             $.isFunction(func) && func(element);
             isElement(parent) && parent.appendChild(element);
             return element;
         },
-        setAttribute = function(element, attributes, exempt) {
+        setAttribute = function (element, attributes, exempt) {
             if (!exempt && (!isElement(element) || !$.isObject(attributes))) { return false; }
             for (var k in attributes) {
                 var v = attributes[k];
@@ -199,28 +199,28 @@ var OUI = function() {
             }
             return element;
         },
-        setNoCache = function(filePath) {
+        setNoCache = function (filePath) {
             var postfix = $.isString(filePath) && filePath ? filePath + (filePath.indexOf('?') >= 0 ? '&' : '?') : '';
             return postfix + new Date().getMilliseconds();
         },
-        loadLinkStyle = function(path, id) {
+        loadLinkStyle = function (path, id) {
             if (!$.isUndefined(id) && doc.getElementById(id)) { return false; }
-            return createElement('link', head, function(el) {
+            return createElement('link', head, function (el) {
                 setAttribute(el, { id: id, type: 'text/css', rel: 'stylesheet', href: setNoCache(path) }, true);
             });
         },
-        loadJsScript = function(path, id, callback, parent) {
+        loadJsScript = function (path, id, callback, parent) {
             if ($.isFunction(id) && !$.isFunction(callback)) {
                 callback = id, id = null;
             }
-            var node = createElement('script', parent || head, function(el) {
+            var node = createElement('script', parent || head, function (el) {
                 setAttribute(el, { id: id, type: 'text/javascript', async: true, src: setNoCache(path), charset: 'utf-8' }, true);
             }), ae = node.attachEvent;
 
             if ($.isFunction(ae) && ae.toString() && ae.toString().indexOf('[native code]') >= 0) {
-                node.attachEvent('onreadystatechange', function(e) { onScriptLoad(e, path); });
+                node.attachEvent('onreadystatechange', function (e) { onScriptLoad(e, path); });
             } else {
-                node.addEventListener('load', function(e) { onScriptLoad(e, path); }, false);
+                node.addEventListener('load', function (e) { onScriptLoad(e, path); }, false);
             }
 
             function onScriptLoad(e, path) { !isDebug() && head.removeChild(node), onCallback(); }
@@ -228,15 +228,15 @@ var OUI = function() {
 
             return node;
         },
-        stopBubble = function(ev) {
+        stopBubble = function (ev) {
             ev = ev || window.event || arguments.callee.caller.arguments[0];
             if (ev.stopPropagation) { ev.stopPropagation(); } else { ev.cancelBubble = true; }
             if (ev.preventDefault) { ev.preventDefault(); } else { ev.returnValue = false; }
         },
-        addListener = function(element, e, fn) {
+        addListener = function (element, e, fn) {
             element.addEventListener ? element.addEventListener(e, fn, false) : element.attachEvent('on' + e, fn);
         },
-        removeListener = function(element, e, fn) {
+        removeListener = function (element, e, fn) {
             element.removeEventListener ? element.removeEventListener(e, fn, false) : element.detachEvent('on' + e, fn);
         };
 
@@ -261,12 +261,12 @@ var OUI = function() {
 }(OUI);
 
 // Javascript Native Object
-!function($) {
+!function ($) {
     'use strict';
 
     var extendCounter = 1, debug = $.isDebug ? $.isDebug() : true;
     $.extend($, {
-        extendNative: function(destination, source, constructor) {
+        extendNative: function (destination, source, constructor) {
             var printLog = debug && $.isString(constructor);
             for (var property in source) {
                 var isExtend = $.isUndefined(destination[property]), func = source[property];
@@ -283,7 +283,7 @@ var OUI = function() {
     });
 
     $.extendNative(Array.prototype, {
-        indexOf: function(el) {
+        indexOf: function (el) {
             for (var i = 0, n = this.length; i < n; i++) {
                 if (this[i] === el) {
                     return i;
@@ -291,7 +291,7 @@ var OUI = function() {
             }
             return -1;
         },
-        forEach: function(callback, thisValue) {
+        forEach: function (callback, thisValue) {
             if (typeof callback === 'function') {
                 for (var i = 0, c = this.length; i < c; i++) {
                     callback.call(thisValue, this[i], i, this);
@@ -301,36 +301,36 @@ var OUI = function() {
     }, 'Array.prototype');
 
     $.extendNative(String.prototype, {
-        trim: function() { return this.replace(/(^[\s]*)|([\s]*$)/g, ''); },
-        trimStart: function() { return this.replace(/(^[\s]*)/g, ''); },
-        trimEnd: function() { return this.replace(/([\s]*$)/g, ''); },
-        trimLeft: function() { return this.trimStart(); },
-        trimRight: function() { return this.trimEnd(); },
-        padStart: function(totalWidth, paddingChar) {
+        trim: function () { return this.replace(/(^[\s]*)|([\s]*$)/g, ''); },
+        trimStart: function () { return this.replace(/(^[\s]*)/g, ''); },
+        trimEnd: function () { return this.replace(/([\s]*$)/g, ''); },
+        trimLeft: function () { return this.trimStart(); },
+        trimRight: function () { return this.trimEnd(); },
+        padStart: function (totalWidth, paddingChar) {
             var s = this, char = paddingChar || '0', c = totalWidth - s.length;
             for (var i = 0; i < c; i++) {
                 s = char + s;
             }
             return s;
         },
-        padEnd: function(totalWidth, paddingChar) {
+        padEnd: function (totalWidth, paddingChar) {
             var s = this, char = paddingChar || '0', c = totalWidth - s.length;
             for (var i = 0; i < c; i++) {
                 s += char;
             }
             return s;
         },
-        padLeft: function(totalWidth, paddingChar) { return this.padStart(totalWidth, paddingChar); },
-        padRight: function(totalWidth, paddingChar) { return this.padEnd(totalWidth, paddingChar); },
-        startsWith: function(s) { return this.slice(0, s.length) === s; },
-        endsWith: function(s) { return this.slice(-s.length) === s; },
-        startWith: function(s) { return this.startsWith(s); },
-        endWith: function(s) { return this.endsWith(s); },
-        len: function() { return this.replace(/([^\x00-\xff])/g, 'aa').length; },
-        replaceAll: function(pattern, v) {
+        padLeft: function (totalWidth, paddingChar) { return this.padStart(totalWidth, paddingChar); },
+        padRight: function (totalWidth, paddingChar) { return this.padEnd(totalWidth, paddingChar); },
+        startsWith: function (s) { return this.slice(0, s.length) === s; },
+        endsWith: function (s) { return this.slice(-s.length) === s; },
+        startWith: function (s) { return this.startsWith(s); },
+        endWith: function (s) { return this.endsWith(s); },
+        len: function () { return this.replace(/([^\x00-\xff])/g, 'aa').length; },
+        replaceAll: function (pattern, v) {
             return this.replace($.isRegexp(pattern) ? pattern : new RegExp(pattern, 'gm'), v);
         },
-        append: function(v, c) {
+        append: function (v, c) {
             var s = this;
             if ($.isNumber(c)) {
                 for (var i = 0; i < c; i++) { s += v; }
@@ -338,7 +338,7 @@ var OUI = function() {
             }
             return s + v;
         },
-        insert: function(v, c) {
+        insert: function (v, c) {
             var s = this;
             if ($.isNumber(c)) {
                 for (var i = 0; i < c; i++) { s = v + s; }
@@ -346,26 +346,26 @@ var OUI = function() {
             }
             return v + s;
         },
-        clean: function(s) {
+        clean: function (s) {
             var reg = new RegExp('(' + (s || ' ') + ')', 'g');
             return this.replace(reg, '');
         },
-        clear: function(s) {
+        clear: function (s) {
             //清除字符串的多余字符，默认清除 - 和 空格
             var reg = new RegExp('[' + (s || '- ') + ']', 'g');
             return this.replace(reg, '');
         },
-        separate: function(delimiter, itemLen) {
+        separate: function (delimiter, itemLen) {
             var reg = new RegExp('(.{' + itemLen + '}(?!$))', 'g');
             return this.replace(reg, '$1' + delimiter);
         },
-        isEmpty: function() { return this.trim() === ''; },
-        isNumeric: function() { return $.isnumeric(this); },
-        isDecimal: function() { return $.isDecimal(this); },
-        isInteger: function() { return $.isInteger(this); },
-        isFloat: function() { return $.isDecimal(this); },
-        isInt: function() { return $.isInteger(this); },
-        toNumber: function(defaultValue, isFloat, decimalLen) {
+        isEmpty: function () { return this.trim() === ''; },
+        isNumeric: function () { return $.isnumeric(this); },
+        isDecimal: function () { return $.isDecimal(this); },
+        isInteger: function () { return $.isInteger(this); },
+        isFloat: function () { return $.isDecimal(this); },
+        isInt: function () { return $.isInteger(this); },
+        toNumber: function (defaultValue, isFloat, decimalLen) {
             //这里判断是否是数字的正则规则是 判断从数字开始到非数字结束，根据 parseFloat 的规则
             var s = this, v = 0, dv = defaultValue, pattern = /^[-+]?(\d+)(.[\d]{0,})/;
             if ($.isNumeric(dv)) {
@@ -393,13 +393,13 @@ var OUI = function() {
             }
             return !isNaN(v) ? v : Number(dv) || 0;
         },
-        toInt: function(defaultValue) { return $.toInteger(this, defaultValue); },
-        toFloat: function(defaultValue, decimalLen) { return $.toDecimal(this, defaultValue, decimalLen); },
-        toThousand: function(delimiter) {
+        toInt: function (defaultValue) { return $.toInteger(this, defaultValue); },
+        toFloat: function (defaultValue, decimalLen) { return $.toDecimal(this, defaultValue, decimalLen); },
+        toThousand: function (delimiter) {
             var a = this.split('.'), hasPoint = this.indexOf('.') >= 0;
             return a[0].replace(/\B(?=(?:[\dA-Fa-f]{3})+$)/g, delimiter || ',') + (hasPoint ? '.' + (a[1] || '') : '');
         },
-        toDate: function(format) {
+        toDate: function (format) {
             var ts = Date.parse(this.replace(/-/g, '/'));
             if (isNaN(ts) && /^[\d]{10,13}$/.test(this)) {
                 ts = Number(this.padRight(13));
@@ -411,7 +411,7 @@ var OUI = function() {
             }
             return $.isString(format) ? dt.format(format) : dt;
         },
-        toArray: function(delimiter, type, keepZero, distinct) {
+        toArray: function (delimiter, type, keepZero, distinct) {
             if ($.isBoolean(type)) {
                 distinct = keepZero, keepZero = type, type = null;
             }
@@ -436,10 +436,18 @@ var OUI = function() {
             }
             return list;
         },
-        timeSpan: function(dt2) {
+        toUnicode: function () {
+            var s = this, c = s.length, u = '';
+            for (var i = 0; i < c; i++) {
+                var hex = s.charCodeAt(i).toString(16);
+                u += '\\u' + hex.padStart(4);
+            }
+            return u;
+        },
+        timeSpan: function (dt2) {
             return this.toDate().timeSpan(dt2.toDate());
         },
-        equals: function(obj) {
+        equals: function (obj) {
             if (null === obj) {
                 return false;
             }
@@ -449,7 +457,7 @@ var OUI = function() {
             }
             return this === str;
         },
-        compareTo: function(obj) {
+        compareTo: function (obj) {
             var p = /^[-+]?(\d+)(.[\d]{0,})?$/, s1 = p.test(this) ? Number(this) : this, s2 = p.test(obj) ? Number(obj) : obj;
             if (isNaN(s1) || isNaN(s2)) {
                 s1 = s1.toString(), s2 = s2.toString();
@@ -459,52 +467,52 @@ var OUI = function() {
     }, 'String.prototype');
 
     $.extendNative(String, {
-        compare: function(s1, s2) { return s1.compareTo(s2); }
+        compare: function (s1, s2) { return s1.compareTo(s2); }
     }, 'String');
 
-        //Boolean.prototype extend
+    //Boolean.prototype extend
     $.extendNative(Boolean.prototype, {
-        toNumber: function() { return Number(this); }
+        toNumber: function () { return Number(this); }
     }, 'Boolean.prototype');
 
     //Number.prototype extend
     $.extendNative(Number.prototype, {
-        getDecimalLen: function() { return (this.toString().split('.')[1] || '').length; },
-        delDecimalPoint: function() { return Number(this.toString().replace('.', '')); },
-        add: function(arg) {
+        getDecimalLen: function () { return (this.toString().split('.')[1] || '').length; },
+        delDecimalPoint: function () { return Number(this.toString().replace('.', '')); },
+        add: function (arg) {
             var a = this.getDecimalLen(), b = arg.getDecimalLen(), m = Math.pow(10, Math.max(a, b));
             return (this.mul(m) + arg.mul(m)) / m;
         },
-        sub: function(arg) {
+        sub: function (arg) {
             return this.add(-arg);
         },
-        mul: function(arg) {
+        mul: function (arg) {
             var a = this.getDecimalLen(), b = arg.getDecimalLen(), m = a + b;
             return this.delDecimalPoint() * arg.delDecimalPoint() / Math.pow(10, m);
         },
-        div: function(arg) {
+        div: function (arg) {
             var a = this.delDecimalPoint(), b = arg.delDecimalPoint(), n = this.getDecimalLen(), m = arg.getDecimalLen();
             return (a / b).mul(Math.pow(10, m - n));
         },
-        round: function(len) {
+        round: function (len) {
             var m = Math.pow(10, len || 0);
             return Math.round(this * m) / m;
         },
-        padLeft: function(totalWidth, paddingChar) { return this.toString().padLeft(totalWidth, paddingChar); },
-        padRight: function(totalWidth, paddingChar) { return this.toString().padRight(totalWidth, paddingChar); },
-        isDecimal: function() { return $.isDecimal(this); },
-        isInteger: function() { return $.isInteger(this); },
-        isFloat: function() { return $.isDecimal(this); },
-        isInt: function() { return $.isInteger(this); },
-        isHex: function() { return this.toString().toUpperCase().indexOf('0X') === 0; },
-        toHex: function() { return this.toString(16).toUpperCase(); },
-        toThousand: function(delimiter) { return this.toString().toThousand(delimiter); },
-        toDate: function(format) { return this.toString().toDate(format); }
+        padLeft: function (totalWidth, paddingChar) { return this.toString().padLeft(totalWidth, paddingChar); },
+        padRight: function (totalWidth, paddingChar) { return this.toString().padRight(totalWidth, paddingChar); },
+        isDecimal: function () { return $.isDecimal(this); },
+        isInteger: function () { return $.isInteger(this); },
+        isFloat: function () { return $.isDecimal(this); },
+        isInt: function () { return $.isInteger(this); },
+        isHex: function () { return this.toString().toUpperCase().indexOf('0X') === 0; },
+        toHex: function () { return this.toString(16).toUpperCase(); },
+        toThousand: function (delimiter) { return this.toString().toThousand(delimiter); },
+        toDate: function (format) { return this.toString().toDate(format); }
     }, 'Number.prototype');
 
     //Date.prototype extend
     $.extendNative(Date.prototype, {
-        format: function(formatString, len) {
+        format: function (formatString, len) {
             var t = this, year = t.getFullYear();
             if (isNaN(year)) {
                 return '';
@@ -524,24 +532,24 @@ var OUI = function() {
                 };
             return (formatString || 'yyyy-MM-dd HH:mm:ss').replace(p, '{$1}').format(d);
         },
-        compareTo: function(dt) {
+        compareTo: function (dt) {
             var t1 = this.getTime(), t2 = dt.getTime();
             return t1 > t2 ? 1 : t1 < t2 ? -1 : 0;
         },
-        timeSpan: function(dt2) {
+        timeSpan: function (dt2) {
             //获取两个Date的毫秒数和差值
             var dt1 = this, t1 = dt1.getTime(), t2 = dt2.getTime(), tick = Number(t1 - t2) || 0;
             return Date.timeTick(tick);
         },
-        add: function(v, type) { return this.setTime(Date.addTick(this, v, type)), this; },
-        addYears: function(v) { return this.setYear(this.getFullYear() + (parseInt(v, 10) || 0)), this; },
-        addMonths: function(v) { return this.setMonth(this.getMonth() + (parseInt(v, 10) || 0)), this; },
-        addDays: function(v) { return this.add(v, 'days'); },
-        addHours: function(v) { return this.add(v, 'hours'); },
-        addMinutes: function(v) { return this.add(v, 'minutes'); },
-        addSeconds: function(v) { return this.add(v, 'seconds'); },
-        addMilliseconds: function(v) { return this.add(v, 'milliseconds'); },
-        getDateList: function(days) {
+        add: function (v, type) { return this.setTime(Date.addTick(this, v, type)), this; },
+        addYears: function (v) { return this.setYear(this.getFullYear() + (parseInt(v, 10) || 0)), this; },
+        addMonths: function (v) { return this.setMonth(this.getMonth() + (parseInt(v, 10) || 0)), this; },
+        addDays: function (v) { return this.add(v, 'days'); },
+        addHours: function (v) { return this.add(v, 'hours'); },
+        addMinutes: function (v) { return this.add(v, 'minutes'); },
+        addSeconds: function (v) { return this.add(v, 'seconds'); },
+        addMilliseconds: function (v) { return this.add(v, 'milliseconds'); },
+        getDateList: function (days) {
             var list = [];
             for (var i = 0; i < days; i++) {
                 list.push(this.addDays(i).format('yyyy-MM-dd'));
@@ -551,8 +559,8 @@ var OUI = function() {
     }, 'Date.prototype');
 
     $.extendNative(Date, {
-        compare: function(dt1, dt2) { return dt1.compareTo(dt2); },
-        addTick: function(tick, v, type) {
+        compare: function (dt1, dt2) { return dt1.compareTo(dt2); },
+        addTick: function (tick, v, type) {
             if (typeof tick !== 'number') {
                 tick = Number(tick);
             }
@@ -568,7 +576,7 @@ var OUI = function() {
             }
             return tick;
         },
-        timeTick: function(tick) {
+        timeTick: function (tick) {
             if (tick === 0) {
                 return {
                     totalDays: 0, totalHours: 0, totalMinutes: 0, totalSeconds: 0, totalMilliseconds: 0,
@@ -591,11 +599,11 @@ var OUI = function() {
             ts.seconds = parseInt((ms -= ts.minutes * ds.m), 10);
             ts.milliseconds = ((ms -= ts.seconds) * ds.s).round();
 
-            ts.add = function(v, type) {
+            ts.add = function (v, type) {
                 //先除以10000，将ticks换算回毫秒
                 return Date.timeTick(Date.addTick(this.ticks / 10000, v, type));
             },
-                ts.show = function(formatString, hideMilliseconds) {
+                ts.show = function (formatString, hideMilliseconds) {
                     var s = this, fs = formatString, hide = hideMilliseconds;
                     if (typeof hide === 'undefined' && typeof fs === 'boolean') {
                         hide = fs, fs = '';
@@ -619,25 +627,25 @@ var OUI = function() {
                 };
             return ts;
         },
-        timeSpan: function(dt1, dt2) {
+        timeSpan: function (dt1, dt2) {
             return dt1.timeSpan(dt2);
         }
     }, 'Date');
 }(OUI);
 
 // String.prototype.format
-!function($) {
+!function ($) {
     'use strict';
 
-    var throwFormatError = function(msg, str, args) {
+    var throwFormatError = function (msg, str, args) {
         try {
             if (!$.isUndefined(str)) { console.log('str:\r\n\t', str, '\r\nargs:\r\n\t', args); } console.trace();
         } catch (e) { }
         throw new Error(msg);
-    }, formatNumberZero = function(arv, arn) {
+    }, formatNumberZero = function (arv, arn) {
         var arr = [], idx = arn.length - 1;
         for (var i = arv.length - 1; i >= 0; i--) {
-            arr.push(arv[i] === '0' ? (idx >= 0 ? arn[idx] : arv[i]) : (function() { ++idx; return arv[i]; })());
+            arr.push(arv[i] === '0' ? (idx >= 0 ? arn[idx] : arv[i]) : (function () { ++idx; return arv[i]; })());
             idx--;
         }
         for (var i = idx; i >= 0; i--) {
@@ -645,7 +653,7 @@ var OUI = function() {
         }
         arr = arr.reverse();
         return arr.join('');
-    }, scientificNotation = function(v, f, n, dn, numLen) {
+    }, scientificNotation = function (v, f, n, dn, numLen) {
         var num = parseInt('0' + dn[0], 10), fn = num < 1 ? 1 : dn[0].substr(0, 1), e = Math.pow(10, n),
             en = v.toString().substr(1).replace('.', ''), el = en.length,
             postfix = '001', postfixLen = (f === 'g' || f === 'G') ? 2 : 3, prefix = '', symbol = num >= 1 ? '+' : '-';
@@ -665,7 +673,7 @@ var OUI = function() {
         return fn + '.' + en + (so[f] || f) + symbol + postfix;
     }, regPattern = {
         numberSymbol: /([CDEFGNRX])/gi, number: /^(0x)?[\dA-Fa-f]+$/
-    }, formatNumberSwitch = function(v, f, n, dn, err, str, args) {
+    }, formatNumberSwitch = function (v, f, n, dn, err, str, args) {
         //console.log('v: ', v, ', f: ', f, ',is: ', (isHexNumber(v) && fu !== 'X'));
         var fu = f.toUpperCase(), pos = 0, numLen = dn[0].length, decimalLen = (dn[1] || '').length;
         //if(isHexNumber(v) && ['C', 'F', 'N'].indexOf(fu) >= 0){
@@ -725,11 +733,11 @@ var OUI = function() {
                 break;
         }
         return v;
-    }, isNumberString = function(obj, f) {
+    }, isNumberString = function (obj, f) {
         return $.isNumber(obj) || (!regPattern.numberSymbol.test(f) && regPattern.number.test(obj));
-    }, isHexNumber = function(obj, f) {
+    }, isHexNumber = function (obj, f) {
         return !regPattern.numberSymbol.test(f) && regPattern.number.test(obj);
-    }, formatNumber = function(mv, v, err, str, args) {
+    }, formatNumber = function (mv, v, err, str, args) {
         if (!/[:]/g.test(mv)) {
             return v;
         }
@@ -759,7 +767,7 @@ var OUI = function() {
             }
         }
         return v;
-    }, distillObjVal = function(key, obj, err, str, vals) {
+    }, distillObjVal = function (key, obj, err, str, vals) {
         var v;
         if (!$.isUndefined(obj[key])) {
             v = obj[key];
@@ -782,7 +790,7 @@ var OUI = function() {
     };
 
     if ($.isUndefined(String.prototype.format)) {
-        String.prototype.format = function(args) {
+        String.prototype.format = function (args) {
             var s = this, vals = [], rst = [], pattern = /({|})/g, ms = s.match(pattern);
             if (null === ms) {
                 return s.toString() || s;
@@ -860,7 +868,7 @@ var OUI = function() {
     }
 
     //String.format
-    String.format = String.format || function(s) {
+    String.format = String.format || function (s) {
         if ($.isString(s)) {
             var a = [], c = arguments.length;
             for (var i = 1; i < c; i++) {

@@ -109,6 +109,11 @@ ID:<input type="text" id="txtId" style="width:50px;" />
         }
     ];
 
+
+        var tb1 = new OUI.Table();
+
+        console.log('tb1: ', tb1);
+    tb1.createBody(bodyData);
     
     var tb = new OUI.Table({
         table: 'tblist',                //表格（对象 或 Id 或 null)，为null则自动创建表格对象（可以不设置）
@@ -131,6 +136,7 @@ ID:<input type="text" id="txtId" style="width:50px;" />
             //className: ['expand', 'collapse'] //可以数组形式，第1个元素为节点展开的样式
         } 
     });
+        console.log('tb: ', tb);
 
     tb.createBody(bodyData);
 
@@ -269,7 +275,7 @@ ID:<input type="text" id="txtId" style="width:50px;" />
 
     window.setTimeout(function(){
         console.log('tb.tree: ', tb.tree);
-        tb.getTree().collapse(6);
+        tb.tree.collapse(6);
     }, 2000);
 
     function toggle(collapse){
