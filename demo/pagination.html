@@ -12,15 +12,25 @@
 </html>
 <script type="text/javascript">
 
-   var p1 = new OUI.Pagination({
+    var timer = null;
+    var p1 = new OUI.Pagination({
         element: document.getElementById('p1'),
-        dataCount: 90,
+        dataCount: 912,
         markCount: 10,
-        pageIndex: 1,
-        pageStart: 1,
-        markType: 'symbol',
+        pageIndex: 0,
+        pageStart: 0,
+        pageSize: 5,
+        showType: 'list',
+        markType: 'chinese',
         callback: function(pageIndex){
-            console.log('p2-callback: ', pageIndex);
+            if(timer != null){
+                window.clearTimeout(timer);
+            }
+            timer = window.setTimeout(function(){
+                console.log('p2-callback: ', pageIndex);
+                //这里写真正的业务 函数
+
+            }, 200);
             p1.paging(pageIndex);
         }
     });
