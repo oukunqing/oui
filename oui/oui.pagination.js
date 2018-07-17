@@ -1,10 +1,14 @@
 
-!function ($) {
+!function($) {
     'use strict';
 
     var doc = document,
         head = document.getElementsByTagName('head')[0],
         thisFilePath = $.getScriptFilePath(),
+        defaultClassName = 'oui-pagination',
+        defaultPositon = 'left',
+        defaultType = 'symbol',
+        defaultSkin = 'default',
         texts = {
             symbol: {
                 first: '&lt;&lt;', previous: '&lt;', next: '&gt;', last: '&gt;&gt;', ellipsis: '\u2026',
@@ -19,8 +23,8 @@
                 dataStat: '\u663e\u793a\u7b2c {0} \u6761\u5230\u7b2c {1} \u6761\u8bb0\u5f55\uff0c\u5171 {2} \u6761'
             },
             english: {
-                first: 'First', previous: 'Previous', next: 'Next', last: 'Last', ellipsis: '\u2026', 
-                refurbish: 'Reload', 
+                first: 'First', previous: 'Previous', next: 'Next', last: 'Last', ellipsis: '\u2026',
+                refurbish: 'Reload',
                 pageCount: '\u5171 {0} \u9875', dataCount: '\u5171 {0} \u6761',
                 dataStat: '\u663e\u793a\u7b2c {0} \u6761\u5230\u7b2c {1} \u6761\u8bb0\u5f55\uff0c\u5171 {2} \u6761'
             }
@@ -28,7 +32,7 @@
         positions = {
             left: 1, right: 0
         },
-        setNumber = function (op, keys) {
+        setNumber = function(op, keys) {
             for (var i in keys) {
                 var key = keys[i];
                 if (isNaN(Number(op[key])) || op[key] < 0) {
@@ -36,7 +40,7 @@
                 }
             }
         },
-        setOptions = function (op, options) {
+        setOptions = function(op, options) {
             if ($.isNumber(options)) {
                 op.pageIndex = options;
             } else {
@@ -62,7 +66,7 @@
                     op.pageSize = 1;
                 }
 
-                if($.isNumber(op.debounce) && op.debounce >= 50){
+                if ($.isNumber(op.debounce) && op.debounce >= 50) {
                     op.debounceTimeout = op.debounce;
                     op.debounce = true;
                 }
@@ -73,7 +77,7 @@
             }
             return op;
         },
-        getMinMax = function (that) {
+        getMinMax = function(that) {
             var op = that.options, min = op.pageStart, max = 0;
             if (op.pageCount <= op.markCount) {
                 max = op.pageCount;
@@ -88,8 +92,8 @@
             }
             return [min, max];
         },
-        buildLinkText = function (enabled, that, arr, pageIndex, key, noLink) {
-            if(!enabled){return false;}
+        buildLinkText = function(enabled, that, arr, pageIndex, key, noLink) {
+            if (!enabled) { return false; }
             if (noLink) {
                 arr.push(['<li>', '<a class="text">', that.options.markText[key], '</a>', '</li>'].join(''));
             } else {
@@ -98,52 +102,52 @@
                 ].join(''));
             }
         },
-        buildPageInput = function (enabled, that, arr, showButton) {
-            if(!enabled){return false;}
+        buildPageInput = function(enabled, that, arr, showButton) {
+            if (!enabled) { return false; }
             var op = that.options, maxlength = op.pageCount.toString().length, className = showButton ? ' group' : '';
             arr.push('<input type="text" class="text' + className + '" value="' + (op.pageIndex + op.minuend) + '" maxlength="' + maxlength + '"/>');
             if (showButton) {
                 arr.push('<button class="btn group">GO</button>');
             }
         },
-        buildDataCount = function(enabled, that, arr, text, datas){
-            if(!enabled){return false;}
+        buildDataCount = function(enabled, that, arr, text, datas) {
+            if (!enabled) { return false; }
             arr.push('<span class="label">' + (text || '{0}').format(datas) + '</span>');
         },
-        buildDataStat = function(enabled, that, arr, text){
-            if(!enabled){return false;}
+        buildDataStat = function(enabled, that, arr, text) {
+            if (!enabled) { return false; }
             var op = that.options, min = (op.pageIndex - op.pageStart) * op.pageSize, max = min + op.pageSize;
             var datas = [
                 min + 1, max < op.dataCount ? max : op.dataCount, op.dataCount
             ];
             arr.push('<div class="stat ' + getPosition(that, false) + '">' + (text || '{0}').format(datas) + '</div>');
         },
-        setCallback = function(that, objs, eventName, minuend, func, isPageSize){
+        setCallback = function(that, objs, eventName, minuend, func, isPageSize) {
             var op = that.options, obj = objs, objVal = null;
-            if($.isArray(objs)){
+            if ($.isArray(objs)) {
                 obj = objs[0], objVal = objs[1];
             }
-            if($.isUndefined(obj)) { return false; }
-            $.addListener(obj, eventName, function (ev) {
-                if(eventName.indexOf('key') >= 0 && ev.keyCode !== 13){
+            if ($.isUndefined(obj)) { return false; }
+            $.addListener(obj, eventName, function(ev) {
+                if (eventName.indexOf('key') >= 0 && ev.keyCode !== 13) {
                     return false;
                 }
                 var val = getValue(objVal || this);
                 if (!isNaN(val) && $.isFunction(op.callback)) {
-                    if($.isFunction(func)){ func(val); }
-                    if(isPageSize){
+                    if ($.isFunction(func)) { func(val); }
+                    if (isPageSize) {
                         //设置PageSize，页码重新设置为起始页码
                         op.callback(op.pageStart);
                     } else {
                         //是否启用防抖功能，抖动频率需大于50毫秒
-                        if(op.debounce && op.debounceTimeout > 50){
+                        if (op.debounce && op.debounceTimeout > 50) {
                             //内部分页
                             that.paging(val - minuend);
 
-                            if(op.timerDebounce != null){
+                            if (op.timerDebounce != null) {
                                 window.clearTimeout(op.timerDebounce);
                             }
-                            op.timerDebounce = window.setTimeout(function(){
+                            op.timerDebounce = window.setTimeout(function() {
                                 //外部回调
                                 op.callback(val - minuend);
                             }, op.debounceTimeout);
@@ -154,35 +158,35 @@
                 }
             });
         },
-        getClassName = function(that){
+        getClassName = function(that) {
             return that.options.className || 'oui-pagination';
         },
-        getPosition = function(that, isMain){
+        getPosition = function(that, isMain) {
             return isMain ? that.options.position : positions[that.options.position] ? 'right' : 'left';
         },
-        createEvent = function (that, minuend) {
+        createEvent = function(that, minuend) {
             var op = that.options, links = op.element.getElementsByTagName('A'), c = links.length;
             for (var i = 0; i < c; i++) {
                 setCallback(that, links[i], 'click', 0);
             }
 
             var selects = op.element.getElementsByTagName('Select');
-            if(selects[0] !== null){ selects[0].value = op.pageSize; }
-            setCallback(that, selects[0], 'change', 0, function(val){ op.pageSize = val; }, true);
+            if (selects[0] !== null) { selects[0].value = op.pageSize; }
+            setCallback(that, selects[0], 'change', 0, function(val) { op.pageSize = val; }, true);
 
             var inputs = op.element.getElementsByTagName('Input'), ic = inputs.length;
             var btn = op.element.getElementsByTagName('Button');
-            setCallback(that, [btn[0], inputs[ic-1]], 'click', minuend);
+            setCallback(that, [btn[0], inputs[ic - 1]], 'click', minuend);
 
             for (var i = 0; i < ic; i++) {
                 setCallback(that, inputs[i], 'keyup', minuend);
             }
         },
-        getValue = function (obj) {
+        getValue = function(obj) {
             return parseInt(obj.value || obj.getAttribute('value'), 10);
         },
-        buildPageSize = function (enabled, that, arr, minuend) {
-            if(!enabled){return false;}
+        buildPageSize = function(enabled, that, arr, minuend) {
+            if (!enabled) { return false; }
             var op = that.options, html = ['<select class="select">'], selected = false;
             if ($.isArray(op.sizeOptions)) {
                 for (var i in op.sizeOptions) {
@@ -195,7 +199,7 @@
                     html.push('<option value="' + (dr.value || dr.val) + '">' + (dr.text || dr.key) + '</option>');
                 }
             }
-            if(!selected){
+            if (!selected) {
                 html.push('<option value="' + op.pageSize + '">' + op.pageSize + '</option>');
             }
             html.push('</select>');
@@ -204,8 +208,6 @@
         };
 
     function Pagination(options) {
-        $.loadLinkStyle($.getFilePath(thisFilePath) + $.getFileName(thisFilePath, true) + '.css', 'oui-pagination');
-
         this.options = setOptions({
             element: null,
             pageStart: 0,
@@ -213,12 +215,12 @@
             pageSize: 10,
             dataCount: 0,
             markCount: 10,
-            markType: 'symbol',     // Symbol|Chinese|Englist
-            markText: texts['symbol'],
+            markType: defaultType,     // Symbol|Chinese|Englist
+            markText: texts[defaultType],
             showList: true,
-            className: 'oui-pagination',    //默认样式名称，可以修改为外置样式
-            skin: 'default',        //样式，若skin=null则不启用内置样式
-            position: 'left',       // left|right
+            className: defaultClassName,    //默认样式名称，可以修改为外置样式
+            skin: defaultSkin,        //样式，若skin=null则不启用内置样式
+            position: defaultPositon,       // left|right
             showInvalid: true,
             showEllipsis: true,
             showFirstLast: true,
@@ -230,18 +232,22 @@
             showDataStat: true,
             showSizeSelect: true,
             sizeOptions: [5, 10, 20, 30, 50, 100],
-            callback: function (pageIndex) {
+            callback: function(pageIndex) {
                 console.log('pageIndex: ', pageIndex);
             },
             debounce: true,                 //是否启用防抖功能（或者值为number，且大于50即为启用）
             debounceTimeout: 256            //抖动时长，单位：毫秒
         }, options);
 
+        if(this.options.className === defaultClassName){
+            $.loadLinkStyle($.getFilePath(thisFilePath) + $.getFileName(thisFilePath, true) + '.css', 'oui-pagination');
+        }
+
         this.paging();
     }
 
     Pagination.prototype = {
-        paging: function (options) {
+        paging: function(options) {
             if ($.isObject(options) || $.isNumber(options)) {
                 this.options = setOptions(this.options, options);
             }
@@ -259,7 +265,7 @@
                 pcSub = op.pageCount - op.minuend,
                 pmSum = op.pageIndex + op.markCount,
                 html = [
-                    '<div class="' + getClassName(that) + '">', 
+                    '<div class="' + getClassName(that) + '">',
                     '<div class="' + op.skin + ' ' + getPosition(that, true) + '">',
                     '<ul class="list">'
                 ];
