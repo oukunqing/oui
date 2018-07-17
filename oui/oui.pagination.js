@@ -11,7 +11,7 @@
         defaultSkin = 'default',
         texts = {
             symbol: {
-                first: '&lt;&lt;', previous: '&lt;', next: '&gt;', last: '&gt;&gt;', ellipsis: '\u2026',
+                first: '&lt;&lt;', previous: '&lt;', next: '&gt;', last: '&#62;&#62;', ellipsis: '\u2026',
                 refurbish: 'Reload',
                 pageCount: '\u5171 {0} \u9875', dataCount: '\u5171 {0} \u6761',
                 dataStat: '\u663e\u793a\u7b2c{0}\u6761\u5230\u7b2c{1}\u6761\u8bb0\u5f55\uff0c\u5171{2}\u6761'
@@ -122,6 +122,33 @@
             ];
             arr.push('<div class="stat ' + getPosition(that, false) + '">' + (text || '{0}').format(datas) + '</div>');
         },
+        keyPaging = function(ev, that, obj){
+            var isPaging = true, op = that.options, val = 0;
+            if(ev.keyCode === 38){
+                if(op.pageIndex <= op.pageStart){
+                    return null;
+                }
+                val = op.pageStart + op.minuend;
+            } else if(ev.keyCode === 40) {
+                if(op.pageIndex + op.minuend >= op.pageCount){
+                    return null;
+                }
+                val = op.pageCount;
+            } else if(ev.keyCode === 37){
+                if(op.pageIndex - op.minuend - op.pageStart < op.pageStart){
+                    return null;
+                }
+                val = op.pageIndex - 1 + op.minuend;
+            } else if(ev.keyCode === 39){
+                if(op.pageIndex + op.minuend >= op.pageCount){
+                    return null;
+                }
+                val = op.pageIndex + 1 + op.minuend;
+            } else {
+                isPaging = false;
+            }
+            return {paging: isPaging, value: val};
+        },
         setCallback = function(that, objs, eventName, minuend, func, isPageSize) {
             var op = that.options, obj = objs, objVal = null;
             if ($.isArray(objs)) {
@@ -129,10 +156,19 @@
             }
             if ($.isUndefined(obj)) { return false; }
             $.addListener(obj, eventName, function(ev) {
-                if (eventName.indexOf('key') >= 0 && ev.keyCode !== 13) {
-                    return false;
-                }
                 var val = getValue(objVal || this);
+                if (eventName.indexOf('key') >= 0) {
+                    var kp = keyPaging(ev, that, this);
+                    console.log('kp: ', kp);  
+                    if(kp === null){
+                        return false;
+                    }  
+                    if(kp.paging){
+                        val = kp.value;
+                    } else if(ev.keyCode !== 13){
+                        return false;
+                    }
+                }
                 if (!isNaN(val) && $.isFunction(op.callback)) {
                     if ($.isFunction(func)) { func(val); }
                     if (isPageSize) {
@@ -179,7 +215,8 @@
             setCallback(that, [btn[0], inputs[ic - 1]], 'click', minuend);
 
             for (var i = 0; i < ic; i++) {
-                setCallback(that, inputs[i], 'keyup', minuend);
+                setCallback(that, inputs[i], 'keydown', minuend);
+                inputs[i].focus();
             }
         },
         getValue = function(obj) {
