@@ -18,5 +18,9 @@
 .oui-pagination a.cur{border:solid 1px #f00; color:#f00;}
 .oui-pagination a.text{border:solid 1px #999; color:#999;}
 
-.oui-pagination input.jump{width:50px;text-align:center;}
+.oui-pagination input.text{width:50px;text-align:center; bordre:solid 1px #ccc; border-radius:4px;}
+.oui-pagination input.group{width:50px;text-align:center;}
 .oui-pagination button.btn{text-align:center;}
+.oui-pagination button.group{text-align:center;}
+
+.oui-pagination .stat{float:right;}

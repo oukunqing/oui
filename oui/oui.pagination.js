@@ -6,152 +6,204 @@
         head = document.getElementsByTagName('head')[0],
         thisFilePath = $.getScriptFilePath(),
         texts = {
-        symbol: { 
-            first: '&lt;&lt;', previous: '&lt;', next: '&gt;', last: '&gt;&gt;', ellipsis: '...',
-            refurbish: 'Re',
-            totalPage: '\u5171{0}\u9875' 
+            symbol: {
+                first: '&lt;&lt;', previous: '&lt;', next: '&gt;', last: '&gt;&gt;', ellipsis: '...',
+                refurbish: 'Re',
+                pageCount: '\u5171 {0} \u9875', dataCount: '\u5171 {0} \u6761',
+                dataStat: '\u663e\u793a\u7b2c{0}\u6761\u5230\u7b2c{1}\u6761\u8bb0\u5f55\uff0c\u5171{2}\u6761'
+            },
+            chinese: {
+                first: '\u9996\u9875', previous: '\u4e0a\u4e00\u9875', next: '\u4e0b\u4e00\u9875', last: '\u5c3e\u9875', ellipsis: '...',
+                refurbish: '\u5237\u65b0',
+                pageCount: '\u5171 {0} \u9875', dataCount: '\u5171 {0} \u6761',
+                dataStat: '\u663e\u793a\u7b2c {0} \u6761\u5230\u7b2c {1} \u6761\u8bb0\u5f55\uff0c\u5171 {2} \u6761'
+            },
+            english: {
+                first: 'First', previous: 'Previous', next: 'Next', last: 'Last', ellipsis: '...', 
+                refurbish: 'Re', 
+                pageCount: '\u5171 {0} \u9875', dataCount: '\u5171 {0} \u6761',
+                dataStat: '\u663e\u793a\u7b2c {0} \u6761\u5230\u7b2c {1} \u6761\u8bb0\u5f55\uff0c\u5171 {2} \u6761'
+            }
         },
-        chinese: {
-            first: '\u9996\u9875', previous: '\u4e0a\u4e00\u9875', next: '\u4e0b\u4e00\u9875', last: '\u5c3e\u9875', ellipsis: '...',
-            refurbish: '\u5237\u65b0',
-            totalPage: '\u5171{0}\u9875'
+        types = {
+            list: 'list', text: 'text'
         },
-        english: { 
-            first: 'First', previous: 'Previous', next: 'Next', last: 'Last', ellipsis: '...', refurbish: 'Re', totalPage: 'Total Page: {0}'
-        }
-    }, setNumber = function (op, keys) {
-        for (var i in keys) {
-            var key = keys[i];
-            if (isNaN(Number(op[key])) || op[key] < 0) {
-                op[key] = 0;
-            }
-        }
-    }, setOptions = function (op, options) {
-        if ($.isNumber(options)) {
-            op.pageIndex = options;
-        } else {
-            $.extend(op, options);
-            if (!$.isElement(op.element)) {
-                if ($.isString(op.element)) {
-                    op.element = doc.getElementById(op.element);
-                } else {
-                    op.element = doc.createElement('DIV');
-                    op.element.id = new Date().getTime();
-                    doc.body.appendChild(op.element);
+        isList = function(showType){
+            showType = showType.toLowerCase();
+            return types.list === showType || types.list.indexOf(showType) >= 0;
+        },
+        setNumber = function (op, keys) {
+            for (var i in keys) {
+                var key = keys[i];
+                if (isNaN(Number(op[key])) || op[key] < 0) {
+                    op[key] = 0;
                 }
             }
-            if (!texts[op.markType]) {
-                op.markType = 'symbol';
-            }
-            if (!$.isArray(options.markText)) {
-                op.markText = texts[op.markType];
-            }
-            setNumber(op, ['dataCount', 'pageStart', 'pageSize', 'pageIndex', 'markCount']);
-            if (op.pageSize < 1) {
-                op.pageSize = 1;
-            }
-            if(op.showType !== 'list'){
-                op.showPageJump = true;
-            }
-        }
-        return op;
-    }, getMinMax = function(pageCount, pageStart, pageIndex, markCount){
-        var min = pageStart, max = 0;
-        if (pageCount <= markCount)
-        {
-            max = pageCount;
-        }
-        else
-        {
-            var mc = Math.ceil(markCount/2), num = pageIndex - pageStart + mc;
-            max = num > pageCount ? pageCount : num < markCount ? markCount : num;
-            min = max - markCount + pageStart;
-            if (min < pageStart)
-            {
-                min = pageStart;
-            }
-        }
-        return [min, max];
-    }, buildLinkText = function (pageIndex, key, options, noLink) {
-        if(noLink){                
-            return ['<li>', '<a class="text">', options.markText[key], '</a>', '</li>'].join('');
-        } else {
-            return [
-                '<li>', '<a class="link" href="javascript:void(0);" value="' + pageIndex + '">', options.markText[key], '</a>', '</li>'
-            ].join('');
-        }
-    }, buildPageInput = function (arr, pageCount, pageIndex, minuend, showButton) {
-        var maxlength = pageCount.toString().length;
-        arr.push('<input type="text" class="jump" value="' + (pageIndex + minuend) + '" maxlength="' + maxlength + '"/>');
-        if(showButton){
-            arr.push('<button class="btn">GO</button>');
-        }
-    }, createEvent = function(op, minuend){
-        var links = op.element.getElementsByTagName('A'), c = links.length;
-        for(var i=0; i<c; i++){
-            $.addListener(links[i], 'click', function(){
-                var val = getValue(this);
-                if(!isNaN(val)){
-                    op.callback(val);
+        },
+        setOptions = function (op, options) {
+            if ($.isNumber(options)) {
+                op.pageIndex = options;
+            } else {
+                $.extend(op, options);
+                if (!$.isElement(op.element)) {
+                    if ($.isString(op.element)) {
+                        op.element = doc.getElementById(op.element);
+                    } else {
+                        op.element = doc.createElement('DIV');
+                        op.element.id = new Date().getTime();
+                        doc.body.appendChild(op.element);
+                    }
                 }
-            });
-        }
-
-        var selects = op.element.getElementsByTagName('Select');
-        if(selects.length > 0){
-            console.log('op.pageSize: ', op.pageSize);
-            selects[0].value = op.pageSize;
-
-            $.addListener(selects[0], 'change', function(){
-                var val = parseInt(this.value, 10);
-                if(!isNaN(val)){
-                    op.pageSize = val;
-                    op.callback(op.pageIndex);
+                if (!texts[op.markType]) {
+                    op.markType = 'symbol';
                 }
-            });
-        }
+                if (!$.isArray(options.markText)) {
+                    op.markText = texts[op.markType];
+                }
+                setNumber(op, ['dataCount', 'pageStart', 'pageSize', 'pageIndex', 'markCount']);
 
-        var input = op.element.getElementsByTagName('Input');
-        var btn = op.element.getElementsByTagName('Button');
-        if( btn.length > 0){
-            $.addListener(btn[0], 'click', function(){
-                if(input.length > 0){
-                    var val = parseInt(input[0].value, 10);
-                    if(!isNaN(val)){
-                        op.callback(val - minuend);
+                if (op.pageSize < 1) {
+                    op.pageSize = 1;
+                }
+
+                if($.isNumber(op.debounce) && op.debounce >= 50){
+                    op.debounceTimeout = op.debounce;
+                    op.debounce = true;
+                }
+
+                if (isList(op.showType)) {
+                    op.showPageJump = true;
+                }
+            }
+            return op;
+        },
+        getMinMax = function (that) {
+            var op = that.options, min = op.pageStart, max = 0;
+            if (op.pageCount <= op.markCount) {
+                max = op.pageCount;
+            }
+            else {
+                var mc = Math.ceil(op.markCount / 2), num = op.pageIndex - op.pageStart + mc;
+                max = num > op.pageCount ? op.pageCount : num < op.markCount ? op.markCount : num;
+                min = max - op.markCount + op.pageStart;
+                if (min < op.pageStart) {
+                    min = op.pageStart;
+                }
+            }
+            return [min, max];
+        },
+        buildLinkText = function (enabled, that, arr, pageIndex, key, noLink) {
+            if(!enabled){return false;}
+            if (noLink) {
+                arr.push(['<li>', '<a class="text">', that.options.markText[key], '</a>', '</li>'].join(''));
+            } else {
+                arr.push([
+                    '<li>', '<a class="link" href="javascript:void(0);" value="' + pageIndex + '">', that.options.markText[key], '</a>', '</li>'
+                ].join(''));
+            }
+        },
+        buildPageInput = function (enabled, that, arr, showButton) {
+            if(!enabled){return false;}
+            var op = that.options, maxlength = op.pageCount.toString().length, className = showButton ? ' group' : '';
+            arr.push('<input type="text" class="text' + className + '" value="' + (op.pageIndex + op.minuend) + '" maxlength="' + maxlength + '"/>');
+            if (showButton) {
+                arr.push('<button class="btn group">GO</button>');
+            }
+        },
+        buildDataStat = function(enabled, that, arr, text, datas){
+            if(!enabled){return false;}
+            if(!datas){
+                var op = that.options, min = (op.pageIndex - op.pageStart) * op.pageSize, max = min + op.pageSize;
+                datas = [
+                    min + 1, max < op.dataCount ? max : op.dataCount, op.dataCount
+                ];
+                arr.push('<div class="stat">' + (text || '{0}').format(datas) + '</div>');
+            } else {
+                arr.push((text || '{0}').format(datas));
+            }
+            console.log('text: ', text, ', datas: ', datas);
+        },
+        setCallback = function(that, objs, eventName, minuend, func, isPageSize){
+            if($.isUndefined(objs)) {
+                return false;
+            }
+            var op = that.options, obj = objs, objVal = null;
+            if($.isArray(objs)){
+                obj = objs[0], objVal = objs[1];
+            }
+
+            $.addListener(obj, eventName, function (ev) {
+                if(eventName.indexOf('key') >= 0 && ev.keyCode !== 13){
+                    return false;
+                }
+                var val = getValue(objVal || this);
+                if (!isNaN(val) && $.isFunction(op.callback)) {
+                    if($.isFunction(func)){ func(val); }
+                    if(isPageSize){
+                        //设置PageSize，页码重新设置为起始页码
+                        op.callback(op.pageStart);
+                    } else {
+                        //是否启用防抖功能，抖动频率需大于50毫秒
+                        if(op.debounce && op.debounceTimeout > 50){
+                            //内部分页
+                            that.paging(val - minuend);
+
+                            if(op.timerDebounce != null){
+                                window.clearTimeout(op.timerDebounce);
+                            }
+                            op.timerDebounce = window.setTimeout(function(){
+                                //外部回调
+                                op.callback(val - minuend);
+                            }, op.debounceTimeout);
+                        } else {
+                            op.callback(val - minuend);
+                        }
                     }
                 }
             });
-        }
-        if(input.length > 0){
-            $.addListener(input[0], 'keyup', function(ev){
-                if(ev.keyCode === 13){
-                    var val = parseInt(this.value, 10);
-                    if(!isNaN(val)){
-                        op.callback(val - minuend);
-                    }
-                }
-            });
-        }
-    }, getValue = function(obj){
-        return parseInt(obj.getAttribute('value'), 10);
-    }, buildPageSize = function(op, minuend){
-        var html = ['<select class="select">'];
-        console.log(typeof op.sizeOptions);
-        if($.isArray(op.sizeOptions)){
-            for(var i in op.sizeOptions){
-                html.push('<option value="' + op.sizeOptions[i] + '">' + op.sizeOptions[i] + '</option>');
+        },
+        createEvent = function (that, minuend) {
+            var op = that.options, links = op.element.getElementsByTagName('A'), c = links.length;
+            for (var i = 0; i < c; i++) {
+                setCallback(that, links[i], 'click', 0);
             }
-        } else if($.isObject(op.sizeOptions)){
-            for(var k in op.sizeOptions){
-                var dr = op.sizeOptions[k];
-                html.push('<option value="' + (dr.value || dr.val) + '">' + (dr.text || dr.key) + '</option>');
-            }
-        }
-        html.push('</select>');
 
-        return html.join('');
-    };
+            var selects = op.element.getElementsByTagName('Select');
+            if(selects[0] !== null){ selects[0].value = op.pageSize; }
+            setCallback(that, selects[0], 'change', 0, function(val){ op.pageSize = val; }, true);
+
+            var inputs = op.element.getElementsByTagName('Input'), ic = inputs.length;
+            var btn = op.element.getElementsByTagName('Button');
+            setCallback(that, [btn[0], inputs[ic-1]], 'click', minuend);
+
+            for (var i = 0; i < ic; i++) {
+                setCallback(that, inputs[i], 'keyup', minuend);
+            }
+        },
+        getValue = function (obj) {
+            return parseInt(obj.value || obj.getAttribute('value'), 10);
+        },
+        buildPageSize = function (enabled, that, arr, minuend) {
+            if(!enabled){return false;}
+            var op = that.options, html = ['<select class="select">'], selected = false;
+            if ($.isArray(op.sizeOptions)) {
+                for (var i in op.sizeOptions) {
+                    html.push('<option value="' + op.sizeOptions[i] + '">' + op.sizeOptions[i] + '</option>');
+                }
+                selected = op.sizeOptions.indexOf(op.pageSize) >= 0;
+            } else if ($.isObject(op.sizeOptions)) {
+                for (var k in op.sizeOptions) {
+                    var dr = op.sizeOptions[k];
+                    html.push('<option value="' + (dr.value || dr.val) + '">' + (dr.text || dr.key) + '</option>');
+                }
+            }
+            if(!selected){
+                html.push('<option value="' + op.pageSize + '">' + op.pageSize + '</option>');
+            }
+            html.push('</select>');
+
+            arr.push(html.join(''));
+        };
 
     function Pagination(options) {
         $.loadLinkStyle($.getFilePath(thisFilePath) + $.getFileName(thisFilePath, true) + '.css');
@@ -169,117 +221,111 @@
             showInvalid: true,
             showEllipsis: true,
             showFirstLast: true,
-            showDataCount: true,
             showPageJump: true,
             showRefurbish: true,
-            showDataStat: true,
+            showDataCount: true,
             showPageCount: true,
+            showDataStat: true,
             showSizeSelect: true,
-            sizeOptions: [5, 10, 20, 30, 50, 100],            
-            callback: function(pageIndex){
+            sizeOptions: [5, 10, 20, 30, 50, 100],
+            callback: function (pageIndex) {
                 console.log('pageIndex: ', pageIndex);
-            }
+            },
+            debounce: true,                 //是否启用防抖功能（或者值为number，且大于50即为启用）
+            debounceTimeout: 256            //抖动时长，单位：毫秒
         }, options);
 
         this.paging();
     }
 
     Pagination.prototype = {
-        paging: function(options){
-            if($.isObject(options) || $.isNumber(options)){
+        paging: function (options) {
+            if ($.isObject(options) || $.isNumber(options)) {
                 this.options = setOptions(this.options, options);
             }
-            var op = this.options, mi =parseInt(op.markCount / 2, 10), 
-                mc = Math.ceil(op.markCount / 2), 
-                minuend = Math.abs(op.pageStart - 1),
-                pageCount = Math.ceil(op.dataCount / op.pageSize),
-                minMax = getMinMax(pageCount, op.pageStart, op.pageIndex, op.markCount),
+            var that = this, op = $.extend(that.options, {
+                pageCount: Math.ceil(that.options.dataCount / that.options.pageSize),
+                minuend: Math.abs(that.options.pageStart - 1)
+            });
+            var mi = parseInt(op.markCount / 2, 10),
+                mc = Math.ceil(op.markCount / 2),
+                minMax = getMinMax(that),
                 min = minMax[0],
                 max = minMax[1] + op.pageStart,
                 quickNum = 0,
-                s = ['<div class="oui-pagination">', '<ul>'];
+                pmSub = op.pageIndex - op.markCount,
+                pcSub = op.pageCount - op.minuend,
+                pmSum = op.pageIndex + op.markCount,
+                html = ['<div class="oui-pagination">', '<ul>'];
 
-                console.log('minMax: ', minMax);
+            console.log('minMax: ', minMax);
 
-            if (op.pageIndex != min && pageCount > 0) {
-                if(op.showFirstLast){
-                    s.push(buildLinkText(op.pageStart, 'first', op));
-                }
+            buildDataStat(op.showDataStat, that, html, op.markText['dataStat']);
+            buildDataStat(op.showDataCount, that, html, op.markText['dataCount'], op.dataCount);
+
+            if (op.pageIndex != min && op.pageCount > 0) {
+                buildLinkText(op.showFirstLast, that, html, op.pageStart, 'first');
                 //显示省略号快退按钮
-                if ((op.pageIndex - op.pageStart >= op.markCount) && op.showEllipsis){
-                    quickNum = op.pageIndex - op.markCount > op.pageStart ? op.pageIndex - op.markCount : op.pageStart;
-                    s.push(buildLinkText(quickNum, 'ellipsis', op));
+                if (op.showEllipsis && pmSub >= op.pageStart) {
+                    quickNum = pmSub > op.pageStart ? pmSub : op.pageStart;
+                    buildLinkText(true, that, html, quickNum, 'ellipsis');
                 }
-                s.push(buildLinkText(op.pageIndex - 1, 'previous', op));
-            }            
-            else if(op.showInvalid){
-                if(op.showFirstLast){
-                    s.push(buildLinkText(0, 'first', op, true));
-                }
-                s.push(buildLinkText(0, 'previous', op, true));
+                buildLinkText(true, that, html, op.pageIndex - 1, 'previous');
+            }
+            else if (op.showInvalid) {
+                buildLinkText(op.showFirstLast, that, html, 0, 'first', true);
+                buildLinkText(true, that, html, 0, 'previous', true);
             }
 
-            if(op.showType === 'list'){
+            if (isList(op.showType)) {
                 var c = 0;
-                for(var i=min; i<max; i++){
-                    var num = i + minuend;
-                    if( i> pageCount || c >op.markCount){
+                for (var i = min; i < max; i++) {
+                    var num = i + op.minuend;
+                    if (i > op.pageCount || c > op.markCount) {
                         break;
                     }
-                    if(i === op.pageIndex){
-                        s.push('<li><a class="cur">' + num + '</a></li>');
+                    if (i === op.pageIndex) {
+                        html.push('<li><a class="cur">' + num + '</a></li>');
                     } else {
-                        s.push('<li><a class="link" href="javascript:void(0);" value="' + i + '">' + num + '</a></li>');
+                        html.push('<li><a class="link" href="javascript:void(0);" value="' + i + '">' + num + '</a></li>');
                     }
                     c++;
                 }
             } else {
-                //buildPageInput(s, pageCount, op.pageIndex, minuend);
+                buildPageInput(true, that, html, false);
             }
 
             //上一页<、下一页>、第一页<<、最后一页标记>>
-            if (op.pageIndex != pageCount - minuend && pageCount > 0) {
-                s.push(buildLinkText(op.pageIndex + 1, 'next', op));
+            if (op.pageIndex != op.pageCount - op.minuend && op.pageCount > 0) {
+                buildLinkText(true, that, html, op.pageIndex + 1, 'next');
 
                 //显示省略号快进按钮
-                if ((pageCount - op.pageIndex >= op.markCount) && op.showEllipsis){
-                    quickNum = op.pageIndex + op.markCount < pageCount - minuend ? op.pageIndex + op.markCount : pageCount - minuend;
-                    s.push(buildLinkText(quickNum, 'ellipsis', op));
+                if (op.showEllipsis && pmSum < op.pageCount) {
+                    quickNum = pmSum < pcSub ? pmSum : pcSub;
+                    buildLinkText(true, that, html, quickNum, 'ellipsis');
                 }
-                if(op.showFirstLast){
-                    s.push(buildLinkText(pageCount - minuend, 'last', op));
-                }
+                buildLinkText(op.showFirstLast, that, html, pcSub, 'last');
             }
-            else if(op.showInvalid){  
-                s.push(buildLinkText(0, 'next', op, true));
-                if(op.showFirstLast){
-                    s.push(buildLinkText(0, 'last', op, true));
-                }
+            else if (op.showInvalid) {
+                buildLinkText(true, that, html, 0, 'next', true);
+                buildLinkText(op.showFirstLast, that, html, 0, 'last', true);
             }
 
-            if(op.showPageJump){
-                buildPageInput(s, pageCount, op.pageIndex, minuend, true);
-            }
+            buildPageInput(op.showPageJump, that, html, true);
 
-            if(op.showRefurbish){
-                s.push(buildLinkText(op.pageIndex, 'refurbish', op));
-            }
+            buildLinkText(op.showRefurbish, that, html, op.pageIndex, 'refurbish');
 
-            if(op.showPageCount){
-                s.push(op.markText.totalPage.format(pageCount));
-            }
+            buildDataStat(op.showPageCount, that, html, op.markText['pageCount'], op.pageCount);
 
-            if(op.showSizeSelect){
-                s.push(buildPageSize(op, minuend));
-            }
+            buildPageSize(op.showSizeSelect, that, html, op.minuend);
 
-            s.push('</ul>');
+            html.push('</ul>');
 
-            s.push('</div>');
+            html.push('</div>');
 
-            op.element.innerHTML = s.join('');
+            op.element.innerHTML = html.join('');
 
-            createEvent(op, minuend);
+            createEvent(that, op.minuend);
         }
     };
 
