@@ -7,7 +7,14 @@
 </head>
 <body>
 <div id="p1"></div>
+<br />
 <div id="p2"></div>
+<br />
+<div id="p3"></div>
+<br />
+<div id="p4"></div>
+<br />
+<div id="p5"></div>
 </body>
 </html>
 <script type="text/javascript">
@@ -20,30 +27,82 @@
         pageIndex: 1,
         pageStart: 1,
         pageSize: 12,
-        showType: 'list',
+        showPageJump: false,
+        showList: true,
+        skin: 'red',
         markType: 'chinese',
         callback: function(pageIndex){
-            if(timer != null){
-                window.clearTimeout(timer);
-            }
             console.log('p2-callback: ', pageIndex);
 
             p1.paging(pageIndex);
         }
     });
-
    console.log('p1: ', p1);
-/*
    var p2 = new OUI.Pagination({
         element: document.getElementById('p2'),
         dataCount: 100,
         pageIndex: 0,
         pageStart: 0,
-        markType: 'chinese',
+        showList: true,
+        position: 'right',
+        markType: 'symbol',
+        skin: 'green',
         callback: function(pageIndex){
-            console.log('p1-callback: ', pageIndex);
+            console.log('p2-callback: ', pageIndex);
+
+            p2.paging(pageIndex);
         }
     });
    console.log('p2: ', p2);
-   */
+
+
+   var p3 = new OUI.Pagination({
+        element: document.getElementById('p3'),
+        dataCount: 136,
+        pageIndex: 0,
+        pageStart: 0,
+        showList: true,
+        position: 'left',
+        markType: 'symbol',
+        skin: 'blue',
+        callback: function(pageIndex){
+            console.log('p3-callback: ', pageIndex);
+
+            p3.paging(pageIndex);
+        }
+    });
+
+
+   var p4 = new OUI.Pagination({
+        element: document.getElementById('p4'),
+        dataCount: 312,
+        pageIndex: 0,
+        pageStart: 0,
+        showList: true,
+        position: 'left',
+        markType: 'english',
+        skin: 'black',
+        callback: function(pageIndex){
+            console.log('p4-callback: ', pageIndex);
+
+            p4.paging(pageIndex);
+        }
+    });
+
+   var p5 = new OUI.Pagination({
+        element: document.getElementById('p5'),
+        dataCount: 212,
+        pageIndex: 0,
+        pageStart: 0,
+        showList: true,
+        position: 'left',
+        markType: 'english',
+        skin: 'default',
+        callback: function(pageIndex){
+            console.log('p5-callback: ', pageIndex);
+
+            p5.paging(pageIndex);
+        }
+    });
+   
 </script>

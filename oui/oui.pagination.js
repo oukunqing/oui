@@ -7,30 +7,26 @@
         thisFilePath = $.getScriptFilePath(),
         texts = {
             symbol: {
-                first: '&lt;&lt;', previous: '&lt;', next: '&gt;', last: '&gt;&gt;', ellipsis: '...',
-                refurbish: 'Re',
+                first: '&lt;&lt;', previous: '&lt;', next: '&gt;', last: '&gt;&gt;', ellipsis: '\u2026',
+                refurbish: 'Reload',
                 pageCount: '\u5171 {0} \u9875', dataCount: '\u5171 {0} \u6761',
                 dataStat: '\u663e\u793a\u7b2c{0}\u6761\u5230\u7b2c{1}\u6761\u8bb0\u5f55\uff0c\u5171{2}\u6761'
             },
             chinese: {
-                first: '\u9996\u9875', previous: '\u4e0a\u4e00\u9875', next: '\u4e0b\u4e00\u9875', last: '\u5c3e\u9875', ellipsis: '...',
+                first: '\u9996\u9875', previous: '\u4e0a\u4e00\u9875', next: '\u4e0b\u4e00\u9875', last: '\u5c3e\u9875', ellipsis: '\u2026',
                 refurbish: '\u5237\u65b0',
                 pageCount: '\u5171 {0} \u9875', dataCount: '\u5171 {0} \u6761',
                 dataStat: '\u663e\u793a\u7b2c {0} \u6761\u5230\u7b2c {1} \u6761\u8bb0\u5f55\uff0c\u5171 {2} \u6761'
             },
             english: {
-                first: 'First', previous: 'Previous', next: 'Next', last: 'Last', ellipsis: '...', 
-                refurbish: 'Re', 
+                first: 'First', previous: 'Previous', next: 'Next', last: 'Last', ellipsis: '\u2026', 
+                refurbish: 'Reload', 
                 pageCount: '\u5171 {0} \u9875', dataCount: '\u5171 {0} \u6761',
                 dataStat: '\u663e\u793a\u7b2c {0} \u6761\u5230\u7b2c {1} \u6761\u8bb0\u5f55\uff0c\u5171 {2} \u6761'
             }
         },
-        types = {
-            list: 'list', text: 'text'
-        },
-        isList = function(showType){
-            showType = showType.toLowerCase();
-            return types.list === showType || types.list.indexOf(showType) >= 0;
+        positions = {
+            left: 1, right: 0
         },
         setNumber = function (op, keys) {
             for (var i in keys) {
@@ -71,8 +67,8 @@
                     op.debounce = true;
                 }
 
-                if (isList(op.showType)) {
-                    op.showPageJump = true;
+                if (op.showList && !$.isBoolean(op.showPageCount)) {
+                    op.showPageCount = true;
                 }
             }
             return op;
@@ -110,28 +106,24 @@
                 arr.push('<button class="btn group">GO</button>');
             }
         },
-        buildDataStat = function(enabled, that, arr, text, datas){
+        buildDataCount = function(enabled, that, arr, text, datas){
             if(!enabled){return false;}
-            if(!datas){
-                var op = that.options, min = (op.pageIndex - op.pageStart) * op.pageSize, max = min + op.pageSize;
-                datas = [
-                    min + 1, max < op.dataCount ? max : op.dataCount, op.dataCount
-                ];
-                arr.push('<div class="stat">' + (text || '{0}').format(datas) + '</div>');
-            } else {
-                arr.push((text || '{0}').format(datas));
-            }
-            console.log('text: ', text, ', datas: ', datas);
+            arr.push('<span class="label">' + (text || '{0}').format(datas) + '</span>');
+        },
+        buildDataStat = function(enabled, that, arr, text){
+            if(!enabled){return false;}
+            var op = that.options, min = (op.pageIndex - op.pageStart) * op.pageSize, max = min + op.pageSize;
+            var datas = [
+                min + 1, max < op.dataCount ? max : op.dataCount, op.dataCount
+            ];
+            arr.push('<div class="stat ' + getPosition(that, false) + '">' + (text || '{0}').format(datas) + '</div>');
         },
         setCallback = function(that, objs, eventName, minuend, func, isPageSize){
-            if($.isUndefined(objs)) {
-                return false;
-            }
             var op = that.options, obj = objs, objVal = null;
             if($.isArray(objs)){
                 obj = objs[0], objVal = objs[1];
             }
-
+            if($.isUndefined(obj)) { return false; }
             $.addListener(obj, eventName, function (ev) {
                 if(eventName.indexOf('key') >= 0 && ev.keyCode !== 13){
                     return false;
@@ -161,6 +153,12 @@
                     }
                 }
             });
+        },
+        getClassName = function(that){
+            return that.options.className || 'oui-pagination';
+        },
+        getPosition = function(that, isMain){
+            return isMain ? that.options.position : positions[that.options.position] ? 'right' : 'left';
         },
         createEvent = function (that, minuend) {
             var op = that.options, links = op.element.getElementsByTagName('A'), c = links.length;
@@ -206,7 +204,7 @@
         };
 
     function Pagination(options) {
-        $.loadLinkStyle($.getFilePath(thisFilePath) + $.getFileName(thisFilePath, true) + '.css');
+        $.loadLinkStyle($.getFilePath(thisFilePath) + $.getFileName(thisFilePath, true) + '.css', 'oui-pagination');
 
         this.options = setOptions({
             element: null,
@@ -215,12 +213,16 @@
             pageSize: 10,
             dataCount: 0,
             markCount: 10,
-            markType: 'symbol', // Symbol|Chinese|Englist
+            markType: 'symbol',     // Symbol|Chinese|Englist
             markText: texts['symbol'],
-            showType: 'list',
+            showList: true,
+            className: 'oui-pagination',    //默认样式名称，可以修改为外置样式
+            skin: 'default',        //样式，若skin=null则不启用内置样式
+            position: 'left',       // left|right
             showInvalid: true,
             showEllipsis: true,
             showFirstLast: true,
+            showPageInput: true,
             showPageJump: true,
             showRefurbish: true,
             showDataCount: true,
@@ -256,12 +258,18 @@
                 pmSub = op.pageIndex - op.markCount,
                 pcSub = op.pageCount - op.minuend,
                 pmSum = op.pageIndex + op.markCount,
-                html = ['<div class="oui-pagination">', '<ul>'];
+                html = [
+                    '<div class="' + getClassName(that) + '">', 
+                    '<div class="' + op.skin + ' ' + getPosition(that, true) + '">',
+                    '<ul class="list">'
+                ];
 
             console.log('minMax: ', minMax);
 
-            buildDataStat(op.showDataStat, that, html, op.markText['dataStat']);
-            buildDataStat(op.showDataCount, that, html, op.markText['dataCount'], op.dataCount);
+            //
+            buildDataCount(op.showDataCount, that, html, op.markText['dataCount'], op.dataCount);
+
+            buildPageSize(op.showSizeSelect, that, html, op.minuend);
 
             if (op.pageIndex != min && op.pageCount > 0) {
                 buildLinkText(op.showFirstLast, that, html, op.pageStart, 'first');
@@ -277,7 +285,7 @@
                 buildLinkText(true, that, html, 0, 'previous', true);
             }
 
-            if (isList(op.showType)) {
+            if (op.showList) {
                 var c = 0;
                 for (var i = min; i < max; i++) {
                     var num = i + op.minuend;
@@ -292,7 +300,7 @@
                     c++;
                 }
             } else {
-                buildPageInput(true, that, html, false);
+                buildPageInput(op.showPageInput, that, html, false);
             }
 
             //上一页<、下一页>、第一页<<、最后一页标记>>
@@ -315,11 +323,11 @@
 
             buildLinkText(op.showRefurbish, that, html, op.pageIndex, 'refurbish');
 
-            buildDataStat(op.showPageCount, that, html, op.markText['pageCount'], op.pageCount);
+            buildDataCount(op.showPageCount, that, html, op.markText['pageCount'], op.pageCount);
 
-            buildPageSize(op.showSizeSelect, that, html, op.minuend);
+            html.push('</ul></div>');
 
-            html.push('</ul>');
+            buildDataStat(op.showDataStat, that, html, op.markText['dataStat']);
 
             html.push('</div>');
 

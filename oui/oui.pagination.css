@@ -1,5 +1,14 @@
-.oui-pagination{font-size:12px;
+.oui-pagination{
+    clear:both;
+    display: block;
+    font-size:12px;
+    font-family: 宋体,Arial;
+    overflow: hidden;
+    border: solid 1px #ccc;
+    margin:0;
+    padding:2px 5px;
 
+    /*禁止选中内容*/
     moz-user-select: -moz-none;
     -moz-user-select: none;
     -o-user-select:none;
@@ -8,19 +17,55 @@
     -ms-user-select:none;
     user-select:none;
 }
+
+.oui-pagination .left{float: left;}
+.oui-pagination .right{float: right;}
+
+.oui-pagination .default{}
+.oui-pagination .stat{line-height: 1.5em;}
+
 .oui-pagination ul,.oui-pagination li{margin:0; padding:0; list-style: normal;}
-.oui-pagination li{display: inline-table; font-family: Arial;}
+.oui-pagination li{display: inline-table;}
+.oui-pagination .list{}
 .oui-pagination a{
-    text-decoration: none; padding:2px 7px; margin:0 3px; 
-    font-family: Arial; border-radius:4px;
+    text-decoration: none; padding:2px 7px; margin:0 3px; border-radius:4px; display:inline-block;
 }
+/*链接文字颜色默认为蓝色*/
 .oui-pagination a.link{border:solid 1px #005eac;}
-.oui-pagination a.cur{border:solid 1px #f00; color:#f00;}
+.oui-pagination a.link:hover{border:solid 1px #005eac; color:#fff; background: #005eac;}
+.oui-pagination a.cur{border:solid 1px #005eac; color:#fff; background: #005eac; font-weight: bold;}
+/*非链接文字默认颜色为灰色*/
 .oui-pagination a.text{border:solid 1px #999; color:#999;}
+
 
 .oui-pagination input.text{width:50px;text-align:center; bordre:solid 1px #ccc; border-radius:4px;}
 .oui-pagination input.group{width:50px;text-align:center;}
 .oui-pagination button.btn{text-align:center;}
 .oui-pagination button.group{text-align:center;}
 
-.oui-pagination .stat{float:right;}
+.oui-pagination .label{padding:0 3px;}
+
+.oui-pagination .select{}
+.oui-pagination .label{}
+
+/*以下为定制样式 blue,red,green,black等，调用时指定参数中的 skin 为相应的样式名称*/
+
+.oui-pagination .blue{}
+.oui-pagination .black a.link{border:solid 1px #005eac;color:#005eac;}
+.oui-pagination .black a.link:hover{border:solid 1px #005eac; color:#fff; background: #005eac;}
+.oui-pagination .black a.cur{border:solid 1px #005eac;color:#fff;background: #005eac;}
+
+.oui-pagination .red{}
+.oui-pagination .red a.link{border:solid 1px #f00;color:#000;}
+.oui-pagination .red a.link:hover{border:solid 1px #f00; color:#fff; background: #f00;}
+.oui-pagination .red a.cur{border:solid 1px #f00;color:#fff;background: #f00;}
+
+.oui-pagination .green{}
+.oui-pagination .green a.link{border:solid 1px #008000;color:#000;}
+.oui-pagination .green a.link:hover{border:solid 1px #008000; color:#fff; background: #008000;}
+.oui-pagination .green a.cur{border:solid 1px #008000;color:#fff;background: #008000;}
+
+.oui-pagination .black{}
+.oui-pagination .black a.link{border:solid 1px #000;color:#000;}
+.oui-pagination .black a.link:hover{border:solid 1px #000; color:#fff; background: #000;}
+.oui-pagination .black a.cur{border:solid 1px #000;color:#fff;background: #000;}
