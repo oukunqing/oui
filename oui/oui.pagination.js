@@ -166,7 +166,7 @@
         },
         checkInputValue = function(op, val) {
             if (val > op.pageCount) {
-                val = op.pageCount;
+                val = op.pageCount - op.minuend;
             } else if (val < op.pageStart) {
                 val = op.pageStart;
             }
