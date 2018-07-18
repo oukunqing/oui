@@ -12,19 +12,19 @@
         texts = {
             symbol: {
                 first: '&lt;&lt;', previous: '&lt;', next: '&gt;', last: '&#62;&#62;', ellipsis: '\u2026',
-                refurbish: 'Reload',
+                refurbish: 'Reload', jump: 'Go',
                 pageCount: '\u5171 {0} \u9875', dataCount: '\u5171 {0} \u6761',
                 dataStat: '\u663e\u793a\u7b2c{0}\u6761\u5230\u7b2c{1}\u6761\u8bb0\u5f55\uff0c\u5171{2}\u6761'
             },
             chinese: {
                 first: '\u9996\u9875', previous: '\u4e0a\u4e00\u9875', next: '\u4e0b\u4e00\u9875', last: '\u5c3e\u9875', ellipsis: '\u2026',
-                refurbish: '\u5237\u65b0',
+                refurbish: '\u5237\u65b0', jump: '\u8df3\u5230',
                 pageCount: '\u5171 {0} \u9875', dataCount: '\u5171 {0} \u6761',
                 dataStat: '\u663e\u793a\u7b2c {0} \u6761\u5230\u7b2c {1} \u6761\u8bb0\u5f55\uff0c\u5171 {2} \u6761'
             },
             english: {
                 first: 'First', previous: 'Previous', next: 'Next', last: 'Last', ellipsis: '\u2026',
-                refurbish: 'Reload',
+                refurbish: 'Reload', jump: 'Go',
                 pageCount: '\u5171 {0} \u9875', dataCount: '\u5171 {0} \u6761',
                 dataStat: '\u663e\u793a\u7b2c {0} \u6761\u5230\u7b2c {1} \u6761\u8bb0\u5f55\uff0c\u5171 {2} \u6761'
             }
@@ -40,9 +40,13 @@
                 }
             }
         },
-        setOptions = function(op, options) {
+        setOptions = function(op, options, dataCount) {
             if ($.isNumber(options)) {
                 op.pageIndex = options;
+                if($.isNumber(dataCount)){
+                    op.dataCount = dataCount;
+                }
+                setNumber(op, ['dataCount', 'pageIndex']);
             } else {
                 $.extend(op, options);
                 if (!$.isElement(op.element)) {
@@ -55,7 +59,7 @@
                     }
                 }
                 if (!texts[op.markType]) {
-                    op.markType = 'symbol';
+                    op.markType = defaultType;
                 }
                 if (!$.isArray(options.markText)) {
                     op.markText = texts[op.markType];
@@ -71,10 +75,12 @@
                     op.debounce = true;
                 }
 
-                if (op.showList && !$.isBoolean(op.showPageCount)) {
-                    op.showPageCount = true;
+                //判断是否显示输入框，若外部参数未指定，则设置为显示
+                if (!op.showList && !$.isBoolean(options.showPageInput)) {
+                    op.showPageInput = true;
                 }
             }
+
             return op;
         },
         getMinMax = function(that) {
@@ -102,12 +108,13 @@
                 ].join(''));
             }
         },
-        buildPageInput = function(enabled, that, arr, showButton) {
+        // 参数 t 用来指示当前获取焦点是哪个输入框
+        buildPageInput = function(enabled, that, arr, showButton, t) {
             if (!enabled) { return false; }
             var op = that.options, maxlength = op.pageCount.toString().length, className = showButton ? ' group' : '';
-            arr.push('<input type="text" class="text' + className + '" value="' + (op.pageIndex + op.minuend) + '" maxlength="' + maxlength + '"/>');
+            arr.push('<input type="text" class="text' + className + '" value="' + (op.pageIndex + op.minuend) + '" maxlength="' + maxlength + '" t="' + t + '" />');
             if (showButton) {
-                arr.push('<button class="btn group">GO</button>');
+                arr.push('<button class="btn group">' + op.markText['jump'] + '</button>');
             }
         },
         buildDataCount = function(enabled, that, arr, text, datas) {
@@ -116,86 +123,88 @@
         },
         buildDataStat = function(enabled, that, arr, text) {
             if (!enabled) { return false; }
-            var op = that.options, min = (op.pageIndex - op.pageStart) * op.pageSize, max = min + op.pageSize;
-            var datas = [
-                min + 1, max < op.dataCount ? max : op.dataCount, op.dataCount
-            ];
-            arr.push('<div class="stat ' + getPosition(that, false) + '">' + (text || '{0}').format(datas) + '</div>');
+            var op = that.options, str = text || '{0}', datas = [0, 0, 0];
+            if(op.dataCount > 0){
+                var min = (op.pageIndex - op.pageStart) * op.pageSize, max = min + op.pageSize;
+                datas = [ min + 1, max < op.dataCount ? max : op.dataCount, op.dataCount ];
+            }
+            arr.push('<div class="stat ' + getPosition(that, false) + '">' + str.format(datas) + '</div>');
         },
         keyPaging = function(ev, that, obj){
-            var isPaging = true, op = that.options, val = 0;
-            if(ev.keyCode === 38){
-                if(op.pageIndex <= op.pageStart){
-                    return null;
-                }
-                val = op.pageStart + op.minuend;
-            } else if(ev.keyCode === 40) {
-                if(op.pageIndex + op.minuend >= op.pageCount){
-                    return null;
-                }
-                val = op.pageCount;
-            } else if(ev.keyCode === 37){
-                if(op.pageIndex - op.minuend - op.pageStart < op.pageStart){
-                    return null;
-                }
-                val = op.pageIndex - 1 + op.minuend;
-            } else if(ev.keyCode === 39){
-                if(op.pageIndex + op.minuend >= op.pageCount){
-                    return null;
-                }
-                val = op.pageIndex + 1 + op.minuend;
+            var op = that.options, pageIndex = 0;
+            if(ev.keyCode === 13) {
+                pageIndex = getValue(obj);
+            } else if(ev.keyCode === 38 && op.pageIndex > op.pageStart){
+                pageIndex = op.pageStart + op.minuend;
+            } else if(ev.keyCode === 40 && (op.pageIndex + op.minuend) < op.pageCount) {
+                pageIndex = op.pageCount;
+            } else if(ev.keyCode === 37 && (op.pageIndex - op.minuend - op.pageStart) >= op.pageStart){
+                pageIndex = op.pageIndex - 1 + op.minuend;
+            } else if(ev.keyCode === 39 && (op.pageIndex + op.minuend) < op.pageCount){
+                pageIndex = op.pageIndex + 1 + op.minuend;
             } else {
-                isPaging = false;
+                return false;
             }
-            return {paging: isPaging, value: val};
+            console.log(obj);
+            setInputer(that, obj);
+
+            return {value: pageIndex};
+        },
+        setInputer = function(that, obj){
+            if($.isElement(obj, 'INPUT')){
+                that.options.inputer = obj.getAttribute('t');
+            }
+        },
+        isInputer = function(that, obj){
+            if($.isElement(obj, 'INPUT')){
+                return that.options.inputer === obj.getAttribute('t');
+            }
+            return false;
         },
         setCallback = function(that, objs, eventName, minuend, func, isPageSize) {
-            var op = that.options, obj = objs, objVal = null;
+            var op = that.options, obj = objs, objVal = null, pageIndex = 0;
             if ($.isArray(objs)) {
                 obj = objs[0], objVal = objs[1];
             }
             if ($.isUndefined(obj)) { return false; }
             $.addListener(obj, eventName, function(ev) {
-                var val = getValue(objVal || this);
+                //判断是否是键盘按钮事件 keyup keydown keypress 等
                 if (eventName.indexOf('key') >= 0) {
                     var kp = keyPaging(ev, that, this);
-                    console.log('kp: ', kp);  
-                    if(kp === null){
-                        return false;
-                    }  
-                    if(kp.paging){
-                        val = kp.value;
-                    } else if(ev.keyCode !== 13){
-                        return false;
-                    }
+                    pageIndex = kp ? kp.value : 'None';
+                } else {
+                    pageIndex = getValue(objVal || this);
+                    setInputer(that, objVal);
                 }
-                if (!isNaN(val) && $.isFunction(op.callback)) {
-                    if ($.isFunction(func)) { func(val); }
+                if (!isNaN(pageIndex) && $.isFunction(op.callback)) {
+                    if ($.isFunction(func)) { func(pageIndex); }
                     if (isPageSize) {
                         //设置PageSize，页码重新设置为起始页码
                         op.callback(op.pageStart);
                     } else {
+                        //
+                        pageIndex -= minuend;
                         //是否启用防抖功能，抖动频率需大于50毫秒
                         if (op.debounce && op.debounceTimeout > 50) {
-                            //内部分页
-                            that.paging(val - minuend);
-
+                            //内部分页，显示分页效果
+                            that.paging(pageIndex);
+                            //防抖
                             if (op.timerDebounce != null) {
-                                window.clearTimeout(op.timerDebounce);
+                                window.clearTimeout(op.timerDebounce); 
                             }
                             op.timerDebounce = window.setTimeout(function() {
                                 //外部回调
-                                op.callback(val - minuend);
+                                op.callback(pageIndex);
                             }, op.debounceTimeout);
                         } else {
-                            op.callback(val - minuend);
+                            op.callback(pageIndex);
                         }
                     }
                 }
             });
         },
         getClassName = function(that) {
-            return that.options.className || 'oui-pagination';
+            return that.options.className || defaultClassName;
         },
         getPosition = function(that, isMain) {
             return isMain ? that.options.position : positions[that.options.position] ? 'right' : 'left';
@@ -206,18 +215,29 @@
                 setCallback(that, links[i], 'click', 0);
             }
 
-            var selects = op.element.getElementsByTagName('Select');
-            if (selects[0] !== null) { selects[0].value = op.pageSize; }
-            setCallback(that, selects[0], 'change', 0, function(val) { op.pageSize = val; }, true);
+            var select = op.element.getElementsByTagName('Select')[0];
+            if (select !== null) { select.value = op.pageSize; }
+            setCallback(that, select, 'change', 0, function(val) { op.pageSize = val; }, true);
 
             var inputs = op.element.getElementsByTagName('Input'), ic = inputs.length;
-            var btn = op.element.getElementsByTagName('Button');
-            setCallback(that, [btn[0], inputs[ic - 1]], 'click', minuend);
+            var btn = op.element.getElementsByTagName('Button')[0];
+            if(btn){
+                var input = btn.previousSibling;
+                console.log(input.tagName);
+                input = input.tagName === 'INPUT' ? input : null;
+                setCallback(that, [btn, input || inputs[ic-1]], 'click', minuend);
+            }
 
+            var focusInput = inputs[0];
             for (var i = 0; i < ic; i++) {
                 setCallback(that, inputs[i], 'keydown', minuend);
-                inputs[i].focus();
+                if(isInputer(that, inputs[i])){
+                    focusInput = inputs[i];
+                }
             }
+            console.log('focusInput: ', focusInput);
+            //设置输入框获取焦点
+            $.setFocus(focusInput);
         },
         getValue = function(obj) {
             return parseInt(obj.value || obj.getAttribute('value'), 10);
@@ -244,24 +264,24 @@
             arr.push(html.join(''));
         };
 
-    function Pagination(options) {
+    function Pagination(options, dataCount) {
         this.options = setOptions({
-            element: null,
-            pageStart: 0,
-            pageIndex: 0,
-            pageSize: 10,
-            dataCount: 0,
-            markCount: 10,
-            markType: defaultType,     // Symbol|Chinese|Englist
-            markText: texts[defaultType],
-            showList: true,
+            element: null,              //分页显示HTML控件（或ID）
+            pageStart: 0,               //起始页，0 或 1，与 pageIndex 起始值对应
+            pageIndex: 0,               //起始页码，默认与 pageStart 相同
+            pageSize: 10,               //每页显示条数，默认为10
+            dataCount: 0,               //总数据条数
+            markCount: 10,              //分页数字按钮显示个数，默认为10个
+            markType: defaultType,      //标记类型：图标|中文|英文（symbol|chinese|english）
+            markText: texts[defaultType],   //标记文字（上一页 下一页）
+            showList: true,             //是否显示数字列表，若不显示数字列表，则默认显示输入框
             className: defaultClassName,    //默认样式名称，可以修改为外置样式
-            skin: defaultSkin,        //样式，若skin=null则不启用内置样式
-            position: defaultPositon,       // left|right
-            showInvalid: true,
+            skin: defaultSkin,          //样式，若skin=null则不启用内置样式
+            position: defaultPositon,   //left|right
+            showInvalid: true,          //
             showEllipsis: true,
             showFirstLast: true,
-            showPageInput: true,
+            showPageInput: false,
             showPageJump: true,
             showRefurbish: true,
             showDataCount: true,
@@ -274,7 +294,7 @@
             },
             debounce: true,                 //是否启用防抖功能（或者值为number，且大于50即为启用）
             debounceTimeout: 256            //抖动时长，单位：毫秒
-        }, options);
+        }, options, dataCount);
 
         if(this.options.className === defaultClassName){
             $.loadLinkStyle($.getFilePath(thisFilePath) + $.getFileName(thisFilePath, true) + '.css', 'oui-pagination');
@@ -284,9 +304,9 @@
     }
 
     Pagination.prototype = {
-        paging: function(options) {
+        paging: function(options, dataCount) {
             if ($.isObject(options) || $.isNumber(options)) {
-                this.options = setOptions(this.options, options);
+                this.options = setOptions(this.options, options, dataCount);
             }
             var that = this, op = $.extend(that.options, {
                 pageCount: Math.ceil(that.options.dataCount / that.options.pageSize),
@@ -307,9 +327,6 @@
                     '<ul class="list">'
                 ];
 
-            console.log('minMax: ', minMax);
-
-            //
             buildDataCount(op.showDataCount, that, html, op.markText['dataCount'], op.dataCount);
 
             buildPageSize(op.showSizeSelect, that, html, op.minuend);
@@ -322,8 +339,7 @@
                     buildLinkText(true, that, html, quickNum, 'ellipsis');
                 }
                 buildLinkText(true, that, html, op.pageIndex - 1, 'previous');
-            }
-            else if (op.showInvalid) {
+            } else if (op.showInvalid) {
                 buildLinkText(op.showFirstLast, that, html, 0, 'first', true);
                 buildLinkText(true, that, html, 0, 'previous', true);
             }
@@ -335,6 +351,9 @@
                     if (i > op.pageCount || c > op.markCount) {
                         break;
                     }
+                    if(c === mi){                        
+                        buildPageInput(op.showPageInput, that, html, false, 'i');
+                    }
                     if (i === op.pageIndex) {
                         html.push('<li><a class="cur">' + num + '</a></li>');
                     } else {
@@ -343,7 +362,7 @@
                     c++;
                 }
             } else {
-                buildPageInput(op.showPageInput, that, html, false);
+                buildPageInput(op.showPageInput, that, html, false, 'i');
             }
 
             //上一页<、下一页>、第一页<<、最后一页标记>>
@@ -356,13 +375,12 @@
                     buildLinkText(true, that, html, quickNum, 'ellipsis');
                 }
                 buildLinkText(op.showFirstLast, that, html, pcSub, 'last');
-            }
-            else if (op.showInvalid) {
+            } else if (op.showInvalid) {
                 buildLinkText(true, that, html, 0, 'next', true);
                 buildLinkText(op.showFirstLast, that, html, 0, 'last', true);
             }
 
-            buildPageInput(op.showPageJump, that, html, true);
+            buildPageInput(op.showPageJump, that, html, true, 'j');
 
             buildLinkText(op.showRefurbish, that, html, op.pageIndex, 'refurbish');
 

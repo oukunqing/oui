@@ -27,12 +27,13 @@
         pageIndex: 1,
         pageStart: 1,
         pageSize: 12,
-        showPageJump: false,
+        showPageInput: true,
+        showPageJump: true,
         showList: true,
         skin: 'red',
         markType: 'chinese',
         callback: function(pageIndex){
-            console.log('p2-callback: ', pageIndex);
+            console.log('p1-callback: ', pageIndex);
 
             p1.paging(pageIndex);
         }
@@ -40,12 +41,14 @@
    console.log('p1: ', p1);
    var p2 = new OUI.Pagination({
         element: document.getElementById('p2'),
-        dataCount: 100,
+        dataCount: 520,
         pageIndex: 0,
         pageStart: 0,
         showList: false,
         position: 'right',
         markType: 'symbol',
+        showPageInput: true,
+        showPageJump: false,
         skin: 'green',
         callback: function(pageIndex){
             console.log('p2-callback: ', pageIndex);
@@ -58,7 +61,7 @@
 
    var p3 = new OUI.Pagination({
         element: document.getElementById('p3'),
-        dataCount: 136,
+        dataCount: 666,
         pageIndex: 0,
         pageStart: 0,
         showList: true,
@@ -75,12 +78,12 @@
 
    var p4 = new OUI.Pagination({
         element: document.getElementById('p4'),
-        dataCount: 312,
+        dataCount: 812,
         pageIndex: 0,
         pageStart: 0,
-        showList: true,
+        showList: false,
         position: 'left',
-        markType: 'english',
+        markType: 'chinese',
         skin: 'black',
         callback: function(pageIndex){
             console.log('p4-callback: ', pageIndex);
@@ -91,9 +94,9 @@
 
    var p5 = new OUI.Pagination({
         element: document.getElementById('p5'),
-        dataCount: 212,
-        pageIndex: 0,
-        pageStart: 0,
+        dataCount: 911,
+        pageIndex: 1,
+        pageStart: 1,
         showList: true,
         position: 'left',
         markType: 'english',

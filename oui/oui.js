@@ -21,7 +21,10 @@ var OUI = function () {
         isFunction = function (f) { return typeof f === 'function' && typeof f.nodeType !== 'number'; },
         isObject = function (o) { return o !== null && typeof o === 'object'; },
         isArray = Array.isArray || function (a) { return Object.prototype.toString.call(a) === '[object Array]'; },
-        isBoolean = function (b, dv) { return typeof b === 'boolean' ? b : typeof dv === 'boolean' ? dv : false; },
+        isBoolean = function (b, dv) {
+            var bool = typeof b === 'boolean';
+            return typeof dv === 'boolean' ? (bool ? b : dv) : bool;
+        },
         isNumeric = function (o) { return /^[-+]?(\d+)([.][\d]{0,})?$/.test(o); },
         isDecimal = function (o) { return /^[-+]?(\d+)([.][\d]{0,})$/.test(o); },
         isInteger = function (o) { return /^[-+]?(\d+)$/.test(o); },
@@ -238,6 +241,12 @@ var OUI = function () {
         },
         removeListener = function (element, e, fn) {
             element.removeEventListener ? element.removeEventListener(e, fn, false) : element.detachEvent('on' + e, fn);
+        },
+        setFocus = function (element) {
+            if(isElement(element)){
+                console.log('element aa: ', element);
+                element.focus();
+            }
         };
 
     $.extend($, {
@@ -256,7 +265,8 @@ var OUI = function () {
         loadJsScript: loadJsScript,
         stopBubble: stopBubble,
         addListener: addListener,
-        removeListener: removeListener
+        removeListener: removeListener,
+        setFocus: setFocus
     });
 }(OUI);
 
