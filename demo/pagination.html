@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title></title>
     <script type="text/javascript" src="../oui/oui.js"></script>
     <script type="text/javascript" src="../oui/oui.pagination.js"></script>
@@ -32,10 +33,15 @@
         showList: true,
         skin: 'red',
         markType: 'chinese',
-        callback: function(pageIndex){
-            console.log('p1-callback: ', pageIndex);
+        //sizeOptions: [10, 20, 30],
+        callback: function(pageIndex, param){
+            console.log('p1-callback: ', pageIndex, ', param: ', param);
 
             p1.paging(pageIndex);
+        },
+        useKeyEvent: false,
+        callbackParam: {
+            id: 123, prompt: '这是回调参数'
         }
     });
    console.log('p1: ', p1);

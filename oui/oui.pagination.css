@@ -37,7 +37,7 @@
 
 .oui-pagination a {
     box-sizing: content-box; cursor: pointer; height: 20px; line-height: 20px; 
-    text-decoration: none;  padding: 0 6px; margin: 0 2px 0;
+    text-decoration: none;  padding: 0 6px; margin: 0 2px 0; display: inline-block;
 
     -ms-touch-action: manipulation;
     touch-action: manipulation;
@@ -96,6 +96,7 @@
 .oui-pagination a.ellipsis { padding: 0 4px; }
 
 .oui-pagination input.text {
+    display: inline-block;
     width: 50px;
     padding: 0 3px;
     background: #fff;
@@ -111,7 +112,7 @@
 }
 
 .oui-pagination input.group {
-    border-top-right-radius: 0; border-bottom-right-radius: 0;
+    border-top-right-radius: 0; border-bottom-right-radius: 0; border-right: none 0 ;
 }
 
 .oui-pagination button.btn {
@@ -149,24 +150,29 @@
 .oui-pagination .blue a.link { border: solid 1px #005eac; }
 .oui-pagination .blue a.link:hover { background: #005eac; }
 .oui-pagination .blue a.cur {background: #005eac; }
+.oui-pagination .blue button.btn { background: #337ab7; border-color: #2e6da4; }
 
 .oui-pagination .red { }
 .oui-pagination .red a.link { border: solid 1px #f00; }
 .oui-pagination .red a.link:hover { background: #f00; }
 .oui-pagination .red a.cur { background: #f00; }
+.oui-pagination .red button.btn { background: #f00; border-color: #f00; }
 
 .oui-pagination .orange { }
 .oui-pagination .orange a.link { border: solid 1px #f50; }
 .oui-pagination .orange a.link:hover { background: #f50; }
 .oui-pagination .orange a.cur { background: #f50; }
+.oui-pagination .orange button.btn { background: #f50; border-color: #f50; }
 
 .oui-pagination .green { }
 .oui-pagination .green a.link { border: solid 1px #008000; }
 .oui-pagination .green a.link:hover { background: #008000; }
 .oui-pagination .green a.cur { background: #008000; }
+.oui-pagination .green button.btn { background: #008000; border-color: #008000; }
 
 .oui-pagination .black { }
 .oui-pagination .black a.link { border: solid 1px #000; }
 .oui-pagination .black a.link:hover { background: #000; }
 .oui-pagination .black a.cur { background: #000; }
+.oui-pagination .black button.btn { background: #000; border-color: #000; }
 

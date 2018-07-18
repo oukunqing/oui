@@ -41,8 +41,10 @@ var OUI = function () {
         isProperty = function (o, property) { return o.hasOwnProperty(property) && (property in o); },
         trim = function (s) { return s.replace(/(^[\s]*)|([\s]*$)/g, ''); },
         extend = function (destination, source, deepCopy) {
-            for (var property in source) {
-                destination[property] = source[property];
+            if(isObject(destination) && isObject(source)){
+                for (var property in source) {
+                    destination[property] = source[property];
+                }
             }
             return destination;
         },
@@ -243,10 +245,7 @@ var OUI = function () {
             element.removeEventListener ? element.removeEventListener(e, fn, false) : element.detachEvent('on' + e, fn);
         },
         setFocus = function (element) {
-            if(isElement(element)){
-                console.log('element aa: ', element);
-                element.focus();
-            }
+            try { return isElement(element) ? element.focus() || true : false; } catch (e) { return false; }
         };
 
     $.extend($, {

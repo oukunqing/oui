@@ -9,38 +9,38 @@
         defaultPositon = 'left',
         defaultType = 'symbol',
         defaultSkin = 'default',
-        texts = {
-            symbol: {
-                first: '&laquo;', previous: '&lsaquo;', next: '&rsaquo;', last: '&raquo;',
-                ellipsis: '&middot;&middot;&middot;', jump: 'Go', reload: 'Re',
-                pageCount: '\u5171 {0} \u9875', dataCount: '\u5171 {0} \u6761',
-                dataStat: '\u663e\u793a\u7b2c{0}\u6761\u5230\u7b2c{1}\u6761\u8bb0\u5f55\uff0c\u5171{2}\u6761'
-            },
-            chinese: {
-                first: '\u9996\u9875', previous: '\u4e0a\u4e00\u9875', next: '\u4e0b\u4e00\u9875', last: '\u5c3e\u9875',
-                ellipsis: '&middot;&middot;&middot;', jump: '\u8df3\u8f6c', reload: '\u5237\u65b0',
-                pageCount: '\u5171 {0} \u9875', dataCount: '\u5171 {0} \u6761',
-                dataStat: '\u663e\u793a\u7b2c {0} \u6761\u5230\u7b2c {1} \u6761\u8bb0\u5f55\uff0c\u5171 {2} \u6761'
-            },
-            english: {
-                first: 'First', previous: 'Prev', next: 'Next', last: 'Last',
-                ellipsis: '&middot;&middot;&middot;', jump: 'Go', reload: 'Re',
-                pageCount: '\u5171 {0} \u9875', dataCount: '\u5171 {0} \u6761',
-                dataStat: '\u663e\u793a\u7b2c {0} \u6761\u5230\u7b2c {1} \u6761\u8bb0\u5f55\uff0c\u5171 {2} \u6761'
-            }
-        },
         positions = {
             left: 1, right: 0
         },
         setNumber = function(op, keys) {
             for (var i in keys) {
-                var key = keys[i];
-                if (isNaN(Number(op[key])) || op[key] < 0) {
+                var key = parseInt(keys[i], 10);
+                if (isNaN(key) || op[key] < 0) {
                     op[key] = 0;
                 }
             }
         },
         setOptions = function(op, options, dataCount) {
+            var texts = {
+                symbol: {
+                    first: '&laquo;', previous: '&lsaquo;', next: '&rsaquo;', last: '&raquo;',
+                    ellipsis: '&middot;&middot;&middot;', jump: 'Go', reload: 'Re',
+                    pageCount: '\u5171 {0} \u9875', dataCount: '\u5171 {0} \u6761',
+                    dataStat: '\u663e\u793a\u7b2c{0}\u6761\u5230\u7b2c{1}\u6761\u8bb0\u5f55\uff0c\u5171{2}\u6761'
+                },
+                chinese: {
+                    first: '\u9996\u9875', previous: '\u4e0a\u4e00\u9875', next: '\u4e0b\u4e00\u9875', last: '\u5c3e\u9875',
+                    ellipsis: '&middot;&middot;&middot;', jump: '\u8df3\u8f6c', reload: '\u5237\u65b0',
+                    pageCount: '\u5171 {0} \u9875', dataCount: '\u5171 {0} \u6761',
+                    dataStat: '\u663e\u793a\u7b2c {0} \u6761\u5230\u7b2c {1} \u6761\u8bb0\u5f55\uff0c\u5171 {2} \u6761'
+                },
+                english: {
+                    first: 'First', previous: 'Prev', next: 'Next', last: 'Last',
+                    ellipsis: '&middot;&middot;&middot;', jump: 'Go', reload: 'Re',
+                    pageCount: '\u5171 {0} \u9875', dataCount: '\u5171 {0} \u6761',
+                    dataStat: '\u663e\u793a\u7b2c {0} \u6761\u5230\u7b2c {1} \u6761\u8bb0\u5f55\uff0c\u5171 {2} \u6761'
+                }
+            };
             if ($.isNumber(options)) {
                 op.pageIndex = options;
                 if ($.isNumber(dataCount)) {
@@ -61,11 +61,8 @@
                 if (!texts[op.markType]) {
                     op.markType = defaultType;
                 }
-                if (!$.isObject(options.markText)) {
-                    op.markText = texts[op.markType];
-                } else {
-                    op.markText = $.extend(texts[op.markType], op.markText);
-                }
+                op.markText = $.extend(texts[op.markType], options.markText);
+
                 setNumber(op, ['dataCount', 'pageStart', 'pageSize', 'pageIndex', 'markCount']);
 
                 if (op.pageSize < 1) {
@@ -101,7 +98,9 @@
             return [min, max];
         },
         buildLinkText = function(enabled, that, arr, pageIndex, key, noLink, className) {
-            if (!enabled) { return false; }
+            if (!enabled) {
+                return false;
+            }
             var text = that.options.markText[key];
             if (noLink) {
                 arr.push(['<li>', '<a class="none ' + (className || '') + '">', text, '</a>', '</li>'].join(''));
@@ -111,7 +110,9 @@
         },
         // 参数 t 用来指示当前获取焦点是哪个输入框
         buildPageInput = function(enabled, that, arr, showButton, t) {
-            if (!enabled) { return false; }
+            if (!enabled) {
+                return false;
+            }
             var op = that.options, maxlength = op.pageCount.toString().length, className = showButton ? ' group' : '',
                 input = '<input type="text" class="text ' + className + '" value="' + (op.pageIndex + op.minuend)
                     + '" maxlength="' + maxlength + '" t="' + t + '"' + '/>';
@@ -121,11 +122,15 @@
             }
         },
         buildDataCount = function(enabled, that, arr, text, datas) {
-            if (!enabled) { return false; }
+            if (!enabled) {
+                return false;
+            }
             arr.push('<span class="label">' + (text || '{0}').format(datas) + '</span>');
         },
         buildDataStat = function(enabled, that, arr, text) {
-            if (!enabled) { return false; }
+            if (!enabled) {
+                return false;
+            }
             var op = that.options, str = text || '{0}', datas = [0, 0, 0];
             if (op.dataCount > 0) {
                 var min = (op.pageIndex - op.pageStart) * op.pageSize, max = min + op.pageSize;
@@ -195,7 +200,7 @@
                 }
                 if (isPageSize) {
                     //设置PageSize，页码重新设置为起始页码
-                    op.callback(op.pageStart);
+                    op.callback(op.pageStart, op.callbackParam);
                 } else {
                     val = checkInputValue(op, val - minuend);
                     //是否启用防抖功能，抖动频率需大于50毫秒
@@ -205,9 +210,9 @@
                         //防抖
                         if (op.timerDebounce != null) { window.clearTimeout(op.timerDebounce); }
                         //外部回调
-                        op.timerDebounce = window.setTimeout(function() { op.callback(val); }, op.debounceTimeout);
+                        op.timerDebounce = window.setTimeout(function() { op.callback(val, op.callbackParam); }, op.debounceTimeout);
                     } else {
-                        op.callback(val);
+                        op.callback(val, op.callbackParam);
                     }
                 }
             });
@@ -238,7 +243,9 @@
 
             var focusInput = inputs[0];
             for (var i = 0; i < ic; i++) {
-                setCallback(that, inputs[i], 'keydown', minuend);
+                if (op.useKeyEvent) {
+                    setCallback(that, inputs[i], 'keydown', minuend);
+                }
                 //清除输入的非数字字符，只能输入正整数
                 $.addListener(inputs[i], 'keyup', function(ev) {
                     this.value = this.value.replace(/[^\d]/, '');
@@ -254,20 +261,24 @@
             return parseInt(obj.value || obj.getAttribute('value'), 10);
         },
         buildPageSize = function(enabled, that, arr, minuend) {
-            if (!enabled) { return false; }
+            if (!enabled) {
+                return false;
+            }
             var op = that.options, html = ['<select class="select">'], selected = false;
             if ($.isArray(op.sizeOptions)) {
                 for (var i in op.sizeOptions) {
-                    html.push('<option value="' + op.sizeOptions[i] + '">' + op.sizeOptions[i] + '</option>');
-                }
-                selected = op.sizeOptions.indexOf(op.pageSize) >= 0;
-            } else if ($.isObject(op.sizeOptions)) {
-                for (var k in op.sizeOptions) {
-                    var dr = op.sizeOptions[k];
-                    html.push('<option value="' + (dr.value || dr.val) + '">' + (dr.text || dr.key) + '</option>');
+                    var dr = op.sizeOptions[i];
+                    if ($.isInteger(dr)) {
+                        html.push('<option value="' + dr + '">' + dr + '</option>');
+                    } else if ($.isArray(dr)) {
+                        if (!selected) {
+                            selected = parseInt(dr[0], 10) === op.pageSize;
+                        }
+                        html.push('<option value="' + dr[0] + '">' + (dr[1] || dr[0]) + '</option>');
+                    }
                 }
             }
-            if (!selected) {
+            if (!selected && op.sizeOptions.indexOf(op.pageSize) < 0) {
                 html.push('<option value="' + op.pageSize + '">' + op.pageSize + '</option>');
             }
             html.push('</select>');
@@ -284,25 +295,27 @@
             dataCount: 0,               //总数据条数
             markCount: 10,              //分页数字按钮显示个数，默认为10个
             markType: defaultType,      //标记类型：图标|中文|英文（symbol|chinese|english）
-            markText: texts[defaultType],   //标记文字（上一页 下一页）
+            markText: null,   //标记文字（上一页 下一页）
             showList: true,             //是否显示数字列表，若不显示数字列表，则默认显示输入框
-            className: defaultClassName,    //默认样式名称，可以修改为外置样式
-            skin: defaultSkin,          //样式，若skin=null则不启用内置样式
-            position: defaultPositon,   //left|right
-            showInvalid: true,          //
-            showEllipsis: true,
-            showFirstLast: true,
-            showPageInput: false,
-            showPageJump: true,
-            showReload: false,
-            showDataCount: false,
-            showPageCount: true,
-            showDataStat: false,
-            showSizeSelect: true,
-            sizeOptions: [5, 10, 20, 30, 50, 100],
-            callback: function(pageIndex) {
-                console.log('pageIndex: ', pageIndex);
+            showInvalid: true,          //是否显示无效的按钮
+            showEllipsis: true,         //是否显示省略号(快进)按钮
+            showFirstLast: true,        //是否显示首页/尾页按钮
+            showPageInput: false,       //是否显示页码输入框
+            showPageJump: true,         //是否显示页码跳转输入框
+            showDataCount: false,       //是否显示数据条数
+            showPageCount: true,        //是否显示总页数
+            showDataStat: false,        //是否显示数据统计
+            showSizeSelect: true,       //是否显示PageSize下拉框
+            sizeOptions: [5, 10, 20, 30, 50, 100],      //PageSize下拉框默认选项
+            callback: function(pageIndex, param) {      //回调函数
+                console.log('pageIndex: ', pageIndex, ', param: ', param);
             },
+            callbackParam: null,            //回调参数
+            useKeyEvent: true,              //是否启用快捷键（回车键/方向键）
+            showReload: false,              //是否显示刷新按钮
+            position: defaultPositon,       //left|right
+            className: defaultClassName,    //默认样式名称，可以修改为外置样式
+            skin: defaultSkin,              //样式，若skin=null则不启用内置样式
             debounce: true,                 //是否启用防抖功能（或者值为number，且大于50即为启用）
             debounceTimeout: 256            //抖动时长，单位：毫秒
         }, options, dataCount);
@@ -332,12 +345,12 @@
                 pmSub = op.pageIndex - op.markCount,
                 pcSub = op.pageCount - op.minuend,
                 pmSum = op.pageIndex + op.markCount,
+                className = op.markType === defaultType ? 'symbol' : 'text',
                 html = [
                     '<div class="' + getClassName(that) + '">',
                     '<div class="' + op.skin + ' ' + getPosition(that, true) + '">',
                     '<ul class="list">'
-                ],
-                className = op.markType === defaultType ? 'symbol' : 'text';
+                ];
 
             buildDataCount(op.showDataCount, that, html, op.markText['dataCount'], op.dataCount);
 
