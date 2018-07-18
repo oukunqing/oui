@@ -24,8 +24,8 @@
         element: document.getElementById('p1'),
         dataCount: 1912,
         markCount: 10,
-        pageIndex: 1,
-        pageStart: 1,
+        pageIndex: 0,
+        pageStart: 0,
         pageSize: 12,
         showPageInput: true,
         showPageJump: true,
@@ -66,7 +66,8 @@
         pageStart: 0,
         showList: true,
         position: 'left',
-        markType: 'symbol',
+        markType: 'chinese',
+        markText: {last:'末页',reload:'刷',jump:'跳一跳'},
         skin: 'blue',
         callback: function(pageIndex){
             console.log('p3-callback: ', pageIndex);
@@ -83,7 +84,7 @@
         pageStart: 0,
         showList: false,
         position: 'left',
-        markType: 'chinese',
+        //markType: 'chinese',
         skin: 'black',
         callback: function(pageIndex){
             console.log('p4-callback: ', pageIndex);

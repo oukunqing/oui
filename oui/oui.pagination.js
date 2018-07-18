@@ -11,20 +11,20 @@
         defaultSkin = 'default',
         texts = {
             symbol: {
-                first: '&lt;&lt;', previous: '&lt;', next: '&gt;', last: '&#62;&#62;', ellipsis: '\u2026',
-                refurbish: 'Reload', jump: 'Go',
+                first: '&laquo;', previous: '&lsaquo;', next: '&rsaquo;', last: '&raquo;',
+                ellipsis: '&middot;&middot;&middot;', jump: 'Go', reload: 'Re',
                 pageCount: '\u5171 {0} \u9875', dataCount: '\u5171 {0} \u6761',
                 dataStat: '\u663e\u793a\u7b2c{0}\u6761\u5230\u7b2c{1}\u6761\u8bb0\u5f55\uff0c\u5171{2}\u6761'
             },
             chinese: {
-                first: '\u9996\u9875', previous: '\u4e0a\u4e00\u9875', next: '\u4e0b\u4e00\u9875', last: '\u5c3e\u9875', ellipsis: '\u2026',
-                refurbish: '\u5237\u65b0', jump: '\u8df3\u5230',
+                first: '\u9996\u9875', previous: '\u4e0a\u4e00\u9875', next: '\u4e0b\u4e00\u9875', last: '\u5c3e\u9875',
+                ellipsis: '&middot;&middot;&middot;', jump: '\u8df3\u8f6c', reload: '\u5237\u65b0',
                 pageCount: '\u5171 {0} \u9875', dataCount: '\u5171 {0} \u6761',
                 dataStat: '\u663e\u793a\u7b2c {0} \u6761\u5230\u7b2c {1} \u6761\u8bb0\u5f55\uff0c\u5171 {2} \u6761'
             },
             english: {
-                first: 'First', previous: 'Previous', next: 'Next', last: 'Last', ellipsis: '\u2026',
-                refurbish: 'Reload', jump: 'Go',
+                first: 'First', previous: 'Prev', next: 'Next', last: 'Last',
+                ellipsis: '&middot;&middot;&middot;', jump: 'Go', reload: 'Re',
                 pageCount: '\u5171 {0} \u9875', dataCount: '\u5171 {0} \u6761',
                 dataStat: '\u663e\u793a\u7b2c {0} \u6761\u5230\u7b2c {1} \u6761\u8bb0\u5f55\uff0c\u5171 {2} \u6761'
             }
@@ -43,7 +43,7 @@
         setOptions = function(op, options, dataCount) {
             if ($.isNumber(options)) {
                 op.pageIndex = options;
-                if($.isNumber(dataCount)){
+                if ($.isNumber(dataCount)) {
                     op.dataCount = dataCount;
                 }
                 setNumber(op, ['dataCount', 'pageIndex']);
@@ -61,8 +61,10 @@
                 if (!texts[op.markType]) {
                     op.markType = defaultType;
                 }
-                if (!$.isArray(options.markText)) {
+                if (!$.isObject(options.markText)) {
                     op.markText = texts[op.markType];
+                } else {
+                    op.markText = $.extend(texts[op.markType], op.markText);
                 }
                 setNumber(op, ['dataCount', 'pageStart', 'pageSize', 'pageIndex', 'markCount']);
 
@@ -98,21 +100,22 @@
             }
             return [min, max];
         },
-        buildLinkText = function(enabled, that, arr, pageIndex, key, noLink) {
+        buildLinkText = function(enabled, that, arr, pageIndex, key, noLink, className) {
             if (!enabled) { return false; }
+            var text = that.options.markText[key];
             if (noLink) {
-                arr.push(['<li>', '<a class="text">', that.options.markText[key], '</a>', '</li>'].join(''));
+                arr.push(['<li>', '<a class="none ' + (className || '') + '">', text, '</a>', '</li>'].join(''));
             } else {
-                arr.push([
-                    '<li>', '<a class="link" href="javascript:void(0);" value="' + pageIndex + '">', that.options.markText[key], '</a>', '</li>'
-                ].join(''));
+                arr.push(['<li>', '<a class="link ' + (className || '') + '" value="' + pageIndex + '">', text, '</a>', '</li>'].join(''));
             }
         },
         // 参数 t 用来指示当前获取焦点是哪个输入框
         buildPageInput = function(enabled, that, arr, showButton, t) {
             if (!enabled) { return false; }
-            var op = that.options, maxlength = op.pageCount.toString().length, className = showButton ? ' group' : '';
-            arr.push('<input type="text" class="text' + className + '" value="' + (op.pageIndex + op.minuend) + '" maxlength="' + maxlength + '" t="' + t + '" />');
+            var op = that.options, maxlength = op.pageCount.toString().length, className = showButton ? ' group' : '',
+                input = '<input type="text" class="text ' + className + '" value="' + (op.pageIndex + op.minuend)
+                    + '" maxlength="' + maxlength + '" t="' + t + '"' + '/>';
+            arr.push(input);
             if (showButton) {
                 arr.push('<button class="btn group">' + op.markText['jump'] + '</button>');
             }
@@ -124,45 +127,53 @@
         buildDataStat = function(enabled, that, arr, text) {
             if (!enabled) { return false; }
             var op = that.options, str = text || '{0}', datas = [0, 0, 0];
-            if(op.dataCount > 0){
+            if (op.dataCount > 0) {
                 var min = (op.pageIndex - op.pageStart) * op.pageSize, max = min + op.pageSize;
-                datas = [ min + 1, max < op.dataCount ? max : op.dataCount, op.dataCount ];
+                datas = [min + 1, max < op.dataCount ? max : op.dataCount, op.dataCount];
             }
             arr.push('<div class="stat ' + getPosition(that, false) + '">' + str.format(datas) + '</div>');
         },
-        keyPaging = function(ev, that, obj){
+        keyPaging = function(ev, that, obj) {
             var op = that.options, pageIndex = 0;
-            if(ev.keyCode === 13) {
+            if (ev.keyCode === 13) {
                 pageIndex = getValue(obj);
-            } else if(ev.keyCode === 38 && op.pageIndex > op.pageStart){
+            } else if (ev.keyCode === 38 && op.pageIndex > op.pageStart) {
                 pageIndex = op.pageStart + op.minuend;
-            } else if(ev.keyCode === 40 && (op.pageIndex + op.minuend) < op.pageCount) {
+            } else if (ev.keyCode === 40 && (op.pageIndex + op.minuend) < op.pageCount) {
                 pageIndex = op.pageCount;
-            } else if(ev.keyCode === 37 && (op.pageIndex - op.minuend - op.pageStart) >= op.pageStart){
+            } else if (ev.keyCode === 37 && (op.pageIndex - op.minuend - op.pageStart) >= op.pageStart) {
                 pageIndex = op.pageIndex - 1 + op.minuend;
-            } else if(ev.keyCode === 39 && (op.pageIndex + op.minuend) < op.pageCount){
+            } else if (ev.keyCode === 39 && (op.pageIndex + op.minuend) < op.pageCount) {
                 pageIndex = op.pageIndex + 1 + op.minuend;
             } else {
+                obj.value = obj.value.replace(/[^\d]/, '');
                 return false;
             }
-            console.log(obj);
             setInputer(that, obj);
 
-            return {value: pageIndex};
+            return { value: pageIndex };
         },
-        setInputer = function(that, obj){
-            if($.isElement(obj, 'INPUT')){
+        setInputer = function(that, obj) {
+            if ($.isElement(obj, 'INPUT')) {
                 that.options.inputer = obj.getAttribute('t');
             }
         },
-        isInputer = function(that, obj){
-            if($.isElement(obj, 'INPUT')){
+        isInputer = function(that, obj) {
+            if ($.isElement(obj, 'INPUT')) {
                 return that.options.inputer === obj.getAttribute('t');
             }
             return false;
         },
+        checkInputValue = function(op, val) {
+            if (val > op.pageCount) {
+                val = op.pageCount;
+            } else if (val < op.pageStart) {
+                val = op.pageStart;
+            }
+            return val;
+        },
         setCallback = function(that, objs, eventName, minuend, func, isPageSize) {
-            var op = that.options, obj = objs, objVal = null, pageIndex = 0;
+            var op = that.options, obj = objs, objVal = null, val = 0;
             if ($.isArray(objs)) {
                 obj = objs[0], objVal = objs[1];
             }
@@ -171,34 +182,32 @@
                 //判断是否是键盘按钮事件 keyup keydown keypress 等
                 if (eventName.indexOf('key') >= 0) {
                     var kp = keyPaging(ev, that, this);
-                    pageIndex = kp ? kp.value : 'None';
+                    val = kp ? kp.value : 'None';
                 } else {
-                    pageIndex = getValue(objVal || this);
+                    val = getValue(objVal || this);
                     setInputer(that, objVal);
                 }
-                if (!isNaN(pageIndex) && $.isFunction(op.callback)) {
-                    if ($.isFunction(func)) { func(pageIndex); }
-                    if (isPageSize) {
-                        //设置PageSize，页码重新设置为起始页码
-                        op.callback(op.pageStart);
+                if (isNaN(val) || !$.isFunction(op.callback)) {
+                    return false;
+                }
+                if ($.isFunction(func)) {
+                    func(val);
+                }
+                if (isPageSize) {
+                    //设置PageSize，页码重新设置为起始页码
+                    op.callback(op.pageStart);
+                } else {
+                    val = checkInputValue(op, val - minuend);
+                    //是否启用防抖功能，抖动频率需大于50毫秒
+                    if (op.debounce && op.debounceTimeout > 50) {
+                        //内部分页，显示分页效果
+                        that.paging(val);
+                        //防抖
+                        if (op.timerDebounce != null) { window.clearTimeout(op.timerDebounce); }
+                        //外部回调
+                        op.timerDebounce = window.setTimeout(function() { op.callback(val); }, op.debounceTimeout);
                     } else {
-                        //
-                        pageIndex -= minuend;
-                        //是否启用防抖功能，抖动频率需大于50毫秒
-                        if (op.debounce && op.debounceTimeout > 50) {
-                            //内部分页，显示分页效果
-                            that.paging(pageIndex);
-                            //防抖
-                            if (op.timerDebounce != null) {
-                                window.clearTimeout(op.timerDebounce); 
-                            }
-                            op.timerDebounce = window.setTimeout(function() {
-                                //外部回调
-                                op.callback(pageIndex);
-                            }, op.debounceTimeout);
-                        } else {
-                            op.callback(pageIndex);
-                        }
+                        op.callback(val);
                     }
                 }
             });
@@ -221,21 +230,23 @@
 
             var inputs = op.element.getElementsByTagName('Input'), ic = inputs.length;
             var btn = op.element.getElementsByTagName('Button')[0];
-            if(btn){
+            if (btn) {
                 var input = btn.previousSibling;
-                console.log(input.tagName);
                 input = input.tagName === 'INPUT' ? input : null;
-                setCallback(that, [btn, input || inputs[ic-1]], 'click', minuend);
+                setCallback(that, [btn, input || inputs[ic - 1]], 'click', minuend);
             }
 
             var focusInput = inputs[0];
             for (var i = 0; i < ic; i++) {
                 setCallback(that, inputs[i], 'keydown', minuend);
-                if(isInputer(that, inputs[i])){
+                //清除输入的非数字字符，只能输入正整数
+                $.addListener(inputs[i], 'keyup', function(ev) {
+                    this.value = this.value.replace(/[^\d]/, '');
+                });
+                if (isInputer(that, inputs[i])) {
                     focusInput = inputs[i];
                 }
             }
-            console.log('focusInput: ', focusInput);
             //设置输入框获取焦点
             $.setFocus(focusInput);
         },
@@ -283,10 +294,10 @@
             showFirstLast: true,
             showPageInput: false,
             showPageJump: true,
-            showRefurbish: true,
-            showDataCount: true,
+            showReload: false,
+            showDataCount: false,
             showPageCount: true,
-            showDataStat: true,
+            showDataStat: false,
             showSizeSelect: true,
             sizeOptions: [5, 10, 20, 30, 50, 100],
             callback: function(pageIndex) {
@@ -296,7 +307,7 @@
             debounceTimeout: 256            //抖动时长，单位：毫秒
         }, options, dataCount);
 
-        if(this.options.className === defaultClassName){
+        if (this.options.className === defaultClassName) {
             $.loadLinkStyle($.getFilePath(thisFilePath) + $.getFileName(thisFilePath, true) + '.css', 'oui-pagination');
         }
 
@@ -325,23 +336,24 @@
                     '<div class="' + getClassName(that) + '">',
                     '<div class="' + op.skin + ' ' + getPosition(that, true) + '">',
                     '<ul class="list">'
-                ];
+                ],
+                className = op.markType === defaultType ? 'symbol' : 'text';
 
             buildDataCount(op.showDataCount, that, html, op.markText['dataCount'], op.dataCount);
 
             buildPageSize(op.showSizeSelect, that, html, op.minuend);
 
             if (op.pageIndex != min && op.pageCount > 0) {
-                buildLinkText(op.showFirstLast, that, html, op.pageStart, 'first');
+                buildLinkText(op.showFirstLast, that, html, op.pageStart, 'first', false, className);
                 //显示省略号快退按钮
                 if (op.showEllipsis && pmSub >= op.pageStart) {
                     quickNum = pmSub > op.pageStart ? pmSub : op.pageStart;
-                    buildLinkText(true, that, html, quickNum, 'ellipsis');
+                    buildLinkText(true, that, html, quickNum, 'ellipsis', false, 'ellipsis');
                 }
-                buildLinkText(true, that, html, op.pageIndex - 1, 'previous');
+                buildLinkText(true, that, html, op.pageIndex - 1, 'previous', false, className);
             } else if (op.showInvalid) {
-                buildLinkText(op.showFirstLast, that, html, 0, 'first', true);
-                buildLinkText(true, that, html, 0, 'previous', true);
+                buildLinkText(op.showFirstLast, that, html, 0, 'first', true, className);
+                buildLinkText(true, that, html, 0, 'previous', true, className);
             }
 
             if (op.showList) {
@@ -351,13 +363,13 @@
                     if (i > op.pageCount || c > op.markCount) {
                         break;
                     }
-                    if(c === mi){                        
+                    if (c === mi) {
                         buildPageInput(op.showPageInput, that, html, false, 'i');
                     }
                     if (i === op.pageIndex) {
-                        html.push('<li><a class="cur">' + num + '</a></li>');
+                        html.push('<li><a class="link cur">' + num + '</a></li>');
                     } else {
-                        html.push('<li><a class="link" href="javascript:void(0);" value="' + i + '">' + num + '</a></li>');
+                        html.push('<li><a class="link num" href="javascript:void(0);" value="' + i + '">' + num + '</a></li>');
                     }
                     c++;
                 }
@@ -367,22 +379,22 @@
 
             //上一页<、下一页>、第一页<<、最后一页标记>>
             if (op.pageIndex != op.pageCount - op.minuend && op.pageCount > 0) {
-                buildLinkText(true, that, html, op.pageIndex + 1, 'next');
+                buildLinkText(true, that, html, op.pageIndex + 1, 'next', false, className);
 
                 //显示省略号快进按钮
                 if (op.showEllipsis && pmSum < op.pageCount) {
                     quickNum = pmSum < pcSub ? pmSum : pcSub;
-                    buildLinkText(true, that, html, quickNum, 'ellipsis');
+                    buildLinkText(true, that, html, quickNum, 'ellipsis', false, 'ellipsis');
                 }
-                buildLinkText(op.showFirstLast, that, html, pcSub, 'last');
+                buildLinkText(op.showFirstLast, that, html, pcSub, 'last', false, className);
             } else if (op.showInvalid) {
-                buildLinkText(true, that, html, 0, 'next', true);
-                buildLinkText(op.showFirstLast, that, html, 0, 'last', true);
+                buildLinkText(true, that, html, 0, 'next', true, className);
+                buildLinkText(op.showFirstLast, that, html, 0, 'last', true, false, className);
             }
 
             buildPageInput(op.showPageJump, that, html, true, 'j');
 
-            buildLinkText(op.showRefurbish, that, html, op.pageIndex, 'refurbish');
+            buildLinkText(op.showReload, that, html, op.pageIndex, 'reload', false, 'text');
 
             buildDataCount(op.showPageCount, that, html, op.markText['pageCount'], op.pageCount);
 
