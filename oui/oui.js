@@ -162,7 +162,7 @@ var OUI = function () {
             try { return !$.isUndefined(getQueryString()[key || 'debug']) } catch (e) { return false; }
         },
         isElement = function (ele, tagName) {
-            var b = $.isObject(ele) && $.isNumber(ele.nodeType) && $.isString(ele.tagName);
+            var b = ele === doc || ($.isObject(ele) && $.isNumber(ele.nodeType) && $.isString(ele.tagName));
             return b && $.isString(tagName) ? ele.tagName === tagName : b;
         },
         getLocationPath = function () {
@@ -246,9 +246,11 @@ var OUI = function () {
             if (ev.preventDefault) { ev.preventDefault(); } else { ev.returnValue = false; }
         },
         addEventListener = function (ele, ev, func, useCapture) {
+            if(!isElement(ele)){ return false; }
             ele.addEventListener ? ele.addEventListener(ev, func, useCapture || false) : ele.attachEvent('on' + ev, func);
         },
         removeEventListener = function (ele, ev, func, useCapture) {
+            if(!isElement(ele)){ return false; }
             ele.removeEventListener ? ele.removeEventListener(ev, func, useCapture || false) : ele.detachEvent('on' + ev, func);
         },
         bindEventListener = function(obj, func) {
