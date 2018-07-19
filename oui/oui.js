@@ -190,9 +190,12 @@ var OUI = function () {
         },
         createElement = function (nodeName, parent, func) {
             var ele = doc.createElement(nodeName);
-            $.isFunction(func) && func(ele);
-            isElement(parent) && parent.appendChild(ele);
-            return ele;
+            if($.isFunction(parent)){
+                func = parent, parent = doc.body;
+            } else if(!isElement(parent)) {
+                parent = doc.body;
+            }
+            return $.isFunction(func) && func(ele), parent.appendChild(ele), ele;
         },
         getElementStyle = function (ele, styleName) {
             var style = ele.currentStyle || document.defaultView.getComputedStyle(ele, null);
