@@ -11,7 +11,7 @@
 
     var doc = document,
         head = document.getElementsByTagName('head')[0],
-        thisFilePath = $.getScriptFilePath(),
+        thisFilePath = $.getScriptSelfPath(),
         isCellSpan = function (span) {
             return $.isNumber(span) && span > 0;
         },
@@ -101,7 +101,7 @@
                     //that.tree.toggle(this.getAttribute('tid'));
                     //需要给相关的tr td 和 图标 设置 tid 属性
                     that.tree[action || 'toggle'](obj.getAttribute('tid'));
-                    $.stopBubble();
+                    $.cancelBubble();
                 },
                 trigger = that.options.trigger,
                 set = function () {
@@ -128,15 +128,15 @@
 
                     var btnSwitch = doc.getElementById(buildSwitchId(id));
 
-                    $.addListener(btnSwitch, 'click', function () { func(this, 'toggle'); });
+                    $.addEventListener(btnSwitch, 'click', function () { func(this, 'toggle'); });
 
                     if (trigger.cell) {
                         cell.setAttribute('tid', id);
-                        $.addListener(cell, trigger.cell[0], function () { func(this, trigger.cell[1] || 'toggle'); });
+                        $.addEventListener(cell, trigger.cell[0], function () { func(this, trigger.cell[1] || 'toggle'); });
                     }
                     if (trigger.row) {
                         row.setAttribute('tid', id);
-                        $.addListener(row, trigger.row[0], function () { func(this, trigger.row[1] || 'toggle'); });
+                        $.addEventListener(row, trigger.row[0], function () { func(this, trigger.row[1] || 'toggle'); });
                     }
                 } else {
                     cell.innerHTML = content;
@@ -163,7 +163,7 @@
             }
             if ($.isObject(dr.event)) {
                 for (var k in dr.event) {
-                    $.addListener(element, k, dr.event[k]);
+                    $.addEventListener(element, k, dr.event[k]);
                 }
             }
             var attr = dr.attribute || dr.attr || dr.property || dr.prop;

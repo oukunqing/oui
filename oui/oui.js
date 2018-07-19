@@ -161,14 +161,14 @@ var OUI = function () {
         isDebug = function (key) {
             try { return !$.isUndefined(getQueryString()[key || 'debug']) } catch (e) { return false; }
         },
-        isElement = function (element, tagName) {
-            var b = $.isObject(element) && $.isNumber(element.nodeType) && $.isString(element.tagName);
-            return b && $.isString(tagName) ? element.tagName === tagName : b;
+        isElement = function (ele, tagName) {
+            var b = $.isObject(ele) && $.isNumber(ele.nodeType) && $.isString(ele.tagName);
+            return b && $.isString(tagName) ? ele.tagName === tagName : b;
         },
         getLocationPath = function () {
             return location.href.substring(0, location.href.lastIndexOf('/') + 1);
         },
-        getScriptFilePath = function () {
+        getScriptSelfPath = function () {
             var elements = doc.getElementsByTagName('script'), len = elements.length;
             return elements[len - 1].src;
         },
@@ -189,20 +189,24 @@ var OUI = function () {
             return pos >= 0 && withoutExtension ? name.substr(0, pos) : name;
         },
         createElement = function (nodeName, parent, func) {
-            var element = doc.createElement(nodeName);
-            $.isFunction(func) && func(element);
-            isElement(parent) && parent.appendChild(element);
-            return element;
+            var ele = doc.createElement(nodeName);
+            $.isFunction(func) && func(ele);
+            isElement(parent) && parent.appendChild(ele);
+            return ele;
         },
-        setAttribute = function (element, attributes, exempt) {
-            if (!exempt && (!isElement(element) || !$.isObject(attributes))) { return false; }
-            for (var k in attributes) {
-                var v = attributes[k];
-                if (!$.isNull(v) && !$.isUndefined(v)) {
-                    try { element.setAttribute(k, v); } catch (e) { console.log(e); }
+        getElementStyle = function (ele, styleName) {
+            var style = ele.currentStyle || document.defaultView.getComputedStyle(ele, null);
+            return $.isString(styleName) ? style[styleName] : style;
+        },
+        setAttribute = function (ele, attributes, exempt) {
+            if (!exempt && (!isElement(ele) || !$.isObject(attributes))) { return false; }
+            for (var key in attributes) {
+                var val = attributes[key];
+                if (!$.isNull(val) && !$.isUndefined(val)) {
+                    try { ele.setAttribute(key, val); } catch (er) { console.log('setAttribute: ', er); }
                 }
             }
-            return element;
+            return ele;
         },
         setNoCache = function (filePath) {
             var postfix = $.isString(filePath) && filePath ? filePath + (filePath.indexOf('?') >= 0 ? '&' : '?') : '';
@@ -210,61 +214,81 @@ var OUI = function () {
         },
         loadLinkStyle = function (path, id) {
             if (!$.isUndefined(id) && doc.getElementById(id)) { return false; }
-            return createElement('link', head, function (el) {
-                setAttribute(el, { id: id, type: 'text/css', rel: 'stylesheet', href: setNoCache(path) }, true);
+            return createElement('link', head, function (ele) {
+                setAttribute(ele, { id: id, type: 'text/css', rel: 'stylesheet', href: setNoCache(path) }, true);
             });
         },
         loadJsScript = function (path, id, callback, parent) {
             if ($.isFunction(id) && !$.isFunction(callback)) {
                 callback = id, id = null;
             }
-            var node = createElement('script', parent || head, function (el) {
-                setAttribute(el, { id: id, type: 'text/javascript', async: true, src: setNoCache(path), charset: 'utf-8' }, true);
+            var node = createElement('script', parent || head, function (ele) {
+                setAttribute(ele, { id: id, type: 'text/javascript', async: true, src: setNoCache(path), charset: 'utf-8' }, true);
             }), ae = node.attachEvent;
 
             if ($.isFunction(ae) && ae.toString() && ae.toString().indexOf('[native code]') >= 0) {
-                node.attachEvent('onreadystatechange', function (e) { onScriptLoad(e, path); });
+                node.attachEvent('onreadystatechange', function (ev) { onScriptLoad(ev, path); });
             } else {
-                node.addEventListener('load', function (e) { onScriptLoad(e, path); }, false);
+                node.addEventListener('load', function (ev) { onScriptLoad(ev, path); }, false);
             }
 
-            function onScriptLoad(e, path) { !isDebug() && head.removeChild(node), onCallback(); }
+            function onScriptLoad(ev, path) { !isDebug() && head.removeChild(node), onCallback(); }
             function onCallback() { $.isFunction(callback) && callback(); }
 
             return node;
         },
-        stopBubble = function (ev) {
+        cancelBubble = function (ev) {
             ev = ev || window.event || arguments.callee.caller.arguments[0];
             if (ev.stopPropagation) { ev.stopPropagation(); } else { ev.cancelBubble = true; }
             if (ev.preventDefault) { ev.preventDefault(); } else { ev.returnValue = false; }
         },
-        addListener = function (element, e, fn) {
-            element.addEventListener ? element.addEventListener(e, fn, false) : element.attachEvent('on' + e, fn);
+        addEventListener = function (ele, ev, func, useCapture) {
+            ele.addEventListener ? ele.addEventListener(ev, func, useCapture || false) : ele.attachEvent('on' + ev, func);
         },
-        removeListener = function (element, e, fn) {
-            element.removeEventListener ? element.removeEventListener(e, fn, false) : element.detachEvent('on' + e, fn);
+        removeEventListener = function (ele, ev, func, useCapture) {
+            ele.removeEventListener ? ele.removeEventListener(ev, func, useCapture || false) : ele.detachEvent('on' + ev, func);
         },
-        setFocus = function (element) {
-            try { return isElement(element) ? element.focus() || true : false; } catch (e) { return false; }
+        bindEventListener = function(obj, func) {
+            if(!$.isObject(obj) || !$.isFunction(func)){
+                return false;
+            }
+            var args = Array.prototype.slice.call(arguments).slice(2);
+            return function (ev) {
+                return func.apply(obj, [ev || window.event].concat(args));
+            };
+        },
+        bind = function(obj, func, args) {
+            if(!$.isObject(obj) || !$.isFunction(func)){
+                return false;
+            }
+            return function () {
+                return func.apply(obj, args || []);
+            };
+        },
+        setFocus = function (ele) {
+            try { return isElement(ele) ? ele.focus() || true : false; } catch (e) { return false; }
         };
 
     $.extend($, {
         doc: doc, head: head, redirect: redirect,
         getLocationPath: getLocationPath,
-        getScriptFilePath: getScriptFilePath,
+        getScriptSelfPath: getScriptSelfPath,
         getFilePath: getFilePath,
         getFileName: getFileName,
         getQueryString: getQueryString,
         isDebug: isDebug,
         isElement: isElement,
         createElement: createElement,
+        getElementStyle: getElementStyle,
         setAttribute: setAttribute,
         setNoCache: setNoCache,
         loadLinkStyle: loadLinkStyle,
         loadJsScript: loadJsScript,
-        stopBubble: stopBubble,
-        addListener: addListener,
-        removeListener: removeListener,
+        cancelBubble: cancelBubble,
+        addEventListener: addEventListener,
+        removeEventListener: removeEventListener,
+        bindEventListener: bindEventListener,
+        bind: bind, 
         setFocus: setFocus
     });
 }(OUI);
@@ -292,9 +316,9 @@ var OUI = function () {
     });
 
     $.extendNative(Array.prototype, {
-        indexOf: function (el) {
+        indexOf: function (ele) {
             for (var i = 0, n = this.length; i < n; i++) {
-                if (this[i] === el) {
+                if (this[i] === ele) {
                     return i;
                 }
             }

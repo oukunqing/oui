@@ -1,10 +1,17 @@
 
+/*
+ @Title: OUI.Pagination.js
+ @Description：分页插件
+ @Author: oukunqing
+ @License：MIT
+*/
+
 !function($) {
     'use strict';
 
     var doc = document,
         head = document.getElementsByTagName('head')[0],
-        thisFilePath = $.getScriptFilePath(),
+        thisFilePath = $.getScriptSelfPath(),
         defaultClassName = 'oui-pagination',
         defaultPositon = 'left',
         defaultType = 'symbol',
@@ -183,7 +190,7 @@
                 obj = objs[0], objVal = objs[1];
             }
             if ($.isUndefined(obj)) { return false; }
-            $.addListener(obj, eventName, function(ev) {
+            $.addEventListener(obj, eventName, function(ev) {
                 //判断是否是键盘按钮事件 keyup keydown keypress 等
                 if (eventName.indexOf('key') >= 0) {
                     var kp = keyPaging(ev, that, this);
@@ -247,7 +254,7 @@
                     setCallback(that, inputs[i], 'keydown', minuend);
                 }
                 //清除输入的非数字字符，只能输入正整数
-                $.addListener(inputs[i], 'keyup', function(ev) {
+                $.addEventListener(inputs[i], 'keyup', function(ev) {
                     this.value = this.value.replace(/[^\d]/, '');
                 });
                 if (isInputer(that, inputs[i])) {
@@ -382,7 +389,7 @@
                     if (i === op.pageIndex) {
                         html.push('<li><a class="link cur">' + num + '</a></li>');
                     } else {
-                        html.push('<li><a class="link num" href="javascript:void(0);" value="' + i + '">' + num + '</a></li>');
+                        html.push('<li><a class="link num" value="' + i + '">' + num + '</a></li>');
                     }
                     c++;
                 }
