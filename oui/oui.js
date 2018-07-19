@@ -670,7 +670,7 @@ var OUI = function () {
 !function ($) {
     'use strict';
 
-    var throwFormatError = function (msg, str, args) {
+    var throwError = function (msg, str, args) {
         try {
             if (!$.isUndefined(str)) { console.log('str:\r\n\t', str, '\r\nargs:\r\n\t', args); } console.trace();
         } catch (e) { }
@@ -724,7 +724,7 @@ var OUI = function () {
                 break;
             case 'D':   //整数
                 if (/([.])/g.test(v)) {
-                    throwFormatError(err[3], str, args);
+                    throwError(err[3], str, args);
                 }
                 v = v.padLeft(n, '0');
                 break;
@@ -791,7 +791,7 @@ var OUI = function () {
                 var nv = parseInt(ss.substr(1), 10), dn = v.toString().split('.'), n = isNaN(nv) ? (f.toUpperCase() === 'D' ? 0 : 2) : nv;
                 v = formatNumberSwitch(v, f, n, dn, err, str, args);
             } else if ((ss.length === 1 && p2.test(ss)) || (ss.length >= 2 && p4.test(ss))) {
-                throwFormatError(err[3], str, args);
+                throwError(err[3], str, args);
             } else if (/([0]+)/g.test(ss)) {
                 var nv = Math.round(v, 10), arv = ss.split(''), arn = nv.toString().split('');
                 v = formatNumberZero(arv, arn);
@@ -813,11 +813,11 @@ var OUI = function () {
                     o = o[ks[i]], v = o;
                 }
                 if ($.isUndefined(o)) {
-                    v = !$.isUndefined(dv) ? dv : throwFormatError(err, s, vals);
+                    v = !$.isUndefined(dv) ? dv : throwError(err, s, vals);
                 }
             }
         } else {
-            throwFormatError(err, str, vals);
+            throwError(err, str, vals);
         }
         return v;
     };
@@ -825,7 +825,7 @@ var OUI = function () {
     if ($.isUndefined(String.prototype.format)) {
         String.prototype.format = function (args) {
             var s = this, vals = [], rst = [], pattern = /({|})/g, ms = s.match(pattern);
-            if (null === ms) {
+            if ($.isNull(ms)) {
                 return s.toString() || s;
             }
             var err = ['输入字符串的格式不正确。', '索引(从零开始)必须大于或等于零，且小于参数列表的大小。',
@@ -833,11 +833,11 @@ var OUI = function () {
 
             if (arguments.length > 1) {
                 for (var i = 0, c = arguments.length; i < c; i++) {
-                    if (arguments[i] !== undefined && arguments[i] !== null) {
+                    if (!$.isNullOrUndefined(arguments[i])) {
                         vals.push(arguments[i]);
                     } else {
                         var er = err[2] + '第' + (i + 1) + '个参数值为：' + arguments[i];
-                        throwFormatError(err, s, args);
+                        throwError(err, s, args);
                     }
                 }
             } else if ($.isArray(args)) {
@@ -846,20 +846,20 @@ var OUI = function () {
                 vals.push(args);
             }
             if (ms.length % 2 !== 0) {
-                throwFormatError(err[0], s, vals);
+                throwError(err[0], s, vals);
             }
             //var matchs = s.match(/({+[-\d]+(:[\D\d]*?)*?}+)|({+([\D]*?|[:\d]*?)}+)|([{]{1,2}[\w]*?)|([\w]*?[}]{1,2})/g);
             var matchs = s.match(/({+[-\d]+(:[\D\d]*?)*?}+)|({+([\D]*?|[:\d]*?)}+)|({+([\w\.\|]*?)}+)|([{]{1,2}[\w]*?)|([\w]*?[}]{1,2})/g);
             if (null === matchs) {
                 return s.toString() || s;
             }
-            var len = vals.length, mc = matchs.length, isObject = typeof vals[0] === 'object', obj = isObject ? vals[0] : {};
+            var len = vals.length, mc = matchs.length, isObject = $.isObject(vals[0]), obj = isObject ? vals[0] : {};
 
             for (var i = 0; i < mc; i++) {
                 var m = matchs[i], mv = m.replace(pattern, ''), p = s.indexOf(m), idx = parseInt(mv, 10);
                 var c = /{/g.test(m) ? m.match(/{/g).length : 0, d = /}/g.test(m) ? m.match(/}/g).length : 0;
                 if ((c + d) % 2 != 0) {
-                    throwFormatError(err[0], s, vals);
+                    throwError(err[0], s, vals);
                 }
                 var m2 = m.replace(/{{/g, '{').replace(/}}/g, '}');
                 var odd = c % 2 != 0 || d % 2 != 0, single = c <= 2 && d <= 2;
@@ -869,15 +869,15 @@ var OUI = function () {
                     if ($.isBoolean(v) && !v) {
                         return false;
                     }
-                    if (/^-\d$/g.test(mv) && odd) { throwFormatError(err[0], s, vals); }
-                    else if (idx >= len) { throwFormatError(err[1], s, vals); }
-                    else if ($.isNullOrUndefined(v)) { throwFormatError(err[2], s, vals); }
+                    if (/^-\d$/g.test(mv) && odd) { throwError(err[0], s, vals); }
+                    else if (idx >= len) { throwError(err[1], s, vals); }
+                    else if ($.isNullOrUndefined(v)) { throwError(err[2], s, vals); }
 
                     rst.push(s.substr(0, p) + (c > 1 || d > 1 ? (c % 2 != 0 || d % 2 != 0 ? m2.replace('{' + idx + '}', v) : m2) : v));
                 } else if (odd) {
                     if (c === 1 && d === 1) {
                         if (!isObject || !single) {
-                            throwFormatError(err[0], s, vals);
+                            throwError(err[0], s, vals);
                         }
                         v = distillObjVal(mv, obj, err[0], s, vals);
                         rst.push(s.substr(0, p) + (c > 1 || d > 1 ? (c % 2 !== 0 || d % 2 !== 0 ? m2.replace('{' + idx + '}', v) : m2) : v));
@@ -886,7 +886,7 @@ var OUI = function () {
                         if (mcs != null && mcs.length > 0) {
                             rst.push(s.substr(0, p) + m2.replace(mcs[0], distillObjVal(mcs[0].replace(/({|})/g, ''), obj, err[0], s)));
                         } else {
-                            throwFormatError(err[0], s, vals);
+                            throwError(err[0], s, vals);
                         }
                     }
                 } else {
@@ -909,6 +909,6 @@ var OUI = function () {
             }
             return s.format(a);
         }
-        throwFormatError((typeof o) + '.format is not a function');
+        throwError((typeof o) + '.format is not a function');
     };
 }(OUI);
