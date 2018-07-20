@@ -74,6 +74,10 @@ var OUI = function () {
                     arr[i][key] < pivot[key] ? left.push(arr[i]) : right.push(arr[i]);
                 }
                 return this.quickSort(left, key).concat(pivot, this.quickSort(right, key));
+            }, 
+            throwError: function(err) {
+                try {console.trace(); console.log(err); } catch (e) { }
+                throw new Error(err);
             }
         };
 
@@ -197,7 +201,17 @@ var OUI = function () {
             }
             return $.isFunction(func) && func(ele), parent.appendChild(ele), ele;
         },
+        createJsScript = function (data, parent, func) {
+            var ele = createElement('script', parent || head, function(ele){
+                ele.innerHTML = data;
+                setAttribute(ele, { type: 'text/javascript', charset: 'utf-8' }, true);
+            });
+            return $.isFunction(func) && func(ele), ele;
+        },
         getElementStyle = function (ele, styleName) {
+            if(!isElement(ele)){
+                return false;
+            }
             var style = ele.currentStyle || document.defaultView.getComputedStyle(ele, null);
             return $.isString(styleName) ? style[styleName] : style;
         },
@@ -240,6 +254,62 @@ var OUI = function () {
 
             return node;
         },
+        removeJsScript = function(id, filePath){
+            if(id){
+                var script = doc.getElementById(id);
+                if (script !== null && script.parentNode) {
+                    return script.parentNode.removeChild(script), true;
+                }
+            } else if(filePath){
+                var arr = doc.getElementsByTagName('script'), len = arr.length;
+                for (var i = 0; i < len; i++) {
+                    var path = arr[i].src.split('?')[0];
+                    if(path === filePath){
+                        return arr[i].parentNode.removeChild(arr[i]), true;
+                    }
+                }
+            }
+            return false;
+        },
+        globalEval = function(data){
+            if(data && $.trim(data)){
+                ( window.execScript || function( data ) {
+                    window['eval'].call( window, data );
+                } )( data );
+            }
+        },
+        parseJSON = function(data){
+            if ( data === null ) {
+                return data;
+            }
+            if ( window.JSON && window.JSON.parse ) {
+                return window.JSON.parse( data );
+            } else if($.isString(data, true)){
+                return  (new Function('return ' + data))();
+            }
+            $.throwError('Invalid JSON: ' + data);
+        },
+        parseXML = function(data){
+            if(!$.isString(data, true)){
+                return null;
+            }
+            try {
+                if (window.DOMParser) {
+                    xml = new DOMParser().parseFromString(data, 'text/xml');
+                } else {
+                    xml = new ActiveXObject('Microsoft.XMLDOM');
+                    xml.async = 'false';
+                    xml.loadXML(data);
+                }
+            } catch (e) {
+                xml = undefined;
+            }        
+            if (!xml || !xml.documentElement || xml.getElementsByTagName('parsererror').length) {
+                $.throwError('Invalid XML: ' + data);
+            }
+            return xml;
+        },
+
         cancelBubble = function (ev) {
             ev = ev || window.event || arguments.callee.caller.arguments[0];
             if (ev.stopPropagation) { ev.stopPropagation(); } else { ev.cancelBubble = true; }
@@ -284,11 +354,16 @@ var OUI = function () {
         isDebug: isDebug,
         isElement: isElement,
         createElement: createElement,
+        createJsScript: createJsScript,
         getElementStyle: getElementStyle,
         setAttribute: setAttribute,
         setNoCache: setNoCache,
         loadLinkStyle: loadLinkStyle,
         loadJsScript: loadJsScript,
+        removeJsScript: removeJsScript,
+        globalEval: globalEval,
+        parseJSON: parseJSON,
+        parseXML: parseXML,
         cancelBubble: cancelBubble,
         addEventListener: addEventListener,
         removeEventListener: removeEventListener,
@@ -297,6 +372,7 @@ var OUI = function () {
         setFocus: setFocus
     });
 }(OUI);
+
 
 // Javascript Native Object
 !function ($) {
@@ -916,4 +992,178 @@ var OUI = function () {
         }
         throwError((typeof o) + '.format is not a function');
     };
+}(OUI);
+
+// Ajax
+!function ($){
+    'use strict';
+
+    function ajax(url, options) {
+        if($.isObject(url)){
+            var tmp = $.isString(options) ? options : '';
+            options = url, options.url = options.url || tmp;
+        } else if($.isString(url)){
+            if(!$.isObject(options)){
+                options = {};
+            }
+            options.url = url;
+        }
+        var o = checkOptions($.extend({
+            async: true,
+            url: '',
+            data: '',
+            type: 'POST',       //GET,POST
+            dataType: 'JSON',   //TEXT, JSON, JSONP, HTML, XML, SCRIPT
+            contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+            jsonp: 'callback',
+            jsonpCallback: '',
+            callback: null,
+            error: null,
+            timeout: 4000,
+            load: false,        //是否加载js文件到html
+            checkException: true,
+            result: ''
+        }, options)), isStatic = false;
+ 
+        if (o.dataType === 'JSONP' && o.jsonp !== false) {
+            return ajaxJSONP(o.url, o.jsonp, o.jsonpCallback, o.callback) || false;
+        }
+ 
+        if (o.async && !$.isFunction(o.callback)) {
+            return false;
+        }
+        /*
+        if (o.dataType === 'HTML' || isStaticFile(o.url)) {
+            //由于大多数WEB服务器不允许静态文件响应POST请求（会返回 405 Method Not Allowed），所以改为GET请求
+            o.type = 'GET';
+            o.url += (/\?/.test(o.url) ? "&" : "?") + new Date().getTime();
+        }
+        */
+        if (o.dataType === 'HTML' || o.dataType === 'SCRIPT') {
+            //由于大多数WEB服务器不允许静态文件响应POST请求（会返回 405 Method Not Allowed），所以改为GET请求
+            if(isStaticFile(o.url)){
+                o.type = 'GET', isStatic = true;;
+            }
+            o.url += (/\?/.test(o.url) ? "&" : "?") + new Date().getTime();
+        }
+ 
+        var xhr = new XmlHttpRequest();
+ 
+        if (o.async) {
+            xhr.timeout = o.timeout;
+        }
+ 
+        xhr.open(o.type, o.url, o.async);
+
+        if (o.type === 'POST') {
+            xhr.setRequestHeader("content-type", o.contentType);
+        }
+
+        xhr.onreadystatechange = function () {
+            if (4 !== xhr.readyState) {
+                return false;
+            }
+            o.result = xhr.responseText;
+            if (200 === xhr.status) {
+                switch (o.dataType) {
+                    //这里调用的不是 $.parseJSON，而是 parseJSON，因为getJSON时需要屏蔽JSON解析错误
+                    case 'JSON': o.result = parseJSON(o.result, o); break;
+                    case 'XML': o.result = $.parseXML(xhr.responseXML); break;
+                    case 'SCRIPT': o.load ? $.createJsScript(o.result) : $.globalEval(o.result); break;
+                }
+                if ($.isFunction(o.callback)) {
+                    o.callback(o.result, xhr.statusText, xhr);
+                }
+
+                if (o.dataType === 'HTML') {
+                    //解析HTML文件中的JS代码并执行
+                    parseHTML(o.result);
+                }
+            } else {
+                $.isFunction(o.error) ? o.error(o.result, xhr.statusText, xhr) : throwError(o.result);
+            }
+            xhr = null;
+        };
+        xhr.send(o.data);
+  
+        if (o.async === false) {
+            return o.result;
+        }
+    }
+
+    function XmlHttpRequest() {
+        return function () {
+            var len = arguments.length;
+            for (var i = 0; i < len; i++) {
+                try { return arguments[i](); } catch (e) { }
+            }
+        }(function () { return new XMLHttpRequest() },
+        function () { return new ActiveXObject('Msxml2.XMLHTTP') },
+        function () { return new ActiveXObject('Microsoft.XMLHTTP') });
+    }
+     
+    var jsonp_idx = 1, checkOptions = function(op){
+        op.async = $.isBoolean(op.async, true);
+        op.type = (op.type||'').toUpperCase();
+        op.dataType = (op.dataType||'').toUpperCase();
+        op.callback = op.callback || op.success;
+        op.timeout = !$.isNumeric(op.timeout) ? 4000 : parseInt(op.timeout, 10);
+
+        return op;
+    }, ajaxJSONP = function (url, jsonp, jsonpCallback, callback) {
+        //if (!jsonpCallback) {
+        //不管有没有指定JSONP回调函数，都自动生成回调函数，然后取出数据给ajax回调函数
+        if (!jsonpCallback || true) {
+            jsonpCallback = 'jsonpCallback_' + new Date().getTime() + '_' + jsonp_idx++;
+ 
+            window[jsonpCallback] = function (result) {
+                $.removeJsScript(jsonpCallback);
+                callback(result);
+            };
+        } 
+        url += (/\?/.test(url) ? "&" : "?") + jsonp + "=" + jsonpCallback;
+ 
+        return $.loadJsScript(url, jsonpCallback);
+    }, isStaticFile = function(url){
+        url = (url || '').split('?')[0];
+        var ext = url.substr(url.lastIndexOf('.') + 1).toLowerCase();
+
+        return /(html|htm|txt|json|js)/ig.test(ext);
+    }, parseHTML = function(html) {
+        var ms = html.match(/<script(.|\n)*?>(.|\n|\r\n)*?<\/script>/ig);
+        if (ms) {
+            for (var i = 0, len = ms.length; i < len; i++) {
+                var m = ms[i].match(/<script(.|\n)*?>((.|\n|\r\n)*)?<\/script>/im);
+                $.globalEval(m[2]);
+            }
+        }
+    }, parseJSON = function (data, op) {
+        try{
+            return $.parseJSON(data);
+        } catch(e){
+            if(!op.checkException){
+                return op.callback = null, '';
+            }
+            $.throwError(e);
+        }
+    };
+ 
+    $.extend($, {
+        ajax: ajax,
+        get: function(url, data, callback){
+            return ajax(url, {dataType: 'TEXT', data: data, callback:callback});
+        },
+        post: function(url, data, callback, type){
+            return ajax(url, {dataType: type || 'TEXT', data: data, callback:callback});
+        },
+        load: function(url, data, callback){
+            return ajax(url, {dataType: 'HTML', data: data, callback:callback, async: $.isFunction(callback) });
+        },
+        getJSON: function(url, data, callback, checkException) {
+            return ajax(url, { dataType: 'JSON', data: data, callback: callback, checkException: checkException || false });
+        },
+        getScript: function(url, callback, load){
+            return ajax(url, { dataType: 'SCRIPT', callback: callback, load: load });
+        }
+    });
 }(OUI);

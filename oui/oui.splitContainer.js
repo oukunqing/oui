@@ -9,6 +9,7 @@
             collapsed: false,
             minSize: 0,
             element: null,
+            content: '',
             width: 0,
             height: 0,
             x: 0,
@@ -75,7 +76,7 @@
         }, options);
 
         op.element = op.parent || op.element;
-        op.element.style.cssText += 'position:relative;overflow:hidden;display:block;';
+        op.element.style.cssText += 'position:relative;overflow:hidden;display:block;padding:0px;box-sizing:border-box;';
 
         op.Panel1 = $.extend(new Panel(options.panel1 || options.Panel1));
         op.Panel2 = $.extend(new Panel(options.panel2 || options.Panel2));
@@ -94,7 +95,7 @@
         initial: function(){
             var that = this;
 
-            if(createPanel.call(this)){
+            if(createPanel.apply(this)){
                 $.addEventListener(this.Splitter.element, 'mousedown', $.bindEventListener(this, start, true));
             }
         },
@@ -114,7 +115,11 @@
     },
     getSize = function(ele){
         var style = $.getElementStyle(ele);
-        var width = parseInt(style['width'], 10), height = parseInt(style['height'], 10);
+        console.log('width: ', style['width'], ele.parentNode.style.width);
+        var width = style['width'].indexOf('%') >= 0 ? ele.clientWidth : parseInt(style['width'], 10), 
+            height = style['height'].indexOf('%') >= 0 ? ele.clientHeight : parseInt(style['height'], 10);
+
+            console.log('width: ', width, ', height: ', height);
         return {width: width, height: height};
     },
     getPosition = function(ele){
@@ -129,11 +134,12 @@
     createPanel = function(){
         var that = this, size = getSize(that.element), p1Show = !that.Panel1.collapsed, p2Show = !that.Panel2.collapsed, w = 0, css = '';
 
+        console.log('size: ', size);
         if(p1Show){
             w = p2Show ? that.Splitter.distance : size.width;            
             that.Panel1.set($.createElement('div', that.element, function(ele){
                 ele.innerHTML = '左边面板';
-                css = 'width:{0}px;height:{1}px;float:left;background:#ccc;'.format(w, size.height);
+                css = 'width:{0}px;height:{1}px;float:left;background:#ccc;overflow:auto;'.format(w, size.height);
                 ele.style.cssText = css;
             }));
         }
@@ -151,7 +157,7 @@
             w = size.width - (p1Show ? that.Splitter.distance + that.Splitter.width : 0);
             that.Panel2.set($.createElement('div', that.element, function(ele){
                 ele.innerHTML = '右边面板';
-                css = 'width:{0}px;height:{1}px;float:right;background:#00f;'.format(w, size.height);
+                css = 'width:{0}px;height:{1}px;float:right;background:#00f;overflow:auto;'.format(w, size.height);
                 ele.style.cssText = css;
             }));
         }
@@ -211,8 +217,6 @@
             $.removeEventListener(window, "blur", this.stop);
         };
     };
-
-
 
     $.SplitContainer = SplitContainer;
 }(OUI);
