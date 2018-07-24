@@ -7,7 +7,79 @@
 */
 
 // OUI
-var OUI = function () {
+!function () {
+    var isWindow = function () {
+        return typeof window !== 'undefined';
+    }, $ = isWindow() ? window.$ : undefined;
+
+    if (typeof $ !== 'undefined' && $.constructor === Function) {
+        window.OUI = $;
+    } else {
+        var slice = Array.prototype.slice,
+            isUndefined = function (o) { return typeof o === 'undefined'; },
+            isObject = function (o) { return o !== null && typeof o === 'object'; },
+            isString = function (s) { return typeof s === 'string'; },
+            isFunction = function (f) { return typeof f === 'function'; },
+            isElement = function (o) {
+                return (
+                    typeof HTMLElement === "object" ? o instanceof HTMLElement : //DOM2
+                        o && isObject(o) && o.nodeType === 1 && isString(o.nodeName)
+                );
+            },
+            isOUI = function (d) {
+                return d instanceof OUI;
+            };
+
+        function OUI(selector, context) {
+            if (!isOUI(this) && typeof selector !== 'undefined') {
+                return new OUI(selector, context);
+            }
+            var self = this, nodes = [];
+            if (selector === undefined) {
+                self.length = 0;
+                return this;
+            }
+
+            if (isElement(selector)) {
+                nodes = [selector];
+            } else {
+                if (isString(context)) {
+                    context = document.querySelector(context);
+                }
+                nodes = slice.call((context || document).querySelectorAll(selector));
+            }
+
+            for (var i = 0; i < nodes.length; i++) {
+                self[i] = nodes[i];
+            }
+            self.length = nodes.length;
+        }
+
+        OUI.fn = OUI.prototype = {
+
+        };
+
+        OUI.extend = OUI.fn.extend = function (destination, source) {
+            if (typeof source === 'undefined') {
+                source = destination;
+                destination = this;
+            }
+            for (var property in source) {
+                destination[property] = source[property];
+            }
+            return destination;
+        };
+
+        if (isWindow()) {
+            window.OUI = window.$ = OUI;
+        } else {
+            global.OUI = global.$ = OUI;
+        }
+    }
+}();
+
+
+!function ($) {
     'use strict';
 
     var version = '1.0.0',
@@ -18,16 +90,21 @@ var OUI = function () {
             var isNum = isNumber(n), isMin = isNumber(min), isMax = isNumber(max);
             return isNum ? (isMin && isMax ? n >= min && n <= max : (isMin ? n >= min : isMax ? n <= max : true)) : false;
         },
-        isFunction = function (f) { return typeof f === 'function' && typeof f.nodeType !== 'number'; },
         isObject = function (o) { return o !== null && typeof o === 'object'; },
         isArray = Array.isArray || function (a) { return Object.prototype.toString.call(a) === '[object Array]'; },
         isBoolean = function (b, dv) {
             var bool = typeof b === 'boolean';
             return typeof dv === 'boolean' ? (bool ? b : dv) : bool;
         },
+        trim = function (s) { return s.replace(/(^[\s]*)|([\s]*$)/g, ''); },
+        isFunction = function (f) { return typeof f === 'function' && typeof f.nodeType !== 'number'; },
         isNumeric = function (o) { return /^[-+]?(\d+)([.][\d]{0,})?$/.test(o); },
         isDecimal = function (o) { return /^[-+]?(\d+)([.][\d]{0,})$/.test(o); },
         isInteger = function (o) { return /^[-+]?(\d+)$/.test(o); },
+        isRegexp = function (o) { return isObject(o) || isFunction(o) ? ('' + o).indexOf('/') == 0 : false; },
+        isNull = function (o) { return o === null; },
+        isNullOrUndefined = function (o) { return isUndefined(o) || isNull(o); },
+        isProperty = function (o, property) { return o.hasOwnProperty(property) && (property in o); },
         toDecimal = function (s, defaultValue, decimalLen) {
             var v = parseFloat(s, 10);
             v = !isNaN(v) && $.isInteger(decimalLen) ? v.round(Math.abs(decimalLen)) : v;
@@ -37,52 +114,112 @@ var OUI = function () {
             var v = parseInt(s, 10);
             return !isNaN(v) ? v : Number(defaultValue) || 0;
         },
-        isNull = function (o) { return o === null; },
-        isProperty = function (o, property) { return o.hasOwnProperty(property) && (property in o); },
-        trim = function (s) { return s.replace(/(^[\s]*)|([\s]*$)/g, ''); },
-        extend = function (destination, source, deepCopy) {
-            if (isObject(destination) && isObject(source)) {
-                for (var property in source) {
-                    destination[property] = source[property];
+        toJsonString = function (o) { return JSON.stringify(o); },
+        toJson = function (s) { return JSON.parse(s); },
+        toEncode = function (s) { return encodeURIComponent(s); },
+        param = function (a, v) {
+            var s = [];
+            if (isString(a)) {
+                if (!isUndefined(v)) {
+                    a = [{ key: a, value: v }];
+                } else {
+                    return a;
                 }
             }
-            return destination;
+            if (isArray(a)) {
+                for (var i = 0, c = a.length; i < c; i++) {
+                    var key = a[i].key || a[i].name, val = a[i].value || a[i].data;
+                    if (isObject(val)) {
+                        val = toJsonString(val);
+                    }
+                    s.push(key + '=' + toEncode(val));
+                }
+            } else if (isObject(a)) {
+                for (var key in a) {
+                    var val = isObject(a[key]) ? toJsonString(a[key]) : a[key];
+                    s.push(key + '=' + toEncode(val));
+                }
+            } else if (!isUndefined(a)) {
+                s.push(a);
+            }
+            return s.join('&');
         },
-        utils = {
-            isUndefined: isUndefined, isString: isString, isNumber: isNumber, isFunction: isFunction,
-            isObject: isObject, isArray: isArray, isBoolean: isBoolean, isNull: isNull,
-            isProperty: isProperty, trim: trim, extend: extend, version: version,
-            isNumeric: isNumeric, isDecimal: isDecimal, isInteger: isInteger, isFloat: isDecimal, isInt: isInteger,
-            isRegexp: function (o) { return isObject(o) || isFunction(o) ? ('' + o).indexOf('/') == 0 : false; },
-            isNullOrUndefined: function (o) { return isUndefined(o) || isNull(o); },
-            isEmpty: function (o) {
-                if (isUndefined(o) || null === o) { return true; }
-                else if (isString(o)) { return '' === trim(o); }
-                else if (isArray(o)) { return 0 === o.length; }
-                else if (isObject(o)) { for (var name in o) { return false; } return true; }
-                return false;
-            },
-            toJsonString: function (o) { return JSON.stringify(o); },
-            toJson: function (s) { return JSON.parse(s); },
-            toEncode: function (s) { return encodeURIComponent(s); },
-            toDecimal: toDecimal, toFloat: toDecimal, checkNumber: checkNumber,
-            toInteger: toInteger, toInt: toInteger,
-            quickSort: function (arr, key) {
-                if (0 === arr.length) { return []; }
-                var left = [], right = [], pivot = arr[0], c = arr.length;
-                for (var i = 1; i < c; i++) {
-                    arr[i][key] < pivot[key] ? left.push(arr[i]) : right.push(arr[i]);
-                }
-                return this.quickSort(left, key).concat(pivot, this.quickSort(right, key));
-            },
-            throwError: function (err) {
-                try { console.trace(); console.log(err); } catch (e) { }
-                throw new Error(err);
+        setQueryString = function (url, data, value) {
+            if (!isString(url)) {
+                return url;
             }
+            return url + (url.indexOf('?') > -1 ? '&' : '?') + (!isUndefined(data) ? param(data, value) : new Date().getTime());
+        },
+        getQueryString = function (url, name) {
+            var str = isString(url) ? url : location.href, params = str.substr(str.indexOf('?')), obj = {};
+            if (params.indexOf('?') >= 0) {
+                var arr = params.substr(1).split('&'), c = arr.length;
+                for (var i = 0; i < c; i++) {
+                    var s = arr[i], pos = s.indexOf('='), key = s.split('=')[0];
+                    if (trim(key)) {
+                        obj[key] = pos > 0 ? unescape(s.substr(pos + 1)) : '';
+                    }
+                }
+            }
+            return !isUndefined(name) ? obj[name] : obj;
+        },
+        isDebug = function (key) {
+            try { return !isUndefined(getQueryString()[key || 'debug']) } catch (e) { return false; }
         };
 
-    return utils;
-}();
+    var counter = 1, debug = isBoolean(isDebug(), true);
+    $.extendNative = $.fn.extendNative = function (destination, source) {
+        if (typeof source === 'undefined') {
+            source = destination;
+            destination = this;
+        }
+        var log = debug, con = constructor, native = isString(con);
+        for (var property in source) {
+            var extend = isUndefined(destination[property]), func = source[property];
+            if (extend) {
+                destination[property] = func;
+            }
+            if (log && isFunction(func) && (native || !extend)) {
+                var s = func.toString(),
+                    declare = s.substr(0, s.indexOf('{')),
+                    code = !extend ? native ? '[native code]' : '[native]' : '';
+                console.log('extend[' + (counter++) + ']:', (con ? con + '.' : '') + property, '=', declare, code);
+            }
+        }
+        return destination;
+    };
+
+    $.extendNative($, {
+        trim: trim, isUndefined: isUndefined, isString: isString, isNumber: isNumber, isFunction: isFunction,
+        isObject: isObject, isArray: isArray, isBoolean: isBoolean, isNull: isNull,
+        isProperty: isProperty, version: version,
+        isNumeric: isNumeric, isDecimal: isDecimal, isInteger: isInteger, isFloat: isDecimal, isInt: isInteger,
+        isRegexp: isRegexp, isNullOrUndefined: isNullOrUndefined,
+        isEmpty: function (o) {
+            if (isUndefined(o) || null === o) { return true; }
+            else if (isString(o)) { return '' === trim(o); }
+            else if (isArray(o)) { return 0 === o.length; }
+            else if (isObject(o)) { for (var name in o) { return false; } return true; }
+            return false;
+        },
+        toDecimal: toDecimal, toFloat: toDecimal, checkNumber: checkNumber,
+        toInteger: toInteger, toInt: toInteger,
+        toJsonString: toJsonString, toJson: toJson, toEncode: toEncode,
+        param: param, setQueryString: setQueryString, getQueryString: getQueryString, isDebug: isDebug,
+        quickSort: function (arr, key) {
+            if (0 === arr.length) { return []; }
+            var left = [], right = [], pivot = arr[0], c = arr.length;
+            for (var i = 1; i < c; i++) {
+                arr[i][key] < pivot[key] ? left.push(arr[i]) : right.push(arr[i]);
+            }
+            return this.quickSort(left, key).concat(pivot, this.quickSort(right, key));
+        },
+        throwError: function (err) {
+            try { console.trace(); console.log(err); } catch (e) { }
+            throw new Error(err);
+        }
+    });
+}(OUI);
 
 // Dictionary
 !function ($) {
@@ -149,58 +286,9 @@ var OUI = function () {
         redirect = function (url) {
             $.isString(url, true) ? location.href = url : null;
         },
-        param = function (a, v) {
-            var s = [];
-            if ($.isString(a)) {
-                if (!$.isUndefined(v)) {
-                    a = [{ key: a, value: v }];
-                } else {
-                    return a;
-                }
-            }
-            if ($.isArray(a)) {
-                for (var i = 0, c = a.length; i < c; i++) {
-                    var key = a[i].key || a[i].name, val = a[i].value || a[i].data;
-                    if ($.isObject(val)) {
-                        val = $.toJsonString(val);
-                    }
-                    s.push(key + '=' + $.toEncode(val));
-                }
-            } else if ($.isObject(a)) {
-                for (var key in a) {
-                    var val = $.isObject(a[key]) ? $.toJsonString(a[key]) : a[key];
-                    s.push(key + '=' + $.toEncode(val));
-                }
-            } else if (!$.isUndefined(a)) {
-                s.push(a);
-            }
-            return s.join('&');
-        },
-        setQueryString = function (url, data, value) {
-            if (!$.isString(url)) {
-                return url;
-            }
-            return url + (url.indexOf('?') > -1 ? '&' : '?') + (!$.isUndefined(data) ? param(data, value) : new Date().getTime());
-        },
-        getQueryString = function (url, name) {
-            var str = $.isString(url) ? url : location.href, params = str.substr(str.indexOf('?')), obj = {};
-            if (params.indexOf('?') >= 0) {
-                var arr = params.substr(1).split('&'), c = arr.length;
-                for (var i = 0; i < c; i++) {
-                    var s = arr[i], pos = s.indexOf('='), key = s.split('=')[0];
-                    if ($.trim(key)) {
-                        obj[key] = pos > 0 ? unescape(s.substr(pos + 1)) : '';
-                    }
-                }
-            }
-            return !$.isUndefined(name) ? obj[name] : obj;
-        },
-        isDebug = function (key) {
-            try { return !$.isUndefined(getQueryString()[key || 'debug']) } catch (e) { return false; }
-        },
-        isElement = function (ele, tagName) {
-            var b = ele === doc || ($.isObject(ele) && $.isNumber(ele.nodeType) && $.isString(ele.tagName));
-            return b && $.isString(tagName) ? ele.tagName === tagName : b;
+        isElement = function (elem, tagName) {
+            var b = elem === doc || ($.isObject(elem) && $.isNumber(elem.nodeType) && $.isString(elem.tagName));
+            return b && $.isString(tagName) ? elem.tagName === tagName : b;
         },
         getLocationPath = function () {
             return location.href.substring(0, location.href.lastIndexOf('/') + 1);
@@ -230,50 +318,50 @@ var OUI = function () {
             return pos >= 0 ? name.substr(pos + 1).toLowerCase() : '';
         },
         createElement = function (nodeName, parent, func) {
-            var ele = doc.createElement(nodeName);
+            var elem = doc.createElement(nodeName);
             if ($.isFunction(parent)) {
                 func = parent, parent = doc.body;
             } else if (!isElement(parent)) {
                 parent = doc.body;
             }
-            return $.isFunction(func) && func(ele), parent.appendChild(ele), ele;
+            return $.isFunction(func) && func(elem), parent.appendChild(elem), elem;
         },
         createJsScript = function (data, parent, func) {
-            var ele = createElement('script', parent || head, function (ele) {
-                ele.innerHTML = data;
-                setAttribute(ele, { type: 'text/javascript', charset: 'utf-8' }, true);
+            var elem = createElement('script', parent || head, function (elem) {
+                elem.innerHTML = data;
+                setAttribute(elem, { type: 'text/javascript', charset: 'utf-8' }, true);
             });
-            return $.isFunction(func) && func(ele), ele;
+            return $.isFunction(func) && func(elem), elem;
         },
-        getElementStyle = function (ele, styleName) {
-            if (!isElement(ele)) {
+        getElementStyle = function (elem, styleName) {
+            if (!isElement(elem)) {
                 return false;
             }
-            var style = ele.currentStyle || document.defaultView.getComputedStyle(ele, null);
+            var style = elem.currentStyle || document.defaultView.getComputedStyle(elem, null);
             return $.isString(styleName) ? style[styleName] : style;
         },
-        setAttribute = function (ele, attributes, exempt) {
-            if (!exempt && (!isElement(ele) || !$.isObject(attributes))) { return false; }
+        setAttribute = function (elem, attributes, exempt) {
+            if (!exempt && (!isElement(elem) || !$.isObject(attributes))) { return false; }
             for (var key in attributes) {
                 var val = attributes[key];
                 if (!$.isNull(val) && !$.isUndefined(val)) {
-                    try { ele.setAttribute(key, val); } catch (er) { console.log('setAttribute: ', er); }
+                    try { elem.setAttribute(key, val); } catch (er) { console.log('setAttribute: ', er); }
                 }
             }
-            return ele;
+            return elem;
         },
         loadLinkStyle = function (path, id) {
             if (!$.isUndefined(id) && doc.getElementById(id)) { return false; }
-            return createElement('link', head, function (ele) {
-                setAttribute(ele, { id: id, type: 'text/css', rel: 'stylesheet', href: setQueryString(path) }, true);
+            return createElement('link', head, function (elem) {
+                setAttribute(elem, { id: id, type: 'text/css', rel: 'stylesheet', href: setQueryString(path) }, true);
             });
         },
         loadJsScript = function (path, id, callback, parent) {
             if ($.isFunction(id) && !$.isFunction(callback)) {
                 callback = id, id = null;
             }
-            var node = createElement('script', parent || head, function (ele) {
-                setAttribute(ele, { id: id, type: 'text/javascript', async: true, src: setQueryString(path), charset: 'utf-8' }, true);
+            var node = createElement('script', parent || head, function (elem) {
+                setAttribute(elem, { id: id, type: 'text/javascript', async: true, src: setQueryString(path), charset: 'utf-8' }, true);
             }), ae = node.attachEvent;
 
             if ($.isFunction(ae) && ae.toString() && ae.toString().indexOf('[native code]') >= 0) {
@@ -347,13 +435,13 @@ var OUI = function () {
             if (ev.stopPropagation) { ev.stopPropagation(); } else { ev.cancelBubble = true; }
             if (ev.preventDefault) { ev.preventDefault(); } else { ev.returnValue = false; }
         },
-        addEventListener = function (ele, ev, func, useCapture) {
-            if (!isElement(ele)) { return false; }
-            ele.addEventListener ? ele.addEventListener(ev, func, useCapture || false) : ele.attachEvent('on' + ev, func);
+        addEventListener = function (elem, ev, func, useCapture) {
+            if (!isElement(elem)) { return false; }
+            elem.addEventListener ? elem.addEventListener(ev, func, useCapture || false) : elem.attachEvent('on' + ev, func);
         },
-        removeEventListener = function (ele, ev, func, useCapture) {
-            if (!isElement(ele)) { return false; }
-            ele.removeEventListener ? ele.removeEventListener(ev, func, useCapture || false) : ele.detachEvent('on' + ev, func);
+        removeEventListener = function (elem, ev, func, useCapture) {
+            if (!isElement(elem)) { return false; }
+            elem.removeEventListener ? elem.removeEventListener(ev, func, useCapture || false) : elem.detachEvent('on' + ev, func);
         },
         bindEventListener = function (obj, func) {
             if (!$.isObject(obj) || !$.isFunction(func)) {
@@ -372,20 +460,17 @@ var OUI = function () {
                 return func.apply(obj, args || []);
             };
         },
-        setFocus = function (ele) {
-            try { return isElement(ele) ? ele.focus() || true : false; } catch (e) { return false; }
+        setFocus = function (elem) {
+            try { return isElement(elem) ? elem.focus() || true : false; } catch (e) { return false; }
         };
 
-    $.extend($, {
-        doc: doc, head: head, redirect: redirect, param: param,
+    $.extendNative($, {
+        doc: doc, head: head, redirect: redirect,
         getLocationPath: getLocationPath,
         getScriptSelfPath: getScriptSelfPath,
         getFilePath: getFilePath,
         getFileName: getFileName,
         getExtension: getExtension,
-        setQueryString: setQueryString,
-        getQueryString: getQueryString,
-        isDebug: isDebug,
         isElement: isElement,
         createElement: createElement,
         createJsScript: createJsScript,
@@ -411,28 +496,10 @@ var OUI = function () {
 !function ($) {
     'use strict';
 
-    var extendCounter = 1, debug = $.isDebug ? $.isDebug() : true;
-    $.extend($, {
-        extendNative: function (destination, source, constructor) {
-            var printLog = debug && $.isString(constructor);
-            for (var property in source) {
-                var isExtend = $.isUndefined(destination[property]), func = source[property];
-                if (isExtend) {
-                    destination[property] = func;
-                }
-                if (printLog && $.isFunction(func)) {
-                    var s = func.toString(), declare = s.substr(0, s.indexOf('{')), native = !isExtend ? '[native code]' : '';
-                    console.log('extend[' + (extendCounter++) + ']:', constructor + '.' + property, '=', declare, native);
-                }
-            }
-            return destination;
-        }
-    });
-
     $.extendNative(Array.prototype, {
-        indexOf: function (ele) {
+        indexOf: function (elem) {
             for (var i = 0, n = this.length; i < n; i++) {
-                if (this[i] === ele) {
+                if (this[i] === elem) {
                     return i;
                 }
             }
@@ -1030,11 +1097,12 @@ var OUI = function () {
     };
 }(OUI);
 
-// Ajax
+// jQuery 
 !function ($) {
     'use strict';
 
     function ajax(url, options) {
+        console.log('ajax-ajax');
         var o = $.extend({
             async: true,
             url: '',
@@ -1084,13 +1152,13 @@ var OUI = function () {
                     case 'XML': o.result = $.parseXML(xhr.responseXML); break;
                     case 'SCRIPT': o.load ? $.createJsScript(o.result) : $.globalEval(o.result); break;
                 }
-                if ($.isFunction(o.callback)) {
-                    o.callback(o.result, xhr.statusText, xhr);
-                }
-
+                console.log('o.dataType: ', o.dataType);
                 if (o.dataType === 'HTML') {
                     //解析HTML文件中的JS代码并执行
                     parseHTML(o.result);
+                }
+                if ($.isFunction(o.callback)) {
+                    o.callback(o.result, xhr.statusText, xhr);
                 }
             } else {
                 $.isFunction(o.error) ? o.error(o.result, xhr.statusText, xhr) : $.throwError(o.result);
@@ -1100,7 +1168,7 @@ var OUI = function () {
 
         xhr.send(o.data);
 
-        if (o.async === false) {
+        if (o.async === false || o.dataType === 'HTML') {
             return o.result;
         }
     }
@@ -1119,16 +1187,17 @@ var OUI = function () {
     var jsonp_idx = 1,
         checkOptions = function (url, o) {
             if ($.isObject(o)) {
-                //url参数格式检测，可以是 字符串 或 字符数组(第1个元素为url) 或 字面量对象(须包含“url”字段)
-                if ($.isArray(url)) {
-                    url = url[0].split('?')[0] + (url[1] ? '?' + url.slice(1).join('&') : '');
-                } else if ($.isObject(url)) {
-                    url = url['url'] || url['Url'] || url['URL'];
-                }
                 o.url = url || o.url;
             } else {
                 o = $.isObject(url) ? url : { url: url };
             }
+            //url参数格式检测，可以是 字符串 或 字符数组(第1个元素为url) 或 字面量对象(须包含“url”字段)
+            if ($.isArray(o.url)) {
+                o.url = (o.url[0] || '').toString().split('?')[0] + (o.url[1] ? '?' + o.url.slice(1).join('&') : '');
+            } else if ($.isObject(o.url)) {
+                o.url = o.url['url'] || o.url['Url'] || o.url['URL'];
+            }
+
             o.async = $.isBoolean(o.async, true);
             o.method = (o.method || o.type || 'GET').toUpperCase();
             o.data = $.param(o.data);
@@ -1164,11 +1233,13 @@ var OUI = function () {
             if (o.dataType === 'HTML' || o.dataType === 'SCRIPT') {
                 return true;
             } else {
+                console.log('isStaticFile: ', o.url);
                 return /(html|htm|txt|json|js)/ig.test($.getExtension(o.url));
             }
         },
         parseHTML = function (html) {
             var ms = html.match(/<script(.|\n)*?>(.|\n|\r\n)*?<\/script>/ig);
+            console.log('ms: ', ms);
             if (ms) {
                 for (var i = 0, len = ms.length; i < len; i++) {
                     var m = ms[i].match(/<script(.|\n)*?>((.|\n|\r\n)*)?<\/script>/im);
@@ -1185,31 +1256,106 @@ var OUI = function () {
                 }
                 $.throwError(e);
             }
+        },
+        build = function (url, data, callback, dataType, method) {
+            console.log('dataType22: ', dataType);
+            if ($.isFunction(data)) {
+                dataType = callback || dataType, callback = data, data = null;
+            }
+            console.log('dataType33: ', dataType);
+            return {
+                url: url, method: method, dataType: dataType, data: data, callback: callback,
+                set: function (data, value) {
+                    if (typeof data === 'object') {
+                        for (var k in data) {
+                            this[k] = data[k];
+                        }
+                    } else {
+                        this[data] = value;
+                    }
+                    return this;
+                }
+            };
         };
 
-    $.extend($, {
-        ajax: ajax, get: function (url, data, callback, type) {
-            if ($.isFunction(data)) {
-                type = callback;
-                callback = data;
-                data = null;
-            }
-            return ajax(url, { method: 'GET', dataType: type || 'TEXT', data: data, callback: callback });
+    $.extendNative($, {
+        ajax: ajax,
+        get: function (url, data, callback, dataType) {
+            return ajax(build(url, data, callback, dataType, 'GET'));
         },
-        post: function (url, data, callback, type) {
-            return ajax(url, { method: 'POST', dataType: type || 'TEXT', data: data, callback: callback });
-        },
-        load: function (url, data, callback) {
-            return ajax(url, { dataType: 'HTML', data: data, callback: callback, async: $.isFunction(callback) });
+        post: function (url, data, callback, dataType) {
+            return ajax(build(url, data, callback, dataType, 'POST'));
         },
         getJSON: function (url, data, callback, checkException) {
-            return ajax(url, { dataType: 'JSON', data: data, callback: callback, checkException: checkException || false });
+            var p = build(url, data, callback, checkException, 'GET');
+            return ajax(p.set({ dataType: 'JSON', checkException: $.isBoolean(p.dataType, false) }));
         },
         getScript: function (url, data, callback, load) {
-            if ($.isFunction(data)) {
-                load = $.isBoolean(callback, false), callback = data, data = null;
+            var p = build(url, data, callback, load, 'GET');
+            return ajax(p.set({ dataType: 'SCRIPT', load: $.isBoolean(p.dataType, false) }));
+        },
+        load: function (url, data, callback, dataType) {
+            var p = build(url, data, callback, dataType, 'GET');
+            if ($.isObject(p.data)) {
+                p.method = 'POST';
             }
-            return ajax(url, { dataType: 'SCRIPT', callback: callback, load: load });
+            return ajax(p.set({ async: $.isFunction(p.callback), dataType: p.dataType || 'HTML' }));
+        }
+    });
+
+    $.fn.extendNative({
+        each: function (func) {
+            for (var i = 0; i < this.length; i++) {
+                func(i, this[i]);
+            }
+            return this;
+        },
+        prop: function (name, value) {
+            var self = this, elem = self[0] || {};
+            if ($.isUndefined(value)) {
+                return elem ? elem[name] : '';
+            } else {
+                return self.each(function (i, obj) { obj[name] = value; }), self;
+            }
+        },
+        html: function (value, attr) {
+            return this.prop(attr || 'innerHTML', value);
+        },
+        val: function (value) {
+            return this.prop('value', value);
+        },
+        attr: function (name, value) {
+            var self = this, elem = self[0] || {};
+            if ($.isUndefined(value)) {
+                return elem.getAttribute ? elem.getAttribute(name) : '';
+            } else {
+                return self.each(function (i, obj) { obj.setAttribute(name, value); }), self;
+            }
+        },
+        removeAttr: function (name) {
+            return this.each(function (i, obj) {
+                obj.removeAttribute(name);
+            });
+        }
+    });
+
+    $.fn.extendNative({
+        load: function (url, data, callback, dataType) {
+            var self = this;
+            if (self.length > 0) {
+                var p = build(url, data, callback, dataType, 'GET'), func = p.callback;
+                $.ajax(p.set({
+                    dataType: p.dataType || 'HTML', method: $.isObject(p.data) ? 'POST' : p.method,
+                    callback: function (data, status, xhr) {
+                        self.html(data);
+
+                        if ($.isFunction(func)) {
+                            self.each(function (data, status) { func(data, status); });
+                        }
+                    }
+                }));
+            }
+            return self;
         }
     });
 }(OUI);
