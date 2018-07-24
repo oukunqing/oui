@@ -191,7 +191,7 @@
                 }
                 setNumber(op, ['dataCount', 'pageIndex']);
             } else {
-                $.extend(op, options);
+                $.extend(op, options || {});
                 //父容器参数字段名称
                 op.element = op.element || op.parent || op.container || op.obj;
                 if (!$.isElement(op.element)) {
@@ -206,7 +206,7 @@
                 if (!texts[op.markType]) {
                     op.markType = defaultType;
                 }
-                op.markText = $.extend(texts[op.markType], options.markText);
+                op.markText = $.extend(texts[op.markType], options.markText || {});
 
                 setNumber(op, ['dataCount', 'pageStart', 'pageSize', 'pageIndex', 'markCount']);
 

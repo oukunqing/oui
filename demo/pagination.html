@@ -22,7 +22,7 @@
 
     var timer = null;
     var p1 = new OUI.Pagination({
-        parent: document.getElementById('p1'),
+        parent: $('#p1')[0],
         dataCount: 1912,
         markCount: 10,
         pageIndex: 0,
@@ -64,6 +64,7 @@
     });
    console.log('p2: ', p2);
 
+    
 
    var p3 = new OUI.Pagination({
         element: document.getElementById('p3'),

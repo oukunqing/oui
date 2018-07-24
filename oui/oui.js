@@ -43,13 +43,16 @@
             if (isElement(selector)) {
                 nodes = [selector];
             } else {
-                if (isString(context)) {
-                    context = document.querySelector(context);
-                }
                 if(selector === document){
                     nodes = [document];
                 } else {
-                    nodes = slice.call((context || document).querySelectorAll(selector));
+                    if (isString(context)) {
+                        context = document.querySelector(context);
+                    }
+                    console.log('selector: ', selector)
+                    if(isString(selector)){
+                        nodes = slice.call((context || document).querySelectorAll(selector));
+                    }
                 }
             }
 
@@ -460,14 +463,6 @@
                 return func.apply(obj, [ev || window.event].concat(args));
             };
         },
-        bind = function (obj, func, args) {
-            if (!$.isObject(obj) || !$.isFunction(func)) {
-                return false;
-            }
-            return function () {
-                return func.apply(obj, args || []);
-            };
-        },
         setFocus = function (elem) {
             try { return isElement(elem) ? elem.focus() || true : false; } catch (e) { return false; }
         };
@@ -494,7 +489,6 @@
         addEventListener: addEventListener,
         removeEventListener: removeEventListener,
         bindEventListener: bindEventListener,
-        bind: bind,
         setFocus: setFocus
     });
 }(OUI);
