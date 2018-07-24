@@ -28,9 +28,9 @@
             },
             isOUI = function (d) {
                 return d instanceof OUI;
-            };
+            }, rootOUI;
 
-        function OUI(selector, context) {
+        var OUI = function (selector, context) {
             if (!isOUI(this) && typeof selector !== 'undefined') {
                 return new OUI(selector, context);
             }
@@ -46,17 +46,25 @@
                 if (isString(context)) {
                     context = document.querySelector(context);
                 }
-                nodes = slice.call((context || document).querySelectorAll(selector));
+                if(selector === document){
+                    nodes = [document];
+                } else {
+                    nodes = slice.call((context || document).querySelectorAll(selector));
+                }
             }
 
             for (var i = 0; i < nodes.length; i++) {
                 self[i] = nodes[i];
             }
             self.length = nodes.length;
-        }
+
+            if(self.length > 1){
+                self.prevObject = rootOUI;
+            }
+        }, rootOUI = new OUI(document);
 
         OUI.fn = OUI.prototype = {
-
+            constructor: OUI
         };
 
         OUI.extend = OUI.fn.extend = function (destination, source) {
@@ -168,7 +176,7 @@
         };
 
     var counter = 1, debug = isBoolean(isDebug(), true);
-    $.extendNative = $.fn.extendNative = function (destination, source) {
+    $.extendNative = $.fn.extendNative = function (destination, source, constructor) {
         if (typeof source === 'undefined') {
             source = destination;
             destination = this;
@@ -353,7 +361,7 @@
         loadLinkStyle = function (path, id) {
             if (!$.isUndefined(id) && doc.getElementById(id)) { return false; }
             return createElement('link', head, function (elem) {
-                setAttribute(elem, { id: id, type: 'text/css', rel: 'stylesheet', href: setQueryString(path) }, true);
+                setAttribute(elem, { id: id, type: 'text/css', rel: 'stylesheet', href: $.setQueryString(path) }, true);
             });
         },
         loadJsScript = function (path, id, callback, parent) {
@@ -361,7 +369,7 @@
                 callback = id, id = null;
             }
             var node = createElement('script', parent || head, function (elem) {
-                setAttribute(elem, { id: id, type: 'text/javascript', async: true, src: setQueryString(path), charset: 'utf-8' }, true);
+                setAttribute(elem, { id: id, type: 'text/javascript', async: true, src: $.setQueryString(path), charset: 'utf-8' }, true);
             }), ae = node.attachEvent;
 
             if ($.isFunction(ae) && ae.toString() && ae.toString().indexOf('[native code]') >= 0) {
@@ -370,7 +378,7 @@
                 node.addEventListener('load', function (ev) { onScriptLoad(ev, path); }, false);
             }
 
-            function onScriptLoad(ev, path) { !isDebug() && head.removeChild(node), onCallback(); }
+            function onScriptLoad(ev, path) { !$.isDebug() && head.removeChild(node), onCallback(); }
             function onCallback() { $.isFunction(callback) && callback(); }
 
             return node;
@@ -1102,7 +1110,6 @@
     'use strict';
 
     function ajax(url, options) {
-        console.log('ajax-ajax');
         var o = $.extend({
             async: true,
             url: '',
@@ -1152,7 +1159,6 @@
                     case 'XML': o.result = $.parseXML(xhr.responseXML); break;
                     case 'SCRIPT': o.load ? $.createJsScript(o.result) : $.globalEval(o.result); break;
                 }
-                console.log('o.dataType: ', o.dataType);
                 if (o.dataType === 'HTML') {
                     //解析HTML文件中的JS代码并执行
                     parseHTML(o.result);
@@ -1224,7 +1230,6 @@
                     $.isFunction(callback) && callback(result);
                 };
             }
-            //url += (/\?/.test(url) ? '&' : '?') + jsonp + '=' + jsonpCallback;
             url = $.setQueryString(url, jsonp, jsonpCallback);
 
             return $.loadJsScript(url, jsonpCallback);
@@ -1233,13 +1238,11 @@
             if (o.dataType === 'HTML' || o.dataType === 'SCRIPT') {
                 return true;
             } else {
-                console.log('isStaticFile: ', o.url);
                 return /(html|htm|txt|json|js)/ig.test($.getExtension(o.url));
             }
         },
         parseHTML = function (html) {
             var ms = html.match(/<script(.|\n)*?>(.|\n|\r\n)*?<\/script>/ig);
-            console.log('ms: ', ms);
             if (ms) {
                 for (var i = 0, len = ms.length; i < len; i++) {
                     var m = ms[i].match(/<script(.|\n)*?>((.|\n|\r\n)*)?<\/script>/im);
@@ -1258,11 +1261,9 @@
             }
         },
         build = function (url, data, callback, dataType, method) {
-            console.log('dataType22: ', dataType);
             if ($.isFunction(data)) {
                 dataType = callback || dataType, callback = data, data = null;
             }
-            console.log('dataType33: ', dataType);
             return {
                 url: url, method: method, dataType: dataType, data: data, callback: callback,
                 set: function (data, value) {
@@ -1300,6 +1301,31 @@
                 p.method = 'POST';
             }
             return ajax(p.set({ async: $.isFunction(p.callback), dataType: p.dataType || 'HTML' }));
+        },
+        each: function( obj, callback ) {
+            var length, i = 0;
+            if ( $.isArrayLike( obj ) ) {
+                length = obj.length;
+                for ( ; i < length; i++ ) {
+                    if ( callback.call( obj[ i ], i, obj[ i ] ) === false ) {
+                        break;
+                    }
+                }
+            } else {
+                for ( i in obj ) {
+                    if ( callback.call( obj[ i ], i, obj[ i ] ) === false ) {
+                        break;
+                    }
+                }
+            }
+            return obj;
+        },
+        merge: function( first, second ) {
+            var len = +second.length, j = 0, i = first.length;
+            for ( ; j < len; j++ ) {
+                first[ i++ ] = second[ j ];
+            }
+            return first.length = i, first;
         }
     });
 
@@ -1309,6 +1335,16 @@
                 func(i, this[i]);
             }
             return this;
+        },
+        pushStack: function( elems ) {
+            var ret = $.merge( new this.constructor(), elems );
+            ret.prevObject = this;
+            return ret;
+        },
+        eq: function(i){
+            var len = this.length,
+                j = +i + ( i < 0 ? len : 0 );
+            return this.pushStack( j >= 0 && j < len ? [ this[ j ] ] : [] );
         },
         prop: function (name, value) {
             var self = this, elem = self[0] || {};
@@ -1327,7 +1363,7 @@
         attr: function (name, value) {
             var self = this, elem = self[0] || {};
             if ($.isUndefined(value)) {
-                return elem.getAttribute ? elem.getAttribute(name) : '';
+                return elem.getAttribute ? elem.getAttribute(name) || undefined : '';
             } else {
                 return self.each(function (i, obj) { obj.setAttribute(name, value); }), self;
             }
