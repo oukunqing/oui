@@ -717,12 +717,12 @@
     $.extendNative(String, {
         compare: function(s1, s2) { return s1.compareTo(s2); }
     }, 'String');
-    /*
-        //Boolean.prototype extend
-        $.extendNative(Boolean.prototype, {
-            toNumber: function () { return Number(this); }
-        }, 'Boolean.prototype');
-    */
+    
+    //Boolean.prototype extend
+    $.extendNative(Boolean.prototype, {
+        toNumber: function () { return Number(this); }
+    }, 'Boolean.prototype');
+    
     //Number.prototype extend
     $.extendNative(Number.prototype, {
         getDecimalLen: function() { return (this.toString().split('.')[1] || '').length; },

@@ -35,11 +35,12 @@
                 console.log('pageIndex: ', pageIndex, ', param: ', param);
             },
             callbackParam: null,            //回调参数
-            useKeyEvent: true,              //是否启用快捷键（回车键/方向键）
+            useKeyEvent: true,              //是否启用快捷键（回车键，方向键 [上下左右或HJKL] ）
             showReload: false,              //是否显示刷新按钮
             position: defaultPositon,       //left|right
             className: defaultClassName,    //默认样式名称，可以修改为外置样式
             skin: defaultSkin,              //样式，若skin=null则不启用内置样式
+            inputWidth: 50,                 //输入框宽度，默认为50px
             debounce: true,                 //是否启用防抖功能（或者值为number，且大于50即为启用）
             debounceTimeout: 256            //抖动时长，单位：毫秒
         }, options, dataCount);
@@ -233,6 +234,11 @@
                     op.debounce = true;
                 }
 
+                op.inputWidth = parseInt(op.inputWidth, 10);
+                if(isNaN(op.inputWidth)){
+                    op.inputWidth = 50;
+                }
+
                 //判断是否显示输入框，若外部参数未指定，则设置为显示
                 if (!op.showList && !$.isBoolean(options.showPageInput)) {
                     op.showPageInput = true;
@@ -274,7 +280,7 @@
             }
             var op = that.options, maxlength = op.pageCount.toString().length, className = showButton ? ' group' : '',
                 input = '<input type="text" class="text ' + className + '" value="' + (op.pageIndex + op.minuend)
-                    + '" maxlength="' + maxlength + '" t="' + t + '"' + '/>';
+                    + '" maxlength="' + maxlength + '" t="' + t + '"' + ' style="width:' + op.inputWidth + 'px;" />';
             arr.push(input);
             if (showButton) {
                 arr.push('<button class="btn group">' + op.markText['jump'] + '</button>');
@@ -298,16 +304,16 @@
             arr.push('<div class="stat ' + getPosition(that, false) + '">' + str.format(datas) + '</div>');
         },
         keyPaging = function(ev, that, obj) {
-            var op = that.options, pageIndex = 0;
-            if (ev.keyCode === 13) {
+            var op = that.options, pageIndex = 0, ec = ev.keyCode;
+            if (ec === 13) {
                 pageIndex = getValue(obj);
-            } else if (ev.keyCode === 38 && op.pageIndex > op.pageStart) {
+            } else if ((ec === 38 || ec === 72) && op.pageIndex > op.pageStart) {
                 pageIndex = op.pageStart + op.minuend;
-            } else if (ev.keyCode === 40 && (op.pageIndex + op.minuend) < op.pageCount) {
+            } else if ((ec === 40 || ec === 76) && (op.pageIndex + op.minuend) < op.pageCount) {
                 pageIndex = op.pageCount;
-            } else if (ev.keyCode === 37 && (op.pageIndex - op.minuend - op.pageStart) >= op.pageStart) {
+            } else if ((ec === 37 || ec === 75) && (op.pageIndex - op.minuend - op.pageStart) >= op.pageStart) {
                 pageIndex = op.pageIndex - 1 + op.minuend;
-            } else if (ev.keyCode === 39 && (op.pageIndex + op.minuend) < op.pageCount) {
+            } else if ((ec === 39 || ec === 74) && (op.pageIndex + op.minuend) < op.pageCount) {
                 pageIndex = op.pageIndex + 1 + op.minuend;
             } else {
                 obj.value = obj.value.replace(/[^\d]/, '');

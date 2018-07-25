@@ -165,13 +165,13 @@ console.log(ts.toDate('yyyy年MM月dd日 HH:mm:ss'));
 
 var num = '123.5'.toNumber();
 console.log(typeof num);
-/*
+
 console.log('true.toNumber(): ', true.toNumber());
 
 console.log('(2 > 1).toNumber(): ', (2 > 1).toNumber());
 
 console.log(typeof 'true'.toNumber());
-*/
+
 console.log('hello'.startWith('h'));
 console.log('hello'.endWith('o'));
 
@@ -278,7 +278,7 @@ $.extend(true, obj, {
     func: function(a, b){
         return a + b;
     },
-    obj: {code: 'asd', type: 12}
+    obj: {code: 'asd', type: null}
 });
 
 console.log(obj);
