@@ -18,7 +18,7 @@
             dataCount: 0,               //总数据条数
             markCount: 10,              //分页数字按钮显示个数，默认为10个
             markType: defaultType,      //标记类型：图标|中文|英文（symbol|chinese|english）
-            markText: null,   //标记文字（上一页 下一页）
+            markText: null,             //标记文字（上一页 下一页）
             showList: true,             //是否显示数字列表，若不显示数字列表，则默认显示输入框
             showInvalid: true,          //是否显示无效的按钮
             showEllipsis: true,         //是否显示省略号(快进)按钮
@@ -31,10 +31,11 @@
             showDataStat: false,        //是否显示数据统计
             showSizeSelect: true,       //是否显示PageSize下拉框
             sizeOptions: [5, 10, 20, 30, 50, 100],      //PageSize下拉框默认选项
-            callback: function(pageIndex, param) {      //回调函数
+            callback: function(pageIndex, param) {      //回调函数模式
                 console.log('pageIndex: ', pageIndex, ', param: ', param);
             },
             callbackParam: null,                    //回调参数
+            url: '',                                //URL模式，必须包含关键字 {0} 或 {pageIndex}，若url可用，则url优先于callback
             useKeyEvent: true,                      //是否启用快捷键（回车键，方向键 [上下左右或HJKL] ）
             useLongPress: true,                     //是否启用长按功能（长按 上一页 下一页）
             longPressTime: defaultLongPressTime,    //长按时长，单位：毫秒
@@ -87,20 +88,19 @@
 
             buildPageSize(op.showSizeSelect, that, html, op.minuend);
 
-
             if (op.pageIndex != min && op.pageCount > 0) {
                 buildLinkText(op.showFirstLast, that, html, op.pageStart, 'first', false, className);
                 //显示省略号快退按钮
                 if (op.showEllipsis && pmSub >= op.pageStart) {
                     quickNum = pmSub > op.pageStart ? pmSub : op.pageStart;
                     buildLinkText(true, that, html, quickNum, 'ellipsis', false, 'ellipsis');
-                } else if(op.alwaysEllipsis){
+                } else if (op.alwaysEllipsis) {
                     buildLinkText(true, that, html, 'PQ', 'ellipsis', true, 'ellipsis');
                 }
                 buildLinkText(true, that, html, op.pageIndex - 1, 'previous', false, className + ' prev');
             } else if (op.showInvalid) {
                 buildLinkText(op.showFirstLast, that, html, 0, 'first', true, className);
-                if(op.alwaysEllipsis){
+                if (op.alwaysEllipsis) {
                     buildLinkText(true, that, html, 'PQ', 'ellipsis', true, 'ellipsis');
                 }
                 buildLinkText(true, that, html, 0, 'previous', true, className);
@@ -135,13 +135,13 @@
                 if (op.showEllipsis && pmSum < op.pageCount) {
                     quickNum = pmSum < pcSub ? pmSum : pcSub;
                     buildLinkText(true, that, html, quickNum, 'ellipsis', false, 'ellipsis');
-                } else if(op.alwaysEllipsis){
+                } else if (op.alwaysEllipsis) {
                     buildLinkText(true, that, html, 'NQ', 'ellipsis', true, 'ellipsis');
                 }
                 buildLinkText(op.showFirstLast, that, html, pcSub, 'last', false, className);
             } else if (op.showInvalid) {
                 buildLinkText(true, that, html, 0, 'next', true, className);
-                if(op.alwaysEllipsis){
+                if (op.alwaysEllipsis) {
                     buildLinkText(true, that, html, 'NQ', 'ellipsis', true, 'ellipsis');
                 }
                 buildLinkText(op.showFirstLast, that, html, 0, 'last', true, false, className);
@@ -165,7 +165,6 @@
         }
     };
 
-
     var thisFilePath = $.getScriptSelfPath(),
         defaultClassName = 'oui-pagination',
         defaultPositon = 'left',
@@ -180,7 +179,7 @@
         defaultLongPressTime = 1024,     //长按最小时长，单位：毫秒
         setNumber = function(op, keys) {
             for (var i in keys) {
-                var key = keys[i], num = op[key];
+                var key = keys[i], num = parseInt(op[key], 10);
                 op[key] = isNaN(num) || num < 0 ? 0 : num;
             }
         },
@@ -222,7 +221,7 @@
                     if ($.isString(op.element)) {
                         op.element = document.getElementById(op.element);
                     } else {
-                        op.element = $.createElement('DIV', function(ele){
+                        op.element = $.createElement('DIV', function(ele) {
                             ele.id = new Date().getTime();
                         });
                     }
@@ -237,21 +236,26 @@
                 if (op.pageSize < minPageSize) {
                     op.pageSize = minPageSize;
                 }
+  
+                //pageUrl中必须包含{0}或{pageIndex}，用于替换pageIndex值
+                if (!$.isString(op.url) || (op.url.indexOf('{0}') < 0 && op.url.indexOf('{pageIndex}') < 0)) {
+                    op.url = '';
+                }
 
                 if ($.isNumber(op.debounce) && op.debounce >= defaultDebounceTime) {
                     op.debounceTime = op.debounce;
                     op.debounce = true;
                 }
 
-                if($.isNumber(op.useLongPress) && op.useLongPress >= defaultLongPressTime){
+                if ($.isNumber(op.useLongPress) && op.useLongPress >= defaultLongPressTime) {
                     op.longPressTime = op.useLongPress;
                     op.useLongPress = true;
-                } else if(op.longPressTime < defaultLongPressTime) {
+                } else if (op.longPressTime < defaultLongPressTime) {
                     op.longPressTime = defaultLongPressTime;
                 }
 
                 op.inputWidth = parseInt(op.inputWidth, 10);
-                if(isNaN(op.inputWidth)){
+                if (isNaN(op.inputWidth)) {
                     op.inputWidth = defaultInputWidth;
                 }
 
@@ -263,14 +267,14 @@
 
             return op;
         },
-        checkPageIndex = function(that, value){
+        checkPageIndex = function(that, value) {
             var op = that.options;
-            if($.isNumeric(value)){
+            if ($.isNumeric(value)) {
                 return (value + op.minuend <= op.pageCount) && (value >= op.pageStart);
             } else {
-                if(op.pageIndex + op.minuend > op.pageCount){
+                if (op.pageIndex + op.minuend > op.pageCount) {
                     op.pageIndex = op.pageCount - op.minuend;
-                } else if(op.pageIndex < op.pageStart){
+                } else if (op.pageIndex < op.pageStart) {
                     op.pageIndex = op.pageStart;
                 }
             }
@@ -370,7 +374,15 @@
             }
             return val;
         },
-        realCallback = function(that, val){
+        pageCallback = function(that, val) {
+            var op = that.options;
+            if ($.isString(op.url, true)) {
+                location.href = op.url.format(op.url.indexOf('{0}') >= 0 ? val : op);
+            } else if ($.isFunction(op.callback)) {
+                op.callback(val, op.callbackParam);
+            }
+        },
+        realCallback = function(that, val) {
             var op = that.options;
             //是否启用防抖功能，抖动频率需大于50毫秒
             if (op.debounce && op.debounceTime >= defaultDebounceTime) {
@@ -379,9 +391,9 @@
                 //防抖
                 if (op.timerDebounce != null) { window.clearTimeout(op.timerDebounce); }
                 //外部回调
-                op.timerDebounce = window.setTimeout(function() { op.callback(val, op.callbackParam); }, op.debounceTime);
+                op.timerDebounce = window.setTimeout(function() { pageCallback(that, val); }, op.debounceTime);
             } else {
-                op.callback(val, op.callbackParam);
+                pageCallback(that, val);
             }
         },
         setCallback = function(that, objs, eventName, minuend, func, isPageSize) {
@@ -407,10 +419,9 @@
                 }
                 if (isPageSize) {
                     //设置PageSize，页码重新设置为起始页码
-                    op.callback(op.pageStart, op.callbackParam);
+                    pageCallback(that, op.pageStart);
                 } else {
-                    val = checkInputValue(op, val - minuend);
-                    realCallback(that, val);
+                    realCallback(that, checkInputValue(op, val - minuend));
                 }
             });
         },
@@ -420,40 +431,40 @@
         getPosition = function(that, isMain) {
             return isMain ? that.options.position : positions[that.options.position] ? 'right' : 'left';
         },
-        longPressPaging = function(that, obj, isStop){
+        longPressPaging = function(that, obj, isStop) {
             var op = that.options;
-            if(isStop){
-                if(op.longPressTimer){ window.clearTimeout(op.longPressTimer); }
-                if(op.longPressTimer2){ window.clearInterval(op.longPressTimer2); }
+            if (isStop) {
+                if (op.timerLongPress) { window.clearTimeout(op.timerLongPress); }
+                if (op.timerLongPress2) { window.clearInterval(op.timerLongPress2); }
                 return false;
             }
-            op.longPressTimer2 = window.setInterval(function(){
+            op.timerLongPress2 = window.setInterval(function() {
                 var val = op.pageIndex, add = obj.className.indexOf('next') >= 0;
                 val += add ? 1 : -1;
 
-                if(!checkPageIndex(that, val)){
-                    if(op.longPressTimer2){ window.clearInterval(op.longPressTimer2); }
+                if (!checkPageIndex(that, val)) {
+                    if (op.timerLongPress2) { window.clearInterval(op.timerLongPress2); }
                     return false;
                 }
                 setValue(obj, val);
                 realCallback(that, val);
-            }, 50);            
+            }, 50);
         },
         createEvent = function(that, minuend) {
             var op = that.options, links = op.element.getElementsByTagName('A'), c = links.length;
             for (var i = 0; i < c; i++) {
                 var a = links[i];
-                if(op.useLongPress && (a.className.indexOf('prev') >= 0 || a.className.indexOf('next') >= 0)){
-                    $.addEventListener(a, 'mousedown', function(){
+                if (op.useLongPress && (a.className.indexOf('prev') >= 0 || a.className.indexOf('next') >= 0)) {
+                    $.addEventListener(a, 'mousedown', function() {
                         var obj = this;
-                        op.longPressTimer = window.setTimeout(function(){
+                        op.timerLongPress = window.setTimeout(function() {
                             longPressPaging(that, obj, false);
                         }, op.longPressTime);
                     });
-                    $.addEventListener(op.element, 'mouseup', function(){
+                    $.addEventListener(op.element, 'mouseup', function() {
                         longPressPaging(that, null, true);
                     });
-                    $.addEventListener(op.element, 'mouseout', function(){
+                    $.addEventListener(op.element, 'mouseout', function() {
                         longPressPaging(that, null, true);
                     });
                 }
@@ -491,8 +502,8 @@
         getValue = function(obj) {
             return parseInt(obj.value || obj.getAttribute('value'), 10);
         },
-        setValue = function(obj, value){
-            if(obj.tagName === 'INPUT'){
+        setValue = function(obj, value) {
+            if (obj.tagName === 'INPUT') {
                 obj.value = value;
             } else {
                 obj.setAttribute('value', value);
