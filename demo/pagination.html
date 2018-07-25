@@ -27,7 +27,7 @@
     var p1 = new OUI.Pagination({
         parent: $('#p1')[0],
         dataCount: 11912,
-        markCount: 10,
+        markCount: 12,
         pageIndex: pageIndex,
         pageStart: 1,
         pageSize: 12,
@@ -36,7 +36,7 @@
         showList: true,
         skin: 'red',
         markType: 'chinese',
-        url: '?pageIndex={0}&type=2&pid=32',
+        //url: '?pageIndex={0}&type=2&pid=32',
         //sizeOptions: [10, 20, 30],
         callback: function(pageIndex, param){
             console.log('p1-callback: ', pageIndex, ', param: ', param);

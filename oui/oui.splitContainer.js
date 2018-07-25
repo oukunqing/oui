@@ -78,7 +78,6 @@
             Child: null
         }, options || {});
 
-        op.element = op.parent || op.element;
         op.element.style.cssText += 'position:relative;overflow:hidden;display:block;padding:0px;box-sizing:border-box;';
 
         $.extend(op, {Panel1 : new Panel(options.panel1 || options.Panel1)} );
@@ -87,6 +86,9 @@
 
         $.extend(this, op);
 
+        if(op.parent){
+            op.parent.setChild(this);
+        }
         this.move = $.bindEventListener(this, move);
         this.stop = bind(this, stop);
         this.initial();
@@ -98,6 +100,7 @@
         initial: function(resize){
             if(resize){
                 console.log('resize: ', this.id,  new Date().getTime());
+                this.resize();
             } else if(createPanel.apply(this)){
                 $.addEventListener(this.Splitter.element, 'mousedown', $.bindEventListener(this, start, true));
             }
@@ -110,12 +113,14 @@
                 return setStyle(this.element, args), this;
             }
         },
-        resize: function(){
+        resize: function(isChild){
+            if(!isChild){
                 createPanel.call(this, true);
+            }
 
-                if(this.Child){
-                    this.Child.resize();
-                }
+            if(this.Child){
+                this.Child.resize();
+            }
         },
         setChild: function(obj){
             this.Child = obj;
@@ -241,6 +246,7 @@
             this.Panel2.size({height: size.height - y - this.Splitter.height - 2});
             this.Panel1.size({height: y});
         }
+        this.resize(true);
     },
     stop= function(){
         console.log('stop:stop:')

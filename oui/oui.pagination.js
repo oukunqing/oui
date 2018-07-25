@@ -38,7 +38,8 @@
             url: '',                                //URL模式，必须包含关键字 {0} 或 {pageIndex}，若url可用，则url优先于callback
             useKeyEvent: true,                      //是否启用快捷键（回车键，方向键 [上下左右或HJKL] ）
             useLongPress: true,                     //是否启用长按功能（长按 上一页 下一页）
-            longPressTime: defaultLongPressTime,    //长按时长，单位：毫秒
+            longPressTime: defaultLongPressTime,    //长按生效时长（长按多少毫秒启动长按功能），单位：毫秒
+            longPressInterval: defaultLongPressInterval,    //长按分页切换频率，单位：毫秒
             showReload: false,                      //是否显示刷新按钮
             position: defaultPositon,               //left|right
             className: defaultClassName,            //默认样式名称，可以修改为外置样式
@@ -97,7 +98,7 @@
                 } else if (op.alwaysEllipsis) {
                     buildLinkText(true, that, html, 'PQ', 'ellipsis', true, 'ellipsis');
                 }
-                buildLinkText(true, that, html, op.pageIndex - 1, 'previous', false, className + ' prev');
+                buildLinkText(true, that, html, op.pageIndex - 1, 'previous', false, className);
             } else if (op.showInvalid) {
                 buildLinkText(op.showFirstLast, that, html, 0, 'first', true, className);
                 if (op.alwaysEllipsis) {
@@ -176,7 +177,9 @@
         minPageSize = 1,                //pageSize最小值
         defaultInputWidth = 50,         //输入框默认宽度，单位px
         defaultDebounceTime = 50,       //防抖最小时长，单位：毫秒
-        defaultLongPressTime = 1024,     //长按最小时长，单位：毫秒
+        defaultLongPressTime = 1024,    //长按最小时长，单位：毫秒
+        defaultLongPressInterval = 50,          //长按分页间隔，单位：毫秒
+        minLongPressInterval = 20,              //长按分页最小间隔，单位：毫秒
         setNumber = function(op, keys) {
             for (var i in keys) {
                 var key = keys[i], num = parseInt(op[key], 10);
@@ -252,6 +255,10 @@
                     op.useLongPress = true;
                 } else if (op.longPressTime < defaultLongPressTime) {
                     op.longPressTime = defaultLongPressTime;
+                }
+
+                if(!$.isNumber(op.longPressInterval) || op.longPressInterval < minLongPressInterval){
+                    op.longPressInterval = defaultLongPressInterval;
                 }
 
                 op.inputWidth = parseInt(op.inputWidth, 10);
@@ -448,7 +455,7 @@
                 }
                 setValue(obj, val);
                 realCallback(that, val);
-            }, 50);
+            }, op.longPressInterval);
         },
         createEvent = function(that, minuend) {
             var op = that.options, links = op.element.getElementsByTagName('A'), c = links.length;

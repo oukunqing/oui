@@ -18,9 +18,6 @@
 </body>
 </html>
 <script type="text/javascript">
-    window.onresize = function(){
-        console.log('wh: ', document.body.clientWidth, document.body.clientHeight);
-    };
     var sc = new OUI.SplitContainer({
         element: document.getElementById('divBox'),
         splitter: {distance: 235, fixed: false},
@@ -28,5 +25,28 @@
         panel2: {collapsed: false, minSize:300, background:'#ff0'}
     });
 
+    console.log('sc: ', sc);
+
+    var sc1 = new OUI.SplitContainer({
+        element: sc.Panel2.element,
+        parent: sc,
+        splitter: {distance: 235, fixed: false},
+        panel1: {collapsed: false, minSize:80, background:'#00f'},
+        panel2: {collapsed: false, minSize:100, background:'#008000'}
+    });
+
+
+    var sc2 = new OUI.SplitContainer({
+        element: sc1.Panel2.element,
+        parent: sc1,
+        splitter: {distance: 200, fixed: false},
+        panel1: {collapsed: false, minSize:80, background:'#005eac'},
+        panel2: {collapsed: false, minSize:100, background:'#ff0'}
+    });
+
+    window.onresize = function(){
+        console.log('wh: ', document.body.clientWidth, document.body.clientHeight);
+        sc.resize();
+    };
 
 </script>
