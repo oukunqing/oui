@@ -27,8 +27,8 @@
         parent: $('#p1')[0],
         dataCount: 1912,
         markCount: 10,
-        pageIndex: 0,
-        pageStart: 0,
+        pageIndex: 1,
+        pageStart: 1,
         pageSize: 12,
         showPageInput: true,
         showPageJump: true,
@@ -47,6 +47,9 @@
             id: 123, prompt: '这是回调参数'
         }
     });
+
+    p1.paging(5555);
+
    console.log('p1: ', p1);
    var p2 = new OUI.Pagination({
         element: document.getElementById('p2'),
@@ -128,7 +131,7 @@
         showList: true,
         position: 'left',
         markType: 'en',
-        skin: 'orange',
+        skin: 'gray',
         callback: function(pageIndex){
             console.log('p6-callback: ', pageIndex);
 

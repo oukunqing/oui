@@ -61,6 +61,10 @@
                 pageCount: Math.ceil(that.options.dataCount / that.options.pageSize),
                 minuend: Math.abs(that.options.pageStart - 1)
             });
+
+            //检测pageIndex是否在pageCount范围内
+            checkPageIndex(that);
+
             var mi = parseInt(op.markCount / 2, 10),
                 mc = Math.ceil(op.markCount / 2),
                 minMax = getMinMax(that),
@@ -80,6 +84,7 @@
             buildDataCount(op.showDataCount, that, html, op.markText['dataCount'], op.dataCount);
 
             buildPageSize(op.showSizeSelect, that, html, op.minuend);
+
 
             if (op.pageIndex != min && op.pageCount > 0) {
                 buildLinkText(op.showFirstLast, that, html, op.pageStart, 'first', false, className);
@@ -169,10 +174,8 @@
         },
         setNumber = function(op, keys) {
             for (var i in keys) {
-                var key = parseInt(keys[i], 10);
-                if (isNaN(key) || op[key] < 0) {
-                    op[key] = 0;
-                }
+                var key = keys[i], num = op[key];
+                op[key] = isNaN(num) || num < 0 ? 0 : num;
             }
         },
         setOptions = function(op, options, dataCount) {
@@ -247,6 +250,14 @@
 
             return op;
         },
+        checkPageIndex = function(that){
+            var op = that.options;
+            if(op.pageIndex + op.minuend > op.pageCount){
+                op.pageIndex = op.pageCount - op.minuend;
+            } else if(op.pageIndex < op.pageStart){
+                op.pageIndex = op.pageStart;
+            }
+        },
         getMinMax = function(that) {
             var op = that.options, min = op.pageStart, max = 0;
             if (op.pageCount <= op.markCount) {
@@ -263,45 +274,45 @@
             return [min, max];
         },
         buildLinkText = function(enabled, that, arr, pageIndex, key, noLink, className) {
-            if (!enabled) {
-                return false;
+            if (enabled) {
+                var text = that.options.markText[key];
+                if (noLink) {
+                    arr.push(['<li>', '<a class="none ' + (className || '') + '">', text, '</a>', '</li>'].join(''));
+                } else {
+                    arr.push(['<li>', '<a class="link ' + (className || '') + '" value="' + pageIndex + '">', text, '</a>', '</li>'].join(''));
+                }
             }
-            var text = that.options.markText[key];
-            if (noLink) {
-                arr.push(['<li>', '<a class="none ' + (className || '') + '">', text, '</a>', '</li>'].join(''));
-            } else {
-                arr.push(['<li>', '<a class="link ' + (className || '') + '" value="' + pageIndex + '">', text, '</a>', '</li>'].join(''));
-            }
+            return that;
         },
         // 参数 t 用来指示当前获取焦点是哪个输入框
         buildPageInput = function(enabled, that, arr, showButton, t) {
-            if (!enabled) {
-                return false;
+            if (enabled) {
+                var op = that.options, maxlength = op.pageCount.toString().length, className = showButton ? ' group' : '',
+                    input = '<input type="text" class="text ' + className + '" value="' + (op.pageIndex + op.minuend)
+                        + '" maxlength="' + maxlength + '" t="' + t + '"' + ' style="width:' + op.inputWidth + 'px;" />';
+                arr.push(input);
+                if (showButton) {
+                    arr.push('<button class="btn group">' + op.markText['jump'] + '</button>');
+                }
             }
-            var op = that.options, maxlength = op.pageCount.toString().length, className = showButton ? ' group' : '',
-                input = '<input type="text" class="text ' + className + '" value="' + (op.pageIndex + op.minuend)
-                    + '" maxlength="' + maxlength + '" t="' + t + '"' + ' style="width:' + op.inputWidth + 'px;" />';
-            arr.push(input);
-            if (showButton) {
-                arr.push('<button class="btn group">' + op.markText['jump'] + '</button>');
-            }
+            return that;
         },
         buildDataCount = function(enabled, that, arr, text, datas) {
-            if (!enabled) {
-                return false;
+            if (enabled) {
+                arr.push('<span class="label">' + (text || '{0}').format(datas) + '</span>');
             }
-            arr.push('<span class="label">' + (text || '{0}').format(datas) + '</span>');
+            return that;
         },
         buildDataStat = function(enabled, that, arr, text) {
-            if (!enabled) {
-                return false;
+            if (enabled) {
+                var op = that.options, str = text || '{0}', datas = [0, 0, 0];
+                if (op.dataCount > 0) {
+                    var min = (op.pageIndex - op.pageStart) * op.pageSize, max = min + op.pageSize;
+                    datas = [min + 1, max < op.dataCount ? max : op.dataCount, op.dataCount];
+                }
+                arr.push('<div class="stat ' + getPosition(that, false) + '">' + str.format(datas) + '</div>');
             }
-            var op = that.options, str = text || '{0}', datas = [0, 0, 0];
-            if (op.dataCount > 0) {
-                var min = (op.pageIndex - op.pageStart) * op.pageSize, max = min + op.pageSize;
-                datas = [min + 1, max < op.dataCount ? max : op.dataCount, op.dataCount];
-            }
-            arr.push('<div class="stat ' + getPosition(that, false) + '">' + str.format(datas) + '</div>');
+            return that;
         },
         keyPaging = function(ev, that, obj) {
             var op = that.options, pageIndex = 0, ec = ev.keyCode;
@@ -426,29 +437,29 @@
             return parseInt(obj.value || obj.getAttribute('value'), 10);
         },
         buildPageSize = function(enabled, that, arr, minuend) {
-            if (!enabled) {
-                return false;
-            }
-            var op = that.options, html = ['<select class="select">'], selected = false;
-            if ($.isArray(op.sizeOptions)) {
-                for (var i in op.sizeOptions) {
-                    var dr = op.sizeOptions[i];
-                    if ($.isInteger(dr)) {
-                        html.push('<option value="' + dr + '">' + dr + '</option>');
-                    } else if ($.isArray(dr)) {
-                        if (!selected) {
-                            selected = parseInt(dr[0], 10) === op.pageSize;
+            if (enabled) {
+                var op = that.options, html = ['<select class="select">'], selected = false;
+                if ($.isArray(op.sizeOptions)) {
+                    for (var i in op.sizeOptions) {
+                        var dr = op.sizeOptions[i];
+                        if ($.isInteger(dr)) {
+                            html.push('<option value="' + dr + '">' + dr + '</option>');
+                        } else if ($.isArray(dr)) {
+                            if (!selected) {
+                                selected = parseInt(dr[0], 10) === op.pageSize;
+                            }
+                            html.push('<option value="' + dr[0] + '">' + (dr[1] || dr[0]) + '</option>');
                         }
-                        html.push('<option value="' + dr[0] + '">' + (dr[1] || dr[0]) + '</option>');
                     }
                 }
-            }
-            if (!selected && op.sizeOptions.indexOf(op.pageSize) < 0) {
-                html.push('<option value="' + op.pageSize + '">' + op.pageSize + '</option>');
-            }
-            html.push('</select>');
+                if (!selected && op.sizeOptions.indexOf(op.pageSize) < 0) {
+                    html.push('<option value="' + op.pageSize + '">' + op.pageSize + '</option>');
+                }
+                html.push('</select>');
 
-            arr.push(html.join(''));
+                arr.push(html.join(''));
+            }
+            return that;
         };
 
     $.Pagination = Pagination;

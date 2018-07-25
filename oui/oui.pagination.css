@@ -176,3 +176,10 @@
 .oui-pagination .black a.cur { background: #000; }
 .oui-pagination .black button.btn { background: #000; border-color: #000; }
 
+.oui-pagination .gray { }
+.oui-pagination .gray a.link { border: solid 1px #ddd; }
+.oui-pagination .gray a.link:hover { background: #ddd; }
+.oui-pagination .gray a.cur { background: #ddd;}
+.oui-pagination .gray button.btn { background: #ddd; border-color: #ddd; }
+
+
