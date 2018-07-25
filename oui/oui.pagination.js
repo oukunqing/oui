@@ -34,15 +34,17 @@
             callback: function(pageIndex, param) {      //回调函数
                 console.log('pageIndex: ', pageIndex, ', param: ', param);
             },
-            callbackParam: null,            //回调参数
-            useKeyEvent: true,              //是否启用快捷键（回车键，方向键 [上下左右或HJKL] ）
-            showReload: false,              //是否显示刷新按钮
-            position: defaultPositon,       //left|right
-            className: defaultClassName,    //默认样式名称，可以修改为外置样式
-            skin: defaultSkin,              //样式，若skin=null则不启用内置样式
-            inputWidth: 50,                 //输入框宽度，默认为50px
-            debounce: true,                 //是否启用防抖功能（或者值为number，且大于50即为启用）
-            debounceTimeout: 256            //抖动时长，单位：毫秒
+            callbackParam: null,                    //回调参数
+            useKeyEvent: true,                      //是否启用快捷键（回车键，方向键 [上下左右或HJKL] ）
+            useLongPress: true,                     //是否启用长按功能（长按 上一页 下一页）
+            longPressTime: defaultLongPressTime,    //长按时长，单位：毫秒
+            showReload: false,                      //是否显示刷新按钮
+            position: defaultPositon,               //left|right
+            className: defaultClassName,            //默认样式名称，可以修改为外置样式
+            skin: defaultSkin,                      //样式，若skin=null则不启用内置样式
+            inputWidth: defaultInputWidth,          //输入框宽度，默认为50px
+            debounce: true,                         //是否启用防抖功能（或者值为number，且大于50即为启用）
+            debounceTime: defaultDebounceTime       //抖动时长，单位：毫秒
         }, options, dataCount);
 
         if (this.options.className === defaultClassName) {
@@ -74,7 +76,7 @@
                 pmSub = op.pageIndex - op.markCount,
                 pcSub = op.pageCount - op.minuend,
                 pmSum = op.pageIndex + op.markCount,
-                className = op.markType === defaultType ? 'symbol' : 'text',
+                className = op.markType === defaultType ? 'text symbol' : 'text',
                 html = [
                     '<div class="' + getClassName(that) + '">',
                     '<div class="' + op.skin + ' ' + getPosition(that, true) + '">',
@@ -95,7 +97,7 @@
                 } else if(op.alwaysEllipsis){
                     buildLinkText(true, that, html, 'PQ', 'ellipsis', true, 'ellipsis');
                 }
-                buildLinkText(true, that, html, op.pageIndex - 1, 'previous', false, className);
+                buildLinkText(true, that, html, op.pageIndex - 1, 'previous', false, className + ' prev');
             } else if (op.showInvalid) {
                 buildLinkText(op.showFirstLast, that, html, 0, 'first', true, className);
                 if(op.alwaysEllipsis){
@@ -172,6 +174,10 @@
         positions = {
             left: 1, right: 0
         },
+        minPageSize = 1,                //pageSize最小值
+        defaultInputWidth = 50,         //输入框默认宽度，单位px
+        defaultDebounceTime = 50,       //防抖最小时长，单位：毫秒
+        defaultLongPressTime = 1024,     //长按最小时长，单位：毫秒
         setNumber = function(op, keys) {
             for (var i in keys) {
                 var key = keys[i], num = op[key];
@@ -228,18 +234,25 @@
 
                 setNumber(op, ['dataCount', 'pageStart', 'pageSize', 'pageIndex', 'markCount']);
 
-                if (op.pageSize < 1) {
-                    op.pageSize = 1;
+                if (op.pageSize < minPageSize) {
+                    op.pageSize = minPageSize;
                 }
 
-                if ($.isNumber(op.debounce) && op.debounce >= 50) {
-                    op.debounceTimeout = op.debounce;
+                if ($.isNumber(op.debounce) && op.debounce >= defaultDebounceTime) {
+                    op.debounceTime = op.debounce;
                     op.debounce = true;
+                }
+
+                if($.isNumber(op.useLongPress) && op.useLongPress >= defaultLongPressTime){
+                    op.longPressTime = op.useLongPress;
+                    op.useLongPress = true;
+                } else if(op.longPressTime < defaultLongPressTime) {
+                    op.longPressTime = defaultLongPressTime;
                 }
 
                 op.inputWidth = parseInt(op.inputWidth, 10);
                 if(isNaN(op.inputWidth)){
-                    op.inputWidth = 50;
+                    op.inputWidth = defaultInputWidth;
                 }
 
                 //判断是否显示输入框，若外部参数未指定，则设置为显示
@@ -250,12 +263,16 @@
 
             return op;
         },
-        checkPageIndex = function(that){
+        checkPageIndex = function(that, value){
             var op = that.options;
-            if(op.pageIndex + op.minuend > op.pageCount){
-                op.pageIndex = op.pageCount - op.minuend;
-            } else if(op.pageIndex < op.pageStart){
-                op.pageIndex = op.pageStart;
+            if($.isNumeric(value)){
+                return (value + op.minuend <= op.pageCount) && (value >= op.pageStart);
+            } else {
+                if(op.pageIndex + op.minuend > op.pageCount){
+                    op.pageIndex = op.pageCount - op.minuend;
+                } else if(op.pageIndex < op.pageStart){
+                    op.pageIndex = op.pageStart;
+                }
             }
         },
         getMinMax = function(that) {
@@ -273,13 +290,13 @@
             }
             return [min, max];
         },
-        buildLinkText = function(enabled, that, arr, pageIndex, key, noLink, className) {
+        buildLinkText = function(enabled, that, arr, pageIndex, textKey, noLink, className) {
             if (enabled) {
-                var text = that.options.markText[key];
+                var text = that.options.markText[textKey], css = className + (className === textKey ? '' : ' ' + textKey);
                 if (noLink) {
-                    arr.push(['<li>', '<a class="none ' + (className || '') + '">', text, '</a>', '</li>'].join(''));
+                    arr.push(['<li>', '<a class="none ' + (css || '') + '">', text, '</a>', '</li>'].join(''));
                 } else {
-                    arr.push(['<li>', '<a class="link ' + (className || '') + '" value="' + pageIndex + '">', text, '</a>', '</li>'].join(''));
+                    arr.push(['<li>', '<a class="link ' + (css || '') + '" value="' + pageIndex + '">', text, '</a>', '</li>'].join(''));
                 }
             }
             return that;
@@ -353,6 +370,20 @@
             }
             return val;
         },
+        realCallback = function(that, val){
+            var op = that.options;
+            //是否启用防抖功能，抖动频率需大于50毫秒
+            if (op.debounce && op.debounceTime >= defaultDebounceTime) {
+                //内部分页，显示分页效果
+                that.paging(val);
+                //防抖
+                if (op.timerDebounce != null) { window.clearTimeout(op.timerDebounce); }
+                //外部回调
+                op.timerDebounce = window.setTimeout(function() { op.callback(val, op.callbackParam); }, op.debounceTime);
+            } else {
+                op.callback(val, op.callbackParam);
+            }
+        },
         setCallback = function(that, objs, eventName, minuend, func, isPageSize) {
             var op = that.options, obj = objs, objVal = null, val = 0;
             if ($.isArray(objs)) {
@@ -379,17 +410,7 @@
                     op.callback(op.pageStart, op.callbackParam);
                 } else {
                     val = checkInputValue(op, val - minuend);
-                    //是否启用防抖功能，抖动频率需大于50毫秒
-                    if (op.debounce && op.debounceTimeout > 50) {
-                        //内部分页，显示分页效果
-                        that.paging(val);
-                        //防抖
-                        if (op.timerDebounce != null) { window.clearTimeout(op.timerDebounce); }
-                        //外部回调
-                        op.timerDebounce = window.setTimeout(function() { op.callback(val, op.callbackParam); }, op.debounceTimeout);
-                    } else {
-                        op.callback(val, op.callbackParam);
-                    }
+                    realCallback(that, val);
                 }
             });
         },
@@ -399,10 +420,44 @@
         getPosition = function(that, isMain) {
             return isMain ? that.options.position : positions[that.options.position] ? 'right' : 'left';
         },
+        longPressPaging = function(that, obj, isStop){
+            var op = that.options;
+            if(isStop){
+                if(op.longPressTimer){ window.clearTimeout(op.longPressTimer); }
+                if(op.longPressTimer2){ window.clearInterval(op.longPressTimer2); }
+                return false;
+            }
+            op.longPressTimer2 = window.setInterval(function(){
+                var val = op.pageIndex, add = obj.className.indexOf('next') >= 0;
+                val += add ? 1 : -1;
+
+                if(!checkPageIndex(that, val)){
+                    if(op.longPressTimer2){ window.clearInterval(op.longPressTimer2); }
+                    return false;
+                }
+                setValue(obj, val);
+                realCallback(that, val);
+            }, 50);            
+        },
         createEvent = function(that, minuend) {
             var op = that.options, links = op.element.getElementsByTagName('A'), c = links.length;
             for (var i = 0; i < c; i++) {
-                setCallback(that, links[i], 'click', 0);
+                var a = links[i];
+                if(op.useLongPress && (a.className.indexOf('prev') >= 0 || a.className.indexOf('next') >= 0)){
+                    $.addEventListener(a, 'mousedown', function(){
+                        var obj = this;
+                        op.longPressTimer = window.setTimeout(function(){
+                            longPressPaging(that, obj, false);
+                        }, op.longPressTime);
+                    });
+                    $.addEventListener(op.element, 'mouseup', function(){
+                        longPressPaging(that, null, true);
+                    });
+                    $.addEventListener(op.element, 'mouseout', function(){
+                        longPressPaging(that, null, true);
+                    });
+                }
+                setCallback(that, a, 'click', 0);
             }
 
             var select = op.element.getElementsByTagName('Select')[0];
@@ -435,6 +490,13 @@
         },
         getValue = function(obj) {
             return parseInt(obj.value || obj.getAttribute('value'), 10);
+        },
+        setValue = function(obj, value){
+            if(obj.tagName === 'INPUT'){
+                obj.value = value;
+            } else {
+                obj.setAttribute('value', value);
+            }
         },
         buildPageSize = function(enabled, that, arr, minuend) {
             if (enabled) {

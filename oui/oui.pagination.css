@@ -74,15 +74,6 @@
 
 }
 
-.oui-pagination a.symbol { font-size: 14px;
-    font-family: Arial; color: #000; padding: 0 8px;
-}
-
-/*非链接文字默认颜色为灰色*/
-.oui-pagination a.none {
-    color: #999; border: solid 1px #ccc; cursor: default;
-}
-
 .oui-pagination a.text { font-size: 12px; }
 
 .oui-pagination a.link:hover {
@@ -91,6 +82,15 @@
 
 .oui-pagination a.cur {
     color: #fff; background: #005eac; font-weight: bold; border: solid 1px #005eac;
+}
+
+.oui-pagination a.symbol { font-size: 14px;
+    font-family: Arial; color: #000; padding: 0 8px;
+}
+
+/*非链接文字默认颜色为灰色*/
+.oui-pagination a.none {
+    color: #999; border: solid 1px #ccc; cursor: default;
 }
 
 .oui-pagination a.ellipsis { padding: 0 4px; }
