@@ -22,6 +22,7 @@
             showList: true,             //是否显示数字列表，若不显示数字列表，则默认显示输入框
             showInvalid: true,          //是否显示无效的按钮
             showEllipsis: true,         //是否显示省略号(快进)按钮
+            alwaysEllipsis: false,      //是否始终显示省略号按钮
             showFirstLast: true,        //是否显示首页/尾页按钮
             showPageInput: false,       //是否显示页码输入框
             showPageJump: true,         //是否显示页码跳转输入框
@@ -85,10 +86,15 @@
                 if (op.showEllipsis && pmSub >= op.pageStart) {
                     quickNum = pmSub > op.pageStart ? pmSub : op.pageStart;
                     buildLinkText(true, that, html, quickNum, 'ellipsis', false, 'ellipsis');
+                } else if(op.alwaysEllipsis){
+                    buildLinkText(true, that, html, 'PQ', 'ellipsis', true, 'ellipsis');
                 }
                 buildLinkText(true, that, html, op.pageIndex - 1, 'previous', false, className);
             } else if (op.showInvalid) {
                 buildLinkText(op.showFirstLast, that, html, 0, 'first', true, className);
+                if(op.alwaysEllipsis){
+                    buildLinkText(true, that, html, 'PQ', 'ellipsis', true, 'ellipsis');
+                }
                 buildLinkText(true, that, html, 0, 'previous', true, className);
             }
 
@@ -121,10 +127,15 @@
                 if (op.showEllipsis && pmSum < op.pageCount) {
                     quickNum = pmSum < pcSub ? pmSum : pcSub;
                     buildLinkText(true, that, html, quickNum, 'ellipsis', false, 'ellipsis');
+                } else if(op.alwaysEllipsis){
+                    buildLinkText(true, that, html, 'NQ', 'ellipsis', true, 'ellipsis');
                 }
                 buildLinkText(op.showFirstLast, that, html, pcSub, 'last', false, className);
             } else if (op.showInvalid) {
                 buildLinkText(true, that, html, 0, 'next', true, className);
+                if(op.alwaysEllipsis){
+                    buildLinkText(true, that, html, 'NQ', 'ellipsis', true, 'ellipsis');
+                }
                 buildLinkText(op.showFirstLast, that, html, 0, 'last', true, false, className);
             }
 
@@ -184,6 +195,9 @@
                     dataStat: '\u663e\u793a\u7b2c {0} \u6761\u5230\u7b2c {1} \u6761\u8bb0\u5f55\uff0c\u5171 {2} \u6761'
                 }
             };
+            texts['cn'] = texts.chinese;
+            texts['en'] = texts.english;
+
             if ($.isNumber(options)) {
                 op.pageIndex = options;
                 if ($.isNumber(dataCount)) {

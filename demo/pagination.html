@@ -16,6 +16,8 @@
 <div id="p4"></div>
 <br />
 <div id="p5"></div>
+<br />
+<div id="p6"></div>
 </body>
 </html>
 <script type="text/javascript">
@@ -116,4 +118,19 @@
         }
     });
    
+   var p6 = new OUI.Pagination({
+        element: document.getElementById('p6'),
+        dataCount: 89,
+        pageIndex: 0,
+        pageStart: 0,
+        showList: true,
+        position: 'left',
+        markType: 'en',
+        skin: 'orange',
+        callback: function(pageIndex){
+            console.log('p6-callback: ', pageIndex);
+
+            p6.paging(pageIndex);
+        }
+    });
 </script>

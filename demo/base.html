@@ -165,13 +165,13 @@ console.log(ts.toDate('yyyy年MM月dd日 HH:mm:ss'));
 
 var num = '123.5'.toNumber();
 console.log(typeof num);
-
+/*
 console.log('true.toNumber(): ', true.toNumber());
 
 console.log('(2 > 1).toNumber(): ', (2 > 1).toNumber());
 
 console.log(typeof 'true'.toNumber());
-
+*/
 console.log('hello'.startWith('h'));
 console.log('hello'.endWith('o'));
 
@@ -262,5 +262,25 @@ for (var k in arrKey) {
 }
 
 
+var obj = {
+    id: 123, name: 'acc', func: function(){
+
+    },
+    obj: {
+        type: 5, code: 'obj', name: 'ext'
+    },
+    arr: [
+        {id: 1, pid: 0}
+    ]
+};
+
+$.extend(true, obj, {
+    func: function(a, b){
+        return a + b;
+    },
+    obj: {code: 'asd', type: 12}
+});
+
+console.log(obj);
 
 </script>
