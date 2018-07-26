@@ -59,7 +59,7 @@
         */
     </style>
     <script type="text/javascript" src="../oui/oui.js"></script>
-    <script type="text/javascript" src="../oui/oui.table.js"></script>
+    <script type="text/javascript" src="../oui/table/oui.table.js"></script>
 </head>
 <body>
 层级：<input type="text" id="txtLevel" style="width:50px;" />
@@ -110,12 +110,12 @@ ID:<input type="text" id="txtId" style="width:50px;" />
     ];
 
 
-        var tb1 = new OUI.Table();
+        var tb1 = new $.Table();
 
         console.log('tb1: ', tb1);
     tb1.createBody(bodyData);
     
-    var tb = new OUI.Table({
+    var tb = new $.Table({
         table: 'tblist',                //表格（对象 或 Id 或 null)，为null则自动创建表格对象（可以不设置）
         parent: document.body,          //表格父节点，默认为 document.body （可以不设置）
         headData: headData,             //初始化时要创建的表格头部数据（可以不设置），数据格式参考示例说明
@@ -306,7 +306,7 @@ ID:<input type="text" id="txtId" style="width:50px;" />
     }
 
     
-    OUI.loadJsScript('../oui/oui.pagination.js',  function(){
+    OUI.loadJsScript('../oui/pagination/oui.pagination.js',  function(){
         console.log('oui.pagination.js');
         console.log('oui: ', OUI);
     });

@@ -260,6 +260,77 @@
     });
 }(OUI);
 
+// CRC
+!function($){
+    'use strict';
+
+    var CRC = function(){
+        var CRC16 = function(bytes, isReverse) {
+            var len = bytes.length, crc = 0xFFFF;
+            if (len > 0) {
+                for (var i = 0; i < len; i++) {
+                    crc = (crc ^ (bytes[i]));
+                    for (var j = 0; j < 8; j++) {
+                        crc = (crc & 1) !== 0 ? ((crc >> 1) ^ 0xA001) : (crc >> 1);
+                    }
+                }
+                var high = (crc & 0xFF00) >> 8, low = crc & 0x00FF;
+                return isReverse ? (high + low * 0x100) : (high * 0x100 + low);
+            }
+            return 0;
+        }, strToByte = function(s) {
+            if (Object.prototype.toString.call(s) === '[object Array]' && typeof s[0] === 'number') {return s; }
+            var chars = s.split(''), len = chars.length, arr = [];
+            for (var i = 0; i < len; i++) {
+                var char = encodeURI(chars[i]);
+                if (char.length === 1) {
+                    arr.push(char.charCodeAt());
+                } else {
+                    var byte = char.split('%'), c = byte.length;
+                    for (var j = 1; j < c; j++) {
+                        arr.push(parseInt('0x' + byte[j]));
+                    }
+                }
+            }
+            return arr;
+        }, strToHexByte = function(s, isFilter) {
+            var hex = strToHexChar(s, isFilter).join('').replace(/\s/g, "");
+            //若字符个数为奇数，补一个空格
+            hex += hex.length % 2 != 0 ? " " : "";
+
+            var c = hex.length / 2, arr = [];
+            for (var i = 0; i < c; i++) {
+                arr.push(parseInt(hex.substr(i * 2, 2), 16));
+            }
+            return arr;
+        }, strToHexChar = function(s, isFilter) {
+            var chars = s.split(''), len = chars.length, arr = [];
+            for (var i = 0; i < len; i++) {
+                var char = chars[i].charCodeAt();
+                if (char > 0 && char < 127) {
+                    arr.push(chars[i]);
+                } else if (!isFilter) {
+                    arr.push(char.toString(16));
+                }
+            }
+            return arr;
+        }, toHex = function(n, w){
+            return n.toString(16).toUpperCase().padStart(w, '0');
+        };
+
+        return {
+            toCRC16: function(s, isReverse) {
+                return toHex(CRC16(strToByte(s), isReverse), 4);
+            },
+            toModbusCRC16: function(s, isReverse) {
+                return toHex(CRC16(strToHexByte(s), isReverse), 4);
+            }
+        };
+    };
+    
+    $.extend($, { CRC: CRC, crc: new CRC() });
+}(OUI);
+
 // Dictionary
 !function($) {
     'use strict';
@@ -313,7 +384,7 @@
         global.Dictionary = Dictionary;
     }
 
-    $.extend($, { Dictionary: Dictionary });
+    $.extend($, { Dictionary: Dictionary, dic: new Dictionary() });
 }(OUI);
 
 // Web
@@ -366,7 +437,10 @@
             return $.isFunction(func) && func(elem), parent.appendChild(elem), elem;
         },
         createJsScript = function(data, parent, func) {
-            var elem = createElement('script', parent || head, function(elem) {
+            //parent = parent || head;
+            //这里为什么默认选择body而不是head，是因为有些js会动态加载同名的css文件，而JS需要通过找到最后一个script文件来找到文件名称
+            parent = parent || doc.body;
+            var elem = createElement('script', parent, function(elem) {
                 elem.innerHTML = data;
                 setAttribute(elem, { type: 'text/javascript', charset: 'utf-8' }, true);
             });
@@ -389,17 +463,34 @@
             }
             return elem;
         },
-        loadLinkStyle = function(path, id) {
+        loadLinkStyle = function(path, id, callback) {
             if (!$.isUndefined(id) && doc.getElementById(id)) { return false; }
-            return createElement('link', head, function(elem) {
+            var node = createElement('link', head, function(elem) {
                 setAttribute(elem, { id: id, type: 'text/css', rel: 'stylesheet', href: $.setQueryString(path) }, true);
-            });
+            }), ae = node.attachEvent;
+
+            if ($.isFunction(ae) && ae.toString() && ae.toString().indexOf('[native code]') >= 0) {
+                node.attachEvent('onreadystatechange', function(ev) { onScriptLoad(ev, path); });
+            } else {
+                node.addEventListener('load', function(ev) { onScriptLoad(ev, path); }, false);
+            }
+
+            function onScriptLoad(ev, path) { onCallback(); }
+            function onCallback() { $.isFunction(callback) && callback(); }
         },
         loadJsScript = function(path, id, callback, parent) {
             if ($.isFunction(id) && !$.isFunction(callback)) {
                 callback = id, id = null;
             }
-            var node = createElement('script', parent || head, function(elem) {
+            id = id || $.crc.toCRC16(path);
+            var node = doc.getElementById(id), ae = null;
+            if(node){
+                return $.isFunction(callback) && callback(), node;
+            }
+
+            //parent = parent || head;
+            parent = parent || doc.body;
+            node = createElement('script', parent, function(elem) {
                 setAttribute(elem, { id: id, type: 'text/javascript', async: true, src: $.setQueryString(path), charset: 'utf-8' }, true);
             }), ae = node.attachEvent;
 
@@ -409,7 +500,7 @@
                 node.addEventListener('load', function(ev) { onScriptLoad(ev, path); }, false);
             }
 
-            function onScriptLoad(ev, path) { !$.isDebug() && head.removeChild(node), onCallback(); }
+            function onScriptLoad(ev, path) { !$.isDebug() && parent.removeChild(node), onCallback(); }
             function onCallback() { $.isFunction(callback) && callback(); }
 
             return node;

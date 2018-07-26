@@ -53,7 +53,7 @@
     function Splitter(options){
         var op = $.extend({
             width: 4,
-            background: '#f00',
+            background: '#dbebfe',
             distance: 400,
             fixed: false,
             element: null,
@@ -129,8 +129,8 @@
 
     var doc = document, isIE = (doc.all) ? true : false;
 
-    var isVertical = function() {
-        return this.orientation === 'vertical';
+    var isVertical = function(that) {
+        return that.orientation === 'vertical';
     },
     bind = function (obj, func, args) {
         if (!$.isObject(obj) || !$.isFunction(func)) {
@@ -142,10 +142,11 @@
     },
     getSize = function(ele){
         var style = $.getElementStyle(ele);
+        //console.log(ele.id, ele.clientWidth, style['width']);
         var width = (style['width']||'').indexOf('%') >= 0 ? ele.clientWidth : parseInt(style['width'], 10), 
             height = (style['height']||'').indexOf('%') >= 0 ? ele.clientHeight : parseInt(style['height'], 10);
 
-            console.log('width: ', width, ', height: ', height);
+            //console.log(ele.id, 'width: ', width, ', height: ', height);
         return {width: width, height: height};
     },
     getPosition = function(ele){
@@ -154,60 +155,120 @@
     },
     setStyle = function(ele, args){
         for(var k in args){
-            ele.style[k] = args[k] + 'px';
+            if(args[k]){
+                var s = args[k].toString();
+                ele.style[k] = s + (s.indexOf('%') < 0 && s.indexOf('px') < 0 ? 'px' : '');
+            }
         }
     },
+    getPercent = function(num, total, noPostfix){
+        if($.isNumber(num)){
+            num = parseFloat(num, 10);
+        }
+        return noPostfix ? num.div(total).mul(100).round(2) : '{0:P2}'.format(num.div(total));
+    },
     createPanel = function(resize){
-        var that = this, size = getSize(that.element), p1Show = !that.Panel1.collapsed, p2Show = !that.Panel2.collapsed, w = 0, css = '';
+        var that = this, size = getSize(that.element), p1Show = !that.Panel1.collapsed, p2Show = !that.Panel2.collapsed, w = 0, h = 0, css = '';
+        var vertical = isVertical(this), splitterRate = getPercent(this.Splitter.width, vertical ? size.width : size.height, true);
+        var panel1Rate = 0;
+        console.log('size: ', size);
+        console.log('splitterRate: ', splitterRate, splitterRate*size.height/100);
 
         if(that.Splitter.distance < 0){
             that.Splitter.distance += size.width;
         }
-        console.log('size: ', size);
+
         if(p1Show){
-            w = p2Show ? that.Splitter.distance : size.width;
+            if(vertical){
+                w = p2Show ? that.Splitter.distance : size.width;
+                w = getPercent(w, size.width, true);
+                console.log('1: w:', w);
+            } else {
+                h = p2Show ? that.Splitter.distance : size.height;
+                h = getPercent(h, size.height, true);
+                console.log('1: h:', h, h*size.height/100);
+            }
+
+            panel1Rate = vertical ? w : h;
+            //console.log('w1: ', w);
             if(resize){
-                that.Panel1.size({width: w, height: size.height});
+                that.Panel1.size(vertical ? {width: w + '%', height: '100%'} : {width: '100%', height: h + '%'});
             } else {
                 that.Panel1.set($.createElement('div', that.element, function(ele){
                     ele.innerHTML = that.Panel1.content || '';
-                    css = 'width:{0}px;height:{1}px;float:left;background:{2};overflow:auto;position:relative;'.format(w, size.height, that.Panel1.background);
+                    if(vertical){
+                        css = 'width:{0};height:{1};float:left;background:{2};overflow:auto;position:relative;'.format(w + '%', '100%', that.Panel1.background);
+                    } else {
+                        css = 'width:{0};height:{1};background:{2};overflow:auto;position:relative;clear:both;'.format('100%', h + '%', that.Panel1.background);
+                    }
                     ele.style.cssText = css;
                 }));
             }
         }
 
+        //console.log('size: ', size);
         if(p1Show && p2Show){
+                console.log('3: w:', splitterRate);
             if(resize){
-                that.Splitter.size({height:size.height});
+                var ss = getSize(this.Panel1.element);
+                
+                that.Splitter.size(vertical ? {left: getPercent(ss['width'], size.width)} : {top:getPercent(ss['height'], size.height)});
+
+                //console.log('ps: ', this.id, left);
+                //that.Splitter.size({height:size.height});
+                //console.log('rs: ', this.id, 'that.Splitter.element.style.left:', that.Splitter.element.style.left);
             } else {
                 that.Splitter.set($.createElement('div', that.element, function(ele){
-                    var cursor = that.Splitter.fixed ? 'default' : 'ew-resize';
-                    css = 'width:{width}px;height:{1}px;left:{distance}px;background:{background};cursor:{2};position:absolute;'.format(
-                        that.Splitter, size.height, cursor);
+                    var cursor = that.Splitter.fixed ? 'default' : vertical ? 'ew-resize' : 'ns-resize';
+                    if(vertical){
+                        css = 'width:{width}px;height:{1};left:{3};background:{background};cursor:{2};position:absolute;'.format(
+                            that.Splitter, '100%', cursor, getPercent(that.Splitter.distance, size.width));
+                    } else {
+                        css = 'width:{1};height:{width}px;top:{3};background:{background};cursor:{2};'.format(
+                            that.Splitter, '100%', cursor, getPercent(that.Splitter.distance, size.height));
+                    }
                     ele.style.cssText = css;
                 }));
             }
         }
 
         if(p2Show){
-            w = size.width - (p1Show ? that.Splitter.distance + that.Splitter.width + 2 : 0);
+            
+            if(vertical){
+                w = size.width - (p1Show ? that.Splitter.distance + that.Splitter.width + 0 : 0);
+                w = getPercent(w, size.width);
+
+            w = 100 - panel1Rate - splitterRate;
+                console.log('2: w:', w);
+            } else {
+                h = size.height - (p1Show ? that.Splitter.distance + that.Splitter.height + 0 : 0);
+                h = getPercent(h, size.height);
+            h = 100 - panel1Rate - splitterRate;
+                console.log('2: h:', h, h*size.height/100);
+            }
+            //console.log('w2: ', w);
             if(resize){
-                that.Panel2.size({width: w, height: size.height});
+                that.Panel2.size(vertical ? {width: w + '%', height: '100%'} : {width: '100%', height: h + '%'});
             } else {
                 that.Panel2.set($.createElement('div', that.element, function(ele){
                     ele.innerHTML = that.Panel2.content || '';
-                    css = 'width:{0}px;height:{1}px;float:right;background:{2};overflow:auto;position:relative;'.format(w, size.height, that.Panel2.background);
+                    if(vertical){
+                        css = 'width:{0};height:{1};float:right;background:{2};overflow:auto;position:relative;'.format(w + '%', '100%', that.Panel2.background);
+                    } else {
+                        css = 'width:{0};height:{1};background:{2};overflow:auto;position:relative;clear:both;'.format('100%', h + '%', that.Panel2.background);
+                    }
                     ele.style.cssText = css;
                 }));
             }
         }
+
+
         return that.Splitter.get() && !that.Splitter.fixed;
     },
     start = function (e, isDrag) {
         if (!isDrag) { $.cancelBubble(e); }
 
-        var vertical = isVertical.call(this), pos = this.Splitter.position(), x = e.clientX - pos.left, y = e.clientY - pos.top;
+        var vertical = isVertical(this), pos = this.Splitter.position(), x = e.clientX - pos.left, y = e.clientY - pos.top;
         this.Splitter.start({x: x, y: y});
         /*
         if (isIE) {
@@ -225,7 +286,7 @@
     move= function (e) {
         window.getSelection ? window.getSelection().removeAllRanges() : doc.selection.empty();
 
-        var vertical = isVertical.call(this), 
+        var vertical = isVertical(this), 
             size = this.size(), 
             start = this.Splitter.start(), 
             sw = this.Splitter.width,
@@ -235,8 +296,8 @@
             x = Math.min(x, size.width - this.Panel2.minSize - sw);
             y = Math.min(y, size.height - this.Panel2.minSize - sw);
 
-            console.log('x: ', x);
-
+            console.log('x: ', x, y);
+            /*
         if(vertical){
             this.Splitter.position({left: Math.max(x, 0)});
             this.Panel2.size({width: size.width - x - this.Splitter.width - 2});
@@ -245,6 +306,16 @@
             this.Splitter.position({top: Math.max(y, 0)});
             this.Panel2.size({height: size.height - y - this.Splitter.height - 2});
             this.Panel1.size({height: y});
+        }*/
+        console.log(this.id, ':', x, y);
+        if(vertical){
+            this.Splitter.position({left: Math.max(x, 0)});
+            this.Panel2.size({width: getPercent(size.width - x - this.Splitter.width - 0, size.width)});
+            this.Panel1.size({width: getPercent(x, size.width)});
+        } else {
+            this.Splitter.position({top: Math.max(y, 0)});
+            this.Panel2.size({height: getPercent(size.height - y - this.Splitter.width - 0, size.height)});
+            this.Panel1.size({height: getPercent(y, size.height)});
         }
         this.resize(true);
     },

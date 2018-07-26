@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title></title>
+    <script type="text/javascript" src="../oui/oui.js"></script>
+    <script type="text/javascript" src="../oui/dialog/oui.dialog.js"></script>
+</head>
+</head>
+<body>
+    <div id="p1"></div>
+
+    <a onclick="paging();">分页</a>
+</body>
+</html>
+<script type="text/javascript">
+    var d1 = new $.Dialog();
+
+console.log($.Pagination);
+
+function paging(){
+    $.loadJsScript('../oui/pagination/oui.pagination.js', function(){
+        console.log('分页');
+        var p1 = new OUI.Pagination({
+            parent: $('#p1')[0],
+            dataCount: 11912,
+            markCount: 10,
+            pageIndex: 1,
+            pageStart: 1,
+            pageSize: 12,
+            showPageInput: true,
+            showPageJump: true,
+            showList: true,
+            skin: 'red',
+            markType: 'chinese',
+            //url: '?pageIndex={0}&type=2&pid=32',
+            //sizeOptions: [10, 20, 30],
+            callback: function(pageIndex, param){
+                console.log('p1-callback: ', pageIndex, ', param: ', param);
+
+                p1.paging(pageIndex);
+            },
+            useKeyEvent: true,
+            inputWidth: 55,
+            callbackParam: {
+                id: 123, prompt: '这是回调参数'
+            }
+        });
+    });
+}
+
+</script>

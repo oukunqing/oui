@@ -19,29 +19,34 @@
 </html>
 <script type="text/javascript">
     var sc = new OUI.SplitContainer({
+        id: 1,
+        //orientation: 'horizontal',
         element: document.getElementById('divBox'),
-        splitter: {distance: 235, fixed: false},
-        panel1: {collapsed: false, minSize:150, background:'#ddd'},
-        panel2: {collapsed: false, minSize:300, background:'#ff0'}
+        splitter: {distance: 125, fixed: false},
+        panel1: {collapsed: false, minSize:80, background:'#ddd'},
+        panel2: {collapsed: false, minSize:100, background:'#eee'}
     });
 
     console.log('sc: ', sc);
 
     var sc1 = new OUI.SplitContainer({
+        id: 2,
         element: sc.Panel2.element,
+        orientation: 'horizontal',
         parent: sc,
-        splitter: {distance: 235, fixed: false},
-        panel1: {collapsed: false, minSize:80, background:'#00f'},
-        panel2: {collapsed: false, minSize:100, background:'#008000'}
+        splitter: {distance: 135, fixed: false},
+        panel1: {collapsed: false, minSize:80, background:'#eee'},
+        panel2: {collapsed: false, minSize:100, background:'#eee'}
     });
 
 
     var sc2 = new OUI.SplitContainer({
+        id: 3,
         element: sc1.Panel2.element,
         parent: sc1,
         splitter: {distance: 200, fixed: false},
-        panel1: {collapsed: false, minSize:80, background:'#005eac'},
-        panel2: {collapsed: false, minSize:100, background:'#ff0'}
+        panel1: {collapsed: false, minSize:80, background:'#f9f9f9'},
+        panel2: {collapsed: false, minSize:100, background:'#f8f8f8'}
     });
 
     window.onresize = function(){

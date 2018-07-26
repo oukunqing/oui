@@ -10,7 +10,8 @@
     'use strict';
 
     function Pagination(options, dataCount) {
-        this.options = setOptions({
+        var that = this;
+        that.options = setOptions({
             element: null,              //分页显示HTML控件（或ID）
             pageStart: 0,               //起始页，0 或 1，与 pageIndex 起始值对应
             pageIndex: 0,               //起始页码，默认与 pageStart 相同
@@ -49,11 +50,13 @@
             debounceTime: defaultDebounceTime       //抖动时长，单位：毫秒
         }, options, dataCount);
 
-        if (this.options.className === defaultClassName) {
-            $.loadLinkStyle($.getFilePath(thisFilePath) + $.getFileName(thisFilePath, true) + '.css', 'oui-pagination');
+        if (that.options.className === defaultClassName) {
+            $.loadLinkStyle($.getFilePath(thisFilePath, thisFilePath) + $.getFileName(thisFilePath, true) + '.css', 'oui-pagination', function(){
+                that.paging();
+            });
+        } else {
+            that.paging();
         }
-
-        this.paging();
     }
 
     Pagination.prototype = {
