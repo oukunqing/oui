@@ -20,15 +20,16 @@
     var d1 = new $.Dialog();
 
 
-$.setAttribute(document.getElementById('txt1'), {
+
+$.setAttribute($I('txt1'), {
     tree: {id:1, pid:0, level:0}, list: [1,2,3], arr:[{id:1},{id:2}], name: 'txt',
-    obj: document.getElementById('txt2')
+    obj: $I('txt2')
 }, true, true);
 
-var txt1 = document.getElementById('txt1');
+var txt1 = $I('txt1');
 txt1.style.cssText += 'background:#f00;';
 
-var tree = document.getElementById('txt1').getAttribute('tree');
+var tree = $I('txt1').getAttribute('tree');
 console.log(tree, typeof tree, typeof $.toJson(tree), $.toJson(tree).id);
 
 console.log($.Pagination);

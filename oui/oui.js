@@ -701,11 +701,11 @@
                 var obj = arr[i], pass = [];
                 if ($.isBoolean(checked)) {
                     pass.push(obj.checked === checked ? 1 : 0);
-                } 
+                }
                 if (checkValue) {
                     pass.push(values.indexOf(obj.value) < 0 ? 0 : 1);
                 }
-                
+
                 if (checkTag) {
                     pass.push(tagNames.indexOf(obj.tagName) < 0 ? 0 : 1);
                 }
@@ -715,22 +715,22 @@
 
                 if ($.isBoolean(disabled)) {
                     pass.push(obj.disabled === disabled ? 1 : 0);
-                } 
+                }
                 if (checkParent) {
                     pass.push(obj.parentNode === parent ? 1 : 0);
                 }
                 if (checkAttr) {
                     for (var name in attrs) {
                         var val = obj.getAttribute(name), con = attrs[name];
-                        if(name === 'disabled' || name === 'checked'){
-                            if(con === null || con === '' || ($.isBoolean(con) && !con)){
+                        if (name === 'disabled' || name === 'checked') {
+                            if (con === null || con === '' || ($.isBoolean(con) && !con)) {
                                 pass.push(val === null ? 1 : 0);
-                            } else if(!$.isUndefined(con)) {
+                            } else if (!$.isUndefined(con)) {
                                 pass.push(val !== null ? 1 : 0);
                             } else {
                                 pass.push(0);
                             }
-                        }else {
+                        } else {
                             pass.push(val === con ? 1 : 0);
                         }
                     }
@@ -750,6 +750,9 @@
 
         $.extend(window, {
             $I: function(id, parent) {
+                if (id.indexOf('#') === 0) {
+                    id = id.substr(1);
+                }
                 return (parent || doc).getElementById(id);
             },
             $Q: function(selectors, parent) {
@@ -777,6 +780,9 @@
                 return checkCondition(arr, options);
             },
             $C: function(className, options, parent) {
+                if (className.indexOf('.') === 0) {
+                    className = className.substr(1);
+                }
                 if ($.isElement(options)) {
                     parent = options, options = null;
                 }
