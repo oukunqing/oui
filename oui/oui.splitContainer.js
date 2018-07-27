@@ -194,7 +194,7 @@
             if(resize){
                 that.Panel1.size(vertical ? {width: w + '%', height: '100%'} : {width: '100%', height: h + '%'});
             } else {
-                that.Panel1.set($.createElement('div', that.element, function(ele){
+                that.Panel1.set($.createElement('div', function(ele){
                     ele.innerHTML = that.Panel1.content || '';
                     if(vertical){
                         css = 'width:{0};height:{1};float:left;background:{2};overflow:auto;position:relative;'.format(w + '%', '100%', that.Panel1.background);
@@ -202,7 +202,7 @@
                         css = 'width:{0};height:{1};background:{2};overflow:auto;position:relative;clear:both;'.format('100%', h + '%', that.Panel1.background);
                     }
                     ele.style.cssText = css;
-                }));
+                }, that.element));
             }
         }
 
@@ -218,7 +218,7 @@
                 //that.Splitter.size({height:size.height});
                 //console.log('rs: ', this.id, 'that.Splitter.element.style.left:', that.Splitter.element.style.left);
             } else {
-                that.Splitter.set($.createElement('div', that.element, function(ele){
+                that.Splitter.set($.createElement('div', function(ele){
                     var cursor = that.Splitter.fixed ? 'default' : vertical ? 'ew-resize' : 'ns-resize';
                     if(vertical){
                         css = 'width:{width}px;height:{1};left:{3};background:{background};cursor:{2};position:absolute;'.format(
@@ -228,7 +228,7 @@
                             that.Splitter, '100%', cursor, getPercent(that.Splitter.distance, size.height));
                     }
                     ele.style.cssText = css;
-                }));
+                }, that.element));
             }
         }
 
@@ -250,7 +250,7 @@
             if(resize){
                 that.Panel2.size(vertical ? {width: w + '%', height: '100%'} : {width: '100%', height: h + '%'});
             } else {
-                that.Panel2.set($.createElement('div', that.element, function(ele){
+                that.Panel2.set($.createElement('div', function(ele){
                     ele.innerHTML = that.Panel2.content || '';
                     if(vertical){
                         css = 'width:{0};height:{1};float:right;background:{2};overflow:auto;position:relative;'.format(w + '%', '100%', that.Panel2.background);
@@ -258,7 +258,7 @@
                         css = 'width:{0};height:{1};background:{2};overflow:auto;position:relative;clear:both;'.format('100%', h + '%', that.Panel2.background);
                     }
                     ele.style.cssText = css;
-                }));
+                }, that.element));
             }
         }
 

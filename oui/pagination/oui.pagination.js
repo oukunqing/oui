@@ -31,7 +31,7 @@
             showPageCount: true,        //是否显示总页数
             showDataStat: false,        //是否显示数据统计
             showSizeSelect: true,       //是否显示PageSize下拉框
-            sizeOptions: [5, 10, 20, 30, 50, 100],      //PageSize下拉框默认选项
+            pageSizeItems: defaultPageSizeItems,      //PageSize下拉框默认选项
             callback: function(pageIndex, param) {      //回调函数模式
                 console.log('pageIndex: ', pageIndex, ', param: ', param);
             },
@@ -180,6 +180,8 @@
             left: 1, right: 0
         },
         minPageSize = 1,                //pageSize最小值
+        //默认的每页显示条数选项
+        defaultPageSizeItems = [5, 10, 20, 30, 50, 100],
         defaultInputWidth = 50,         //输入框默认宽度，单位px
         defaultDebounceTime = 50,       //防抖最小时长，单位：毫秒
         defaultLongPressTime = 1024,    //长按最小时长，单位：毫秒
@@ -528,9 +530,9 @@
         buildPageSize = function(enabled, that, arr, minuend) {
             if (enabled) {
                 var op = that.options, html = ['<select class="select">'], selected = false;
-                if ($.isArray(op.sizeOptions)) {
-                    for (var i in op.sizeOptions) {
-                        var dr = op.sizeOptions[i];
+                if ($.isArray(op.pageSizeItems)) {
+                    for (var i in op.pageSizeItems) {
+                        var dr = op.pageSizeItems[i];
                         if ($.isInteger(dr)) {
                             html.push('<option value="' + dr + '">' + dr + '</option>');
                         } else if ($.isArray(dr)) {
@@ -541,8 +543,12 @@
                         }
                     }
                 }
-                if (!selected && op.sizeOptions.indexOf(op.pageSize) < 0) {
+                if (!selected && op.pageSizeItems.indexOf(op.pageSize) < 0) {
                     html.push('<option value="' + op.pageSize + '">' + op.pageSize + '</option>');
+                    //将自定义pageSize追加到默认的选项中
+                    if(defaultPageSizeItems.indexOf(op.pageSize) < 0){
+                        defaultPageSizeItems.push(op.pageSize);
+                    }
                 }
                 html.push('</select>');
 
