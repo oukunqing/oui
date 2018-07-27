@@ -427,23 +427,44 @@
             var name = (filePath || '').split('?')[0], pos = name.lastIndexOf('.');
             return pos >= 0 ? name.substr(pos + 1).toLowerCase() : '';
         },
-        createElement = function(nodeName, parent, func) {
-            var elem = doc.createElement(nodeName);
-            if ($.isFunction(parent)) {
-                func = parent, parent = doc.body;
-            } else if (!isElement(parent)) {
-                parent = doc.body;
+        createElement = function(nodeName, id, func, parent) {
+            if ($.isFunction(id)) {
+                parent = func, func = id, id = null;
             }
+            var elem = null, hasId = false;
+            if($.isString(id, true)){
+                hasId = true;
+                elem = doc.getElementById(id);                
+                if(elem !== null){
+                    return $.isFunction(func) && func(elem), elem;
+                } 
+            }
+            elem = doc.createElement(nodeName);
+
+            if(hasId){ elem.id = id; }
+            if(!isElement(parent)) { parent = doc.body; }
+            
             return $.isFunction(func) && func(elem), parent.appendChild(elem), elem;
         },
-        createJsScript = function(data, parent, func) {
+        createJsScript = function(data, id, func, parent) {
+            if ($.isFunction(id)) {
+                parent = func, func = id, id = null;
+            }
             //parent = parent || head;
-            //这里为什么默认选择body而不是head，是因为有些js会动态加载同名的css文件，而JS需要通过找到最后一个script文件来找到文件名称
             parent = parent || doc.body;
-            var elem = createElement('script', parent, function(elem) {
-                elem.innerHTML = data;
-                setAttribute(elem, { type: 'text/javascript', charset: 'utf-8' }, true);
-            });
+            var elem = createElement('script', id, function(elem) {
+                elem.innerHTML = data, setAttribute(elem, { type: 'text/javascript', charset: 'utf-8' }, true);
+            }, parent);
+            return $.isFunction(func) && func(elem), elem;
+        },
+        createCssStyle = function(data, id, func, parent) {
+            if ($.isFunction(id)) {
+                parent = func, func = id, id = null;
+            }
+            parent = parent || head;
+            var elem = createElement('style', id, function(elem) {
+                elem.innerHTML = data, setAttribute(elem, { type: 'text/css' }, true);
+            }, parent);
             return $.isFunction(func) && func(elem), elem;
         },
         getElementStyle = function(elem, styleName) {
@@ -464,16 +485,16 @@
             return elem;
         },
         loadStaticFile = function(path, id, callback , parent, nodeName, attributes) {
+            if(!$.isString(id, true)){
+                id = nodeName + '-' + getFileName(path, true).replace(/[.]/, '-') + '-' + $.crc.toCRC16(path).toLowerCase();
+            }
             var node = doc.getElementById(id), ae = null;
             if(node){
                 return $.isFunction(callback) && callback(), node;
             }
-            node = createElement(nodeName, parent, function(elem) {
-                if(id){
-                    elem.id = id;
-                }
+            node = createElement(nodeName, id, function(elem) {
                 setAttribute(elem, attributes, true);
-            }), ae = node.attachEvent;
+            }, parent), ae = node.attachEvent;
 
             if ($.isFunction(ae) && ae.toString() && ae.toString().indexOf('[native code]') >= 0) {
                 node.attachEvent('onreadystatechange', function(ev) { onFileLoad(ev, path); });
@@ -495,62 +516,20 @@
             if ($.isFunction(id) && !$.isFunction(callback)) {
                 callback = id, id = null;
             }
-            id = id || ('link-' + $.crc.toCRC16(path));
             return loadStaticFile(path, id, callback, head, 'link', { 
                 type: 'text/css', rel: 'stylesheet', href: $.setQueryString(path) 
             });
-            /*
-            var node = doc.getElementById(id), ae = null;
-            if(node){
-                return $.isFunction(callback) && callback(), node;
-            }
-            node = createElement('link', head, function(elem) {
-                setAttribute(elem, { id: id, type: 'text/css', rel: 'stylesheet', href: $.setQueryString(path) }, true);
-            }), ae = node.attachEvent;
-
-            if ($.isFunction(ae) && ae.toString() && ae.toString().indexOf('[native code]') >= 0) {
-                node.attachEvent('onreadystatechange', function(ev) { onScriptLoad(ev, path); });
-            } else {
-                node.addEventListener('load', function(ev) { onScriptLoad(ev, path); }, false);
-            }
-
-            function onScriptLoad(ev, path) { onCallback(); }
-            function onCallback() { $.isFunction(callback) && callback(); }
-            */
         },
         loadJsScript = function(path, id, callback, parent) {
             if ($.isFunction(id) && !$.isFunction(callback)) {
                 parent = callback, callback = id, id = null;
             }
             //parent = parent || head;
+            //这里为什么默认选择body而不是head，是因为有些js会动态加载同名的css文件，而JS需要通过找到最后一个script文件来找到文件名称
             parent = parent || doc.body;
-            id = id || ('script-' + $.crc.toCRC16(path));
-
             return loadStaticFile(path, id, callback, parent, 'script', { 
                 type: 'text/javascript', async: true, src: $.setQueryString(path), charset: 'utf-8' 
             });
-
-            /*
-            var node = doc.getElementById(id), ae = null;
-            if(node){
-                return $.isFunction(callback) && callback(), node;
-            }
-
-            node = createElement('script', parent, function(elem) {
-                setAttribute(elem, { id: id, type: 'text/javascript', async: true, src: $.setQueryString(path), charset: 'utf-8' }, true);
-            }), ae = node.attachEvent;
-
-            if ($.isFunction(ae) && ae.toString() && ae.toString().indexOf('[native code]') >= 0) {
-                node.attachEvent('onreadystatechange', function(ev) { onScriptLoad(ev, path); });
-            } else {
-                node.addEventListener('load', function(ev) { onScriptLoad(ev, path); }, false);
-            }
-
-            function onScriptLoad(ev, path) { !$.isDebug() && parent.removeChild(node), onCallback(); }
-            function onCallback() { $.isFunction(callback) && callback(); }
-
-            return node;
-            */
         },
         removeJsScript = function(id, filePath) {
             if (id) {
@@ -643,6 +622,7 @@
         isElement: isElement,
         createElement: createElement,
         createJsScript: createJsScript,
+        createCssStyle: createCssStyle,
         getElementStyle: getElementStyle,
         setAttribute: setAttribute,
         loadLinkStyle: loadLinkStyle,

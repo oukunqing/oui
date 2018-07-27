@@ -267,7 +267,7 @@
         if ($.isString(trigger.row)) {
             op.trigger.row = [trigger.row, 'toggle'];
         }
-        
+
         //先清除所有行，防止重复添加
         that.clearRow();
 

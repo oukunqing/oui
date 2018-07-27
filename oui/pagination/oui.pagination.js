@@ -50,13 +50,7 @@
             debounceTime: defaultDebounceTime       //抖动时长，单位：毫秒
         }, options, dataCount);
 
-        if (that.options.className === defaultClassName) {
-            $.loadLinkStyle($.getFilePath(thisFilePath, thisFilePath) + $.getFileName(thisFilePath, true) + '.css', 'oui-pagination', function(){
-                that.paging();
-            });
-        } else {
-            that.paging();
-        }
+        that.paging();
     }
 
     Pagination.prototype = {
@@ -87,6 +81,10 @@
                     '<div class="' + op.skin + ' ' + getPosition(that, true) + '">',
                     '<ul class="list">'
                 ];
+
+            var cssData = '.' + op.className + ' li{float: left;}', cssId = op.className + '-css-' + $.crc.toCRC16(op.className).toLowerCase();
+            //创建CssStyle，防止闪烁
+            $.createCssStyle(cssData, cssId);
 
             buildDataCount(op.showDataCount, that, html, op.markText['dataCount'], op.dataCount);
 
@@ -169,8 +167,12 @@
         }
     };
 
-    var thisFilePath = $.getScriptSelfPath(),
-        defaultClassName = 'oui-pagination',
+    var thisFilePath = $.getScriptSelfPath();
+
+    //先加载样式文件
+    $.loadLinkStyle($.getFilePath(thisFilePath, thisFilePath) + $.getFileName(thisFilePath, true) + '.css');
+
+    var defaultClassName = 'oui-pagination',
         defaultPositon = 'left',
         defaultType = 'symbol',
         defaultSkin = 'default',
@@ -272,6 +274,10 @@
                 //判断是否显示输入框，若外部参数未指定，则设置为显示
                 if (!op.showList && !$.isBoolean(options.showPageInput)) {
                     op.showPageInput = true;
+                }
+
+                if (!$.isString(op.className, true)) {
+                    op.className = defaultClassName;
                 }
             }
 
