@@ -659,10 +659,11 @@
 
 // 原生选择器封装
 !function($) {
-
+    'use strict';
+    
     if (typeof window === 'object') {
         var doc = $.doc;
-        var checkCondition = function(arr, options) {
+        var checkCondition = function (arr, options) {
             var list = [], len = arr.length;
 
             var parent = options.parent,
@@ -698,50 +699,35 @@
             }
 
             for (var i = 0; i < len; i++) {
-                var obj = arr[i], pass = [];
-                if ($.isBoolean(checked)) {
-                    pass.push(obj.checked === checked ? 1 : 0);
-                }
-                if (checkValue) {
-                    pass.push(values.indexOf(obj.value) < 0 ? 0 : 1);
-                }
-
-                if (checkTag) {
-                    pass.push(tagNames.indexOf(obj.tagName) < 0 ? 0 : 1);
-                }
-                if (checkType) {
-                    pass.push(types.indexOf(obj.type) < 0 ? 0 : 1);
-                }
-
-                if ($.isBoolean(disabled)) {
-                    pass.push(obj.disabled === disabled ? 1 : 0);
-                }
-                if (checkParent) {
-                    pass.push(obj.parentNode === parent ? 1 : 0);
-                }
-                if (checkAttr) {
+                var obj = arr[i], pass = true;
+                if (!pass) { continue; } else if ($.isBoolean(checked)) { pass = obj.checked === checked; }
+                if (!pass) { continue; } else if (checkValue) { pass = values.indexOf(obj.value) >= 0; }
+                if (!pass) { continue; } else if (checkTag) { pass = tagNames.indexOf(obj.tagName) >= 0; }
+                if (!pass) { continue; } else if (checkType) { pass = types.indexOf(obj.type) >= 0; }
+                if (!pass) { continue; } else if ($.isBoolean(disabled)) { pass = obj.disabled === disabled; }
+                if (!pass) { continue; } else if (checkParent) { pass = obj.parentNode === parent; }
+                if (!pass) { continue; } else if (checkAttr) {
                     for (var name in attrs) {
+                        if (!pass) { break; }
                         var val = obj.getAttribute(name), con = attrs[name];
                         if (name === 'disabled' || name === 'checked') {
                             if (con === null || con === '' || ($.isBoolean(con) && !con)) {
-                                pass.push(val === null ? 1 : 0);
+                                pass = val === null;
                             } else if (!$.isUndefined(con)) {
-                                pass.push(val !== null ? 1 : 0);
-                            } else {
-                                pass.push(0);
+                                pass = val !== null;
                             }
                         } else {
-                            pass.push(val === con ? 1 : 0);
+                            pass = val === con;
                         }
                     }
                 }
-                if (checkStyle) {
+                if (!pass) { continue; } else if (checkStyle) {
                     for (var name in styles) {
-                        pass.push(obj.style[name] === styles[name] ? 1 : 0);
+                        if (!pass) { break; }
+                        pass = obj.style[name] === styles[name];
                     }
                 }
-
-                if (pass.indexOf(0) < 0) {
+                if (pass) {
                     list.push(obj);
                 }
             }
