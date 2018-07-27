@@ -246,9 +246,14 @@
 
         if (!$.isElement(that.table, 'TABLE')) {
             if (isString(that.table)) {
+                op.id = that.table;
                 that.table = doc.getElementById(that.table);
-            } else {
+            }
+            if(that.table === null) {
+                var id = that.table;
                 that.table = doc.createElement('TABLE');
+                that.table.id = op.id || '';
+                that.table.className = op.className || '';
                 op.parent.appendChild(that.table);
             }
         }
@@ -262,6 +267,9 @@
         if ($.isString(trigger.row)) {
             op.trigger.row = [trigger.row, 'toggle'];
         }
+        
+        //先清除所有行，防止重复添加
+        that.clearRow();
 
         if (op.headData) {
             that.createHead(op.headData);
@@ -304,6 +312,7 @@
             }
         },
         clearRow: function (keepRows) {
+            keepRows = keepRows || 0;
             for (var i = this.table.rows.length - 1; i >= keepRows; i--) {
                 this.table.deleteRow(i);
             }

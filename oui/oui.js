@@ -384,7 +384,7 @@
         global.Dictionary = Dictionary;
     }
 
-    $.extend($, { Dictionary: Dictionary, dic: new Dictionary() });
+    $.extend($, { Dictionary: Dictionary, dict: new Dictionary() });
 }(OUI);
 
 // Web
@@ -463,9 +463,48 @@
             }
             return elem;
         },
+        loadStaticFile = function(path, id, callback , parent, nodeName, attributes) {
+            var node = doc.getElementById(id), ae = null;
+            if(node){
+                return $.isFunction(callback) && callback(), node;
+            }
+            node = createElement(nodeName, parent, function(elem) {
+                if(id){
+                    elem.id = id;
+                }
+                setAttribute(elem, attributes, true);
+            }), ae = node.attachEvent;
+
+            if ($.isFunction(ae) && ae.toString() && ae.toString().indexOf('[native code]') >= 0) {
+                node.attachEvent('onreadystatechange', function(ev) { onFileLoad(ev, path); });
+            } else {
+                node.addEventListener('load', function(ev) { onFileLoad(ev, path); }, false);
+            }
+
+            function onFileLoad(ev, path) { 
+                if(!$.isDebug() && nodeName === 'script'){
+                    parent.removeChild(node);
+                }
+                onCallback(); 
+            }
+            function onCallback() { $.isFunction(callback) && callback(); }
+
+            return node;
+        },
         loadLinkStyle = function(path, id, callback) {
-            if (!$.isUndefined(id) && doc.getElementById(id)) { return false; }
-            var node = createElement('link', head, function(elem) {
+            if ($.isFunction(id) && !$.isFunction(callback)) {
+                callback = id, id = null;
+            }
+            id = id || ('link-' + $.crc.toCRC16(path));
+            return loadStaticFile(path, id, callback, head, 'link', { 
+                type: 'text/css', rel: 'stylesheet', href: $.setQueryString(path) 
+            });
+            /*
+            var node = doc.getElementById(id), ae = null;
+            if(node){
+                return $.isFunction(callback) && callback(), node;
+            }
+            node = createElement('link', head, function(elem) {
                 setAttribute(elem, { id: id, type: 'text/css', rel: 'stylesheet', href: $.setQueryString(path) }, true);
             }), ae = node.attachEvent;
 
@@ -477,19 +516,26 @@
 
             function onScriptLoad(ev, path) { onCallback(); }
             function onCallback() { $.isFunction(callback) && callback(); }
+            */
         },
         loadJsScript = function(path, id, callback, parent) {
             if ($.isFunction(id) && !$.isFunction(callback)) {
-                callback = id, id = null;
+                parent = callback, callback = id, id = null;
             }
-            id = id || $.crc.toCRC16(path);
+            //parent = parent || head;
+            parent = parent || doc.body;
+            id = id || ('script-' + $.crc.toCRC16(path));
+
+            return loadStaticFile(path, id, callback, parent, 'script', { 
+                type: 'text/javascript', async: true, src: $.setQueryString(path), charset: 'utf-8' 
+            });
+
+            /*
             var node = doc.getElementById(id), ae = null;
             if(node){
                 return $.isFunction(callback) && callback(), node;
             }
 
-            //parent = parent || head;
-            parent = parent || doc.body;
             node = createElement('script', parent, function(elem) {
                 setAttribute(elem, { id: id, type: 'text/javascript', async: true, src: $.setQueryString(path), charset: 'utf-8' }, true);
             }), ae = node.attachEvent;
@@ -504,6 +550,7 @@
             function onCallback() { $.isFunction(callback) && callback(); }
 
             return node;
+            */
         },
         removeJsScript = function(id, filePath) {
             if (id) {

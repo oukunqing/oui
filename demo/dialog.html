@@ -9,8 +9,10 @@
 </head>
 <body>
     <div id="p1"></div>
+    <div id="t1"></div>
 
-    <a onclick="paging();">分页</a>
+    <button onclick="paging();">分页</button>
+    <button onclick="showTable();">显示表格</button>
 </body>
 </html>
 <script type="text/javascript">
@@ -45,6 +47,95 @@ function paging(){
             callbackParam: {
                 id: 123, prompt: '这是回调参数'
             }
+        });
+    });
+}
+
+function showTable(){
+    $.loadJsScript('../oui/table/oui.table.js', function(){
+
+        var headData = [
+            {
+                rowData:{
+                    style:{background:'#005eac'}
+                }, cellData: ['表头11', '表头12', '表头13', '表头14', '表头15', '表头16']
+            },
+            {
+                rowData:{
+                    style:{background:'#005eac'}
+                }, cellData: ['表头21', '表头22', '表头23', '表头24', '表头25', '表头26']
+            },
+            ['表头31', '表头33', '表头33', '表头34', '表头35', '表头36']
+        ];
+        var bodyData = [
+            {
+                rowData:{ attribute:{ id:1, class:'tr-1'}, event:{click:function(){alert(this.id);}}}, treeData:{id:1, pid:0}, cellData:[
+                    {content:'单元格11', style:{color:'#f00'}}, {content:'单元格12'}, {content:'单元格13'}, {content:'单元格14'}, {content:'单元格15'}, {content:'单元格16'}
+                ]
+            },
+            {
+                rowData: {}, treeData:{id:2, pid:1}, cellData:[
+                    {content:'单元格21', style:'color:#00f;'}, {content:'单元格22'}, {content:'单元格23'}, {content:'单元格24'}, {content:'单元格25'}, {content:'单元格26'}
+                ]
+            },
+            {
+                rowData: {}, treeData:{id:4, pid:2}, cellData:[
+                    {content:'单元格41'}, {content:'单元格42'}, {content:'单元格43'}, {content:'单元格44'}, {content:'单元格45'}, {content:'单元格46'}
+                ]
+            },
+            {
+                rowData: {}, treeData:{id:3, pid:1}, cellData:[
+                    {content:'单元格31'}, {content:'单元格32'}, {content:'单元格33'}, {content:'单元格34'}, {content:'单元格35'}, {content:'单元格36'}
+                ]
+            },
+            {
+                rowData: {}, treeData:{id:5, pid:2}, cellData:[
+                    {content:'单元格51'}, {content:'单元格52'}, {content:'单元格53'}, {content:'单元格54'}, {content:'单元格55'}, {content:'单元格56'}
+                ]
+            },
+            {
+                rowData: {}, treeData:{id:6, pid:4}, cellData:[
+                    {content:'单元格61'}, {content:'单元格62'}, {content:'单元格63'}, {content:'单元格64'}, {content:'单元格65'}, {content:'单元格66'}
+                ]
+            },
+            {
+                rowData: {}, treeData:{id:7, pid:2}, cellData:[
+                    {content:'单元格71'}, {content:'单元格72'}, {content:'单元格73'}, {content:'单元格74'}, {content:'单元格75'}, {content:'单元格76'}
+                ]
+            },
+            {
+                rowData: {}, treeData:{id:8, pid:2}, cellData:[
+                    {content:'单元格81'}, {content:'单元格82'}, {content:'单元格83'}, {content:'单元格84'}, {content:'单元格85'}, {content:'单元格86'}
+                ]
+            },
+            {
+                rowData: {}, treeData:{id:9, pid:3}, cellData:[
+                    {content:'单元格91'}, {content:'单元格92'}, {content:'单元格93'}, {content:'单元格94'}, {content:'单元格95'}, {content:'单元格96'}
+                ]
+            }
+        ];
+
+        var tb = new $.Table({
+            table: 'tblist',                //表格（对象 或 Id 或 null)，为null则自动创建表格对象（可以不设置）
+            className: 'tblist',
+            parent: document.getElementById('t1'),          //表格父节点，默认为 document.body （可以不设置）
+            headData: headData,             //初始化时要创建的表格头部数据（可以不设置），数据格式参考示例说明
+            bodyData: bodyData,                 //初始化时要创建的表格主体数据（可以不设置），数据格式参考示例说明
+            showTree: true,                 //是否显示树形结构，boolean值： true | false, 默认为false（可以不设置）
+            treeCellIndex: 0,               //要显示树形结构的列索引，从0开始，默认为0（可以不设置）
+            trigger: {                      //树形收缩/展开触发器，若cell和row同时设置了不同的事件，可能会有事件冒泡
+                cell: ['click', 'toggle'],  //点击列触发事件，数组或字符串，第1个元素为事件：(click, dblclick)，第2个元素为动作： (toggle, expand, collapse)
+                //row: 'click'                //点击行触发事件，数组或字符串，第1个元素为事件：(click, dblclick)，第2个元素为动作： (toggle, expand, collapse)
+            },
+            treeOptions:{                   //树形结构参数
+                spaceWidth: 16,             //树形每一层之间的缩进距离，单位为px，默认为16px（可以不设置）
+                /*className: {                //树形结构箭头图标样式
+                    expand: 'expand',       //节点展开时的样式
+                    collapse: 'collapse'    //节点收缩时的样式
+                },
+                */
+                //className: ['expand', 'collapse'] //可以数组形式，第1个元素为节点展开的样式
+            } 
         });
     });
 }
