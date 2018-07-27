@@ -306,11 +306,6 @@ ID:<input type="text" id="txtId" style="width:50px;" />
     }
 
     
-    OUI.loadJsScript('../oui/pagination/oui.pagination.js',  function(){
-        console.log('oui.pagination.js');
-        console.log('oui: ', OUI);
-    });
-
 
     OUI.loadJsScript('../oui/oui.crc.js',  function(){
         console.log('异步加载JS文件完成：');
@@ -325,6 +320,11 @@ ID:<input type="text" id="txtId" style="width:50px;" />
         console.log(new OUI.CRC().toCRC16('AB你好'));
 
         console.log(new OUI.CRC().toModbusCRC16('AB  你 好'));
+    });
+
+    OUI.loadJsScript('../oui/pagination/oui.pagination.js',  function(){
+        console.log('oui.pagination.js');
+        console.log('oui: ', OUI);
     });
 
         for(var k in tb){

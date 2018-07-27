@@ -122,8 +122,10 @@
                     //设置tr创建记录，通过id找tr位置时要用到
                     setTreeFlag(that.tree, id, false);
                     content = buildSwitch(that.tree, id, treeData.level) + content;
-                    //临时测试用
-                    content += ' [ id: ' + treeData.id + ', pid: ' + treeData.pid + ', level: ' + treeData.level + ' ]';
+                    if($.isDebug()){
+                        //临时测试用
+                        content += ' [ id: ' + treeData.id + ', pid: ' + treeData.pid + ', level: ' + treeData.level + ' ]';
+                    }
                     cell.innerHTML = content;
 
                     var btnSwitch = doc.getElementById(buildSwitchId(id));
@@ -132,10 +134,12 @@
 
                     if (trigger.cell) {
                         cell.setAttribute('tid', id);
+                        $.setStyle(cell, 'cursor', 'default');
                         $.addEventListener(cell, trigger.cell[0], function () { func(this, trigger.cell[1] || 'toggle'); });
                     }
                     if (trigger.row) {
                         row.setAttribute('tid', id);
+                        $.setStyle(row, 'cursor', 'default');
                         $.addEventListener(row, trigger.row[0], function () { func(this, trigger.row[1] || 'toggle'); });
                     }
                 } else {
@@ -153,25 +157,16 @@
 
             return cell;
         },
-        insertCellProperty = function (element, dr) {
-            if ($.isObject(dr.style)) {
-                for (var k in dr.style) {
-                    element.style[k] = dr.style[k];
-                }
-            } else if ($.isString(dr.style)) {
-                element.style.cssText = dr.style;
-            }
+        insertCellProperty = function (elem, dr) {
+            $.setStyle(elem, dr.style, true);
+
             if ($.isObject(dr.event)) {
                 for (var k in dr.event) {
-                    $.addEventListener(element, k, dr.event[k]);
+                    $.addEventListener(elem, k, dr.event[k]);
                 }
             }
             var attr = dr.attribute || dr.attr || dr.property || dr.prop;
-            if ($.isObject(attr)) {
-                for (var k in attr) {
-                    element.setAttribute(k, attr[k]);
-                }
-            }
+            $.setAttribute(elem, attr, true);
         },
         checkChild = function (key, trees) {
             if (trees !== null) {
@@ -225,17 +220,25 @@
 
     function Table(options) {
         var that = this, op = $.extend({
-            table: null,
-            parent: doc.body,
-            showTree: false,
-            treeCellIndex: 0,
-            trigger: {
-                cell: '',   //['click', 'toggle']
-                row: ''     //['click', 'toggle']
+            table: null,                            //表格（对象 或 Id 或 null)，为null则自动创建表格对象（可以不设置）
+            parent: doc.body,                       //表格父节点，默认为 document.body （可以不设置）
+            showTree: false,                        //是否显示树形结构，boolean值： true | false, 默认为false（可以不设置）
+            treeCellIndex: 0,                       //要显示树形结构的列索引，从0开始，默认为0（可以不设置）
+            trigger: {                              //树形收缩/展开触发器，若cell和row同时设置了不同的事件，可能会有事件冒泡
+                cell: '',   //['click', 'toggle']       //点击列触发事件，数组或字符串，第1个元素为事件：(click, dblclick)，第2个元素为动作： (toggle, expand, collapse)
+                row: ''     //['click', 'toggle']       //点击行触发事件，数组或字符串，第1个元素为事件：(click, dblclick)，第2个元素为动作： (toggle, expand, collapse)
             },
-            headData: [],
-            bodyData: [],
-            treeOptions: {}
+            headData: [],                           //初始化时要创建的表格头部数据（可以不设置），数据格式参考示例说明
+            bodyData: [],                           //初始化时要创建的表格主体数据（可以不设置），数据格式参考示例说明
+            treeOptions: {                          //树形结构参数
+                //spaceWidth: 16,                       //树形每一层之间的缩进距离，单位为px，默认为16px（可以不设置）
+                /*className: {                          //树形结构箭头图标样式
+                    expand: 'expand',                   //节点展开时的样式
+                    collapse: 'collapse'                //节点收缩时的样式
+                },
+                */
+                //className: ['expand', 'collapse']     //可以数组形式，第1个元素为节点展开的样式
+            }
         }, options), trigger = op.trigger;
 
         that.options = op;
