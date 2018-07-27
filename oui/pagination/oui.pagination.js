@@ -167,10 +167,9 @@
         }
     };
 
-    var thisFilePath = $.getScriptSelfPath();
-
+    var thisFilePath = $.getScriptSelfPath(true);
     //先加载样式文件
-    $.loadLinkStyle($.getFilePath(thisFilePath, thisFilePath) + $.getFileName(thisFilePath, true) + '.css');
+    $.loadLinkStyle($.getFilePath(thisFilePath) + $.getFileName(thisFilePath, true) + '.css');
 
     var defaultClassName = 'oui-pagination',
         defaultPositon = 'left',

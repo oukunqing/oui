@@ -11,7 +11,7 @@
 
     var doc = document,
         head = document.getElementsByTagName('head')[0],
-        thisFilePath = $.getScriptSelfPath(),
+        thisFilePath = $.getScriptSelfPath(true),
         isCellSpan = function (span) {
             return $.isNumber(span) && span > 0;
         },

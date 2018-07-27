@@ -403,9 +403,9 @@
         getLocationPath = function () {
             return location.href.substring(0, location.href.lastIndexOf('/') + 1);
         },
-        getScriptSelfPath = function () {
-            var elements = doc.getElementsByTagName('script'), len = elements.length;
-            return elements[len - 1].src;
+        getScriptSelfPath = function (getRelativePath) {
+            var elements = doc.getElementsByTagName('script'), len = elements.length, elem = elements[len - 1];
+            return getRelativePath ? elem.getAttribute('src') : elem.src;
         },
         getFilePath = function (fullPath, currentPath) {
             var pos = fullPath.lastIndexOf('/'), prefix = currentPath || getLocationPath();
