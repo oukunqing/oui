@@ -35,7 +35,7 @@ console.log(tree, typeof tree, typeof $.toJson(tree), $.toJson(tree).id);
 console.log($.Pagination);
 
 function paging(){
-    var node = $.loadJsScript('../oui/pagination/oui.pagination.js', function(){
+    var node = $.loadJsScript('../oui/pagination/oui.pagination.min.js', function(){
         console.log('分页');
         var p1 = new OUI.Pagination({
             parent: $('#p1')[0],

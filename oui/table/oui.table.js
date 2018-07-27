@@ -338,7 +338,7 @@
 
     function TableTree(isTree, options) {
         if ($.isUndefined(options.className) || $.isEmpty(options.className)) {
-            $.loadLinkStyle($.getFilePath(thisFilePath) + $.getFileName(thisFilePath, true) + '.css');
+            $.loadLinkStyle($.getFilePath(thisFilePath) + $.getFileName(thisFilePath, true).replace('.min', '') + '.css');
         }
         var that = this;
         that.options = $.extend({
