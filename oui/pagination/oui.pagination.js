@@ -6,7 +6,7 @@
  @License：MIT
 */
 
-!function($) {
+!function ($) {
     'use strict';
 
     function Pagination(options, dataCount) {
@@ -31,8 +31,8 @@
             showPageCount: true,        //是否显示总页数
             showDataStat: false,        //是否显示数据统计
             showSizeSelect: true,       //是否显示PageSize下拉框
-            pageSizeItems: defaultPageSizeItems,      //PageSize下拉框默认选项
-            callback: function(pageIndex, param) {      //回调函数模式
+            pageSizeItems: [],          //PageSize下拉框默认选项
+            callback: function (pageIndex, param) {      //回调函数模式
                 console.log('pageIndex: ', pageIndex, ', param: ', param);
             },
             callbackParam: null,                    //回调参数
@@ -54,7 +54,7 @@
     }
 
     Pagination.prototype = {
-        paging: function(options, dataCount) {
+        paging: function (options, dataCount) {
             if ($.isObject(options) || $.isNumber(options)) {
                 this.options = setOptions(this.options, options, dataCount);
             }
@@ -187,13 +187,13 @@
         defaultLongPressTime = 1024,    //长按最小时长，单位：毫秒
         defaultLongPressInterval = 50,          //长按分页间隔，单位：毫秒
         minLongPressInterval = 20,              //长按分页最小间隔，单位：毫秒
-        setNumber = function(op, keys) {
+        setNumber = function (op, keys) {
             for (var i in keys) {
                 var key = keys[i], num = parseInt(op[key], 10);
                 op[key] = isNaN(num) || num < 0 ? 0 : num;
             }
         },
-        setOptions = function(op, options, dataCount) {
+        setOptions = function (op, options, dataCount) {
             var texts = {
                 symbol: {
                     first: '&laquo;', previous: '&lsaquo;', next: '&rsaquo;', last: '&raquo;',
@@ -231,7 +231,7 @@
                     if ($.isString(op.element)) {
                         op.element = document.getElementById(op.element);
                     } else {
-                        op.element = $.createElement('DIV', function(ele) {
+                        op.element = $.createElement('DIV', function (ele) {
                             ele.id = new Date().getTime();
                         });
                     }
@@ -246,7 +246,7 @@
                 if (op.pageSize < minPageSize) {
                     op.pageSize = minPageSize;
                 }
-  
+
                 //pageUrl中必须包含{0}或{pageIndex}，用于替换pageIndex值
                 if (!$.isString(op.url) || (op.url.indexOf('{0}') < 0 && op.url.indexOf('{pageIndex}') < 0)) {
                     op.url = '';
@@ -264,7 +264,7 @@
                     op.longPressTime = defaultLongPressTime;
                 }
 
-                if(!$.isNumber(op.longPressInterval) || op.longPressInterval < minLongPressInterval){
+                if (!$.isNumber(op.longPressInterval) || op.longPressInterval < minLongPressInterval) {
                     op.longPressInterval = defaultLongPressInterval;
                 }
 
@@ -285,7 +285,7 @@
 
             return op;
         },
-        checkPageIndex = function(that, value) {
+        checkPageIndex = function (that, value) {
             var op = that.options;
             if ($.isNumeric(value)) {
                 return (value + op.minuend <= op.pageCount) && (value >= op.pageStart);
@@ -297,7 +297,7 @@
                 }
             }
         },
-        getMinMax = function(that) {
+        getMinMax = function (that) {
             var op = that.options, min = op.pageStart, max = 0;
             if (op.pageCount <= op.markCount) {
                 max = op.pageCount;
@@ -312,7 +312,7 @@
             }
             return [min, max];
         },
-        buildLinkText = function(enabled, that, arr, pageIndex, textKey, noLink, className) {
+        buildLinkText = function (enabled, that, arr, pageIndex, textKey, noLink, className) {
             if (enabled) {
                 var text = that.options.markText[textKey], css = className + (className === textKey ? '' : ' ' + textKey);
                 if (noLink) {
@@ -324,7 +324,7 @@
             return that;
         },
         // 参数 t 用来指示当前获取焦点是哪个输入框
-        buildPageInput = function(enabled, that, arr, showButton, t) {
+        buildPageInput = function (enabled, that, arr, showButton, t) {
             if (enabled) {
                 var op = that.options, maxlength = op.pageCount.toString().length, className = showButton ? ' group' : '',
                     input = '<input type="text" class="text ' + className + '" value="' + (op.pageIndex + op.minuend)
@@ -336,13 +336,13 @@
             }
             return that;
         },
-        buildDataCount = function(enabled, that, arr, text, datas) {
+        buildDataCount = function (enabled, that, arr, text, datas) {
             if (enabled) {
                 arr.push('<span class="label">' + (text || '{0}').format(datas) + '</span>');
             }
             return that;
         },
-        buildDataStat = function(enabled, that, arr, text) {
+        buildDataStat = function (enabled, that, arr, text) {
             if (enabled) {
                 var op = that.options, str = text || '{0}', datas = [0, 0, 0];
                 if (op.dataCount > 0) {
@@ -353,7 +353,7 @@
             }
             return that;
         },
-        keyPaging = function(ev, that, obj) {
+        keyPaging = function (ev, that, obj) {
             var op = that.options, pageIndex = 0, ec = ev.keyCode;
             if (ec === 13) {
                 pageIndex = getValue(obj);
@@ -373,18 +373,18 @@
 
             return { value: pageIndex };
         },
-        setInputer = function(that, obj) {
+        setInputer = function (that, obj) {
             if ($.isElement(obj, 'INPUT')) {
                 that.options.inputer = obj.getAttribute('t');
             }
         },
-        isInputer = function(that, obj) {
+        isInputer = function (that, obj) {
             if ($.isElement(obj, 'INPUT')) {
                 return that.options.inputer === obj.getAttribute('t');
             }
             return false;
         },
-        checkInputValue = function(op, val) {
+        checkInputValue = function (op, val) {
             if (val > op.pageCount) {
                 val = op.pageCount - op.minuend;
             } else if (val < op.pageStart) {
@@ -392,7 +392,7 @@
             }
             return val;
         },
-        pageCallback = function(that, val) {
+        pageCallback = function (that, val) {
             var op = that.options;
             if ($.isString(op.url, true)) {
                 location.href = op.url.format(op.url.indexOf('{0}') >= 0 ? val : op);
@@ -400,7 +400,7 @@
                 op.callback(val, op.callbackParam);
             }
         },
-        realCallback = function(that, val) {
+        realCallback = function (that, val) {
             var op = that.options;
             //是否启用防抖功能，抖动频率需大于50毫秒
             if (op.debounce && op.debounceTime >= defaultDebounceTime) {
@@ -409,18 +409,18 @@
                 //防抖
                 if (op.timerDebounce != null) { window.clearTimeout(op.timerDebounce); }
                 //外部回调
-                op.timerDebounce = window.setTimeout(function() { pageCallback(that, val); }, op.debounceTime);
+                op.timerDebounce = window.setTimeout(function () { pageCallback(that, val); }, op.debounceTime);
             } else {
                 pageCallback(that, val);
             }
         },
-        setCallback = function(that, objs, eventName, minuend, func, isPageSize) {
+        setCallback = function (that, objs, eventName, minuend, func, isPageSize) {
             var op = that.options, obj = objs, objVal = null, val = 0;
             if ($.isArray(objs)) {
                 obj = objs[0], objVal = objs[1];
             }
             if ($.isUndefined(obj)) { return false; }
-            $.addEventListener(obj, eventName, function(ev) {
+            $.addEventListener(obj, eventName, function (ev) {
                 //判断是否是键盘按钮事件 keyup keydown keypress 等
                 if (eventName.indexOf('key') >= 0) {
                     var kp = keyPaging(ev, that, this);
@@ -443,20 +443,20 @@
                 }
             });
         },
-        getClassName = function(that) {
+        getClassName = function (that) {
             return that.options.className || defaultClassName;
         },
-        getPosition = function(that, isMain) {
+        getPosition = function (that, isMain) {
             return isMain ? that.options.position : positions[that.options.position] ? 'right' : 'left';
         },
-        longPressPaging = function(that, obj, isStop) {
+        longPressPaging = function (that, obj, isStop) {
             var op = that.options;
             if (isStop) {
                 if (op.timerLongPress) { window.clearTimeout(op.timerLongPress); }
                 if (op.timerLongPress2) { window.clearInterval(op.timerLongPress2); }
                 return false;
             }
-            op.timerLongPress2 = window.setInterval(function() {
+            op.timerLongPress2 = window.setInterval(function () {
                 var val = op.pageIndex, add = obj.className.indexOf('next') >= 0;
                 val += add ? 1 : -1;
 
@@ -468,21 +468,21 @@
                 realCallback(that, val);
             }, op.longPressInterval);
         },
-        createEvent = function(that, minuend) {
+        createEvent = function (that, minuend) {
             var op = that.options, links = op.element.getElementsByTagName('A'), c = links.length;
             for (var i = 0; i < c; i++) {
                 var a = links[i];
                 if (op.useLongPress && (a.className.indexOf('prev') >= 0 || a.className.indexOf('next') >= 0)) {
-                    $.addEventListener(a, 'mousedown', function() {
+                    $.addEventListener(a, 'mousedown', function () {
                         var obj = this;
-                        op.timerLongPress = window.setTimeout(function() {
+                        op.timerLongPress = window.setTimeout(function () {
                             longPressPaging(that, obj, false);
                         }, op.longPressTime);
                     });
-                    $.addEventListener(op.element, 'mouseup', function() {
+                    $.addEventListener(op.element, 'mouseup', function () {
                         longPressPaging(that, null, true);
                     });
-                    $.addEventListener(op.element, 'mouseout', function() {
+                    $.addEventListener(op.element, 'mouseout', function () {
                         longPressPaging(that, null, true);
                     });
                 }
@@ -491,7 +491,7 @@
 
             var select = op.element.getElementsByTagName('Select')[0];
             if (select !== null) { select.value = op.pageSize; }
-            setCallback(that, select, 'change', 0, function(val) { op.pageSize = val; }, true);
+            setCallback(that, select, 'change', 0, function (val) { op.pageSize = val; }, true);
 
             var inputs = op.element.getElementsByTagName('Input'), ic = inputs.length;
             var btn = op.element.getElementsByTagName('Button')[0];
@@ -507,7 +507,7 @@
                     setCallback(that, inputs[i], 'keydown', minuend);
                 }
                 //清除输入的非数字字符，只能输入正整数
-                $.addEventListener(inputs[i], 'keyup', function(ev) {
+                $.addEventListener(inputs[i], 'keyup', function (ev) {
                     this.value = this.value.replace(/[^\d]/, '');
                 });
                 if (isInputer(that, inputs[i])) {
@@ -517,37 +517,47 @@
             //设置输入框获取焦点
             $.setFocus(focusInput);
         },
-        getValue = function(obj) {
+        getValue = function (obj) {
             return parseInt(obj.value || obj.getAttribute('value'), 10);
         },
-        setValue = function(obj, value) {
+        setValue = function (obj, value) {
             if (obj.tagName === 'INPUT') {
                 obj.value = value;
             } else {
                 obj.setAttribute('value', value);
             }
         },
-        buildPageSize = function(enabled, that, arr, minuend) {
+        buildPageSize = function (enabled, that, arr, minuend) {
             if (enabled) {
-                var op = that.options, html = ['<select class="select">'], selected = false;
+                var op = that.options, html = ['<select class="select">'];
+                if (!$.isArray(op.pageSizeItems) || $.isEmpty(op.pageSizeItems)) {
+                    op.pageSizeItems = defaultPageSizeItems;
+                }
+
+                if (op.pageSizeItems.indexOf(op.pageSize) < 0) {
+                    if ($.isArray(op.pageSizeItems[0])) {
+                        var text = (op.pageSizeItems[0][1] || '').replace(/[\d]+/, op.pageSize);
+                        op.pageSizeItems.push([op.pageSize, text]);
+                    } else {
+                        op.pageSizeItems.push(op.pageSize);
+                    }
+                    op.pageSizeItems.sort(function (a, b) { return (a[0] || a) - (b[0] || b); });
+
+                    //将自定义pageSize追加到默认的选项中
+                    if (defaultPageSizeItems.indexOf(op.pageSize) < 0) {
+                        defaultPageSizeItems.push(op.pageSize);
+                        defaultPageSizeItems.sort(function (a, b) { return a - b; });
+                    }
+                }
+
                 if ($.isArray(op.pageSizeItems)) {
                     for (var i in op.pageSizeItems) {
                         var dr = op.pageSizeItems[i];
                         if ($.isInteger(dr)) {
                             html.push('<option value="' + dr + '">' + dr + '</option>');
                         } else if ($.isArray(dr)) {
-                            if (!selected) {
-                                selected = parseInt(dr[0], 10) === op.pageSize;
-                            }
                             html.push('<option value="' + dr[0] + '">' + (dr[1] || dr[0]) + '</option>');
                         }
-                    }
-                }
-                if (!selected && op.pageSizeItems.indexOf(op.pageSize) < 0) {
-                    html.push('<option value="' + op.pageSize + '">' + op.pageSize + '</option>');
-                    //将自定义pageSize追加到默认的选项中
-                    if(defaultPageSizeItems.indexOf(op.pageSize) < 0){
-                        defaultPageSizeItems.push(op.pageSize);
                     }
                 }
                 html.push('</select>');

@@ -249,7 +249,7 @@
                 op.id = that.table;
                 that.table = doc.getElementById(that.table);
             }
-            if(that.table === null) {
+            if (that.table === null) {
                 var id = that.table;
                 that.table = doc.createElement('TABLE');
                 that.table.id = op.id || '';
