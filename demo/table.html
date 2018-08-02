@@ -99,7 +99,7 @@ ID:<input type="text" id="txtId" style="width:50px;" />
     var bodyData = [        
         {
             rowData:{ attr:{ id: 1, class:'tr-1'}, event:{click:function(){alert(this.id);}}}, treeData:{id:1, pid:0}, cellData:[
-                {content:'单元格11', style:{color:'#f00'}}, {content:'单元格12'}, {content:'单元格13', rowSpan:2, colSpan:3}, {content:'单元格14'}, {content:'单元格15'}, {content:'单元格16'}
+                {content:'单元格11', style:{color:'#f00'}}, {content:'单元格12'}, {content:'单元格13', rowSpan:0, colSpan:0}, {content:'单元格14'}, {content:'单元格15'}, {content:'单元格16'}
             ]
         },
         {
@@ -109,34 +109,36 @@ ID:<input type="text" id="txtId" style="width:50px;" />
         }
     ];
 
+    var tb1 = new $.Table();
 
-        var tb1 = new $.Table();
+    console.log('tb1: ', tb1);
 
-        console.log('tb1: ', tb1);
     tb1.createBody(bodyData);
     
     var tb = new $.Table({
         table: 'tblist',                //表格（对象 或 Id 或 null)，为null则自动创建表格对象（可以不设置）
         parent: document.body,          //表格父节点，默认为 document.body （可以不设置）
+        alternate: false,                //是否设置交替行样式（背景色）
         headData: headData,             //初始化时要创建的表格头部数据（可以不设置），数据格式参考示例说明
         bodyData: null,                 //初始化时要创建的表格主体数据（可以不设置），数据格式参考示例说明
         showTree: true,                 //是否显示树形结构，boolean值： true | false, 默认为false（可以不设置）
         treeCellIndex: 0,               //要显示树形结构的列索引，从0开始，默认为0（可以不设置）
         trigger: {                      //树形收缩/展开触发器，若cell和row同时设置了不同的事件，可能会有事件冒泡
             cell: ['click', 'toggle'],  //点击列触发事件，数组或字符串，第1个元素为事件：(click, dblclick)，第2个元素为动作： (toggle, expand, collapse)
-            //row: 'click'                //点击行触发事件，数组或字符串，第1个元素为事件：(click, dblclick)，第2个元素为动作： (toggle, expand, collapse)
+            //row: 'click'              //点击行触发事件，数组或字符串，第1个元素为事件：(click, dblclick)，第2个元素为动作： (toggle, expand, collapse)
         },
         treeOptions:{                   //树形结构参数
             spaceWidth: 16,             //树形每一层之间的缩进距离，单位为px，默认为16px（可以不设置）
-            /*className: {                //树形结构箭头图标样式
+            /*className: {              //树形结构箭头图标样式
                 expand: 'expand',       //节点展开时的样式
-                collapse: 'collapse'    //节点收缩时的样式
+                collapse: 'collapse',   //节点收缩时的样式
+                selected: 'selected'    //节点选中时 表格行的样式
             },
             */
             //className: ['expand', 'collapse'] //可以数组形式，第1个元素为节点展开的样式
         } 
     });
-        console.log('tb: ', tb);
+    console.log('tb: ', tb);
 
     tb.createBody(bodyData);
 
@@ -276,6 +278,8 @@ ID:<input type="text" id="txtId" style="width:50px;" />
     window.setTimeout(function(){
         console.log('tb.tree: ', tb.tree);
         tb.tree.collapse(6);
+
+        tb.alternate();
     }, 2000);
 
     function toggle(collapse){
