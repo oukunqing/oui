@@ -744,6 +744,16 @@
             $Q: function(selectors, parent) {
                 return (parent || doc).querySelector(selectors);
             },
+            $QA: function(selectors, options, parent) {
+                if ($.isElement(options)) {
+                    parent = options, options = null;
+                }
+                var arr = (parent || doc).querySelectorAll(selectors);
+                if (!$.isObject(options) || $.isEmpty(options)) {
+                    return arr;
+                }
+                return checkCondition(arr, options);
+            },
             //options: { value:[], checked:true, attribute:{}, style:{} }
             $N: function(name, options) {
                 var arr = doc.getElementsByName(name), len = arr.length, list = [];
@@ -777,21 +787,10 @@
                     return arr;
                 }
                 return checkCondition(arr, options);
-            },
-            $QA: function(selectors, options, parent) {
-                if ($.isElement(options)) {
-                    parent = options, options = null;
-                }
-                var arr = (parent || doc).querySelectorAll(selectors);
-                if (!$.isObject(options) || $.isEmpty(options)) {
-                    return arr;
-                }
-                return checkCondition(arr, options);
             }
         });
     }
 }(OUI);
-
 
 // Javascript Native Object
 !function($) {

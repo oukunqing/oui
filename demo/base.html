@@ -11,6 +11,9 @@ base.js demo
 请打开浏览器调试工具
 
 <div id="div1">
+    <input type="text" name="txt" value="txt123" />
+    <input type="text" name="txt" value="txt321" />
+    <input type="text" name="txt" value="txt12345" />
     <input type="checkbox" name="chb" value="1" class="chb" /> 复选框1
     <input type="checkbox" name="chb" value="2" id="chb2" checked="checked" /> 复选框2
     <input type="checkbox" name="chb" value="3" class="chb" /> 复选框3
@@ -357,4 +360,9 @@ for(var i = 0; i < arr.length; i++){
     console.log('chb: ', arr[i].value, arr[i].disabled);
 }
 
+var arr = $QA('[name=txt]');
+for(var i = 0; i < arr.length; i++){
+    console.log('chb: ', arr[i].value, arr[i].name, arr[i].type);
+}
+console.log(arr, arr[0]);
 </script>
