@@ -1347,77 +1347,81 @@
 
     if (typeof window === 'object') {
         var doc = $.doc;
-        var checkCondition = function(arr, options) {
-            var list = [], len = arr.length;
 
-            var parent = options.parent,
-                tagNames = options.tagName,
-                types = options.type,
-                values = options.value,
-                checked = options.checked,
-                disabled = options.disabled,
-                attrs = options.attribute,
-                styles = options.style;
+        // matchCondition
+        $.extend($, {
+            matchCondition: function(elements, options){
+                var list = [], len = elements.length, op = options;
 
-            if (!$.isUndefined(values)) {
-                if (!$.isArray(values)) {
-                    values = ['' + values];
-                } else {
-                    //转换为字符串数组
-                    values = values.join(',').split(',');
+                var parent = op.parent,
+                    tagNames = op.tagName,
+                    checked = op.checked,
+                    disabled = op.disabled,
+                    types = op.type || op.types,
+                    values = op.value || op.values,
+                    attrs = op.attribute || op.attributes || op.attrs,
+                    styles = op.style || op.styles;
+
+                if (!$.isUndefined(values)) {
+                    if (!$.isArray(values)) {
+                        values = ['' + values];
+                    } else {
+                        //转换为字符串数组
+                        values = values.join(',').split(',');
+                    }
                 }
-            }
-            var checkParent = $.isElement(parent),
-                checkTag = ($.isString(tagNames, true) && tagNames !== '*') || $.isArray(tagNames),
-                checkType = $.isString(types, true) || $.isArray(types),
-                checkValue = $.isArray(values) && !$.isEmpty(values),
-                checkAttr = $.isObject(attrs),
-                checkStyle = $.isObject(styles);
+                var checkParent = $.isElement(parent),
+                    checkTag = ($.isString(tagNames, true) && tagNames !== '*') || $.isArray(tagNames),
+                    checkType = $.isString(types, true) || $.isArray(types),
+                    checkValue = $.isArray(values) && !$.isEmpty(values),
+                    checkAttr = $.isObject(attrs),
+                    checkStyle = $.isObject(styles);
 
-            if (checkTag && !$.isArray(tagNames)) {
-                tagNames = [tagNames];
-            }
+                if (checkTag && !$.isArray(tagNames)) {
+                    tagNames = [tagNames];
+                }
 
-            if (checkType && !$.isArray(types)) {
-                types = [types];
-            }
+                if (checkType && !$.isArray(types)) {
+                    types = [types];
+                }
 
-            for (var i = 0; i < len; i++) {
-                var obj = arr[i], pass = true;
-                if (!pass) { continue; } else if ($.isBoolean(checked)) { pass = obj.checked === checked; }
-                if (!pass) { continue; } else if (checkValue) { pass = values.indexOf(obj.value) >= 0; }
-                if (!pass) { continue; } else if (checkTag) { pass = tagNames.indexOf(obj.tagName) >= 0; }
-                if (!pass) { continue; } else if (checkType) { pass = types.indexOf(obj.type) >= 0; }
-                if (!pass) { continue; } else if ($.isBoolean(disabled)) { pass = obj.disabled === disabled; }
-                if (!pass) { continue; } else if (checkParent) { pass = obj.parentNode === parent; }
-                if (!pass) { continue; } else if (checkAttr) {
-                    for (var name in attrs) {
-                        if (!pass) { break; }
-                        var val = obj.getAttribute(name), con = attrs[name];
-                        if (name === 'disabled' || name === 'checked') {
-                            if (con === null || con === '' || ($.isBoolean(con) && !con)) {
-                                pass = val === null;
-                            } else if (!$.isUndefined(con)) {
-                                pass = val !== null;
+                for (var i = 0; i < len; i++) {
+                    var obj = elements[i], pass = true;
+                    if (!pass) { continue; } else if ($.isBoolean(checked)) { pass = obj.checked === checked; }
+                    if (!pass) { continue; } else if (checkValue) { pass = values.indexOf(obj.value) >= 0; }
+                    if (!pass) { continue; } else if (checkTag) { pass = tagNames.indexOf(obj.tagName) >= 0; }
+                    if (!pass) { continue; } else if (checkType) { pass = types.indexOf(obj.type) >= 0; }
+                    if (!pass) { continue; } else if ($.isBoolean(disabled)) { pass = obj.disabled === disabled; }
+                    if (!pass) { continue; } else if (checkParent) { pass = obj.parentNode === parent; }
+                    if (!pass) { continue; } else if (checkAttr) {
+                        for (var name in attrs) {
+                            if (!pass) { break; }
+                            var val = obj.getAttribute(name), con = attrs[name];
+                            if (name === 'disabled' || name === 'checked') {
+                                if (con === null || con === '' || ($.isBoolean(con) && !con)) {
+                                    pass = val === null;
+                                } else if (!$.isUndefined(con)) {
+                                    pass = val !== null;
+                                }
+                            } else {
+                                pass = val === con;
                             }
-                        } else {
-                            pass = val === con;
                         }
                     }
-                }
-                if (!pass) { continue; } else if (checkStyle) {
-                    for (var name in styles) {
-                        if (!pass) { break; }
-                        pass = obj.style[name] === styles[name];
+                    if (!pass) { continue; } else if (checkStyle) {
+                        for (var name in styles) {
+                            if (!pass) { break; }
+                            pass = obj.style[name] === styles[name];
+                        }
+                    }
+                    if (pass) {
+                        list.push(obj);
                     }
                 }
-                if (pass) {
-                    list.push(obj);
-                }
+                return list;
             }
-            return list;
-        };
-
+        });
+        
         $.extend(window, {
             $I: function(id, parent) {
                 if (id.indexOf('#') === 0) {
@@ -1436,7 +1440,7 @@
                 if (!$.isObject(options) || $.isEmpty(options)) {
                     return arr;
                 }
-                return checkCondition(arr, options);
+                return $.matchCondition(arr, options);
             },
             //options: { value:[], checked:true, attribute:{}, style:{} }
             $N: function(name, options) {
@@ -1444,7 +1448,7 @@
                 if (!$.isObject(options) || $.isEmpty(options)) {
                     return arr;
                 }
-                return checkCondition(arr, options);
+                return $.matchCondition(arr, options);
             },
             $T: function(tagName, options, parent) {
                 if ($.isElement(options)) {
@@ -1457,7 +1461,7 @@
                 if (!$.isObject(options) || $.isEmpty(options)) {
                     return arr;
                 }
-                return checkCondition(arr, options);
+                return $.matchCondition(arr, options);
             },
             $C: function(className, options, parent) {
                 if (className.indexOf('.') === 0) {
@@ -1470,7 +1474,7 @@
                 if (!$.isObject(options) || $.isEmpty(options)) {
                     return arr;
                 }
-                return checkCondition(arr, options);
+                return $.matchCondition(arr, options);
             }
         });
 
@@ -1496,6 +1500,48 @@
             return wsi(func, delay);
         };
     }
+}(OUI);
+
+
+// utils
+!function($) {
+    'use strict';
+
+    var isName = function(selector){
+        return !/[\.\#\[\=]/.test(selector);
+    };
+
+    $.extendNative($, {
+        setChecked: function(selector, action, values){
+            var arr = isName(selector) ? $N(selector) : $QA(selector);
+            if(arr){
+                if($.isString(values)){
+                    values = values.split(/[|,]/);
+                }
+                if($.isArray(values)){
+                    arr = $.matchCondition(arr, {values: values});
+                }
+                for(var i = 0, c = arr.length; i < c; i++){
+                    var obj = arr[i];
+                    switch(parseInt(action, 10)) {
+                        case 0: obj.checked = false; break;
+                        case 1: obj.checked = true; break;
+                        case 2: obj.checked = !obj.checked; break;
+                    }
+                }
+            }
+        },
+        getChecked: function(selector){
+            if(isName(selector)){
+                return $N(selector, { attribute: {checked: true}});
+            } else {
+                if(!/(\[checked)/gi.test(selector.replace(/[\s]/g, ''))){
+                    selector += '[checked]';
+                }
+                return $QA(selector);
+            }
+        }
+    });
 }(OUI);
 
 // jQuery 
@@ -1766,11 +1812,15 @@
                 obj.removeAttribute(name);
             });
         },
-        addClass: function() {
-
+        addClass: function(value) {
+            return this.each(function(i, obj){
+                $.addClass(obj, value);
+            });
         },
         removeClass: function() {
-
+            return this.each(function(i, obj){
+                $.removeClass(obj, value);
+            });
         }
     });
 
@@ -1794,3 +1844,4 @@
         }
     });
 }(OUI);
+

@@ -20,6 +20,30 @@
     background: #ffe7bc; border: solid 1px #ffdcbc;
 }
 
+.oui-table td.cell-line-number{
+    text-align: center;
+}
+.oui-table td.cell-checkbox{
+    text-align: center;
+}
+
+.oui-table a.quick-a{
+    cursor: pointer; color: #999; border: none 0; border-radius: 2px; background: #fff; 
+    font-size: 10px; line-height: 12px; width: 12px; height: 12px; padding:0 0; margin:3px 0 0 0; float: right;
+}
+
+.oui-table div.quick-menu{
+    position: absolute; border:solid 1px #ddd; border-radius:4px; background:#fff;
+    margin: -3px 0 0 20px; line-height: 1.8em; min-width: 80px;
+    display: none; overflow: hidden;
+}
+.oui-table div.quick-menu a{
+    display: block; padding: 0px 10px; margin: 0; font-size: 12px; border: none 0; background: none; text-align: left;
+}
+.oui-table div.quick-menu a:hover{
+    background: #005eac; color: #fff;
+}
+
 .oui-table-tree{}
 
 .oui-table-tree .expand{

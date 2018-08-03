@@ -12,6 +12,9 @@
     var doc = document,
         head = document.getElementsByTagName('head')[0],
         thisFilePath = $.getScriptSelfPath(true),
+        CELL_LINE_NUMBER = 'cell-line-number',
+        CELL_CHECKBOX = 'cell-checkbox',
+        TABLE_INDEX = 1,
         isCellSpan = function (span) {
             return $.isNumber(span) && span > 0;
         },
@@ -51,14 +54,24 @@
                 return tb.tBodies[0] || tb.createTBody();
             }
         },
+        isTHead = function(container){
+            return container.tagName === 'THEAD';
+        },
         createRow = function (that, container, datas, trees, pids, isAppend) {
-            var rowIndex = container.rows.length;
+            var rowIndex = container.rows.length, op = that.options;
             if (!isDyadicArray(datas)) {
                 datas = [datas];
             }
+            console.log(container.tagName);
+            var isHead = isTHead(container), len = datas.length, inserted = false;
             if (!that.options.showTree || $.isUndefined(trees)) {
                 for (var i in datas) {
                     var row = container.insertRow(rowIndex + Number(i));
+                    if(!isHead || !inserted){
+                        insertCheckboxCell(that, row, isHead, len);
+                        insertLineNumberCell(that, row, isHead, len);
+                        inserted = true;
+                    }
                     insertCell(that, row, datas[i]);
                 }
             } else {
@@ -66,6 +79,7 @@
             }
         },
         createTreeRow = function (that, container, datas, trees, pids, isAppend) {
+            var op = that.options, isHead = isTHead(container), len = datas.length, inserted = false;
             isAppend = $.isBoolean(isAppend, false);
             for (var i in datas) {
                 var d = datas[i], isArray = $.isArray(d), treeData = d.treeData || {};
@@ -74,7 +88,13 @@
                     if (isAppend) {
                         rowIndex = findRowIndex(that, container, treeData.pid);
                     }
-                    insertCell(that, container.insertRow(rowIndex), datas[i]);
+                    var row = container.insertRow(rowIndex);
+                    if(!isHead || !inserted){
+                        insertCheckboxCell(that, row, isHead, len);
+                        insertLineNumberCell(that, row, isHead, len);
+                        inserted = true;
+                    }
+                    insertCell(that, row, datas[i]);
 
                     var key = buildKey(treeData.id), hasChild = checkChild(key, trees);
                     if (hasChild) {
@@ -85,6 +105,87 @@
             }
             return 0;
         },
+        getOptionValue = function(dr){
+            if($.isString(dr)){
+                return dr;
+            }
+            var keys = ['content', 'html', 'text'];
+            for(var i in keys){
+                var key = keys[i];
+                if(!$.isUndefined(dr[key])){
+                    return dr[key];
+                }
+            }
+            return '';
+        },
+        insertLineNumberCell = function(that, row, isHead, rowCount){
+            var op = that.options;
+            if(op.showLineNumber){
+                var cell = row.insertCell(0);
+                cell.className = CELL_LINE_NUMBER;
+                if(isHead){
+                    if(rowCount > 1){
+                        cell.rowSpan = rowCount;
+                    }
+                    cell.innerHTML = '序号';
+                } else {
+                    cell.innerHTML = '';
+                }
+            }
+        },
+        insertCheckboxCell = function(that, row, isHead, rowCount){
+            var op = that.options;
+            if(op.showCheckbox){
+                var cell = row.insertCell(0), id = that.id + '-chb', menu = id + '-menu';
+                cell.className = CELL_CHECKBOX;                 
+                if(isHead){
+                    if(rowCount > 1){
+                        cell.rowSpan = rowCount;
+                    }
+                    cell.innerHTML = '<input type="checkbox" id="' + id + '" />'
+                        + '<a id=' + (id + '-a') + ' class="quick-a">&or;</a>'
+                        + '<div id="' + (menu) + '" class="quick-menu" style="display:none;">'
+                        + '<a v="1">全选</a>'
+                        + '<a v="0">不选</a>'
+                        + '<a v="2">反选</a>'
+                        + '</div>';
+                    $.addEventListener($I(id), 'click', function(){
+                        $.setChecked(id, this.checked ? 1 : 0);
+                    });
+                    
+                    $.addEventListener($I(id + '-a'), 'click', function(){
+                        var obj = $I(menu), show = obj.style.display;
+                        //toggle方式显示快捷菜单
+                        $I(menu).style.display = show === 'none' ? 'block' : 'none';
+                        $.cancelBubble();
+
+                        if(!this.first){
+                            $.addEventListener(document, 'click', function(){
+                                $I(menu).style.display = 'none';
+                            });
+                        }
+                        this.first = 1;
+                    });
+
+                    $('#' + menu + ' a').each(function(i, obj){
+                        $.addEventListener(obj, 'click', function(){
+                            var action = parseInt(obj.getAttribute('v'), 10);
+                            $.setChecked(id, action);
+                            $I(id).checked = action === 1 ? true : action === 0 ? false : !$I(id).checked;
+                            this.parentNode.style.display = 'none';
+                        });
+                    });
+                } else {
+                    cell.innerHTML = '<input type="checkbox" name="' + id + '" />';
+                }
+            }
+        },
+        getCheckedRow = function(that, name){
+            name = name || (that.id + '-chb');
+            var arr = $N(name, {attribute: {checked: true}});
+
+            console.log('getCheckedRow: ', arr);
+        },
         insertCell = function (that, row, data) {
             var isArray = $.isArray(data),
                 showTree = that.options.showTree,
@@ -92,7 +193,7 @@
                 cellData = isArray ? data : data.cellData || data.cell || data.cells,
                 rowData = data.rowData || data.row,
                 treeData = data.treeData || data.tree,
-                cellIndex = 0,
+                cellIndex = 0, startIndex = row.cells.length,
                 cols = !$.isUndefined(cellData) ? cellData.length : 0,
                 isRow = $.isObject(rowData) && !$.isEmpty(rowData),
                 isTree = showTree && $.isObject(treeData) && !$.isEmpty(treeData),
@@ -111,12 +212,12 @@
                 };
 
             for (var i = 0; i < cols; i++) {
-                var dr = cellData[i], cell = row.insertCell(cellIndex);
+                var dr = cellData[i], cell = row.insertCell(startIndex + cellIndex);
                 if (isRow && i === 0) {
                     insertCellProperty(row, rowData);
                 }
 
-                var content = dr.content || dr.html || dr.text || dr;
+                var content = getOptionValue(dr);
                 if (isTree && cellIndex === treeCellIndex) {
                     row.setAttribute('id', buildId(id));
                     //row.setAttribute('tree', '{{id:{id},pid:{pid},level:{level}}}'.format(treeData));
@@ -221,23 +322,38 @@
             return null;
         },
         setRowStyle = function(force, className){
-            var that = this, op = this.options, css = className || op.className.alternate;
+            var that = this, op = that.options, css = className || op.alternateClassName;
             if((!force && !op.alternate) || !css){
                 return false;
             }
             if(op.timerAlternate){
                 window.clearTimeout(op.timerAlternate);
             }
-
             op.timerAlternate = window.setTimeout(function(){
-                console.log('setRowStyle: ', new Date().toString());
-                var tb = that.table, headRows = getTHeadRows(tb), rows = tb.rows.length, idx = 0;
-                
+                var tb = that.table, headRows = getTHeadRows(tb), rows = tb.rows.length, idx = 0;                
                 for(var i = headRows; i < rows; i++){
                     var tr = tb.rows[i];
                     $.removeClass(tr, css);
                     if(idx++ % 2 === 0){
                         $.addClass(tr, css);
+                    }
+                }
+            }, 320);
+        },
+        setLineNumber = function(force){
+            var that = this, op = that.options;
+            if(!force && !op.showLineNumber){
+                return false;
+            }
+            if(op.timerLineNumber){
+                window.clearTimeout(op.timerLineNumber);
+            }
+            op.timerLineNumber = window.setTimeout(function(){
+                var tb = that.table, headRows = getTHeadRows(tb), rows = tb.rows.length, idx = 0;
+                for(var i = headRows; i < rows; i++){
+                    var cell = tb.rows[i].cells[0];
+                    if(cell){
+                        cell.innerHTML = ++idx;
                     }
                 }
             }, 320);
@@ -247,10 +363,11 @@
         var that = this, op = $.extend({
             table: null,                            //表格（对象 或 Id 或 null)，为null则自动创建表格对象（可以不设置）
             parent: doc.body,                       //表格父节点，默认为 document.body （可以不设置）
+            showLineNumber: false,                  //是否显示行号（若为true，则自动增加一列用于显示行号）
+            showCheckbox: false,                    //是否显示复选框
             alternate: false,                       //是否设置交替行样式（背景色）
-            className: {
-                alternate: 'alternate'
-            },
+            alternateClassName: 'alternate',
+            className: '',
             showTree: false,                        //是否显示树形结构，boolean值： true | false, 默认为false（可以不设置）
             treeCellIndex: 0,                       //要显示树形结构的列索引，从0开始，默认为0（可以不设置）
             trigger: {                              //树形收缩/展开触发器，若cell和row同时设置了不同的事件，可能会有事件冒泡
@@ -271,10 +388,12 @@
             }
         }, options), trigger = op.trigger;
 
+        that.id = 'oui-table-' + (TABLE_INDEX++);
         that.options = op;
         that.table = op.table;
         if (op.showTree) {
             that.tree = new TableTree(op.showTree, op.treeOptions || {});
+            that.tree.Table = that;
         }
 
         if (!$.isElement(that.table, 'TABLE')) {
@@ -300,14 +419,8 @@
             $.addClass(that.table, 'oui-table-tree');
         }
 
-        if(!$.isObject(op.className)){
-            op.className = {
-                alternate: 'alternate'
-            };
-        }
-
         if($.isString(op.alternate, true)){
-            op.className.alternate = op.alternate;
+            op.alternateClassName = op.alternate;
             op.alternate = true;
         }
 
@@ -345,7 +458,7 @@
             } else {
                 createRow(that, container, bodyData);
             }
-            return setRowStyle.call(this), this;
+            return setRowStyle.call(this), setLineNumber.call(this), this;
         },
         appendBody: function (bodyData) {
             return this.createBody(bodyData), this;
@@ -362,7 +475,7 @@
             if (this.table.rows.length > rowIndex) {
                 this.table.deleteRow(rowIndex);
             }
-            return setRowStyle.call(this), this;
+            return setRowStyle.call(this), setLineNumber.call(this), this;
         },
         clearRow: function (keepRows) {
             keepRows = keepRows || 0;
@@ -384,6 +497,9 @@
             } else {
                 return $I(this.tree.buildId(id));
             }
+        },
+        getCheckedRow: function(){
+            return getCheckedRow(this);
         },
         alternate: function(className){
             return setRowStyle.call(this, true, className), this;
@@ -485,67 +601,68 @@
                     this.expandParent(pid);
                 }
             }
+            return this;
         },
         toggle: function (id, collapse) {
             var that = this, btnSwitch = $I(buildSwitchId(id));
-            if (btnSwitch === null) {
-                return false;
-            }
-            //判断收缩还是展开
-            collapse = $.isBoolean(collapse, btnSwitch.getAttribute('expand') === '1');
-            setSwitch(that, btnSwitch, collapse, false);
+            if (btnSwitch !== null) {
+                //判断收缩还是展开
+                collapse = $.isBoolean(collapse, btnSwitch.getAttribute('expand') === '1');
+                setSwitch(that, btnSwitch, collapse, false);
 
-            //展开时，需要检查父级节点是否是展开状态，若为收缩则展开
-            if (!collapse) {
-                that.expandParent(id);
-            }
+                //展开时，需要检查父级节点是否是展开状态，若为收缩则展开
+                if (!collapse) {
+                    that.expandParent(id);
+                }
 
-            //获取当前节点下的所有子节点
-            var childs = getChildIds(that, id), ids = getRowIds(that, childs, collapse, []);
-            //记录收缩状态
-            setCollapse(that, id, ids, collapse);
+                //获取当前节点下的所有子节点
+                var childs = getChildIds(that, id), ids = getRowIds(that, childs, collapse, []);
+                //记录收缩状态
+                setCollapse(that, id, ids, collapse);
 
-            for (var i = ids.length - 1; i >= 0; i--) {
-                var obj = $I(buildId(ids[i]));
-                if (obj !== null) {
-                    obj.style.display = collapse ? 'none' : '';
+                for (var i = ids.length - 1; i >= 0; i--) {
+                    var obj = $I(buildId(ids[i]));
+                    if (obj !== null) {
+                        obj.style.display = collapse ? 'none' : '';
+                    }
                 }
             }
+            return this;
         },
         collapse: function (id) {
-            this.toggle(id, true);
+            return this.toggle(id, true), this;
         },
         expand: function (id) {
-            this.toggle(id, false);
+            return this.toggle(id, false), this;
         },
         toggleLevel: function (level, collapse) {
-            if (!$.isInteger(level)) {
-                return false;
-            }
-            //按层级展开时，收缩的层级+1
-            level = (level < 0 ? 0 : level) + (collapse ? 0 : 1);
+            if ($.isInteger(level)) {
+                //按层级展开时，收缩的层级+1
+                level = (level < 0 ? 0 : level) + (collapse ? 0 : 1);
 
-            for (var i in this.options.treeDatas) {
-                var dr = this.options.treeDatas[i].treeData || {}, id = dr.id;
-                var obj = $I(buildId(id)), btnSwitch = $I(buildSwitchId(id));
-                if (obj !== null) {
-                    obj.style.display = dr.level <= level ? '' : 'none';
-                }
-                if (dr.level === level) {
-                    //设置当前等级的子级为收缩状态，记录收缩状态
-                    setSwitch(this, btnSwitch, true, true);
-                    setCollapse(this, id, [], true);
-                } else if (!collapse && dr.level < level) {
-                    //按层级展开时，设置当前等级为展开状态
-                    setSwitch(this, btnSwitch, false, true);
+                for (var i in this.options.treeDatas) {
+                    var dr = this.options.treeDatas[i].treeData || {}, id = dr.id;
+                    var obj = $I(buildId(id)), btnSwitch = $I(buildSwitchId(id));
+                    if (obj !== null) {
+                        obj.style.display = dr.level <= level ? '' : 'none';
+                    }
+                    if (dr.level === level) {
+                        //设置当前等级的子级为收缩状态，记录收缩状态
+                        setSwitch(this, btnSwitch, true, true);
+                        setCollapse(this, id, [], true);
+                    } else if (!collapse && dr.level < level) {
+                        //按层级展开时，设置当前等级为展开状态
+                        setSwitch(this, btnSwitch, false, true);
+                    }
                 }
             }
+            return this;
         },
         collapseLevel: function (level) {
-            this.toggleLevel(level, true);
+            return this.toggleLevel(level, true), this;
         },
         expandLevel: function (level) {
-            this.toggleLevel(level, false);
+            return this.toggleLevel(level, false), this;
         },
         toggleAll: function (collapse) {
             for (var i in this.options.treeDatas) {
@@ -560,12 +677,13 @@
                     setCollapse(this, id, [], collapse);
                 }
             }
+            return this;
         },
         collapseAll: function () {
-            this.toggleAll(true);
+            return this.toggleAll(true), this;
         },
         expandAll: function () {
-            this.toggleAll(false);
+            return this.toggleAll(false), this;
         },
         remove: function (id, keepSelf) {
             //获取当前节点下的所有子节点
@@ -577,9 +695,11 @@
             if (!keepSelf) {
                 deleteTableRow($I(buildId(id)));
             }
+            setLineNumber.call(this.Table);
+            return this;
         },
         removeChild: function (id) {
-            this.remove(id, true);
+            return this.remove(id, true), this;
         },
         select: function (id) {
             var that = this, op = that.options, fa = $I(buildFocusId(id));
@@ -595,6 +715,7 @@
                 }
                 fa.focus();
             }
+            return this;
         }
     };
 
