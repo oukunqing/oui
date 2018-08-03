@@ -133,6 +133,24 @@
                 }
             }
         },
+        showQuickMenu = function(sender, menu, ev){
+            var obj = $I(menu), show = obj.style.display === 'none';
+            //toggle方式显示快捷菜单
+            obj.style.display = show ? 'block' : 'none';
+
+            if(show){                
+                obj.style.left = ev.clientX + 'px';
+                obj.style.top = ev.clientY + 'px';
+            }
+
+            if(!sender.first){
+                $.addEventListener(document, 'click', function(){
+                    obj.style.display = 'none';
+                });
+            }
+            sender.first = 1;
+            $.cancelBubble();
+        },
         insertCheckboxCell = function(that, row, isHead, rowCount){
             var op = that.options;
             if(op.showCheckbox){
@@ -142,39 +160,47 @@
                     if(rowCount > 1){
                         cell.rowSpan = rowCount;
                     }
-                    cell.innerHTML = '<input type="checkbox" id="' + id + '" />'
-                        + '<a id=' + (id + '-a') + ' class="quick-a">&or;</a>'
-                        + '<div id="' + (menu) + '" class="quick-menu" style="display:none;">'
-                        + '<a v="1">全选</a>'
-                        + '<a v="0">不选</a>'
-                        + '<a v="2">反选</a>'
-                        + '</div>';
-                    $.addEventListener($I(id), 'click', function(){
-                        $.setChecked(id, this.checked ? 1 : 0);
-                    });
+                    var html = '<input type="checkbox" id="' + id + '" />';
                     
-                    $.addEventListener($I(id + '-a'), 'click', function(){
-                        var obj = $I(menu), show = obj.style.display;
-                        //toggle方式显示快捷菜单
-                        $I(menu).style.display = show === 'none' ? 'block' : 'none';
-                        $.cancelBubble();
+                    if(op.showQuickMenu){
+                        if(op.showQuickMenuButton){
+                            html += '<a id=' + (id + '-a') + ' class="quick-a">&or;</a>';
+                        }
+                        html += '<div id="' + (menu) + '" class="quick-menu" style="display:none;">'
+                            + '<a v="1">全选</a>'
+                            + '<a v="0">不选</a>'
+                            + '<a v="2">反选</a>'
+                            + '</div>';
+                    }
+                    cell.innerHTML = html;
 
-                        if(!this.first){
-                            $.addEventListener(document, 'click', function(){
-                                $I(menu).style.display = 'none';
+                    $.addEventListener($I(id), 'click', function(ev){
+                        $.setChecked(id, this.checked ? 1 : 0);
+                        ev.stopPropagation();
+                    });
+
+                    if(op.showQuickMenu){
+                        if(op.showQuickMenuButton){
+                            $.addEventListener($I(id + '-a'), 'click', function(ev){
+                                showQuickMenu(this, menu, ev);
+                            });
+                        } else {
+                            $.addEventListener(cell, 'click', function(ev){
+                                showQuickMenu(this, menu, ev);
                             });
                         }
-                        this.first = 1;
-                    });
-
-                    $('#' + menu + ' a').each(function(i, obj){
-                        $.addEventListener(obj, 'click', function(){
-                            var action = parseInt(obj.getAttribute('v'), 10);
-                            $.setChecked(id, action);
-                            $I(id).checked = action === 1 ? true : action === 0 ? false : !$I(id).checked;
-                            this.parentNode.style.display = 'none';
+                        $('#' + menu + ' a').each(function(i, obj){
+                            $.addEventListener(obj, 'click', function(){
+                                var action = parseInt(obj.getAttribute('v'), 10);
+                                $.setChecked(id, action);
+                                //设置表头中的复选框状态
+                                $I(id).checked = action === 1 ? true : action === 0 ? false : !$I(id).checked;
+                                //隐藏快捷菜单DIV
+                                this.parentNode.style.display = 'none';
+                                $.cancelBubble();
+                            });
                         });
-                    });
+                    }
                 } else {
                     cell.innerHTML = '<input type="checkbox" name="' + id + '" />';
                 }
@@ -357,6 +383,9 @@
                     }
                 }
             }, 320);
+        },
+        callback = function(func, value){
+            $.isFunction(func) && func(value);
         };
 
     function Table(options) {
@@ -365,6 +394,8 @@
             parent: doc.body,                       //表格父节点，默认为 document.body （可以不设置）
             showLineNumber: false,                  //是否显示行号（若为true，则自动增加一列用于显示行号）
             showCheckbox: false,                    //是否显示复选框
+            showQuickMenu: false,                   //是否显示复选框快捷菜单
+            showQuickMenuButton: false,             //是否显示复选框快捷菜单按钮
             alternate: false,                       //是否设置交替行样式（背景色）
             alternateClassName: 'alternate',
             className: '',
@@ -424,6 +455,12 @@
             op.alternate = true;
         }
 
+        if(op.showCheckbox){
+            if(!$.isBoolean(options.showQuickMenu)){
+                op.showQuickMenu = true;
+            }
+        }
+
         if ($.isString(trigger.cell)) {
             op.trigger.cell = [trigger.cell, 'toggle'];
         }
@@ -444,10 +481,10 @@
     }
 
     Table.prototype = {
-        createHead: function (headData) {
-            return createRow(this, getContainer(this.table, true), headData), this;
+        createHead: function (headData, func) {
+            return createRow(this, getContainer(this.table, true), headData), callback(func), this;
         },
-        createBody: function (bodyData) {
+        createBody: function (bodyData, func) {
             if (bodyData.length === 0) {
                 return false;
             }
@@ -458,31 +495,34 @@
             } else {
                 createRow(that, container, bodyData);
             }
-            return setRowStyle.call(this), setLineNumber.call(this), this;
+            return setRowStyle.call(this), setLineNumber.call(this), callback(func), this;
         },
-        appendBody: function (bodyData) {
-            return this.createBody(bodyData), this;
+        appendBody: function (bodyData, func) {
+            return this.createBody(bodyData, func), this;
         },
-        append: function (bodyData, isHeadData) {
+        append: function (bodyData, isHeadData, func) {
+            if($.isFunction(isHeadData)){
+                func = isHeadData, isHeadData = false;
+            }
             if (isHeadData) {
-                this.createHead(bodyData);
+                this.createHead(bodyData, func);
             } else {
-                this.createBody(bodyData);
+                this.createBody(bodyData, func);
             }
             return this;
         },
-        deleteRow: function (rowIndex) {
+        deleteRow: function (rowIndex, func) {
             if (this.table.rows.length > rowIndex) {
                 this.table.deleteRow(rowIndex);
             }
-            return setRowStyle.call(this), setLineNumber.call(this), this;
+            return setRowStyle.call(this), setLineNumber.call(this), callback(func), this;
         },
-        clearRow: function (keepRows) {
+        clearRow: function (keepRows, func) {
             keepRows = keepRows || 0;
             for (var i = this.table.rows.length - 1; i >= keepRows; i--) {
                 this.table.deleteRow(i);
             }
-            return this;
+            return callback(func), this;
         },
         getRow: function (ids) {
             if ($.isArray(ids)) {
@@ -589,7 +629,7 @@
 
             return { datas: datas, trees: trees, pids: pids };
         },
-        expandParent: function (id) {
+        expandParent: function (id, func) {
             var key = buildKey(id), data = this.options.treeDatas[key];
             if (data && data.treeData) {
                 var pid = data.treeData.pid || 0, pkey = buildKey(pid), pdata = this.options.treeDatas[pkey];
@@ -598,12 +638,12 @@
                     if (btnSwitch !== null && btnSwitch.getAttribute('expand') === '0') {
                         this.expand(pid);
                     }
-                    this.expandParent(pid);
+                    this.expandParent(pid, func);
                 }
             }
-            return this;
+            return callback(func), this;
         },
-        toggle: function (id, collapse) {
+        toggle: function (id, collapse, func) {
             var that = this, btnSwitch = $I(buildSwitchId(id));
             if (btnSwitch !== null) {
                 //判断收缩还是展开
@@ -627,15 +667,15 @@
                     }
                 }
             }
-            return this;
+            return callback(func), this;
         },
-        collapse: function (id) {
-            return this.toggle(id, true), this;
+        collapse: function (id, func) {
+            return this.toggle(id, true, func), this;
         },
-        expand: function (id) {
-            return this.toggle(id, false), this;
+        expand: function (id, func) {
+            return this.toggle(id, false, func), this;
         },
-        toggleLevel: function (level, collapse) {
+        toggleLevel: function (level, collapse, func) {
             if ($.isInteger(level)) {
                 //按层级展开时，收缩的层级+1
                 level = (level < 0 ? 0 : level) + (collapse ? 0 : 1);
@@ -656,15 +696,15 @@
                     }
                 }
             }
-            return this;
+            return callback(func), this;
         },
-        collapseLevel: function (level) {
-            return this.toggleLevel(level, true), this;
+        collapseLevel: function (level, func) {
+            return this.toggleLevel(level, true, func), this;
         },
-        expandLevel: function (level) {
-            return this.toggleLevel(level, false), this;
+        expandLevel: function (level, func) {
+            return this.toggleLevel(level, false, func), this;
         },
-        toggleAll: function (collapse) {
+        toggleAll: function (collapse, func) {
             for (var i in this.options.treeDatas) {
                 var dr = this.options.treeDatas[i].treeData || {}, id = dr.id;
                 var obj = $I(buildId(id)), btnSwitch = $I(buildSwitchId(id));
@@ -677,15 +717,22 @@
                     setCollapse(this, id, [], collapse);
                 }
             }
-            return this;
+            return callback(func), this;
         },
-        collapseAll: function () {
-            return this.toggleAll(true), this;
+        collapseAll: function (func) {
+            return this.toggleAll(true, func), this;
         },
-        expandAll: function () {
-            return this.toggleAll(false), this;
+        expandAll: function (func) {
+            return this.toggleAll(false, func), this;
         },
-        remove: function (id, keepSelf) {
+        remove: function (id, keepSelf, func) {
+            if($.isFunction(keepSelf)){
+                func = keepSelf, keepSelf = false;
+            }
+            var obj = $I(buildId(id));
+            if(obj === null){
+                return callback(func, false), this; 
+            }
             //获取当前节点下的所有子节点
             var childs = getChildIds(this, id), ids = getRowIds(this, childs, true, []), len = ids.length;
             for (var i = len - 1; i >= 0; i--) {
@@ -693,17 +740,18 @@
                 deleteTableRow(tr);
             }
             if (!keepSelf) {
-                deleteTableRow($I(buildId(id)));
+                deleteTableRow(obj);
             }
             setLineNumber.call(this.Table);
-            return this;
+            
+            return callback(func, true), this;
         },
-        removeChild: function (id) {
-            return this.remove(id, true), this;
+        removeChild: function (id, func) {
+            return this.remove(id, true, func), this;
         },
-        select: function (id) {
-            var that = this, op = that.options, fa = $I(buildFocusId(id));
-            if (fa !== null) {
+        select: function (id, func) {
+            var that = this, op = that.options, fa = $I(buildFocusId(id)), find = fa !== null;
+            if (find) {
                 var tr = findRow(fa);
                 if(tr !== null) {
                     if(that.selector){
@@ -715,7 +763,7 @@
                 }
                 fa.focus();
             }
-            return this;
+            return callback(func, find), this;
         }
     };
 

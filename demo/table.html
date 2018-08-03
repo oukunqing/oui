@@ -4,7 +4,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>（树形）表格插件测试 - OUI</title>
     <style type="text/css">
-        body{font-size:12px; font-family: Arial;}
+        body{font-size:12px; font-family: Arial; margin:10px; padding: 10px;}
         .tblist{border-collapse:collapse;}
         .tblist td{border:solid 1px #ccc; padding:5px;}
 
@@ -91,13 +91,13 @@ ID:<input type="text" id="txtId" style="width:50px;" />
             rowData:{
                 style:{background:'#005eac'}
             }, cellData: ['表头11', '表头12', '表头13', '表头14', '表头15', '表头16']
-        }/*,
+        },
         {
             rowData:{
                 style:{background:'#005eac'}
             }, cellData: ['表头21', '表头22', '表头23', '表头24', '表头25', '表头26']
-        }*/
-        //, ['表头31', '表头33', '表头33', '表头34', '表头35', '表头36']
+        }
+        , ['表头31', '表头33', '表头33', '表头34', '表头35', '表头36']
     ];
         
     var bodyData = [        
@@ -124,6 +124,8 @@ ID:<input type="text" id="txtId" style="width:50px;" />
         parent: document.body,          //表格父节点，默认为 document.body （可以不设置）
         showLineNumber: true,           //是否显示行号（若为true，则自动增加一列用于显示行号）
         showCheckbox: true,
+        //showQuickMenu: true,
+        //showQuickMenuButton: true,
         alternate: false,                //是否设置交替行样式（背景色）
         //alternateClassName: 'alternate',
         headData: headData,             //初始化时要创建的表格头部数据（可以不设置），数据格式参考示例说明
@@ -313,7 +315,9 @@ ID:<input type="text" id="txtId" style="width:50px;" />
     
     function select(){
         var id = document.getElementById('txtId').value;
-        tb.tree.select(id);
+        tb.tree.select(id, function(find){
+            alert('选择：' + find)
+        });
     }
 
     
