@@ -176,7 +176,9 @@
                     }
                     cell.innerHTML = html;
 
-                    $.addEventListener($I(id), 'click', function (ev) {
+                    var chbAll = $I(id);
+
+                    $.addEventListener(chbAll, 'click', function (ev) {
                         $.setChecked(id, this.checked ? 1 : 0);
                         ev.stopPropagation();
                     });
@@ -194,9 +196,7 @@
                         $('#' + menu + ' a').each(function (i, obj) {
                             $.addEventListener(obj, 'click', function () {
                                 var action = obj.getAttribute('v') || '';
-                                $.setChecked(id, action).cancelBubble().setChecked($I(id), action);
-                                //设置表头中的复选框状态
-                                //$I(id).checked = action === 1 ? true : action === 0 ? false : !$I(id).checked;
+                                $.setChecked(id, action).cancelBubble().setChecked(chbAll, action);
                                 //隐藏快捷菜单DIV
                                 this.parentNode.style.display = 'none';
                             });
@@ -210,17 +210,12 @@
         getCheckedRow = function (that, name) {
             name = name || (that.id + '-chb');
 
-            //var arr = $N(name, { attribute: { checked: true } }), len = arr.length, tb = that.table, list = [];
             var arr = $N(name, true), len = arr.length, tb = that.table, list = [];
 
             for (var i = 0; i < len; i++) {
                 list.push(findRow(arr[i])); 
             }
             return { inputs: arr, rows: list };
-        },
-        showSortButton = function (field) {
-            console.log('sortable: ', field);
-
         },
         insertCell = function (that, row, data, isHead) {
             var isArray = $.isArray(data),
@@ -242,9 +237,11 @@
                 },
                 trigger = that.options.trigger,
                 set = function (obj, id, configs) {
-                    obj.setAttribute('tid', id);
-                    $.setStyle(obj, 'cursor', 'default');
-                    $.addEventListener(obj, configs[0], function () { func(this, configs[1] || 'toggle'); });
+                    $.setAttribute(obj, {tid: id})
+                        .setStyle(obj, 'cursor', 'default', true)
+                        .addEventListener(obj, configs[0], function () { 
+                            func(this, configs[1] || 'toggle'); 
+                        });
                 };
 
             for (var i = 0; i < cols; i++) {
@@ -276,9 +273,11 @@
                     trigger.row && set(row, id, trigger.row || []);
                 } else {
                     if (isHead && dr.sortable) {
-                        content += showSortButton(dr.field);
+                        cell.innerHTML = content + showSortFlag(dr.field);
+                        setSortAction(that, cell, dr.field);
+                    } else {
+                        cell.innerHTML = content;
                     }
-                    cell.innerHTML = content;
                 }
 
                 if ($.isObject(dr)) {
@@ -398,6 +397,68 @@
         },
         callback = function (func, value) {
             $.isFunction(func) && func(value);
+        },
+        showSortFlag = function (field) {
+            console.log('sortable: ', field);
+            var html = [
+                '<span style="float:right;">',
+                '<a field="{0}" action="asc">^</a>',
+                '<a field="{0}" action="desc">V</a>',
+                '</span>'
+            ];
+            return html.join('').format(field);
+        },
+        setSortAction = function(that, cell, field){
+            $.setAttribute(cell, {action:'', field:field});
+            $.addEventListener(cell, 'click', function(){
+                var action = this.getAttribute('action');
+                var asc = !action || action === 'desc' ? 'asc' : 'desc';
+                this.setAttribute('action', asc);
+
+                sort(that, this.cellIndex, asc);
+            });
+        },
+        sort = function(that, field, asc) {
+            var tb = that.table, cellIndex = -1;
+            if($.isNumber(field)){
+                cellIndex = field;
+            } else {
+                var pass = false;
+                for(var i = 0; i < 1; i++){
+                    for(var j=0; j<tb.rows[i].cells.length; j++){
+                        if(field === tb.rows[i].cells[j].innerText){
+                            cellIndex = j;
+                            pass = true;
+                            break;
+                        }
+                    }
+                    if(pass){break;}
+                }
+            }
+            var container = getContainer(tb, false), arr = [], rows = container.rows.length, num = 0;
+            for(var i=0; i<rows; i++){
+                var row = container.rows[i];
+                for(var j=0; j<row.cells.length; j++){
+                    if(j === cellIndex){
+                        var cell = row.cells[j], con = cell.innerText;
+                        num += $.isNumeric(con) ? 1 : 0;
+                        arr.push({row: row, con: cell.innerText });
+                    }
+                }
+            }
+            arr.sort(function(a, b){
+                if(rows === num){
+                    return asc === 'asc' ? a.con - b.con : b.con - a.con;
+                } else {
+                    return asc === 'asc' ? a.con.localeCompare(b.con) : b.con.localeCompare(a.con);
+                }
+            });
+
+            var frag = doc.createDocumentFragment();
+            for(var i=0; i<arr.length; i++){
+                frag.appendChild(arr[i].row);
+            }
+            container.appendChild(frag);
         };
 
     function Table(options) {
@@ -557,6 +618,9 @@
         },
         alternate: function (className) {
             return setRowStyle.call(this, true, className), this;
+        },
+        sort: function(field, asc, func) {
+            return sort(this, field, asc), callback(func), this;
         }
     };
 
@@ -636,7 +700,7 @@
                 datas.push(dr);
             }
             //按level层级排序(升序)
-            datas = quickSort(datas, 'level');
+            datas = quickSort(datas, 'treeData', 'level');
 
             return { datas: datas, trees: trees, pids: pids };
         },
@@ -889,15 +953,19 @@
             var key = buildKey(id);
             return !$.isUndefined(that.options.treeCache[key]);
         },
-        quickSort = function (arr, key) {
+        quickSort = function (arr, key, key0) {
             if (0 === arr.length) {
                 return [];
             }
             var left = [], right = [], pivot = arr[0], c = arr.length;
             for (var i = 1; i < c; i++) {
-                arr[i].treeData[key] < pivot.treeData[key] ? left.push(arr[i]) : right.push(arr[i]);
+                if(key0){
+                    arr[i][key][key0] < pivot[key][key0] ? left.push(arr[i]) : right.push(arr[i]);
+                } else {
+                    arr[i][key] < pivot[key] ? left.push(arr[i]) : right.push(arr[i]);
+                }
             }
-            return quickSort(left, key).concat(pivot, quickSort(right, key));
+            return quickSort(left, key, key0).concat(pivot, quickSort(right, key, key0));
         };
 
     $.Table = Table;

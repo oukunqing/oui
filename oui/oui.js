@@ -1005,6 +1005,10 @@
     'use strict';
 
     var rnothtmlwhite = (/[^\x20\t\r\n\f]+/g);
+    var isAttributeValue = function(value){
+        return $.isString(value) || $.isNumber(value);
+    };
+
     var doc = function () { try { return document } catch (e) { return null } }(),
         head = doc ? doc.getElementsByTagName('head')[0] : null,
         redirect = function (url) {
@@ -1089,30 +1093,42 @@
             return $.isString(styleName) ? style[styleName] : style;
         },
         setAttribute = function (elem, attributes, exempt, serialize) {
-            if (!exempt && (!isElement(elem) || !$.isObject(attributes))) { return false; }
-            for (var key in attributes) {
-                var val = attributes[key];
-                if (serialize && $.isObject(val)) {
-                    if ($.isArray(val) || $.isElement(val)) {
-                        elem.setAttribute(key, val);
-                    } else {
-                        elem.setAttribute(key, $.toJsonString(val));
+            if($.isBoolean(exempt, false) || $.isElement(elem)){
+                if ($.isObject(attributes)) {
+                    for (var key in attributes) {
+                        var val = attributes[key];
+                        if (serialize && $.isObject(val)) {
+                            if ($.isArray(val) || $.isElement(val)) {
+                                elem.setAttribute(key, val);
+                            } else {
+                                elem.setAttribute(key, $.toJsonString(val));
+                            }
+                        } else {
+                            elem.setAttribute(key, val);
+                        }
                     }
-                } else {
-                    elem.setAttribute(key, val);
+                } else if ($.isString(attributes) && isAttributeValue(exempt)) {
+                    elem.setAttribute(attributes, exempt);
                 }
             }
-            return elem;
+            return this;
         },
-        setStyle = function (elem, styles, exempt) {
-            if (!exempt && !isElement(elem)) { return false; }
-            if ($.isObject(styles)) {
-                for (var key in styles) {
-                    elem.style[key] = styles[key];
-                }
-            } else if ($.isString(styles)) {
-                elem.style.cssText += styles;
+        setStyle = function (elem, styles, value, exempt) {
+            if($.isBoolean(value)){
+                exempt = value, value = null;
             }
+            if($.isBoolean(exempt, false) || $.isElement(elem)){
+                if ($.isObject(styles)) {
+                    for (var key in styles) {
+                        elem.style[key] = styles[key];
+                    }
+                } else if ($.isString(styles) && isAttributeValue(value)) {
+                    elem.style[styles] = value;
+                }  else if ($.isString(styles)) {
+                    elem.style.cssText += styles;
+                }
+            }
+            return this;
         },
         stripAndCollapse = function (value) {
             var tokens = value.match(rnothtmlwhite) || [];

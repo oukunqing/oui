@@ -91,25 +91,30 @@ ID:<input type="text" id="txtId" style="width:50px;" />
         {
             rowData:{
                 style:{background:'#005eac'}
-            }, cellData: [{ content:'表头11', sortable: true, field:'Code' }, '表头12', '表头13', '表头14', '表头15', '表头16']
+            }, cellData: [
+                { content:'表头11', sortable: true, field:'Code' }, 
+                { content: '表头12', sortable: true, field:'Name' },
+                 '表头13', '表头14', '表头15', '表头16',
+                { content: '表头17', sortable: true, field: 'Number' }
+            ]
         },
         {
             rowData:{
                 style:{background:'#005eac'}
-            }, cellData: ['表头21', '表头22', '表头23', '表头24', '表头25', '表头26']
+            }, cellData: ['表头21', '表头22', '表头23', '表头24', '表头25', '表头26', '表头27']
         }
-        , ['表头31', '表头33', '表头33', '表头34', '表头35', '表头36']
+        , ['表头31', '表头33', '表头33', '表头34', '表头35', '表头36', '表头37']
     ];
         
     var bodyData = [        
         {
             rowData:{ attr:{ id: 1, class:'tr-1'}, event:{click:function(){alert(this.id);}}}, treeData:{id:1, pid:0}, cellData:[
-                {content:'单元格11', style:{color:'#f00'}}, {content:'单元格12'}, {content:'单元格13', rowSpan:0, colSpan:0}, {content:'单元格14'}, {content:'单元格15'}, {content:'单元格16'}
+                {content:'单元格11', style:{color:'#f00'}}, {content:'单元格12'}, {content:'单元格13', rowSpan:0, colSpan:0}, {content:'单元格14'}, {content:'单元格15'}, {content:'单元格16'}, '1'
             ]
         },
         {
             rowData: {}, treeData:{id:2, pid:1}, cellData:[
-                {content:'单元格21', style:'color:#00f;'}, {content:'单元格22'}, {content:'单元格23'}, {content:'单元格24'}, {content:'单元格25'}, {content:'单元格26'}
+                {content:'单元格21', style:'color:#00f;'}, {content:'单元格22'}, {content:'单元格23'}, {content:'单元格24'}, {content:'单元格25'}, {content:'单元格26'}, '2'
             ]
         }
     ];
@@ -131,7 +136,7 @@ ID:<input type="text" id="txtId" style="width:50px;" />
         //alternateClassName: 'alternate',
         headData: headData,             //初始化时要创建的表格头部数据（可以不设置），数据格式参考示例说明
         bodyData: null,                 //初始化时要创建的表格主体数据（可以不设置），数据格式参考示例说明
-        showTree: false,                 //是否显示树形结构，boolean值： true | false, 默认为false（可以不设置）
+        showTree: true,                 //是否显示树形结构，boolean值： true | false, 默认为false（可以不设置）
         treeCellIndex: 0,               //要显示树形结构的列索引，从0开始，默认为0（可以不设置）
         trigger: {                      //树形收缩/展开触发器，若cell和row同时设置了不同的事件，可能会有事件冒泡
             cell: ['click', 'toggle'],  //点击列触发事件，数组或字符串，第1个元素为事件：(click, dblclick)，第2个元素为动作： (toggle, expand, collapse)
@@ -156,47 +161,47 @@ ID:<input type="text" id="txtId" style="width:50px;" />
         var bodyData = [
             {
                 rowData:{ attribute:{ id:1, class:'tr-1'}, event:{click:function(){alert(this.id);}}}, treeData:{id:1, pid:0}, cellData:[
-                    {content:'单元格11', style:{color:'#f00'}}, {content:'单元格12'}, {content:'单元格13'}, {content:'单元格14'}, {content:'单元格15'}, {content:'单元格16'}
+                    {content:'单元格11', style:{color:'#f00'}}, {content:'单元格12'}, {content:'单元格13'}, {content:'单元格14'}, {content:'单元格15'}, {content:'单元格16'}, '1'
                 ]
             },
             {
                 rowData: {}, treeData:{id:2, pid:1}, cellData:[
-                    {content:'单元格21', style:'color:#00f;'}, {content:'单元格22'}, {content:'单元格23'}, {content:'单元格24'}, {content:'单元格25'}, {content:'单元格26'}
+                    {content:'单元格21', style:'color:#00f;'}, {content:'单元格22'}, {content:'单元格23'}, {content:'单元格24'}, {content:'单元格25'}, {content:'单元格26'}, '2'
                 ]
             },
             {
                 rowData: {}, treeData:{id:4, pid:2}, cellData:[
-                    {content:'单元格41'}, {content:'单元格42'}, {content:'单元格43'}, {content:'单元格44'}, {content:'单元格45'}, {content:'单元格46'}
+                    {content:'单元格41'}, {content:'单元格42'}, {content:'单元格43'}, {content:'单元格44'}, {content:'单元格45'}, {content:'单元格46'}, '3'
                 ]
             },
             {
                 rowData: {}, treeData:{id:3, pid:1}, cellData:[
-                    {content:'单元格31'}, {content:'单元格32'}, {content:'单元格33'}, {content:'单元格34'}, {content:'单元格35'}, {content:'单元格36'}
+                    {content:'单元格31'}, {content:'单元格32'}, {content:'单元格33'}, {content:'单元格34'}, {content:'单元格35'}, {content:'单元格36'}, '4'
                 ]
             },
             {
                 rowData: {}, treeData:{id:5, pid:2}, cellData:[
-                    {content:'单元格51'}, {content:'单元格52'}, {content:'单元格53'}, {content:'单元格54'}, {content:'单元格55'}, {content:'单元格56'}
+                    {content:'单元格51'}, {content:'单元格52'}, {content:'单元格53'}, {content:'单元格54'}, {content:'单元格55'}, {content:'单元格56'}, '5'
                 ]
             },
             {
                 rowData: {}, treeData:{id:6, pid:4}, cellData:[
-                    {content:'单元格61'}, {content:'单元格62'}, {content:'单元格63'}, {content:'单元格64'}, {content:'单元格65'}, {content:'单元格66'}
+                    {content:'单元格61'}, {content:'单元格62'}, {content:'单元格63'}, {content:'单元格64'}, {content:'单元格65'}, {content:'单元格66'}, '6'
                 ]
             },
             {
                 rowData: {}, treeData:{id:7, pid:2}, cellData:[
-                    {content:'单元格71'}, {content:'单元格72'}, {content:'单元格73'}, {content:'单元格74'}, {content:'单元格75'}, {content:'单元格76'}
+                    {content:'单元格71'}, {content:'单元格72'}, {content:'单元格73'}, {content:'单元格74'}, {content:'单元格75'}, {content:'单元格76'}, '7'
                 ]
             },
             {
                 rowData: {}, treeData:{id:8, pid:2}, cellData:[
-                    {content:'单元格81'}, {content:'单元格82'}, {content:'单元格83'}, {content:'单元格84'}, {content:'单元格85'}, {content:'单元格86'}
+                    {content:'单元格81'}, {content:'单元格82'}, {content:'单元格83'}, {content:'单元格84'}, {content:'单元格85'}, {content:'单元格86'}, '8'
                 ]
             },
             {
                 rowData: {}, treeData:{id:9, pid:3}, cellData:[
-                    {content:'单元格91'}, {content:'单元格92'}, {content:'单元格93'}, {content:'单元格94'}, {content:'单元格95'}, {content:'单元格96'}
+                    {content:'单元格91'}, {content:'单元格92'}, {content:'单元格93'}, {content:'单元格94'}, {content:'单元格95'}, {content:'单元格96'}, '9'
                 ]
             }
         ];
@@ -207,12 +212,12 @@ ID:<input type="text" id="txtId" style="width:50px;" />
         var appendData = [
             {
                 rowData: {}, treeData:{id:18, pid:2}, cellData:[
-                    {content:'单元格181'}, {content:'单元格182'}, {content:'单元格183'}, {content:'单元格184'}, {content:'单元格185'}, {content:'单元格186'}
+                    {content:'单元格181'}, {content:'单元格182'}, {content:'单元格183'}, {content:'单元格184'}, {content:'单元格185'}, {content:'单元格186'}, '10'
                 ]
             },
             {
                 rowData: {}, treeData:{id:19, pid:3}, cellData:[
-                    {content:'单元格191'}, {content:'单元格192'}, {content:'单元格193'}, {content:'单元格194'}, {content:'单元格195'}, {content:'单元格196'}
+                    {content:'单元格191'}, {content:'单元格192'}, {content:'单元格193'}, {content:'单元格194'}, {content:'单元格195'}, {content:'单元格196'}, '11'
                 ]
             }
         ];
@@ -221,7 +226,7 @@ ID:<input type="text" id="txtId" style="width:50px;" />
 
 
     window.setTimeout(function(){
-        var appendData =  ['单元格101', '单元格103', '单元格103', '单元格104', '单元格105', '单元格106'];
+        var appendData =  ['单元格101', '单元格103', '单元格103', '单元格104', '单元格105', '单元格106', '12'];
         tb.append(appendData);
     }, 1200);
 
@@ -229,22 +234,22 @@ ID:<input type="text" id="txtId" style="width:50px;" />
         var appendData = [
             {
                 rowData: {}, treeData:{id:28, pid:6}, cellData:[
-                    {content:'单元格281'}, {content:'单元格282'}, {content:'单元格283'}, {content:'单元格284'}, {content:'单元格285'}, {content:'单元格286'}
+                    {content:'单元格281'}, {content:'单元格282'}, {content:'单元格283'}, {content:'单元格284'}, {content:'单元格285'}, {content:'单元格286'}, '13'
                 ]
             },
             {
                 rowData: {}, treeData:{id:29, pid:4}, cellData:[
-                    {content:'单元格291'}, {content:'单元格292'}, {content:'单元格293'}, {content:'单元格294'}, {content:'单元格295'}, {content:'单元格296'}
+                    {content:'单元格291'}, {content:'单元格292'}, {content:'单元格293'}, {content:'单元格294'}, {content:'单元格295'}, {content:'单元格296'}, '14'
                 ]
             },
             {
                 rowData: {}, treeData:{id:30, pid:28}, cellData:[
-                    {content:'单元格301'}, {content:'单元格302'}, {content:'单元格303'}, {content:'单元格304'}, {content:'单元格305'}, {content:'单元格306'}
+                    {content:'单元格301'}, {content:'单元格302'}, {content:'单元格303'}, {content:'单元格304'}, {content:'单元格305'}, {content:'单元格306'}, '15'
                 ]
             },
             {
                 rowData: {}, treeData:{id:31, pid:40}, cellData:[
-                    {content:'单元格311'}, {content:'单元格312'}, {content:'单元格313'}, {content:'单元格314'}, {content:'单元格315'}, {content:'单元格316'}
+                    {content:'单元格311'}, {content:'单元格312'}, {content:'单元格313'}, {content:'单元格314'}, {content:'单元格315'}, {content:'单元格316'}, '16'
                 ]
             }
         ];
@@ -256,7 +261,7 @@ ID:<input type="text" id="txtId" style="width:50px;" />
         var appendData = [
             {
                 rowData: {}, treeData:{id:32, pid:40}, cellData:[
-                    {content:'单元格321'}, {content:'单元格322'}, {content:'单元格323'}, {content:'单元格324'}, {content:'单元格325'}, {content:'单元格326'}
+                    {content:'单元格321'}, {content:'单元格322'}, {content:'单元格323'}, {content:'单元格324'}, {content:'单元格325'}, {content:'单元格326'}, '17'
                 ]
             }
         ];
@@ -268,17 +273,17 @@ ID:<input type="text" id="txtId" style="width:50px;" />
         var appendData = [
             {
                 rowData: {}, treeData:{id:33, pid:41}, cellData:[
-                    {content:'单元格331'}, {content:'单元格332'}, {content:'单元格333'}, {content:'单元格334'}, {content:'单元格335'}, {content:'单元格336'}
+                    {content:'单元格331'}, {content:'单元格332'}, {content:'单元格333'}, {content:'单元格334'}, {content:'单元格335'}, {content:'单元格336'}, '18'
                 ]
             },
             {
                 rowData: {}, treeData:{id:34, pid:29}, cellData:[
-                    {content:'单元格341'}, {content:'单元格342'}, {content:'单元格343'}, {content:'单元格344'}, {content:'单元格345'}, {content:'单元格346'}
+                    {content:'单元格341'}, {content:'单元格342'}, {content:'单元格343'}, {content:'单元格344'}, {content:'单元格345'}, {content:'单元格346'}, '19'
                 ]
             },
             {
                 rowData: {}, treeData:{id:35, pid:7}, cellData:[
-                    {content:'单元格351'}, {content:'单元格352'}, {content:'单元格353'}, {content:'单元格354'}, {content:'单元格355'}, {content:'单元格356'}
+                    {content:'单元格351'}, {content:'单元格352'}, {content:'单元格353'}, {content:'单元格354'}, {content:'单元格355'}, {content:'单元格356'}, '20'
                 ]
             }
         ];
