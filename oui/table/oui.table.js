@@ -67,12 +67,13 @@
             if (!that.options.showTree || $.isUndefined(trees)) {
                 for (var i in datas) {
                     var row = container.insertRow(rowIndex + Number(i));
+                    insertCell(that, row, datas[i], isHead);
+
                     if(!isHead || !inserted){
                         insertCheckboxCell(that, row, isHead, len);
                         insertLineNumberCell(that, row, isHead, len);
                         inserted = true;
                     }
-                    insertCell(that, row, datas[i]);
                 }
             } else {
                 createTreeRow(that, container, datas, trees, pids, isAppend);
@@ -89,12 +90,13 @@
                         rowIndex = findRowIndex(that, container, treeData.pid);
                     }
                     var row = container.insertRow(rowIndex);
+                    insertCell(that, row, datas[i], isHead);
+
                     if(!isHead || !inserted){
                         insertCheckboxCell(that, row, isHead, len);
                         insertLineNumberCell(that, row, isHead, len);
                         inserted = true;
                     }
-                    insertCell(that, row, datas[i]);
 
                     var key = buildKey(treeData.id), hasChild = checkChild(key, trees);
                     if (hasChild) {
@@ -181,13 +183,9 @@
 
                     if(op.showQuickMenu){
                         if(op.showQuickMenuButton){
-                            $.addEventListener($I(id + '-a'), 'click', function(ev){
-                                showQuickMenu(this, menu, ev);
-                            });
+                            $.addEventListener($I(id + '-a'), 'click', function(ev){ showQuickMenu(this, menu, ev); });
                         } else {
-                            $.addEventListener(cell, 'click', function(ev){
-                                showQuickMenu(this, menu, ev);
-                            });
+                            $.addEventListener(cell, 'click', function(ev){ showQuickMenu(this, menu, ev); });
                         }
                         $('#' + menu + ' a').each(function(i, obj){
                             $.addEventListener(obj, 'click', function(){
@@ -212,7 +210,7 @@
 
             console.log('getCheckedRow: ', arr);
         },
-        insertCell = function (that, row, data) {
+        insertCell = function (that, row, data, isHead) {
             var isArray = $.isArray(data),
                 showTree = that.options.showTree,
                 treeCellIndex = that.options.treeCellIndex || 0,
@@ -244,6 +242,7 @@
                 }
 
                 var content = getOptionValue(dr);
+                //如果用了树形结构，排序会引起顺序错乱，所以不允许排序
                 if (isTree && cellIndex === treeCellIndex) {
                     row.setAttribute('id', buildId(id));
                     //row.setAttribute('tree', '{{id:{id},pid:{pid},level:{level}}}'.format(treeData));
@@ -275,8 +274,6 @@
                 }
                 cellIndex++;
             }
-
-            return cell;
         },
         insertCellProperty = function (elem, dr) {
             $.setStyle(elem, dr.style, true);
@@ -389,6 +386,14 @@
         };
 
     function Table(options) {
+        /*
+        options = options || {};
+        if ($.isUndefined(options.className) || $.isEmpty(options.className)) {
+            $.loadLinkStyle($.getFilePath(thisFilePath) + $.getFileName(thisFilePath, true).replace('.min', '') + '.css');
+        }
+        */
+        $.loadLinkStyle($.getFilePath(thisFilePath) + $.getFileName(thisFilePath, true).replace('.min', '') + '.css');
+
         var that = this, op = $.extend({
             table: null,                            //表格（对象 或 Id 或 null)，为null则自动创建表格对象（可以不设置）
             parent: doc.body,                       //表格父节点，默认为 document.body （可以不设置）
@@ -397,8 +402,8 @@
             showQuickMenu: false,                   //是否显示复选框快捷菜单
             showQuickMenuButton: false,             //是否显示复选框快捷菜单按钮
             alternate: false,                       //是否设置交替行样式（背景色）
-            alternateClassName: 'alternate',
-            className: '',
+            alternateClassName: 'alternate',        //交替行的样式
+            className: '',                          //指定表格样式
             showTree: false,                        //是否显示树形结构，boolean值： true | false, 默认为false（可以不设置）
             treeCellIndex: 0,                       //要显示树形结构的列索引，从0开始，默认为0（可以不设置）
             trigger: {                              //树形收缩/展开触发器，若cell和row同时设置了不同的事件，可能会有事件冒泡
@@ -547,9 +552,11 @@
     };
 
     function TableTree(isTree, options) {
+        /*
         if ($.isUndefined(options.className) || $.isEmpty(options.className)) {
             $.loadLinkStyle($.getFilePath(thisFilePath) + $.getFileName(thisFilePath, true).replace('.min', '') + '.css');
         }
+        */
         var that = this;
         that.options = $.extend({
             spaceWidth: 16,
@@ -743,7 +750,7 @@
                 deleteTableRow(obj);
             }
             setLineNumber.call(this.Table);
-            
+
             return callback(func, true), this;
         },
         removeChild: function (id, func) {

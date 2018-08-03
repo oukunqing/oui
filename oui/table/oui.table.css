@@ -20,10 +20,11 @@
     background: #ffe7bc; border: solid 1px #ffdcbc;
 }
 
-.oui-table td.cell-line-number{
+.oui-table .cell-line-number{
     text-align: center;
 }
-.oui-table td.cell-checkbox{
+
+.oui-table .cell-checkbox{
     text-align: center;
 }
 
