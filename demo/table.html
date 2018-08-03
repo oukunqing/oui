@@ -134,9 +134,12 @@ ID:<input type="text" id="txtId" style="width:50px;" />
         //showQuickMenuButton: true,
         alternate: false,                //是否设置交替行样式（背景色）
         //alternateClassName: 'alternate',
+        sortCallback: function(field, asc){
+            console.log('sortCallback: ', field, asc);
+        },
         headData: headData,             //初始化时要创建的表格头部数据（可以不设置），数据格式参考示例说明
         bodyData: null,                 //初始化时要创建的表格主体数据（可以不设置），数据格式参考示例说明
-        showTree: true,                 //是否显示树形结构，boolean值： true | false, 默认为false（可以不设置）
+        showTree: false,                 //是否显示树形结构，boolean值： true | false, 默认为false（可以不设置）
         treeCellIndex: 0,               //要显示树形结构的列索引，从0开始，默认为0（可以不设置）
         trigger: {                      //树形收缩/展开触发器，若cell和row同时设置了不同的事件，可能会有事件冒泡
             cell: ['click', 'toggle'],  //点击列触发事件，数组或字符串，第1个元素为事件：(click, dblclick)，第2个元素为动作： (toggle, expand, collapse)

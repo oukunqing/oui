@@ -1092,6 +1092,34 @@
             var style = elem.currentStyle || document.defaultView.getComputedStyle(elem, null);
             return $.isString(styleName) ? style[styleName] : style;
         },
+        isWindow = function  (obj ) {
+            return obj != null && obj === obj.window;
+        },
+        isArrayLike = function(obj){
+            var length = !!obj && 'length' in obj && obj.length,
+                type = typeof obj;
+
+            if ( $.isFunction( obj ) || isWindow( obj ) ) {
+                return false;
+            }
+
+            return $.isArray(obj) || length === 0 || $.isNumber(length) && length > 0 && ( length - 1 ) in obj;
+        },
+        makeArray = function (likeArray, results) {
+            var arr = [];
+            try {
+                arr = Array.prototype.slice.call(likeArray);
+            } catch (e) {
+                for (var i = 0; i < likeArray.length; i ++) {
+                    arr[arr.length] = likeArray[i];
+                }
+            }
+            if($.isArray(results)){
+                results.concat(arr);
+                return results;
+            }
+            return arr;
+        },
         setAttribute = function (elem, attributes, exempt, serialize) {
             if($.isBoolean(exempt, false) || $.isElement(elem)){
                 if ($.isObject(attributes)) {
@@ -1166,21 +1194,28 @@
             return cur;
         },
         setClass = function (elem, value, action) {
-            var classes = classesToArray(value), j = 0, curValue, cur, finalValue, css;
-            if (classes.length > 0) {
-                curValue = getClass(elem);
-                cur = elem.nodeType === 1 && stripAndCollapse(curValue).space();
-                if (cur) {
-                    while ((css = classes[j++])) {
-                        if (2 === action) {
-                            cur = setClassValue(cur, css, hasClass(elem, css) ? 1 : 0);
-                        } else {
-                            cur = setClassValue(cur, css, action);
+            if(isArrayLike(elem)){
+                elem = makeArray(elem);
+            } else if(!$.isArray(elem)){
+                elem = [elem];
+            }
+            for(var i=0,c=elem.length; i<c; i++){
+                var classes = classesToArray(value), j = 0, curValue, cur, finalValue, css;
+                if (classes.length > 0) {
+                    curValue = getClass(elem[i]);
+                    cur = elem[i].nodeType === 1 && stripAndCollapse(curValue).space();
+                    if (cur) {
+                        while ((css = classes[j++])) {
+                            if (2 === action) {
+                                cur = setClassValue(cur, css, hasClass(elem[i], css) ? 1 : 0);
+                            } else {
+                                cur = setClassValue(cur, css, action);
+                            }
                         }
-                    }
-                    finalValue = stripAndCollapse(cur);
-                    if (curValue != finalValue) {
-                        elem.setAttribute('class', finalValue);
+                        finalValue = stripAndCollapse(cur);
+                        if (curValue != finalValue) {
+                            elem[i].setAttribute('class', finalValue);
+                        }
                     }
                 }
             }
@@ -1340,6 +1375,9 @@
         createJsScript: createJsScript,
         createCssStyle: createCssStyle,
         getElementStyle: getElementStyle,
+        isWindow: isWindow,
+        isArrayLike: isArrayLike,
+        makeArray: makeArray,
         setAttribute: setAttribute,
         setStyle: setStyle,
         addClass: addClass,
@@ -1552,6 +1590,9 @@
 
     $.extendNative($, {
         setChecked: function (selector, action, values) {
+            if($.isArrayLike(selector)){
+                selector = $.makeArray(selector);
+            }
             if($.isArray(selector)){
                 for(var i = 0, c = selector.length; i < c; i++){
                     selector[i].checked = _checked(action, selector[i]);
@@ -1862,7 +1903,7 @@
                 $.addClass(obj, value);
             });
         },
-        removeClass: function () {
+        removeClass: function (value) {
             return this.each(function (i, obj) {
                 $.removeClass(obj, value);
             });
