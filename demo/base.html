@@ -295,7 +295,7 @@ base.js demo
     <input type="checkbox" name="chb" value="1" class="chb" /> 复选框1
     <input type="checkbox" name="chb" value="2" id="chb2" checked="checked" /> 复选框2
     <input type="checkbox" name="chb" value="3" class="chb" /> 复选框3
-    <input type="checkbox" name="chb" value="4" /> 复选框4
+    <input type="checkbox" name="chb" value="4" checked /> 复选框4
     <input type="checkbox" name="chb" value="5" class="chb"  disabled="disabled" /> 复选框5 (禁用)
     <input type="checkbox" name="chb" value="6" id="chb6" checked="checked" /> 复选框6
     <input type="checkbox" name="chb" value="7" class="chb" disabled="1" /> 复选框7 (禁用)
@@ -382,4 +382,9 @@ console.log(arr, arr[0]);
 
 var arr = $.getChecked('#div1 input[name=chb][ checked]');
 console.log(arr);
+
+var arr = $N('chb');
+for(var i=0; i<arr.length; i++){
+    console.log(arr[i].getAttribute('checked'));
+}
 </script>

@@ -54,7 +54,7 @@
                 return tb.tBodies[0] || tb.createTBody();
             }
         },
-        isTHead = function(container){
+        isTHead = function (container) {
             return container.tagName === 'THEAD';
         },
         createRow = function (that, container, datas, trees, pids, isAppend) {
@@ -69,7 +69,7 @@
                     var row = container.insertRow(rowIndex + Number(i));
                     insertCell(that, row, datas[i], isHead);
 
-                    if(!isHead || !inserted){
+                    if (!isHead || !inserted) {
                         insertCheckboxCell(that, row, isHead, len);
                         insertLineNumberCell(that, row, isHead, len);
                         inserted = true;
@@ -92,7 +92,7 @@
                     var row = container.insertRow(rowIndex);
                     insertCell(that, row, datas[i], isHead);
 
-                    if(!isHead || !inserted){
+                    if (!isHead || !inserted) {
                         insertCheckboxCell(that, row, isHead, len);
                         insertLineNumberCell(that, row, isHead, len);
                         inserted = true;
@@ -107,26 +107,26 @@
             }
             return 0;
         },
-        getOptionValue = function(dr){
-            if($.isString(dr)){
+        getOptionValue = function (dr) {
+            if ($.isString(dr)) {
                 return dr;
             }
             var keys = ['content', 'html', 'text'];
-            for(var i in keys){
+            for (var i in keys) {
                 var key = keys[i];
-                if(!$.isUndefined(dr[key])){
+                if (!$.isUndefined(dr[key])) {
                     return dr[key];
                 }
             }
             return '';
         },
-        insertLineNumberCell = function(that, row, isHead, rowCount){
+        insertLineNumberCell = function (that, row, isHead, rowCount) {
             var op = that.options;
-            if(op.showLineNumber){
+            if (op.showLineNumber) {
                 var cell = row.insertCell(0);
                 cell.className = CELL_LINE_NUMBER;
-                if(isHead){
-                    if(rowCount > 1){
+                if (isHead) {
+                    if (rowCount > 1) {
                         cell.rowSpan = rowCount;
                     }
                     cell.innerHTML = '序号';
@@ -135,37 +135,37 @@
                 }
             }
         },
-        showQuickMenu = function(sender, menu, ev){
+        showQuickMenu = function (sender, menu, ev) {
             var obj = $I(menu), show = obj.style.display === 'none';
             //toggle方式显示快捷菜单
             obj.style.display = show ? 'block' : 'none';
 
-            if(show){                
+            if (show) {
                 obj.style.left = ev.clientX + 'px';
                 obj.style.top = ev.clientY + 'px';
             }
 
-            if(!sender.first){
-                $.addEventListener(document, 'click', function(){
+            if (!sender.first) {
+                $.addEventListener(document, 'click', function () {
                     obj.style.display = 'none';
                 });
             }
             sender.first = 1;
             $.cancelBubble();
         },
-        insertCheckboxCell = function(that, row, isHead, rowCount){
+        insertCheckboxCell = function (that, row, isHead, rowCount) {
             var op = that.options;
-            if(op.showCheckbox){
+            if (op.showCheckbox) {
                 var cell = row.insertCell(0), id = that.id + '-chb', menu = id + '-menu';
-                cell.className = CELL_CHECKBOX;                 
-                if(isHead){
-                    if(rowCount > 1){
+                cell.className = CELL_CHECKBOX;
+                if (isHead) {
+                    if (rowCount > 1) {
                         cell.rowSpan = rowCount;
                     }
                     var html = '<input type="checkbox" id="' + id + '" />';
-                    
-                    if(op.showQuickMenu){
-                        if(op.showQuickMenuButton){
+
+                    if (op.showQuickMenu) {
+                        if (op.showQuickMenuButton) {
                             html += '<a id=' + (id + '-a') + ' class="quick-a">&or;</a>';
                         }
                         html += '<div id="' + (menu) + '" class="quick-menu" style="display:none;">'
@@ -176,26 +176,29 @@
                     }
                     cell.innerHTML = html;
 
-                    $.addEventListener($I(id), 'click', function(ev){
+                    $.addEventListener($I(id), 'click', function (ev) {
                         $.setChecked(id, this.checked ? 1 : 0);
                         ev.stopPropagation();
                     });
 
-                    if(op.showQuickMenu){
-                        if(op.showQuickMenuButton){
-                            $.addEventListener($I(id + '-a'), 'click', function(ev){ showQuickMenu(this, menu, ev); });
+                    if (op.showQuickMenu) {
+                        if (op.showQuickMenuButton) {
+                            $.addEventListener($I(id + '-a'), 'click', function (ev) { 
+                                showQuickMenu(this, menu, ev); 
+                            });
                         } else {
-                            $.addEventListener(cell, 'click', function(ev){ showQuickMenu(this, menu, ev); });
+                            $.addEventListener(cell, 'click', function (ev) { 
+                                showQuickMenu(this, menu, ev); 
+                            });
                         }
-                        $('#' + menu + ' a').each(function(i, obj){
-                            $.addEventListener(obj, 'click', function(){
-                                var action = parseInt(obj.getAttribute('v'), 10);
-                                $.setChecked(id, action);
+                        $('#' + menu + ' a').each(function (i, obj) {
+                            $.addEventListener(obj, 'click', function () {
+                                var action = obj.getAttribute('v') || '';
+                                $.setChecked(id, action).cancelBubble().setChecked($I(id), action);
                                 //设置表头中的复选框状态
-                                $I(id).checked = action === 1 ? true : action === 0 ? false : !$I(id).checked;
+                                //$I(id).checked = action === 1 ? true : action === 0 ? false : !$I(id).checked;
                                 //隐藏快捷菜单DIV
                                 this.parentNode.style.display = 'none';
-                                $.cancelBubble();
                             });
                         });
                     }
@@ -204,11 +207,20 @@
                 }
             }
         },
-        getCheckedRow = function(that, name){
+        getCheckedRow = function (that, name) {
             name = name || (that.id + '-chb');
-            var arr = $N(name, {attribute: {checked: true}});
 
-            console.log('getCheckedRow: ', arr);
+            //var arr = $N(name, { attribute: { checked: true } }), len = arr.length, tb = that.table, list = [];
+            var arr = $N(name, true), len = arr.length, tb = that.table, list = [];
+
+            for (var i = 0; i < len; i++) {
+                list.push(findRow(arr[i])); 
+            }
+            return { inputs: arr, rows: list };
+        },
+        showSortButton = function (field) {
+            console.log('sortable: ', field);
+
         },
         insertCell = function (that, row, data, isHead) {
             var isArray = $.isArray(data),
@@ -250,7 +262,7 @@
                     //设置tr创建记录，通过id找tr位置时要用到
                     setTreeFlag(that.tree, id, false);
                     content = buildSwitch(that.tree, id, treeData.level) + content;
-                    if($.isDebug()){
+                    if ($.isDebug()) {
                         //临时测试用
                         content += ' [ id: ' + treeData.id + ', pid: ' + treeData.pid + ', level: ' + treeData.level + ' ]';
                     }
@@ -263,6 +275,9 @@
                     trigger.cell && set(cell, id, trigger.cell || []);
                     trigger.row && set(row, id, trigger.row || []);
                 } else {
+                    if (isHead && dr.sortable) {
+                        content += showSortButton(dr.field);
+                    }
                     cell.innerHTML = content;
                 }
 
@@ -335,63 +350,57 @@
             }
             return rowCount + (idx < 0 ? container.rows.length : idx + 1);
         },
-        findRow = function(obj) {
-            if(obj !== null) {
+        findRow = function (obj) {
+            if (obj !== null) {
                 var parent = obj.parentNode;
-                if(parent !== null) {
+                if (parent !== null) {
                     return parent.tagName === 'TR' ? parent : findRow(parent);
                 }
             }
             return null;
         },
-        setRowStyle = function(force, className){
+        setRowStyle = function (force, className) {
             var that = this, op = that.options, css = className || op.alternateClassName;
-            if((!force && !op.alternate) || !css){
+            if ((!force && !op.alternate) || !css) {
                 return false;
             }
-            if(op.timerAlternate){
+            if (op.timerAlternate) {
                 window.clearTimeout(op.timerAlternate);
             }
-            op.timerAlternate = window.setTimeout(function(){
-                var tb = that.table, headRows = getTHeadRows(tb), rows = tb.rows.length, idx = 0;                
-                for(var i = headRows; i < rows; i++){
+            op.timerAlternate = window.setTimeout(function () {
+                var tb = that.table, headRows = getTHeadRows(tb), rows = tb.rows.length, idx = 0;
+                for (var i = headRows; i < rows; i++) {
                     var tr = tb.rows[i];
                     $.removeClass(tr, css);
-                    if(idx++ % 2 === 0){
+                    if (idx++ % 2 === 0) {
                         $.addClass(tr, css);
                     }
                 }
             }, 320);
         },
-        setLineNumber = function(force){
+        setLineNumber = function (force) {
             var that = this, op = that.options;
-            if(!force && !op.showLineNumber){
+            if (!force && !op.showLineNumber) {
                 return false;
             }
-            if(op.timerLineNumber){
+            if (op.timerLineNumber) {
                 window.clearTimeout(op.timerLineNumber);
             }
-            op.timerLineNumber = window.setTimeout(function(){
+            op.timerLineNumber = window.setTimeout(function () {
                 var tb = that.table, headRows = getTHeadRows(tb), rows = tb.rows.length, idx = 0;
-                for(var i = headRows; i < rows; i++){
+                for (var i = headRows; i < rows; i++) {
                     var cell = tb.rows[i].cells[0];
-                    if(cell){
+                    if (cell) {
                         cell.innerHTML = ++idx;
                     }
                 }
             }, 320);
         },
-        callback = function(func, value){
+        callback = function (func, value) {
             $.isFunction(func) && func(value);
         };
 
     function Table(options) {
-        /*
-        options = options || {};
-        if ($.isUndefined(options.className) || $.isEmpty(options.className)) {
-            $.loadLinkStyle($.getFilePath(thisFilePath) + $.getFileName(thisFilePath, true).replace('.min', '') + '.css');
-        }
-        */
         $.loadLinkStyle($.getFilePath(thisFilePath) + $.getFileName(thisFilePath, true).replace('.min', '') + '.css');
 
         var that = this, op = $.extend({
@@ -451,17 +460,17 @@
 
         $.addClass(that.table, 'oui-table');
 
-        if(op.showTree){
+        if (op.showTree) {
             $.addClass(that.table, 'oui-table-tree');
         }
 
-        if($.isString(op.alternate, true)){
+        if ($.isString(op.alternate, true)) {
             op.alternateClassName = op.alternate;
             op.alternate = true;
         }
 
-        if(op.showCheckbox){
-            if(!$.isBoolean(options.showQuickMenu)){
+        if (op.showCheckbox) {
+            if (!$.isBoolean(options.showQuickMenu)) {
                 op.showQuickMenu = true;
             }
         }
@@ -506,7 +515,7 @@
             return this.createBody(bodyData, func), this;
         },
         append: function (bodyData, isHeadData, func) {
-            if($.isFunction(isHeadData)){
+            if ($.isFunction(isHeadData)) {
                 func = isHeadData, isHeadData = false;
             }
             if (isHeadData) {
@@ -543,20 +552,15 @@
                 return $I(this.tree.buildId(id));
             }
         },
-        getCheckedRow: function(){
+        getCheckedRow: function () {
             return getCheckedRow(this);
         },
-        alternate: function(className){
+        alternate: function (className) {
             return setRowStyle.call(this, true, className), this;
         }
     };
 
     function TableTree(isTree, options) {
-        /*
-        if ($.isUndefined(options.className) || $.isEmpty(options.className)) {
-            $.loadLinkStyle($.getFilePath(thisFilePath) + $.getFileName(thisFilePath, true).replace('.min', '') + '.css');
-        }
-        */
         var that = this;
         that.options = $.extend({
             spaceWidth: 16,
@@ -733,12 +737,12 @@
             return this.toggleAll(false, func), this;
         },
         remove: function (id, keepSelf, func) {
-            if($.isFunction(keepSelf)){
+            if ($.isFunction(keepSelf)) {
                 func = keepSelf, keepSelf = false;
             }
             var obj = $I(buildId(id));
-            if(obj === null){
-                return callback(func, false), this; 
+            if (obj === null) {
+                return callback(func, false), this;
             }
             //获取当前节点下的所有子节点
             var childs = getChildIds(this, id), ids = getRowIds(this, childs, true, []), len = ids.length;
@@ -760,8 +764,8 @@
             var that = this, op = that.options, fa = $I(buildFocusId(id)), find = fa !== null;
             if (find) {
                 var tr = findRow(fa);
-                if(tr !== null) {
-                    if(that.selector){
+                if (tr !== null) {
+                    if (that.selector) {
                         $.removeClass(that.selector, op.className.selected);
                     }
                     that.selector = tr;
@@ -848,7 +852,7 @@
             }
             return w;
         },
-        buildFocusId = function(id){
+        buildFocusId = function (id) {
             return 'focus_' + id;
         },
         buildSwitchId = function (id) {

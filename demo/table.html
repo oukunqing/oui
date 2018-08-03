@@ -7,7 +7,7 @@
         body{font-size:12px; font-family: Arial; margin:10px; padding: 10px;}
         .tblist{border-collapse:collapse;}
         .tblist td{border:solid 1px #ccc; padding:5px;}
-        
+
         .green{background:#008000;}
 
         /*
@@ -74,6 +74,7 @@ ID:<input type="text" id="txtId" style="width:50px;" />
 <button onclick="toggleAll(true);">全部收缩</button>
 
 <button onclick="select();">按ID选中行</button>
+<button onclick="getCheckedRow();">获取选中的行</button>
 <br /><br />
 
 <table id="tblist" class="tblist"></table>
@@ -320,7 +321,11 @@ ID:<input type="text" id="txtId" style="width:50px;" />
         });
     }
 
-    
+    function getCheckedRow(){
+        var arr = tb.getCheckedRow();
+
+        console.log('getCheckedRow: ', arr);
+    }
 
     OUI.loadJsScript('../oui/oui.crc.js',  function(){
         console.log('异步加载JS文件完成：');
