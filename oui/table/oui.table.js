@@ -223,7 +223,15 @@
         setTreeAttr = function (row, data) {
             row.setAttribute('tree', '{"id":' + toJsonValue(data.id) + ',"pid":' + toJsonValue(data.pid) + ',"level":' + data.level + '}');
         },
-        setTreeData = function (that, data, cell, content) {
+        setTreeRow = function(that, row, data, id){
+            //设置tr的id属性
+            row.setAttribute('id', buildId(id));
+            //设置 tree 属性
+            setTreeAttr(row, data);
+            //设置tr创建记录，通过id找tr位置时要用到
+            setTreeFlag(that.tree, id, false);
+        },
+        setTreeCell = function (that, cell, data, content) {
             content = buildSwitch(that.tree, data.id, data.level) + content;
 
             if ($.isDebug()) {
@@ -276,12 +284,10 @@
                 var content = getOptionValue(dr);
                 //如果用了树形结构，排序会引起顺序错乱，所以不允许排序
                 if (isTree && cellIndex === treeCellIndex) {
-                    row.setAttribute('id', buildId(id));
-                    setTreeAttr(row, treeData);
-                    //设置tr创建记录，通过id找tr位置时要用到
-                    setTreeFlag(that.tree, id, false);
-                    //设置树形数据、事件
-                    setTreeData(that, treeData, cell, content);
+                    //设置树形行数据、事件
+                    setTreeRow(that, row, treeData, id);
+                    //设置树形列数据、事件
+                    setTreeCell(that, cell, treeData, content);
 
                     trigger.cell && setTreeAction(that, cell, id, trigger.cell || []);
                     trigger.row && setTreeAction(that, row, id, trigger.row || []);
@@ -496,17 +502,14 @@
             var datas = ds.datas, len = datas.length;
 
             for (var i = 0; i < len; i++) {
-                var dr = datas[i].treeData, id = dr.id || '', tr = datas[i].row;
+                var treeData = datas[i].treeData, id = treeData.id || '', tr = datas[i].row;
 
-                if (dr.level >= 0) {
-                    var rowIndex = findRowIndex(that, container, dr.pid);
+                if (treeData.level >= 0) {
+                    var rowIndex = findRowIndex(that, container, treeData.pid);
                     var row = container.insertRow(rowIndex);
-                    //设置tr的id属性
-                    row.setAttribute('id', buildId(id));
-                    //设置 tree 属性
-                    setTreeAttr(row, dr);
-                    //设置tr创建记录，通过id找tr位置时要用到
-                    setTreeFlag(that.tree, id, false);
+                    
+                    //设置树形行数据、事件
+                    setTreeRow(that, row, treeData, id);
 
                     for (var j = 0; j < datas[i].row.cells.length; j++) {
                         var cell = tr.cells[j].cloneNode(true);
@@ -514,7 +517,7 @@
                         row.appendChild(cell);
 
                         if (index === j) {
-                            setTreeData(that, dr, cell, cell.innerHTML);
+                            setTreeCell(that, cell, treeData, cell.innerHTML);
                             setTreeAction(that, cell, id, ['click', 'toggle']);
                         }
                     }

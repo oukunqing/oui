@@ -262,11 +262,14 @@ var appendData = [
 var tb = null;
 
 function test(){
-	tb = new $.Table('tb1').toTree({
-			expandCallback: function(id, obj){
-				console.log('expandCallback: ', id, obj);
-			}
-		},
+	var treeCellIndex = 0;
+	var treeOptions = {
+		expandCallback: function(id, obj){
+			console.log('expandCallback: ', id, obj);
+		}
+	};
+
+	tb = new $.Table('tb1').toTree(treeCellIndex, treeOptions,
 		function(obj) {
 			obj.append(appendData);
 		}
