@@ -426,7 +426,11 @@
         },
         setSortAction = function (that, cell, field) {
             $.setAttribute(cell, { action: '', field: field }).setStyle(cell, 'cursor', 'default');
-            $.addEventListener(cell, 'click', function () {
+            $.addEventListener(cell, 'click', function () {                
+                if(that.options.showTree){
+                    console.log('showTree is true, ', 'sort disabled.');
+                    return false;
+                }
                 var action = this.getAttribute('action');
                 var asc = !action || action === 'desc' ? 'asc' : 'desc';
                 $.setAttribute(this, 'action', asc)
@@ -596,6 +600,11 @@
             return false;
         }
 
+        var id = that.table.id || that.id;
+        if(TO_TREE_LOG[id]){
+            return that = TO_TREE_LOG[id], that;
+        }
+
         $.addClass(that.table, 'oui-table');
 
         that.treeInitial();
@@ -711,7 +720,7 @@
                 return callback(func, this), this;
             }
             //记录toTree行为，防止重复操作
-            TO_TREE_LOG[id] = 1;
+            TO_TREE_LOG[id] = this;
 
             if ($.isFunction(cellIndex)) {
                 func = cellIndex, cellIndex = 0, treeOptions = {};
