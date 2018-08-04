@@ -1005,7 +1005,7 @@
     'use strict';
 
     var rnothtmlwhite = (/[^\x20\t\r\n\f]+/g);
-    var isAttributeValue = function(value){
+    var isAttributeValue = function (value) {
         return $.isString(value) || $.isNumber(value);
     };
 
@@ -1092,36 +1092,49 @@
             var style = elem.currentStyle || document.defaultView.getComputedStyle(elem, null);
             return $.isString(styleName) ? style[styleName] : style;
         },
-        isWindow = function  (obj ) {
+        isWindow = function (obj) {
             return obj != null && obj === obj.window;
         },
-        isArrayLike = function(obj){
+        isArrayLike = function (obj) {
+            if($.isString(obj)){
+                return false;
+            } else if ($.isFunction(obj) || isWindow(obj)) {
+                return false;
+            }
             var length = !!obj && 'length' in obj && obj.length,
                 type = typeof obj;
 
-            if ( $.isFunction( obj ) || isWindow( obj ) ) {
-                return false;
+            return $.isArray(obj) || length === 0 || $.isNumber(length) && length > 0 && (length - 1) in obj;
+        },
+        merge = function (first, second) {
+            var len = +second.length,
+                j = 0,
+                i = first.length;
+
+            for (; j < len; j++) {
+                first[i++] = second[j];
             }
 
-            return $.isArray(obj) || length === 0 || $.isNumber(length) && length > 0 && ( length - 1 ) in obj;
+            first.length = i;
+
+            return first;
         },
         makeArray = function (likeArray, results) {
             var arr = [];
             try {
                 arr = Array.prototype.slice.call(likeArray);
             } catch (e) {
-                for (var i = 0; i < likeArray.length; i ++) {
+                for (var i = 0; i < likeArray.length; i++) {
                     arr[arr.length] = likeArray[i];
                 }
             }
-            if($.isArray(results)){
-                results.concat(arr);
-                return results;
+            if ($.isArray(results)) {
+                arr = merge(results, arr);
             }
             return arr;
         },
         setAttribute = function (elem, attributes, exempt, serialize) {
-            if($.isBoolean(exempt, false) || $.isElement(elem)){
+            if ($.isBoolean(exempt, false) || $.isElement(elem)) {
                 if ($.isObject(attributes)) {
                     for (var key in attributes) {
                         var val = attributes[key];
@@ -1142,17 +1155,17 @@
             return this;
         },
         setStyle = function (elem, styles, value, exempt) {
-            if($.isBoolean(value)){
+            if ($.isBoolean(value)) {
                 exempt = value, value = null;
             }
-            if($.isBoolean(exempt, false) || $.isElement(elem)){
+            if ($.isBoolean(exempt, false) || $.isElement(elem)) {
                 if ($.isObject(styles)) {
                     for (var key in styles) {
                         elem.style[key] = styles[key];
                     }
                 } else if ($.isString(styles) && isAttributeValue(value)) {
                     elem.style[styles] = value;
-                }  else if ($.isString(styles)) {
+                } else if ($.isString(styles)) {
                     elem.style.cssText += styles;
                 }
             }
@@ -1194,12 +1207,12 @@
             return cur;
         },
         setClass = function (elem, value, action) {
-            if(isArrayLike(elem)){
+            if (isArrayLike(elem)) {
                 elem = makeArray(elem);
-            } else if(!$.isArray(elem)){
+            } else if (!$.isArray(elem)) {
                 elem = [elem];
             }
-            for(var i=0,c=elem.length; i<c; i++){
+            for (var i = 0, c = elem.length; i < c; i++) {
                 var classes = classesToArray(value), j = 0, curValue, cur, finalValue, css;
                 if (classes.length > 0) {
                     curValue = getClass(elem[i]);
@@ -1312,6 +1325,32 @@
             }
             $.throwError('Invalid JSON: ' + data);
         },
+        isJsonLike = function (data) {
+            if (data.startWith('{') && data.endWith('}')) {
+                return /[:]/.test(data);
+            } else if (data.startWith('[') && data.endWith(']')) {
+                return true;
+            }
+            return false;
+        },
+        tryParseJSON = function (data) {
+            var res = { status: false, complete: false, data: data };
+            if(data !== null){
+                try {
+                    res.data = parseJSON(data);
+                    res.status = true;
+                    res.complete = true;
+                } catch (e) {
+                    try {
+                        if($.isString(data) && isJsonLike(data)){
+                            res.data = eval('(' + data + ')');
+                            res.status = true;
+                        }
+                    } catch (e) { }
+                }
+            }
+            return res;
+        },
         parseXML = function (data) {
             if (!$.isString(data, true)) {
                 return null;
@@ -1339,7 +1378,7 @@
             return this;
         },
         addEventListener = function (elem, ev, func, useCapture) {
-            if (isElement(elem)) { 
+            if (isElement(elem)) {
                 elem.addEventListener ? elem.addEventListener(ev, func, useCapture || false) : elem.attachEvent('on' + ev, func);
             }
             return this;
@@ -1377,6 +1416,7 @@
         getElementStyle: getElementStyle,
         isWindow: isWindow,
         isArrayLike: isArrayLike,
+        merge: merge,
         makeArray: makeArray,
         setAttribute: setAttribute,
         setStyle: setStyle,
@@ -1389,7 +1429,9 @@
         loadJsScript: loadJsScript,
         removeJsScript: removeJsScript,
         globalEval: globalEval,
-        parseJSON: parseJSON,
+        parseJSON: parseJSON, parseJson: parseJSON,
+        isJsonLike: isJsonLike,
+        tryParseJSON: tryParseJSON, tryParseJson: tryParseJSON,
         parseXML: parseXML,
         cancelBubble: cancelBubble,
         addEventListener: addEventListener,
@@ -1574,8 +1616,8 @@
     var isName = function (selector) {
         return !/[\.\#\[\=]/.test(selector);
     },
-        _checked = function(action, obj){
-            if($.isBoolean(action)){
+        _checked = function (action, obj) {
+            if ($.isBoolean(action)) {
                 return action;
             } else {
                 var checked = false;
@@ -1590,15 +1632,15 @@
 
     $.extendNative($, {
         setChecked: function (selector, action, values) {
-            if($.isArrayLike(selector)){
+            if ($.isArrayLike(selector)) {
                 selector = $.makeArray(selector);
             }
-            if($.isArray(selector)){
-                for(var i = 0, c = selector.length; i < c; i++){
+            if ($.isArray(selector)) {
+                for (var i = 0, c = selector.length; i < c; i++) {
                     selector[i].checked = _checked(action, selector[i]);
                 }
                 return this;
-            } else if($.isElement(selector)){
+            } else if ($.isElement(selector)) {
                 selector.checked = _checked(action, selector);
                 return this;
             }

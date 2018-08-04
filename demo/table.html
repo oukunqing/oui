@@ -92,7 +92,7 @@ ID:<input type="text" id="txtId" style="width:50px;" />
             rowData:{
                 style:{background:'#005eac'}
             }, cellData: [
-                { content:'表头11', sortable: true, field:'Code' }, 
+                { content:'表头11', sortable: true, field:'Code', dragable: true, }, 
                 { content: '表头12', sortable: true, field:'Name' },
                  '表头13', '表头14', '表头15', '表头16',
                 { content: '表头17', sortable: true, field: 'Number' }
@@ -141,7 +141,7 @@ ID:<input type="text" id="txtId" style="width:50px;" />
         */
         headData: headData,             //初始化时要创建的表格头部数据（可以不设置），数据格式参考示例说明
         bodyData: null,                 //初始化时要创建的表格主体数据（可以不设置），数据格式参考示例说明
-        showTree: false,                 //是否显示树形结构，boolean值： true | false, 默认为false（可以不设置）
+        showTree: true,                 //是否显示树形结构，boolean值： true | false, 默认为false（可以不设置）
         treeCellIndex: 0,               //要显示树形结构的列索引，从0开始，默认为0（可以不设置）
         trigger: {                      //树形收缩/展开触发器，若cell和row同时设置了不同的事件，可能会有事件冒泡
             cell: ['click', 'toggle'],  //点击列触发事件，数组或字符串，第1个元素为事件：(click, dblclick)，第2个元素为动作： (toggle, expand, collapse)
@@ -160,7 +160,7 @@ ID:<input type="text" id="txtId" style="width:50px;" />
     });
     console.log('tb: ', tb);
 
-    tb.createBody(bodyData);
+    //tb.createBody(bodyData);
 
     window.setTimeout(function(){
         var bodyData = [
@@ -335,6 +335,12 @@ ID:<input type="text" id="txtId" style="width:50px;" />
         var arr = tb.getCheckedRow();
 
         console.log('getCheckedRow: ', arr);
+
+        var tr = arr.rows[0];
+        if(tr){
+            console.log(tr.getAttribute('tree'));
+            console.log($.toJson(tr.getAttribute('tree')));
+        }
     }
 
     OUI.loadJsScript('../oui/oui.crc.js',  function(){

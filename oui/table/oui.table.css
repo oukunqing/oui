@@ -75,6 +75,14 @@
 
 .oui-table-tree{}
 
+.oui-table-tree .tree-cell{
+    text-align: left;
+}
+
+.oui-table-tree .cursor{
+    cursor: default;
+}
+
 .oui-table-tree .expand{
     display:inline-block;
     width:0;
