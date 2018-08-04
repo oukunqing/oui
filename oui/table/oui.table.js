@@ -15,6 +15,7 @@
         CELL_LINE_NUMBER = 'cell-line-number',
         CELL_CHECKBOX = 'cell-checkbox',
         TABLE_INDEX = 1,
+        TO_TREE_LOG = {},
         isCellSpan = function (span) {
             return $.isNumber(span) && span > 0;
         },
@@ -702,6 +703,13 @@
             return that;
         },
         toTree: function (cellIndex, treeOptions, func) {
+            var id = this.table.id || this.id;
+            if(this.options.showTree || TO_TREE_LOG[id]){
+                return callback(func, this), this;
+            }
+            //记录toTree行为，防止重复操作
+            TO_TREE_LOG[id] = 1;
+
             if ($.isFunction(cellIndex)) {
                 func = cellIndex, cellIndex = 0, treeOptions = {};
             } else if($.isObject(cellIndex)) {
@@ -714,7 +722,7 @@
 
             this.treeInitial(cellIndex || 0, treeOptions);
 
-            return toTree(this), callback(func, this), this;
+            return toTree(this), setRowStyle.call(this, true), callback(func, this), this;
         },
         getRow: function (ids) {
             if ($.isArray(ids)) {
