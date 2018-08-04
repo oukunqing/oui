@@ -84,15 +84,20 @@
         },
         createTreeRow = function (that, container, datas, trees, pids, isAppend) {
             var op = that.options, isHead = isTHead(container), len = datas.length, inserted = false;
+            var treeOp = that.tree.options;
+
             isAppend = $.isBoolean(isAppend, false);
             for (var i in datas) {
-                var d = datas[i], isArray = $.isArray(d), treeData = d.treeData || {};
+                var d = datas[i], isArray = $.isArray(d), treeData = d.treeData || {}, id = treeData.id || '';
                 if (isArray || pids.indexOf(treeData.pid) >= 0) {
                     var rowIndex = container.rows.length;
                     if (isAppend) {
                         rowIndex = findRowIndex(that, container, treeData.pid);
                     }
                     var row = container.insertRow(rowIndex);
+
+                    setOpenLevel(that, treeData, treeOp, row, id);
+
                     insertCell(that, row, datas[i], isHead);
 
                     if (!isHead || !inserted) {
@@ -243,6 +248,15 @@
             setSwitchAction(that, $I(buildSwitchId(data.id)), 'toggle');
 
             $.addClass(cell, 'tree-cell');
+        },
+        setOpenLevel = function(that, treeData, treeOption, row, id){
+            //确认默认展开级数
+            var isExpand = (treeData.level <= treeOption.openLevel + 1) || treeOption.openLevel < -1;
+            if(!isExpand){
+                row.style.display = 'none';
+                //记录收缩状态
+                setCollapse(that.tree, treeData.pid, [id], true, true);
+            }
         },
         setTreeAction = function (that, obj, id, actions) {
             $.setAttribute(obj, { tid: id })
@@ -504,6 +518,7 @@
 
             var ds = that.tree.initial(bodyData);
             var datas = ds.datas, len = datas.length;
+            var treeOp = that.tree.options;
 
             for (var i = 0; i < len; i++) {
                 var treeData = datas[i].treeData, id = treeData.id || '', tr = datas[i].row;
@@ -511,7 +526,9 @@
                 if (treeData.level >= 0) {
                     var rowIndex = findRowIndex(that, container, treeData.pid);
                     var row = container.insertRow(rowIndex);
-                    
+
+                    setOpenLevel(that, treeData, treeOp, row, id);
+
                     //设置树形行数据、事件
                     setTreeRow(that, row, treeData, id);
 
@@ -526,6 +543,7 @@
                         }
                     }
                 } else {
+                    //没有tree属性的表格行tr，直接追加到表格
                     container.appendChild(tr);
                 }
             }
@@ -565,13 +583,13 @@
                 //spaceWidth: 16,                       //树形每一层之间的缩进距离，单位为px，默认为16px（可以不设置）
                 /*className: {                          //树形结构箭头图标样式
                     expand: 'expand',                   //节点展开时的样式
-                    collapse: 'collapse',                //节点收缩时的样式
+                    collapse: 'collapse',               //节点收缩时的样式
                     selected: 'selected'
                 },
                 */
                 //className: ['expand', 'collapse', 'selected'],     //可以数组形式，第1个元素为节点展开的样式
-                
-                expandCallback: function (id, that) {
+                openLevel: -2,                          //默认展开级数，-2 表示全部展开
+                expandCallback: function (id, that) {   //节点展开时的回调函数
                     if($.isDebug()){
                         console.log('expandCallback-0: ', id, that);
                     }
@@ -596,6 +614,7 @@
                 op.parent.appendChild(that.table);
             }
         }
+
         if (that.table === null) {
             return false;
         }
@@ -764,6 +783,7 @@
                 collapse: 'collapse',
                 selected: 'selected'
             },
+            openLevel: -2,    //默认展开级数，-2表示全部展开
             /*
             expandCallback: function (id, that) {
                 if($.isDebug()){
@@ -1052,9 +1072,9 @@
             }
             return rows;
         },
-        buildSpace = function (len, spaceWidth) {
+        buildSpace = function (level, spaceWidth) {
             var w = 0;
-            for (var i = 0; i < len; i++) {
+            for (var i = 0; i < level; i++) {
                 w += (spaceWidth || 16);
             }
             return w;
@@ -1065,10 +1085,11 @@
         buildSwitchId = function (id) {
             return 'switch_' + id;
         },
-        buildSwitch = function (that, id, len) {
+        buildSwitch = function (that, id, level) {
+            var op = that.options, isExpand = (level <= op.openLevel) || op.openLevel < -1;
             var f = '<a id="' + buildFocusId(id) + '" class="table-tree-focuser" href="#" /></a>';
-            var a = '<a id="{0}" tid="{1}" expand="1" class="{2}" style="cursor:pointer;margin-left:{3}px !important;"></a>'.format(
-                buildSwitchId(id), id, that.options.className.expand, buildSpace(len, that.options.spaceWidth)
+            var a = '<a id="{0}" tid="{1}" expand="{2}" class="{3}" style="cursor:pointer;margin-left:{4}px !important;"></a>'.format(
+                buildSwitchId(id), id, isExpand ? 1 : 0, isExpand ? op.className.expand : op.className.collapse, buildSpace(level, op.spaceWidth)
             );
             return f + a;
         },
@@ -1079,10 +1100,14 @@
             obj.setAttribute('expand', collapse ? 0 : 1);
             obj.className = that.options.className[collapse ? 'collapse' : 'expand'];
         },
-        setCollapse = function (that, pid, ids, collapse) {
+        setCollapse = function (that, pid, ids, collapse, initial) {
             var key = buildKey(pid);
             if (collapse) {
-                that.options.treeCache[key] = [];
+                if(initial){
+                    that.options.treeCache[key] = that.options.treeCache[key] || [];
+                } else {
+                    that.options.treeCache[key] = [];
+                }
                 for (var i in ids) {
                     that.options.treeCache[key].push(ids[i]);
                 }

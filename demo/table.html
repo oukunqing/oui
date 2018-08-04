@@ -156,6 +156,7 @@ ID:<input type="text" id="txtId" style="width:50px;" />
             },
             */
             //className: ['expand', 'collapse'], //可以数组形式，第1个元素为节点展开的样式
+            openLevel: 0,               //默认展开级数，最小值为 -1 表示全部收缩
             expandCallback: function (id, that) {
                 console.log('expandCallback2: ', id, that);
             }

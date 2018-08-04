@@ -264,6 +264,7 @@ var tb = null;
 function test(){
 	var treeCellIndex = 0;
 	var treeOptions = {
+        openLevel: 0,
 		expandCallback: function(id, obj){
 			console.log('expandCallback: ', id, obj);
 		}
@@ -271,7 +272,7 @@ function test(){
 
 	tb = new $.Table('tb1').toTree(treeCellIndex, treeOptions,
 		function(obj) {
-			obj.append(appendData);
+			//obj.append(appendData);
 		}
 	);
 }
