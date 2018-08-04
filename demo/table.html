@@ -155,7 +155,10 @@ ID:<input type="text" id="txtId" style="width:50px;" />
                 selected: 'selected'    //节点选中时 表格行的样式
             },
             */
-            //className: ['expand', 'collapse'] //可以数组形式，第1个元素为节点展开的样式
+            //className: ['expand', 'collapse'], //可以数组形式，第1个元素为节点展开的样式
+            expandCallback: function (id, that) {
+                console.log('expandCallback2: ', id, that);
+            }
         } 
     });
     console.log('tb: ', tb);
@@ -363,11 +366,11 @@ ID:<input type="text" id="txtId" style="width:50px;" />
         console.log('oui: ', OUI);
     });
 
-        for(var k in tb){
-            console.log('tk: ', k);
-        }
-    
-        for(var k in tb.tree){
-            console.log('ttk: ', k);
-        }
+    for(var k in tb){
+        console.log('tk: ', k);
+    }
+
+    for(var k in tb.tree){
+        console.log('ttk: ', k);
+    }
 </script>

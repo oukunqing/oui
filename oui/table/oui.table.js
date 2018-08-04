@@ -561,9 +561,12 @@
                     selected: 'selected'
                 },
                 */
-                //className: ['expand', 'collapse', 'selected']     //可以数组形式，第1个元素为节点展开的样式
-                expandCallback: function (id) {
-
+                //className: ['expand', 'collapse', 'selected'],     //可以数组形式，第1个元素为节点展开的样式
+                
+                expandCallback: function (id, that) {
+                    if($.isDebug()){
+                        console.log('expandCallback-0: ', id, that);
+                    }
                 }
             }
         }, options), trigger = op.trigger;
@@ -681,9 +684,6 @@
         },
         treeInitial: function (cellIndex, treeOptions) {
             var that = this, op = that.options;
-            if (!op.showTree) {
-                op.showTree = true;
-            }
             if ($.isNumber(cellIndex)) {
                 op.treeCellIndex = cellIndex;
                 //对现有表格使用树形结构，增加单元格点击事件，以方便点击
@@ -693,7 +693,7 @@
                 op.treeOptions = $.extend(op.treeOptions, treeOptions);
             }
 
-            if (!that.tree) {
+            if (op.showTree && !that.tree) {
                 $.addClass(that.table, 'oui-table-tree');
 
                 that.tree = new TableTree(op.showTree, op.treeOptions || {});
@@ -704,9 +704,14 @@
         toTree: function (cellIndex, treeOptions, func) {
             if ($.isFunction(cellIndex)) {
                 func = cellIndex, cellIndex = 0, treeOptions = {};
+            } else if($.isObject(cellIndex)) {
+                func = treeOptions, treeOptions = cellIndex, cellIndex = 0;
             } else if ($.isFunction(treeOptions)) {
                 func = treeOptions, treeOptions = {};
             }
+            //设置显示树形结构
+            this.options.showTree = true;
+
             this.treeInitial(cellIndex || 0, treeOptions);
 
             return toTree(this), callback(func, this), this;
@@ -739,9 +744,14 @@
                 collapse: 'collapse',
                 selected: 'selected'
             },
-            expandCallback: function (id) {
-
+            /*
+            expandCallback: function (id, that) {
+                if($.isDebug()){
+                    console.log('expandCallback-0: ', id, that);
+                }
             }
+            */
+            expandCallback: null
         }, options);
 
         $.extend(that.options, {
@@ -828,7 +838,7 @@
             return callback(func, this), this;
         },
         toggle: function (id, collapse, func) {
-            var that = this, btnSwitch = $I(buildSwitchId(id));
+            var that = this, op = that.options, btnSwitch = $I(buildSwitchId(id));
             if (btnSwitch !== null) {
                 //判断收缩还是展开
                 collapse = $.isBoolean(collapse, btnSwitch.getAttribute('expand') === '1');
@@ -837,6 +847,10 @@
                 //展开时，需要检查父级节点是否是展开状态，若为收缩则展开
                 if (!collapse) {
                     that.expandParent(id);
+
+                    if($.isFunction(op.expandCallback)){
+                        op.expandCallback(id, that);
+                    }
                 }
 
                 //获取当前节点下的所有子节点

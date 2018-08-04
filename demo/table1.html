@@ -261,9 +261,15 @@ var appendData = [
 var tb = null;
 
 function test(){
-	tb = new $.Table('tb1').toTree(function(obj) {
-		obj.append(appendData);
-	});
+	tb = new $.Table('tb1').toTree({
+			expandCallback: function(id, obj){
+				console.log('expandCallback: ', id, obj);
+			}
+		},
+		function(obj) {
+			obj.append(appendData);
+		}
+	);
 }
 
 
