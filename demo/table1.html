@@ -272,7 +272,9 @@ function test(){
 
 	tb = new $.Table('tb1').toTree(treeCellIndex, treeOptions,
 		function(obj) {
-			//obj.append(appendData);
+			window.setTimeout(function(){
+				obj.append(appendData);
+			}, 2000);
 		}
 	);
 }

@@ -96,7 +96,7 @@
                     }
                     var row = container.insertRow(rowIndex);
 
-                    setOpenLevel(that, treeData, treeOp, row, id);
+                    setOpenLevel(that, treeData, treeOp, row, id, isAppend);
 
                     insertCell(that, row, datas[i], isHead);
 
@@ -249,9 +249,28 @@
 
             $.addClass(cell, 'tree-cell');
         },
-        setOpenLevel = function(that, treeData, treeOption, row, id){
-            //确认默认展开级数
-            var isExpand = (treeData.level <= treeOption.openLevel + 1) || treeOption.openLevel < -1;
+        isNodeHide = function(that, id) {
+            var row = $I(buildId(id));
+            if(row !== null){
+                return row.style.display === 'none';
+            }
+            return false
+        },
+        isNodeExpand = function(that, id) {
+            var btnSwitch = $I(buildSwitchId(id));
+            if(btnSwitch !== null) {
+                return btnSwitch.getAttribute('expand') === '1';
+            }
+            return true;
+        },
+        setOpenLevel = function(that, treeData, treeOption, row, id, isAppend){
+            var isExpand = true;
+            if(!isAppend) {
+                //首次创建，确认默认展开级数
+                isExpand = (treeData.level <= treeOption.openLevel + 1) || treeOption.openLevel < -1;
+            } else {
+                isExpand = !isNodeHide(that, treeData.pid) && isNodeExpand(that, treeData.pid);
+            }
             if(!isExpand){
                 row.style.display = 'none';
                 //记录收缩状态
