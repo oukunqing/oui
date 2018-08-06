@@ -58,8 +58,8 @@
         }
         */
     </style>
-    <script type="text/javascript" src="../oui/oui.js"></script>
-    <script type="text/javascript" src="../oui/table/oui.table.js"></script>
+    <script type="text/javascript" src="../oui/oui.js?1"></script>
+    <script type="text/javascript" src="../oui/table/oui.table.js?1"></script>
 </head>
 <body>
 层级：<input type="text" id="txtLevel" style="width:50px;" />
@@ -75,6 +75,10 @@ ID:<input type="text" id="txtId" style="width:50px;" />
 
 <button onclick="select();">按ID选中行</button>
 <button onclick="getCheckedRow();">获取选中的行</button>
+<button onclick="getChildCount(false);">获取子节点数量</button>
+<button onclick="getChildCount(true);">获取子节点数量（递归）</button>
+<button onclick="getChildIds(false);">获取子节点ID</button>
+<button onclick="getChildIds(true);">获取子节点ID（递归）</button>
 <br /><br />
 
 <table id="tblist" class="tblist"></table>
@@ -157,6 +161,7 @@ ID:<input type="text" id="txtId" style="width:50px;" />
             */
             //className: ['expand', 'collapse'], //可以数组形式，第1个元素为节点展开的样式
             openLevel: 0,               //默认展开级数，最小值为 -1 表示全部收缩
+            showChildCount: true,
             expandCallback: function (id, that) {
                 console.log('expandCallback2: ', id, that);
             }
@@ -281,7 +286,7 @@ ID:<input type="text" id="txtId" style="width:50px;" />
     window.setTimeout(function(){
         var appendData = [
             {
-                rowData: {}, treeData:{id:33, pid:41}, cellData:[
+                rowData: {}, treeData:{id:33, pid:2}, cellData:[
                     {content:'单元格331'}, {content:'单元格332'}, {content:'单元格333'}, {content:'单元格334'}, {content:'单元格335'}, {content:'单元格336'}, '18'
                 ]
             },
@@ -297,7 +302,7 @@ ID:<input type="text" id="txtId" style="width:50px;" />
             }
         ];
         tb.append(appendData);
-    }, 1500);
+    }, 1800);
 
     window.setTimeout(function(){
         console.log('tb.tree: ', tb.tree);
@@ -345,6 +350,20 @@ ID:<input type="text" id="txtId" style="width:50px;" />
             console.log(tr.getAttribute('tree'));
             console.log($.toJson(tr.getAttribute('tree')));
         }
+    }
+
+    function getChildCount(recursion){
+        var id = document.getElementById('txtId').value;
+        var count = tb.tree.getChildCount(id, recursion);
+
+        console.log('getChildCount: ', recursion, count);
+    }
+
+    function getChildIds(recursion){
+        var id = document.getElementById('txtId').value;
+        var arr = tb.tree.getChildIds(id, recursion);
+
+        console.log('getChildIds: ', recursion, arr);
     }
 
     OUI.loadJsScript('../oui/oui.crc.js',  function(){

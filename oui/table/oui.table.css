@@ -35,7 +35,7 @@
 
 .oui-table div.quick-menu{
     position: absolute; border:solid 1px #ddd; border-radius:4px; background:#fff;
-    margin: -3px 0 0 20px; line-height: 1.8em; min-width: 80px; margin:0;
+    margin: -3px 0 0 20px; line-height: 1.8em; min-width: 100px; margin:0;
     display: none; overflow: hidden;
 }
 .oui-table div.quick-menu a{
@@ -77,6 +77,10 @@
 
 .oui-table-tree .tree-cell{
     text-align: left;
+}
+
+.oui-table-tree .child-count{
+    margin:0 0 0 5px; color: #999; padding: 0; border: none 0; background: transparent;
 }
 
 .oui-table-tree .cursor{

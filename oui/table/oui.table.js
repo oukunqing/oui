@@ -16,6 +16,23 @@
         CELL_CHECKBOX = 'cell-checkbox',
         TABLE_INDEX = 1,
         TO_TREE_LOG = {},
+        ID_PREFIX = {
+            SWITCH: 'oui_table_tree_switch_',
+            FOCUS: 'oui_table_tree_focus_',
+            COUNT: 'oui_table_tree_count_',
+            ROW: 'oui_table_tr_',
+            KEY: 'k_'
+        },
+        buildId = function(id, prefix){
+            if(prefix){
+                return ID_PREFIX[prefix] + id;
+            } else {
+                return ID_PREFIX.ROW + id;
+            }
+        },
+        buildKey = function (id) {
+            return buildId(id, 'KEY');
+        },            
         isCellSpan = function (span) {
             return $.isNumber(span) && span > 0;
         },
@@ -230,7 +247,7 @@
         },
         setTreeRow = function(that, row, data, id){
             //设置tr的id属性
-            row.setAttribute('id', buildId(id));
+            row.setAttribute('id', buildId(id, 'ROW'));
             //设置 tree 属性
             setTreeAttr(row, data);
             //设置tr创建记录，通过id找tr位置时要用到
@@ -245,19 +262,19 @@
             }
             cell.innerHTML = content;
 
-            setSwitchAction(that, $I(buildSwitchId(data.id)), 'toggle');
+            setSwitchAction(that, $I(buildId(data.id, 'SWITCH')), 'toggle');
 
             $.addClass(cell, 'tree-cell');
         },
         isNodeHide = function(that, id) {
-            var row = $I(buildId(id));
+            var row = $I(buildId(id, 'ROW'));
             if(row !== null){
                 return row.style.display === 'none';
             }
             return false
         },
         isNodeExpand = function(that, id) {
-            var btnSwitch = $I(buildSwitchId(id));
+            var btnSwitch = $I(buildId(id, 'SWITCH'));
             if(btnSwitch !== null) {
                 return btnSwitch.getAttribute('expand') === '1';
             }
@@ -383,7 +400,7 @@
                 var id = 0, realPid = 0;
                 //找到父节点下的最后一个有效的直系子节点所在的行
                 for (var i = len - 1; i >= 0; i--) {
-                    id = childs[i], idx = getRowIndex($I(buildId(id))) - headRows;
+                    id = childs[i], idx = getRowIndex($I(buildId(id, 'ROW'))) - headRows;
                     if (idx >= 0) {
                         realPid = id;
                         break;
@@ -402,11 +419,12 @@
             }
             return rowCount + (idx < 0 ? container.rows.length : idx + 1);
         },
-        findRow = function (obj) {
+        findRow = function (obj, tagName) {
+            tagName = tagName || 'TR';
             if (obj !== null) {
                 var parent = obj.parentNode;
                 if (parent !== null) {
-                    return parent.tagName === 'TR' ? parent : findRow(parent);
+                    return parent.tagName === tagName ? parent : findRow(parent);
                 }
             }
             return null;
@@ -460,7 +478,7 @@
         setSortAction = function (that, cell, field) {
             $.setAttribute(cell, { action: '', field: field }).setStyle(cell, 'cursor', 'default');
             $.addEventListener(cell, 'click', function () {                
-                if(that.options.showTree){
+                if(that.options.showTree && !$.isDebug()){
                     console.log('showTree is true, ', 'sort disabled.');
                     return false;
                 }
@@ -568,6 +586,13 @@
             }
         },
         callback = function (func, that, value) {
+            if(that.tree) {
+                if(that.tree.options.showChildCount){
+                    that.tree.showChildCount();
+                }
+            } else if(that && that.options.showChildCount){
+                that.showChildCount();
+            }
             $.isFunction(func) && func(that, value);
         };
 
@@ -608,6 +633,7 @@
                 */
                 //className: ['expand', 'collapse', 'selected'],     //可以数组形式，第1个元素为节点展开的样式
                 openLevel: -2,                          //默认展开级数，-2 表示全部展开
+                showChildCount: false,                  //是否显示子节点数量
                 expandCallback: function (id, that) {   //节点展开时的回调函数
                     if($.isDebug()){
                         console.log('expandCallback-0: ', id, that);
@@ -772,20 +798,20 @@
 
             this.treeInitial(cellIndex || 0, treeOptions);
 
-            return toTree(this), setRowStyle.call(this, true), callback(func, this), this;
+            return toTree(this), setRowStyle.call(this, true), callback(func, this, this.tree), this;
         },
         getRow: function (ids) {
             if ($.isArray(ids)) {
                 var list = [];
                 for (var i in ids) {
-                    var tr = $I(this.tree.buildId(ids[i]));
+                    var tr = $I(buildId(ids[i]));
                     if (tr != null) {
                         list.push(tr);
                     }
                 }
                 return list;
             } else {
-                return $I(this.tree.buildId(id));
+                return $I(buildId(ids));
             }
         },
         getCheckedRow: function () {
@@ -803,6 +829,7 @@
                 selected: 'selected'
             },
             openLevel: -2,    //默认展开级数，-2表示全部展开
+            showChildCount: false,      //是否显示子节点数量
             /*
             expandCallback: function (id, that) {
                 if($.isDebug()){
@@ -887,7 +914,7 @@
             if (data && data.treeData) {
                 var pid = data.treeData.pid || 0, pkey = buildKey(pid), pdata = this.options.treeDatas[pkey];
                 if (pdata) {
-                    var btnSwitch = $I(buildSwitchId(pid));
+                    var btnSwitch = $I(buildId(pid, 'SWITCH'));
                     if (btnSwitch !== null && btnSwitch.getAttribute('expand') === '0') {
                         this.expand(pid);
                     }
@@ -897,7 +924,7 @@
             return callback(func, this), this;
         },
         toggle: function (id, collapse, func) {
-            var that = this, op = that.options, btnSwitch = $I(buildSwitchId(id));
+            var that = this, op = that.options, btnSwitch = $I(buildId(id, 'SWITCH'));
             if (btnSwitch !== null) {
                 //判断收缩还是展开
                 collapse = $.isBoolean(collapse, btnSwitch.getAttribute('expand') === '1');
@@ -939,7 +966,7 @@
 
                 for (var i in this.options.treeDatas) {
                     var dr = this.options.treeDatas[i].treeData || {}, id = dr.id;
-                    var obj = $I(buildId(id)), btnSwitch = $I(buildSwitchId(id));
+                    var obj = $I(buildId(id, 'ROW')), btnSwitch = $I(buildId(id, 'SWITCH'));
                     if (obj !== null) {
                         obj.style.display = dr.level <= level ? '' : 'none';
                     }
@@ -964,7 +991,7 @@
         toggleAll: function (collapse, func) {
             for (var i in this.options.treeDatas) {
                 var dr = this.options.treeDatas[i].treeData || {}, id = dr.id;
-                var obj = $I(buildId(id)), btnSwitch = $I(buildSwitchId(id));
+                var obj = $I(buildId(id, 'ROW')), btnSwitch = $I(buildId(id, 'SWITCH'));
                 if (obj !== null) {
                     obj.style.display = collapse && dr.level > 0 ? 'none' : '';
                 }
@@ -986,28 +1013,32 @@
             if ($.isFunction(keepSelf)) {
                 func = keepSelf, keepSelf = false;
             }
-            var obj = $I(buildId(id));
+            var that = this, obj = $I(buildId(id, 'ROW'));
             if (obj === null) {
-                return callback(func, this, false), this;
+                return callback(func, that, false), that;
             }
             //获取当前节点下的所有子节点
-            var childs = getChildIds(this, id), ids = getRowIds(this, childs, true, []), len = ids.length;
+            var childs = getChildIds(that, id), ids = getRowIds(that, childs, true, []), len = ids.length;
             for (var i = len - 1; i >= 0; i--) {
                 var tr = $I(buildId(ids[i]));
                 deleteTableRow(tr);
+                removeData(that, id);
             }
             if (!keepSelf) {
                 deleteTableRow(obj);
+                removeData(that, id, getParentId(that, id));
+            } else {
+                removeData(that, id);
             }
-            setLineNumber.call(this.Table);
+            setLineNumber.call(that.Table);
 
-            return callback(func, this, true), this;
+            return callback(func, that, true), that;
         },
         removeChild: function (id, func) {
             return this.remove(id, true, func), this;
         },
         select: function (id, func) {
-            var that = this, op = that.options, fa = $I(buildFocusId(id)), find = fa !== null;
+            var that = this, op = that.options, fa = $I(buildId(id, 'FOCUS')), find = fa !== null;
             if (find) {
                 var tr = findRow(fa);
                 if (tr !== null) {
@@ -1020,17 +1051,41 @@
                 }
                 fa.focus();
             }
-            return callback(func, find), this;
+            return callback(func, that, find), this;
+        },
+        showChildCount: function (id){
+            var that = this, op = that.options;
+            if(!op.showChildCount){
+                op.showChildCount = true;
+            }
+            if(id){
+                showChildCount(that, id);
+            } else {
+                var timeout = 128;
+                if(op.timerChildCount){
+                    window.clearTimeout(op.timerChildCount);
+                }
+                op.timerChildCount = window.setTimeout(function(){
+                    var datas = that.options.treeDatas;
+                    for(var i in datas){
+                        showChildCount(that, datas[i].treeData.id);
+                    }
+                }, timeout);
+            }
+        },
+        getChildIds: function (id, recursion) {
+            if(!$I(buildId(id, 'SWITCH'))){
+                return [];
+            }
+            var childIds = getChildIds(this, id);
+            return recursion ? getRowIds(this, childIds, true, []) : childIds;
+        },
+        getChildCount: function (id, recursion) {
+            return this.getChildIds(id, recursion).length;
         }
     };
 
-    var buildKey = function (id) {
-        return 'k_' + id;
-    },
-        buildId = function (id) {
-            return 'tr_' + id;
-        },
-        setKeyValue = function (data, key, value) {
+    var setKeyValue = function (data, key, value) {
             if ($.isUndefined(data[key])) {
                 data[key] = [];
             }
@@ -1042,9 +1097,40 @@
         hasParent = function (that, key) {
             return !$.isUndefined(that.options.treeDatas[key]);
         },
+        getParentId = function(that, id){
+            var data = that.options.treeDatas[buildKey(id)];
+            if(data && data.treeData){
+                return data.treeData.pid;
+            }
+        },
         getChildIds = function (that, pid) {
             var pkey = buildKey(pid);
             return that.options.treeIndex[pkey] || [];
+        },
+        removeData = function (that, id, pid){
+            var op = that.options;
+            if(pid){
+                var pkey = buildKey(pid), ids = op.treeIndex[pkey];
+                if($.isArray(ids)){
+                    var idx = ids.indexOf(id);
+                    //没有找到id位置，转换成数字再找一次
+                    if(idx < 0){
+                        idx = ids.indexOf(parseInt(id, 10));
+                    }
+                    if(idx > -1){
+                        ids.splice(idx, 1);
+                    }
+                }
+            }
+
+            var key = buildKey(id);
+            if(op.treeIndex[key]){
+                if(pid){
+                    delete op.treeIndex[key];
+                } else {
+                    op.treeIndex[key] = [];
+                }
+            }
         },
         setLevel = function (that, data, pkey, hasParent) {
             if (!hasParent) {
@@ -1098,17 +1184,11 @@
             }
             return w;
         },
-        buildFocusId = function (id) {
-            return 'focus_' + id;
-        },
-        buildSwitchId = function (id) {
-            return 'switch_' + id;
-        },
         buildSwitch = function (that, id, level) {
             var op = that.options, isExpand = (level <= op.openLevel) || op.openLevel < -1;
-            var f = '<a id="' + buildFocusId(id) + '" class="table-tree-focuser" href="#" /></a>';
+            var f = '<a id="' + buildId(id, 'FOCUS') + '" class="table-tree-focuser" href="#" /></a>';
             var a = '<a id="{0}" tid="{1}" expand="{2}" class="{3}" style="cursor:pointer;margin-left:{4}px !important;"></a>'.format(
-                buildSwitchId(id), id, isExpand ? 1 : 0, isExpand ? op.className.expand : op.className.collapse, buildSpace(level, op.spaceWidth)
+                buildId(id, 'SWITCH'), id, isExpand ? 1 : 0, isExpand ? op.className.expand : op.className.collapse, buildSpace(level, op.spaceWidth)
             );
             return f + a;
         },
@@ -1118,6 +1198,20 @@
             }
             obj.setAttribute('expand', collapse ? 0 : 1);
             obj.className = that.options.className[collapse ? 'collapse' : 'expand'];
+        },
+        showChildCount = function(that, id) {
+            var btnSwitch = $I(buildId(id, 'SWITCH'));
+            if(!btnSwitch){
+                return false;
+            }
+            var childs = getChildIds(that, id), objCount = $I(buildId(id, 'COUNT'));
+            if(!objCount){
+                var cell = findRow(btnSwitch, 'TD');
+                objCount = $.createElement('span', buildId(id, 'COUNT'), function(elem){
+                    elem.className = 'child-count';
+                }, cell);
+            }
+            objCount.innerHTML = '(' + childs.length + ')';
         },
         setCollapse = function (that, pid, ids, collapse, initial) {
             var key = buildKey(pid);

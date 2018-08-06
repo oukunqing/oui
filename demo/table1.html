@@ -50,13 +50,13 @@
 			return true;
 		};
 	</script>
-	<script type="text/javascript" src="../oui/oui.js"></script>
-	<script type="text/javascript" src="../oui/table/oui.table.js"></script>
+	<script type="text/javascript" src="../oui/oui.js?1"></script>
+	<script type="text/javascript" src="../oui/table/oui.table.js?1"></script>
 </head>
 <body>
 <div style="line-height:24px;padding:5px 0;">
 	树形表格示例<br />
-	你现在看到的是原始的表格内容显示，请点击下面的“调用树形菜单”按钮就可以看到效果了。
+	你现在看到的是原始的表格内容显示，请点击下面的“调用树形表格”按钮就可以看到效果了。
 	<br />
 	<input type="button" onclick="test();" value="调用树形表格" style="margin-right:20px;" />
 	<input type="button" onclick="expandAll();" value="全部展开" />
@@ -265,15 +265,19 @@ function test(){
 	var treeCellIndex = 0;
 	var treeOptions = {
         openLevel: 0,
+        showChildCount: true,
 		expandCallback: function(id, obj){
 			console.log('expandCallback: ', id, obj);
 		}
 	};
 
 	tb = new $.Table('tb1').toTree(treeCellIndex, treeOptions,
-		function(obj) {
+		function(otb, tree) {
 			window.setTimeout(function(){
-				obj.append(appendData);
+				otb.append(appendData);
+
+				tree.showChildCount();
+				tree.showChildCount();
 			}, 2000);
 		}
 	);
