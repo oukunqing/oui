@@ -496,6 +496,13 @@
                 }
             });
         },
+        copyRow = function(row, oldRow){
+            for(var i=0; i<oldRow.cells.length; i++){
+                var cell = oldRow.cells[i].cloneNode(true);
+                row.appendChild(cell);
+            }
+            return row;
+        },
         sort = function (that, field, asc) {
             var tb = that.table, cellIndex = -1;
             if ($.isNumber(field)) {
@@ -817,6 +824,62 @@
         getCheckedRow: function () {
             return getCheckedRow(this);
         }
+        /*,
+        move: function (id, action, targetId, func){
+            var that = this, row = that.getRow(id);
+            if(!row){
+                return that;
+            }
+            var tb = that.table, container = getContainer(that.table, false), rowCount = tb.rows.length, rowIndex = row.rowIndex;
+            if($.isFunction(targetId)){
+                func = targetId;
+                targetId = null;
+            }
+            if(!targetId) {
+                var targetRow = tb.rows[rowIndex + (action === 'up' ? -1 : 1)];
+                if(!targetRow || !targetRow.parentNode || targetRow.parentNode !== container) {
+                    return that;
+                }
+                var tree = $.tryParseJson(targetRow.getAttribute('tree'));
+                if(tree.status) {
+                    targetId = tree.data.id;
+                }
+            }
+
+            var hasTarget = !$.isNullOrUndefined(targetId), rowIndex = row.rowIndex;
+            console.log('move: rowIndex: ', rowIndex)
+            //获取当前节点下的所有子节点
+            var childs = getChildIds(that.tree, id), rows = getRowIds(that.tree, childs, true, [], true);
+            if(hasTarget){
+
+            } else if(rows.length > 0) {
+
+            } else {
+                var frag = doc.createDocumentFragment();
+                if(action === 'up'){
+                    frag.appendChild(row);
+                } else {
+                    frag.appendChild(tb.rows[rowIndex + 1]);
+                }
+                rowIndex += action === 'up' ? -1 : 0;
+
+                for(var i=rowIndex; i<rowCount-1; i++){
+                    console.log('i:', i);
+                    frag.appendChild(tb.rows[rowIndex]);
+                }
+                container.appendChild(frag);
+            }
+
+            console.log('move: ', 'childs: ', childs, ', rows: ', rows)
+
+            return callback(func, that), that;
+        },
+        up: function (id, func){
+            return this.move(id, 'up', func);
+        },
+        down: function (id, func){
+            return this.move(id, 'down', func);
+        }*/
     };
 
     function TableTree(isTree, options) {
@@ -1159,19 +1222,19 @@
         isExist = function (that, key) {
             return !$.isUndefined(that.options.treeDatas[key]);
         },
-        getRowIds = function (that, trees, collapse, rows) {
+        getRowIds = function (that, trees, collapse, rows, getRow) {
             for (var i in trees) {
                 var id = trees[i];
                 if (!hasTreeFlag(that, id)) {
                     break;
                 }
-                rows.push(id);
+                rows.push(!getRow ? id : $I(buildId(id)));
 
                 //展开时需要屏蔽之前被收缩的子节点
                 if (!isCollapse(that, id) || collapse) {
                     var childs = that.options.treeIndex[buildKey(id)];
                     if ($.isArray(childs)) {
-                        getRowIds(that, childs, collapse, rows);
+                        getRowIds(that, childs, collapse, rows, getRow);
                     }
                 }
             }
@@ -1249,5 +1312,5 @@
             return quickSort(left, key, key0).concat(pivot, quickSort(right, key, key0));
         };
 
-    $.Table = Table;
+    $.extend($, { Table: Table });
 }(OUI);

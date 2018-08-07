@@ -1,12 +1,29 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title></title>
-    <script type="text/javascript" src="../oui/oui.js"></script>
-    <script type="text/javascript" src="../oui/tree/oui.tree.js"></script>
+    <title>树形菜单</title>
+    <script type="text/javascript" src="../oui/oui.js?1"></script>
+    <script type="text/javascript" src="../oui/tree/oui.tree.js?1"></script>
 </head>
 <body>
-
+<div id="tree1"></div>
 </body>
 </html>
+<script type="text/javascript">
+    var tree = new $.Tree('tree1');
+    console.log('tree: ', tree, tree.nodes, tree.id);
+
+
+    tree.add({id:1, pid:0, text: '根节点'});
+    tree.add({id:2, pid:1, text: '子节点'});
+
+    tree.nodes.each(function(i, key, node){
+        console.log(i, key, node);
+    });
+
+    
+    for(var i in tree){
+        console.log(i, tree[i]);
+    }
+
+</script>
