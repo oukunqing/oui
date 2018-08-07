@@ -71,8 +71,8 @@
         };
 
         OUI.extend = OUI.fn.extend = function () {
-            var target = arguments[0] || {},
-                source = null,
+            var source, name, src, copy, copyIsArray, clone,
+                target = arguments[0] || {},
                 i = 1,
                 length = arguments.length,
                 deep = false;
@@ -82,7 +82,7 @@
                 target = arguments[1] || {};
                 i++;
             }
-            if (typeof target !== "object" && !isFunction(target)) {
+            if (typeof target !== 'object' && !isFunction(target)) {
                 target = {};
             }
             if (i === length) {
@@ -90,14 +90,26 @@
                 i--;
             }
             for (; i < length; i++) {
-                if ((source = arguments[i]) != null) {
-                    for (var name in source) {
-                        var obj = source[name];
-                        if (deep && isObject(obj)) {
-                            target[name] = OUI.extend(deep, target[name] || {}, obj);
-                        } else if (typeof obj !== 'undefined') {
-                            target[name] = obj;
+                if ((source = arguments[i]) === null) {
+                    continue;
+                }
+                for (name in source) {
+                    if ((copy = source[name]) === target) {
+                        continue;
+                    }
+
+                    src = target[name];
+
+                    if (deep && ((copyIsArray = isArray(copy)) || isObject(copy))) {
+                        if (copyIsArray) {
+                            copyIsArray = false;
+                            clone = src && isArray(src) ? src : [];
+                        } else {
+                            clone = src && isObject(src) ? src : {};
                         }
+                        target[name] = OUI.extend(deep, clone, copy);
+                    } else if (typeof copy !== 'undefined') {
+                        target[name] = copy;
                     }
                 }
             }
@@ -111,7 +123,6 @@
         }
     }
 }();
-
 
 !function ($) {
     'use strict';
