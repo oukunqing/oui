@@ -301,6 +301,9 @@ base.js demo
     <input type="checkbox" name="chb" value="7" class="chb" disabled="1" /> 复选框7 (禁用)
     <input type="checkbox" name="chb" value="8" /> 复选框8
     <input type="checkbox" name="chb" value="9" class="chb" /> 复选框9
+
+    <button id="btn1">button1</button>
+    <button id="btn2">button1</button>
 </div>
 <div id="div2">
     <br />
@@ -394,4 +397,9 @@ console.log(arr);
 console.log($.isArrayLike(arr));
 console.log($.makeArray(arr));
 $.setChecked(arr, 1);
+
+
+$('#btn1,#btn2').blur(function(e, i, obj){
+    console.log(i, obj, e);
+});
 </script>

@@ -1056,9 +1056,9 @@
             var name = (filePath || '').split('?')[0], pos = name.lastIndexOf('.');
             return pos >= 0 ? name.substr(pos + 1).toLowerCase() : '';
         },
-        createElement = function (nodeName, id, func, parent) {
+        createElement = function (nodeName, id, func, parent, exempt) {
             if ($.isFunction(id)) {
-                parent = func, func = id, id = null;
+                exempt = parent, parent = func, func = id, id = null;
             }
             var elem = null, hasId = false;
             if ($.isString(id, true)) {
@@ -1071,7 +1071,7 @@
             elem = doc.createElement(nodeName);
 
             if (hasId) { elem.id = id; }
-            if (!isElement(parent)) { parent = doc.body; }
+            if (!exempt && !isElement(parent)) { parent = doc.body; }
 
             return $.isFunction(func) && func(elem), parent.appendChild(elem), elem;
         },
@@ -1107,7 +1107,7 @@
             return obj != null && obj === obj.window;
         },
         isArrayLike = function (obj) {
-            if($.isString(obj)){
+            if ($.isString(obj)) {
                 return false;
             } else if ($.isFunction(obj) || isWindow(obj)) {
                 return false;
@@ -1346,14 +1346,14 @@
         },
         tryParseJSON = function (data) {
             var res = { status: false, complete: false, data: data };
-            if(data !== null){
+            if (data !== null) {
                 try {
                     res.data = parseJSON(data);
                     res.status = true;
                     res.complete = true;
                 } catch (e) {
                     try {
-                        if($.isString(data) && isJsonLike(data)){
+                        if ($.isString(data) && isJsonLike(data)) {
                             res.data = eval('(' + data + ')');
                             res.status = true;
                         }
@@ -1961,6 +1961,27 @@
                 $.removeClass(obj, value);
             });
         }
+    });
+
+    $.fn.extendNative({
+        event: function (action, func) {
+            return this.each(function (i, obj) {
+                $.addEventListener(obj, action, function (e) {
+                    func(e, i, this);
+                });
+            });
+        },
+        click: function (func) { return this.event('click', func); },
+        dblclick: function (func) { return this.event('dblclick', func); },
+        blur: function (func) { return this.event('blur', func); },
+        change: function (func) { return this.event('change', func); },
+        focus: function (func) { return this.event('focus', func); },
+        keydown: function (func) { return this.event('keydown', func); },
+        keyup: function (func) { return this.event('keyup', func); },
+        keypress: function (func) { return this.event('keypress', func); },
+        mousedown: function (func) { return this.event('mousedown', func); },
+        mouseup: function (func) { return this.event('mouseup', func); },
+        mousemove: function (func) { return this.event('mousemove', func); }
     });
 
     $.fn.extendNative({
