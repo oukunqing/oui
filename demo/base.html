@@ -135,7 +135,8 @@
 
         var d1 = '2018-06-23 22:12:15.123'.toDate();
         var ts = d1.format('timestamp', 10);
-        console.log('时间戳：', ts);
+        console.log('时间戳0：', ts);
+        
 
         console.log('toDate: ', ts.toDate());
 
@@ -283,7 +284,7 @@
 base.js demo
 
 请打开浏览器调试工具
-
+<div id="dv"></div>
 <div id="div1">
     <input type="text" name="txt" value="txt123" />
     <input type="text" name="txt" value="txt321" />
@@ -312,6 +313,41 @@ base.js demo
 </body>
 </html>
 <script type="text/javascript">
+    var ts = new Date().format('timestamp', 10);
+    $('#dv').html('时间戳1：' + ts);
+
+var num = 12345678901;
+console.log(num);
+var str = $.numberToChinese(num);
+console.log(str);
+
+var num = 12345678900.06;
+console.log(num);
+var str = $.numberToChinese(num, true);
+console.log(str);
+
+var num = '12,345,678,900.06';
+console.log(num);
+var str = $.numberToChinese(num, true);
+console.log(str);
+
+console.log('货币转中文大写：', num, num.toChinese(true));
+
+var num = 1200101;
+console.log(num);
+var str = $.numberToChinese(num);
+console.log(str);
+
+var num = 135;
+console.log(num);
+var str = $.numberToChinese(num);
+console.log(str);
+
+var num = 123456789012345620;
+console.log(num);
+var str = $.numberToChinese(num);
+console.log(str);
+
 var arr = $N('chb', {
     checked: true
 });
@@ -399,7 +435,9 @@ console.log($.makeArray(arr));
 $.setChecked(arr, 1);
 
 
-$('#btn1,#btn2').blur(function(e, i, obj){
+$('#btn1,#btn2').click(function(e, i, obj){
     console.log(i, obj, e);
+
+    console.log(this);
 });
 </script>
