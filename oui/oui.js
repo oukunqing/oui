@@ -7,8 +7,8 @@
 */
 
 // OUI
-!function () {
-    var isWindow = function () {
+!function() {
+    var isWindow = function() {
         return typeof window !== 'undefined';
     }, $ = isWindow() ? window.$ : undefined;
 
@@ -16,23 +16,23 @@
         window.OUI = $;
     } else {
         var slice = Array.prototype.slice,
-            doc = function () { try { return document } catch (e) { return null } }(),
-            isUndefined = function (o) { return typeof o === 'undefined'; },
-            isObject = function (o) { return o !== null && typeof o === 'object'; },
-            isString = function (s) { return typeof s === 'string'; },
-            isFunction = function (f) { return typeof f === 'function'; },
-            isArray = Array.isArray || function (a) { return Object.prototype.toString.call(a) === '[object Array]'; },
-            isElement = function (o) {
+            doc = function() { try { return document } catch (e) { return null } }(),
+            isUndefined = function(o) { return typeof o === 'undefined'; },
+            isObject = function(o) { return o !== null && typeof o === 'object'; },
+            isString = function(s) { return typeof s === 'string'; },
+            isFunction = function(f) { return typeof f === 'function'; },
+            isArray = Array.isArray || function(a) { return Object.prototype.toString.call(a) === '[object Array]'; },
+            isElement = function(o) {
                 return (
                     typeof HTMLElement === 'object' ? o instanceof HTMLElement : //DOM2
                         o && isObject(o) && o.nodeType === 1 && isString(o.nodeName)
                 );
             },
-            isOUI = function (d) {
+            isOUI = function(d) {
                 return d instanceof OUI;
             }, rootOUI;
 
-        var OUI = function (selector, context) {
+        var OUI = function(selector, context) {
             if (!isOUI(this) && typeof selector !== 'undefined') {
                 return new OUI(selector, context);
             }
@@ -70,7 +70,7 @@
             constructor: OUI
         };
 
-        OUI.extend = OUI.fn.extend = function () {
+        OUI.extend = OUI.fn.extend = function() {
             var source, name, src, copy, copyIsArray, clone,
                 target = arguments[0] || {},
                 i = 1,
@@ -124,45 +124,45 @@
     }
 }();
 
-!function ($) {
+!function($) {
     'use strict';
 
     var version = '1.0.0',
-        isUndefined = function (o) { return typeof o === 'undefined'; },
-        isString = function (s, nonempty) { return typeof s === 'string' && (nonempty ? s.trim() !== '' : true); },
-        isNumber = function (n) { return typeof n === 'number'; },
-        checkNumber = function (n, min, max) {
+        isUndefined = function(o) { return typeof o === 'undefined'; },
+        isString = function(s, nonempty) { return typeof s === 'string' && (nonempty ? s.trim() !== '' : true); },
+        isNumber = function(n) { return typeof n === 'number'; },
+        checkNumber = function(n, min, max) {
             var isNum = isNumber(n), isMin = isNumber(min), isMax = isNumber(max);
             return isNum ? (isMin && isMax ? n >= min && n <= max : (isMin ? n >= min : isMax ? n <= max : true)) : false;
         },
-        isObject = function (o) { return o !== null && typeof o === 'object'; },
-        isArray = Array.isArray || function (a) { return Object.prototype.toString.call(a) === '[object Array]'; },
-        isBoolean = function (b, dv) {
+        isObject = function(o) { return o !== null && typeof o === 'object'; },
+        isArray = Array.isArray || function(a) { return Object.prototype.toString.call(a) === '[object Array]'; },
+        isBoolean = function(b, dv) {
             var bool = typeof b === 'boolean';
             return typeof dv === 'boolean' ? (bool ? b : dv) : bool;
         },
-        trim = function (s) { return s.replace(/(^[\s]*)|([\s]*$)/g, ''); },
-        isFunction = function (f) { return typeof f === 'function' && typeof f.nodeType !== 'number'; },
-        isNumeric = function (o) { return /^[-+]?(\d+)([.][\d]{0,})?$/.test(o); },
-        isDecimal = function (o) { return /^[-+]?(\d+)([.][\d]{0,})$/.test(o); },
-        isInteger = function (o) { return /^[-+]?(\d+)$/.test(o); },
-        isRegexp = function (o) { return isObject(o) || isFunction(o) ? ('' + o).indexOf('/') == 0 : false; },
-        isNull = function (o) { return o === null; },
-        isNullOrUndefined = function (o) { return isUndefined(o) || isNull(o); },
-        isProperty = function (o, property) { return o.hasOwnProperty(property) && (property in o); },
-        toDecimal = function (s, defaultValue, decimalLen) {
+        trim = function(s) { return s.replace(/(^[\s]*)|([\s]*$)/g, ''); },
+        isFunction = function(f) { return typeof f === 'function' && typeof f.nodeType !== 'number'; },
+        isNumeric = function(o) { return /^[-+]?(\d+)([.][\d]{0,})?$/.test(o); },
+        isDecimal = function(o) { return /^[-+]?(\d+)([.][\d]{0,})$/.test(o); },
+        isInteger = function(o) { return /^[-+]?(\d+)$/.test(o); },
+        isRegexp = function(o) { return isObject(o) || isFunction(o) ? ('' + o).indexOf('/') == 0 : false; },
+        isNull = function(o) { return o === null; },
+        isNullOrUndefined = function(o) { return isUndefined(o) || isNull(o); },
+        isProperty = function(o, property) { return o.hasOwnProperty(property) && (property in o); },
+        toDecimal = function(s, defaultValue, decimalLen) {
             var v = parseFloat(s, 10);
             v = !isNaN(v) && $.isInteger(decimalLen) ? v.round(Math.abs(decimalLen)) : v;
             return !isNaN(v) ? v : Number(defaultValue) || 0;
         },
-        toInteger = function (s, defaultValue) {
+        toInteger = function(s, defaultValue) {
             var v = parseInt(s, 10);
             return !isNaN(v) ? v : Number(defaultValue) || 0;
         },
-        toJsonString = function (o) { return JSON.stringify(o); },
-        toJson = function (s) { return JSON.parse(s); },
-        toEncode = function (s) { return encodeURIComponent(s); },
-        param = function (a, v) {
+        toJsonString = function(o) { return JSON.stringify(o); },
+        toJson = function(s) { return JSON.parse(s); },
+        toEncode = function(s) { return encodeURIComponent(s); },
+        param = function(a, v) {
             var s = [];
             if (isString(a)) {
                 if (!isUndefined(v)) {
@@ -189,13 +189,13 @@
             }
             return s.join('&');
         },
-        setQueryString = function (url, data, value) {
+        setQueryString = function(url, data, value) {
             if (!isString(url)) {
                 return url;
             }
             return url + (url.indexOf('?') > -1 ? '&' : '?') + (!isUndefined(data) ? param(data, value) : new Date().getTime());
         },
-        getQueryString = function (url, name) {
+        getQueryString = function(url, name) {
             var str = isString(url) ? url : location.href, params = str.substr(str.indexOf('?')), obj = {};
             if (params.indexOf('?') >= 0) {
                 var arr = params.substr(1).split('&'), c = arr.length;
@@ -208,12 +208,12 @@
             }
             return !isUndefined(name) ? obj[name] : obj;
         },
-        isDebug = function (key) {
+        isDebug = function(key) {
             try { return !isUndefined(getQueryString()[key || 'debug']) } catch (e) { return false; }
         };
 
     var counter = 1, debug = isBoolean(isDebug(), true);
-    $.extendNative = $.fn.extendNative = function (destination, source, constructor) {
+    $.extendNative = $.fn.extendNative = function(destination, source, constructor) {
         if (arguments.length < 2) {
             source = destination;
             destination = this;
@@ -245,7 +245,7 @@
         isProperty: isProperty, version: version,
         isNumeric: isNumeric, isDecimal: isDecimal, isInteger: isInteger, isFloat: isDecimal, isInt: isInteger,
         isRegexp: isRegexp, isNullOrUndefined: isNullOrUndefined,
-        isEmpty: function (o) {
+        isEmpty: function(o) {
             if (isUndefined(o) || null === o) { return true; }
             else if (isString(o)) { return '' === trim(o); }
             else if (isArray(o)) { return 0 === o.length; }
@@ -256,7 +256,7 @@
         toInteger: toInteger, toInt: toInteger,
         toJsonString: toJsonString, toJson: toJson, toEncode: toEncode,
         param: param, setQueryString: setQueryString, getQueryString: getQueryString, isDebug: isDebug,
-        quickSort: function (arr, key) {
+        quickSort: function(arr, key) {
             if (0 === arr.length) { return []; }
             var left = [], right = [], pivot = arr[0], c = arr.length;
             for (var i = 1; i < c; i++) {
@@ -264,7 +264,7 @@
             }
             return this.quickSort(left, key).concat(pivot, this.quickSort(right, key));
         },
-        throwError: function (err) {
+        throwError: function(err) {
             try { console.trace(); console.log(err); } catch (e) { }
             throw new Error(err);
         }
@@ -272,11 +272,11 @@
 }(OUI);
 
 // CRC
-!function ($) {
+!function($) {
     'use strict';
 
-    function CRC () {
-        var CRC16 = function (bytes, isReverse) {
+    function CRC() {
+        var CRC16 = function(bytes, isReverse) {
             var len = bytes.length, crc = 0xFFFF;
             if (len > 0) {
                 for (var i = 0; i < len; i++) {
@@ -289,7 +289,7 @@
                 return isReverse ? (high + low * 0x100) : (high * 0x100 + low);
             }
             return 0;
-        }, strToByte = function (s) {
+        }, strToByte = function(s) {
             if (Object.prototype.toString.call(s) === '[object Array]' && typeof s[0] === 'number') { return s; }
             var chars = s.split(''), len = chars.length, arr = [];
             for (var i = 0; i < len; i++) {
@@ -304,7 +304,7 @@
                 }
             }
             return arr;
-        }, strToHexByte = function (s, isFilter) {
+        }, strToHexByte = function(s, isFilter) {
             var hex = strToHexChar(s, isFilter).join('').replace(/\s/g, "");
             //若字符个数为奇数，补一个空格
             hex += hex.length % 2 != 0 ? " " : "";
@@ -314,7 +314,7 @@
                 arr.push(parseInt(hex.substr(i * 2, 2), 16));
             }
             return arr;
-        }, strToHexChar = function (s, isFilter) {
+        }, strToHexChar = function(s, isFilter) {
             var chars = s.split(''), len = chars.length, arr = [];
             for (var i = 0; i < len; i++) {
                 var char = chars[i].charCodeAt();
@@ -325,20 +325,20 @@
                 }
             }
             return arr;
-        }, toHex = function (n, w) {
+        }, toHex = function(n, w) {
             return n.toString(16).toUpperCase().padStart(w, '0');
         };
 
         return {
-            toCRC16: function (s, isReverse) {
+            toCRC16: function(s, isReverse) {
                 return toHex(CRC16(strToByte(s), isReverse), 4);
             },
-            toModbusCRC16: function (s, isReverse) {
+            toModbusCRC16: function(s, isReverse) {
                 return toHex(CRC16(strToHexByte(s), isReverse), 4);
             }
         };
     }
-    
+
     if (typeof window === 'object') {
         window.CRC = CRC;
     }
@@ -347,11 +347,11 @@
 }(OUI);
 
 // Dictionary
-!function ($) {
+!function($) {
     'use strict';
 
     function Dictionary() {
-        var get = function (data) {
+        var get = function(data) {
             var obj = { keys: [], values: [] };
             for (var k in data) {
                 obj.keys.push(k), obj.values.push(data[k]);
@@ -360,13 +360,13 @@
         }, _ = this;
 
         _.data = {}, _.keys = [], _.values = [];
-        _.add = function (key, value) {
+        _.add = function(key, value) {
             if (!$.isUndefined(key) && !_.contains(key)) {
                 var val = !$.isUndefined(value) ? value : null;
                 _.data[key] = val, _.keys.push(key), _.values.push(val);
             }
             return _;
-        }, _.remove = function (keys) {
+        }, _.remove = function(keys) {
             var arr = $.isArray(keys) ? keys : [keys];
             for (var i in arr) {
                 var key = arr[i];
@@ -377,18 +377,18 @@
             var obj = get(_.data);
             _.keys = obj.keys, _.values = obj.values;
             return _;
-        }, _.clear = function () {
+        }, _.clear = function() {
             return _.data = {}, _.keys = [], _.values = [], _;
-        }, _.contains = function (key, isAdd, value) {
+        }, _.contains = function(key, isAdd, value) {
             //return !$.isUndefined(_.data[key]);
             if ($.isUndefined(_.data[key])) {
                 if (isAdd) { _.add(key, value); }
                 return false;
             }
             return true;
-        }, _.count = function () {
+        }, _.count = function() {
             return _.keys.length;
-        }, _.getValue = function (key, defaultValue) {
+        }, _.getValue = function(key, defaultValue) {
             return !$.isUndefined(_.data[key]) ? _.data[key] : defaultValue;
         };
     }
@@ -401,39 +401,41 @@
 }(OUI);
 
 // numberToChinese
-!function ($){
+!function($) {
     'use strict';
 
     $.extend($, {
-        numberToChinese: function(num, isMoney){
+        numberToChinese: function(num, isMoney) {
             if (typeof num !== 'string' && typeof num !== 'number' || (!/^[\d,.，]+$/.test(num))) {
                 return num;
             }
-            var chars = (isMoney ? '零壹贰叁肆伍陆柒捌玖拾' : '零一二三四五六七八九十').split(''),
+            var chars = (isMoney ? '零壹贰叁肆伍陆柒捌玖' : '零一二三四五六七八九').split(''),
                 units = isMoney ? ['', '拾', '佰', '仟', '万'] : ['', '十', '百', '千', '万'],
                 teams = ['', '万', '亿', '兆', '京'],
-                moneys = ['分', '角', '元'];
+                moneys = ['角', '分', '厘', '毫'];
 
-            var toChinese = function (txt, isMoney) {
+            var toChinese = function(txt, isMoney, isDecimal) {
                 if (typeof txt !== 'string') {
                     return '';
                 }
-                var str = [], len = txt.length, _units = isMoney ? moneys : units;
+                if (isDecimal && txt.length > 4) {
+                    txt = txt.substr(0, 4);
+                }
+                var str = [], len = txt.length;
 
                 for (var i = 0; i < len; i++) {
                     if (/^[0]+$/.test(txt.substr(i))) {
                         break;
                     }
-                    var n = parseInt(txt[i], 10), unit = _units[len - 1 - i];
-                    var s = (chars[n] + unit).replace(/^[零][十百千]/, '零').replace('一十', '十');
-                    if (isMoney) {
-                        s = s.replace(/^[零][角]/, '');
-                    }
+                    var n = parseInt(txt[i], 10), char = chars[n], unit = isDecimal ? moneys[i] : units[len - 1 - i];
+
+                    var s = (char + unit).replace(/^[零][十百千拾佰仟]/, '零').replace(/[一壹]([十拾])/, '$1').replace(/^[零][角分毫]/, '');
+
                     str.push(s);
                 }
                 return str.join('');
             },
-                splitNumber = function (txt) {
+                splitNumber = function(txt) {
                     var arr = [], len = txt.length, minuend = 4 - (len % 4), s = '';
                     for (var i = 0; i < len; i++) {
                         s += txt[i];
@@ -450,25 +452,59 @@
             var nums = splitNumber(str[0]), len = nums.length, res = [];
 
             for (var i = 0; i < len; i++) {
-                res.push(toChinese(nums[i]));
+                res.push(toChinese(nums[i], isMoney));
                 res.push(teams[len - 1 - i]);
             }
             if (isMoney) {
-                res.push(moneys[2]);
-                res.push(toChinese(str[1], true));
+                res.push('元');
+                res.push(str[1] ? toChinese(str[1], isMoney, true) : '整');
             }
 
             return res.join('');
+        },
+        chineseToNumber: function(str) {
+            var chars = {
+                '零': 0,
+                '一': 1, '二': 2, '三': 3, '四': 4, '五': 5, '六': 6, '七': 7, '八': 8, '九': 9,
+                '壹': 1, '贰': 2, '叁': 3, '肆': 4, '伍': 5, '陆': 6, '柒': 7, '捌': 8, '玖': 9
+            };
+            var units = {
+                '十': 10, '拾': 10, '百': 100, '佰': 100, '千': 1000, '仟': 1000, '万': 10000,
+                '整': 1, '元': 1, '角': 0.1, '分': 0.01, '厘': 0.001, '毫': 0.0001
+            };
+            var total = 0, decimal = 0, num = 0, len = str.length, i = 0;
+            while (i < len) {
+                var s = str[i], n = chars[s];
+                if (typeof n !== 'undefined') {
+                    num = n;
+                } else {
+                    if (/[十拾]/.test(s) && (i === 0 || num === 0)) {
+                        num = 1;
+                    }
+                    if ('万亿兆京'.indexOf(s) > -1) {
+                        total = (total + num) * units['万'];
+                    } else if ('角分厘毫'.indexOf(s) > -1) {
+                        decimal += num * units[s];
+                    } else {
+                        total += num * units[s];
+                    }
+                    num = 0;
+                }
+                i++;
+            }
+            total += num + decimal;
+
+            return total;
         }
     });
 }(OUI);
 
 // Javascript Native Object
-!function ($) {
+!function($) {
     'use strict';
 
     $.extendNative(Array.prototype, {
-        indexOf: function (elem) {
+        indexOf: function(elem) {
             for (var i = 0, n = this.length; i < n; i++) {
                 if (this[i] === elem) {
                     return i;
@@ -476,7 +512,7 @@
             }
             return -1;
         },
-        forEach: function (callback, thisValue) {
+        forEach: function(callback, thisValue) {
             if (typeof callback === 'function') {
                 for (var i = 0, c = this.length; i < c; i++) {
                     callback.call(thisValue, this[i], i, this);
@@ -486,36 +522,36 @@
     }, 'Array.prototype');
 
     $.extendNative(String.prototype, {
-        trim: function () { return this.replace(/(^[\s]*)|([\s]*$)/g, ''); },
-        trimStart: function () { return this.replace(/(^[\s]*)/g, ''); },
-        trimEnd: function () { return this.replace(/([\s]*$)/g, ''); },
-        trimLeft: function () { return this.trimStart(); },
-        trimRight: function () { return this.trimEnd(); },
-        padStart: function (totalWidth, paddingChar) {
+        trim: function() { return this.replace(/(^[\s]*)|([\s]*$)/g, ''); },
+        trimStart: function() { return this.replace(/(^[\s]*)/g, ''); },
+        trimEnd: function() { return this.replace(/([\s]*$)/g, ''); },
+        trimLeft: function() { return this.trimStart(); },
+        trimRight: function() { return this.trimEnd(); },
+        padStart: function(totalWidth, paddingChar) {
             var s = this, char = paddingChar || '0', c = totalWidth - s.length;
             for (var i = 0; i < c; i++) {
                 s = char + s;
             }
             return s;
         },
-        padEnd: function (totalWidth, paddingChar) {
+        padEnd: function(totalWidth, paddingChar) {
             var s = this, char = paddingChar || '0', c = totalWidth - s.length;
             for (var i = 0; i < c; i++) {
                 s += char;
             }
             return s;
         },
-        padLeft: function (totalWidth, paddingChar) { return this.padStart(totalWidth, paddingChar); },
-        padRight: function (totalWidth, paddingChar) { return this.padEnd(totalWidth, paddingChar); },
-        startsWith: function (s) { return this.slice(0, s.length) === s; },
-        endsWith: function (s) { return this.slice(-s.length) === s; },
-        startWith: function (s) { return this.startsWith(s); },
-        endWith: function (s) { return this.endsWith(s); },
-        len: function () { return this.replace(/([^\x00-\xff])/g, 'aa').length; },
-        replaceAll: function (pattern, v) {
+        padLeft: function(totalWidth, paddingChar) { return this.padStart(totalWidth, paddingChar); },
+        padRight: function(totalWidth, paddingChar) { return this.padEnd(totalWidth, paddingChar); },
+        startsWith: function(s) { return this.slice(0, s.length) === s; },
+        endsWith: function(s) { return this.slice(-s.length) === s; },
+        startWith: function(s) { return this.startsWith(s); },
+        endWith: function(s) { return this.endsWith(s); },
+        len: function() { return this.replace(/([^\x00-\xff])/g, 'aa').length; },
+        replaceAll: function(pattern, v) {
             return this.replace($.isRegexp(pattern) ? pattern : new RegExp(pattern, 'gm'), v);
         },
-        append: function (v, c) {
+        append: function(v, c) {
             var s = this;
             if ($.isNumber(c)) {
                 for (var i = 0; i < c; i++) { s += v; }
@@ -523,7 +559,7 @@
             }
             return s + v;
         },
-        insert: function (v, c) {
+        insert: function(v, c) {
             var s = this;
             if ($.isNumber(c)) {
                 for (var i = 0; i < c; i++) { s = v + s; }
@@ -531,32 +567,32 @@
             }
             return v + s;
         },
-        space: function (prefix, postfix) {
+        space: function(prefix, postfix) {
             var s = this,
                 s1 = $.isNumber(prefix) ? ''.append(' ', prefix) : (prefix || ' '),
                 s2 = $.isNumber(postfix) ? ''.append(' ', postfix) : (postfix || ' ');
             return s1 + s + s2;
         },
-        clean: function (s) {
+        clean: function(s) {
             var reg = new RegExp('(' + (s || ' ') + ')', 'g');
             return this.replace(reg, '');
         },
-        clear: function (s) {
+        clear: function(s) {
             //清除字符串的多余字符，默认清除 - 和 空格
             var reg = new RegExp('[' + (s || '- ') + ']', 'g');
             return this.replace(reg, '');
         },
-        separate: function (delimiter, itemLen) {
+        separate: function(delimiter, itemLen) {
             var reg = new RegExp('(.{' + itemLen + '}(?!$))', 'g');
             return this.replace(reg, '$1' + delimiter);
         },
-        isEmpty: function () { return this.trim() === ''; },
-        isNumeric: function () { return $.isnumeric(this); },
-        isDecimal: function () { return $.isDecimal(this); },
-        isInteger: function () { return $.isInteger(this); },
-        isFloat: function () { return $.isDecimal(this); },
-        isInt: function () { return $.isInteger(this); },
-        toNumber: function (defaultValue, isFloat, decimalLen) {
+        isEmpty: function() { return this.trim() === ''; },
+        isNumeric: function() { return $.isnumeric(this); },
+        isDecimal: function() { return $.isDecimal(this); },
+        isInteger: function() { return $.isInteger(this); },
+        isFloat: function() { return $.isDecimal(this); },
+        isInt: function() { return $.isInteger(this); },
+        toNumber: function(defaultValue, isFloat, decimalLen) {
             //这里判断是否是数字的正则规则是 判断从数字开始到非数字结束，根据 parseFloat 的规则
             var s = this, v = 0, dv = defaultValue, pattern = /^[-+]?(\d+)(.[\d]{0,})/;
             if ($.isNumeric(dv)) {
@@ -584,14 +620,16 @@
             }
             return !isNaN(v) ? v : Number(dv) || 0;
         },
-        toInt: function (defaultValue) { return $.toInteger(this, defaultValue); },
-        toFloat: function (defaultValue, decimalLen) { return $.toDecimal(this, defaultValue, decimalLen); },
-        toChinese: function(isMoney) { return $.numberToChinese(this, isMoney); },
-        toThousand: function (delimiter) {
+        toInt: function(defaultValue) { return $.toInteger(this, defaultValue); },
+        toFloat: function(defaultValue, decimalLen) { return $.toDecimal(this, defaultValue, decimalLen); },
+        toChineseNumber: function(isMoney) { return $.numberToChinese(this, isMoney); },
+        chineseToNumber: function() { return $.chineseToNumber(this); },
+        convertChineseToNumber: function() { return $.chineseToNumber(this); },
+        toThousand: function(delimiter) {
             var a = this.split('.'), hasPoint = this.indexOf('.') >= 0;
             return a[0].replace(/\B(?=(?:[\dA-Fa-f]{3})+$)/g, delimiter || ',') + (hasPoint ? '.' + (a[1] || '') : '');
         },
-        toDate: function (format) {
+        toDate: function(format) {
             var ts = Date.parse(this.replace(/-/g, '/'));
             if (isNaN(ts) && /^[\d]{10,13}$/.test(this)) {
                 ts = Number(this.padRight(13));
@@ -603,7 +641,7 @@
             }
             return $.isString(format) ? dt.format(format) : dt;
         },
-        toArray: function (delimiter, type, keepZero, distinct) {
+        toArray: function(delimiter, type, keepZero, distinct) {
             if ($.isBoolean(type)) {
                 distinct = keepZero, keepZero = type, type = null;
             }
@@ -628,7 +666,7 @@
             }
             return list;
         },
-        toUnicode: function () {
+        toUnicode: function() {
             var s = this, c = s.length, u = '';
             for (var i = 0; i < c; i++) {
                 var hex = s.charCodeAt(i).toString(16);
@@ -636,10 +674,10 @@
             }
             return u;
         },
-        timeSpan: function (dt2) {
+        timeSpan: function(dt2) {
             return this.toDate().timeSpan(dt2.toDate());
         },
-        equals: function (obj) {
+        equals: function(obj) {
             if (null === obj) {
                 return false;
             }
@@ -649,66 +687,66 @@
             }
             return this === str;
         },
-        compareTo: function (obj) {
+        compareTo: function(obj) {
             var p = /^[-+]?(\d+)(.[\d]{0,})?$/, s1 = p.test(this) ? Number(this) : this, s2 = p.test(obj) ? Number(obj) : obj;
             if (isNaN(s1) || isNaN(s2)) {
                 s1 = s1.toString(), s2 = s2.toString();
             }
             return s1 > s2 ? 1 : s1 < s2 ? -1 : 0;
         },
-        setQueryString: function (data, value) {
+        setQueryString: function(data, value) {
             return $.setQueryString(this, data, value);
         }
     }, 'String.prototype');
 
     $.extendNative(String, {
-        compare: function (s1, s2) { return s1.compareTo(s2); }
+        compare: function(s1, s2) { return s1.compareTo(s2); }
     }, 'String');
 
     //Boolean.prototype extend
     $.extendNative(Boolean.prototype, {
-        toNumber: function () { return Number(this); }
+        toNumber: function() { return Number(this); }
     }, 'Boolean.prototype');
 
     //Number.prototype extend
     $.extendNative(Number.prototype, {
-        getDecimalLen: function () { return (this.toString().split('.')[1] || '').length; },
-        delDecimalPoint: function () { return Number(this.toString().replace('.', '')); },
-        add: function (arg) {
+        getDecimalLen: function() { return (this.toString().split('.')[1] || '').length; },
+        delDecimalPoint: function() { return Number(this.toString().replace('.', '')); },
+        add: function(arg) {
             var a = this.getDecimalLen(), b = arg.getDecimalLen(), m = Math.pow(10, Math.max(a, b));
             return (this.mul(m) + arg.mul(m)) / m;
         },
-        sub: function (arg) {
+        sub: function(arg) {
             return this.add(-arg);
         },
-        mul: function (arg) {
+        mul: function(arg) {
             var a = this.getDecimalLen(), b = arg.getDecimalLen(), m = a + b;
             return this.delDecimalPoint() * arg.delDecimalPoint() / Math.pow(10, m);
         },
-        div: function (arg) {
+        div: function(arg) {
             var a = this.delDecimalPoint(), b = arg.delDecimalPoint(), n = this.getDecimalLen(), m = arg.getDecimalLen();
             return (a / b).mul(Math.pow(10, m - n));
         },
-        round: function (len) {
+        round: function(len) {
             var m = Math.pow(10, len || 0);
             return Math.round(this * m) / m;
         },
-        padLeft: function (totalWidth, paddingChar) { return this.toString().padLeft(totalWidth, paddingChar); },
-        padRight: function (totalWidth, paddingChar) { return this.toString().padRight(totalWidth, paddingChar); },
-        isDecimal: function () { return $.isDecimal(this); },
-        isInteger: function () { return $.isInteger(this); },
-        isFloat: function () { return $.isDecimal(this); },
-        isInt: function () { return $.isInteger(this); },
-        isHex: function () { return this.toString().toUpperCase().indexOf('0X') === 0; },
-        toHex: function () { return this.toString(16).toUpperCase(); },
-        toThousand: function (delimiter) { return this.toString().toThousand(delimiter); },
-        toChinese: function(isMoney) { return $.numberToChinese(this, isMoney); },
-        toDate: function (format) { return this.toString().toDate(format); }
+        padLeft: function(totalWidth, paddingChar) { return this.toString().padLeft(totalWidth, paddingChar); },
+        padRight: function(totalWidth, paddingChar) { return this.toString().padRight(totalWidth, paddingChar); },
+        isDecimal: function() { return $.isDecimal(this); },
+        isInteger: function() { return $.isInteger(this); },
+        isFloat: function() { return $.isDecimal(this); },
+        isInt: function() { return $.isInteger(this); },
+        isHex: function() { return this.toString().toUpperCase().indexOf('0X') === 0; },
+        toHex: function() { return this.toString(16).toUpperCase(); },
+        toThousand: function(delimiter) { return this.toString().toThousand(delimiter); },
+        toChineseNumber: function(isMoney) { return $.numberToChinese(this, isMoney); },
+        toDate: function(format) { return this.toString().toDate(format); }
     }, 'Number.prototype');
 
     //Date.prototype extend
     $.extendNative(Date.prototype, {
-        format: function (formatString, len) {
+        format: function(formatString, len) {
             var t = this, year = t.getFullYear();
             if (isNaN(year)) {
                 return '';
@@ -728,24 +766,24 @@
                 };
             return (formatString || 'yyyy-MM-dd HH:mm:ss').replace(p, '{$1}').format(d);
         },
-        compareTo: function (dt) {
+        compareTo: function(dt) {
             var t1 = this.getTime(), t2 = dt.getTime();
             return t1 > t2 ? 1 : t1 < t2 ? -1 : 0;
         },
-        timeSpan: function (dt2) {
+        timeSpan: function(dt2) {
             //获取两个Date的毫秒数和差值
             var dt1 = this, t1 = dt1.getTime(), t2 = dt2.getTime(), tick = Number(t1 - t2) || 0;
             return Date.timeTick(tick);
         },
-        add: function (v, type) { return this.setTime(Date.addTick(this, v, type)), this; },
-        addYears: function (v) { return this.setYear(this.getFullYear() + (parseInt(v, 10) || 0)), this; },
-        addMonths: function (v) { return this.setMonth(this.getMonth() + (parseInt(v, 10) || 0)), this; },
-        addDays: function (v) { return this.add(v, 'days'); },
-        addHours: function (v) { return this.add(v, 'hours'); },
-        addMinutes: function (v) { return this.add(v, 'minutes'); },
-        addSeconds: function (v) { return this.add(v, 'seconds'); },
-        addMilliseconds: function (v) { return this.add(v, 'milliseconds'); },
-        getDateList: function (days) {
+        add: function(v, type) { return this.setTime(Date.addTick(this, v, type)), this; },
+        addYears: function(v) { return this.setYear(this.getFullYear() + (parseInt(v, 10) || 0)), this; },
+        addMonths: function(v) { return this.setMonth(this.getMonth() + (parseInt(v, 10) || 0)), this; },
+        addDays: function(v) { return this.add(v, 'days'); },
+        addHours: function(v) { return this.add(v, 'hours'); },
+        addMinutes: function(v) { return this.add(v, 'minutes'); },
+        addSeconds: function(v) { return this.add(v, 'seconds'); },
+        addMilliseconds: function(v) { return this.add(v, 'milliseconds'); },
+        getDateList: function(days) {
             var list = [];
             for (var i = 0; i < days; i++) {
                 list.push(this.addDays(i).format('yyyy-MM-dd'));
@@ -755,8 +793,8 @@
     }, 'Date.prototype');
 
     $.extendNative(Date, {
-        compare: function (dt1, dt2) { return dt1.compareTo(dt2); },
-        addTick: function (tick, v, type) {
+        compare: function(dt1, dt2) { return dt1.compareTo(dt2); },
+        addTick: function(tick, v, type) {
             if (typeof tick !== 'number') {
                 tick = Number(tick);
             }
@@ -772,7 +810,7 @@
             }
             return tick;
         },
-        timeTick: function (tick) {
+        timeTick: function(tick) {
             if (tick === 0) {
                 return {
                     totalDays: 0, totalHours: 0, totalMinutes: 0, totalSeconds: 0, totalMilliseconds: 0,
@@ -795,11 +833,11 @@
             ts.seconds = parseInt((ms -= ts.minutes * ds.m), 10);
             ts.milliseconds = ((ms -= ts.seconds) * ds.s).round();
 
-            ts.add = function (v, type) {
+            ts.add = function(v, type) {
                 //先除以10000，将ticks换算回毫秒
                 return Date.timeTick(Date.addTick(this.ticks / 10000, v, type));
             },
-                ts.show = function (formatString, hideMilliseconds) {
+                ts.show = function(formatString, hideMilliseconds) {
                     var s = this, fs = formatString, hide = hideMilliseconds;
                     if (typeof hide === 'undefined' && typeof fs === 'boolean') {
                         hide = fs, fs = '';
@@ -823,25 +861,25 @@
                 };
             return ts;
         },
-        timeSpan: function (dt1, dt2) {
+        timeSpan: function(dt1, dt2) {
             return dt1.timeSpan(dt2);
         }
     }, 'Date');
 }(OUI);
 
 // String.prototype.format
-!function ($) {
+!function($) {
     'use strict';
 
-    var throwError = function (msg, str, args) {
+    var throwError = function(msg, str, args) {
         try {
             if (!$.isUndefined(str)) { console.log('str:\r\n\t', str, '\r\nargs:\r\n\t', args); } console.trace();
         } catch (e) { }
         throw new Error(msg);
-    }, formatNumberZero = function (arv, arn) {
+    }, formatNumberZero = function(arv, arn) {
         var arr = [], idx = arn.length - 1;
         for (var i = arv.length - 1; i >= 0; i--) {
-            arr.push(arv[i] === '0' ? (idx >= 0 ? arn[idx] : arv[i]) : (function () { ++idx; return arv[i]; })());
+            arr.push(arv[i] === '0' ? (idx >= 0 ? arn[idx] : arv[i]) : (function() { ++idx; return arv[i]; })());
             idx--;
         }
         for (var i = idx; i >= 0; i--) {
@@ -849,7 +887,7 @@
         }
         arr = arr.reverse();
         return arr.join('');
-    }, scientificNotation = function (v, f, n, dn, numLen) {
+    }, scientificNotation = function(v, f, n, dn, numLen) {
         var num = parseInt('0' + dn[0], 10), fn = num < 1 ? 1 : dn[0].substr(0, 1), e = Math.pow(10, n),
             en = v.toString().substr(1).replace('.', ''), el = en.length,
             postfix = '001', postfixLen = (f === 'g' || f === 'G') ? 2 : 3, prefix = '', symbol = num >= 1 ? '+' : '-';
@@ -869,7 +907,7 @@
         return fn + '.' + en + (so[f] || f) + symbol + postfix;
     }, regPattern = {
         numberSymbol: /([CDEFGNRX])/gi, number: /^(0x)?[\dA-Fa-f]+$/
-    }, formatNumberSwitch = function (v, f, n, dn, err, str, args) {
+    }, formatNumberSwitch = function(v, f, n, dn, err, str, args) {
         //console.log('v: ', v, ', f: ', f, ',is: ', (isHexNumber(v) && fu !== 'X'));
         var fu = f.toUpperCase(), pos = 0, numLen = dn[0].length, decimalLen = (dn[1] || '').length;
         //if(isHexNumber(v) && ['C', 'F', 'N'].indexOf(fu) >= 0){
@@ -929,11 +967,11 @@
                 break;
         }
         return v;
-    }, isNumberString = function (obj, f) {
+    }, isNumberString = function(obj, f) {
         return $.isNumber(obj) || (!regPattern.numberSymbol.test(f) && regPattern.number.test(obj));
-    }, isHexNumber = function (obj, f) {
+    }, isHexNumber = function(obj, f) {
         return !regPattern.numberSymbol.test(f) && regPattern.number.test(obj);
-    }, formatNumber = function (mv, v, err, str, args) {
+    }, formatNumber = function(mv, v, err, str, args) {
         if (!/[:]/g.test(mv)) {
             return v;
         }
@@ -963,7 +1001,7 @@
             }
         }
         return v;
-    }, distillObjVal = function (key, obj, err, str, vals) {
+    }, distillObjVal = function(key, obj, err, str, vals) {
         var v;
         if (!$.isUndefined(obj[key])) {
             v = obj[key];
@@ -986,7 +1024,7 @@
     };
 
     if ($.isUndefined(String.prototype.format)) {
-        String.prototype.format = function (args) {
+        String.prototype.format = function(args) {
             var s = this, vals = [], rst = [], pattern = /({|})/g, ms = s.match(pattern);
             if ($.isNull(ms)) {
                 return s.toString() || s;
@@ -1064,7 +1102,7 @@
     }
 
     //String.format
-    String.format = String.format || function (s) {
+    String.format = String.format || function(s) {
         if ($.isString(s)) {
             var a = [], c = arguments.length;
             for (var i = 1; i < c; i++) {
@@ -1078,31 +1116,31 @@
 
 
 // Web
-!function ($) {
+!function($) {
     'use strict';
 
     var rnothtmlwhite = (/[^\x20\t\r\n\f]+/g);
-    var isAttributeValue = function (value) {
+    var isAttributeValue = function(value) {
         return $.isString(value) || $.isNumber(value);
     };
 
-    var doc = function () { try { return document } catch (e) { return null } }(),
+    var doc = function() { try { return document } catch (e) { return null } }(),
         head = doc ? doc.getElementsByTagName('head')[0] : null,
-        redirect = function (url) {
+        redirect = function(url) {
             $.isString(url, true) ? location.href = url : null;
         },
-        isElement = function (elem, tagName) {
+        isElement = function(elem, tagName) {
             var b = elem === doc || ($.isObject(elem) && $.isNumber(elem.nodeType) && $.isString(elem.tagName));
             return b && $.isString(tagName) ? elem.tagName === tagName : b;
         },
-        getLocationPath = function () {
+        getLocationPath = function() {
             return location.href.substring(0, location.href.lastIndexOf('/') + 1);
         },
-        getScriptSelfPath = function (relativePath) {
+        getScriptSelfPath = function(relativePath) {
             var elements = doc.getElementsByTagName('script'), len = elements.length, elem = elements[len - 1];
             return relativePath ? elem.getAttribute('src') : elem.src;
         },
-        getFilePath = function (fullPath, currentPath) {
+        getFilePath = function(fullPath, currentPath) {
             var pos = fullPath.lastIndexOf('/'), prefix = currentPath || getLocationPath();
             if (pos >= 0) {
                 var path = fullPath.substr(0, pos + 1);
@@ -1113,16 +1151,16 @@
             }
             return '';
         },
-        getFileName = function (filePath, withoutExtension) {
+        getFileName = function(filePath, withoutExtension) {
             var path = (filePath || '').split('?')[0], p = path.lastIndexOf('/');
             var name = p >= 0 ? path.substr(p + 1) : path, pos = name.lastIndexOf('.');
             return pos >= 0 && withoutExtension ? name.substr(0, pos) : name;
         },
-        getExtension = function (filePath) {
+        getExtension = function(filePath) {
             var name = (filePath || '').split('?')[0], pos = name.lastIndexOf('.');
             return pos >= 0 ? name.substr(pos + 1).toLowerCase() : '';
         },
-        createElement = function (nodeName, id, func, parent, exempt) {
+        createElement = function(nodeName, id, func, parent, exempt) {
             if ($.isFunction(id)) {
                 exempt = parent, parent = func, func = id, id = null;
             }
@@ -1141,38 +1179,38 @@
 
             return $.isFunction(func) && func(elem), parent.appendChild(elem), elem;
         },
-        createJsScript = function (data, id, func, parent) {
+        createJsScript = function(data, id, func, parent) {
             if ($.isFunction(id)) {
                 parent = func, func = id, id = null;
             }
             //parent = parent || head;
             parent = parent || doc.body;
-            var elem = createElement('script', id, function (elem) {
+            var elem = createElement('script', id, function(elem) {
                 elem.innerHTML = data, setAttribute(elem, { type: 'text/javascript', charset: 'utf-8' }, true);
             }, parent);
             return $.isFunction(func) && func(elem), elem;
         },
-        createCssStyle = function (data, id, func, parent) {
+        createCssStyle = function(data, id, func, parent) {
             if ($.isFunction(id)) {
                 parent = func, func = id, id = null;
             }
             parent = parent || head;
-            var elem = createElement('style', id, function (elem) {
+            var elem = createElement('style', id, function(elem) {
                 elem.innerHTML = data, setAttribute(elem, { type: 'text/css' }, true);
             }, parent);
             return $.isFunction(func) && func(elem), elem;
         },
-        getElementStyle = function (elem, styleName) {
+        getElementStyle = function(elem, styleName) {
             if (!isElement(elem)) {
                 return false;
             }
             var style = elem.currentStyle || document.defaultView.getComputedStyle(elem, null);
             return $.isString(styleName) ? style[styleName] : style;
         },
-        isWindow = function (obj) {
+        isWindow = function(obj) {
             return obj != null && obj === obj.window;
         },
-        isArrayLike = function (obj) {
+        isArrayLike = function(obj) {
             if ($.isString(obj)) {
                 return false;
             } else if ($.isFunction(obj) || isWindow(obj)) {
@@ -1183,7 +1221,7 @@
 
             return $.isArray(obj) || length === 0 || $.isNumber(length) && length > 0 && (length - 1) in obj;
         },
-        merge = function (first, second) {
+        merge = function(first, second) {
             var len = +second.length,
                 j = 0,
                 i = first.length;
@@ -1196,7 +1234,7 @@
 
             return first;
         },
-        makeArray = function (likeArray, results) {
+        makeArray = function(likeArray, results) {
             var arr = [];
             try {
                 arr = Array.prototype.slice.call(likeArray);
@@ -1210,7 +1248,7 @@
             }
             return arr;
         },
-        setAttribute = function (elem, attributes, exempt, serialize) {
+        setAttribute = function(elem, attributes, exempt, serialize) {
             if ($.isBoolean(exempt, false) || $.isElement(elem)) {
                 if ($.isObject(attributes)) {
                     for (var key in attributes) {
@@ -1231,7 +1269,7 @@
             }
             return this;
         },
-        setStyle = function (elem, styles, value, exempt) {
+        setStyle = function(elem, styles, value, exempt) {
             if ($.isBoolean(value)) {
                 exempt = value, value = null;
             }
@@ -1248,14 +1286,14 @@
             }
             return this;
         },
-        stripAndCollapse = function (value) {
+        stripAndCollapse = function(value) {
             var tokens = value.match(rnothtmlwhite) || [];
             return tokens.join(' ');
         },
-        getClass = function (elem) {
+        getClass = function(elem) {
             return elem.getAttribute && elem.getAttribute('class') || '';
         },
-        classesToArray = function (value) {
+        classesToArray = function(value) {
             if ($.isArray(value)) {
                 return value;
             }
@@ -1264,14 +1302,14 @@
             }
             return [];
         },
-        hasClass = function (elem, selector) {
+        hasClass = function(elem, selector) {
             var className = ' ' + selector + ' ';
             if (elem.nodeType === 1 && (' ' + stripAndCollapse(getClass(elem)) + ' ').indexOf(className) > -1) {
                 return true;
             }
             return false;
         },
-        setClassValue = function (cur, css, action) {
+        setClassValue = function(cur, css, action) {
             if (0 === action) {
                 if (cur.indexOf(css.space()) < 0) {
                     cur += css + ' ';
@@ -1283,7 +1321,7 @@
             }
             return cur;
         },
-        setClass = function (elem, value, action) {
+        setClass = function(elem, value, action) {
             if (isArrayLike(elem)) {
                 elem = makeArray(elem);
             } else if (!$.isArray(elem)) {
@@ -1311,16 +1349,16 @@
             }
             return this;
         },
-        addClass = function (elem, value) {
+        addClass = function(elem, value) {
             return setClass(elem, value, 0), this;
         },
-        removeClass = function (elem, value) {
+        removeClass = function(elem, value) {
             return setClass(elem, value, 1), this;
         },
-        toggleClass = function (elem, value) {
+        toggleClass = function(elem, value) {
             return setClass(elem, value, 2), this;
         },
-        loadStaticFile = function (path, id, callback, parent, nodeName, attributes) {
+        loadStaticFile = function(path, id, callback, parent, nodeName, attributes) {
             if (!$.isString(id, true)) {
                 id = nodeName + '-' + getFileName(path, true).replace(/[.]/, '-') + '-' + $.crc.toCRC16(path).toLowerCase();
             }
@@ -1328,14 +1366,14 @@
             if (node) {
                 return $.isFunction(callback) && callback(), node;
             }
-            node = createElement(nodeName, id, function (elem) {
+            node = createElement(nodeName, id, function(elem) {
                 setAttribute(elem, attributes, true);
             }, parent), ae = node.attachEvent;
 
             if ($.isFunction(ae) && ae.toString() && ae.toString().indexOf('[native code]') >= 0) {
-                node.attachEvent('onreadystatechange', function (ev) { onFileLoad(ev, path); });
+                node.attachEvent('onreadystatechange', function(ev) { onFileLoad(ev, path); });
             } else {
-                node.addEventListener('load', function (ev) { onFileLoad(ev, path); }, false);
+                node.addEventListener('load', function(ev) { onFileLoad(ev, path); }, false);
             }
 
             function onFileLoad(ev, path) {
@@ -1348,7 +1386,7 @@
 
             return node;
         },
-        loadLinkStyle = function (path, id, callback) {
+        loadLinkStyle = function(path, id, callback) {
             if ($.isFunction(id) && !$.isFunction(callback)) {
                 callback = id, id = null;
             }
@@ -1356,7 +1394,7 @@
                 type: 'text/css', rel: 'stylesheet', href: $.setQueryString(path)
             });
         },
-        loadJsScript = function (path, id, callback, parent) {
+        loadJsScript = function(path, id, callback, parent) {
             if ($.isFunction(id) && !$.isFunction(callback)) {
                 parent = callback, callback = id, id = null;
             }
@@ -1367,7 +1405,7 @@
                 type: 'text/javascript', async: true, src: $.setQueryString(path), charset: 'utf-8'
             });
         },
-        removeJsScript = function (id, filePath) {
+        removeJsScript = function(id, filePath) {
             if (id) {
                 var script = doc.getElementById(id);
                 if (script !== null && script.parentNode) {
@@ -1384,14 +1422,14 @@
             }
             return this;
         },
-        globalEval = function (data) {
+        globalEval = function(data) {
             if (data && $.trim(data)) {
-                (window.execScript || function (data) {
+                (window.execScript || function(data) {
                     window['eval'].call(window, data);
                 })(data);
             }
         },
-        parseJSON = function (data) {
+        parseJSON = function(data) {
             if (data === null) {
                 return data;
             }
@@ -1402,7 +1440,7 @@
             }
             $.throwError('Invalid JSON: ' + data);
         },
-        isJsonLike = function (data) {
+        isJsonLike = function(data) {
             if (data.startWith('{') && data.endWith('}')) {
                 return /[:]/.test(data);
             } else if (data.startWith('[') && data.endWith(']')) {
@@ -1410,7 +1448,7 @@
             }
             return false;
         },
-        tryParseJSON = function (data) {
+        tryParseJSON = function(data) {
             var res = { status: false, complete: false, data: data };
             if (data !== null) {
                 try {
@@ -1428,7 +1466,7 @@
             }
             return res;
         },
-        parseXML = function (data) {
+        parseXML = function(data) {
             if (!$.isString(data, true)) {
                 return null;
             }
@@ -1448,34 +1486,34 @@
             }
             return xml;
         },
-        cancelBubble = function (ev) {
+        cancelBubble = function(ev) {
             ev = ev || window.event || arguments.callee.caller.arguments[0];
             if (ev.stopPropagation) { ev.stopPropagation(); } else { ev.cancelBubble = true; }
             if (ev.preventDefault) { ev.preventDefault(); } else { ev.returnValue = false; }
             return this;
         },
-        addEventListener = function (elem, ev, func, useCapture) {
+        addEventListener = function(elem, ev, func, useCapture) {
             if (isElement(elem)) {
                 elem.addEventListener ? elem.addEventListener(ev, func, useCapture || false) : elem.attachEvent('on' + ev, func);
             }
             return this;
         },
-        removeEventListener = function (elem, ev, func, useCapture) {
+        removeEventListener = function(elem, ev, func, useCapture) {
             if (isElement(elem)) {
                 elem.removeEventListener ? elem.removeEventListener(ev, func, useCapture || false) : elem.detachEvent('on' + ev, func);
             }
             return this;
         },
-        bindEventListener = function (obj, func) {
+        bindEventListener = function(obj, func) {
             if (!$.isObject(obj) || !$.isFunction(func)) {
                 return false;
             }
             var args = Array.prototype.slice.call(arguments).slice(2);
-            return function (ev) {
+            return function(ev) {
                 return func.apply(obj, [ev || window.event].concat(args));
             };
         },
-        setFocus = function (elem) {
+        setFocus = function(elem) {
             try { return isElement(elem) ? elem.focus() || true : false; } catch (e) { return false; }
         };
 
@@ -1520,7 +1558,7 @@
 }(OUI);
 
 // window extend
-!function ($) {
+!function($) {
     'use strict';
 
     if (typeof window === 'object') {
@@ -1528,7 +1566,7 @@
 
         // matchCondition
         $.extend($, {
-            matchCondition: function (elements, options) {
+            matchCondition: function(elements, options) {
                 var list = [], len = elements.length, op = options;
                 var parent = op.parent,
                     tagNames = op.tagName,
@@ -1603,16 +1641,16 @@
         });
 
         $.extend(window, {
-            $I: function (id, parent) {
+            $I: function(id, parent) {
                 if (id.indexOf('#') === 0) {
                     id = id.substr(1);
                 }
                 return (parent || doc).getElementById(id);
             },
-            $Q: function (selectors, parent) {
+            $Q: function(selectors, parent) {
                 return (parent || doc).querySelector(selectors);
             },
-            $QA: function (selectors, options, parent) {
+            $QA: function(selectors, options, parent) {
                 if ($.isElement(options)) {
                     parent = options, options = null;
                 }
@@ -1624,7 +1662,7 @@
             },
             //options: { value:[], checked:true, attribute:{}, style:{} }
             //若 options 为 boolean ，则简化为 checked
-            $N: function (name, options) {
+            $N: function(name, options) {
                 var arr = doc.getElementsByName(name), len = arr.length, list = [];
                 if ($.isBoolean(options)) {
                     options = { attribute: { checked: options } };
@@ -1633,7 +1671,7 @@
                 }
                 return $.matchCondition(arr, options);
             },
-            $T: function (tagName, options, parent) {
+            $T: function(tagName, options, parent) {
                 if ($.isElement(options)) {
                     parent = options, options = null;
                 }
@@ -1646,7 +1684,7 @@
                 }
                 return $.matchCondition(arr, options);
             },
-            $C: function (className, options, parent) {
+            $C: function(className, options, parent) {
                 if (className.indexOf('.') === 0) {
                     className = className.substr(1);
                 }
@@ -1662,20 +1700,20 @@
         });
 
         var wst = window.setTimeout, wsi = window.setInterval;
-        window.setTimeout = function (func, delay) {
+        window.setTimeout = function(func, delay) {
             if ($.isFunction(func)) {
                 var args = Array.prototype.slice.call(arguments, 2);
-                var f = (function () {
+                var f = (function() {
                     func.apply(null, args);
                 });
                 return wst(f, delay);
             }
             return wst(func, delay);
         };
-        window.setInterval = function (func, delay) {
+        window.setInterval = function(func, delay) {
             if ($.isFunction(func)) {
                 var args = Array.prototype.slice.call(arguments, 2);
-                var f = (function () {
+                var f = (function() {
                     func.apply(null, args);
                 });
                 return wsi(f, delay);
@@ -1687,13 +1725,13 @@
 
 
 // utils
-!function ($) {
+!function($) {
     'use strict';
 
-    var isName = function (selector) {
+    var isName = function(selector) {
         return !/[\.\#\[\=]/.test(selector);
     },
-        _checked = function (action, obj) {
+        _checked = function(action, obj) {
             if ($.isBoolean(action)) {
                 return action;
             } else {
@@ -1708,7 +1746,7 @@
         };
 
     $.extendNative($, {
-        setChecked: function (selector, action, values) {
+        setChecked: function(selector, action, values) {
             if ($.isArrayLike(selector)) {
                 selector = $.makeArray(selector);
             }
@@ -1736,7 +1774,7 @@
             }
             return this;
         },
-        getChecked: function (selector) {
+        getChecked: function(selector) {
             if (isName(selector)) {
                 return $N(selector, { attribute: { checked: true } });
             } else {
@@ -1750,7 +1788,7 @@
 }(OUI);
 
 // jQuery 
-!function ($) {
+!function($) {
     'use strict';
 
     function ajax(url, options) {
@@ -1791,7 +1829,7 @@
             xhr.setRequestHeader('Content-Type', o.contentType);
         }
 
-        xhr.onreadystatechange = function () {
+        xhr.onreadystatechange = function() {
             if (4 !== xhr.readyState) {
                 return false;
             }
@@ -1824,18 +1862,18 @@
     }
 
     function XmlHttpRequest() {
-        return function () {
+        return function() {
             var len = arguments.length;
             for (var i = 0; i < len; i++) {
                 try { return arguments[i](); } catch (e) { }
             }
-        }(function () { return new XMLHttpRequest() },
-            function () { return new ActiveXObject('Msxml2.XMLHTTP') },
-            function () { return new ActiveXObject('Microsoft.XMLHTTP') });
+        }(function() { return new XMLHttpRequest() },
+            function() { return new ActiveXObject('Msxml2.XMLHTTP') },
+            function() { return new ActiveXObject('Microsoft.XMLHTTP') });
     }
 
     var jsonp_idx = 1,
-        checkOptions = function (url, o) {
+        checkOptions = function(url, o) {
             if ($.isObject(o)) {
                 o.url = url || o.url;
             } else {
@@ -1863,13 +1901,13 @@
 
             return o;
         },
-        ajaxJSONP = function (url, jsonp, jsonpCallback, callback) {
+        ajaxJSONP = function(url, jsonp, jsonpCallback, callback) {
             //if (!jsonpCallback) {
             //不管有没有指定JSONP回调函数，都自动生成回调函数，然后取出数据给ajax回调函数
             if (!jsonpCallback || true) {
                 jsonpCallback = 'jsonpCallback_' + new Date().getTime() + '_' + jsonp_idx++;
 
-                window[jsonpCallback] = function (result) {
+                window[jsonpCallback] = function(result) {
                     $.removeJsScript(jsonpCallback);
                     $.isFunction(callback) && callback(result);
                 };
@@ -1878,14 +1916,14 @@
 
             return $.loadJsScript(url, jsonpCallback);
         },
-        isStaticFile = function (o) {
+        isStaticFile = function(o) {
             if (o.dataType === 'HTML' || o.dataType === 'SCRIPT') {
                 return true;
             } else {
                 return /(html|htm|txt|json|js)/ig.test($.getExtension(o.url));
             }
         },
-        parseHTML = function (html) {
+        parseHTML = function(html) {
             var ms = html.match(/<script(.|\n)*?>(.|\n|\r\n)*?<\/script>/ig);
             if (ms) {
                 for (var i = 0, len = ms.length; i < len; i++) {
@@ -1894,7 +1932,7 @@
                 }
             }
         },
-        parseJSON = function (data, op) {
+        parseJSON = function(data, op) {
             try {
                 return $.parseJSON(data);
             } catch (e) {
@@ -1904,13 +1942,13 @@
                 $.throwError(e);
             }
         },
-        build = function (url, data, callback, dataType, method) {
+        build = function(url, data, callback, dataType, method) {
             if ($.isFunction(data)) {
                 dataType = callback || dataType, callback = data, data = null;
             }
             return {
                 url: url, method: method, dataType: dataType, data: data, callback: callback,
-                set: function (data, value) {
+                set: function(data, value) {
                     if (typeof data === 'object') {
                         for (var k in data) {
                             this[k] = data[k];
@@ -1925,28 +1963,28 @@
 
     $.extendNative($, {
         ajax: ajax,
-        get: function (url, data, callback, dataType) {
+        get: function(url, data, callback, dataType) {
             return ajax(build(url, data, callback, dataType, 'GET'));
         },
-        post: function (url, data, callback, dataType) {
+        post: function(url, data, callback, dataType) {
             return ajax(build(url, data, callback, dataType, 'POST'));
         },
-        getJSON: function (url, data, callback, checkException) {
+        getJSON: function(url, data, callback, checkException) {
             var p = build(url, data, callback, checkException, 'GET');
             return ajax(p.set({ dataType: 'JSON', checkException: $.isBoolean(p.dataType, false) }));
         },
-        getScript: function (url, data, callback, load) {
+        getScript: function(url, data, callback, load) {
             var p = build(url, data, callback, load, 'GET');
             return ajax(p.set({ dataType: 'SCRIPT', load: $.isBoolean(p.dataType, false) }));
         },
-        load: function (url, data, callback, dataType) {
+        load: function(url, data, callback, dataType) {
             var p = build(url, data, callback, dataType, 'GET');
             if ($.isObject(p.data)) {
                 p.method = 'POST';
             }
             return ajax(p.set({ async: $.isFunction(p.callback), dataType: p.dataType || 'HTML' }));
         },
-        each: function (obj, callback) {
+        each: function(obj, callback) {
             var length, i = 0;
             if ($.isArrayLike(obj)) {
                 length = obj.length;
@@ -1964,7 +2002,7 @@
             }
             return obj;
         },
-        merge: function (first, second) {
+        merge: function(first, second) {
             var len = +second.length, j = 0, i = first.length;
             for (; j < len; j++) {
                 first[i++] = second[j];
@@ -1974,94 +2012,94 @@
     });
 
     $.fn.extendNative({
-        each: function (func) {
+        each: function(func) {
             for (var i = 0; i < this.length; i++) {
                 func(i, this[i]);
             }
             return this;
         },
-        pushStack: function (elems) {
+        pushStack: function(elems) {
             var ret = $.merge(new this.constructor(), elems);
             ret.prevObject = this;
             return ret;
         },
-        eq: function (i) {
+        eq: function(i) {
             var len = this.length,
                 j = +i + (i < 0 ? len : 0);
             return this.pushStack(j >= 0 && j < len ? [this[j]] : []);
         },
-        prop: function (name, value) {
+        prop: function(name, value) {
             var self = this, elem = self[0] || {};
             if ($.isUndefined(value)) {
                 return elem ? elem[name] : '';
             } else {
-                return self.each(function (i, obj) { obj[name] = value; }), self;
+                return self.each(function(i, obj) { obj[name] = value; }), self;
             }
         },
-        html: function (value, attr) {
+        html: function(value, attr) {
             return this.prop(attr || 'innerHTML', value);
         },
-        val: function (value) {
+        val: function(value) {
             return this.prop('value', value);
         },
-        attr: function (name, value) {
+        attr: function(name, value) {
             var self = this, elem = self[0] || {};
             if ($.isUndefined(value)) {
                 return elem.getAttribute ? elem.getAttribute(name) || undefined : '';
             } else {
-                return self.each(function (i, obj) { obj.setAttribute(name, value); }), self;
+                return self.each(function(i, obj) { obj.setAttribute(name, value); }), self;
             }
         },
-        removeAttr: function (name) {
-            return this.each(function (i, obj) {
+        removeAttr: function(name) {
+            return this.each(function(i, obj) {
                 obj.removeAttribute(name);
             });
         },
-        addClass: function (value) {
-            return this.each(function (i, obj) {
+        addClass: function(value) {
+            return this.each(function(i, obj) {
                 $.addClass(obj, value);
             });
         },
-        removeClass: function (value) {
-            return this.each(function (i, obj) {
+        removeClass: function(value) {
+            return this.each(function(i, obj) {
                 $.removeClass(obj, value);
             });
         }
     });
 
     $.fn.extendNative({
-        event: function (action, func) {
-            return this.each(function (i, obj) {
-                $.addEventListener(obj, action, function (e) {
+        event: function(action, func) {
+            return this.each(function(i, obj) {
+                $.addEventListener(obj, action, function(e) {
                     func(e, i, this);
                 });
             });
         },
-        click: function (func) { return this.event('click', func); },
-        dblclick: function (func) { return this.event('dblclick', func); },
-        blur: function (func) { return this.event('blur', func); },
-        change: function (func) { return this.event('change', func); },
-        focus: function (func) { return this.event('focus', func); },
-        keydown: function (func) { return this.event('keydown', func); },
-        keyup: function (func) { return this.event('keyup', func); },
-        keypress: function (func) { return this.event('keypress', func); },
-        mousedown: function (func) { return this.event('mousedown', func); },
-        mouseup: function (func) { return this.event('mouseup', func); },
-        mousemove: function (func) { return this.event('mousemove', func); }
+        click: function(func) { return this.event('click', func); },
+        dblclick: function(func) { return this.event('dblclick', func); },
+        blur: function(func) { return this.event('blur', func); },
+        change: function(func) { return this.event('change', func); },
+        focus: function(func) { return this.event('focus', func); },
+        keydown: function(func) { return this.event('keydown', func); },
+        keyup: function(func) { return this.event('keyup', func); },
+        keypress: function(func) { return this.event('keypress', func); },
+        mousedown: function(func) { return this.event('mousedown', func); },
+        mouseup: function(func) { return this.event('mouseup', func); },
+        mousemove: function(func) { return this.event('mousemove', func); }
     });
 
     $.fn.extendNative({
-        load: function (url, data, callback, dataType) {
+        load: function(url, data, callback, dataType) {
             var self = this;
             if (self.length > 0) {
                 var p = build(url, data, callback, dataType, 'GET'), func = p.callback;
                 $.ajax(p.set({
                     dataType: p.dataType || 'HTML', method: $.isObject(p.data) ? 'POST' : p.method,
-                    callback: function (data, status, xhr) {
+                    callback: function(data, status, xhr) {
                         self.html(data);
 
                         if ($.isFunction(func)) {
-                            self.each(function (data, status) { func(data, status); });
+                            self.each(function(data, status) { func(data, status); });
                         }
                     }
                 }));
