@@ -333,10 +333,12 @@ console.log(str);
 
 console.log('货币转中文大写：', num, num.toChineseNumber(true));
 
-var num = 1200101;
+var num = -1200101;
 console.log(num);
 var str = $.numberToChinese(num);
 console.log(str);
+var n = $.chineseToNumber(str);
+console.log(n);
 
 var num = 135;
 console.log(num);

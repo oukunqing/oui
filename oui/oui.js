@@ -406,19 +406,19 @@
 
     $.extend($, {
         numberToChinese: function(num, isMoney) {
-            if (typeof num !== 'string' && typeof num !== 'number' || (!/^[\d,.，]+$/.test(num))) {
+            if (typeof num !== 'string' && typeof num !== 'number' || (!/^[-]?[\d,.，]+$/.test(num))) {
                 return num;
             }
             var chars = (isMoney ? '零壹贰叁肆伍陆柒捌玖' : '零一二三四五六七八九').split(''),
-                units = isMoney ? ['', '拾', '佰', '仟', '万'] : ['', '十', '百', '千', '万'],
+                units = isMoney ? ['', '拾', '佰', '仟'] : ['', '十', '百', '千'],
                 teams = ['', '万', '亿', '兆', '京'],
                 moneys = ['角', '分', '厘', '毫'];
 
-            var toChinese = function(txt, isMoney, isDecimal) {
+            var toChinese = function (txt, isMoney, isDecimal) {
                 if (typeof txt !== 'string') {
                     return '';
                 }
-                if (isDecimal && txt.length > 4) {
+                if(isDecimal && txt.length > 4){
                     txt = txt.substr(0, 4);
                 }
                 var str = [], len = txt.length;
@@ -427,29 +427,27 @@
                     if (/^[0]+$/.test(txt.substr(i))) {
                         break;
                     }
-                    var n = parseInt(txt[i], 10), char = chars[n], unit = isDecimal ? moneys[i] : units[len - 1 - i];
-
-                    var s = (char + unit).replace(/^[零][十百千拾佰仟]/, '零').replace(/[一壹]([十拾])/, '$1').replace(/^[零][角分毫]/, '');
-
-                    str.push(s);
+                    var n = parseInt(txt[i], 10), s = chars[n] + (isDecimal ? moneys[i] : units[len - 1 - i]);
+                    str.push(s.replace(/^([零])[十百千拾佰仟]/, '$1').replace(/[一壹]([十拾])/, '$1').replace(/^[零][角分毫]/, ''));
                 }
-                return str.join('');
+                return str.join('').replace(/(零){2,}/g,'$1');
             },
                 splitNumber = function(txt) {
-                    var arr = [], len = txt.length, minuend = 4 - (len % 4), s = '';
-                    for (var i = 0; i < len; i++) {
-                        s += txt[i];
-                        if (++minuend % 4 === 0) {
-                            arr.push(s);
-                            minuend = 0;
-                            s = '';
-                        }
+                    var arr = [], len = txt.length, pos = (len % 4), i = 0;
+                    while (i < len) {
+                        arr.push(txt.substr(i, pos));
+                        i += pos;
+                        pos = 4;
                     }
                     return arr;
                 };
 
-            var str = ('' + num).replace(/[,，]/g, '').split('.');
-            var nums = splitNumber(str[0]), len = nums.length, res = [];
+            var str = '' + num, res = [];
+            if(str.indexOf('-') === 0){
+                res.push('负');
+                str = str.substr(1);
+            }
+            var arr = str.replace(/[,，]/g, '').split('.'), nums = splitNumber(arr[0]), len = nums.length;
 
             for (var i = 0; i < len; i++) {
                 res.push(toChinese(nums[i], isMoney));
@@ -457,14 +455,14 @@
             }
             if (isMoney) {
                 res.push('元');
-                res.push(str[1] ? toChinese(str[1], isMoney, true) : '整');
+                res.push(arr[1] ? toChinese(arr[1], isMoney, true) : '整');
             }
 
             return res.join('');
         },
         chineseToNumber: function(str) {
             var chars = {
-                '零': 0,
+                '零': 0, 
                 '一': 1, '二': 2, '三': 3, '四': 4, '五': 5, '六': 6, '七': 7, '八': 8, '九': 9,
                 '壹': 1, '贰': 2, '叁': 3, '肆': 4, '伍': 5, '陆': 6, '柒': 7, '捌': 8, '玖': 9
             };
@@ -472,18 +470,23 @@
                 '十': 10, '拾': 10, '百': 100, '佰': 100, '千': 1000, '仟': 1000, '万': 10000,
                 '整': 1, '元': 1, '角': 0.1, '分': 0.01, '厘': 0.001, '毫': 0.0001
             };
+            var minus = false;
+            if(str.indexOf('负') === 0) {
+                str = str.substr(1);
+                minus = true;
+            }
             var total = 0, decimal = 0, num = 0, len = str.length, i = 0;
-            while (i < len) {
+            while(i < len) {
                 var s = str[i], n = chars[s];
-                if (typeof n !== 'undefined') {
+                if(typeof n !== 'undefined') {
                     num = n;
                 } else {
-                    if (/[十拾]/.test(s) && (i === 0 || num === 0)) {
+                    if(/[十拾]/.test(s) && (i === 0 || num === 0)){
                         num = 1;
                     }
-                    if ('万亿兆京'.indexOf(s) > -1) {
+                    if('万亿兆京'.indexOf(s) > -1) {
                         total = (total + num) * units['万'];
-                    } else if ('角分厘毫'.indexOf(s) > -1) {
+                    } else if('角分厘毫'.indexOf(s) > -1) {
                         decimal += num * units[s];
                     } else {
                         total += num * units[s];
@@ -493,6 +496,10 @@
                 i++;
             }
             total += num + decimal;
+
+            if(minus){
+                total = 0 - total;
+            }
 
             return total;
         }
