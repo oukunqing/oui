@@ -8,6 +8,8 @@
 
 // OUI
 !function() {
+    'use strict';
+
     var isWindow = function() {
         return typeof window !== 'undefined';
     }, $ = isWindow() ? window.$ : undefined;
@@ -400,7 +402,7 @@
     $.extend($, { Dictionary: Dictionary, dict: new Dictionary() });
 }(OUI);
 
-// numberToChinese
+// 字符编码转换
 !function($) {
     'use strict';
 
@@ -559,7 +561,7 @@
     });
 }(OUI);
 
-// Javascript Native Object
+// Javascript 原生对象方法扩展
 !function($) {
     'use strict';
 
