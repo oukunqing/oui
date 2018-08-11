@@ -327,18 +327,21 @@ var str = $.numberToChinese(num, true);
 console.log(str);
 
 var num = '12,345,678,900.06';
+console.log('toThousand: ', num.toThousand(4));
 console.log(num);
 var str = $.numberToChinese(num, true);
 console.log(str);
 
-console.log('货币转中文大写：', num, num.toChineseNumber(true));
+console.log('货币转中文大写： toChineseNumber: ', num, num.toChineseNumber(true));
 
 var num = -1200101;
 console.log(num);
 var str = $.numberToChinese(num);
 console.log(str);
 var n = $.chineseToNumber(str);
-console.log(n);
+console.log('$.chineseToNumber: ', n);
+console.log('chineseToNumber: ', str.chineseToNumber());
+console.log('convertChineseToNumber: ', str.convertChineseToNumber());
 
 var num = 135;
 console.log(num);
@@ -349,6 +352,24 @@ var num = 123456789012345620;
 console.log(num);
 var str = $.numberToChinese(num);
 console.log(str);
+
+var str = '中华人民共和国ABC';
+console.log('中文转Unicode编码：', str);
+console.log(str.chineseToUnicode());
+console.log(str.chineseToUnicode().unicodeToChinese());
+
+
+console.log('ASCII转Unicode编码：', str);
+console.log(str.asciiToUnicode());
+console.log(str.asciiToUnicode().unicodeToAscii());
+
+
+console.log('中华人民共和国万岁万万岁'.separate(',', 5));
+console.log('123456789012'.separate(',', 3, true));
+console.log('abcdefghijkl'.separate(',', 3, true));
+console.log('中华人民共和国万岁万万岁万万岁'.separate(',', 5, true));
+
+console.log('127123123123'.separate('.', 3));
 
 var arr = $N('chb', {
     checked: true

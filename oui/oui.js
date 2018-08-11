@@ -406,80 +406,89 @@
 
     $.extend($, {
         numberToChinese: function(num, isMoney) {
-            if (typeof num !== 'string' && typeof num !== 'number' || (!/^[-]?[\d,.，]+$/.test(num))) {
+            if (isNaN(parseFloat(num, 10))) {
                 return num;
             }
             var chars = (isMoney ? '零壹贰叁肆伍陆柒捌玖' : '零一二三四五六七八九').split(''),
                 units = isMoney ? ['', '拾', '佰', '仟'] : ['', '十', '百', '千'],
                 teams = ['', '万', '亿', '兆', '京'],
-                moneys = ['角', '分', '厘', '毫'];
-
-            var toChinese = function (txt, isMoney, isDecimal) {
-                if (typeof txt !== 'string') {
-                    return '';
-                }
-                if(isDecimal && txt.length > 4){
-                    txt = txt.substr(0, 4);
-                }
-                var str = [], len = txt.length;
-
-                for (var i = 0; i < len; i++) {
-                    if (/^[0]+$/.test(txt.substr(i))) {
-                        break;
+                decimals = ['角', '分', '厘', '毫'],
+                others = { unit: '元', int: '整', minus: '负' },
+                toChinese = function (txt, isMoney, isDecimal) {
+                    if (typeof txt !== 'string') {
+                        return '';
                     }
-                    var n = parseInt(txt[i], 10), s = chars[n] + (isDecimal ? moneys[i] : units[len - 1 - i]);
-                    str.push(s.replace(/^([零])[十百千拾佰仟]/, '$1').replace(/[一壹]([十拾])/, '$1').replace(/^[零][角分毫]/, ''));
-                }
-                return str.join('').replace(/(零){2,}/g,'$1');
-            },
+                    if(isDecimal && txt.length > 4){
+                        txt = txt.substr(0, 4);
+                    }
+                    var str = [], len = txt.length - 1;
+                    for (var i = 0; i <= len; i++) {
+                        var num = parseInt(txt[i], 10), pos = len - i, unit = isDecimal ? decimals[i] : units[pos];
+                        if(num === 0 && (i === len || txt[i+1] === '0')){
+                            continue;
+                        }
+                        //当值为0时,舍弃单位
+                        //当整数部分 值为1，并且单位为“十”时，舍弃值
+                        str.push(num === 0 ? chars[num] : (num === 1 && pos === 1 && !isDecimal) ? unit : (chars[num] + unit));
+                    }
+                    return str.join('');
+                },
                 splitNumber = function(txt) {
-                    var arr = [], len = txt.length, pos = (len % 4), i = 0;
-                    while (i < len) {
-                        arr.push(txt.substr(i, pos));
-                        i += pos;
-                        pos = 4;
-                    }
-                    return arr;
-                };
+                    return txt.replace(/\B(?=(?:[\d]{4})+$)/g, ',').split(',');
+                },
+                arr = ('' + num).replace(/[,]/g, '').split('.'), str = arr[0], 
+                res = [];
 
-            var str = '' + num, res = [];
             if(str.indexOf('-') === 0){
-                res.push('负');
+                res.push(others.minus);
                 str = str.substr(1);
             }
-            var arr = str.replace(/[,，]/g, '').split('.'), nums = splitNumber(arr[0]), len = nums.length;
 
-            for (var i = 0; i < len; i++) {
+            var nums = splitNumber(str), len = nums.length - 1;
+
+            for (var i = 0; i <= len; i++) {
                 res.push(toChinese(nums[i], isMoney));
-                res.push(teams[len - 1 - i]);
+                res.push(teams[len - i]);
             }
             if (isMoney) {
-                res.push('元');
-                res.push(arr[1] ? toChinese(arr[1], isMoney, true) : '整');
+                res.push(others.unit);
+                res.push(arr[1] ? toChinese(arr[1], isMoney, true) : others.int);
             }
 
             return res.join('');
         },
         chineseToNumber: function(str) {
-            var chars = {
-                '零': 0, 
-                '一': 1, '二': 2, '三': 3, '四': 4, '五': 5, '六': 6, '七': 7, '八': 8, '九': 9,
-                '壹': 1, '贰': 2, '叁': 3, '肆': 4, '伍': 5, '陆': 6, '柒': 7, '捌': 8, '玖': 9
-            };
-            var units = {
-                '十': 10, '拾': 10, '百': 100, '佰': 100, '千': 1000, '仟': 1000, '万': 10000,
-                '整': 1, '元': 1, '角': 0.1, '分': 0.01, '厘': 0.001, '毫': 0.0001
-            };
-            var minus = false;
-            if(str.indexOf('负') === 0) {
+            var minus = str.indexOf('负') === 0, point = false,
+                i = 0, j = 0, k = 0, total = 0, decimal = 0, num = 0,
+                chars = {
+                    '一': 1, '二': 2, '三': 3, '四': 4, '五': 5, '六': 6, '七': 7, '八': 8, '九': 9, '零': 0,
+                    '壹': 1, '贰': 2, '叁': 3, '肆': 4, '伍': 5, '陆': 6, '柒': 7, '捌': 8, '玖': 9
+                },
+                units = {
+                    '十': 10, '拾': 10, '百': 100, '佰': 100, '千': 1000, '仟': 1000, '万': 10000,
+                    '整': 1, '元': 1, '点': 1
+                },
+                decimals = { '角': 0.1, '分': 0.01, '厘': 0.001, '毫': 0.0001 };
+
+            if(minus) {
                 str = str.substr(1);
-                minus = true;
             }
-            var total = 0, decimal = 0, num = 0, len = str.length, i = 0;
+
+            if(str.indexOf('点') > -1) {
+                for(var m in decimals) {
+                    decimals[k++] = decimals[m];
+                }
+            }
+
+            var len = str.length;
             while(i < len) {
                 var s = str[i], n = chars[s];
-                if(typeof n !== 'undefined') {
-                    num = n;
+                if (typeof n !== 'undefined') {            
+                    if(!point) {
+                        num = n;
+                    } else {
+                        total += n * decimals[j++];
+                    }
                 } else {
                     if(/[十拾]/.test(s) && (i === 0 || num === 0)){
                         num = 1;
@@ -487,9 +496,12 @@
                     if('万亿兆京'.indexOf(s) > -1) {
                         total = (total + num) * units['万'];
                     } else if('角分厘毫'.indexOf(s) > -1) {
-                        decimal += num * units[s];
+                        decimal += num * decimals[s];
                     } else {
-                        total += num * units[s];
+                        total += num * (units[s] || 0);
+                        if(s === '点') {
+                            point = true;
+                        }
                     }
                     num = 0;
                 }
@@ -502,6 +514,47 @@
             }
 
             return total;
+        },
+        chineseToUnicode: function(str, returnArray, noPrefix) {
+            var arr = $.isArray(str) ? str : str.split(''), len = arr.length, res = [];
+            for (var i = 0; i < len; i++) {
+                var code = arr[i].charCodeAt();
+                var code16 = code.toString(16).padStart(4, '0');
+                res.push((noPrefix ? '' : '\\u') + code16);
+            }
+            return returnArray ? res : res.join('');
+        },
+        unicodeToChinese: function(code, returnArray) {
+            if ($.isArray(code)) {
+                code = code.join('');
+            }
+            var teamLen = code.indexOf('\\u') > -1 ? 6 : 4;
+            var len = code.length, i = 0, arr = [], prefix = teamLen === 6;
+            while (i < len - 1) {
+                arr.push((!prefix ? '\\u' : '') + code.substr(i, teamLen));
+                i += teamLen;
+            }
+            var words = JSON.parse('["' + arr.join('","') + '"]');
+            return returnArray ? words : words.join('');
+        },
+        asciiToUnicode: function(str, returnArray) {
+            var arr = str.split(''), len = arr.length, res = [];
+            for (var i = 0; i < len; i++) {
+                res.push('&#' + arr[i].charCodeAt() + ';');
+            }
+            return returnArray ? res : res.join('');
+        },
+        unicodeToAscii: function(code, returnArray) {
+            if ($.isArray(code)) {
+                code = code.join('');
+            }
+            var arr = code.split(';'), len = arr.length, chars = [];
+            for (var i = 0; i < len; i++) {
+                if (arr[i]) {
+                    chars.push(String.fromCharCode(arr[i].substr(2)));
+                }
+            }
+            return returnArray ? chars : chars.join('');
         }
     });
 }(OUI);
@@ -632,9 +685,23 @@
         toChineseNumber: function(isMoney) { return $.numberToChinese(this, isMoney); },
         chineseToNumber: function() { return $.chineseToNumber(this); },
         convertChineseToNumber: function() { return $.chineseToNumber(this); },
-        toThousand: function(delimiter) {
-            var a = this.split('.'), hasPoint = this.indexOf('.') >= 0;
-            return a[0].replace(/\B(?=(?:[\dA-Fa-f]{3})+$)/g, delimiter || ',') + (hasPoint ? '.' + (a[1] || '') : '');
+        chineseToUnicode: function(returnArray, noPrefix) { return $.chineseToUnicode(this, returnArray, noPrefix); },
+        unicodeToChinese: function(returnArray) { return $.unicodeToChinese(this, returnArray); },
+        asciiToUnicode: function(returnArray) { return $.asciiToUnicode(this, returnArray); },
+        asciiToUnicode: function(returnArray) { return $.asciiToUnicode(this, returnArray); },
+        unicodeToAscii: function(returnArray) { return $.unicodeToAscii(this, returnArray); },
+        toThousand: function(delimiter, len) {
+            if ($.isNumber(delimiter)) {
+                len = delimiter;
+                delimiter = ',';
+            }
+            var s = this;
+            if (s.indexOf(',') > -1) {
+                s = s.replace(/[,]/g, '');
+            }
+            var a = s.split('.'), hasPoint = s.indexOf('.') >= 0;
+            var reg = new RegExp('\\B(?=(?:[\\dA-Fa-f]{' + (len || 3) + '})+$)', 'gi');
+            return a[0].replace(reg, delimiter || ',') + (hasPoint ? '.' + (a[1] || '') : '');
         },
         toDate: function(format) {
             var ts = Date.parse(this.replace(/-/g, '/'));
@@ -746,7 +813,7 @@
         isInt: function() { return $.isInteger(this); },
         isHex: function() { return this.toString().toUpperCase().indexOf('0X') === 0; },
         toHex: function() { return this.toString(16).toUpperCase(); },
-        toThousand: function(delimiter) { return this.toString().toThousand(delimiter); },
+        toThousand: function(delimiter, len) { return this.toString().toThousand(delimiter, len); },
         toChineseNumber: function(isMoney) { return $.numberToChinese(this, isMoney); },
         toDate: function(format) { return this.toString().toDate(format); }
     }, 'Number.prototype');
