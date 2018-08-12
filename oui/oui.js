@@ -411,11 +411,19 @@
             if (isNaN(parseFloat(num, 10))) {
                 return num;
             }
-            var chars = (isMoney ? '零壹贰叁肆伍陆柒捌玖' : '零一二三四五六七八九').split(''),
-                units = isMoney ? ['', '拾', '佰', '仟'] : ['', '十', '百', '千'],
-                teams = ['', '万', '亿', '兆', '京'],
-                decimals = ['角', '分', '厘', '毫'],
-                others = { unit: '元', int: '整', minus: '负' },
+            var chars = isMoney ? 
+                //零壹贰叁肆伍陆柒捌玖
+                ['\u96f6', '\u58f9', '\u8d30', '\u53c1', '\u8086', '\u4f0d', '\u9646', '\u67d2', '\u634c', '\u7396'] : 
+                //零一二三四五六七八九
+                ['\u96f6', '\u4e00', '\u4e8c', '\u4e09', '\u56db', '\u4e94', '\u516d', '\u4e03', '\u516b', '\u4e5d'],
+                //空，拾，佰，仟 或 十，百，千
+                units = isMoney ? ['', '\u62fe', '\u4f70', '\u4edf'] : ['', '\u5341', '\u767e', '\u5343'],
+                //空，万，亿，兆，京
+                teams = ['', '\u4e07', '\u4ebf', '\u5146', '\u4eac'],
+                //角，分，厘，毫
+                decimals = ['\u89d2', '\u5206', '\u5398', '\u6beb'],
+                //元，整，负
+                others = { unit: '\u5143', int: '\u6574', minus: '\u8d1f' },
                 toChinese = function (txt, isMoney, isDecimal) {
                     if (typeof txt !== 'string') {
                         return '';
@@ -431,7 +439,15 @@
                         }
                         //当值为0时,舍弃单位
                         //当整数部分 值为1，并且单位为“十”时，舍弃值
-                        str.push(num === 0 ? chars[num] : (num === 1 && pos === 1 && !isDecimal) ? unit : (chars[num] + unit));
+                        //str.push(num === 0 ? (!isDecimal ? chars[num] : '') : (num === 1 && pos === 1 && !isDecimal) ? unit : (chars[num] + unit));                        
+                        if(num === 0) {
+                            str.push(isDecimal ? '' : chars[num]);
+                        } else if(num === 1 && pos === 1 && !isDecimal) {
+                            str.push(unit);
+                        } else {
+                            str.push(chars[num] + unit);
+                        }
+                        
                     }
                     return str.join('');
                 },
@@ -460,23 +476,28 @@
             return res.join('');
         },
         chineseToNumber: function(str) {
-            var minus = str.indexOf('负') === 0, point = false,
+            var minus = str.indexOf('\u8d1f') === 0, point = false,
                 i = 0, j = 0, k = 0, total = 0, decimal = 0, num = 0,
                 chars = {
-                    '一': 1, '二': 2, '三': 3, '四': 4, '五': 5, '六': 6, '七': 7, '八': 8, '九': 9, '零': 0,
-                    '壹': 1, '贰': 2, '叁': 3, '肆': 4, '伍': 5, '陆': 6, '柒': 7, '捌': 8, '玖': 9
+                    //一，二，三，四，五，六，七，八，九，零
+                    '\u4e00': 1, '\u4e8c': 2, '\u4e09': 3, '\u56db': 4, '\u4e94': 5, '\u516d': 6, '\u4e03': 7, '\u516b': 8, '\u4e5d': 9, '\u96f6': 0,
+                    //壹，贰，叁，肆，伍，陆，柒，捌，玖
+                    '\u58f9': 1, '\u8d30': 2, '\u53c1': 3, '\u8086': 4, '\u4f0d': 5, '\u9646': 6, '\u67d2': 7, '\u634c': 8, '\u7396': 9
                 },
                 units = {
-                    '十': 10, '拾': 10, '百': 100, '佰': 100, '千': 1000, '仟': 1000, '万': 10000,
-                    '整': 1, '元': 1, '点': 1
+                    //十，拾，百，佰，千，仟，万
+                    '\u5341': 10, '\u62fe': 10, '\u767e': 100, '\u4f70': 100, '\u5343': 1000, '\u4edf': 1000, '\u4e07': 10000,
+                    //元，整，负
+                    '\u5143': 1, '\u6574': 1, '\u70b9': 1
                 },
-                decimals = { '角': 0.1, '分': 0.01, '厘': 0.001, '毫': 0.0001 };
+                //角，分，厘，毫
+                decimals = { '\u89d2': 0.1, '\u5206': 0.01, '\u5398': 0.001, '\u6beb': 0.0001 };
 
             if(minus) {
                 str = str.substr(1);
             }
-
-            if(str.indexOf('点') > -1) {
+            // \u70b9 点
+            if(str.indexOf('\u70b9') > -1) {
                 for(var m in decimals) {
                     decimals[k++] = decimals[m];
                 }
@@ -492,16 +513,22 @@
                         total += n * decimals[j++];
                     }
                 } else {
-                    if(/[十拾]/.test(s) && (i === 0 || num === 0)){
+                    //十，拾
+                    if(['\u5341', '\u62fe'].indexOf(s) > -1 && (i === 0 || num === 0)){
                         num = 1;
                     }
-                    if('万亿兆京'.indexOf(s) > -1) {
-                        total = (total + num) * units['万'];
-                    } else if('角分厘毫'.indexOf(s) > -1) {
+                    //万，亿，兆，京
+                    if(['\u4e07','\u4ebf','\u5146','\u4eac'].indexOf(s) > -1) {
+                        // \u4e07 万
+                        total = (total + num) * units['\u4e07'];
+                    } 
+                    //角，分，厘，毫
+                    else if(['\u89d2','\u5206','\u5398','\u6beb'].indexOf(s) > -1) {
                         decimal += num * decimals[s];
                     } else {
                         total += num * (units[s] || 0);
-                        if(s === '点') {
+                        // \u70b9 点
+                        if(s === '\u70b9') {
                             point = true;
                         }
                     }
@@ -919,7 +946,8 @@
                         hide = fs, fs = '';
                     }
                     if (typeof fs !== 'string' || ['en', 'cn', 'time'].indexOf(fs) >= 0) {
-                        var a = ['{days}天', '{hours}小时', '{minutes}分钟', '{seconds}秒', '{milliseconds}毫秒'],
+                        //\u5929 天, \u5c0f\u65f6 小时, \u5206\u949f 分钟, \u79d2 秒, \u6beb\u79d2 毫秒
+                        var a = ['{days}\u5929', '{hours}\u5c0f\u65f6', '{minutes}\u5206\u949f', '{seconds}\u79d2', '{milliseconds}\u6beb\u79d2'],
                             p = s.days ? 0 : (s.hours ? 1 : (s.minutes ? 2 : s.seconds ? 3 : 4)), len = a.length - (hide ? 1 : 0);
                         if (fs === 'en') {
                             a = ['{days}days ', '{hours}h ', '{minutes}m ', '{seconds}s ', '{milliseconds}ms'];
@@ -1105,15 +1133,25 @@
             if ($.isNull(ms)) {
                 return s.toString() || s;
             }
-            var err = ['输入字符串的格式不正确。', '索引(从零开始)必须大于或等于零，且小于参数列表的大小。',
-                '值不能为null（或undefined）。', '格式说明符无效。'];
+            var err = [
+                //输入字符串的格式不正确。
+                '\u8f93\u5165\u5b57\u7b26\u4e32\u7684\u683c\u5f0f\u4e0d\u6b63\u786e\u3002', 
+                //索引(从零开始)必须大于或等于零，且小于参数列表的大小。
+                '\u7d22\u5f15\u0028\u4ece\u96f6\u5f00\u59cb\u0029\u5fc5\u987b\u5927\u4e8e\u6216\u7b49\u4e8e\u96f6\uff0c\u4e14\u5c0f\u4e8e\u53c2\u6570\u5217\u8868\u7684\u5927\u5c0f\u3002',
+                //值不能为null（或undefined）。
+                '\u503c\u4e0d\u80fd\u4e3a\u006e\u0075\u006c\u006c\uff08\u6216\u0075\u006e\u0064\u0065\u0066\u0069\u006e\u0065\u0064\uff09\u3002', 
+                //格式说明符无效。
+                '\u683c\u5f0f\u8bf4\u660e\u7b26\u65e0\u6548\u3002'
+            ];
 
             if (arguments.length > 1) {
                 for (var i = 0, c = arguments.length; i < c; i++) {
                     if (!$.isNullOrUndefined(arguments[i])) {
                         vals.push(arguments[i]);
                     } else {
-                        var er = err[2] + '第' + (i + 1) + '个参数值为：' + arguments[i];
+                        //\u7b2c 第
+                        //\u4e2a\u53c2\u6570\u503c\u4e3a\uff1a 个参数值为：
+                        var er = err[2] + '\u7b2c' + (i + 1) + '\u4e2a\u53c2\u6570\u503c\u4e3a\uff1a' + arguments[i];
                         throwError(err, s, args);
                     }
                 }

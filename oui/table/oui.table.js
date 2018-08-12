@@ -154,7 +154,7 @@
                     if (rowCount > 1) {
                         cell.rowSpan = rowCount;
                     }
-                    cell.innerHTML = '序号';
+                    cell.innerHTML = '\u5e8f\u53f7'; //序号
                 } else {
                     cell.innerHTML = '';
                 }
@@ -194,9 +194,9 @@
                             html += '<a id=' + (id + '-a') + ' class="quick-a">&or;</a>';
                         }
                         html += '<div id="' + (menu) + '" class="quick-menu" style="display:none;">'
-                            + '<a v="1">全选</a>'
-                            + '<a v="0">不选</a>'
-                            + '<a v="2">反选</a>'
+                            + '<a v="1">\u5168\u9009</a>'   //全选
+                            + '<a v="0">\u4e0d\u9009</a>'   //不选
+                            + '<a v="2">\u53cd\u9009</a>'   //反选
                             + '</div>';
                     }
                     cell.innerHTML = html;

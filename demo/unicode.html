@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Unicode编码转换</title>
+    <script type="text/javascript" src="../oui/oui.js?321"></script>
+</head>
+<body>
+    <table>
+        <tr>
+            <td>
+                <textarea id="source" style="width:500px;height:300px;" rows="1" cols="1"></textarea>
+            </td>
+            <td>
+                <textarea id="result" style="width:500px;height:300px;" rows="1" cols="1"></textarea>
+            </td>
+        </tr>
+    </table>
+    <button onclick="convertUnicode(1);">中文转Unicode</button>
+    <button onclick="convertUnicode(2);">Unicode转中文</button>
+    <button onclick="convertUnicode(3);">ASCII转Unicode</button>
+    <button onclick="convertUnicode(4);">Unicode转ASCII</button>
+</body>
+</html>
+<script type="text/javascript">
+    
+    function getSource(){
+        return $I('source').value.trim();
+    }
+
+    function convertUnicode(action){
+        var str = getSource();
+        var code = '';
+        switch(action){
+            case 1: code = str.chineseToUnicode(); break;
+            case 2: code = str.unicodeToChinese(); break;
+            case 3: code = str.asciiToUnicode(); break;
+            case 4: code = str.unicodeToAscii(); break;
+        }
+        $I('result').value = code;
+    }
+</script>
