@@ -148,6 +148,8 @@
         isNumeric = function(o) { return /^[-+]?(\d+)([.][\d]{0,})?$/.test(o); },
         isDecimal = function(o) { return /^[-+]?(\d+)([.][\d]{0,})$/.test(o); },
         isInteger = function(o) { return /^[-+]?(\d+)$/.test(o); },
+        isHexNumeric = function(o) { return /^(0x)?[\dA-Fa-f]+$/i.test(o); },
+        isHexNumber = function(o) { return isNumber(o) && isHexNumeric(o); },        
         isRegexp = function(o) { return isObject(o) || isFunction(o) ? ('' + o).indexOf('/') == 0 : false; },
         isNull = function(o) { return o === null; },
         isNullOrUndefined = function(o) { return isUndefined(o) || isNull(o); },
@@ -418,7 +420,7 @@
                 ['\u96f6', '\u4e00', '\u4e8c', '\u4e09', '\u56db', '\u4e94', '\u516d', '\u4e03', '\u516b', '\u4e5d'],
                 //空，拾，佰，仟 或 十，百，千
                 units = isMoney ? ['', '\u62fe', '\u4f70', '\u4edf'] : ['', '\u5341', '\u767e', '\u5343'],
-                //空，万，亿，兆，京
+                //空值，万，亿，兆，京
                 teams = ['', '\u4e07', '\u4ebf', '\u5146', '\u4eac'],
                 //角，分，厘，毫
                 decimals = ['\u89d2', '\u5206', '\u5398', '\u6beb'],
@@ -434,10 +436,10 @@
                     var str = [], len = txt.length - 1;
                     for (var i = 0; i <= len; i++) {
                         var num = parseInt(txt[i], 10), pos = len - i, unit = isDecimal ? decimals[i] : units[pos];
-                        if(num === 0 && (i === len || txt[i+1] === '0')){
+                        if(num === 0 && (i === len || txt[i + 1] === '0')) {
                             continue;
                         }
-                        //当值为0时,舍弃单位
+                        //当值为0时,舍弃单位，当值为0并且为金额小数时，舍弃值和单位
                         //当整数部分 值为1，并且单位为“十”时，舍弃值
                         //str.push(num === 0 ? (!isDecimal ? chars[num] : '') : (num === 1 && pos === 1 && !isDecimal) ? unit : (chars[num] + unit));                        
                         if(num === 0) {
@@ -476,7 +478,9 @@
             return res.join('');
         },
         chineseToNumber: function(str) {
-            var minus = str.indexOf('\u8d1f') === 0, point = false,
+            var minus = str.indexOf('\u8d1f') === 0, 
+                //是否出现“点”，若出现点字，表示不是金额，而是普通的小数（中文格式）
+                point = false,
                 i = 0, j = 0, k = 0, total = 0, decimal = 0, num = 0,
                 chars = {
                     //一，二，三，四，五，六，七，八，九，零
@@ -496,6 +500,7 @@
             if(minus) {
                 str = str.substr(1);
             }
+            // 如果出现“点”字，表示包含小数，按字面量“角分厘毫”的顺序 增加 decimals 数组下标元素，元素值同字面量值
             // \u70b9 点
             if(str.indexOf('\u70b9') > -1) {
                 for(var m in decimals) {
@@ -510,9 +515,11 @@
                     if(!point) {
                         num = n;
                     } else {
+                        //小数（非角分厘毫）直接追加
                         total += n * decimals[j++];
                     }
                 } else {
+                    //将十转换为数字1，因为十是单位，后面会进行数字与单位相乘，即 1 * 10 运算
                     //十，拾
                     if(['\u5341', '\u62fe'].indexOf(s) > -1 && (i === 0 || num === 0)){
                         num = 1;
@@ -524,6 +531,7 @@
                     } 
                     //角，分，厘，毫
                     else if(['\u89d2','\u5206','\u5398','\u6beb'].indexOf(s) > -1) {
+                        //小数部分先全部运算完，最后再与整数相加
                         decimal += num * decimals[s];
                     } else {
                         total += num * (units[s] || 0);
@@ -681,6 +689,7 @@
         isInteger: function() { return $.isInteger(this); },
         isFloat: function() { return $.isDecimal(this); },
         isInt: function() { return $.isInteger(this); },
+        isHexNumeric: function() { return $.isHexNumeric(this); },
         toNumber: function(defaultValue, isFloat, decimalLen) {
             //这里判断是否是数字的正则规则是 判断从数字开始到非数字结束，根据 parseFloat 的规则
             var s = this, v = 0, dv = defaultValue, pattern = /^[-+]?(\d+)(.[\d]{0,})/;
@@ -840,7 +849,7 @@
         isInteger: function() { return $.isInteger(this); },
         isFloat: function() { return $.isDecimal(this); },
         isInt: function() { return $.isInteger(this); },
-        isHex: function() { return this.toString().toUpperCase().indexOf('0X') === 0; },
+        isHexNumber: function() { return $.isHexNumeric(this); },
         toHex: function() { return this.toString(16).toUpperCase(); },
         toThousand: function(delimiter, len) { return this.toString().toThousand(delimiter, len); },
         toChineseNumber: function(isMoney) { return $.numberToChinese(this, isMoney); },
