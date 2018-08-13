@@ -601,6 +601,25 @@
                 that.showChildCount();
             }
             $.isFunction(func) && func(that, value);
+        },
+        expandCallback = function(func, that, btn, id) {
+            var op = that.options;
+            if(!id){
+                id = btn.getAttribute('tid');
+            }
+            if($.isFunction(func)){
+                var limit = btn.getAttribute('limit') || 0;
+                //记录展开回调次数
+                btn.setAttribute('limit', limit + 1);
+
+                if(op.expandCallbackLimit >= 0) {
+                    if(op.expandCallbackLimit > limit) {
+                        func(id, that);
+                    }
+                } else {
+                    func(id, that);
+                }
+            }
         };
 
     function Table(options) {
@@ -645,7 +664,8 @@
                     if($.isDebug()){
                         console.log('expandCallback-0: ', id, that);
                     }
-                }
+                },
+                expandCallbackLimit: -1                 //展开回调的次数限制，-1表示不限制次数
             }
         }, options), trigger = op.trigger;
 
@@ -898,9 +918,10 @@
                 if($.isDebug()){
                     console.log('expandCallback-0: ', id, that);
                 }
-            }
+            },
             */
-            expandCallback: null
+            expandCallback: null,
+            expandCallbackLimit: -1     //展开回调的次数限制，-1表示不限制次数
         }, options);
 
         $.extend(that.options, {
@@ -997,9 +1018,7 @@
                 if (!collapse) {
                     that.expandParent(id);
 
-                    if($.isFunction(op.expandCallback)){
-                        op.expandCallback(id, that);
-                    }
+                    expandCallback(op.expandCallback, that, btnSwitch, id);
                 }
 
                 //获取当前节点下的所有子节点

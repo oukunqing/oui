@@ -35,8 +35,8 @@
 
 .oui-table div.quick-menu{
     position: absolute; border:solid 1px #ddd; border-radius:4px; background:#fff;
-    margin: -3px 0 0 20px; line-height: 1.8em; min-width: 100px; margin:0;
-    display: none; overflow: hidden;
+    margin: -3px 0 0 20px; line-height: 1.8em; min-width: 120px; margin:0;
+    display: none; overflow: hidden; z-index: 1001;
 }
 .oui-table div.quick-menu a{
     display: block; padding: 1px 10px; margin: 0; font-size: 12px; border: none 0; background: none; text-align: left; cursor: pointer;

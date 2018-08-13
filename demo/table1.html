@@ -51,7 +51,7 @@
 		};
 	</script>
 	<script type="text/javascript" src="../oui/oui.js?1"></script>
-	<script type="text/javascript" src="../oui/table/oui.table.js?1"></script>
+	<script type="text/javascript" src="../oui/table/oui.table.js?12"></script>
 </head>
 <body>
 <div style="line-height:24px;padding:5px 0;">
@@ -268,7 +268,8 @@ function test(){
         showChildCount: true,
 		expandCallback: function(id, obj){
 			console.log('expandCallback: ', id, obj);
-		}
+		},
+		expandCallbackLimit: 1		//只回调1次
 	};
 
 	tb = new $.Table('tb1').toTree(treeCellIndex, treeOptions,
