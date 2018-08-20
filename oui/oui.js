@@ -148,8 +148,8 @@
         isNumeric = function(o) { return /^[-+]?(\d+)([.][\d]{0,})?$/.test(o); },
         isDecimal = function(o) { return /^[-+]?(\d+)([.][\d]{0,})$/.test(o); },
         isInteger = function(o) { return /^[-+]?(\d+)$/.test(o); },
-        isHexNumeric = function(o) { return /^(0x)?[\dA-Fa-f]+$/i.test(o); },
-        isHexNumber = function(o) { return isNumber(o) && isHexNumeric(o); },        
+        isHexNumeric = function(o) { return /^(0x)?[\dA-F]+$/gi.test(o); },
+        isHexNumber = function(o) { return isNumber(o) && isHexNumeric(o); },
         isRegexp = function(o) { return isObject(o) || isFunction(o) ? ('' + o).indexOf('/') == 0 : false; },
         isNull = function(o) { return o === null; },
         isNullOrUndefined = function(o) { return isUndefined(o) || isNull(o); },
@@ -212,8 +212,20 @@
             }
             return !isUndefined(name) ? obj[name] : obj;
         },
+        getHost = function(url) {
+            var pos = url.indexOf('//'),
+                str = pos > -1 ? url.substr(pos + 2): url,
+                pos1 = str.indexOf('/');
+            return pos1 > -1 ? str.substr(0, pos1) : str;
+        },
         isDebug = function(key) {
             try { return !isUndefined(getQueryString()[key || 'debug']) } catch (e) { return false; }
+        },
+        isMobile = function(num) {
+            return /^1([38][0-9]|4[579]|5[0-3,5-9]|6[6]|7[0135678]|9[89])\d{8}$/.test(num);
+        },
+        isEmail = function(email) {
+            return /^[A-Z0-9\u4e00-\u9fa5]+@[A-Z0-9_-]+(\.[A-Z0-9_-]+)+$/gi.test(email);
         };
 
     var counter = 1, debug = isBoolean(isDebug(), true);
@@ -248,6 +260,7 @@
         isObject: isObject, isArray: isArray, isBoolean: isBoolean, isNull: isNull,
         isProperty: isProperty, version: version,
         isNumeric: isNumeric, isDecimal: isDecimal, isInteger: isInteger, isFloat: isDecimal, isInt: isInteger,
+        isHexNumeric: isHexNumeric, isHexNumber: isHexNumber, isMobile: isMobile, isEmail: isEmail,
         isRegexp: isRegexp, isNullOrUndefined: isNullOrUndefined,
         isEmpty: function(o) {
             if (isUndefined(o) || null === o) { return true; }
@@ -259,7 +272,7 @@
         toDecimal: toDecimal, toFloat: toDecimal, checkNumber: checkNumber,
         toInteger: toInteger, toInt: toInteger,
         toJsonString: toJsonString, toJson: toJson, toEncode: toEncode,
-        param: param, setQueryString: setQueryString, getQueryString: getQueryString, isDebug: isDebug,
+        param: param, setQueryString: setQueryString, getQueryString: getQueryString, getHost: getHost, isDebug: isDebug,
         quickSort: function(arr, key) {
             if (0 === arr.length) { return []; }
             var left = [], right = [], pivot = arr[0], c = arr.length;
@@ -690,6 +703,8 @@
         isFloat: function() { return $.isDecimal(this); },
         isInt: function() { return $.isInteger(this); },
         isHexNumeric: function() { return $.isHexNumeric(this); },
+        isMobile: function() { return $.isMobile(this); },
+        isEmail: function() { return $.isEmail(this); },
         toNumber: function(defaultValue, isFloat, decimalLen) {
             //这里判断是否是数字的正则规则是 判断从数字开始到非数字结束，根据 parseFloat 的规则
             var s = this, v = 0, dv = defaultValue, pattern = /^[-+]?(\d+)(.[\d]{0,})/;
@@ -808,6 +823,12 @@
         },
         setQueryString: function(data, value) {
             return $.setQueryString(this, data, value);
+        },
+        getQueryString: function(name) {
+            return $.getQueryString(this, name);
+        },
+        getHost: function() {
+            return $.getHost(this);
         }
     }, 'String.prototype');
 
