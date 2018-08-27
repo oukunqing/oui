@@ -212,7 +212,7 @@
             }
             return !isUndefined(name) ? obj[name] : obj;
         },
-        getHost = function(url) {
+        getUrlHost = function(url) {
             var pos = url.indexOf('//'),
                 str = pos > -1 ? url.substr(pos + 2): url,
                 pos1 = str.indexOf('/');
@@ -272,7 +272,7 @@
         toDecimal: toDecimal, toFloat: toDecimal, checkNumber: checkNumber,
         toInteger: toInteger, toInt: toInteger,
         toJsonString: toJsonString, toJson: toJson, toEncode: toEncode,
-        param: param, setQueryString: setQueryString, getQueryString: getQueryString, getHost: getHost, isDebug: isDebug,
+        param: param, setQueryString: setQueryString, getQueryString: getQueryString, getUrlHost: getUrlHost, isDebug: isDebug,
         quickSort: function(arr, key) {
             if (0 === arr.length) { return []; }
             var left = [], right = [], pivot = arr[0], c = arr.length;
@@ -741,7 +741,6 @@
         chineseToUnicode: function(returnArray, noPrefix) { return $.chineseToUnicode(this, returnArray, noPrefix); },
         unicodeToChinese: function(returnArray) { return $.unicodeToChinese(this, returnArray); },
         asciiToUnicode: function(returnArray) { return $.asciiToUnicode(this, returnArray); },
-        asciiToUnicode: function(returnArray) { return $.asciiToUnicode(this, returnArray); },
         unicodeToAscii: function(returnArray) { return $.unicodeToAscii(this, returnArray); },
         toThousand: function(delimiter, len) {
             if ($.isNumber(delimiter)) {
@@ -827,8 +826,8 @@
         getQueryString: function(name) {
             return $.getQueryString(this, name);
         },
-        getHost: function() {
-            return $.getHost(this);
+        getUrlHost: function() {
+            return $.getUrlHost(this);
         }
     }, 'String.prototype');
 
@@ -1927,11 +1926,77 @@
                 }
                 return $QA(selector);
             }
+        },
+        getTextCursorPosition: function(elem) {
+            try{
+                if(!$.isElement(elem)) {
+                    return -1;
+                }
+                if(elem.selectionStart) {
+                    return elem.selectionStart;
+                } else {
+                    var range = $.doc.selection.createRange();
+                    range.moveStart('character', -elem.value.length);
+                    return range.text.length;
+                }
+            } catch(e) {
+                if($.isDebug()) {
+                    console.log('getTextCursorPosition: ', e);
+                }
+            }
+            return -1;
+        },
+        setTextCursorPosition: function(elem, pos) {
+            if(!$.isElement(elem)) {
+                return false;
+            }
+            var val = elem.value, len = val.length;
+            if(!$.isNumber(pos) || pos > len) {
+                pos = len;
+            }
+            window.setTimeout(function() {
+                elem.focus();
+                if(elem.setSelectionRange) {
+                    elem.setSelectionRange(pos, pos);
+                } else {
+                    var range = obj.createTextRange();
+                    range.moveStart('character', -len);
+                    range.moveEnd('character', -len);
+                    range.moveStart('character', index);
+                    range.moveEnd('character', 0);
+                    range.select();
+                }
+            }, 10);
+            return this;
+        },
+        getSelectedText: function(elem) {
+            if(elem.selectionStart || elem.selectionStart === '0') {
+                return elem.value.substring(elem.selectionStart, elem.selectionEnd);
+            } else if(document.selection) {
+                obj.focus();
+                return document.selection.createRange().text;
+            }
+            return '';
+        },
+        setInputFormat: function(elements, options) {
+
+            return this;
+        },
+        getControlValue: function(elements, defaultValue) {
+            if($.isArrayLike(elements) || elements.length > 1) {
+                var arr = [], len = elements.length;
+                for(var i = 0; i < len; i++) {
+                    arr.push(elements[i].value);
+                }
+                return arr;
+            } else {
+                return elements.value || defaultValue;
+            }
         }
     });
 }(OUI);
 
-// jQuery 
+// 仿jQuery 
 !function($) {
     'use strict';
 

@@ -286,7 +286,7 @@ base.js demo
 请打开浏览器调试工具
 <div id="dv"></div>
 <div id="div1">
-    <input type="text" name="txt" value="txt123" />
+    <input id="txt1" type="text" name="txt" value="txt123" />
     <input type="text" name="txt" value="txt321" />
     <input type="text" name="txt" value="txt12345" />
     <input type="text" name="txt" value="123" />
@@ -304,7 +304,8 @@ base.js demo
     <input type="checkbox" name="chb" value="9" class="chb" /> 复选框9
 
     <button id="btn1">button1</button>
-    <button id="btn2">button1</button>
+    <button id="btn2">button2</button>
+    <button id="btn3">button3</button>
 </div>
 <div id="div2">
     <br />
@@ -462,12 +463,22 @@ $('#btn1,#btn2').click(function(e, i, obj){
     console.log(i, obj, e);
 
     console.log(this);
+
+    console.log('getTextCursorPosition: ', $.getTextCursorPosition($I('txt1')));
+});
+
+$('#btn3').click(function(e, i, obj){
+    console.log(i, obj, e);
+
+    console.log(this);
+
+    console.log('setTextCursorPosition: ', $.setTextCursorPosition($I('txt1'), 5));
 });
 
 
 var url = 'http://www.iqiyi.com/v_19rqyp60ks.html?id=1&type=abc';
 
 console.log(url.getQueryString());
-console.log(url.getHost());
+console.log(url.getUrlHost());
 
 </script>

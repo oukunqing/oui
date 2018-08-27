@@ -101,7 +101,7 @@
         },
         createTreeRow = function (that, container, datas, trees, pids, isAppend) {
             var op = that.options, isHead = isTHead(container), len = datas.length, inserted = false;
-            var treeOp = that.tree.options;
+            var treeOp = that.tree.options, attrName = treeOp.attributeName;
 
             isAppend = $.isBoolean(isAppend, false);
             for (var i in datas) {
@@ -115,7 +115,7 @@
 
                     setOpenLevel(that, treeData, treeOp, row, id, isAppend);
 
-                    insertCell(that, row, datas[i], isHead);
+                    insertCell(that, row, datas[i], isHead, attrName);
 
                     if (!isHead || !inserted) {
                         insertCheckboxCell(that, row, isHead, len);
@@ -242,14 +242,14 @@
             }
             return { inputs: arr, rows: list };
         },
-        setTreeAttr = function (row, data) {
-            row.setAttribute('tree', '{"id":' + toJsonValue(data.id) + ',"pid":' + toJsonValue(data.pid) + ',"level":' + data.level + '}');
+        setTreeAttr = function (attrName, row, data) {
+            row.setAttribute(attrName, '{"id":' + toJsonValue(data.id) + ',"pid":' + toJsonValue(data.pid) + ',"level":' + data.level + '}');
         },
-        setTreeRow = function(that, row, data, id){
+        setTreeRow = function(that, attrName, row, data, id){
             //设置tr的id属性
             row.setAttribute('id', buildId(id, 'ROW'));
             //设置 tree 属性
-            setTreeAttr(row, data);
+            setTreeAttr(attrName, row, data);
             //设置tr创建记录，通过id找tr位置时要用到
             setTreeFlag(that.tree, id, false);
         },
@@ -311,7 +311,7 @@
             that.tree[action || 'toggle'](obj.getAttribute('tid'));
             $.cancelBubble();
         },
-        insertCell = function (that, row, data, isHead) {
+        insertCell = function (that, row, data, isHead, attrName) {
             var isArray = $.isArray(data),
                 showTree = that.options.showTree,
                 treeCellIndex = that.options.treeCellIndex || 0,
@@ -335,7 +335,7 @@
                 //如果用了树形结构，排序会引起顺序错乱，所以不允许排序
                 if (isTree && cellIndex === treeCellIndex) {
                     //设置树形行数据、事件
-                    setTreeRow(that, row, treeData, id);
+                    setTreeRow(that, attrName, row, treeData, id);
                     //设置树形列数据、事件
                     setTreeCell(that, cell, treeData, content);
 
@@ -545,12 +545,12 @@
             }
             container.appendChild(frag);
         },
-        toTree = function (that) {
-            var op = that.options, tb = that.table, bodyData = [];
+        toTree = function (that) {  //这里的that指的是 Table，而不是 TableTree
+            var op = that.options, tb = that.table, bodyData = [], attrName = op.treeOptions.attributeName || 'tree';
             var container = getContainer(tb, false), rows = container.rows.length, index = op.treeCellIndex;
 
             for (var i = 0; i < rows; i++) {
-                var tr = container.rows[i], tree = tr.getAttribute('tree'), res = $.tryParseJSON(tree);
+                var tr = container.rows[i], tree = tr.getAttribute(attrName), res = $.tryParseJSON(tree);
                 if (res.status) {
                     bodyData.push({ treeData: res.data, row: tr });
                 } else {
@@ -574,7 +574,7 @@
                     setOpenLevel(that, treeData, treeOp, row, id);
 
                     //设置树形行数据、事件
-                    setTreeRow(that, row, treeData, id);
+                    setTreeRow(that, attrName, row, treeData, id);
 
                     for (var j = 0; j < datas[i].row.cells.length; j++) {
                         var cell = tr.cells[j].cloneNode(true);
@@ -658,6 +658,7 @@
                 },
                 */
                 //className: ['expand', 'collapse', 'selected'],     //可以数组形式，第1个元素为节点展开的样式
+                attributeName: 'tree',                  //表示树形结构数据的属性名称，示例：<tr tree='{id:1,pid:0,level:0}'>
                 openLevel: -2,                          //默认展开级数，-2 表示全部展开
                 showChildCount: false,                  //是否显示子节点数量
                 expandCallback: function (id, that) {   //节点展开时的回调函数
@@ -911,6 +912,7 @@
                 collapse: 'collapse',
                 selected: 'selected'
             },
+            attributeName: 'tree',  //表示树形结构数据的属性名称，示例：<tr tree='{id:1,pid:0,level:0}'>
             openLevel: -2,    //默认展开级数，-2表示全部展开
             showChildCount: false,      //是否显示子节点数量
             /*

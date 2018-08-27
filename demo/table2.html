@@ -58,7 +58,7 @@
 	树形表格示例<br />
 	你现在看到的是原始的表格内容显示，请点击下面的“调用树形表格”按钮就可以看到效果了。
 	<br />
-	<span style="color:#f00;">在本示例中，树形结构数据所用的属性名称是 <strong style="font-family: Arial;">tree</strong></span>
+	<span style="color:#f00;">在本示例中，树形结构数据所用的属性名称是 <strong style="font-family: Arial;">tree-data</strong></span>
 	<br />
 	<input type="button" onclick="test();" value="调用树形表格" style="margin-right:20px;" />
 	<input type="button" onclick="expandAll();" value="全部展开" />
@@ -79,7 +79,7 @@
 		<th>编号</th>
 		<th>说明</th>
 	</tr>
-	<tr tree='{id:2,pid:"ab",level:0}' onclick="alert(this.id);alert(this.data);alert(this.data.id);">
+	<tr tree-data='{id:2,pid:"ab",level:0}' onclick="alert(this.id);alert(this.data);alert(this.data.id);">
 		<td>C#.NET开发</td>
 		<td style="color:#f00;">2</td>
 		<td class="red">1</td>
@@ -87,7 +87,7 @@
 		<td>c#</td>
 		<td></td>
 	</tr>
-	<tr tree="{id:'ab',pid:0,level:0}" ondblclick="alert('dblclick');">
+	<tr tree-data="{id:'ab',pid:0,level:0}" ondblclick="alert('dblclick');">
 		<td>软件开发</td>
 		<td>1</td>
 		<td>0</td>
@@ -95,7 +95,7 @@
 		<td></td>
 		<td>本表格中的内容仅仅是示例，不代表任何言论观点，请勿对号入座</td>
 	</tr>
-	<tr tree="{id:'ac',pid:'ab',level:1}">
+	<tr tree-data="{id:'ac',pid:'ab',level:1}">
 		<td>ASP.NET开发</td>
 		<td>3</td>
 		<td>1</td>
@@ -103,7 +103,7 @@
 		<td>asp.net</td>
 		<td></td>
 	</tr>
-	<tr tree="{id:4,pid:'ac',level:2}">
+	<tr tree-data="{id:4,pid:'ac',level:2}">
 		<td>ASP.NET控件开发</td>
 		<td>4</td>
 		<td>3</td>
@@ -111,7 +111,7 @@
 		<td>asp.net control</td>
 		<td>ASP.NET控件开发的说明</td>
 	</tr>
-	<tr tree="{id:5,pid:'ab',level:1}">
+	<tr tree-data="{id:5,pid:'ab',level:1}">
 		<td>JAVASCRIPT开发</td>
 		<td>5</td>
 		<td>1</td>
@@ -119,7 +119,7 @@
 		<td>javascript</td>
 		<td></td>
 	</tr>
-	<tr tree="{id:6,pid:0,level:0}">
+	<tr tree-data="{id:6,pid:0,level:0}">
 		<td>音乐</td>
 		<td>6</td>
 		<td>0</td>
@@ -127,7 +127,7 @@
 		<td>music</td>
 		<td>音乐使人快乐</td>
 	</tr>
-	<tr tree="{id:24,pid:7,level:3}">
+	<tr tree-data="{id:24,pid:7,level:3}">
 		<td>原生JAVASCRIPT插件开发</td>
 		<td>24</td>
 		<td>7</td>
@@ -135,7 +135,7 @@
 		<td>javascript</td>
 		<td></td>
 	</tr>
-	<tr tree="{id:7,pid:5,level:2}">
+	<tr tree-data="{id:7,pid:5,level:2}">
 		<td>JAVASCRIPT插件开发</td>
 		<td>7</td>
 		<td>5</td>
@@ -143,7 +143,7 @@
 		<td>javascript</td>
 		<td></td>
 	</tr>
-	<tr tree="{id:25,pid:7,level:3}">
+	<tr tree-data="{id:25,pid:7,level:3}">
 		<td>JQUERY插件开发</td>
 		<td>25</td>
 		<td>7</td>
@@ -151,7 +151,7 @@
 		<td>jquery</td>
 		<td></td>
 	</tr>
-	<tr tree="{id:20,pid:0,level:0}">
+	<tr tree-data="{id:20,pid:0,level:0}">
 		<td>运动</td>
 		<td>20</td>
 		<td>0</td>
@@ -159,7 +159,7 @@
 		<td>sport</td>
 		<td>生命在于运动</td>
 	</tr>
-	<tr tree="{id:8,pid:6,level:1}">
+	<tr tree-data="{id:8,pid:6,level:1}">
 		<td>轻音乐</td>
 		<td>8</td>
 		<td>6</td>
@@ -167,7 +167,7 @@
 		<td></td>
 		<td></td>
 	</tr>
-	<tr tree="{id:21,pid:20,level:1}">
+	<tr tree-data="{id:21,pid:20,level:1}">
 		<td>乒乓球</td>
 		<td>21</td>
 		<td>20</td>
@@ -175,7 +175,7 @@
 		<td></td>
 		<td></td>
 	</tr>
-	<tr tree="{id:13,pid:9,level:2}">
+	<tr tree-data="{id:13,pid:9,level:2}">
 		<td>竹笛</td>
 		<td>13</td>
 		<td>9</td>
@@ -183,7 +183,7 @@
 		<td></td>
 		<td></td>
 	</tr>
-	<tr tree="{id:9,pid:6,level:1}">
+	<tr tree-data="{id:9,pid:6,level:1}">
 		<td>民乐</td>
 		<td>9</td>
 		<td>6</td>
@@ -191,7 +191,7 @@
 		<td></td>
 		<td></td>
 	</tr>
-	<tr tree="{id:14,pid:9,level:2}">
+	<tr tree-data="{id:14,pid:9,level:2}">
 		<td>二胡</td>
 		<td>14</td>
 		<td>9</td>
@@ -199,7 +199,7 @@
 		<td></td>
 		<td></td>
 	</tr>
-	<tr tree="{id:22,pid:20,level:1}">
+	<tr tree-data="{id:22,pid:20,level:1}">
 		<td>羽毛球</td>
 		<td>22</td>
 		<td>20</td>
@@ -207,7 +207,7 @@
 		<td></td>
 		<td></td>
 	</tr>
-	<tr tree="{id:23,pid:20,level:1}">
+	<tr tree-data="{id:23,pid:20,level:1}">
 		<td>足球</td>
 		<td>23</td>
 		<td>20</td>
@@ -215,7 +215,7 @@
 		<td></td>
 		<td>曾经很喜欢踢足球，后来就再没有踢过了</td>
 	</tr>
-	<tr tree="{id:10,pid:8,level:2}">
+	<tr tree-data="{id:10,pid:8,level:2}">
 		<td>钢琴曲</td>
 		<td>10</td>
 		<td>8</td>
@@ -223,7 +223,7 @@
 		<td></td>
 		<td></td>
 	</tr>
-	<tr tree="{id:11,pid:10,level:3}">
+	<tr tree-data="{id:11,pid:10,level:3}">
 		<td>钢琴独奏</td>
 		<td>11</td>
 		<td>10</td>
@@ -231,7 +231,7 @@
 		<td></td>
 		<td></td>
 	</tr>
-	<tr tree="{id:12,pid:10,level:3}">
+	<tr tree-data="{id:12,pid:10,level:3}">
 		<td>钢琴合奏</td>
 		<td>12</td>
 		<td>10</td>
@@ -268,7 +268,7 @@ function test(){
 	var treeOptions = {
         openLevel: 0,
         showChildCount: true,
-        attributeName: 'tree',
+        attributeName: 'tree-data',
 		expandCallback: function(id, obj){
 			console.log('expandCallback: ', id, obj);
 		},
