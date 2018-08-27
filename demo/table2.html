@@ -64,9 +64,11 @@
 	<input type="button" onclick="expandAll();" value="全部展开" />
 	<input type="button" onclick="collapseAll();" value="全部收缩" />
 	层级：<input type="text" id="txtLevel" style="width:40px;" />
-	<input type="button" onclick="expandLevel();" value="按层级展开" />
+	<input type="button" onclick="expandLevel(false);" value="按层级展开" />
+	<input type="button" onclick="expandLevel(true);" value="按层级收缩" />
 	ID:<input type="text" id="txtId" style="width:40px;" />
-	<input type="button" onclick="expand();" value="按ID展开" />
+	<input type="button" onclick="expand(false);" value="按ID展开" />
+	<input type="button" onclick="expand(true);" value="按ID收缩" />
 </div>
 <table id="tb1">
 <tbody>
@@ -82,14 +84,14 @@
 	<tr tree-data='{id:2,pid:"ab",level:0}' onclick="alert(this.id);alert(this.data);alert(this.data.id);">
 		<td>C#.NET开发</td>
 		<td style="color:#f00;">2</td>
-		<td class="red">1</td>
+		<td class="red">ab</td>
 		<td>0</td>
 		<td>c#</td>
 		<td></td>
 	</tr>
 	<tr tree-data="{id:'ab',pid:0,level:0}" ondblclick="alert('dblclick');">
 		<td>软件开发</td>
-		<td>1</td>
+		<td>ab</td>
 		<td>0</td>
 		<td>0</td>
 		<td></td>
@@ -97,8 +99,8 @@
 	</tr>
 	<tr tree-data="{id:'ac',pid:'ab',level:1}">
 		<td>ASP.NET开发</td>
-		<td>3</td>
-		<td>1</td>
+		<td>ac</td>
+		<td>ab</td>
 		<td>1</td>
 		<td>asp.net</td>
 		<td></td>
@@ -106,7 +108,7 @@
 	<tr tree-data="{id:4,pid:'ac',level:2}">
 		<td>ASP.NET控件开发</td>
 		<td>4</td>
-		<td>3</td>
+		<td>ac</td>
 		<td>2</td>
 		<td>asp.net control</td>
 		<td>ASP.NET控件开发的说明</td>
@@ -114,7 +116,7 @@
 	<tr tree-data="{id:5,pid:'ab',level:1}">
 		<td>JAVASCRIPT开发</td>
 		<td>5</td>
-		<td>1</td>
+		<td>ab</td>
 		<td>1</td>
 		<td>javascript</td>
 		<td></td>
@@ -270,6 +272,7 @@ function test(){
         showChildCount: true,
         attributeName: 'tree-data',
 		expandCallback: function(id, obj){
+			
 			console.log('expandCallback: ', id, obj);
 		},
 		expandCallbackLimit: 1		//只回调1次
@@ -296,15 +299,15 @@ function collapseAll(){
 	tb.tree.toggleAll(true);
 }
 
-function expandLevel(){
+function expandLevel(collapse){
     var level = parseInt(document.getElementById('txtLevel').value, 10);
     if(!isNaN(level)){
-        tb.tree.toggleLevel(level, false);
+        tb.tree.toggleLevel(level, collapse);
     }
 }
 
-function expand(){
+function expand(collapse){
     var id = document.getElementById('txtId').value;
-    tb.tree.toggle(id, false);
+    tb.tree.toggle(id, collapse);
 }
 </script>

@@ -62,27 +62,44 @@
     <script type="text/javascript" src="../oui/table/oui.table.js?1"></script>
 </head>
 <body>
-层级：<input type="text" id="txtLevel" style="width:50px;" />
-<button onclick="toggleLevel(false);">按层级展开</button>
-<button onclick="toggleLevel(true);">按层级收缩</button>
-ID:<input type="text" id="txtId" style="width:50px;" />
-<button onclick="toggle(false);">按ID展开</button>
-<button onclick="toggle(true);">按ID收缩</button>
-<button onclick="remove();">按ID删除</button>
+<table>
+    <tr>
+        <td colspan="3">
+        <button onclick="toggleAll(false);">全部展开</button>
+        <button onclick="toggleAll(true);">全部收缩</button>
+        <button onclick="getCheckedRow();">获取选中的行</button>
+        </td>
+    </tr>
+    <tr>
+        <td>层级：</td>
+        <td>
+            <input type="text" id="txtLevel" style="width:50px;" />
+        </td>
+        <td>
+            <button onclick="toggleLevel(false);">按层级展开</button>
+            <button onclick="toggleLevel(true);">按层级收缩</button>
+        </td>
+    </tr>
+    <tr>
+        <td>ID：</td>
+        <td>
+            <input type="text" id="txtId" style="width:50px;" />
+        </td>
+        <td>
+            <button onclick="toggle(false);">按ID展开</button>
+            <button onclick="toggle(true);">按ID收缩</button>
+            <button onclick="remove();">按ID删除</button>
 
-<button onclick="toggleAll(false);">全部展开</button>
-<button onclick="toggleAll(true);">全部收缩</button>
-
-<button onclick="select();">按ID选中行</button>
-<button onclick="getCheckedRow();">获取选中的行</button>
-<button onclick="getChildCount(false);">获取子节点数量</button>
-<button onclick="getChildCount(true);">获取子节点数量（递归）</button>
-<button onclick="getChildIds(false);">获取子节点ID</button>
-<button onclick="getChildIds(true);">获取子节点ID（递归）</button>
-<!--<button onclick="move('up');">向上移动节点</button>
-<button onclick="move('down');">向下移动节点</button>-->
-<br /><br />
-
+            <button onclick="select();">按ID选中行</button>
+            <button onclick="getChildCount(false);">获取子节点数量</button>
+            <button onclick="getChildCount(true);">获取子节点数量（递归）</button>
+            <button onclick="getChildIds(false);">获取子节点ID</button>
+            <button onclick="getChildIds(true);">获取子节点ID（递归）</button>
+            <!--<button onclick="move('up');">向上移动节点</button>
+            <button onclick="move('down');">向下移动节点</button>-->
+        </td>
+    </tr>
+</table>
 <table id="tblist" class="tblist"></table>
 <br />
 <table id="tblist1" class="tblist"></table>
