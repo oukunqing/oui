@@ -269,6 +269,20 @@
             else if (isObject(o)) { for (var name in o) { return false; } return true; }
             return false;
         },
+        padLeft: function(s, totalWidth, paddingChar) {
+            var char = paddingChar || '0', c = totalWidth - s.length;
+            for (var i = 0; i < c; i++) {
+                s = char + s;
+            }
+            return s;
+        },
+        padRight: function(s, totalWidth, paddingChar) {
+            var char = paddingChar || '0', c = totalWidth - s.length;
+            for (var i = 0; i < c; i++) {
+                s += char;
+            }
+            return s;
+        },
         toDecimal: toDecimal, toFloat: toDecimal, checkNumber: checkNumber,
         toInteger: toInteger, toInt: toInteger,
         toJsonString: toJsonString, toJson: toJson, toEncode: toEncode,
@@ -637,22 +651,10 @@
         trimEnd: function() { return this.replace(/([\s]*$)/g, ''); },
         trimLeft: function() { return this.trimStart(); },
         trimRight: function() { return this.trimEnd(); },
-        padStart: function(totalWidth, paddingChar) {
-            var s = this, char = paddingChar || '0', c = totalWidth - s.length;
-            for (var i = 0; i < c; i++) {
-                s = char + s;
-            }
-            return s;
-        },
-        padEnd: function(totalWidth, paddingChar) {
-            var s = this, char = paddingChar || '0', c = totalWidth - s.length;
-            for (var i = 0; i < c; i++) {
-                s += char;
-            }
-            return s;
-        },
-        padLeft: function(totalWidth, paddingChar) { return this.padStart(totalWidth, paddingChar); },
-        padRight: function(totalWidth, paddingChar) { return this.padEnd(totalWidth, paddingChar); },
+        padStart: function(totalWidth, paddingChar) { return $.padLeft(this, totalWidth, paddingChar || ' '); },
+        padEnd: function(totalWidth, paddingChar) { return $.padRight(this, totalWidth, paddingChar || ' '); },
+        padLeft: function(totalWidth, paddingChar) { return $.padLeft(this, totalWidth, paddingChar || '0'); },
+        padRight: function(totalWidth, paddingChar) { return $.padRight(this, totalWidth, paddingChar || '0'); },
         startsWith: function(s) { return this.slice(0, s.length) === s; },
         endsWith: function(s) { return this.slice(-s.length) === s; },
         startWith: function(s) { return this.startsWith(s); },
@@ -1267,13 +1269,14 @@
         return $.isString(value) || $.isNumber(value);
     };
 
-    var doc = function() { try { return document } catch (e) { return null } }(),
+    var win = function() { try { return window } catch (e) { return null } }(),
+        doc = function() { try { return document } catch (e) { return null } }(),
         head = doc ? doc.getElementsByTagName('head')[0] : null,
         redirect = function(url) {
             $.isString(url, true) ? location.href = url : null;
         },
         isElement = function(elem, tagName) {
-            var b = elem === doc || ($.isObject(elem) && $.isNumber(elem.nodeType) && $.isString(elem.tagName));
+            var b = elem === doc || elem === win || ($.isObject(elem) && $.isNumber(elem.nodeType) && $.isString(elem.tagName));
             return b && $.isString(tagName) ? elem.tagName === tagName : b;
         },
         getLocationPath = function() {
@@ -1349,6 +1352,13 @@
             }
             var style = elem.currentStyle || document.defaultView.getComputedStyle(elem, null);
             return $.isString(styleName) ? style[styleName] : style;
+        },
+        getBodySize = function () {
+            if (typeof document.compatMode !== 'undefined' && document.compatMode === 'CSS1Compat') {
+                return { width: document.documentElement.clientWidth, height: document.documentElement.clientHeight };
+            } else if (typeof document.body !== 'undefined') {
+                return { width: document.body.clientWidth, height: document.body.clientHeight };
+            }
         },
         isWindow = function(obj) {
             return obj != null && obj === obj.window;
@@ -1672,6 +1682,7 @@
         createJsScript: createJsScript,
         createCssStyle: createCssStyle,
         getElementStyle: getElementStyle,
+        getBodySize: getBodySize,
         isWindow: isWindow,
         isArrayLike: isArrayLike,
         merge: merge,
