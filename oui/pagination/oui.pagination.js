@@ -32,8 +32,8 @@
             showDataStat: false,        //是否显示数据统计
             showSizeSelect: true,       //是否显示PageSize下拉框
             pageSizeItems: [],          //PageSize下拉框默认选项
-            callback: function (pageIndex, param) {      //回调函数模式
-                console.log('pageIndex: ', pageIndex, ', param: ', param);
+            callback: function (pageIndex, pageSize, that, param) {      //回调函数模式
+                console.log('pageIndex: ', pageIndex, 'pageSize: ', pageSize, ', param: ', param);
             },
             callbackParam: null,                    //回调参数
             url: '',                                //URL模式，必须包含关键字 {0} 或 {pageIndex}，若url可用，则url优先于callback
@@ -396,7 +396,7 @@
             if ($.isString(op.url, true)) {
                 location.href = op.url.format(op.url.indexOf('{0}') >= 0 ? val : op);
             } else if ($.isFunction(op.callback)) {
-                op.callback(val, op.callbackParam);
+                op.callback(val, op.pageSize, that, op.callbackParam);
             }
         },
         realCallback = function (that, val) {

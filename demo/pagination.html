@@ -39,10 +39,10 @@
         markType: 'chinese',
         //url: '?pageIndex={0}&type=2&pid=32',
         //sizeOptions: [10, 20, 30],
-        callback: function(pageIndex, param){
-            console.log('p1-callback: ', pageIndex, ', param: ', param);
+        callback: function(pageIndex, pageSize, that, param){
+            console.log('p1-callback: ', ' pageIndex: ', pageIndex, ' pageSize: ', pageSize, ', param: ', param);
 
-            p1.paging(pageIndex);
+            that.paging(pageIndex);
         },
         useKeyEvent: true,
         inputWidth: 55,
