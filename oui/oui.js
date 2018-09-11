@@ -163,6 +163,61 @@
             var v = parseInt(s, 10);
             return !isNaN(v) ? v : Number(defaultValue) || 0;
         },
+        toNumber = function(s, defaultValue, isFloat, decimalLen) {
+            //这里判断是否是数字的正则规则是 判断从数字开始到非数字结束，根据 parseFloat 的规则
+            var v = 0, dv = defaultValue, pattern = /^[-+]?(\d+)(.[\d]{0,})/;
+            if ($.isNumeric(dv)) {
+                if ($.isInteger(isFloat)) {
+                    decimalLen = isFloat, isFloat = true;
+                } else {
+                    if ($.isUndefined(isFloat)) {
+                        isFloat = pattern.test(dv) || pattern.test(s);
+                    }
+                    decimalLen = $.isInteger(decimalLen) ? decimalLen : (dv.toString().split('.')[1] || '').length;
+                }
+            } else if ($.isBoolean(dv)) {
+                decimalLen = $.isInteger(isFloat) ? isFloat : decimalLen, isFloat = dv, dv = 0;
+            } else {
+                isFloat = $.isBoolean(isFloat, pattern.test(dv) || pattern.test(s));
+            }
+
+            if (isFloat) {
+                ////当decimalLen>0时，才进行四舍五入处理
+                //v = parseFloat(s, 10), v = !isNaN(v) && $.isInteger(decimalLen) && decimalLen > 0 ? v.round(decimalLen) : v;
+                //只要decimalLen为整数，就进行四舍五入处理
+                v = parseFloat(s, 10), v = !isNaN(v) && $.isInteger(decimalLen) ? v.round(Math.abs(decimalLen)) : v;
+            } else {
+                v = parseInt(s, 10);
+            }
+            return !isNaN(v) ? v : Number(dv) || 0;
+        },
+        toNumberList = function (numbers, separator, decimalLen) {
+            if(isNumber(separator)) {
+                decimalLen = separator;
+                separator = ',';
+            }
+            if(isUndefined(decimalLen)) {
+                decimalLen = -1;
+            }
+            if (isString(numbers)) {
+                numbers = numbers.split(separator || ',');
+            }
+            if (!isArray(numbers)) {
+                return [];
+            }
+
+            var list = [];
+            for (var i = 0; i < numbers.length; i++) {
+                var num = parseFloat(numbers[i], 10);
+                if (!isNaN(num)) {
+                    if(decimalLen >= 0) {
+                        num = num.round(decimalLen);
+                    }
+                    list.push(num);
+                }
+            }
+            return list;
+        },
         toJsonString = function(o) { return JSON.stringify(o); },
         toJson = function(s) { return JSON.parse(s); },
         toEncode = function(s) { return encodeURIComponent(s); },
@@ -284,7 +339,8 @@
             return s;
         },
         toDecimal: toDecimal, toFloat: toDecimal, checkNumber: checkNumber,
-        toInteger: toInteger, toInt: toInteger,
+        toInteger: toInteger, toInt: toInteger, 
+        toNumber: toNumber, toNumberList: toNumberList,
         toJsonString: toJsonString, toJson: toJson, toEncode: toEncode,
         param: param, setQueryString: setQueryString, getQueryString: getQueryString, getUrlHost: getUrlHost, isDebug: isDebug,
         quickSort: function(arr, key) {
@@ -707,6 +763,7 @@
         isHexNumeric: function() { return $.isHexNumeric(this); },
         isMobile: function() { return $.isMobile(this); },
         isEmail: function() { return $.isEmail(this); },
+        /*
         toNumber: function(defaultValue, isFloat, decimalLen) {
             //这里判断是否是数字的正则规则是 判断从数字开始到非数字结束，根据 parseFloat 的规则
             var s = this, v = 0, dv = defaultValue, pattern = /^[-+]?(\d+)(.[\d]{0,})/;
@@ -735,8 +792,13 @@
             }
             return !isNaN(v) ? v : Number(dv) || 0;
         },
+        */
+        toNumber: function(defaultValue, isFloat, decimalLen) { return $.toNumber(this, defaultValue, isFloat, decimalLen); },
+        toNumberList: function (separator, decimalLen) { return $.toNumberList(this, separator, decimalLen); },
         toInt: function(defaultValue) { return $.toInteger(this, defaultValue); },
+        toInteger: function(defaultValue) { return $.toInteger(this, defaultValue); },
         toFloat: function(defaultValue, decimalLen) { return $.toDecimal(this, defaultValue, decimalLen); },
+        toDecimal: function(defaultValue, decimalLen) { return $.toDecimal(this, defaultValue, decimalLen); },
         toChineseNumber: function(isMoney) { return $.numberToChinese(this, isMoney); },
         chineseToNumber: function() { return $.chineseToNumber(this); },
         convertChineseToNumber: function() { return $.chineseToNumber(this); },
