@@ -481,4 +481,28 @@ var url = 'http://www.iqiyi.com/v_19rqyp60ks.html?id=1&type=abc';
 console.log(url.getQueryString());
 console.log(url.getUrlHost());
 
+
+var numbers = '1,2,3,5,7,9,12,23.555';
+
+console.log(numbers.toNumberList());
+
+var number = '1234.567a';
+
+console.log(number.toNumber());
+console.log(number.toDecimal(0, 2));
+console.log(number.toFloat(0, 1));
+console.log(number.toInt());
+
+
+var arr = [2,3,4,5,6,6,6,7,8,12,6,16,20,21,22,25];
+
+var arr = [2,3,4,5,5,5,7,8,9,25];
+
+console.log($.collapseNumberList(arr, false, ',','-'));
+
+
+console.log($.expandNumberList('1-16,8,16-20,20,20,25-28', true));
+
+console.log($.toNumber('123.456', 0, 2));
+
 </script>

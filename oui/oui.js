@@ -218,6 +218,103 @@
             }
             return list;
         },
+        distinctList = function (arr) {
+            var list = [], dic = {};
+            for(var i = 0, c = arr.length; i < c; i++) {
+                var val = arr[i], key = 'K' + val;
+
+                if(typeof dic[key] === 'undefined') {
+                    dic[key] = val;
+                    list.push(val);
+                }
+            }
+            return dic = null, list;
+        },
+        collapseNumberList = function(numbers, distinct, separator, connector) {
+            if(isString(distinct)) {
+                connector = separator;
+                separator = distinct;
+                distinct = false;
+            }
+            if(!isBoolean(distinct)) {
+                distinct = false;
+            }
+
+            numbers.sort(function(a, b){
+                return a - b;
+            });
+
+            var con = '', start = 0, last = 0;
+
+            for(var i = 0, c = numbers.length; i < c; i++) {
+                var num = numbers[i];
+
+                if(0 === i) {
+                    con += num;
+                    start = num;
+                } else {
+                    if(num - last > 1 || (!distinct && num === last)) {
+                        if(last !== start) {
+                            con += (connector || '-') + last;
+                        }
+                        con += (separator || ',') + num;
+                        start = num;
+                    } else if(i === c - 1) {
+                        if(num !== start) {
+                            con += (connector || '-') + num;
+                        }
+                    }
+                }
+                last = num;
+            }
+
+            return con;
+        },
+        expandNumberList = function(collapsedNumbers, distinct, separator, connector) {
+            if(!isString(collapsedNumbers)) {
+                return [];
+            }
+
+            if(isString(distinct)) {
+                connector = separator;
+                separator = distinct;
+                distinct = false;
+            }
+            if(!isBoolean(distinct)) {
+                distinct = false;
+            }
+
+            var list = [], arr = collapsedNumbers.split(separator || ',');
+
+            for(var i in arr) {
+                var tmp = arr[i].split(connector || '-');
+                var num = 0;
+
+                if(tmp.length >= 2) {
+                    var start = parseInt(tmp[0], 10), end = parseInt(tmp[1], 10);
+                    if(!isNaN(start) && !isNaN(end)) {
+                        for(var j = start; j <= end; j++) {
+                            list.push(j);
+                        }
+                    }
+                } else {
+                    num = parseFloat(tmp[0], 10);
+                    if(!isNaN(num)) {
+                        list.push(num);
+                    }
+                }
+            }
+
+            if(distinct) {
+                list = distinctList(list);
+            }
+
+            list.sort(function(a, b){
+                return a - b;
+            });
+
+            return list;
+        },
         toJsonString = function(o) { return JSON.stringify(o); },
         toJson = function(s) { return JSON.parse(s); },
         toEncode = function(s) { return encodeURIComponent(s); },
@@ -340,7 +437,8 @@
         },
         toDecimal: toDecimal, toFloat: toDecimal, checkNumber: checkNumber,
         toInteger: toInteger, toInt: toInteger, 
-        toNumber: toNumber, toNumberList: toNumberList,
+        toNumber: toNumber, toNumberList: toNumberList, distinctList: distinctList,
+        collapseNumberList: collapseNumberList, expandNumberList: expandNumberList,
         toJsonString: toJsonString, toJson: toJson, toEncode: toEncode,
         param: param, setQueryString: setQueryString, getQueryString: getQueryString, getUrlHost: getUrlHost, isDebug: isDebug,
         quickSort: function(arr, key) {
@@ -355,7 +453,7 @@
             try { console.trace(); console.log(err); } catch (e) { }
             throw new Error(err);
         }
-    });
+    }, '$');
 }(OUI);
 
 // CRC
@@ -430,7 +528,7 @@
         window.CRC = CRC;
     }
 
-    $.extend($, { CRC: CRC, crc: new CRC() });
+    $.extendNative($, { CRC: CRC, crc: new CRC() }, '$');
 }(OUI);
 
 // Dictionary
@@ -484,14 +582,14 @@
         window.Dictionary = Dictionary;
     }
 
-    $.extend($, { Dictionary: Dictionary, dict: new Dictionary() });
+    $.extendNative($, { Dictionary: Dictionary, dict: new Dictionary() }, '$');
 }(OUI);
 
 // 字符编码转换
 !function($) {
     'use strict';
 
-    $.extend($, {
+    $.extendNative($, {
         numberToChinese: function(num, isMoney) {
             if (isNaN(parseFloat(num, 10))) {
                 return num;
@@ -676,7 +774,7 @@
             }
             return returnArray ? chars : chars.join('');
         }
-    });
+    }, '$');
 }(OUI);
 
 // Javascript 原生对象方法扩展
@@ -799,6 +897,7 @@
         toInteger: function(defaultValue) { return $.toInteger(this, defaultValue); },
         toFloat: function(defaultValue, decimalLen) { return $.toDecimal(this, defaultValue, decimalLen); },
         toDecimal: function(defaultValue, decimalLen) { return $.toDecimal(this, defaultValue, decimalLen); },
+        expandNumberList: function() { return $.expandNumberList(this); },
         toChineseNumber: function(isMoney) { return $.numberToChinese(this, isMoney); },
         chineseToNumber: function() { return $.chineseToNumber(this); },
         convertChineseToNumber: function() { return $.chineseToNumber(this); },
@@ -1769,7 +1868,7 @@
         removeEventListener: removeEventListener,
         bindEventListener: bindEventListener,
         setFocus: setFocus
-    });
+    }, '$');
 
 }(OUI);
 
@@ -1856,7 +1955,7 @@
             }
         });
 
-        $.extend(window, {
+        $.extendNative(window, {
             $I: function(id, parent) {
                 if (id.indexOf('#') === 0) {
                     id = id.substr(1);
@@ -1913,7 +2012,7 @@
                 }
                 return $.matchCondition(arr, options);
             }
-        });
+        }, 'window');
 
         var wst = window.setTimeout, wsi = window.setInterval;
         window.setTimeout = function(func, delay) {
@@ -2066,7 +2165,7 @@
                 return elements.value || defaultValue;
             }
         }
-    });
+    }, '$');
 }(OUI);
 
 // 仿jQuery 
@@ -2291,9 +2390,9 @@
             }
             return first.length = i, first;
         }
-    });
+    }, '$');
 
-    $.fn.extendNative({
+    $.extendNative($.fn, {
         each: function(func) {
             for (var i = 0; i < this.length; i++) {
                 func(i, this[i]);
@@ -2347,9 +2446,9 @@
                 $.removeClass(obj, value);
             });
         }
-    });
+    }, '$.fn');
 
-    $.fn.extendNative({
+    $.extendNative($.fn, {
         event: function(action, func) {
             return this.each(function(i, obj) {
                 $.addEventListener(obj, action, function(e) {
@@ -2368,9 +2467,9 @@
         mousedown: function(func) { return this.event('mousedown', func); },
         mouseup: function(func) { return this.event('mouseup', func); },
         mousemove: function(func) { return this.event('mousemove', func); }
-    });
+    }, '$.fn');
 
-    $.fn.extendNative({
+    $.extendNative($.fn, {
         load: function(url, data, callback, dataType) {
             var self = this;
             if (self.length > 0) {
@@ -2388,5 +2487,5 @@
             }
             return self;
         }
-    });
+    }, '$.fn');
 }(OUI);

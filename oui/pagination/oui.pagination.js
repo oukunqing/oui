@@ -566,5 +566,5 @@
             return that;
         };
 
-    $.Pagination = Pagination;
+    $.extendNative($, { Pagination: Pagination }, '$');
 }(OUI);
