@@ -130,8 +130,9 @@
     'use strict';
 
     var version = '1.0.0',
+        trim = function(s) { return s.replace(/(^[\s]*)|([\s]*$)/g, ''); },
         isUndefined = function(o) { return typeof o === 'undefined'; },
-        isString = function(s, nonempty) { return typeof s === 'string' && (nonempty ? s.trim() !== '' : true); },
+        isString = function(s, nonempty) { return typeof s === 'string' && (nonempty ? trim(s) !== '' : true); },
         isNumber = function(n) { return typeof n === 'number'; },
         checkNumber = function(n, min, max) {
             var isNum = isNumber(n), isMin = isNumber(min), isMax = isNumber(max);
@@ -143,7 +144,6 @@
             var bool = typeof b === 'boolean';
             return typeof dv === 'boolean' ? (bool ? b : dv) : bool;
         },
-        trim = function(s) { return s.replace(/(^[\s]*)|([\s]*$)/g, ''); },
         isFunction = function(f) { return typeof f === 'function' && typeof f.nodeType !== 'number'; },
         isNumeric = function(o) { return /^[-+]?(\d+)([.][\d]{0,})?$/.test(o); },
         isDecimal = function(o) { return /^[-+]?(\d+)([.][\d]{0,})$/.test(o); },
@@ -191,12 +191,12 @@
             }
             return !isNaN(v) ? v : Number(dv) || 0;
         },
-        toNumberList = function (numbers, separator, decimalLen) {
-            if(isNumber(separator)) {
+        toNumberList = function(numbers, separator, decimalLen) {
+            if (isNumber(separator)) {
                 decimalLen = separator;
                 separator = ',';
             }
-            if(isUndefined(decimalLen)) {
+            if (isUndefined(decimalLen)) {
                 decimalLen = -1;
             }
             if (isString(numbers)) {
@@ -210,7 +210,7 @@
             for (var i = 0; i < numbers.length; i++) {
                 var num = parseFloat(numbers[i], 10);
                 if (!isNaN(num)) {
-                    if(decimalLen >= 0) {
+                    if (decimalLen >= 0) {
                         num = num.round(decimalLen);
                     }
                     list.push(num);
@@ -218,12 +218,12 @@
             }
             return list;
         },
-        distinctList = function (arr) {
+        distinctList = function(arr) {
             var list = [], dic = {};
-            for(var i = 0, c = arr.length; i < c; i++) {
+            for (var i = 0, c = arr.length; i < c; i++) {
                 var val = arr[i], key = 'K' + val;
 
-                if(typeof dic[key] === 'undefined') {
+                if (typeof dic[key] === 'undefined') {
                     dic[key] = val;
                     list.push(val);
                 }
@@ -231,36 +231,36 @@
             return dic = null, list;
         },
         collapseNumberList = function(numbers, distinct, separator, connector) {
-            if(isString(distinct)) {
+            if (isString(distinct)) {
                 connector = separator;
                 separator = distinct;
                 distinct = false;
             }
-            if(!isBoolean(distinct)) {
+            if (!isBoolean(distinct)) {
                 distinct = false;
             }
 
-            numbers.sort(function(a, b){
+            numbers.sort(function(a, b) {
                 return a - b;
             });
 
             var con = '', start = 0, last = 0;
 
-            for(var i = 0, c = numbers.length; i < c; i++) {
+            for (var i = 0, c = numbers.length; i < c; i++) {
                 var num = numbers[i];
 
-                if(0 === i) {
+                if (0 === i) {
                     con += num;
                     start = num;
                 } else {
-                    if(num - last > 1 || (!distinct && num === last)) {
-                        if(last !== start) {
+                    if (num - last > 1 || (!distinct && num === last)) {
+                        if (last !== start) {
                             con += (connector || '-') + last;
                         }
                         con += (separator || ',') + num;
                         start = num;
-                    } else if(i === c - 1) {
-                        if(num !== start) {
+                    } else if (i === c - 1) {
+                        if (num !== start) {
                             con += (connector || '-') + num;
                         }
                     }
@@ -271,45 +271,45 @@
             return con;
         },
         expandNumberList = function(collapsedNumbers, distinct, separator, connector) {
-            if(!isString(collapsedNumbers)) {
+            if (!isString(collapsedNumbers)) {
                 return [];
             }
 
-            if(isString(distinct)) {
+            if (isString(distinct)) {
                 connector = separator;
                 separator = distinct;
                 distinct = false;
             }
-            if(!isBoolean(distinct)) {
+            if (!isBoolean(distinct)) {
                 distinct = false;
             }
 
             var list = [], arr = collapsedNumbers.split(separator || ',');
 
-            for(var i in arr) {
+            for (var i in arr) {
                 var tmp = arr[i].split(connector || '-');
                 var num = 0;
 
-                if(tmp.length >= 2) {
+                if (tmp.length >= 2) {
                     var start = parseInt(tmp[0], 10), end = parseInt(tmp[1], 10);
-                    if(!isNaN(start) && !isNaN(end)) {
-                        for(var j = start; j <= end; j++) {
+                    if (!isNaN(start) && !isNaN(end)) {
+                        for (var j = start; j <= end; j++) {
                             list.push(j);
                         }
                     }
                 } else {
                     num = parseFloat(tmp[0], 10);
-                    if(!isNaN(num)) {
+                    if (!isNaN(num)) {
                         list.push(num);
                     }
                 }
             }
 
-            if(distinct) {
+            if (distinct) {
                 list = distinctList(list);
             }
 
-            list.sort(function(a, b){
+            list.sort(function(a, b) {
                 return a - b;
             });
 
@@ -366,7 +366,7 @@
         },
         getUrlHost = function(url) {
             var pos = url.indexOf('//'),
-                str = pos > -1 ? url.substr(pos + 2): url,
+                str = pos > -1 ? url.substr(pos + 2) : url,
                 pos1 = str.indexOf('/');
             return pos1 > -1 ? str.substr(0, pos1) : str;
         },
@@ -436,7 +436,7 @@
             return s;
         },
         toDecimal: toDecimal, toFloat: toDecimal, checkNumber: checkNumber,
-        toInteger: toInteger, toInt: toInteger, 
+        toInteger: toInteger, toInt: toInteger,
         toNumber: toNumber, toNumberList: toNumberList, distinctList: distinctList,
         collapseNumberList: collapseNumberList, expandNumberList: expandNumberList,
         toJsonString: toJsonString, toJson: toJson, toEncode: toEncode,
@@ -594,9 +594,9 @@
             if (isNaN(parseFloat(num, 10))) {
                 return num;
             }
-            var chars = isMoney ? 
+            var chars = isMoney ?
                 //零壹贰叁肆伍陆柒捌玖
-                ['\u96f6', '\u58f9', '\u8d30', '\u53c1', '\u8086', '\u4f0d', '\u9646', '\u67d2', '\u634c', '\u7396'] : 
+                ['\u96f6', '\u58f9', '\u8d30', '\u53c1', '\u8086', '\u4f0d', '\u9646', '\u67d2', '\u634c', '\u7396'] :
                 //零一二三四五六七八九
                 ['\u96f6', '\u4e00', '\u4e8c', '\u4e09', '\u56db', '\u4e94', '\u516d', '\u4e03', '\u516b', '\u4e5d'],
                 //空，拾，佰，仟 或 十，百，千
@@ -607,40 +607,43 @@
                 decimals = ['\u89d2', '\u5206', '\u5398', '\u6beb'],
                 //元，整，负
                 others = { unit: '\u5143', int: '\u6574', minus: '\u8d1f' },
-                toChinese = function (txt, isMoney, isDecimal) {
+                //点
+                dot = '\u70b9',
+                toChinese = function(txt, isMoney, isDecimal) {
                     if (typeof txt !== 'string') {
                         return '';
                     }
-                    if(isDecimal && txt.length > 4){
+                    if (isMoney && isDecimal && txt.length > 4) {
                         txt = txt.substr(0, 4);
                     }
                     var str = [], len = txt.length - 1;
                     for (var i = 0; i <= len; i++) {
                         var num = parseInt(txt[i], 10), pos = len - i, unit = isDecimal ? decimals[i] : units[pos];
-                        if(num === 0 && (i === len || txt[i + 1] === '0')) {
+                        if (num === 0 && (i === len || txt[i + 1] === '0')) {
                             continue;
                         }
                         //当值为0时,舍弃单位，当值为0并且为金额小数时，舍弃值和单位
                         //当整数部分 值为1，并且单位为“十”时，舍弃值
+                        //纯数字（非金额）模式，则小数部分没有单位
                         //str.push(num === 0 ? (!isDecimal ? chars[num] : '') : (num === 1 && pos === 1 && !isDecimal) ? unit : (chars[num] + unit));                        
-                        if(num === 0) {
-                            str.push(isDecimal ? '' : chars[num]);
-                        } else if(num === 1 && pos === 1 && !isDecimal) {
+                        if (num === 0) {
+                            str.push(isMoney && isDecimal ? '' : chars[num]);
+                        } else if (num === 1 && pos === 1 && !isDecimal) {
                             str.push(unit);
                         } else {
-                            str.push(chars[num] + unit);
+                            str.push(chars[num] + (isMoney || !isDecimal ? unit : ''));
                         }
-                        
+
                     }
                     return str.join('');
                 },
                 splitNumber = function(txt) {
                     return txt.replace(/\B(?=(?:[\d]{4})+$)/g, ',').split(',');
                 },
-                arr = ('' + num).replace(/[,]/g, '').split('.'), str = arr[0], 
+                arr = ('' + num).replace(/[,]/g, '').split('.'), str = arr[0],
                 res = [];
 
-            if(str.indexOf('-') === 0){
+            if (str.indexOf('-') === 0) {
                 res.push(others.minus);
                 str = str.substr(1);
             }
@@ -654,12 +657,13 @@
             if (isMoney) {
                 res.push(others.unit);
                 res.push(arr[1] ? toChinese(arr[1], isMoney, true) : others.int);
+            } else {
+                res.push(arr[1] ? dot + toChinese(arr[1], isMoney, true) : '');
             }
-
             return res.join('');
         },
-        chineseToNumber: function(str) {
-            var minus = str.indexOf('\u8d1f') === 0, 
+        chineseToNumber: function(str, isMoney) {
+            var minus = str.indexOf('\u8d1f') === 0,
                 //是否出现“点”，若出现点字，表示不是金额，而是普通的小数（中文格式）
                 point = false,
                 i = 0, j = 0, k = 0, total = 0, decimal = 0, num = 0,
@@ -676,48 +680,58 @@
                     '\u5143': 1, '\u6574': 1, '\u70b9': 1
                 },
                 //角，分，厘，毫
-                decimals = { '\u89d2': 0.1, '\u5206': 0.01, '\u5398': 0.001, '\u6beb': 0.0001 };
+                decimals = { '\u89d2': 0.1, '\u5206': 0.01, '\u5398': 0.001, '\u6beb': 0.0001 },
+                //点
+                dot = '\u70b9';
 
-            if(minus) {
+            if (minus) {
                 str = str.substr(1);
             }
             // 如果出现“点”字，表示包含小数，按字面量“角分厘毫”的顺序 增加 decimals 数组下标元素，元素值同字面量值
             // \u70b9 点
-            if(str.indexOf('\u70b9') > -1) {
-                for(var m in decimals) {
+            if (str.indexOf('\u70b9') > -1) {
+                for (var m in decimals) {
                     decimals[k++] = decimals[m];
                 }
             }
 
-            var len = str.length;
-            while(i < len) {
+            var len = str.length, dlen = 4;
+            while (i < len) {
                 var s = str[i], n = chars[s];
-                if (typeof n !== 'undefined') {            
-                    if(!point) {
+                if (typeof n !== 'undefined') {
+                    if (!point) {
                         num = n;
                     } else {
-                        //小数（非角分厘毫）直接追加
-                        total += n * decimals[j++];
+                        ////小数（非角分厘毫）直接追加
+                        //var n1 = n * decimals[j++];
+                        //total += n1;
+                        if (j < dlen) {
+                            total = total.add(n.mul(decimals[j]));
+                        } else {
+                            total = total.add(n.div(Math.pow(10, j + 1)));
+                        }
+                        j++;
                     }
                 } else {
                     //将十转换为数字1，因为十是单位，后面会进行数字与单位相乘，即 1 * 10 运算
                     //十，拾
-                    if(['\u5341', '\u62fe'].indexOf(s) > -1 && (i === 0 || num === 0)){
+                    if (['\u5341', '\u62fe'].indexOf(s) > -1 && (i === 0 || num === 0)) {
                         num = 1;
                     }
                     //万，亿，兆，京
-                    if(['\u4e07','\u4ebf','\u5146','\u4eac'].indexOf(s) > -1) {
+                    if (['\u4e07', '\u4ebf', '\u5146', '\u4eac'].indexOf(s) > -1) {
                         // \u4e07 万
                         total = (total + num) * units['\u4e07'];
-                    } 
+                    }
                     //角，分，厘，毫
-                    else if(['\u89d2','\u5206','\u5398','\u6beb'].indexOf(s) > -1) {
-                        //小数部分先全部运算完，最后再与整数相加
-                        decimal += num * decimals[s];
+                    else if (['\u89d2', '\u5206', '\u5398', '\u6beb'].indexOf(s) > -1) {
+                        ////小数部分先全部运算完，最后再与整数相加
+                        //decimal += num * decimals[s];
+                        decimal = decimal.add(num.mul(decimals[s]));
                     } else {
                         total += num * (units[s] || 0);
                         // \u70b9 点
-                        if(s === '\u70b9') {
+                        if (s === '\u70b9') {
                             point = true;
                         }
                     }
@@ -727,7 +741,7 @@
             }
             total += num + decimal;
 
-            if(minus){
+            if (minus) {
                 total = 0 - total;
             }
 
@@ -892,14 +906,14 @@
         },
         */
         toNumber: function(defaultValue, isFloat, decimalLen) { return $.toNumber(this, defaultValue, isFloat, decimalLen); },
-        toNumberList: function (separator, decimalLen) { return $.toNumberList(this, separator, decimalLen); },
+        toNumberList: function(separator, decimalLen) { return $.toNumberList(this, separator, decimalLen); },
         toInt: function(defaultValue) { return $.toInteger(this, defaultValue); },
         toInteger: function(defaultValue) { return $.toInteger(this, defaultValue); },
         toFloat: function(defaultValue, decimalLen) { return $.toDecimal(this, defaultValue, decimalLen); },
         toDecimal: function(defaultValue, decimalLen) { return $.toDecimal(this, defaultValue, decimalLen); },
         expandNumberList: function() { return $.expandNumberList(this); },
         toChineseNumber: function(isMoney) { return $.numberToChinese(this, isMoney); },
-        chineseToNumber: function() { return $.chineseToNumber(this); },
+        chineseToNumber: function(isMoney) { return $.chineseToNumber(this, isMoney); },
         convertChineseToNumber: function() { return $.chineseToNumber(this); },
         chineseToUnicode: function(returnArray, noPrefix) { return $.chineseToUnicode(this, returnArray, noPrefix); },
         unicodeToChinese: function(returnArray) { return $.unicodeToChinese(this, returnArray); },
@@ -1327,11 +1341,11 @@
             }
             var err = [
                 //输入字符串的格式不正确。
-                '\u8f93\u5165\u5b57\u7b26\u4e32\u7684\u683c\u5f0f\u4e0d\u6b63\u786e\u3002', 
+                '\u8f93\u5165\u5b57\u7b26\u4e32\u7684\u683c\u5f0f\u4e0d\u6b63\u786e\u3002',
                 //索引(从零开始)必须大于或等于零，且小于参数列表的大小。
                 '\u7d22\u5f15\u0028\u4ece\u96f6\u5f00\u59cb\u0029\u5fc5\u987b\u5927\u4e8e\u6216\u7b49\u4e8e\u96f6\uff0c\u4e14\u5c0f\u4e8e\u53c2\u6570\u5217\u8868\u7684\u5927\u5c0f\u3002',
                 //值不能为null（或undefined）。
-                '\u503c\u4e0d\u80fd\u4e3a\u006e\u0075\u006c\u006c\uff08\u6216\u0075\u006e\u0064\u0065\u0066\u0069\u006e\u0065\u0064\uff09\u3002', 
+                '\u503c\u4e0d\u80fd\u4e3a\u006e\u0075\u006c\u006c\uff08\u6216\u0075\u006e\u0064\u0065\u0066\u0069\u006e\u0065\u0064\uff09\u3002',
                 //格式说明符无效。
                 '\u683c\u5f0f\u8bf4\u660e\u7b26\u65e0\u6548\u3002'
             ];
@@ -1514,7 +1528,7 @@
             var style = elem.currentStyle || document.defaultView.getComputedStyle(elem, null);
             return $.isString(styleName) ? style[styleName] : style;
         },
-        getBodySize = function () {
+        getBodySize = function() {
             if (typeof document.compatMode !== 'undefined' && document.compatMode === 'CSS1Compat') {
                 return { width: document.documentElement.clientWidth, height: document.documentElement.clientHeight };
             } else if (typeof document.body !== 'undefined') {
@@ -2100,35 +2114,35 @@
             }
         },
         getTextCursorPosition: function(elem) {
-            try{
-                if(!$.isElement(elem)) {
+            try {
+                if (!$.isElement(elem)) {
                     return -1;
                 }
-                if(elem.selectionStart) {
+                if (elem.selectionStart) {
                     return elem.selectionStart;
                 } else {
                     var range = $.doc.selection.createRange();
                     range.moveStart('character', -elem.value.length);
                     return range.text.length;
                 }
-            } catch(e) {
-                if($.isDebug()) {
+            } catch (e) {
+                if ($.isDebug()) {
                     console.log('getTextCursorPosition: ', e);
                 }
             }
             return -1;
         },
         setTextCursorPosition: function(elem, pos) {
-            if(!$.isElement(elem)) {
+            if (!$.isElement(elem)) {
                 return false;
             }
             var val = elem.value, len = val.length;
-            if(!$.isNumber(pos) || pos > len) {
+            if (!$.isNumber(pos) || pos > len) {
                 pos = len;
             }
             window.setTimeout(function() {
                 elem.focus();
-                if(elem.setSelectionRange) {
+                if (elem.setSelectionRange) {
                     elem.setSelectionRange(pos, pos);
                 } else {
                     var range = obj.createTextRange();
@@ -2142,28 +2156,65 @@
             return this;
         },
         getSelectedText: function(elem) {
-            if(elem.selectionStart || elem.selectionStart === '0') {
+            if (elem.selectionStart || elem.selectionStart === '0') {
                 return elem.value.substring(elem.selectionStart, elem.selectionEnd);
-            } else if(document.selection) {
+            } else if (document.selection) {
                 obj.focus();
                 return document.selection.createRange().text;
             }
             return '';
         },
         setInputFormat: function(elements, options) {
+            //TODO:
 
             return this;
         },
-        getControlValue: function(elements, defaultValue) {
-            if($.isArrayLike(elements) || elements.length > 1) {
+        getElementValue: function(elements, defaultValue, attributeName, func) {
+            var isAttribute = $.isString(attributeName);
+
+            if ($.isArray(elements) || $.isArrayLike(elements) || elements.length > 1) {
                 var arr = [], len = elements.length;
-                for(var i = 0; i < len; i++) {
+                for (var i = 0; i < len; i++) {
                     arr.push(elements[i].value);
                 }
                 return arr;
-            } else {
-                return elements.value || defaultValue;
+            } else if ($.isElement(elements)) {
+                var val = (isAttribute ? elements.getAttribute(attributeName) : elements.value) || defaultValue;
+                if ($.isFunction(func)) {
+                    return func(val);
+                }
+                return val;
             }
+        },
+        setElementAttribute: function(elem, value, attributeName) {
+            if (attributeName === 'value') {
+                elem.value = value;
+            } else {
+                elem.setAttribute(attributeName, value);
+            }
+            return this;
+        },
+        setElementValue: function(elements, values, attributeName, sameValue) {
+            var isAttribute = $.isString(attributeName);
+            if (!$.isString(attributeName)) {
+                attributeName = 'value';
+            }
+
+            if ($.isArray(elements) || $.isArrayLike(elements) || elements.length > 1) {
+                var len = elements.length;
+                if (!$.isArray(values)) {
+                    values = [values];
+                }
+                for (var i = 0; i < len; i++) {
+                    var val = $.isUndefined(values[i]) ? (sameValue ? values[0] : '') : values[i];
+                    $.setElementAttribute(elements[i], val, attributeName);
+                }
+            } else if ($.isElement(elements)) {
+                var val = $.isArray(values) ? values[0] : $.isUndefined(values) ? '' : values;
+                $.setElementAttribute(elements, val, attributeName);
+            }
+
+            return this;
         }
     }, '$');
 }(OUI);

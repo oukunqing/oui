@@ -3,7 +3,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>OUI公共库测试</title>
-    <script type="text/javascript" src="../oui/oui.js?1"></script>
+    <script type="text/javascript" src="../oui/oui.js?12"></script>
     <script type="text/javascript">
         console.log(new Date().getTime());
 
@@ -289,7 +289,7 @@ base.js demo
     <input id="txt1" type="text" name="txt" value="txt123" />
     <input type="text" name="txt" value="txt321" />
     <input type="text" name="txt" value="txt12345" />
-    <input type="text" name="txt" value="123" />
+    <input type="text" name="txt" id="txt123" value="123" />
     <input type="text" name="txt" value="321" />
     <br />
     <br />
@@ -449,13 +449,13 @@ console.log(arr);
 
 var arr = $N('chb');
 for(var i=0; i<arr.length; i++){
-    console.log(arr[i].getAttribute('checked'));
+    console.log('checked: ', arr[i].getAttribute('checked'));
 }
 var arr = $QA('#div1 [name=chb]');
 
 console.log(arr);
-console.log($.isArrayLike(arr));
-console.log($.makeArray(arr));
+console.log('isArrayLike: ', $.isArrayLike(arr));
+console.log('makeArray: ', $.makeArray(arr));
 $.setChecked(arr, 1);
 
 
@@ -503,6 +503,8 @@ console.log($.collapseNumberList(arr, false, ',','-'));
 
 console.log($.expandNumberList('1-16,8,16-20,20,20,25-28', true));
 
-console.log($.toNumber('123.456', 0, 2));
+console.log($.toNumber('123.456', 0, 1));
+
+var val = $.getElementValue($I('txt123'), 0, )
 
 </script>
