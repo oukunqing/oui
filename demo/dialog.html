@@ -8,17 +8,31 @@
 </head>
 </head>
 <body>
-    <div id="p1"></div>
+    <div id="p1" style="height:400px;"></div>
     <div id="t1"></div>
-    <input type="input" id="txt2" />
+    <input id="txt2" type="input" />
     <input id="txt1" type="input" />
     <button onclick="paging();">分页</button>
     <button onclick="showTable();">显示表格</button>
+    <button onclick="showDialog();">对话框</button>
+    <button onclick="update();">更新对话框</button>
 </body>
 </html>
 <script type="text/javascript">
-    var d1 = new $.Dialog();
 
+function showDialog(){
+    var dialog = $.alert('Hello!对话框');
+
+    console.log('dialog: ', dialog);
+}
+
+function update() {
+    var str = '';
+    for(var i=0; i<35; i++){
+        str += (i + 1) + '. 内容更改了内容更改了内容更改了内容更改了内容更改了内容更改了内容更改了内容更改了<br />';
+    }
+    var dialog = $.alert('Hello!对话框<br />' + str);
+}
 
 
 $.setAttribute($I('txt1'), {
@@ -47,7 +61,7 @@ function paging(){
             showPageInput: true,
             showPageJump: true,
             showList: true,
-            skin: 'red',
+            //skin: 'red',
             markType: 'chinese',
             //url: '?pageIndex={0}&type=2&pid=32',
             //sizeOptions: [10, 20, 30],

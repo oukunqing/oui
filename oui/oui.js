@@ -371,7 +371,12 @@
             return pos1 > -1 ? str.substr(0, pos1) : str;
         },
         isDebug = function(key) {
-            try { return !isUndefined(getQueryString()[key || 'debug']) } catch (e) { return false; }
+            try {
+                var debug = getQueryString()[key || 'debug'];
+                return !isUndefined(debug) && debug === '1';
+            } catch (e) { 
+                return false; 
+            }
         },
         isMobile = function(num) {
             return /^1([38][0-9]|4[579]|5[0-3,5-9]|6[6]|7[0135678]|9[89])\d{8}$/.test(num);
@@ -932,6 +937,10 @@
             var reg = new RegExp('\\B(?=(?:[\\dA-Fa-f]{' + (len || 3) + '})+$)', 'gi');
             return a[0].replace(reg, delimiter || ',') + (hasPoint ? '.' + (a[1] || '') : '');
         },
+        toFileSize: function() {
+            var num = parseFloat(this, 10);
+            return num.toFileSize();
+        },
         toDate: function(format) {
             var ts = Date.parse(this.replace(/-/g, '/'));
             if (isNaN(ts) && /^[\d]{10,13}$/.test(this)) {
@@ -1050,7 +1059,41 @@
         toHex: function() { return this.toString(16).toUpperCase(); },
         toThousand: function(delimiter, len) { return this.toString().toThousand(delimiter, len); },
         toChineseNumber: function(isMoney) { return $.numberToChinese(this, isMoney); },
-        toDate: function(format) { return this.toString().toDate(format); }
+        toDate: function(format) { return this.toString().toDate(format); },
+        toNumberUnit: function(num, kn, unit, decimalLen, force, space) {
+            if(typeof decimalLen === 'boolean') {
+                space = force;
+                force = decimalLen;
+                decimalLen = 2;
+            }
+            if(typeof decimalLen !== 'number') {
+                decimalLen = 2;
+            }
+            force = $.isBoolean(force, false);
+            space = $.isBoolean(space, true);
+
+            unit = (space ? ' ' : '') + ('' + (unit || '')).trim();
+            var m = parseInt(num / kn, 10);
+            var n = (num % kn / kn).round(decimalLen);
+            if(force) {
+                return (m + n) > 0 ? (m + n) + unit : num;
+            } else {
+                return m > 0 ? (m + n) + unit : num;
+            }
+        },
+        toFileSize: function(decimalLen, space) {
+            var kb = 1024, mb = 1024 * 1024, gb = 1024 * 1024 * 1024, num = this;
+            if(num >= gb) {
+                return num.toNumberUnit(num, gb, 'GB', decimalLen, false, space);
+            } else if(num >= mb) {
+                return num.toNumberUnit(num, mb, 'MB', decimalLen, false, space);
+            } else if(num >= kb) {
+                return num.toNumberUnit(num, kb, 'KB', decimalLen, false, space);
+            } else if(num < kb) {
+                return num.toNumberUnit(num, kb, 'KB', decimalLen, true, space);
+            }
+            return '';
+        }
     }, 'Number.prototype');
 
     //Date.prototype extend
@@ -1843,6 +1886,30 @@
         },
         setFocus = function(elem) {
             try { return isElement(elem) ? elem.focus() || true : false; } catch (e) { return false; }
+        },
+        getEvent = function () {
+            return window.event || arguments.callee.caller.arguments[0];
+        },
+        getScrollPosition = function () {
+            var scrollPos = {};
+            if (typeof window.pageYOffset !== 'undefined') {
+                scrollPos = { top: window.pageYOffset, left: window.pageXOffset };
+            } else if (typeof doc.compatMode !== 'undefined' && doc.compatMode !== 'BackCompat') {
+                scrollPos = { top: doc.documentElement.scrollTop, left: doc.documentElement.scrollLeft };
+            } else if (typeof doc.body !== 'undefined') {
+                scrollPos = { top: doc.body.scrollTop, left: doc.body.scrollLeft };
+            }
+            return scrollPos;
+        },
+        getKeyCode = function(e){
+            var e = e || window.event;
+            return e.keyCode || e.which || e.charCode;
+        },
+        filterHtmlCode = function(str) {
+            str = str.replace(/<\/?[^>]*>/g,''); //去除HTML tag
+            str = str.replace(/[ | ]*\n/g,'\n'); //去除行尾空白
+            //str = str.replace(/\n[\s| | ]*\r/g,'\n'); //去除多余空行
+            return str;
         };
 
     $.extendNative($, {
@@ -1881,7 +1948,11 @@
         addEventListener: addEventListener,
         removeEventListener: removeEventListener,
         bindEventListener: bindEventListener,
-        setFocus: setFocus
+        setFocus: setFocus,
+        getEvent: getEvent,
+        getScrollPosition: getScrollPosition,
+        getKeyCode: getKeyCode,
+        filterHtmlCode: filterHtmlCode
     }, '$');
 
 }(OUI);
@@ -2416,18 +2487,18 @@
             }
             return ajax(p.set({ async: $.isFunction(p.callback), dataType: p.dataType || 'HTML' }));
         },
-        each: function(obj, callback) {
+        each: function(obj, callback, args) {
             var length, i = 0;
             if ($.isArrayLike(obj)) {
                 length = obj.length;
                 for (; i < length; i++) {
-                    if (callback.call(obj[i], i, obj[i]) === false) {
+                    if (callback.call(obj[i], i, obj[i], args) === false) {
                         break;
                     }
                 }
             } else {
                 for (i in obj) {
-                    if (callback.call(obj[i], i, obj[i]) === false) {
+                    if (callback.call(obj[i], i, obj[i], args) === false) {
                         break;
                     }
                 }
@@ -2444,10 +2515,8 @@
     }, '$');
 
     $.extendNative($.fn, {
-        each: function(func) {
-            for (var i = 0; i < this.length; i++) {
-                func(i, this[i]);
-            }
+        each: function(callback, args) {
+            $.each(this, callback, args);
             return this;
         },
         pushStack: function(elems) {
@@ -2473,6 +2542,18 @@
         },
         val: function(value) {
             return this.prop('value', value);
+        },
+        show: function() {
+            if(this[0]) {
+                this[0].style.display = '';
+            }
+            return this;
+        },
+        hide: function() {
+            if(this[0]) {
+                this[0].style.display = 'none';
+            }
+            return this;
         },
         attr: function(name, value) {
             var self = this, elem = self[0] || {};

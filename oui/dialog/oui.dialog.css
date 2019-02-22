@@ -1,0 +1,237 @@
+
+.oui-dialog-shade {
+    width: 100%; height: 100%;
+    position: fixed; top: 0; left: 0;
+    margin: 0; padding: 0;
+    
+    background: #ccc; opacity: 0.2;
+    z-index: 999990;
+    overflow: auto;
+}
+
+.oui-dialog-container {
+    width: 100%; height: 100%;
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    margin: 0; padding: 0;
+    background: transparent;
+    z-index: 999991;
+    overflow: auto;
+    text-align: center;
+}
+
+.oui-dialog {
+    padding: 3px; 
+    margin: 0px auto;
+    width: 500px; min-height: 300px;
+    position: relative;
+    border: solid 1px #f00;
+    border-radius: 5px;
+    box-sizing: border-box;
+    box-shadow: 0 2px 3px 0 rgba(0,0,0,.32);
+    font-size: 14px;
+    line-height: 1.25em;
+
+    z-index:999992;
+    background: #fff;
+}
+
+.oui-dialog-max {
+    width: 100%; height: 100%; 
+    border-radius: 0px;
+    box-sizing: border-box;
+    /*border: none 0;*/
+}
+
+.oui-dialog-min {
+    width: 200px; height: 32px; min-height: 32px; overflow: hidden;
+    box-sizing: border-box;
+}
+
+.oui-dialog .top{
+    padding:0; margin:0;
+    border: none 0;
+    width: 100%;
+    height: 32px;
+    border-bottom: solid 1px #ddd;
+    box-sizing: border-box;
+    clear:both; overflow:hidden;
+
+    -moz-user-select:none;
+    -khtml-user-select:none;
+    user-select:none;
+}
+
+.oui-dialog .top .title {
+    margin: 0; 
+    padding: 6px 8px; 
+    font-weight: bold;
+    float: left;
+}
+
+.oui-dialog .btn {
+    line-height: 1.8em;
+    text-decoration: none;
+}
+
+.oui-dialog .dialog-btn-panel {
+    margin: 4px 3px 0 0;
+}
+
+.oui-dialog .top .btn {
+    border: solid 1px #ddd;
+    cursor: pointer;
+
+}
+
+.oui-dialog .top .btn-min {
+
+}
+
+.oui-dialog .top .btn-max {
+    
+}
+
+.oui-dialog .top .btn-close {
+    width:30px; height:20px; display: inline-block;
+}
+
+.oui-dialog .body,.oui-dialog-max .body {
+    border: none 0; margin: 0; padding: 0;
+    text-align: left;
+    /*overflow: visible;*/
+    overflow: auto;
+
+    box-sizing: border-box;
+    
+    margin-bottom: 40px;
+
+}
+
+.oui-dialog .body .content {
+    border: none 0;
+    padding: 10px; margin: 0px;
+    line-height: 24px;
+    text-align: left;
+    box-sizing: border-box;
+}
+
+.oui-dialog .bottom {
+    position:absolute; bottom:4px; left:0px;
+    border: none 0;
+    box-sizing: border-box;
+    border-top: solid 1px #ddd;
+    clear:both; overflow:hidden;
+    width: 100%;
+    height: 40px;
+
+    text-align: center;
+
+    -moz-user-select:none;
+    -khtml-user-select:none;
+    user-select:none;
+}
+
+.oui-dialog .bottom .btn {
+    margin: 7px 0 0;
+    border: solid 1px #ddd;
+    cursor: pointer;
+    padding: 0 15px;
+    height: 24px;
+
+    display: inline-block;
+    font-style: normal;
+    font-family: inherit;
+    background: transparent;
+    -webkit-transition: all .3s ease-out;
+    -o-transition: all .3s ease-out;
+    transition: all .3s ease-out;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+    border-radius: 3px;
+    border-style: solid;
+    text-align: center;
+}
+
+.oui-dialog .bottom .btn-ok {
+
+}
+
+.oui-dialog .bottom .btn-cancel {
+
+}
+
+.oui-dialog .bottom .btn-ml {
+    margin-left: 5px;
+}
+
+.oui-dialog .bottom .btn-mr {
+    margin-right: 5px;
+}
+
+
+/*关于拖放开关*/
+
+.oui-dialog .border-switch {
+    background: #f00;
+    margin: 0; padding: 0; 
+    display: inline-block;
+    position: absolute;
+    z-index:999999;
+}
+
+.oui-dialog .top-switch,.oui-dialog .bottom-switch {
+    width: 100%; height: 3px;
+    cursor: ns-resize;
+}
+
+.oui-dialog .left-switch,.oui-dialog .right-switch {
+    width: 3px; height: 100%;
+    cursor: ew-resize;
+}
+
+.oui-dialog .top-switch,.oui-dialog .left-switch{
+    top: 0; left: 0;
+}
+
+.oui-dialog .bottom-switch,.oui-dialog .right-switch {
+    bottom: 0; right: 0;
+}
+
+.oui-dialog .top-left-switch,.oui-dialog .top-right-switch,.oui-dialog .bottom-left-switch,.oui-dialog .bottom-right-switch {
+    width: 10px; height: 10px;
+    border-radius: 3px;
+    background: #00f;
+}
+
+.oui-dialog .top-left-switch {
+    top: 0; left: 0;
+    cursor: se-resize;
+}
+
+.oui-dialog .top-right-switch {
+    top: 0; right: 0;
+    cursor: sw-resize;
+}
+
+.oui-dialog .bottom-left-switch {
+    bottom: 0; left: 0;
+    cursor: sw-resize;
+}
+
+.oui-dialog .bottom-right-switch {
+    bottom: 0; right: 0;
+    cursor: se-resize;
+}
+
+
+.dialog-overflow-hidden {
+    overflow: hidden;
+}
+
+.dialog-overflow-auto {
+    overflow: auto;
+}
+
+.dialog-display-none {
+    display: none;
+}
