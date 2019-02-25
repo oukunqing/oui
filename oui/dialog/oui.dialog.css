@@ -21,9 +21,10 @@
 
 .oui-dialog {
     padding: 3px; 
-    margin: 0px auto;
-    width: 500px; min-height: 300px;
+    /*margin: 0px auto;*/
+    width: 500px; min-width: 200px; min-height: 160px;
     position: relative;
+    top: 0; left: 0; right: 0; bottom: 0;
     border: solid 1px #f00;
     border-radius: 5px;
     box-sizing: border-box;
@@ -33,18 +34,80 @@
 
     z-index:999992;
     background: #fff;
+
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
 }
 
 .oui-dialog-max {
     width: 100%; height: 100%; 
     border-radius: 0px;
     box-sizing: border-box;
+    top: 0; left: 0; right: 0; bottom: 0;
     /*border: none 0;*/
 }
 
 .oui-dialog-min {
     width: 200px; height: 32px; min-height: 32px; overflow: hidden;
     box-sizing: border-box;
+}
+
+.oui-dialog .btn {    
+    margin: 7px 0 0;
+    color: #fff;
+    background: #337ab7;
+    border: solid 1px #2e6da4;
+    cursor: pointer;
+    padding: 0 15px;
+    height: 24px;
+
+    line-height: 1.8em;
+    text-decoration: none;
+
+    display: inline-block;
+    font-style: normal;
+    font-family: inherit;
+    -webkit-transition: all .3s ease-out;
+    -o-transition: all .3s ease-out;
+    transition: all .3s ease-out;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+    border-radius: 3px;
+    border-style: solid;
+    text-align: center;
+}
+
+.oui-dialog .btn-primary {
+    color: #fff;
+    background-color: #337ab7;
+    border-color: #2e6da4;
+}
+
+.oui-dialog .btn-primary:hover {
+    color: #fff;
+    background-color: #286090;
+    border-color: #204d74;
+}
+
+.oui-dialog .btn-default {
+    color: #333;
+    background: #fff;
+    border: solid 1px #ccc;
+}
+
+.oui-dialog .btn-default:hover {
+    color: #fff;
+    background-color: #286090;
+    border-color: #204d74;
+}
+
+.oui-dialog .btn-ml {
+    margin-left: 5px;
+}
+
+.oui-dialog .btn-mr {
+    margin-right: 5px;
 }
 
 .oui-dialog .top{
@@ -68,11 +131,6 @@
     float: left;
 }
 
-.oui-dialog .btn {
-    line-height: 1.8em;
-    text-decoration: none;
-}
-
 .oui-dialog .dialog-btn-panel {
     margin: 4px 3px 0 0;
 }
@@ -80,7 +138,8 @@
 .oui-dialog .top .btn {
     border: solid 1px #ddd;
     cursor: pointer;
-
+    width: 20px; height: 20px;
+    display: inline-block;
 }
 
 .oui-dialog .top .btn-min {
@@ -93,6 +152,7 @@
 
 .oui-dialog .top .btn-close {
     width:30px; height:20px; display: inline-block;
+
 }
 
 .oui-dialog .body,.oui-dialog-max .body {
@@ -131,9 +191,13 @@
     user-select:none;
 }
 
+
+/*
 .oui-dialog .bottom .btn {
     margin: 7px 0 0;
-    border: solid 1px #ddd;
+    color: #fff;
+    background: #337ab7;
+    border: solid 1px #2e6da4;
     cursor: pointer;
     padding: 0 15px;
     height: 24px;
@@ -141,7 +205,6 @@
     display: inline-block;
     font-style: normal;
     font-family: inherit;
-    background: transparent;
     -webkit-transition: all .3s ease-out;
     -o-transition: all .3s ease-out;
     transition: all .3s ease-out;
@@ -159,16 +222,7 @@
 .oui-dialog .bottom .btn-cancel {
 
 }
-
-.oui-dialog .bottom .btn-ml {
-    margin-left: 5px;
-}
-
-.oui-dialog .bottom .btn-mr {
-    margin-right: 5px;
-}
-
-
+*/
 /*关于拖放开关*/
 
 .oui-dialog .border-switch {
@@ -223,6 +277,20 @@
     cursor: se-resize;
 }
 
+.oui-dialog .display-none {
+    display: none;
+}
+
+.oui-dialog .cursor-move {    
+    cursor: move;
+}
+
+.oui-dialog .no-select {
+    -moz-user-select:none;
+    -khtml-user-select:none;
+    user-select:none;
+}
+
 
 .dialog-overflow-hidden {
     overflow: hidden;
@@ -232,6 +300,15 @@
     overflow: auto;
 }
 
-.dialog-display-none {
-    display: none;
+.oui-dialog-fixed {
+    position: fixed;
+}
+
+.oui-dialog-pos {
+    position: absolute;
+    margin: 0; padding: 0;
+}
+
+.dialog-margin-center {
+    margin-left: auto; margin-right: auto;
 }

@@ -1729,6 +1729,18 @@
         toggleClass = function(elem, value) {
             return setClass(elem, value, 2), this;
         },
+        appendChild = function(parent, elem) {
+            if($.isElement(parent) && $.isElement(elem)) {
+                parent.appendChild(elem);
+            }
+            return this;
+        },
+        removeChild = function(parent, elem) {
+            if($.isElement(parent) && $.isElement(elem)) {
+                parent.removeChild(elem);
+            }
+            return this;
+        },
         loadStaticFile = function(path, id, callback, parent, nodeName, attributes) {
             if (!$.isString(id, true)) {
                 id = nodeName + '-' + getFileName(path, true).replace(/[.]/, '-') + '-' + $.crc.toCRC16(path).toLowerCase();
@@ -1936,6 +1948,8 @@
         toggleClass: toggleClass,
         getClass: getClass,
         hasClass: hasClass,
+        appendChild: appendChild,
+        removeChild: removeChild,
         loadLinkStyle: loadLinkStyle,
         loadJsScript: loadJsScript,
         removeJsScript: removeJsScript,
@@ -2516,8 +2530,7 @@
 
     $.extendNative($.fn, {
         each: function(callback, args) {
-            $.each(this, callback, args);
-            return this;
+            return $.each(this, callback, args), this;
         },
         pushStack: function(elems) {
             var ret = $.merge(new this.constructor(), elems);
@@ -2544,16 +2557,10 @@
             return this.prop('value', value);
         },
         show: function() {
-            if(this[0]) {
-                this[0].style.display = '';
-            }
-            return this;
+            return this[0] ? this[0].style.display = '' : null, this;
         },
         hide: function() {
-            if(this[0]) {
-                this[0].style.display = 'none';
-            }
-            return this;
+            return this[0] ? this[0].style.display = 'none' : null, this;
         },
         attr: function(name, value) {
             var self = this, elem = self[0] || {};
