@@ -542,38 +542,72 @@
                 var right = left + width;
                 var bottom = top + height;
 
-
                 document.onmousemove = function(){
                     if(!moveAble) {
                         return false;
                     }
                     var evt = $.getEvent();
+
+                    var minWidth = parseInt($.getElementStyle(_.controls.box, 'minWidth'), 10),
+                        minHeight = parseInt($.getElementStyle(_.controls.box, 'minHeight'), 10);
+
                     var x = evt.clientX - moveX, 
-                        y = evt.clientY - moveY;
-                    var newX = width + x, 
-                        newY = height + y;
+                        y = evt.clientY - moveY,
+                        w = pos.indexOf('left') >= 0 ? width - x : width + x,
+                        h = pos.indexOf('top') >= 0 ? height - y : height + y;
+
+                    var enabled = w > minWidth && h > minHeight;
+
+                    console.log('minWidth: ',minWidth, minHeight);
+
+                    console.log('mousemove: ', pos, left, top, left + x, top + y, x, y);
+
+                    var newWidth = w < minWidth ? minWidth : w, 
+                        newHeight = h < minHeight ? minHeight : h,
+                        newLeft = left + x + newWidth > right ? right - newWidth : left + x,
+                        newTop = top + y + newHeight > bottom ? bottom - newHeight : top + y;
+
+                    if(pos.indexOf('-') >= 0) { 
+                        _.controls.box.style.width = newWidth + 'px';
+                        _.controls.box.style.height = newHeight + 'px';
+                    }
 
                     switch(pos) {
+                        case 'top':
+                            _.controls.box.style.width = width + 'px';
+                            _.controls.box.style.height = newHeight + 'px';
+                            _.controls.box.style.top = newTop + 'px';
+                            break;
+                        case 'left':
+                            _.controls.box.style.width = newWidth + 'px';
+                            _.controls.box.style.height = height + 'px';
+                            _.controls.box.style.left = newLeft + 'px';
+                            break;
                         case 'right':
-                            _.controls.box.style.width = newX + 'px';
+                            _.controls.box.style.width = newWidth + 'px';
+                            _.controls.box.style.height = height + 'px';
                             break;
                         case 'bottom':
-                            _.controls.box.style.height = newY + 'px';
+                            _.controls.box.style.width = width + 'px';
+                            _.controls.box.style.height = newHeight + 'px';
+                            break;
+                        case 'top-left':
+                            _.controls.box.style.left = newLeft + 'px';
+                            _.controls.box.style.top = newTop + 'px';
+                            break;
+                        case 'top-right':
+                            _.controls.box.style.top = newTop + 'px';
                             break;
                         case 'bottom-right':
-                            //_.controls.box.style.top =
-                            _.controls.box.style.width = newX + 'px';
-                            _.controls.box.style.height = newY + 'px';
+                            //_.controls.box.style.width = newWidth + 'px';
+                            //_.controls.box.style.height = newHeight + 'px';
                             break;
                         case 'bottom-left':
-                            _.controls.box.style.left = (left + x) + 'px';
-                            _.controls.box.style.top = top + 'px';
+                            _.controls.box.style.left = newLeft + 'px';
                             break;
                     }
 
                     _.setSize();
-
-                    console.log('mousemove: ', pos, evt.clientX, evt.clientY, moveTop, moveLeft, x, y);
                 };
                 document.onmouseup = function(){
                     moveAble = false;

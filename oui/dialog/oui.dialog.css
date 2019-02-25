@@ -22,7 +22,7 @@
 .oui-dialog {
     padding: 3px; 
     /*margin: 0px auto;*/
-    width: 500px; min-width: 200px; min-height: 160px;
+    width: 400px; min-width: 200px; min-height: 160px;
     position: relative;
     top: 0; left: 0; right: 0; bottom: 0;
     border: solid 1px #f00;
