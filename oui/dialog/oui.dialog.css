@@ -25,7 +25,7 @@
     width: 400px; min-width: 200px; min-height: 160px;
     position: relative;
     top: 0; left: 0; right: 0; bottom: 0;
-    border: solid 1px #f00;
+    border: solid 1px #204d74;
     border-radius: 5px;
     box-sizing: border-box;
     box-shadow: 0 2px 3px 0 rgba(0,0,0,.32);
@@ -163,6 +163,10 @@
 
     box-sizing: border-box;
     
+    -moz-user-select:none;
+    -khtml-user-select:none;
+    user-select:none;
+    
     margin-bottom: 40px;
 
 }
@@ -226,7 +230,7 @@
 /*关于拖放开关*/
 
 .oui-dialog .border-switch {
-    background: #f00;
+    background: transparent;
     margin: 0; padding: 0; 
     display: inline-block;
     position: absolute;
@@ -254,7 +258,7 @@
 .oui-dialog .top-left-switch,.oui-dialog .top-right-switch,.oui-dialog .bottom-left-switch,.oui-dialog .bottom-right-switch {
     width: 10px; height: 10px;
     border-radius: 3px;
-    background: #00f;
+    background: transparent;
 }
 
 .oui-dialog .top-left-switch {

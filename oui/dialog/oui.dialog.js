@@ -330,7 +330,7 @@
                 if(_.controls.container) {
                     $.removeClass(_.controls.container, 'dialog-overflow-hidden');
                 }
-
+                
                 // 从最大化窗口返回常规尺寸，重新设置dialog body尺寸
                 if(_.controls.body.hasHeight) {
                     if(_.controls.body.oldHeight) {
@@ -343,16 +343,18 @@
             } else {
                 this.hideSwitch();
 
+                _.controls.body.oldHeight = _.controls.body.offsetHeight;
+                _.controls.body.hasHeight = _.controls.body.style.height || 0;
+                /*
                 var bs = $.getBodySize();
                 var topHeight = _.controls.top ? _.controls.top.offsetHeight + 1 : 0, 
                     bottomHeight = _.controls.bottom ? _.controls.bottom.offsetHeight + 1 : 0;
 
-                _.controls.body.oldHeight = _.controls.body.offsetHeight;
-
-                _.controls.body.hasHeight = _.controls.body.style.height || 0;
                 _.controls.body.style.height = (bs.height - topHeight - bottomHeight) + 'px';
-
+                */
                 $.addClass(_.controls.box, 'oui-dialog-max');
+
+                _.setSize(true);
 
                 if(_.controls.container) {
                     $.addClass(_.controls.container, 'dialog-overflow-hidden');
@@ -362,8 +364,15 @@
             }
             this.isMin = false;
         },
-        setSize: function() {
+        setSize: function(isMax) {
             var _ = this;
+            if(isMax) {
+                var bs = $.getBodySize();
+                _.controls.box.style.width = bs.width + 'px';
+                _.controls.box.style.height = bs.height + 'px';
+                _.controls.box.style.top = '0px';
+                _.controls.box.style.left = '0px';
+            }
             var boxH = _.controls.box.offsetHeight;
 
             var topHeight = _.controls.top ? _.controls.top.offsetHeight + 1 : 0, 
@@ -609,7 +618,7 @@
 
                     _.setSize();
                 };
-                document.onmouseup = function(){
+                document.onmouseup = _.controls.box.onmouseup = function(){
                     moveAble = false;
                     
                     console.log('mouseup');
