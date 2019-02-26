@@ -22,10 +22,13 @@
 .oui-dialog {
     padding: 3px; 
     /*margin: 0px auto;*/
-    width: 400px; min-width: 200px; min-height: 160px;
+    width: 400px;
     position: relative;
     top: 0; left: 0; right: 0; bottom: 0;
+    /*
     border: solid 1px #204d74;
+    */
+    border: solid 1px #ccc;
     border-radius: 5px;
     box-sizing: border-box;
     box-shadow: 0 2px 3px 0 rgba(0,0,0,.32);
@@ -38,6 +41,11 @@
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
+
+    -moz-user-select:none;
+    -khtml-user-select:none;
+    user-select:none;
+    -ms-user-select: none; /*IE10*/
 }
 
 .oui-dialog-max {
@@ -53,7 +61,113 @@
     box-sizing: border-box;
 }
 
-.oui-dialog .btn {    
+.oui-dialog .top{
+    padding:0; margin:0;
+    border: none 0;
+    width: 100%;
+    height: 32px;
+    border-bottom: solid 1px #ddd;
+    box-sizing: border-box;
+    clear:both; overflow:hidden;
+
+    cursor: move;
+
+    -moz-user-select:none;
+    -khtml-user-select:none;
+    user-select:none;
+    -ms-user-select: none; /*IE10*/
+}
+
+.oui-dialog .top .title {
+    margin: 0; 
+    padding: 6px 8px; 
+    font-weight: bold;
+    float: left;
+}
+
+.oui-dialog .dialog-btn-panel {
+    margin: 4px 3px 0 0;
+}
+
+.oui-dialog .top .btn {
+    border: solid 1px #eee;
+    border-radius: 3px;
+    background-color: transparent;
+
+    cursor: pointer;
+    width: 20px; height: 20px;
+    display: inline-block;
+    margin: 0 0 0 5px; padding: 0;
+}
+
+.oui-dialog .top .btn:hover {
+    background-color: #909090;
+    border: solid 1px #808080;
+}
+
+.oui-dialog .top .btn-min {
+    background: url('imgs/icon.png') no-repeat 0 0;
+}
+
+.oui-dialog .top .btn-max {
+    background: url('imgs/icon.png') no-repeat -20px 0;
+}
+
+.oui-dialog .top .btn-normal {
+    background: url('imgs/icon.png') no-repeat -40px 0;
+}
+
+.oui-dialog .top .btn-close {
+    background: url('imgs/icon.png') no-repeat -60px 0;
+}
+
+.oui-dialog .body,.oui-dialog-max .body {
+    border: none 0; margin: 0; padding: 0;
+    text-align: left;
+    /*overflow: visible;*/
+    overflow: auto;
+
+    box-sizing: border-box;
+
+    -moz-user-select:none;
+    -khtml-user-select:none;
+    user-select:none;
+    -ms-user-select: none; /*IE10*/
+    
+    margin-bottom: 40px;
+
+}
+
+.oui-dialog .body .content {
+    border: none 0;
+    padding: 10px; margin: 0px;
+    line-height: 24px;
+    text-align: left;
+    box-sizing: border-box;
+}
+
+.oui-dialog .bottom-panel {
+    position: absolute;
+    left: 0; bottom: 0;
+    border: none 0;
+    clear:both; overflow: hidden;
+    width: 100%;
+    height: 40px;
+    -moz-user-select:none;
+    -khtml-user-select:none;
+    user-select:none;
+}
+
+.oui-dialog .bottom {
+    border: none 0;
+    box-sizing: border-box;
+    border-top: solid 1px #ddd;
+    text-align: center;
+    margin: 0 3px;
+    padding: 0;
+}
+
+.oui-dialog .bottom .btn {    
     margin: 7px 0 0;
     color: #fff;
     background: #337ab7;
@@ -78,121 +192,36 @@
     text-align: center;
 }
 
-.oui-dialog .btn-primary {
+.oui-dialog .bottom .btn-primary {
     color: #fff;
     background-color: #337ab7;
     border-color: #2e6da4;
 }
 
-.oui-dialog .btn-primary:hover {
+.oui-dialog .bottom .btn-primary:hover {
     color: #fff;
     background-color: #286090;
     border-color: #204d74;
 }
 
-.oui-dialog .btn-default {
+.oui-dialog .bottom .btn-default {
     color: #333;
     background: #fff;
     border: solid 1px #ccc;
 }
 
-.oui-dialog .btn-default:hover {
+.oui-dialog .bottom .btn-default:hover {
     color: #fff;
     background-color: #286090;
     border-color: #204d74;
 }
 
-.oui-dialog .btn-ml {
+.oui-dialog .bottom .btn-ml {
     margin-left: 5px;
 }
 
-.oui-dialog .btn-mr {
+.oui-dialog .bottom .btn-mr {
     margin-right: 5px;
-}
-
-.oui-dialog .top{
-    padding:0; margin:0;
-    border: none 0;
-    width: 100%;
-    height: 32px;
-    border-bottom: solid 1px #ddd;
-    box-sizing: border-box;
-    clear:both; overflow:hidden;
-
-    -moz-user-select:none;
-    -khtml-user-select:none;
-    user-select:none;
-}
-
-.oui-dialog .top .title {
-    margin: 0; 
-    padding: 6px 8px; 
-    font-weight: bold;
-    float: left;
-}
-
-.oui-dialog .dialog-btn-panel {
-    margin: 4px 3px 0 0;
-}
-
-.oui-dialog .top .btn {
-    border: solid 1px #ddd;
-    cursor: pointer;
-    width: 20px; height: 20px;
-    display: inline-block;
-}
-
-.oui-dialog .top .btn-min {
-
-}
-
-.oui-dialog .top .btn-max {
-    
-}
-
-.oui-dialog .top .btn-close {
-    width:30px; height:20px; display: inline-block;
-
-}
-
-.oui-dialog .body,.oui-dialog-max .body {
-    border: none 0; margin: 0; padding: 0;
-    text-align: left;
-    /*overflow: visible;*/
-    overflow: auto;
-
-    box-sizing: border-box;
-    
-    -moz-user-select:none;
-    -khtml-user-select:none;
-    user-select:none;
-    
-    margin-bottom: 40px;
-
-}
-
-.oui-dialog .body .content {
-    border: none 0;
-    padding: 10px; margin: 0px;
-    line-height: 24px;
-    text-align: left;
-    box-sizing: border-box;
-}
-
-.oui-dialog .bottom {
-    position:absolute; bottom:4px; left:0px;
-    border: none 0;
-    box-sizing: border-box;
-    border-top: solid 1px #ddd;
-    clear:both; overflow:hidden;
-    width: 100%;
-    height: 40px;
-
-    text-align: center;
-
-    -moz-user-select:none;
-    -khtml-user-select:none;
-    user-select:none;
 }
 
 

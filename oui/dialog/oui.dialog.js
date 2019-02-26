@@ -11,9 +11,36 @@
     //先加载样式文件
     $.loadLinkStyle($.getFilePath(thisFilePath) + $.getFileName(thisFilePath, true).replace('.min', '') + '.css');
 
+    function checkStyleUnit(s) {
+        if($.isString(s, true)) {
+            s = s.toLowerCase();
+            var arr = ['px', '%', 'em', 'auto', 'pt'];
+            for(var i in arr) {
+                if(s.endsWith(arr[i])) {
+                    return s;
+                }
+            }
+            return s + 'px';
+        } else if($.isNumber(s)) {
+            return s + 'px';
+        }
+        return s;
+    }
+
     function MyDialog(content, options){
         this.id = 1;
-        this.options = options;
+        this.opt = $.extend({
+            minWidth: '180px',
+            minHeight: '160px',
+            maxWidth: '100%',
+            maxHeight: '100%',
+            width: '400px',
+            height: '240px',
+            position: 5,
+            title: '标题栏',
+
+        }, options);
+
         this.docOverflow();
         this.controls = {
             shade: null, container: null, box: null, top: null, title: null, body: null, content: null, bottom: null
@@ -21,8 +48,10 @@
         this.buttons = {
             ok: null, cancel: null, close: null, min: null, max: null
         };
-        this.isMin = false;
-        this.isMax = false;
+
+        this.status = {
+            min: false, max: false, normal: true
+        };
         this.initial(content);
     }
 
@@ -72,6 +101,8 @@
             //对话框
             _ctls.box = document.createElement('div');
             _ctls.box.className = 'oui-dialog';
+
+            //$.setStyle(_ctls.box, {minWidth: _.opt.minWidth, minHeight: _.opt.minHeight});
 
             _ctls.box.cache = {};
 
@@ -132,11 +163,17 @@
 
             var btn = document.createElement('div');
             btn.className = 'dialog-btn-panel';
-            btn.innerHTML = '<a class="btn btn-min">小</a>'
-                + '<a class="btn btn-max">大</a>'
-                + '<a class="btn btn-close">关</a>';
+            btn.innerHTML = '<a class="btn btn-min" code="min"></a>'
+                + '<a class="btn btn-max" code="max"></a>'
+                + '<a class="btn btn-close" code="close"></a>';
             btn.style.cssText = 'float:right;';
+
             div.appendChild(btn);
+
+            for(var i = 0; i < btn.childNodes.length; i++) {
+                var obj = btn.childNodes[i], key = obj.getAttribute('code');
+                this.buttons[key] = obj;
+            }
 
             this.setEvent(btn.childNodes, 'click', false);
 
@@ -157,19 +194,29 @@
             return div;
         },
         buildBottom: function(type) {
+            var panel = document.createElement('div');
+            panel.className = 'bottom-panel';
+
             var div = document.createElement('div');
             div.className = 'bottom';
 
-            var html = '<a class="btn btn-ok btn-primary btn-mr" href="javascript:void(0);" shortcutKey="Y">\u786e\u5b9a</a>'
-                + '<a class="btn btn-cancel btn-default btn-ml" href="javascript:void(0);" shortcutKey="N">\u53d6\u6d88</a>';
+            var html = '<a class="btn btn-ok btn-primary btn-mr" code="ok" href="javascript:void(0);" shortcutKey="Y">\u786e\u5b9a</a>'
+                + '<a class="btn btn-cancel btn-default btn-ml" code="cancel" href="javascript:void(0);" shortcutKey="N">\u53d6\u6d88</a>';
 
             div.innerHTML = html;
+
+            panel.appendChild(div);
+
+            for(var i = 0; i < div.childNodes.length; i++) {
+                var obj = div.childNodes[i], key = obj.getAttribute('code');
+                this.buttons[key] = obj;
+            }
 
             this.setEvent(div.childNodes, 'click', true);
 
             this.setShortcutKeyEvent(div.childNodes);
 
-            return div;
+            return panel;
         },
         buildSwitch: function(dir) {
             var div = document.createElement('div');
@@ -182,21 +229,25 @@
             $('.border-switch').each(function(){
                 $(this).show();
             });
+            return this;
         },
         hideSwitch: function() {
             $('.border-switch').each(function(i, obj, args){
                 $(this).hide();
             });
+            return this;
         },
         show: function (content){
             console.log('show: ' + content);
 
 
+            return this;
         },
         update: function(content){
             this.body.innerHTML = content;
 
             console.log('update: ' + content);
+            return this;
         },
         check: function(obj) {
             if(!$.isElement(obj)) {
@@ -303,13 +354,11 @@
             $.Dialog.remove(this.id);        
         },
         min: function() {
-            console.log('dialog min');
-            $.addClass(this.controls.box, 'oui-dialog-min');
-            $.addClass(this.controls.bottom, 'display-none');
-
             this.isMin = true;
+            this.setSize({type: 'min'});
+        },
+        normal: function() {
 
-            this.hideSwitch();
         },
         max: function() {
             var _ = this;
@@ -330,7 +379,9 @@
                 if(_.controls.container) {
                     $.removeClass(_.controls.container, 'dialog-overflow-hidden');
                 }
-                
+
+                //$.setStyle(_.controls.box, _.oldSize);
+
                 // 从最大化窗口返回常规尺寸，重新设置dialog body尺寸
                 if(_.controls.body.hasHeight) {
                     if(_.controls.body.oldHeight) {
@@ -340,8 +391,13 @@
                     _.controls.body.style['height'] = null;
                 }
                 this.isMax = false;
+
+                _.setSize({type: 'normal'});
+
+                $.removeClass(_.buttons.max, 'btn-normal');
+                
             } else {
-                this.hideSwitch();
+/*
 
                 _.controls.body.oldHeight = _.controls.body.offsetHeight;
                 _.controls.body.hasHeight = _.controls.body.style.height || 0;
@@ -352,18 +408,22 @@
 
                 _.controls.body.style.height = (bs.height - topHeight - bottomHeight) + 'px';
                 */
-                $.addClass(_.controls.box, 'oui-dialog-max');
+                //$.addClass(_.controls.box, 'oui-dialog-max');
+                //$.addClass(_.buttons.max, 'btn-normal');
 
-                _.setSize(true);
+                //_.setSize(true);
 
                 if(_.controls.container) {
                     $.addClass(_.controls.container, 'dialog-overflow-hidden');
                 }
 
+                _.setSize({type: 'max'});
+
                 this.isMax = true;
             }
             this.isMin = false;
         },
+        /*
         setSize: function(isMax) {
             var _ = this;
             if(isMax) {
@@ -379,6 +439,167 @@
                 bottomHeight = _.controls.bottom ? _.controls.bottom.offsetHeight + 1 : 0;
 
             _.controls.body.style.height = (boxH - topHeight - bottomHeight) + 'px';
+        },
+        */
+        setStatus: function(key) {
+            if(key === 'normal') {
+                this.status['min'] = false;
+                this.status['max'] = false;
+                this.status['normal'] = true;
+            } else {
+                this.status['normal'] = false;
+                this.status[key] = true;
+            }
+            return this;
+        },
+        getStatus: function(key) {
+            if(typeof key === 'string') {
+                return this.status[key];
+            } else {
+                for(var key in this.status) {
+                    if(this.status[key]) {
+                        return key;
+                    }
+                }
+            }
+        },
+        setCache: function() {
+            var obj = this.controls.box;
+
+            this.lastSize = {
+                width: obj.offsetWidth + 'px',
+                height: obj.offsetHeight + 'px',
+                top: obj.offsetTop + 'px',
+                left: obj.offsetLeft + 'px',
+                right: (obj.offsetLeft + obj.offsetWidth) + 'px',
+                bottom: (obj.offsetTop + obj.offsetHeight) + 'px'
+            };
+            return this;
+        },
+        setSize: function(options) {
+            var _ = this, _ctls = _.controls, _btns = _.buttons, obj = _ctls.box, par = {};
+            var opt = $.extend({
+                type: 'normal',
+                width: 0,
+                height: 0
+            }, options);
+            var isSetBodySize = false;
+
+            if(_.getStatus() === opt.type) {
+                return this;
+            }
+
+            if(_.getStatus() === 'normal') {
+                _.setCache();
+            }
+
+            if(opt.type === 'max') {
+                par = {width: '100%', height: '100%', top: 0, left: 0, right: 0, botton: 0};
+
+                $.addClass(obj, 'oui-dialog-max');
+                $.addClass(_btns.max, 'btn-normal');
+
+                if(_.status.min) {
+                    $.removeClass(obj, 'oui-dialog-min');
+                }
+                _.hideSwitch().setStatus('max');
+                isSetBodySize = true;
+            } else if(opt.type === 'min') {
+                par = {width: 200, height: 36};
+                $.addClass(_ctls.bottom, 'display-none');
+                $.addClass(obj, 'oui-dialog-min');
+                if(_.status.max) {
+                    $.removeClass(obj, 'oui-dialog-max');
+                }
+                $.removeClass(_btns.max, 'btn-normal');
+
+                _.hideSwitch().setStatus('min');
+            } else {
+                isSetBodySize = true;
+                $.removeClass(_btns.max, 'btn-normal');
+
+                if(_.status.max) {
+                    $.removeClass(obj, 'oui-dialog-max');
+                } else if(_.status.min) {
+                    $.removeClass(obj, 'oui-dialog-min');
+                }
+                _.setStatus('normal');
+
+                if(opt.type === 'normal') {
+                    $.setStyle(_ctls.box, _.lastSize);
+                } else if(opt.type === 'resize') {
+                    par = {width: opt.width, height: opt.height};
+                } else if(opt.type === 'scale') {
+                    isSetBodySize = false;
+                    _.setScale(options);
+                } else {
+
+                }
+            }
+
+            for(var name in par) {
+                var val = par[name];
+                if(!$.isNullOrUndefined(val)) {
+                    obj.style[name] = checkStyleUnit(val);
+                }
+            }
+            if(isSetBodySize) {
+                _.setBodySize();
+            }
+            return _;
+        },
+        setScale: function(options) {
+            var opt = $.extend({
+                type: '',
+                dir: '',
+                width: 0,
+                height: 0,
+                x: 0,
+                y: 0
+            }, options);
+
+            switch(opt.dir) {
+                case 'top':
+                    break;
+                case 'bottom':
+                    break;
+                case 'left':
+                    break;
+                case 'right':
+                    break;
+                case 'top-left':
+                case 'left-top':
+                    break;
+                case 'top-right':
+                case 'right-top':
+                    break;
+                case 'bottom-left':
+                case 'left-bottom':
+                    break;
+                case 'bottom-right':
+                case 'right-bottom':
+                    break;
+                case 'center':
+                    break;
+            }
+
+            return this.setBodySize();
+        },
+        setBodySize: function() {
+            var _ = this, obj = _.controls.box;
+
+            var topHeight = _.controls.top ? _.controls.top.offsetHeight + 1 : 0, 
+                bottomHeight = _.controls.bottom ? _.controls.bottom.offsetHeight + 1 : 0,
+                paddingHeight = parseInt('0' + $.getElementStyle(obj, 'paddingTop'), 10);
+
+            var size = {
+                width: '100%',
+                height: (obj.offsetHeight - topHeight - bottomHeight - paddingHeight) + 'px'
+            };
+
+            $.setStyle(_.controls.body, size);
+
+            return this;
         },
         setPosition: function(pos) {
             var _ = this, _ctls = this.controls;
@@ -411,9 +632,11 @@
                 case 10:
                     break;
             }
+            return this;
         },
         setContent: function() {
 
+            return this;
         },
         dragPosition: function () {
             var _ = this,
@@ -532,8 +755,8 @@
                 docMouseMoveEvent = document.onmousemove,
                 docMouseUpEvent = document.onmouseup;
 
-            function _dragSize(pos) {
-                console.log('_dragSize: ', pos);
+            function _dragSize(dir) {
+                console.log('_dragSize: ', dir);
 
                 var evt = $.getEvent();
 
@@ -551,37 +774,38 @@
                 var right = left + width;
                 var bottom = top + height;
 
+                var minWidth = parseInt(_.opt.minWidth, 10),// parseInt($.getElementStyle(_.controls.box, 'minWidth'), 10),
+                    minHeight = parseInt(_.opt.minHeight, 10); //parseInt($.getElementStyle(_.controls.box, 'minHeight'), 10);
+
+
                 document.onmousemove = function(){
                     if(!moveAble) {
                         return false;
                     }
                     var evt = $.getEvent();
-
-                    var minWidth = parseInt($.getElementStyle(_.controls.box, 'minWidth'), 10),
-                        minHeight = parseInt($.getElementStyle(_.controls.box, 'minHeight'), 10);
-
+                    
                     var x = evt.clientX - moveX, 
                         y = evt.clientY - moveY,
-                        w = pos.indexOf('left') >= 0 ? width - x : width + x,
-                        h = pos.indexOf('top') >= 0 ? height - y : height + y;
+                        w = dir.indexOf('left') >= 0 ? width - x : width + x,
+                        h = dir.indexOf('top') >= 0 ? height - y : height + y;
 
                     var enabled = w > minWidth && h > minHeight;
 
                     console.log('minWidth: ',minWidth, minHeight);
 
-                    console.log('mousemove: ', pos, left, top, left + x, top + y, x, y);
+                    console.log('mousemove: ', dir, left, top, left + x, top + y, x, y);
 
                     var newWidth = w < minWidth ? minWidth : w, 
                         newHeight = h < minHeight ? minHeight : h,
                         newLeft = left + x + newWidth > right ? right - newWidth : left + x,
                         newTop = top + y + newHeight > bottom ? bottom - newHeight : top + y;
 
-                    if(pos.indexOf('-') >= 0) { 
+                    if(dir.indexOf('-') >= 0) { 
                         _.controls.box.style.width = newWidth + 'px';
                         _.controls.box.style.height = newHeight + 'px';
                     }
 
-                    switch(pos) {
+                    switch(dir) {
                         case 'top':
                             _.controls.box.style.width = width + 'px';
                             _.controls.box.style.height = newHeight + 'px';
@@ -616,7 +840,7 @@
                             break;
                     }
 
-                    _.setSize();
+                    _.setBodySize();
                 };
                 document.onmouseup = _.controls.box.onmouseup = function(){
                     moveAble = false;
