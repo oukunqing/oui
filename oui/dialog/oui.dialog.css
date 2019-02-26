@@ -70,7 +70,7 @@
     box-sizing: border-box;
     clear:both; overflow:hidden;
 
-    cursor: move;
+    /*cursor: move;*/
 
     -moz-user-select:none;
     -khtml-user-select:none;

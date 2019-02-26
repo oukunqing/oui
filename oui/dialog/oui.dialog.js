@@ -42,9 +42,11 @@
         }, options);
 
         this.docOverflow();
+
         this.controls = {
             shade: null, container: null, box: null, top: null, title: null, body: null, content: null, bottom: null
         };
+
         this.buttons = {
             ok: null, cancel: null, close: null, min: null, max: null
         };
@@ -52,6 +54,9 @@
         this.status = {
             min: false, max: false, normal: true
         };
+
+        this.lastStatus = 'normal';
+
         this.initial(content);
     }
 
@@ -333,9 +338,11 @@
             } else {
                 _.close();
             }
+            return this;
         },
         focus: function(obj) {
             obj.focus();
+            return this;
         },
         close: function() {
             var _ = this, _ctls = this.controls;
@@ -351,114 +358,37 @@
 
             this.docOverflow(true);
 
-            $.Dialog.remove(this.id);        
+            $.Dialog.remove(this.id);
         },
         min: function() {
-            this.isMin = true;
-            this.setSize({type: 'min'});
+            return this.setSize({type: 'min'});
         },
         normal: function() {
-
+            return this.setSize({type: 'normal'});
         },
         max: function() {
             var _ = this;
-            console.log('dialog max');
-            var css = _.controls.box.className.trim();
-
-            if(this.isMin) {
-                this.isMax = !this.isMax;
-                $.removeClass(_.controls.box, 'oui-dialog-min');
-                $.removeClass(_.controls.bottom, 'display-none');
-            }
-
-            if(this.isMax) {
-                this.showSwitch();
-
-                $.removeClass(_.controls.box, 'oui-dialog-max');
-
-                if(_.controls.container) {
-                    $.removeClass(_.controls.container, 'dialog-overflow-hidden');
-                }
-
-                //$.setStyle(_.controls.box, _.oldSize);
-
-                // 从最大化窗口返回常规尺寸，重新设置dialog body尺寸
-                if(_.controls.body.hasHeight) {
-                    if(_.controls.body.oldHeight) {
-                        _.controls.body.style.height = _.controls.body.oldHeight + 'px';
-                    }
-                } else {
-                    _.controls.body.style['height'] = null;
-                }
-                this.isMax = false;
-
-                _.setSize({type: 'normal'});
-
-                $.removeClass(_.buttons.max, 'btn-normal');
-                
+            if(_.status.max || (_.status.min && _.lastStatus === 'normal')) {
+                return _.setSize({type: 'normal'});                
             } else {
-/*
-
-                _.controls.body.oldHeight = _.controls.body.offsetHeight;
-                _.controls.body.hasHeight = _.controls.body.style.height || 0;
-                /*
-                var bs = $.getBodySize();
-                var topHeight = _.controls.top ? _.controls.top.offsetHeight + 1 : 0, 
-                    bottomHeight = _.controls.bottom ? _.controls.bottom.offsetHeight + 1 : 0;
-
-                _.controls.body.style.height = (bs.height - topHeight - bottomHeight) + 'px';
-                */
-                //$.addClass(_.controls.box, 'oui-dialog-max');
-                //$.addClass(_.buttons.max, 'btn-normal');
-
-                //_.setSize(true);
-
-                if(_.controls.container) {
-                    $.addClass(_.controls.container, 'dialog-overflow-hidden');
-                }
-
-                _.setSize({type: 'max'});
-
-                this.isMax = true;
+                return _.setSize({type: 'max'});
             }
-            this.isMin = false;
         },
-        /*
-        setSize: function(isMax) {
-            var _ = this;
-            if(isMax) {
-                var bs = $.getBodySize();
-                _.controls.box.style.width = bs.width + 'px';
-                _.controls.box.style.height = bs.height + 'px';
-                _.controls.box.style.top = '0px';
-                _.controls.box.style.left = '0px';
+        setStatus: function(key, isLast) {
+            this.lastStatus = this.getStatus();
+            for(var k in this.status) {
+                this.status[k] = false;
             }
-            var boxH = _.controls.box.offsetHeight;
-
-            var topHeight = _.controls.top ? _.controls.top.offsetHeight + 1 : 0, 
-                bottomHeight = _.controls.bottom ? _.controls.bottom.offsetHeight + 1 : 0;
-
-            _.controls.body.style.height = (boxH - topHeight - bottomHeight) + 'px';
-        },
-        */
-        setStatus: function(key) {
-            if(key === 'normal') {
-                this.status['min'] = false;
-                this.status['max'] = false;
-                this.status['normal'] = true;
-            } else {
-                this.status['normal'] = false;
-                this.status[key] = true;
-            }
+            this.status[key] = true;
             return this;
         },
         getStatus: function(key) {
             if(typeof key === 'string') {
                 return this.status[key];
             } else {
-                for(var key in this.status) {
-                    if(this.status[key]) {
-                        return key;
+                for(var k in this.status) {
+                    if(this.status[k]) {
+                        return k;
                     }
                 }
             }
@@ -478,19 +408,25 @@
         },
         setSize: function(options) {
             var _ = this, _ctls = _.controls, _btns = _.buttons, obj = _ctls.box, par = {};
+            var isSetBodySize = false;
             var opt = $.extend({
                 type: 'normal',
                 width: 0,
                 height: 0
             }, options);
-            var isSetBodySize = false;
 
             if(_.getStatus() === opt.type) {
                 return this;
             }
 
-            if(_.getStatus() === 'normal') {
+            if(_.status.normal) {
                 _.setCache();
+            }
+
+            if(_.status.max && opt.type !== 'max' && _ctls.container) {
+                $.removeClass(_ctls.container, 'dialog-overflow-hidden');
+            } else if(opt.type !== 'min') {
+                $.removeClass(_ctls.bottom, 'display-none');
             }
 
             if(opt.type === 'max') {
@@ -502,6 +438,11 @@
                 if(_.status.min) {
                     $.removeClass(obj, 'oui-dialog-min');
                 }
+
+                if(_.controls.container) {
+                    $.addClass(_ctls.container, 'dialog-overflow-hidden');
+                }
+
                 _.hideSwitch().setStatus('max');
                 isSetBodySize = true;
             } else if(opt.type === 'min') {
@@ -523,7 +464,7 @@
                 } else if(_.status.min) {
                     $.removeClass(obj, 'oui-dialog-min');
                 }
-                _.setStatus('normal');
+                _.showSwitch().setStatus('normal');
 
                 if(opt.type === 'normal') {
                     $.setStyle(_ctls.box, _.lastSize);
@@ -548,42 +489,97 @@
             }
             return _;
         },
-        setScale: function(options) {
+        setScale: function(options, isDrag, dp) {
+            var _ = this, obj = _.controls.box;
             var opt = $.extend({
                 type: '',
-                dir: '',
-                width: 0,
-                height: 0,
+                dir: 'bottom-right',
                 x: 0,
                 y: 0
             }, options);
 
+            if(opt.dir === '' || (opt.x === 0 && opt.y === 0)) {
+                return this;
+            }
+
+            if(!isDrag) {                
+                dp = {
+                    width: obj.offsetWidth,
+                    height: obj.offsetHeight,
+                    top: obj.offsetTop,
+                    left: obj.offsetLeft,
+                    right: obj.offsetWidth + obj.offsetLeft,
+                    bottom: obj.offsetHeight + obj.offsetTop,
+                    minWidth: parseInt(_.opt.minWidth, 10),
+                    minHeight: parseInt(_.opt.minHeight, 10)
+                };
+            }
+
+            var w = dp.width + opt.x,
+                h = dp.height + opt.y,
+                newWidth = w < dp.minWidth ? dp.minWidth : w, 
+                newHeight = h < dp.minHeight ? dp.minHeight : h,
+                newLeft = 0,
+                newTop = 0;
+
+            if(opt.dir === 'center') {
+                opt.x = parseInt(Math.abs(opt.x) / 2, 10);
+                opt.y = parseInt(Math.abs(opt.y) / 2, 10);
+                newLeft = dp.left - opt.x;
+                newTop = dp.top - opt.y;
+            } else {
+                opt.x *= opt.dir.indexOf('left') >= 0 ? -1 : 1;
+                opt.y *= opt.dir.indexOf('top') >= 0 ? -1 : 1;
+                newLeft = dp.left + opt.x + newWidth > dp.right ? dp.right - newWidth : dp.left + opt.x,
+                newTop = dp.top + opt.y + newHeight > dp.bottom ? dp.bottom - newHeight : dp.top + opt.y;
+            }
+
+            if(opt.dir.indexOf('-') >= 0 || opt.dir === 'center') { 
+                obj.style.width = newWidth + 'px';
+                obj.style.height = newHeight + 'px';
+            }
+
             switch(opt.dir) {
                 case 'top':
-                    break;
-                case 'bottom':
-                    break;
-                case 'left':
+                    obj.style.width = dp.width + 'px';
+                    obj.style.height = newHeight + 'px';
+                    obj.style.top = newTop + 'px';
                     break;
                 case 'right':
+                    obj.style.width = newWidth + 'px';
+                    obj.style.height = dp.height + 'px';
+                    break;
+                case 'bottom':
+                    obj.style.width = dp.width + 'px';
+                    obj.style.height = newHeight + 'px';
+                    break;
+                case 'left':
+                    obj.style.width = newWidth + 'px';
+                    obj.style.height = dp.height + 'px';
+                    obj.style.left = newLeft + 'px';
                     break;
                 case 'top-left':
                 case 'left-top':
+                    obj.style.left = newLeft + 'px';
+                    obj.style.top = newTop + 'px';
                     break;
                 case 'top-right':
                 case 'right-top':
-                    break;
-                case 'bottom-left':
-                case 'left-bottom':
+                    obj.style.top = newTop + 'px';
                     break;
                 case 'bottom-right':
                 case 'right-bottom':
                     break;
+                case 'bottom-left':
+                case 'left-bottom':
+                    obj.style.left = newLeft + 'px';
+                    break;
                 case 'center':
+                    obj.style.left = newLeft + 'px';
+                    obj.style.top = newTop + 'px';
                     break;
             }
-
-            return this.setBodySize();
+            return _.setBodySize();
         },
         setBodySize: function() {
             var _ = this, obj = _.controls.box;
@@ -597,24 +593,24 @@
                 height: (obj.offsetHeight - topHeight - bottomHeight - paddingHeight) + 'px'
             };
 
-            $.setStyle(_.controls.body, size);
-
-            return this;
+            return $.setStyle(_.controls.body, size), _;
         },
         setPosition: function(pos) {
-            var _ = this, _ctls = this.controls;
+            var _ = this, obj = _.controls.box;
 
             $.addClass(_ctls.box, 'oui-dialog-pos');
 
             switch(pos) {
                 case 1:
-                    _ctls.box.style.left = '0px';
+                    obj.style.top = '0px';
+                    obj.style.left = '0px';
                     break;
                 case 2:
-                    $.addClass(_ctls.box, 'dialog-margin-center');
+                    obj.style.top = '0px';
+                    $.addClass(obj, 'dialog-margin-center');
                     break;
                 case 3:
-                    _ctls.box.style.right = '0px';
+                    obj.style.right = '0px';
                     break;
                 case 4:
                     break;
@@ -623,7 +619,8 @@
                 case 6:
                     break;
                 case 7:
-                    _ctls.box.style.bottom = '0px';
+                    obj.style.left = '0px';
+                    obj.style.bottom = '0px';
                     break;
                 case 8:
                     break;
@@ -680,7 +677,7 @@
                     _.controls.box.style.left = posX + 'px';
                     _.controls.box.style.top = posY + 'px';
 
-                    console.log('mousemove: ', evt.clientX, evt.clientY, moveTop, moveLeft, x, y);
+                    //console.log('mousemove: ', evt.clientX, evt.clientY, moveTop, moveLeft, x, y);
                     /*
                     _.pwMask.style.display = popwin.isIE6 || !cg.dragMask ? 'none' : 'block';
                     if(moveAble) {
@@ -747,36 +744,30 @@
         },
         dragSize: function() {
             var _ = this,
+                obj = _.controls.box,
                 moveX = 0,
                 moveY = 0,
-                moveTop = 0,
-                moveLeft = 0,
                 moveAble = false,
                 docMouseMoveEvent = document.onmousemove,
                 docMouseUpEvent = document.onmouseup;
 
             function _dragSize(dir) {
-                console.log('_dragSize: ', dir);
-
                 var evt = $.getEvent();
 
-                var cp = $.getScrollPosition();
-                var posX = posXOld = evt.clientX;
-                var posY = posYOld = evt.clientY;
                 moveAble = true;
                 moveX = evt.clientX;
                 moveY = evt.clientY;
-                
-                var width = _.controls.box.offsetWidth,
-                    height = _.controls.box.offsetHeight;
-                var top = parseInt(_.controls.box.offsetTop, 10);
-                var left = parseInt(_.controls.box.offsetLeft, 10);
-                var right = left + width;
-                var bottom = top + height;
 
-                var minWidth = parseInt(_.opt.minWidth, 10),// parseInt($.getElementStyle(_.controls.box, 'minWidth'), 10),
-                    minHeight = parseInt(_.opt.minHeight, 10); //parseInt($.getElementStyle(_.controls.box, 'minHeight'), 10);
-
+                var par = {
+                    width: obj.offsetWidth,
+                    height: obj.offsetHeight,
+                    top: obj.offsetTop,
+                    left: obj.offsetLeft,
+                    right: obj.offsetWidth + obj.offsetLeft,
+                    bottom: obj.offsetHeight + obj.offsetTop,
+                    minWidth: parseInt(_.opt.minWidth, 10),
+                    minHeight: parseInt(_.opt.minHeight, 10)
+                };
 
                 document.onmousemove = function(){
                     if(!moveAble) {
@@ -784,10 +775,16 @@
                     }
                     var evt = $.getEvent();
                     
-                    var x = evt.clientX - moveX, 
-                        y = evt.clientY - moveY,
+                    var x = (evt.clientX - moveX) * (dir.indexOf('left') >= 0 ? -1 : 1), 
+                        y = (evt.clientY - moveY) * (dir.indexOf('top') >= 0 ? -1 : 1);
+
+                    _.setScale({ dir: dir, x: x, y: y }, true, par);
+
+                        /*,
                         w = dir.indexOf('left') >= 0 ? width - x : width + x,
                         h = dir.indexOf('top') >= 0 ? height - y : height + y;
+
+                        console.log('x: ', x, ', y: ', y);
 
                     var enabled = w > minWidth && h > minHeight;
 
@@ -841,14 +838,12 @@
                     }
 
                     _.setBodySize();
+                    */
                 };
                 document.onmouseup = _.controls.box.onmouseup = function(){
                     moveAble = false;
-                    
-                    console.log('mouseup');
                 };
             }
-
 
             $('.border-switch').each(function(i, obj){
                 $.addEventListener(obj, 'mousedown', function() {

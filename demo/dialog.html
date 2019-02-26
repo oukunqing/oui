@@ -24,6 +24,24 @@ function showDialog(){
     var dialog = $.alert('Hello!对话框');
 
     console.log('dialog: ', dialog);
+
+    window.setTimeout(function(){
+        dialog.setScale({
+            dir: 'bottom-right',
+            x: 100,
+            y: 80
+        });
+    }, 8000);
+
+
+    window.setTimeout(function(){
+        dialog.setScale({
+            dir: 'center',
+            x: 120,
+            y: 88
+        });
+    }, 15000);
+
 }
 
 function update() {
