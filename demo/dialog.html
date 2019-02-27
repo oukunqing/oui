@@ -3,8 +3,8 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>对话框插件测试（未完） - OUI</title>
-    <script type="text/javascript" src="../oui/oui.js"></script>
-    <script type="text/javascript" src="../oui/dialog/oui.dialog.js"></script>
+    <script type="text/javascript" src="../oui/oui.js?1"></script>
+    <script type="text/javascript" src="../oui/dialog/oui.dialog.js?1"></script>
 </head>
 </head>
 <body>
@@ -21,7 +21,7 @@
 <script type="text/javascript">
 
 function showDialog(){
-    var dialog = $.alert('Hello!对话框');
+    var dialog = $.alert('Hello!对话框', {position: 4});
 
     console.log('dialog: ', dialog);
     /*

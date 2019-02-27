@@ -27,24 +27,41 @@
         return s;
     }
 
-    function MyDialog(content, options){
+    function MyDialog(content, title, options){
         this.id = 1;
+        if($.isObject(content)) {
+            options = content;
+            content = '';
+            title = '';
+        } else if($.isObject(title)) {
+            options = title;
+            title = '';
+        }
         this.opt = $.extend({
+            status: 'normal',
             minWidth: '180px',
             minHeight: '160px',
             maxWidth: '100%',
             maxHeight: '100%',
             width: '400px',
             height: '240px',
+            content: content || '',
+            title: title || '标题栏',
             position: 5,
-            title: '标题栏',
+            x: 0,
+            y: 0,
 
         }, options);
+
+        console.log('opt11:', this.opt);
 
         this.docOverflow();
 
         this.controls = {
-            shade: null, container: null, box: null, top: null, title: null, body: null, content: null, bottom: null
+            shade: null, container: null, box: null, 
+            top: null, title: null, panel: null,
+            body: null, content: null, 
+            bottom: null
         };
 
         this.buttons = {
@@ -52,12 +69,12 @@
         };
 
         this.status = {
-            min: false, max: false, normal: true
+            min: false, max: false, normal: false
         };
 
-        this.lastStatus = 'normal';
+        this.lastStatus = '';
 
-        this.initial(content);
+        this.initial(this.opt);
     }
 
     MyDialog.prototype = {
@@ -74,12 +91,12 @@
                 }
             }
         },
-        initial: function(content, options){
-            this.build(content, options);
+        initial: function(options){
+            this.build(options);
         },
-        build: function(content, options){
-            var _ = this;
-            var _ctls = this.controls;
+        build: function(options){
+            var _ = this, _ctls = this.controls, opt = options;
+
             //遮罩层
             _ctls.shade = document.createElement('div');
             _ctls.shade.className = 'oui-dialog-shade';
@@ -111,23 +128,23 @@
 
             _ctls.box.cache = {};
 
-            _ctls.top = this.buildTop();
+            _ctls.top = _.buildTop(opt.title);
             _ctls.box.appendChild(_ctls.top);
 
-            _ctls.body = this.buildBody(content);
+            _ctls.body = _.buildBody(opt.content);
             _ctls.box.appendChild(_ctls.body);
             
-            _ctls.bottom = this.buildBottom();
+            _ctls.bottom = _.buildBottom();
             _ctls.box.appendChild(_ctls.bottom);
 
-            _ctls.box.appendChild(this.buildSwitch('top'));
-            _ctls.box.appendChild(this.buildSwitch('bottom'));
-            _ctls.box.appendChild(this.buildSwitch('left'));
-            _ctls.box.appendChild(this.buildSwitch('right'));
-            _ctls.box.appendChild(this.buildSwitch('top-left'));
-            _ctls.box.appendChild(this.buildSwitch('top-right'));
-            _ctls.box.appendChild(this.buildSwitch('bottom-left'));
-            _ctls.box.appendChild(this.buildSwitch('bottom-right'));
+            _ctls.box.appendChild(_.buildSwitch('top'));
+            _ctls.box.appendChild(_.buildSwitch('bottom'));
+            _ctls.box.appendChild(_.buildSwitch('left'));
+            _ctls.box.appendChild(_.buildSwitch('right'));
+            _ctls.box.appendChild(_.buildSwitch('top-left'));
+            _ctls.box.appendChild(_.buildSwitch('top-right'));
+            _ctls.box.appendChild(_.buildSwitch('bottom-left'));
+            _ctls.box.appendChild(_.buildSwitch('bottom-right'));
 
             document.body.appendChild(_ctls.shade);
 
@@ -139,50 +156,55 @@
                 document.body.appendChild(_ctls.box);
             }
 
-            this.dragPosition();
+            _.dragPosition().dragSize();
 
-            this.dragSize();
+            _.setSize({type: _.opt.status, width: _.opt.width, height: _.opt.height});
+            _.setPosition({pos: _.opt.position, x: _.opt.x, y: _.opt.y});
+
+            console.log(_.controls.body.offsetHeight, _.controls.body.scrollHeight);
 
             //this.setPosition(3);
         },
-        buildTop: function(str){
+        buildTop: function(title){
             var _ = this;
-            var div = document.createElement('div');
-            div.className = 'top';
+            var top = document.createElement('div');
+            top.className = 'top';
 
-            $.addEventListener(div, 'dblclick', function() {
+            $.addEventListener(top, 'dblclick', function() {
                 _.max();
                 $.cancelBubble();
             });
 
-            $.addEventListener(div, 'mousedown', function() {
+            $.addEventListener(top, 'mousedown', function() {
 
             });
 
-            var title = document.createElement('div');
-            title.className = 'title';
-            title.innerHTML =  str || '标题';
-            div.appendChild(title);
+            var div = document.createElement('div');
+            div.className = 'title';
+            div.innerHTML =  title || _.opt.title;
+            top.appendChild(div);
 
-            this.controls.title = title;
+            _.controls.title = div;
 
-            var btn = document.createElement('div');
-            btn.className = 'dialog-btn-panel';
-            btn.innerHTML = '<a class="btn btn-min" code="min"></a>'
+            var panel = document.createElement('div');
+            panel.className = 'dialog-btn-panel';
+            panel.innerHTML = '<a class="btn btn-min" code="min"></a>'
                 + '<a class="btn btn-max" code="max"></a>'
                 + '<a class="btn btn-close" code="close"></a>';
-            btn.style.cssText = 'float:right;';
+            panel.style.cssText = 'float:right;';
 
-            div.appendChild(btn);
+            top.appendChild(panel);
 
-            for(var i = 0; i < btn.childNodes.length; i++) {
-                var obj = btn.childNodes[i], key = obj.getAttribute('code');
-                this.buttons[key] = obj;
+            _.controls.panel = panel;
+
+            for(var i = 0; i < panel.childNodes.length; i++) {
+                var obj = panel.childNodes[i], key = obj.getAttribute('code');
+                _.buttons[key] = obj;
             }
 
-            this.setEvent(btn.childNodes, 'click', false);
+            _.setEvent(panel.childNodes, 'click', false);
 
-            return div;
+            return top;
         },
         buildBody: function(content) {
             var div = document.createElement('div');
@@ -205,8 +227,8 @@
             var div = document.createElement('div');
             div.className = 'bottom';
 
-            var html = '<a class="btn btn-ok btn-primary btn-mr" code="ok" href="javascript:void(0);" shortcutKey="Y">\u786e\u5b9a</a>'
-                + '<a class="btn btn-cancel btn-default btn-ml" code="cancel" href="javascript:void(0);" shortcutKey="N">\u53d6\u6d88</a>';
+            var html = '<a class="btn btn-primary btn-mr" code="ok" href="javascript:void(0);" shortcutKey="Y">\u786e\u5b9a</a>'
+                + '<a class="btn btn-default btn-ml" code="cancel" href="javascript:void(0);" shortcutKey="N">\u53d6\u6d88</a>';
 
             div.innerHTML = html;
 
@@ -242,17 +264,80 @@
             });
             return this;
         },
-        show: function (content){
-            console.log('show: ' + content);
+        show: function (content, title, isHide){
+            if($.isBoolean(content)) {
+                isHide = content;
+                title = undefined;
+                content = undefined;
+            } else if($.isBoolean(title)) {
+                isHide = title;
+                title = undefined;
+            }
+            var _ = this, _ctls = this.controls, display = isHide ? 'none' : '';
 
+            if(!$.isUndefined(content)) {
+                _ctls.body.innerHTML = content;
+            }
+            if(!$.isUndefined(title)) {
+                _ctls.title.innerHTML = title;
+            }
+
+            if(_ctls.container) {
+                _ctls.container.style.display = display;
+            } else {
+                _ctls.box.style.display = display;
+            }
+            if(_ctls.shade) {
+                _ctls.shade.style.display = display;
+            }
+
+            return _.docOverflow(isHide), _;
+        },
+        hide: function() {
+            return this.show(true);
+        },
+        close: function() {
+            var _ = this, _ctls = this.controls;
+            if(_ctls.container) {
+                //$.removeChild(document.body, _ctls.container);
+                document.body.removeChild(_ctls.container);
+            } else {
+                document.body.removeChild(_ctls.box);
+            }
+            if(_ctls.shade) {
+                document.body.removeChild(_ctls.shade);
+            }
+
+            _.docOverflow(true);
+
+            $.Dialog.remove(_.id);
+
+            return _;
+        },
+        update: function(content, title, options){
+            var _ = this, _ctls = this.controls;
+            _ctls.body.innerHTML = content;
+            _ctls.title.innerHTML = title;
 
             return this;
         },
-        update: function(content){
-            this.body.innerHTML = content;
-
-            console.log('update: ' + content);
+        focus: function(obj) {
+            obj.focus();
             return this;
+        },
+        min: function() {
+            return this.setSize({type: 'min'});
+        },
+        normal: function() {
+            return this.setSize({type: 'normal'});
+        },
+        max: function() {
+            var _ = this;
+            if(_.status.max || (_.status.min && _.lastStatus === 'normal')) {
+                return _.setSize({type: 'normal'});                
+            } else {
+                return _.setSize({type: 'max'});
+            }
         },
         check: function(obj) {
             if(!$.isElement(obj)) {
@@ -266,6 +351,27 @@
                 parent = parent.parentNode;
             }
             return false;
+        },
+        action: function(obj) {
+            var _ = this, code = '';
+            if(typeof obj === 'string') {
+                code = obj;
+            } else {
+                if(!_.check(obj)) {
+                    return false;
+                }
+                code = obj.getAttribute('code');
+            }
+            if(code.in(['close', 'cancel'])) {
+                _.close();
+            } else if(code === 'min') {
+                _.min();
+            } else if(code === 'max') {
+                _.max();
+            } else {
+                _.close();
+            }
+            return this;
         },
         setEvent: function(controls, eventName, keypress) {
             var _ = this;
@@ -319,61 +425,6 @@
                 }
             });
         },
-        action: function(obj) {
-            var _ = this, css = '';
-            if(typeof obj === 'string') {
-                css = obj;
-            } else {
-                if(!_.check(obj)) {
-                    return false;
-                }
-                css = obj.className;
-            }
-            if(css.indexOf('close') >= 0 || css.indexOf('cancel') >= 0) {
-                _.close();
-            } else if(css.indexOf('min') >= 0) {
-                _.min();
-            } else if(css.indexOf('max') >= 0) {
-                _.max();
-            } else {
-                _.close();
-            }
-            return this;
-        },
-        focus: function(obj) {
-            obj.focus();
-            return this;
-        },
-        close: function() {
-            var _ = this, _ctls = this.controls;
-            if(_ctls.container) {
-                //$.removeChild(document.body, _ctls.container);
-                document.body.removeChild(_ctls.container);
-            } else {
-                document.body.removeChild(_ctls.box);
-            }
-            if(_ctls.shade) {
-                document.body.removeChild(_ctls.shade);
-            }
-
-            this.docOverflow(true);
-
-            $.Dialog.remove(this.id);
-        },
-        min: function() {
-            return this.setSize({type: 'min'});
-        },
-        normal: function() {
-            return this.setSize({type: 'normal'});
-        },
-        max: function() {
-            var _ = this;
-            if(_.status.max || (_.status.min && _.lastStatus === 'normal')) {
-                return _.setSize({type: 'normal'});                
-            } else {
-                return _.setSize({type: 'max'});
-            }
-        },
         setStatus: function(key, isLast) {
             this.lastStatus = this.getStatus();
             for(var k in this.status) {
@@ -397,12 +448,12 @@
             var obj = this.controls.box;
 
             this.lastSize = {
-                width: obj.offsetWidth + 'px',
-                height: obj.offsetHeight + 'px',
-                top: obj.offsetTop + 'px',
-                left: obj.offsetLeft + 'px',
-                right: (obj.offsetLeft + obj.offsetWidth) + 'px',
-                bottom: (obj.offsetTop + obj.offsetHeight) + 'px'
+                width: obj.offsetWidth,
+                height: obj.offsetHeight,
+                top: obj.offsetTop,
+                left: obj.offsetLeft,
+                right: (obj.offsetLeft + obj.offsetWidth),
+                bottom: (obj.offsetTop + obj.offsetHeight)
             };
             return this;
         },
@@ -422,11 +473,7 @@
             opt.width = parseInt(opt.width, 10);
             opt.height = parseInt(opt.height, 10);
 
-            if(opt.type === '' || isNaN(opt.width) || isNaN(opt.height)) {
-                return this;
-            }
-
-            if(_.getStatus() === opt.type) {
+            if(opt.type === '' || isNaN(opt.width) || isNaN(opt.height) || _.getStatus() === opt.type) {
                 return this;
             }
 
@@ -441,17 +488,17 @@
             }
 
             if(opt.type === 'max') {
-                par = {width: '100%', height: '100%', top: 0, left: 0, right: 0, botton: 0};
+                par = {width: '100%', height: '100%', top: 0, left: 0, right: 0, bottom: 0};
 
                 $.addClass(obj, 'oui-dialog-max');
                 $.addClass(_btns.max, 'btn-normal');
 
-                if(_.status.min) {
-                    $.removeClass(obj, 'oui-dialog-min');
-                }
-
                 if(_.controls.container) {
                     $.addClass(_ctls.container, 'dialog-overflow-hidden');
+                }
+
+                if(_.status.min) {
+                    $.removeClass(obj, 'oui-dialog-min');
                 }
 
                 _.hideSwitch().setStatus('max');
@@ -465,7 +512,7 @@
                 }
                 $.removeClass(_btns.max, 'btn-normal');
 
-                _.hideSwitch().setStatus('min');
+                _.hideSwitch().setStatus('min').setPosition({pos: _.opt.position});
             } else {
                 isSetBodySize = true;
                 $.removeClass(_btns.max, 'btn-normal');
@@ -483,7 +530,11 @@
                     isSetBodySize = false;
                     _.setScale(options);
                 } else {  //opt.type === 'normal'
-                    $.setStyle(_ctls.box, _.lastSize);
+                    if(!$.isUndefined(_.lastSize)) {
+                        $.setStyle(_ctls.box, _.lastSize, 'px');
+                    } else {
+                        par = {width: opt.width, height: opt.height};
+                    }
                 }
             }
 
@@ -598,10 +649,20 @@
 
             return $.setStyle(_.controls.body, size), _;
         },
+        clearPositionStyle: function(obj) {
+            var arr = obj.style.cssText.split(';');
+            var cssText = [];
+            for(var i in arr) {
+                var name = arr[i].split(':')[0].trim();
+                if(!name.in(['top', 'left', 'right', 'bottom'])) {
+                    cssText.push(arr[i]);
+                }
+            }
+            obj.style.cssText = cssText.join(';');
+            return this;
+        },
         setPosition: function(options) {
             var _ = this, obj = _.controls.box;
-
-            $.addClass(_ctls.box, 'oui-dialog-pos');
 
             if($.isString(options) || $.isNumber(options)) {
                 options = { pos: options };
@@ -612,33 +673,51 @@
                 y: 0
             }, options);
 
-            switch(pos) {
+            opt.pos = opt.pos === 'custom' ? 10 : parseInt(opt.pos, 10);
+
+            if(isNaN(opt.pos) || isNaN(opt.x) || isNaN(opt.y)) {
+                return this;
+            }
+
+            var bs = $.getBodySize(),
+                width = obj.offsetWidth,
+                height = obj.offsetHeight,
+                posX = bs.width / 2 - width / 2,
+                posY = bs.height / 2 - height / 2;
+
+            //清除cssText上下左右4个样式
+            _.clearPositionStyle(obj);
+
+            switch(opt.pos) {
                 case 1:
-                    obj.style.top = '0px';
-                    obj.style.left = '0px';
+                    $.setStyle(obj, {left: opt.x, top: opt.y}, 'px');
                     break;
                 case 2:
-                    obj.style.top = '0px';
-                    $.addClass(obj, 'dialog-margin-center');
+                    $.setStyle(obj, {left: posX, top: opt.y}, 'px');
                     break;
                 case 3:
-                    obj.style.right = '0px';
+                    $.setStyle(obj, {right: opt.x,  top: opt.y}, 'px');
                     break;
                 case 4:
+                    $.setStyle(obj, {left: opt.x, top: posY}, 'px');
                     break;
                 case 5:
+                    $.setStyle(obj, {left: posX, top: posY}, 'px');
                     break;
                 case 6:
+                    $.setStyle(obj, {right: opt.x, bottom: posY}, 'px');
                     break;
                 case 7:
-                    obj.style.left = '0px';
-                    obj.style.bottom = '0px';
+                    $.setStyle(obj, {left: opt.x, bottom: opt.y}, 'px');
                     break;
                 case 8:
+                    $.setStyle(obj, {left: posX, bottom: opt.y}, 'px');
                     break;
                 case 9:
+                    $.setStyle(obj, {right: opt.x, bottom: opt.y}, 'px');
                     break;
                 case 10:    //custom
+
                     $.setStyle(obj, {top: opt.y, left: opt.x}, 'px');
                     break;
             }
@@ -648,11 +727,36 @@
 
             return this;
         },
+        dragToNormal: function(evt, bs, moveX, moveY) {
+            var _ = this, _ctls = _.controls, obj = _ctls.box;
+
+            //对话框最大化时，拖动对话框，先切换到标准模式（尺寸、定位）
+            _.setSize({type: 'normal'})
+
+            var offsetRateX = (evt.clientX / bs.width),
+                offsetX = evt.clientX,
+                offsetY = evt.clientY - moveY,
+                btnPanelWidth = _ctls.panel ? _ctls.panel.offsetWidth : 0;
+
+            if(offsetRateX > 0.5) {
+                offsetX = evt.clientX - obj.offsetWidth + (obj.offsetWidth) * (1 - offsetRateX) + btnPanelWidth * offsetRateX;
+            } else if(offsetX > (obj.offsetWidth) / 2) {
+                offsetX = evt.clientX - (obj.offsetWidth) / 2;
+            } else {
+                offsetX = evt.clientX - moveX;
+            }
+
+            //移动对话框到当前鼠标位置
+            _.setPosition({pos: 'custom', x: offsetX, y: offsetY});
+
+            return this;
+        },
         dragPosition: function () {
             var _ = this,
-                bodySize = $.getBodySize(),
-                clientWidth = bodySize.width,
-                clientHeight = bodySize.height,
+                obj = _.controls.box,
+                bs = $.getBodySize(),
+                clientWidth = bs.width,
+                clientHeight = bs.height,
                 moveX = 0,
                 moveY = 0,
                 moveTop = 0,
@@ -663,10 +767,7 @@
 
             function moveDialog() {
                 var evt = $.getEvent();
-
-                if(_.status.max) {
-                    //_.setSize({type: 'normal'});
-                }
+                var isToNormal = false;
 
                 var cp = $.getScrollPosition();
                 var posX = posXOld = evt.clientX;
@@ -675,65 +776,32 @@
                 moveX = evt.clientX;
                 moveY = evt.clientY;
                 
-                moveTop = parseInt(_.controls.box.offsetTop, 10);
-                moveLeft = parseInt(_.controls.box.offsetLeft, 10);
+                moveTop = obj.offsetTop;
+                moveLeft = obj.offsetLeft;
 
                 document.onmousemove = function(){
                     if(!moveAble) {
                         return false;
                     }
+
                     var evt = $.getEvent();
+
+                    if(!isToNormal && _.status.max) {
+                        isToNormal = true;
+                        _.dragToNormal(evt, bs, moveX, moveY);
+                        moveTop = obj.offsetTop;
+                        moveLeft = obj.offsetLeft;
+                    }
+
                     var x = moveLeft + evt.clientX - moveX,
-                        y = moveTop + evt.clientY - moveY;
-                    var w = _.controls.box.offsetWidth,
-                        h = _.controls.box.offsetHeight;
+                        y = moveTop + evt.clientY - moveY,
+                        w = obj.offsetWidth,
+                        h = obj.offsetHeight;
 
                     posX = x;
                     posY = y;
 
-                    _.controls.box.style.left = posX + 'px';
-                    _.controls.box.style.top = posY + 'px';
-
-                    //console.log('mousemove: ', evt.clientX, evt.clientY, moveTop, moveLeft, x, y);
-                    /*
-                    _.pwMask.style.display = popwin.isIE6 || !cg.dragMask ? 'none' : 'block';
-                    if(moveAble) {
-                        var evt = GetEvent();
-                        var x = moveLeft + evt.clientX - moveX;
-                        var y = moveTop + evt.clientY - moveY;
-                        var w = popwin.isIE6 || !cg.dragMask ? parseInt(_.pwBox.style.width, 10) + 2 : parseInt(_.pwMask.style.width, 10);
-                        var h = popwin.isIE6 || !cg.dragMask ? parseInt(_.pwBox.style.height, 10) + 2 : parseInt(_.pwMask.style.height, 10);
-                        if(cg.dragRangeLimit){ //窗体在当前页面范围(浏览器屏幕范围)内拖动
-                            if(popwin.isIE6){ //IE6浏览器特殊处理
-                                var lc = '' + cg.position == '5';
-                                var w2 = lc ? w/2 : w;
-                                var h2 = lc ? h/2 : h;
-                                posX = x <= 0 || (lc && x-w2 <= 0)? (lc ? w2 : 0) : ((x + w2) > clientWidth ? clientWidth - w2: x);
-                                posY = y <= 0 ? 0 : ((y + h2) > clientHeight ? clientHeight - h2: y);
-                            }
-                            else{
-                                posX = x <= 0 ? 0 : ((x + w) > clientWidth ? clientWidth - w: x);
-                                posY = y <= 0 ? 0 : ((y + h) > clientHeight ? clientHeight - h: y);
-                            }
-                        } else {
-                            posX = x;
-                            posY = y;
-                        }
-                        if(popwin.isIE6 || !cg.dragMask){
-                            _.pwBox.style.left = posX + 'px';
-                            _.pwBox.style.top = posY + 'px';
-                        } else {
-                            _.pwMask.style.left = (posX + cp.left) + 'px';
-                            _.pwMask.style.top = (posY + cp.top) + 'px';
-                        }
-
-                        if(Math.abs(evt.clientX - moveX) >= cg.dragAnchor || Math.abs(evt.clientY - moveY) >= cg.dragAnchor){
-                            cg.leftX = posX;
-                            cg.topY = posY;
-                            cg.anchor = true; //当窗体拖离初始位置锚定范围时，标记窗体被锚定
-                        }
-                    }
-                    */
+                    $.setStyle(obj, {left: posX, top: posY}, 'px');
                 };
                 document.onmouseup = function(){
                     moveAble = false;
@@ -757,10 +825,10 @@
                 };
             }
 
-            $.addEventListener(_.controls.top, 'mousedown', function(){
+            return $.addEventListener(_.controls.top, 'mousedown', function(){
                 moveDialog();
                 $.cancelBubble();
-            });
+            }), this;
         },
         dragSize: function() {
             var _ = this,
@@ -793,10 +861,9 @@
                     if(!moveAble) {
                         return false;
                     }
-                    var evt = $.getEvent();
-                    
-                    var x = (evt.clientX - moveX) * (dir.indexOf('left') >= 0 ? -1 : 1), 
-                        y = (evt.clientY - moveY) * (dir.indexOf('top') >= 0 ? -1 : 1);
+                    var e = $.getEvent(),
+                        x = (e.clientX - moveX) * (dir.indexOf('left') >= 0 ? -1 : 1), 
+                        y = (e.clientY - moveY) * (dir.indexOf('top') >= 0 ? -1 : 1);
 
                     _.setScale({ dir: dir, x: x, y: y }, true, par);
 
@@ -821,43 +888,6 @@
                         _.controls.box.style.width = newWidth + 'px';
                         _.controls.box.style.height = newHeight + 'px';
                     }
-
-                    switch(dir) {
-                        case 'top':
-                            _.controls.box.style.width = width + 'px';
-                            _.controls.box.style.height = newHeight + 'px';
-                            _.controls.box.style.top = newTop + 'px';
-                            break;
-                        case 'left':
-                            _.controls.box.style.width = newWidth + 'px';
-                            _.controls.box.style.height = height + 'px';
-                            _.controls.box.style.left = newLeft + 'px';
-                            break;
-                        case 'right':
-                            _.controls.box.style.width = newWidth + 'px';
-                            _.controls.box.style.height = height + 'px';
-                            break;
-                        case 'bottom':
-                            _.controls.box.style.width = width + 'px';
-                            _.controls.box.style.height = newHeight + 'px';
-                            break;
-                        case 'top-left':
-                            _.controls.box.style.left = newLeft + 'px';
-                            _.controls.box.style.top = newTop + 'px';
-                            break;
-                        case 'top-right':
-                            _.controls.box.style.top = newTop + 'px';
-                            break;
-                        case 'bottom-right':
-                            //_.controls.box.style.width = newWidth + 'px';
-                            //_.controls.box.style.height = newHeight + 'px';
-                            break;
-                        case 'bottom-left':
-                            _.controls.box.style.left = newLeft + 'px';
-                            break;
-                    }
-
-                    _.setBodySize();
                     */
                 };
                 document.onmouseup = _.controls.box.onmouseup = function(){
@@ -871,6 +901,7 @@
                     $.cancelBubble();
                 });
             });
+            return this;
         }
     };
 
@@ -898,15 +929,14 @@
             console.log('DialogCache: ', this.DialogCache);
             return dialog;
         },
-        show: function(content, options) {
+        show: function(content, title, options) {
             var id = 1;
             var d = this.get(id);
 
             if(d === null) {
-                d = this.set(id, new MyDialog(content, options));
-                d.show(content);
+                d = this.set(id, new MyDialog(content, title, options));
             } else {
-                d.update(content);
+                d.update(content, title, options);
             }
 
             return d;
@@ -921,19 +951,19 @@
     $.Dialog = new Dialog();
 
     $.extend({
-        alert: function(content, options){
-            return $.Dialog.show(content, options);
+        alert: function(content, title, options){
+            return $.Dialog.show(content, title, options);
         },
         confirm: function(content, options){
 
         },
-        msg: function(content){
+        msg: function(content, options){
 
         },
-        tips: function(content){
+        tips: function(content, options){
 
         },
-        tooltip: function(content){
+        tooltip: function(content, options){
 
         }
     });
