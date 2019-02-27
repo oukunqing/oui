@@ -409,11 +409,22 @@
         setSize: function(options) {
             var _ = this, _ctls = _.controls, _btns = _.buttons, obj = _ctls.box, par = {};
             var isSetBodySize = false;
+
+            if($.isString(options)) {
+                options = { type: options };
+            }
             var opt = $.extend({
                 type: 'normal',
                 width: 0,
                 height: 0
             }, options);
+
+            opt.width = parseInt(opt.width, 10);
+            opt.height = parseInt(opt.height, 10);
+
+            if(opt.type === '' || isNaN(opt.width) || isNaN(opt.height)) {
+                return this;
+            }
 
             if(_.getStatus() === opt.type) {
                 return this;
@@ -466,15 +477,13 @@
                 }
                 _.showSwitch().setStatus('normal');
 
-                if(opt.type === 'normal') {
-                    $.setStyle(_ctls.box, _.lastSize);
-                } else if(opt.type === 'resize') {
+                if(opt.type === 'resize' || opt.type === 'size') {
                     par = {width: opt.width, height: opt.height};
                 } else if(opt.type === 'scale') {
                     isSetBodySize = false;
                     _.setScale(options);
-                } else {
-
+                } else {  //opt.type === 'normal'
+                    $.setStyle(_ctls.box, _.lastSize);
                 }
             }
 
@@ -498,7 +507,12 @@
                 y: 0
             }, options);
 
-            if(opt.dir === '' || (opt.x === 0 && opt.y === 0)) {
+            opt.x = parseInt(opt.x, 10);
+            opt.y = parseInt(opt.y, 10);
+
+            if(opt.dir === '' || isNaN(opt.x) || isNaN(opt.y)) {
+                return this;
+            } else if(opt.x === 0 && opt.y === 0) {
                 return this;
             }
 
@@ -530,53 +544,42 @@
             } else {
                 opt.x *= opt.dir.indexOf('left') >= 0 ? -1 : 1;
                 opt.y *= opt.dir.indexOf('top') >= 0 ? -1 : 1;
-                newLeft = dp.left + opt.x + newWidth > dp.right ? dp.right - newWidth : dp.left + opt.x,
-                newTop = dp.top + opt.y + newHeight > dp.bottom ? dp.bottom - newHeight : dp.top + opt.y;
+                newLeft = (dp.left + opt.x + newWidth) > dp.right ? dp.right - newWidth : dp.left + opt.x;
+                newTop = (dp.top + opt.y + newHeight) > dp.bottom ? dp.bottom - newHeight : dp.top + opt.y;
             }
 
-            if(opt.dir.indexOf('-') >= 0 || opt.dir === 'center') { 
-                obj.style.width = newWidth + 'px';
-                obj.style.height = newHeight + 'px';
+            if(opt.dir.indexOf('-') >= 0 || opt.dir === 'center') {
+                $.setStyle(obj, {width: newWidth, height: newHeight}, 'px');
             }
 
             switch(opt.dir) {
-                case 'top':
-                    obj.style.width = dp.width + 'px';
-                    obj.style.height = newHeight + 'px';
-                    obj.style.top = newTop + 'px';
+                case 'bottom-right':
+                case 'right-bottom': //不用处理
                     break;
                 case 'right':
-                    obj.style.width = newWidth + 'px';
-                    obj.style.height = dp.height + 'px';
+                    $.setStyle(obj, {width: newWidth, height: dp.height}, 'px');
                     break;
                 case 'bottom':
-                    obj.style.width = dp.width + 'px';
-                    obj.style.height = newHeight + 'px';
+                    $.setStyle(obj, {width: dp.width, height: newHeight}, 'px');
                     break;
                 case 'left':
-                    obj.style.width = newWidth + 'px';
-                    obj.style.height = dp.height + 'px';
-                    obj.style.left = newLeft + 'px';
+                    $.setStyle(obj, {width: newWidth, height: dp.height, left: newLeft}, 'px');
+                    break;
+                case 'top':
+                    $.setStyle(obj, {width: dp.width, height: newHeight, top: newTop}, 'px');
                     break;
                 case 'top-left':
                 case 'left-top':
-                    obj.style.left = newLeft + 'px';
-                    obj.style.top = newTop + 'px';
+                case 'center':
+                    $.setStyle(obj, {left: newLeft, top: newTop}, 'px');
                     break;
                 case 'top-right':
                 case 'right-top':
-                    obj.style.top = newTop + 'px';
-                    break;
-                case 'bottom-right':
-                case 'right-bottom':
+                    $.setStyle(obj, {top: newTop}, 'px');
                     break;
                 case 'bottom-left':
                 case 'left-bottom':
-                    obj.style.left = newLeft + 'px';
-                    break;
-                case 'center':
-                    obj.style.left = newLeft + 'px';
-                    obj.style.top = newTop + 'px';
+                    $.setStyle(obj, {left: newLeft}, 'px');
                     break;
             }
             return _.setBodySize();
@@ -595,10 +598,19 @@
 
             return $.setStyle(_.controls.body, size), _;
         },
-        setPosition: function(pos) {
+        setPosition: function(options) {
             var _ = this, obj = _.controls.box;
 
             $.addClass(_ctls.box, 'oui-dialog-pos');
+
+            if($.isString(options) || $.isNumber(options)) {
+                options = { pos: options };
+            }
+            var opt = $.extend({
+                pos: 5,
+                x: 0,
+                y: 0
+            }, options);
 
             switch(pos) {
                 case 1:
@@ -626,7 +638,8 @@
                     break;
                 case 9:
                     break;
-                case 10:
+                case 10:    //custom
+                    $.setStyle(obj, {top: opt.y, left: opt.x}, 'px');
                     break;
             }
             return this;
@@ -650,6 +663,10 @@
 
             function moveDialog() {
                 var evt = $.getEvent();
+
+                if(_.status.max) {
+                    //_.setSize({type: 'normal'});
+                }
 
                 var cp = $.getScrollPosition();
                 var posX = posXOld = evt.clientX;
@@ -716,7 +733,7 @@
                             cg.anchor = true; //当窗体拖离初始位置锚定范围时，标记窗体被锚定
                         }
                     }
-                        */
+                    */
                 };
                 document.onmouseup = function(){
                     moveAble = false;
@@ -740,7 +757,10 @@
                 };
             }
 
-            $.addEventListener(_.controls.top, 'mousedown', moveDialog);
+            $.addEventListener(_.controls.top, 'mousedown', function(){
+                moveDialog();
+                $.cancelBubble();
+            });
         },
         dragSize: function() {
             var _ = this,
@@ -848,6 +868,7 @@
             $('.border-switch').each(function(i, obj){
                 $.addEventListener(obj, 'mousedown', function() {
                     _dragSize(obj.pos);
+                    $.cancelBubble();
                 });
             });
         }

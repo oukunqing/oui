@@ -833,6 +833,14 @@
         startWith: function(s) { return this.startsWith(s); },
         endWith: function(s) { return this.endsWith(s); },
         len: function() { return this.replace(/([^\x00-\xff])/g, 'aa').length; },
+        in: function(arr) {
+            for(var i in arr) {
+                if(arr[i] === this) {
+                    return true;
+                }
+            }
+            return false;
+        },
         replaceAll: function(pattern, v) {
             return this.replace($.isRegexp(pattern) ? pattern : new RegExp(pattern, 'gm'), v);
         },
@@ -1646,8 +1654,16 @@
             }
             if ($.isBoolean(exempt, false) || $.isElement(elem)) {
                 if ($.isObject(styles)) {
+                    //当同时设置多个样式时，value 可以当成 单位值 来用
+                    var unit = '';
+                    if($.isString(value, true)) {
+                        value = value.toLowerCase().trim();
+                        if(value.in(['px', '%'])) {
+                            unit = value;
+                        }
+                    }
                     for (var key in styles) {
-                        elem.style[key] = styles[key];
+                        elem.style[key] = styles[key] + unit;
                     }
                 } else if ($.isString(styles) && isAttributeValue(value)) {
                     elem.style[styles] = value;
