@@ -28,7 +28,6 @@
     }
 
     function MyDialog(content, title, options){
-        this.id = 1;
         if($.isObject(content)) {
             options = content;
             content = '';
@@ -37,44 +36,64 @@
             options = title;
             title = '';
         }
-        this.opt = $.extend({
+        var _ = this;
+        _.options = _.opt = $.extend({
+            id: '',
+            type: 'alert', //alert,confirm,message,tooltip,window
             status: 'normal',
+            zindex: _.buildZindex(),
             minWidth: '180px',
             minHeight: '160px',
             maxWidth: '100%',
             maxHeight: '100%',
             width: '400px',
             height: '240px',
+            lock: true,                             //是否锁屏
             content: content || '',
-            title: title || '标题栏',
+            url: '',
+            title: title || '\u6807\u9898\u680f',
             position: 5,
             x: 0,
             y: 0,
+            topMost: false,
+            callback: null,
+            closeAble: true,
+            clickBgClose: 'dblclick', // dblclick | click
+            escClose: false,
+            autoClose: false,
+            closeTiming: 5000,
+            dragPosition: true,
+            dragRangeLimit: false,                  //窗体拖动范围限制 true,false
+            dragSize: true,
+            maxAble: true,
+            minAble: true
 
         }, options);
 
-        console.log('opt11:', this.opt);
 
-        this.docOverflow();
+        _.docOverflow();
 
-        this.controls = {
+        _.controls = {
             shade: null, container: null, box: null, 
             top: null, title: null, panel: null,
             body: null, content: null, 
             bottom: null
         };
 
-        this.buttons = {
+        _.buttons = {
             ok: null, cancel: null, close: null, min: null, max: null
         };
 
-        this.status = {
+        _.status = {
             min: false, max: false, normal: false
         };
 
-        this.lastStatus = '';
+        _.lastStatus = ''; //normal
+        _.closed = false;
 
-        this.initial(this.opt);
+        _.dialogId = _.buildId(_.opt.id);
+
+        _.initial(_.opt);
     }
 
     MyDialog.prototype = {
@@ -94,26 +113,48 @@
         initial: function(options){
             this.build(options);
         },
+        isShow: function(key) {
+            switch(key) {
+                case 'shade':
+                    break;
+                case 'bottom':
+                    break;
+            }
+            return true;
+        },
+        isDialog: function(obj) {
+            if(null !== obj && obj.identifier.startsWith('oui-dialog-identifier-')){
+                return true;
+            }
+            return false;
+        },
+        isSelf: function(obj) {
+            if(!this.isDialog(obj)) {
+                return false;
+            }
+            return obj.opt.id === this.opt.id && obj.controls.box.id === this.controls.box.id;
+        },
         build: function(options){
             var _ = this, _ctls = this.controls, opt = options;
 
-            //遮罩层
-            _ctls.shade = document.createElement('div');
-            _ctls.shade.className = 'oui-dialog-shade';
+            _.identifier = 'oui-dialog-identifier-' + _.buildZindex();
 
-            //对话框容器
-            _ctls.container = document.createElement('div');
-            _ctls.container.className = 'oui-dialog-container';
+            if(opt.type === 'tooltip') {
+                //不需要遮罩层
+                
+            } else {
+                if(_.opt.lock) {
+                    //遮罩层
+                    _ctls.shade = document.createElement('div');
+                    _ctls.shade.className = 'oui-dialog-shade';
+                    _ctls.shade.style.zIndex = opt.zindex;
 
-            $.addEventListener(_ctls.container, 'dblclick', function() {
-                _.close();
-            });
-
-            document.onkeyup = function(e){
-                if(KEY_CODE.Esc === $.getKeyCode(e)) {
-                    _.close();
+                    //对话框容器
+                    _ctls.container = document.createElement('div');
+                    _ctls.container.className = 'oui-dialog-container';
+                    _ctls.container.style.zIndex = opt.zindex;
                 }
-            };
+            }
             /*
             document.onkeypress = function(e) {
                 console.log('onkeypress:', $.getKeyCode(e));
@@ -123,8 +164,8 @@
             //对话框
             _ctls.box = document.createElement('div');
             _ctls.box.className = 'oui-dialog';
-
-            //$.setStyle(_ctls.box, {minWidth: _.opt.minWidth, minHeight: _.opt.minHeight});
+            _ctls.box.style.zIndex = opt.zindex;
+            _ctls.box.id = _.dialogId;
 
             _ctls.box.cache = {};
 
@@ -134,25 +175,29 @@
             _ctls.body = _.buildBody(opt.content);
             _ctls.box.appendChild(_ctls.body);
             
-            _ctls.bottom = _.buildBottom();
-            _ctls.box.appendChild(_ctls.bottom);
+            if(opt.type !== 'message' && opt.type !== 'tooltip') {
+                _ctls.bottom = _.buildBottom();
+                _ctls.box.appendChild(_ctls.bottom);
 
-            _ctls.box.appendChild(_.buildSwitch('top'));
-            _ctls.box.appendChild(_.buildSwitch('bottom'));
-            _ctls.box.appendChild(_.buildSwitch('left'));
-            _ctls.box.appendChild(_.buildSwitch('right'));
-            _ctls.box.appendChild(_.buildSwitch('top-left'));
-            _ctls.box.appendChild(_.buildSwitch('top-right'));
-            _ctls.box.appendChild(_.buildSwitch('bottom-left'));
-            _ctls.box.appendChild(_.buildSwitch('bottom-right'));
+                _ctls.box.appendChild(_.buildSwitch('top'));
+                _ctls.box.appendChild(_.buildSwitch('bottom'));
+                _ctls.box.appendChild(_.buildSwitch('left'));
+                _ctls.box.appendChild(_.buildSwitch('right'));
+                _ctls.box.appendChild(_.buildSwitch('top-left'));
+                _ctls.box.appendChild(_.buildSwitch('top-right'));
+                _ctls.box.appendChild(_.buildSwitch('bottom-left'));
+                _ctls.box.appendChild(_.buildSwitch('bottom-right'));
+            }
 
-            document.body.appendChild(_ctls.shade);
+            if(_ctls.shade) {
+                document.body.appendChild(_ctls.shade);
+            }
 
             if(_ctls.container !== null) {
                 _ctls.container.appendChild(_ctls.box);
                 document.body.appendChild(_ctls.container);
             } else {
-                $.addClass(_ctls.box, 'oui-dialog-fixed');
+                //$.addClass(_ctls.box, 'oui-dialog-fixed');
                 document.body.appendChild(_ctls.box);
             }
 
@@ -161,9 +206,61 @@
             _.setSize({type: _.opt.status, width: _.opt.width, height: _.opt.height});
             _.setPosition({pos: _.opt.position, x: _.opt.x, y: _.opt.y});
 
+
+            if(opt.clickBgClose.in(['dblclick', 'click'])) {
+                $.addEventListener(_ctls.container, opt.clickBgClose, function() {
+                    _.close();
+                });
+            }
+
+            if(opt.escClose) {
+                $.Dialog.setEscClose();
+                /*
+                $.addEventListener(document, 'keyup', function(e) {
+                    if(KEY_CODE.Esc === $.getKeyCode(e)) {
+                        //TODO:
+                        var d = $.Dialog.getLast();
+                        if(d !== null && !d.closed) {
+                            d.close();
+                        }
+                    }
+                });
+                */
+            }
+
+            if(_.opt.topMost) {
+                $.addEventListener(_ctls.box, 'mousedown', function() {
+                    _.setTopMost();
+                });
+            }
+
+            $.addEventListener(_ctls.box, 'click', function(){
+                $.cancelBubble();
+            });
+
+            $.addEventListener(_ctls.box, 'dblclick', function(){
+                $.cancelBubble();
+            });
+
+            if(opt.autoClose) {
+                window.setTimeout(function() {
+                    _.close();
+                }, opt.closeTiming);
+            }
+
             console.log(_.controls.body.offsetHeight, _.controls.body.scrollHeight);
 
             //this.setPosition(3);
+        },
+        buildId: function(id){
+            return 'out-dialog-' + id;
+        },
+        buildZindex: function() {
+            var tick = new Date().getTime();
+            return parseInt(('' + tick).substr(4, 8), 10);
+        },
+        getControls: function(className) {
+            return $('#' + this.dialogId + ' ' + className);
         },
         buildTop: function(title){
             var _ = this;
@@ -171,12 +268,17 @@
             top.className = 'top';
 
             $.addEventListener(top, 'dblclick', function() {
-                _.max();
+                if(_.opt.maxAble) {
+                    _.max();
+                }
                 $.cancelBubble();
             });
 
             $.addEventListener(top, 'mousedown', function() {
-
+                if(_.opt.topMost) {
+                    _.setTopMost();
+                }
+                $.cancelBubble();
             });
 
             var div = document.createElement('div');
@@ -207,6 +309,7 @@
             return top;
         },
         buildBody: function(content) {
+            var _ = this;
             var div = document.createElement('div');
             div.className = 'body';
 
@@ -218,9 +321,17 @@
 
             div.appendChild(con);
 
+            $.addEventListener(div, 'mousedown', function() {
+                if(_.opt.topMost) {
+                    _.setTopMost();
+                }
+                $.cancelBubble();
+            });
+
             return div;
         },
         buildBottom: function(type) {
+            var _ = this;
             var panel = document.createElement('div');
             panel.className = 'bottom-panel';
 
@@ -239,6 +350,13 @@
                 this.buttons[key] = obj;
             }
 
+            $.addEventListener(panel, 'mousedown', function() {
+                if(_.opt.topMost) {
+                    _.setTopMost();
+                }
+                $.cancelBubble();
+            });
+
             this.setEvent(div.childNodes, 'click', true);
 
             this.setShortcutKeyEvent(div.childNodes);
@@ -249,17 +367,21 @@
             var div = document.createElement('div');
             div.className = 'border-switch';
             div.pos = dir;
+            div.dialogId = this.opt.id;
             $.addClass(div, (dir || 'bottom-right') + '-switch');
             return div;
         },
+        getSwicths: function() {
+            return this.getControls('.border-switch');
+        },
         showSwitch: function() {
-            $('.border-switch').each(function(){
+            this.getSwicths().each(function(){
                 $(this).show();
             });
             return this;
         },
         hideSwitch: function() {
-            $('.border-switch').each(function(i, obj, args){
+            this.getSwicths().each(function(i, obj, args){
                 $(this).hide();
             });
             return this;
@@ -274,6 +396,12 @@
                 title = undefined;
             }
             var _ = this, _ctls = this.controls, display = isHide ? 'none' : '';
+
+            if(isHide && !_.opt.closeAble) {
+                return false;
+            }
+
+            this.closed = isHide || false;
 
             if(!$.isUndefined(content)) {
                 _ctls.body.innerHTML = content;
@@ -298,6 +426,13 @@
         },
         close: function() {
             var _ = this, _ctls = this.controls;
+            if(!_.opt.closeAble) {
+                return false;
+            }
+            console.log('_ctls.box: ', _.opt.id, _ctls.box, this.disposed);
+            if(this.closed) {
+                return false;
+            }
             if(_ctls.container) {
                 //$.removeChild(document.body, _ctls.container);
                 document.body.removeChild(_ctls.container);
@@ -310,9 +445,23 @@
 
             _.docOverflow(true);
 
-            $.Dialog.remove(_.id);
+            $.Dialog.remove(_.opt.id);
 
-            return _;
+            this.closed = true;
+            
+            return _.dispose();
+        },
+        dispose: function(){
+            for(var i in this.controls){
+                this.controls[i] = null;
+            }
+            for(var i in this.buttons){
+                this.buttons[i] = null;
+            }
+            for(var i in this.options){
+                this.options[i] = null;
+            }
+            return this;
         },
         update: function(content, title, options){
             var _ = this, _ctls = this.controls;
@@ -372,6 +521,24 @@
                 _.close();
             }
             return this;
+        },
+        setConfig: function(key, value) {
+            var opt = this.opt;
+            if(typeof key === 'object') {
+                for(var k in key) {
+                    if($.containsKey(opt, k)){
+                        opt[k] = key[k];
+                    }
+                }
+            } else if(typeof key === 'string') {
+                if($.containsKey(opt, key)){
+                    opt[key] = value;
+                }
+            }
+            return this;
+        },
+        setOption: function(key, value) {
+            return this.setConfig(key, value);
         },
         setEvent: function(controls, eventName, keypress) {
             var _ = this;
@@ -723,6 +890,30 @@
             }
             return this;
         },
+        setTopMost: function() {
+            var topBox = $.Dialog.getTop(), 
+                isDialog = this.isDialog(topBox), 
+                isSelf = this.isSelf(topBox);
+            if(!isDialog || isSelf) {
+                return this;
+            }
+
+            var zindex = topBox.opt.zindex;
+            topBox.setZindex(this.opt.zindex);
+            return this.setZindex(zindex);
+        },
+        setZindex: function(zindex) {
+            var _ctls = this.controls;
+            if(typeof zindex !== 'number') {
+                zindex = this.buildZindex();
+            }
+            if(_ctls.container) {
+                _ctls.container.style.zIndex = zindex;
+            } else {
+                _ctls.box.style.zIndex = zindex;
+            }
+            return this.setOption('zindex', zindex);
+        },
         setContent: function() {
 
             return this;
@@ -757,27 +948,23 @@
                 bs = $.getBodySize(),
                 clientWidth = bs.width,
                 clientHeight = bs.height,
-                moveX = 0,
-                moveY = 0,
-                moveTop = 0,
-                moveLeft = 0,
-                moveAble = false,
                 docMouseMoveEvent = document.onmousemove,
                 docMouseUpEvent = document.onmouseup;
 
             function moveDialog() {
-                var evt = $.getEvent();
+                var evt = $.getEvent(),
+                    moveX = evt.clientX,
+                    moveY = evt.clientY,
+                    moveTop = obj.offsetTop,
+                    moveLeft = obj.offsetLeft,
+                    moveAble = true;
+
                 var isToNormal = false;
 
                 var cp = $.getScrollPosition();
                 var posX = posXOld = evt.clientX;
                 var posY = posYOld = evt.clientY;
-                moveAble = true;
-                moveX = evt.clientX;
-                moveY = evt.clientY;
                 
-                moveTop = obj.offsetTop;
-                moveLeft = obj.offsetLeft;
 
                 document.onmousemove = function(){
                     if(!moveAble) {
@@ -833,18 +1020,14 @@
         dragSize: function() {
             var _ = this,
                 obj = _.controls.box,
-                moveX = 0,
-                moveY = 0,
-                moveAble = false,
                 docMouseMoveEvent = document.onmousemove,
                 docMouseUpEvent = document.onmouseup;
 
             function _dragSize(dir) {
-                var evt = $.getEvent();
-
-                moveAble = true;
-                moveX = evt.clientX;
-                moveY = evt.clientY;
+                var evt = $.getEvent(),
+                    moveX = evt.clientX,
+                    moveY = evt.clientY,
+                    moveAble = true;
 
                 var par = {
                     width: obj.offsetWidth,
@@ -867,11 +1050,11 @@
 
                     _.setScale({ dir: dir, x: x, y: y }, true, par);
 
-                        /*,
-                        w = dir.indexOf('left') >= 0 ? width - x : width + x,
-                        h = dir.indexOf('top') >= 0 ? height - y : height + y;
+                    /*,
+                    w = dir.indexOf('left') >= 0 ? width - x : width + x,
+                    h = dir.indexOf('top') >= 0 ? height - y : height + y;
 
-                        console.log('x: ', x, ', y: ', y);
+                    console.log('x: ', x, ', y: ', y);
 
                     var enabled = w > minWidth && h > minHeight;
 
@@ -895,8 +1078,9 @@
                 };
             }
 
-            $('.border-switch').each(function(i, obj){
+            _.getSwicths().each(function(i, obj){
                 $.addEventListener(obj, 'mousedown', function() {
+                    _.setTopMost();
                     _dragSize(obj.pos);
                     $.cancelBubble();
                 });
@@ -910,31 +1094,70 @@
     };
 
     function Dialog(){
-        this.DialogCache = {};
+        this.caches = {};
+        this.keys = [];
     }
 
     Dialog.prototype = {
+        buildId: function(id) {
+            return 'd_' + id;
+        },
         get: function(id) {
-            if(typeof this.DialogCache[id] !== 'undefined') {
-                return this.DialogCache[id];
+            id = this.buildId(id);
+            if($.containsKey(this.caches, id)) {
+                return this.caches[id];
+            }
+            return null;
+        },
+        getTop: function() {
+            var max = -1, key = '';
+            for(var i=this.keys.length-1; i>=0; i--) {
+                var k = this.keys[i];
+                var d = this.caches[k];
+                console.log('d.opt.zindex: ', i, d.opt.zindex);
+                if(null !== d && !d.closed && d.opt.zindex > max) {
+                    max = d.opt.zindex;
+                    key = k;
+                }
+            }
+            return max >= 0 ? this.caches[key] : null;
+        },
+        getLast: function() {
+            for(var i=this.keys.length-1; i>=0; i--) {
+                var key = this.keys[i];
+                var d = this.caches[key];
+                if(null !== d && !d.closed) {
+                    return d;
+                }
             }
             return null;
         },
         set: function(id, dialog) {
-            if(typeof this.DialogCache[id] !== 'undefined') {
-                this.DialogCache[id] = null;
-            }
-            this.DialogCache[id] = dialog;
-
-            console.log('DialogCache: ', this.DialogCache);
+            id = this.buildId(id);
+            this.keys.push(id);
+            this.caches[id] = dialog;
             return dialog;
         },
-        show: function(content, title, options) {
-            var id = 1;
-            var d = this.get(id);
+        show: function(content, title, options, type) {
+            if($.isObject(content)) {
+                options = content;
+                content = '';
+                title = '';
+            } else if($.isObject(title)) {
+                options = title;
+                title = '';
+            }
+            if(typeof type === 'string') {
+                options.type = type;
+            }
 
+            var opt = $.extend({
+                id: 0
+            }, options);
+
+            var d = this.get(opt.id);
             if(d === null) {
-                d = this.set(id, new MyDialog(content, title, options));
+                d = this.set(opt.id, new MyDialog(content, title, options));
             } else {
                 d.update(content, title, options);
             }
@@ -942,9 +1165,36 @@
             return d;
         },
         remove: function(id) {
-            if(typeof this.DialogCache[id] !== 'undefined') {
-                this.DialogCache[id] = null;
+            id = this.buildId(id);
+            if($.containsKey(this.caches, id)) {
+                delete this.caches[id];
             }
+            var idx = this.keys.indexOf(id);
+            if(idx >= 0) {
+                this.keys.splice(idx, 1);
+            }
+        },
+        closeAll: function() {
+            for(var k in this.caches) {
+                var d = this.caches[k];
+                if(d && !d.closed) {
+                    d.close();
+                }
+            }
+        },
+        setEscClose: function() {
+            if(this.escClose) {
+                return false;
+            }
+            this.escClose = true;
+            $.addEventListener(document, 'keyup', function(e) {
+                if(KEY_CODE.Esc === $.getKeyCode(e)) {
+                    var d = $.Dialog.getLast();
+                    if(d !== null && !d.closed) {
+                        d.close();
+                    }
+                }
+            });
         }
     };
 
@@ -964,7 +1214,7 @@
 
         },
         tooltip: function(content, options){
-
+            return $.Dialog.show(content, undefined, options, 'tooltip');
         }
     });
 }(OUI);

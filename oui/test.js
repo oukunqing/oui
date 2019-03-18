@@ -100,7 +100,7 @@ var arr = con.split('');
 
 buildAssemble(0, 0, 3, arr);
 
-var str = '确定取消';
+var str = '确定取消标题栏';
 console.log(str.toUnicode());
 
 
@@ -143,3 +143,12 @@ randoms.init();
 var num = 349321235000;
 
 console.log(num.toChineseNumber());
+
+
+var str = {id:1,name:'abc'}
+
+for(var k in str){
+    console.log(k, ', ', str[k]);
+}
+console.log(str);
+console.log($.contains(str,'name'));

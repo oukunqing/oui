@@ -21,7 +21,7 @@
 <script type="text/javascript">
 
 function showDialog(){
-    var dialog = $.alert('Hello!对话框', {position: 4});
+    var dialog = $.alert('Hello!对话框', {id: 3, position: 9, lock: false, clickBgClose: 'dblclick', escClose: true, autoClose: false});
 
     console.log('dialog: ', dialog);
     /*
@@ -42,6 +42,15 @@ function showDialog(){
         });
     }, 15000);
 */
+
+    //dialog.setZindex(1000);
+
+    window.setTimeout(function(){
+
+    //dialog.setZindex(2000);
+
+    dialog.setOption('topMost', true);
+    }, 5000);
 }
 
 function update() {
@@ -49,7 +58,26 @@ function update() {
     for(var i=0; i<35; i++){
         str += (i + 1) + '. 内容更改了内容更改了内容更改了内容更改了内容更改了内容更改了内容更改了内容更改了<br />';
     }
-    var dialog = $.alert('Hello!对话框<br />' + str);
+    var dialog = $.alert('Hello!对话框<br />' + str, {id:2, lock: false, escClose: true, autoClose: false});
+
+    //dialog.setZindex(1005);
+
+    dialog.setOption('topMost', true);
+
+update2();
+}
+
+
+function update2() {
+    var str = '';
+    for(var i=0; i<12; i++){
+        str += (i + 1) + '. 内容更改了内容更改了内容更改了内容更改了内容更改了内容更改了内容更改了内容更改了<br />';
+    }
+    var dialog = $.alert('Hello!对话框22<br />' + str, {id:12, lock: false, escClose: true, autoClose: false});
+
+
+    dialog.setOption('topMost', true);
+
 }
 
 
