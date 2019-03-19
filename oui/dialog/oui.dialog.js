@@ -47,26 +47,27 @@
             maxWidth: '100%',
             maxHeight: '100%',
             width: '400px',
-            height: '240px',
+            height: '180px',
             lock: true,                             //是否锁屏
+            title: title || '\u6807\u9898\u680f',
             content: content || '',
             url: '',
-            title: title || '\u6807\u9898\u680f',
             position: 5,
             x: 0,
             y: 0,
             topMost: false,
-            callback: null,
             closeAble: true,
             clickBgClose: 'dblclick', // dblclick | click
             escClose: false,
             autoClose: false,
             closeTiming: 5000,
-            dragPosition: true,
             dragRangeLimit: false,                  //窗体拖动范围限制 true,false
+            dragPosition: true,
             dragSize: true,
             maxAble: true,
-            minAble: true
+            minAble: true,
+            callback: null,
+            buttons: []
 
         }, options);
 
@@ -178,7 +179,7 @@
             if(opt.type !== 'message' && opt.type !== 'tooltip') {
                 _ctls.bottom = _.buildBottom();
                 _ctls.box.appendChild(_ctls.bottom);
-
+/*
                 _ctls.box.appendChild(_.buildSwitch('top'));
                 _ctls.box.appendChild(_.buildSwitch('bottom'));
                 _ctls.box.appendChild(_.buildSwitch('left'));
@@ -187,6 +188,8 @@
                 _ctls.box.appendChild(_.buildSwitch('top-right'));
                 _ctls.box.appendChild(_.buildSwitch('bottom-left'));
                 _ctls.box.appendChild(_.buildSwitch('bottom-right'));
+                */
+                _.setDragSize();
             }
 
             if(_ctls.shade) {
@@ -201,7 +204,7 @@
                 document.body.appendChild(_ctls.box);
             }
 
-            _.dragPosition().dragSize();
+            _.setCache().dragPosition().dragSize();
 
             _.setSize({type: _.opt.status, width: _.opt.width, height: _.opt.height});
             _.setPosition({pos: _.opt.position, x: _.opt.x, y: _.opt.y});
@@ -248,16 +251,19 @@
                 }, opt.closeTiming);
             }
 
-            console.log(_.controls.body.offsetHeight, _.controls.body.scrollHeight);
+            //console.log(_.controls.body.offsetHeight, _.controls.body.scrollHeight);
 
             //this.setPosition(3);
         },
-        buildId: function(id){
+        buildId: function(id) {
+            if(!$.isString(id) && !$.isNumber(id)) {
+                id = buildZindex(0, 13);
+            }
             return 'out-dialog-' + id;
         },
-        buildZindex: function() {
+        buildZindex: function(start, len) {
             var tick = new Date().getTime();
-            return parseInt(('' + tick).substr(4, 8), 10);
+            return parseInt(('' + tick).substr(start || 4, len || 8), 10);
         },
         getControls: function(className) {
             return $('#' + this.dialogId + ' ' + className);
@@ -290,9 +296,9 @@
 
             var panel = document.createElement('div');
             panel.className = 'dialog-btn-panel';
-            panel.innerHTML = '<a class="btn btn-min" code="min"></a>'
-                + '<a class="btn btn-max" code="max"></a>'
-                + '<a class="btn btn-close" code="close"></a>';
+            panel.innerHTML = (_.opt.minAble ? '<a class="btn btn-min" code="min"></a>' : '')
+                + (_.opt.maxAble ? '<a class="btn btn-max" code="max"></a>' : '')
+                + (_.opt.closeAble ? '<a class="btn btn-close" code="close"></a>' : '');
             panel.style.cssText = 'float:right;';
 
             top.appendChild(panel);
@@ -364,11 +370,19 @@
             return panel;
         },
         buildSwitch: function(dir) {
+            if($.isUndefined(dir)) {
+                dir = 'bottom-right';
+            }
+            var id = this.opt.id + '-switch-' + dir;
+            if(document.getElementById(id) !== null) {
+                return false;
+            }
             var div = document.createElement('div');
             div.className = 'border-switch';
             div.pos = dir;
+            div.id = id;
             div.dialogId = this.opt.id;
-            $.addClass(div, (dir || 'bottom-right') + '-switch');
+            $.addClass(div, dir + '-switch');
             return div;
         },
         getSwicths: function() {
@@ -429,7 +443,7 @@
             if(!_.opt.closeAble) {
                 return false;
             }
-            console.log('_ctls.box: ', _.opt.id, _ctls.box, this.disposed);
+            //console.log('_ctls.box: ', _.opt.id, _ctls.box, this.disposed);
             if(this.closed) {
                 return false;
             }
@@ -463,10 +477,51 @@
             }
             return this;
         },
-        update: function(content, title, options){
+        update: function(content, title, options) {
+            if($.isObject(content)) {
+                options = content;
+                content = '';
+                title = '';
+            } else if($.isObject(title)) {
+                options = title;
+                title = '';
+            } else if($.isString(options)){
+                if(options === 'autosize') {
+                    options = {width: 'auto', height: 'auto'};
+                } else if(options === 'autoheight') {
+                    options = {height: 'auto'};
+                } else if(options === 'autowidth') {
+                    options = {width: 'auto'};
+                } else {
+                    options = {};
+                }
+            }
+            var opt = $.extend({
+                content: content,
+                title: title,
+            }, options);
+
             var _ = this, _ctls = this.controls;
-            _ctls.body.innerHTML = content;
-            _ctls.title.innerHTML = title;
+            if(_ctls.content){
+                if(opt.width === 'auto') {
+                    _ctls.box.style.width = 'auto';
+                    _ctls.body.style.width = 'auto';
+                    _ctls.content.style.width = 'auto';
+                }
+                if(opt.height === 'auto') {
+                    _ctls.box.style.height = 'auto';
+                    _ctls.body.style.height = 'auto';
+                    _ctls.content.style.height = 'auto';
+                }
+
+                _ctls.content.innerHTML = opt.content;
+
+                if(_ctls.title && opt.title) {
+                    _ctls.title.innerHTML = opt.title;
+                }
+
+                this.setBodySize().setCache().setPosition();
+            }
 
             return this;
         },
@@ -614,14 +669,18 @@
         setCache: function() {
             var obj = this.controls.box;
 
-            this.lastSize = {
+            var size = {
                 width: obj.offsetWidth,
-                height: obj.offsetHeight,
+                height: obj.offsetHeight
+            };
+
+            this.lastSize = this.opt.heigh === 'auto' ? size : $.extend({
                 top: obj.offsetTop,
                 left: obj.offsetLeft,
                 right: (obj.offsetLeft + obj.offsetWidth),
                 bottom: (obj.offsetTop + obj.offsetHeight)
-            };
+            }, size);
+
             return this;
         },
         setSize: function(options) {
@@ -643,6 +702,8 @@
             if(opt.type === '' || isNaN(opt.width) || isNaN(opt.height) || _.getStatus() === opt.type) {
                 return this;
             }
+
+            console.log('setSize:', options);
 
             if(_.status.normal) {
                 _.setCache();
@@ -716,8 +777,26 @@
             }
             return _;
         },
+        setDragSize: function(dir) {
+            var _ = this, _ctls = this.controls;
+            var arr = ['top', 'bottom', 'left', 'right', 'top-left', 'top-right', 'bottom-left', 'bottom-right'];
+            
+            dir = $.isString(dir) ? [dir] : arr;
+
+            if(_.opt.dragSize) {                
+                for(var i in dir) {
+                    _ctls.box.appendChild(_.buildSwitch(dir[i]));
+                }
+                _.showSwitch();
+            } else {
+                _.hideSwitch();
+            }
+        },
         setScale: function(options, isDrag, dp) {
             var _ = this, obj = _.controls.box;
+            if(!_.opt.dragSize && isDrag) {
+                return this;
+            }
             var opt = $.extend({
                 type: '',
                 dir: 'bottom-right',
@@ -803,16 +882,24 @@
             return _.setBodySize();
         },
         setBodySize: function() {
-            var _ = this, obj = _.controls.box;
+            var _ = this, obj = _.controls.box, bs = $.getBodySize();
 
             var topHeight = _.controls.top ? _.controls.top.offsetHeight + 1 : 0, 
                 bottomHeight = _.controls.bottom ? _.controls.bottom.offsetHeight + 1 : 0,
-                paddingHeight = parseInt('0' + $.getElementStyle(obj, 'paddingTop'), 10);
+                paddingHeight = parseInt('0' + $.getElementStyle(obj, 'paddingTop'), 10),
+                boxHeight = obj.offsetHeight;
+
+            if(boxHeight > bs.height) {
+                boxHeight = bs.height - 20;
+                obj.style.height = boxHeight + 'px';
+            }
 
             var size = {
                 width: '100%',
-                height: (obj.offsetHeight - topHeight - bottomHeight - paddingHeight) + 'px'
+                height: (boxHeight - topHeight - bottomHeight - paddingHeight) + 'px'
             };
+
+            console.log('size:', _.opt.id, size);
 
             return $.setStyle(_.controls.body, size), _;
         },
@@ -891,6 +978,9 @@
             return this;
         },
         setTopMost: function() {
+            if(!this.opt.dragSize) {
+                return false;
+            }
             var topBox = $.Dialog.getTop(), 
                 isDialog = this.isDialog(topBox), 
                 isSelf = this.isSelf(topBox);
@@ -952,6 +1042,9 @@
                 docMouseUpEvent = document.onmouseup;
 
             function moveDialog() {
+                if(!_.opt.dragPosition) {
+                    return false;
+                }
                 var evt = $.getEvent(),
                     moveX = evt.clientX,
                     moveY = evt.clientY,
@@ -1008,7 +1101,7 @@
                         _.pwBox.style.top = posY + 'px'
                     }
                     */
-                    console.log('mouseup');
+                    //console.log('mouseup');
                 };
             }
 
@@ -1024,6 +1117,9 @@
                 docMouseUpEvent = document.onmouseup;
 
             function _dragSize(dir) {
+                if(!_.opt.dragSize) {
+                    return false;
+                }
                 var evt = $.getEvent(),
                     moveX = evt.clientX,
                     moveY = evt.clientY,
@@ -1049,29 +1145,6 @@
                         y = (e.clientY - moveY) * (dir.indexOf('top') >= 0 ? -1 : 1);
 
                     _.setScale({ dir: dir, x: x, y: y }, true, par);
-
-                    /*,
-                    w = dir.indexOf('left') >= 0 ? width - x : width + x,
-                    h = dir.indexOf('top') >= 0 ? height - y : height + y;
-
-                    console.log('x: ', x, ', y: ', y);
-
-                    var enabled = w > minWidth && h > minHeight;
-
-                    console.log('minWidth: ',minWidth, minHeight);
-
-                    console.log('mousemove: ', dir, left, top, left + x, top + y, x, y);
-
-                    var newWidth = w < minWidth ? minWidth : w, 
-                        newHeight = h < minHeight ? minHeight : h,
-                        newLeft = left + x + newWidth > right ? right - newWidth : left + x,
-                        newTop = top + y + newHeight > bottom ? bottom - newHeight : top + y;
-
-                    if(dir.indexOf('-') >= 0) { 
-                        _.controls.box.style.width = newWidth + 'px';
-                        _.controls.box.style.height = newHeight + 'px';
-                    }
-                    */
                 };
                 document.onmouseup = _.controls.box.onmouseup = function(){
                     moveAble = false;
@@ -1114,7 +1187,7 @@
             for(var i=this.keys.length-1; i>=0; i--) {
                 var k = this.keys[i];
                 var d = this.caches[k];
-                console.log('d.opt.zindex: ', i, d.opt.zindex);
+                //console.log('d.opt.zindex: ', i, d.opt.zindex);
                 if(null !== d && !d.closed && d.opt.zindex > max) {
                     max = d.opt.zindex;
                     key = k;
@@ -1204,7 +1277,7 @@
         alert: function(content, title, options){
             return $.Dialog.show(content, title, options);
         },
-        confirm: function(content, options){
+        confirm: function(content, title, options){
 
         },
         msg: function(content, options){

@@ -23,7 +23,7 @@
 function showDialog(){
     var dialog = $.alert('Hello!对话框', {id: 3, position: 9, lock: false, clickBgClose: 'dblclick', escClose: true, autoClose: false});
 
-    console.log('dialog: ', dialog);
+    //console.log('dialog: ', dialog);
     /*
     window.setTimeout(function(){
         dialog.setScale({
@@ -58,26 +58,47 @@ function update() {
     for(var i=0; i<35; i++){
         str += (i + 1) + '. 内容更改了内容更改了内容更改了内容更改了内容更改了内容更改了内容更改了内容更改了<br />';
     }
-    var dialog = $.alert('Hello!对话框<br />' + str, {id:2, lock: false, escClose: true, autoClose: false});
+    var dialog = $.alert('Hello!对话框<br />' + str, {id:2, lock: true, escClose: true, autoClose: false});
 
     //dialog.setZindex(1005);
 
     dialog.setOption('topMost', true);
 
-update2();
+    update2();
+}
+
+function getCon(rows) {
+    var str = '';
+    for(var i=0; i<rows; i++){
+        str += (i + 1) + '. 内容更改了内容更改了内容更改了内容更改了内容更改了内容更改了内容更改了内容更改了<br />';
+    }
+    return str;
 }
 
 
 function update2() {
-    var str = '';
-    for(var i=0; i<12; i++){
-        str += (i + 1) + '. 内容更改了内容更改了内容更改了内容更改了内容更改了内容更改了内容更改了内容更改了<br />';
-    }
-    var dialog = $.alert('Hello!对话框22<br />' + str, {id:12, lock: false, escClose: true, autoClose: false});
-
+    var str = getCon(3);
+    var dialog = $.alert('Hello!对话框22<br />' + str, {
+        id:12, lock: true, minAble: false, maxAble: false, escClose: true, autoClose: false
+    });
 
     dialog.setOption('topMost', true);
 
+    window.setTimeout(function(){
+        dialog.update(getCon(5), '第1次改变','autoheight');
+    }, 5000);
+
+    window.setTimeout(function(){
+        dialog.update(getCon(2), {width:'auto', height:'auto'});
+    }, 8000);
+
+    window.setTimeout(function(){
+        dialog.update(getCon(7), '第2次改变');
+    }, 10000);
+
+    window.setTimeout(function(){
+        dialog.update(getCon(32), '', 'autosize');
+    }, 10000);
 }
 
 
