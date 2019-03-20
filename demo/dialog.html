@@ -21,7 +21,7 @@
 <script type="text/javascript">
 
 function showDialog(){
-    var dialog = $.alert('Hello!对话框', {id: 3, position: 9, lock: false, clickBgClose: 'dblclick', escClose: true, autoClose: false});
+    var dialog = $.alert('Hello!对话框', {id: 3, position: 9, maxHeight: 400, maxWidth: 600, lock: false, clickBgClose: 'dblclick', escClose: true, autoClose: false});
 
     //console.log('dialog: ', dialog);
     /*
@@ -48,9 +48,10 @@ function showDialog(){
     window.setTimeout(function(){
 
     //dialog.setZindex(2000);
+        dialog.append(getCon(6, '大家好'), {height:'auto'});
 
-    dialog.setOption('topMost', true);
-    }, 5000);
+        dialog.setOption('topMost', true);
+    }, 3000);
 }
 
 function update() {
@@ -67,10 +68,10 @@ function update() {
     update2();
 }
 
-function getCon(rows) {
+function getCon(rows, txt) {
     var str = '';
     for(var i=0; i<rows; i++){
-        str += (i + 1) + '. 内容更改了内容更改了内容更改了内容更改了内容更改了内容更改了内容更改了内容更改了<br />';
+        str += (i + 1) + (txt || '. 内容更改了内容更改了内容更改了内容更改了内容更改了内容更改了内容更改了内容更改了') + '<br />';
     }
     return str;
 }
@@ -79,7 +80,7 @@ function getCon(rows) {
 function update2() {
     var str = getCon(3);
     var dialog = $.alert('Hello!对话框22<br />' + str, {
-        id:12, lock: true, minAble: false, maxAble: false, escClose: true, autoClose: false
+        id:12, lock: true, minAble: true, maxAble: true, escClose: true, autoClose: false
     });
 
     dialog.setOption('topMost', true);

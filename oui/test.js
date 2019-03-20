@@ -152,3 +152,9 @@ for(var k in str){
 }
 console.log(str);
 console.log($.contains(str,'name'));
+
+console.log(new Date().format('ts'))
+
+var d = '2019-03-19 16:25:08'.toDate().format('ts')
+
+console.log(d);

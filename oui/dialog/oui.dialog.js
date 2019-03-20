@@ -26,7 +26,7 @@
         }
         return s;
     }
-
+ 
     function MyDialog(content, title, options){
         if($.isObject(content)) {
             options = content;
@@ -46,8 +46,8 @@
             minHeight: '160px',
             maxWidth: '100%',
             maxHeight: '100%',
-            width: '400px',
-            height: '180px',
+            width: '300px',
+            height: '200px',
             lock: true,                             //是否锁屏
             title: title || '\u6807\u9898\u680f',
             content: content || '',
@@ -70,9 +70,6 @@
             buttons: []
 
         }, options);
-
-
-        _.docOverflow();
 
         _.controls = {
             shade: null, container: null, box: null, 
@@ -98,8 +95,8 @@
     }
 
     MyDialog.prototype = {
-        docOverflow: function (close) {
-            if(close) {
+        hideDocOverflow: function (isShow) {
+            if(isShow) {
                 if(this._overflow !== 'hidden') {
                     document.body.style.overflow = this._overflow;
                 }
@@ -110,9 +107,10 @@
                     this._overflow = overflow;
                 }
             }
+            return this;
         },
         initial: function(options){
-            this.build(options);
+            return this.build(options);
         },
         isShow: function(key) {
             switch(key) {
@@ -137,6 +135,10 @@
         },
         build: function(options){
             var _ = this, _ctls = this.controls, opt = options;
+
+            if(_.opt.lock) {
+                _.hideDocOverflow();
+            }
 
             _.identifier = 'oui-dialog-identifier-' + _.buildZindex();
 
@@ -179,16 +181,6 @@
             if(opt.type !== 'message' && opt.type !== 'tooltip') {
                 _ctls.bottom = _.buildBottom();
                 _ctls.box.appendChild(_ctls.bottom);
-/*
-                _ctls.box.appendChild(_.buildSwitch('top'));
-                _ctls.box.appendChild(_.buildSwitch('bottom'));
-                _ctls.box.appendChild(_.buildSwitch('left'));
-                _ctls.box.appendChild(_.buildSwitch('right'));
-                _ctls.box.appendChild(_.buildSwitch('top-left'));
-                _ctls.box.appendChild(_.buildSwitch('top-right'));
-                _ctls.box.appendChild(_.buildSwitch('bottom-left'));
-                _ctls.box.appendChild(_.buildSwitch('bottom-right'));
-                */
                 _.setDragSize();
             }
 
@@ -204,11 +196,10 @@
                 document.body.appendChild(_ctls.box);
             }
 
-            _.setCache().dragPosition().dragSize();
-
             _.setSize({type: _.opt.status, width: _.opt.width, height: _.opt.height});
             _.setPosition({pos: _.opt.position, x: _.opt.x, y: _.opt.y});
 
+            _.setCache().dragPosition().dragSize();
 
             if(opt.clickBgClose.in(['dblclick', 'click'])) {
                 $.addEventListener(_ctls.container, opt.clickBgClose, function() {
@@ -218,17 +209,6 @@
 
             if(opt.escClose) {
                 $.Dialog.setEscClose();
-                /*
-                $.addEventListener(document, 'keyup', function(e) {
-                    if(KEY_CODE.Esc === $.getKeyCode(e)) {
-                        //TODO:
-                        var d = $.Dialog.getLast();
-                        if(d !== null && !d.closed) {
-                            d.close();
-                        }
-                    }
-                });
-                */
             }
 
             if(_.opt.topMost) {
@@ -250,10 +230,8 @@
                     _.close();
                 }, opt.closeTiming);
             }
-
-            //console.log(_.controls.body.offsetHeight, _.controls.body.scrollHeight);
-
             //this.setPosition(3);
+            return this;
         },
         buildId: function(id) {
             if(!$.isString(id) && !$.isNumber(id)) {
@@ -412,7 +390,7 @@
             var _ = this, _ctls = this.controls, display = isHide ? 'none' : '';
 
             if(isHide && !_.opt.closeAble) {
-                return false;
+                return this;
             }
 
             this.closed = isHide || false;
@@ -433,37 +411,32 @@
                 _ctls.shade.style.display = display;
             }
 
-            return _.docOverflow(isHide), _;
+            if(_.opt.lock && !isHide) {
+                alert('docOverflow22')
+                _.hideDocOverflow(isHide);
+            }
+
+            //return _.hideDocOverflow(isHide), _;
+            return _;
         },
         hide: function() {
             return this.show(true);
         },
         close: function() {
             var _ = this, _ctls = this.controls;
-            if(!_.opt.closeAble) {
+            if(!_.opt.closeAble || _.closed) {
                 return false;
             }
-            //console.log('_ctls.box: ', _.opt.id, _ctls.box, this.disposed);
-            if(this.closed) {
-                return false;
-            }
-            if(_ctls.container) {
-                //$.removeChild(document.body, _ctls.container);
-                document.body.removeChild(_ctls.container);
-            } else {
-                document.body.removeChild(_ctls.box);
-            }
+            document.body.removeChild(_ctls.container ? _ctls.container : _ctls.box);
+
             if(_ctls.shade) {
                 document.body.removeChild(_ctls.shade);
             }
-
-            _.docOverflow(true);
-
             $.Dialog.remove(_.opt.id);
 
             this.closed = true;
             
-            return _.dispose();
+            return _.hideDocOverflow(true).dispose();
         },
         dispose: function(){
             for(var i in this.controls){
@@ -520,10 +493,18 @@
                     _ctls.title.innerHTML = opt.title;
                 }
 
-                this.setBodySize().setCache().setPosition();
+                _.setBodySize().setCache().setPosition();
             }
 
-            return this;
+            return _;
+        },
+        append: function(content, title, options) {
+            var html = this.controls.content.innerHTML;
+            return this.update(html + content, title, options);
+        },
+        insert: function(content, title, options) {
+            var html = this.controls.content.innerHTML;
+            return this.update(content + html, title, options);
         },
         focus: function(obj) {
             obj.focus();
@@ -699,7 +680,7 @@
             opt.width = parseInt(opt.width, 10);
             opt.height = parseInt(opt.height, 10);
 
-            if(opt.type === '' || isNaN(opt.width) || isNaN(opt.height) || _.getStatus() === opt.type) {
+            if(opt.type === '' || (isNaN(opt.width) && isNaN(opt.height)) || _.getStatus() === opt.type) {
                 return this;
             }
 
@@ -714,32 +695,34 @@
             } else if(opt.type !== 'min') {
                 $.removeClass(_ctls.bottom, 'display-none');
             }
+            if(opt.type !== 'max' && !_.opt.lock) {
+                _.hideDocOverflow(true);
+            }
 
             if(opt.type === 'max') {
-                par = {width: '100%', height: '100%', top: 0, left: 0, right: 0, bottom: 0};
+                var scrollTop = _.opt.lock ? 0 : document.documentElement.scrollTop;
+                par = {width: '100%', height: '100%', top: scrollTop, left: 0, right: 0, bottom: 0};
+                isSetBodySize = true;
 
-                $.addClass(obj, 'oui-dialog-max');
-                $.addClass(_btns.max, 'btn-normal');
+                $.addClass(obj, 'oui-dialog-max').addClass(_btns.max, 'btn-normal');
 
                 if(_.controls.container) {
                     $.addClass(_ctls.container, 'dialog-overflow-hidden');
                 }
-
                 if(_.status.min) {
                     $.removeClass(obj, 'oui-dialog-min');
                 }
 
-                _.hideSwitch().setStatus('max');
-                isSetBodySize = true;
+                _.hideDocOverflow().hideSwitch().setStatus('max');
             } else if(opt.type === 'min') {
-                par = {width: 200, height: 36};
-                $.addClass(_ctls.bottom, 'display-none');
-                $.addClass(obj, 'oui-dialog-min');
+                var minW = parseInt(_.opt.minWidth, 10), minH = 36;
+                if(isNaN(minW)) { minW = 180; }
+
+                par = {width: minW, height: minH};
+                $.addClass(_ctls.bottom, 'display-none').addClass(obj, 'oui-dialog-min').removeClass(_btns.max, 'btn-normal');
                 if(_.status.max) {
                     $.removeClass(obj, 'oui-dialog-max');
                 }
-                $.removeClass(_btns.max, 'btn-normal');
-
                 _.hideSwitch().setStatus('min').setPosition({pos: _.opt.position});
             } else {
                 isSetBodySize = true;
@@ -758,6 +741,7 @@
                     isSetBodySize = false;
                     _.setScale(options);
                 } else {  //opt.type === 'normal'
+                console.log('opt.type === \'norma\'',_.lastSize);
                     if(!$.isUndefined(_.lastSize)) {
                         $.setStyle(_ctls.box, _.lastSize, 'px');
                     } else {
@@ -845,6 +829,20 @@
                 newTop = (dp.top + opt.y + newHeight) > dp.bottom ? dp.bottom - newHeight : dp.top + opt.y;
             }
 
+            if(_.opt.maxWidth !== '100%'){
+                var mw = parseInt(_.opt.maxWidth, 10);
+                if(!isNaN(mw) && newWidth > mw) {
+                    newWidth = mw;
+                }
+            }
+
+            if(_.opt.maxHeight !== '100%'){
+                var mh = parseInt(_.opt.maxHeight, 10);
+                if(!isNaN(mh) && newHeight > mh) {
+                    newHeight = mh;
+                }
+            }
+
             if(opt.dir.indexOf('-') >= 0 || opt.dir === 'center') {
                 $.setStyle(obj, {width: newWidth, height: newHeight}, 'px');
             }
@@ -889,6 +887,18 @@
                 paddingHeight = parseInt('0' + $.getElementStyle(obj, 'paddingTop'), 10),
                 boxHeight = obj.offsetHeight;
 
+            if(_.opt.height !== 'auto') {
+                if(boxHeight < _.opt.height) {
+                    boxHeight = _.opt.height;
+                    obj.style.height = boxHeight + 'px';
+                }
+            }
+
+            var h = obj.style.height;
+
+            console.log(h, _.opt.height + ',' + obj.offsetHeight);
+
+
             if(boxHeight > bs.height) {
                 boxHeight = bs.height - 20;
                 obj.style.height = boxHeight + 'px';
@@ -920,6 +930,8 @@
 
             if($.isString(options) || $.isNumber(options)) {
                 options = { pos: options };
+            } else if($.isUndefined(options)) {
+                options = { pos: _.opt.position };
             }
             var opt = $.extend({
                 pos: 5,
@@ -1058,7 +1070,6 @@
                 var posX = posXOld = evt.clientX;
                 var posY = posYOld = evt.clientY;
                 
-
                 document.onmousemove = function(){
                     if(!moveAble) {
                         return false;

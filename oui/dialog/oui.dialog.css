@@ -21,7 +21,7 @@
 .oui-dialog {
     padding: 4px; 
     /*margin: 0px auto;*/
-    width: 400px;
+    /*width: auto; */
     position: absolute;
     /*
     top: 0; left: 0; right: 0; bottom: 0;
@@ -57,7 +57,7 @@
 }
 
 .oui-dialog-min {
-    width: 200px; height: 32px; min-height: 32px; overflow: hidden;
+    width: auto; height: 32px; min-width: 160px; min-height: 32px; overflow: hidden;
     box-sizing: border-box;
 }
 
