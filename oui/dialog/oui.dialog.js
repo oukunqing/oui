@@ -5,7 +5,56 @@
         Enter: 13,
         Esc: 27,
         Space: 32
-    };
+    },
+    DialogResult = {
+        None: 0,
+        OK: 1,
+        Cancel: 2,
+        Abort: 3,
+        Retry: 4,
+        Ignore: 5,
+        Yes: 6,
+        No: 7
+    },
+    ButtonConfig = {
+        None: { code: 'None', text: '关闭', result: 0, css: 'btn-default'},
+        OK: { code: 'OK', text: '\u786e\u5b9a', result: 1, css: 'btn-primary' },
+        Cancel: { code: 'Cancel', text: '取消', result: 2, css: 'btn-default' },
+        Abort: { code: 'Abort', text: '中止', result: 3, css: 'btn-primary' },
+        Retry: { code: 'Retry', text: '重试', result: 4, css: 'btn-primary' }, 
+        Ignore: { code: 'Ignore', text: '忽略', result: 5, css: 'btn-default' },
+        Yes: { code: 'Yes', text: '是', result: 6, css: 'btn-primary' },
+        No: { code: 'No', text: '否', result: 7, css: 'btn-default' }
+    },
+    DialogButtons = {
+        None: -1,
+        OK: 0,
+        OKCancel: 1,
+        AbortRetryIgnore: 2,
+        YesNoCancel: 3,
+        YesNo: 4,
+        RetryCancel: 5
+    },
+    /*
+    ButtonMaps = [
+        OK: ['OK'],
+        OKCancel: ['OK', 'Cancel'],
+        AbortRetryIgnore: ['Abort', 'Retry', 'Ignore'],
+        YesNoCancel: ['Yes', 'No', 'Cancel'],
+        YesNo: ['Yes', 'No'],
+        RetryCancel: ['Retry', 'Cancel']
+    ];
+    */
+    ButtonMaps = [
+        ['OK'],
+        ['OK', 'Cancel'],
+        ['Abort', 'Retry', 'Ignore'],
+        ['Yes', 'No', 'Cancel'],
+        ['Yes', 'No'],
+        ['Retry', 'Cancel']
+    ];
+
+    $.DialogButtons = DialogButtons;
 
     var thisFilePath = $.getScriptSelfPath(true);
     //先加载样式文件
@@ -67,9 +116,14 @@
             maxAble: true,
             minAble: true,
             callback: null,
-            buttons: []
+            parameter: null,
+            buttons: $.DialogButtons.OKCancel,
+            showTitle: true,
+            showBottom: true
 
         }, options);
+
+        console.log('_.opt:', _.opt, options);
 
         _.controls = {
             shade: null, container: null, box: null, 
@@ -79,7 +133,7 @@
         };
 
         _.buttons = {
-            ok: null, cancel: null, close: null, min: null, max: null
+            close: null, min: null, max: null
         };
 
         _.status = {
@@ -172,15 +226,22 @@
 
             _ctls.box.cache = {};
 
-            _ctls.top = _.buildTop(opt.title);
-            _ctls.box.appendChild(_ctls.top);
+            if(_.opt.showTitle) {
+                _ctls.top = _.buildTop(opt.title);
+                _ctls.box.appendChild(_ctls.top);
+            }
 
             _ctls.body = _.buildBody(opt.content);
             _ctls.box.appendChild(_ctls.body);
-            
-            if(opt.type !== 'message' && opt.type !== 'tooltip') {
+
+            if(_.opt.showBottom) {
                 _ctls.bottom = _.buildBottom();
                 _ctls.box.appendChild(_ctls.bottom);
+            }
+            
+            if(opt.type !== 'message' && opt.type !== 'tooltip') {
+                //_ctls.bottom = _.buildBottom();
+                //_ctls.box.appendChild(_ctls.bottom);
                 _.setDragSize();
             }
 
@@ -210,6 +271,7 @@
             if(opt.escClose) {
                 $.Dialog.setEscClose();
             }
+            $.Dialog.setWindowResize();
 
             if(_.opt.topMost) {
                 $.addEventListener(_ctls.box, 'mousedown', function() {
@@ -321,12 +383,7 @@
 
             var div = document.createElement('div');
             div.className = 'bottom';
-
-            var html = '<a class="btn btn-primary btn-mr" code="ok" href="javascript:void(0);" shortcutKey="Y">\u786e\u5b9a</a>'
-                + '<a class="btn btn-default btn-ml" code="cancel" href="javascript:void(0);" shortcutKey="N">\u53d6\u6d88</a>';
-
-            div.innerHTML = html;
-
+            div.innerHTML = _.buildButtons();
             panel.appendChild(div);
 
             for(var i = 0; i < div.childNodes.length; i++) {
@@ -346,6 +403,21 @@
             this.setShortcutKeyEvent(div.childNodes);
 
             return panel;
+        },
+        buildButtons: function() {
+            var _ = this, keys = $.DialogButtons, html = [];
+            if(!$.isNumber(_.opt.buttons) || _.opt.button < 0) {
+                return '';
+            }
+            var keys = ButtonMaps[_.opt.buttons];
+            console.log('keys:', _.opt.buttons, keys);
+            for(var i in keys) {
+                var config = ButtonConfig[keys[i]];
+                if(config) {
+                    html.push('<a class="btn {css} btn-mr" code="{code}" result="{result}" href="{{0}}">{text}</a>'.format(config));
+                }
+            }
+            return html.join('').format('javascript:void(0);');
         },
         buildSwitch: function(dir) {
             if($.isUndefined(dir)) {
@@ -412,7 +484,6 @@
             }
 
             if(_.opt.lock && !isHide) {
-                alert('docOverflow22')
                 _.hideDocOverflow(isHide);
             }
 
@@ -422,12 +493,19 @@
         hide: function() {
             return this.show(true);
         },
-        close: function() {
+        close: function(action, dialogResult) {
             var _ = this, _ctls = this.controls;
+
+            if(!$.isString(action)) {
+                action = 'None';
+            }
+            if(!$.isNumber(dialogResult)) {
+                dialogResult = DialogResult.None;
+            }
             if(!_.opt.closeAble || _.closed) {
                 return false;
             }
-            document.body.removeChild(_ctls.container ? _ctls.container : _ctls.box);
+            document.body.removeChild(_ctls.container || _ctls.box);
 
             if(_ctls.shade) {
                 document.body.removeChild(_ctls.shade);
@@ -435,8 +513,16 @@
             $.Dialog.remove(_.opt.id);
 
             this.closed = true;
-            
-            return _.hideDocOverflow(true).dispose();
+
+            return _.callback(action, dialogResult).hideDocOverflow(true).dispose();
+        },
+        callback: function(action, dialogResult) {
+            if($.isFunction(this.opt.callback)) {
+                var par = {}, parameter = this.opt.parameter || this.opt.param;                
+                par[action] = dialogResult;
+                this.opt.callback(par, this, parameter);
+            }
+            return this;
         },
         dispose: function(){
             for(var i in this.controls){
@@ -547,14 +633,15 @@
                 }
                 code = obj.getAttribute('code');
             }
-            if(code.in(['close', 'cancel'])) {
-                _.close();
-            } else if(code === 'min') {
+            if(code === 'min') {
                 _.min();
             } else if(code === 'max') {
                 _.max();
-            } else {
+            } else if(code === 'close') {
                 _.close();
+            } else {
+                var result = parseInt(obj.getAttribute('result'), 10);
+                _.close(code, result);
             }
             return this;
         },
@@ -815,33 +902,37 @@
                 newWidth = w < dp.minWidth ? dp.minWidth : w, 
                 newHeight = h < dp.minHeight ? dp.minHeight : h,
                 newLeft = 0,
-                newTop = 0;
+                newTop = 0,
+                x = 0,
+                y = 0;
+
+            var mw = parseInt(_.opt.maxWidth, 10);
+            if(_.opt.maxWidth !== '100%' && !isNaN(mw) && newWidth > mw) {
+                newWidth = mw;
+            } else {
+                x = opt.x;
+            }
+
+            var mh = parseInt(_.opt.maxHeight, 10);
+            if(_.opt.maxHeight !== '100%' && !isNaN(mh) && newHeight > mh) {
+                newHeight = mh;
+            } else {
+                y = opt.y;
+            }
 
             if(opt.dir === 'center') {
-                opt.x = parseInt(Math.abs(opt.x) / 2, 10);
-                opt.y = parseInt(Math.abs(opt.y) / 2, 10);
+                x = parseInt(Math.abs(x) / 2, 10);
+                y = parseInt(Math.abs(y) / 2, 10);
                 newLeft = dp.left - opt.x;
                 newTop = dp.top - opt.y;
             } else {
-                opt.x *= opt.dir.indexOf('left') >= 0 ? -1 : 1;
-                opt.y *= opt.dir.indexOf('top') >= 0 ? -1 : 1;
-                newLeft = (dp.left + opt.x + newWidth) > dp.right ? dp.right - newWidth : dp.left + opt.x;
-                newTop = (dp.top + opt.y + newHeight) > dp.bottom ? dp.bottom - newHeight : dp.top + opt.y;
+                x *= opt.dir.indexOf('left') >= 0 ? -1 : 1;
+                y *= opt.dir.indexOf('top') >= 0 ? -1 : 1;
+                newLeft = (dp.left + x + newWidth) > dp.right ? dp.right - newWidth : dp.left + x;
+                newTop = (dp.top + y + newHeight) > dp.bottom ? dp.bottom - newHeight : dp.top + y;
             }
 
-            if(_.opt.maxWidth !== '100%'){
-                var mw = parseInt(_.opt.maxWidth, 10);
-                if(!isNaN(mw) && newWidth > mw) {
-                    newWidth = mw;
-                }
-            }
-
-            if(_.opt.maxHeight !== '100%'){
-                var mh = parseInt(_.opt.maxHeight, 10);
-                if(!isNaN(mh) && newHeight > mh) {
-                    newHeight = mh;
-                }
-            }
+            console.log(newWidth, newHeight, x, y, newLeft, newTop);
 
             if(opt.dir.indexOf('-') >= 0 || opt.dir === 'center') {
                 $.setStyle(obj, {width: newWidth, height: newHeight}, 'px');
@@ -885,6 +976,7 @@
             var topHeight = _.controls.top ? _.controls.top.offsetHeight + 1 : 0, 
                 bottomHeight = _.controls.bottom ? _.controls.bottom.offsetHeight + 1 : 0,
                 paddingHeight = parseInt('0' + $.getElementStyle(obj, 'paddingTop'), 10),
+                conPaddingHeight = parseInt('0' + $.getElementStyle(_.controls.content, 'padding'), 10)
                 boxHeight = obj.offsetHeight;
 
             if(_.opt.height !== 'auto') {
@@ -894,11 +986,6 @@
                 }
             }
 
-            var h = obj.style.height;
-
-            console.log(h, _.opt.height + ',' + obj.offsetHeight);
-
-
             if(boxHeight > bs.height) {
                 boxHeight = bs.height - 20;
                 obj.style.height = boxHeight + 'px';
@@ -906,10 +993,13 @@
 
             var size = {
                 width: '100%',
-                height: (boxHeight - topHeight - bottomHeight - paddingHeight) + 'px'
+                height: (boxHeight - topHeight - bottomHeight - paddingHeight - conPaddingHeight + 1) + 'px'
             };
+            if(_.controls.bottom){
+                size.marginBottom = _.controls.bottom.offsetHeight + 'px';
+            }
 
-            console.log('size:', _.opt.id, size);
+            console.log('size:', boxHeight, _.opt.id, size);
 
             return $.setStyle(_.controls.body, size), _;
         },
@@ -924,6 +1014,17 @@
             }
             obj.style.cssText = cssText.join(';');
             return this;
+        },
+        checkPosition: function(key, pos) {
+            if(!$.isNumber(pos)) {
+                pos = this.opt.position;
+            }
+            var keys = {
+                top: [1,2,3], middle: [4,5,6], bottom: [7,8,9],
+                left: [1,4,7], center: [2,5,8], right: [3,6,9],
+                custom: [0, 10]
+            };
+            return (keys[key] || [0]).indexOf(pos) >= 0;
         },
         setPosition: function(options) {
             var _ = this, obj = _.controls.box;
@@ -944,47 +1045,52 @@
             if(isNaN(opt.pos) || isNaN(opt.x) || isNaN(opt.y)) {
                 return this;
             }
+            console.log('setPosition: ', options, opt);
+            
+            var scrollTop = document.documentElement.scrollTop, 
+                scrollLeft = document.documentElement.scrollLeft;
 
             var bs = $.getBodySize(),
                 width = obj.offsetWidth,
                 height = obj.offsetHeight,
-                posX = bs.width / 2 - width / 2,
-                posY = bs.height / 2 - height / 2;
+                posX = _.checkPosition('center', opt.pos) ? bs.width / 2 - width / 2 : opt.x,
+                posY = _.checkPosition('middle', opt.pos) ? bs.height / 2 - height / 2 : opt.y;
+
+            if(!_.opt.lock) {
+                if(_.checkPosition('center', opt.pos)) {
+                    posX += scrollLeft;
+                } else {
+                    posX += _.checkPosition('right', opt.pos) ? - scrollLeft : scrollLeft;
+                }
+                if(_.checkPosition('middle', opt.pos)) {
+                    posY += scrollTop;
+                } else {
+                    posY += _.checkPosition('bottom', opt.pos) ? - scrollTop : scrollTop;
+                }
+            }
 
             //清除cssText上下左右4个样式
             _.clearPositionStyle(obj);
 
             switch(opt.pos) {
+                case 0:
                 case 1:
-                    $.setStyle(obj, {left: opt.x, top: opt.y}, 'px');
-                    break;
                 case 2:
-                    $.setStyle(obj, {left: posX, top: opt.y}, 'px');
-                    break;
-                case 3:
-                    $.setStyle(obj, {right: opt.x,  top: opt.y}, 'px');
-                    break;
                 case 4:
-                    $.setStyle(obj, {left: opt.x, top: posY}, 'px');
-                    break;
                 case 5:
+                case 10:    //custom
                     $.setStyle(obj, {left: posX, top: posY}, 'px');
                     break;
+                case 3:
                 case 6:
-                    $.setStyle(obj, {right: opt.x, bottom: posY}, 'px');
+                    $.setStyle(obj, {right: posX,  top: posY}, 'px');
                     break;
                 case 7:
-                    $.setStyle(obj, {left: opt.x, bottom: opt.y}, 'px');
-                    break;
                 case 8:
-                    $.setStyle(obj, {left: posX, bottom: opt.y}, 'px');
+                    $.setStyle(obj, {left: posX, bottom: posY}, 'px');
                     break;
                 case 9:
-                    $.setStyle(obj, {right: opt.x, bottom: opt.y}, 'px');
-                    break;
-                case 10:    //custom
-
-                    $.setStyle(obj, {top: opt.y, left: opt.x}, 'px');
+                    $.setStyle(obj, {right: posX, bottom: posY}, 'px');
                     break;
             }
             return this;
@@ -1164,9 +1270,9 @@
 
             _.getSwicths().each(function(i, obj){
                 $.addEventListener(obj, 'mousedown', function() {
+                    $.cancelBubble();
                     _.setTopMost();
                     _dragSize(obj.pos);
-                    $.cancelBubble();
                 });
             });
             return this;
@@ -1234,16 +1340,27 @@
             if(typeof type === 'string') {
                 options.type = type;
             }
-
-            var opt = $.extend({
-                id: 0
-            }, options);
-
-            var d = this.get(opt.id);
+            var opt = {id: 0};
+            switch(options.type) {
+                case 'alert':
+                    opt.buttons = DialogButtons.OK;
+                    break;
+                case 'confirm':
+                    opt.buttons = DialogButtons.OKCancel;
+                    break;
+                case 'dialog':
+                    break;
+                default:
+                    opt.buttons = DialogButtons.None;
+                    opt.showTitle = opt.showBottom = opt.dragSize = false;
+                    opt.height = opt.minHeight = 'auto';
+                    break;
+            }
+            var d = this.get($.extend(opt, options).id);
             if(d === null) {
-                d = this.set(opt.id, new MyDialog(content, title, options));
+                d = this.set(opt.id, new MyDialog(content, title, opt));
             } else {
-                d.update(content, title, options);
+                d.update(content, title, opt);
             }
 
             return d;
@@ -1279,23 +1396,45 @@
                     }
                 }
             });
+        },
+        setWindowResize: function() {
+            var _ = this;
+            if(_.resizeEvent) {
+                return false;
+            }
+            _.resizeEvent = true;
+            $.addEventListener(window, 'resize', function(e) {
+                for(var i=_.keys.length-1; i>=0; i--) {
+                    var key = _.keys[i];
+                    var d = _.caches[key];
+                    if(null !== d && !d.closed && d.checkPosition('center') || d.checkPosition('middle')) {
+                        d.setPosition();
+                    }
+                }
+            });
         }
     };
 
     $.Dialog = new Dialog();
 
     $.extend({
+        dialog: function(content, title, options) {
+            return $.Dialog.show(content, title, options, 'dialog');
+        },
         alert: function(content, title, options){
-            return $.Dialog.show(content, title, options);
+            return $.Dialog.show(content, title, options, 'alert');
         },
         confirm: function(content, title, options){
-
+            return $.Dialog.show(content, title, options, 'confirm');
+        },
+        message: function(content, options){
+            return $.Dialog.show(content, undefined, options, 'message');
         },
         msg: function(content, options){
-
+            return $.Dialog.show(content, undefined, options, 'msg');
         },
         tips: function(content, options){
-
+            return $.Dialog.show(content, undefined, options, 'tips');
         },
         tooltip: function(content, options){
             return $.Dialog.show(content, undefined, options, 'tooltip');

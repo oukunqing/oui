@@ -21,7 +21,20 @@
 <script type="text/javascript">
 
 function showDialog(){
-    var dialog = $.alert('Hello!对话框', {id: 3, position: 9, maxHeight: 400, maxWidth: 600, lock: false, clickBgClose: 'dblclick', escClose: true, autoClose: false});
+    var dialog = $.msg('Hello!对话框', {
+        id: 3, position: 5, maxHeight: 400, maxWidth: 600, lock: true, clickBgClose: 'dblclick', escClose: true, autoClose: false,
+        //buttons: $.DialogButtons.YesNo, 
+        showTitle: true,
+        callback: function(dialogResult, d, param) {
+            console.log(dialogResult, d, param);
+            if(dialogResult.OK || dialogResult.Yes) {
+                alert('OK');
+            } else if(dialogResult.Cancel) {
+                alert('Cancel');
+            }
+        },
+        param: {id:123, name:'Tom'}
+    });
 
     //console.log('dialog: ', dialog);
     /*
@@ -45,10 +58,9 @@ function showDialog(){
 
     //dialog.setZindex(1000);
 
-    window.setTimeout(function(){
-
-    //dialog.setZindex(2000);
-        dialog.append(getCon(6, '大家好'), {height:'auto'});
+    window.setTimeout(function() {
+        //dialog.setZindex(2000);
+        //dialog.append(getCon(6, '大家好'), {height:'auto'});
 
         dialog.setOption('topMost', true);
     }, 3000);
