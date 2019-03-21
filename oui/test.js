@@ -100,8 +100,6 @@ var arr = con.split('');
 
 buildAssemble(0, 0, 3, arr);
 
-var str = '确定取消标题栏';
-console.log(str.toUnicode());
 
 
 var w = [10, 10, 10];
@@ -158,3 +156,7 @@ console.log(new Date().format('ts'))
 var d = '2019-03-19 16:25:08'.toDate().format('ts')
 
 console.log(d);
+
+
+var str = '确定,取消,标题栏,是,否,中止,重试,忽略,关闭';
+console.log(str.toUnicode());

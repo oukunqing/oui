@@ -16,6 +16,7 @@
     <button onclick="showTable();">显示表格</button>
     <button onclick="showDialog();">对话框</button>
     <button onclick="win();">Win</button>
+    <button onclick="load();">Load</button>
     <button onclick="update();">更新对话框</button>
 </body>
 </html>
@@ -69,6 +70,10 @@ function showDialog(){
 
 function win(){
     var win = $.dialog.win('这是普通窗口模式');
+}
+
+function load(){
+    var win = $.dialog.load('table.html');
 }
 
 function update() {

@@ -1,80 +1,4 @@
 !function($){
-
-    var KEY_CODE = {
-        Enter: 13,
-        Esc: 27,
-        Space: 32
-    },
-    DialogResult = {
-        None: 0,
-        OK: 1,
-        Cancel: 2,
-        Abort: 3,
-        Retry: 4,
-        Ignore: 5,
-        Yes: 6,
-        No: 7
-    },
-    ButtonConfig = {
-        None: { code: 'None', text: '关闭', result: 0, css: 'btn-default'},
-        OK: { code: 'OK', text: '\u786e\u5b9a', result: 1, css: 'btn-primary' },
-        Cancel: { code: 'Cancel', text: '取消', result: 2, css: 'btn-default' },
-        Abort: { code: 'Abort', text: '中止', result: 3, css: 'btn-primary' },
-        Retry: { code: 'Retry', text: '重试', result: 4, css: 'btn-primary' }, 
-        Ignore: { code: 'Ignore', text: '忽略', result: 5, css: 'btn-default' },
-        Yes: { code: 'Yes', text: '是', result: 6, css: 'btn-primary' },
-        No: { code: 'No', text: '否', result: 7, css: 'btn-default' }
-    },
-    DialogButtons = {
-        None: -1,
-        OK: 0,
-        OKCancel: 1,
-        AbortRetryIgnore: 2,
-        YesNoCancel: 3,
-        YesNo: 4,
-        RetryCancel: 5
-    },
-    /*
-    ButtonMaps = [
-        OK: ['OK'],
-        OKCancel: ['OK', 'Cancel'],
-        AbortRetryIgnore: ['Abort', 'Retry', 'Ignore'],
-        YesNoCancel: ['Yes', 'No', 'Cancel'],
-        YesNo: ['Yes', 'No'],
-        RetryCancel: ['Retry', 'Cancel']
-    ];
-    */
-    ButtonMaps = [
-        ['OK'],
-        ['OK', 'Cancel'],
-        ['Abort', 'Retry', 'Ignore'],
-        ['Yes', 'No', 'Cancel'],
-        ['Yes', 'No'],
-        ['Retry', 'Cancel']
-    ];
-
-    $.DialogButtons = DialogButtons;
-
-    var thisFilePath = $.getScriptSelfPath(true);
-    //先加载样式文件
-    $.loadLinkStyle($.getFilePath(thisFilePath) + $.getFileName(thisFilePath, true).replace('.min', '') + '.css');
-
-    function checkStyleUnit(s) {
-        if($.isString(s, true)) {
-            s = s.toLowerCase();
-            var arr = ['px', '%', 'em', 'auto', 'pt'];
-            for(var i in arr) {
-                if(s.endsWith(arr[i])) {
-                    return s;
-                }
-            }
-            return s + 'px';
-        } else if($.isNumber(s)) {
-            return s + 'px';
-        }
-        return s;
-    }
- 
     function MyDialog(content, title, options){
         if($.isObject(content)) {
             options = content;
@@ -361,12 +285,15 @@
             var _ = this;
             var div = document.createElement('div');
             div.className = 'body';
-
+            /*
             var con = document.createElement('div');
             con.className = 'content';
             con.innerHTML = content;
+            */
 
-            this.controls.content = con;
+            var con = _.buildContent(content);
+
+            _.controls.content = con;
 
             div.appendChild(con);
 
@@ -378,6 +305,33 @@
             });
 
             return div;
+        },
+        buildContent: function(content) {
+            var _ = this, ctls = this.controls, op = this.opt, con = ctls.content;
+            if(con === null) {
+                con = document.createElement('div');
+                con.className = 'content';
+            }
+
+            if(['url', 'iframe', 'load'].indexOf(op.type) >= 0) {
+                if(con){
+                    console.log('tagName: ', con.tagName);
+                }
+                con.innerHTML = _.buildIframe(content);
+            } else {
+                con.innerHTML = content;
+            }
+
+            return con;
+        },
+        buildIframe: function(url) {
+            var height = '100%';
+            return ['<iframe class="iframe" width="100%"',
+                ' height="', height, '"',
+                ' src="', url, '"',
+                ' frameborder="0" scrolling="auto">',
+                '</iframe>'
+            ].join('');
         },
         buildBottom: function(type) {
             var _ = this;
@@ -391,7 +345,7 @@
 
             for(var i = 0; i < div.childNodes.length; i++) {
                 var obj = div.childNodes[i], key = obj.getAttribute('code');
-                this.buttons[key] = obj;
+                _.buttons[key] = obj;
             }
 
             $.addEventListener(panel, 'mousedown', function() {
@@ -401,9 +355,9 @@
                 $.cancelBubble();
             });
 
-            this.setEvent(div.childNodes, 'click', true);
+            _.setEvent(div.childNodes, 'click', true);
 
-            this.setShortcutKeyEvent(div.childNodes);
+            _.setShortcutKeyEvent(div.childNodes);
 
             return panel;
         },
@@ -576,7 +530,8 @@
                     _ctls.content.style.height = 'auto';
                 }
 
-                _ctls.content.innerHTML = opt.content;
+                //_ctls.content.innerHTML = opt.content;
+                _ctls.content = _.buildContent(opt.content);
 
                 if(_ctls.title && opt.title) {
                     _ctls.title.innerHTML = opt.title;
@@ -675,6 +630,7 @@
                 }
                 $.addEventListener(obj, eventName || 'click', function() {
                     _.action(this);
+                    $.cancelBubble();
                 });
 
                 if(keypress) {
@@ -745,7 +701,7 @@
                 height: obj.offsetHeight
             };
 
-            this.lastSize = this.opt.heigh === 'auto' ? size : $.extend({
+            this.lastSize = this.opt.height === 'auto' ? size : $.extend({
                 top: obj.offsetTop,
                 left: obj.offsetLeft,
                 right: (obj.offsetLeft + obj.offsetWidth),
@@ -982,6 +938,10 @@
                 conPaddingHeight = parseInt('0' + $.getElementStyle(_.controls.content, 'padding'), 10)
                 boxHeight = obj.offsetHeight;
 
+            //boxHeight = this.lastSize ? this.lastSize.height : obj.offsetHeight;
+
+            console.log('this.lastSize: ', this.lastSize);
+
             if(_.opt.height !== 'auto') {
                 if(boxHeight < _.opt.height) {
                     boxHeight = _.opt.height;
@@ -1122,10 +1082,6 @@
                 _ctls.box.style.zIndex = zindex;
             }
             return this.setOption('zindex', zindex);
-        },
-        setContent: function() {
-
-            return this;
         },
         dragToNormal: function(evt, bs, moveX, moveY) {
             var _ = this, _ctls = _.controls, obj = _ctls.box;
@@ -1301,6 +1257,74 @@
     var DialogType = {
 
     };
+
+
+
+    var KEY_CODE = {
+        Enter: 13,
+        Esc: 27,
+        Space: 32
+    },
+    DialogResult = {
+        None: 0,
+        OK: 1,
+        Cancel: 2,
+        Abort: 3,
+        Retry: 4,
+        Ignore: 5,
+        Yes: 6,
+        No: 7
+    },
+    ButtonConfig = {
+        None: { code: 'None', text: '\u5173\u95ed', result: 0, css: 'btn-default'},
+        OK: { code: 'OK', text: '\u786e\u5b9a', result: 1, css: 'btn-primary' },
+        Cancel: { code: 'Cancel', text: '\u53d6\u6d88', result: 2, css: 'btn-default' },
+        Abort: { code: 'Abort', text: '\u4e2d\u6b62', result: 3, css: 'btn-primary' },
+        Retry: { code: 'Retry', text: '\u91cd\u8bd5', result: 4, css: 'btn-primary' }, 
+        Ignore: { code: 'Ignore', text: '\u5ffd\u7565', result: 5, css: 'btn-default' },
+        Yes: { code: 'Yes', text: '\u662f', result: 6, css: 'btn-primary' },
+        No: { code: 'No', text: '\u5426', result: 7, css: 'btn-default' }
+    },
+    DialogButtons = {
+        None: -1,
+        OK: 0,
+        OKCancel: 1,
+        AbortRetryIgnore: 2,
+        YesNoCancel: 3,
+        YesNo: 4,
+        RetryCancel: 5
+    },
+    ButtonMaps = [
+        ['OK'],
+        ['OK', 'Cancel'],
+        ['Abort', 'Retry', 'Ignore'],
+        ['Yes', 'No', 'Cancel'],
+        ['Yes', 'No'],
+        ['Retry', 'Cancel']
+    ];
+
+    $.DialogButtons = DialogButtons;
+
+    var thisFilePath = $.getScriptSelfPath(true);
+    //先加载样式文件
+    $.loadLinkStyle($.getFilePath(thisFilePath) + $.getFileName(thisFilePath, true).replace('.min', '') + '.css');
+
+    function checkStyleUnit(s) {
+        if($.isString(s, true)) {
+            s = s.toLowerCase();
+            var arr = ['px', '%', 'em', 'auto', 'pt'];
+            for(var i in arr) {
+                if(s.endsWith(arr[i])) {
+                    return s;
+                }
+            }
+            return s + 'px';
+        } else if($.isNumber(s)) {
+            return s + 'px';
+        }
+        return s;
+    }
+ 
 
     function Dialog(){
         this.caches = {};
