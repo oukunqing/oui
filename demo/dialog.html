@@ -14,17 +14,22 @@
     <input id="txt1" type="input" />
     <button onclick="paging();">分页</button>
     <button onclick="showTable();">显示表格</button>
-    <button onclick="showDialog();">对话框</button>
+    <button onclick="alert2();">Alert</button>
+    <button onclick="confirm2();">Confirm</button>
     <button onclick="win();">Win</button>
     <button onclick="load();">Load</button>
+    <button onclick="msg();">Msg</button>
+    <button onclick="tips();">Tips</button>
     <button onclick="update();">更新对话框</button>
 </body>
 </html>
 <script type="text/javascript">
 
-function showDialog(){
-    var dialog = $.msg('Hello!对话框', {
-        id: 3, position: 5, maxHeight: 400, maxWidth: 600, lock: true, clickBgClose: 'dblclick', escClose: true, autoClose: false,
+function alert2(){
+    var dialog = $.alert('Hello!对话框', {
+        id: 3, position: 5, maxHeight: 360, maxWidth: 500, lock: true, clickBgClose: 'dblclick', 
+        escClose: true, autoClose: true, 
+        maxAble: true, minAble: true,
         //buttons: $.DialogButtons.YesNo, 
         showTitle: true,
         callback: function(dialogResult, d, param) {
@@ -62,10 +67,26 @@ function showDialog(){
 
     window.setTimeout(function() {
         //dialog.setZindex(2000);
-        //dialog.append(getCon(6, '大家好'), {height:'auto'});
+        dialog.append(getCon(16, '大家好'), {height:'auto'});
 
         dialog.setOption('topMost', true);
     }, 3000);
+}
+
+function confirm2(){
+    var win = $.confirm('确定要保存内容吗？', '保存', {
+        buttons: $.DialogButtons.OKCancel,
+        success: function() {
+            alert('success: ');
+        },
+        callback: function(dialogResult, d) {
+            if(dialogResult.OK || dialogResult.Yes) {
+                alert('点击了确定按钮');
+            } else {
+                alert('点击了取消按钮');
+            }
+        }
+    });
 }
 
 function win(){
@@ -73,7 +94,19 @@ function win(){
 }
 
 function load(){
-    var win = $.dialog.load('table.html');
+    var win = $.dialog.load('pagination.html');
+}
+
+function msg(){
+    var win = $.msg('这是普通窗口模式');
+
+    window.setTimeout(function() {
+        win.update('请注意：提示信息改变了。请注意：提示信息改变了', {width:'auto'});
+    }, 3000);
+}
+
+function tips(){
+    var win = $.tips('这是普通窗口模式');
 }
 
 function update() {
@@ -81,7 +114,7 @@ function update() {
     for(var i=0; i<35; i++){
         str += (i + 1) + '. 内容更改了内容更改了内容更改了内容更改了内容更改了内容更改了内容更改了内容更改了<br />';
     }
-    var dialog = $.alert('Hello!对话框<br />' + str, {id:2, lock: true, escClose: true, autoClose: false});
+    var dialog = $.alert('Hello!对话框<br />' + str, {id:2, lock: false, escClose: true, autoClose: false});
 
     //dialog.setZindex(1005);
 
@@ -102,7 +135,7 @@ function getCon(rows, txt) {
 function update2() {
     var str = getCon(3);
     var dialog = $.alert('Hello!对话框22<br />' + str, {
-        id:12, lock: true, minAble: true, maxAble: true, escClose: true, autoClose: false
+        id:12, lock: false, minAble: true, maxAble: true, escClose: true, autoClose: false
     });
 
     dialog.setOption('topMost', true);

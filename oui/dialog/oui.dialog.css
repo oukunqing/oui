@@ -4,7 +4,7 @@
     position: fixed; top: 0; left: 0;
     margin: 0; padding: 0;
     
-    background: #ccc; opacity: 0.2;
+    background: #909090; opacity: 0.2;
     overflow: auto;
     
 }
@@ -20,7 +20,7 @@
 
 .oui-dialog {
     padding: 4px; 
-    /*margin: 0px auto;*/
+    margin: 0px;
     /*width: auto; */
     position: absolute;
     /*
@@ -36,7 +36,7 @@
     font-size: 14px;
     line-height: 1.25em;
 
-    background: #fff;
+    background: #fff;G
 
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
@@ -53,7 +53,7 @@
     border-radius: 0px;
     box-sizing: border-box;
     top: 0; left: 0;
-    /*border: none 0;*/
+    border: none 0;
 }
 
 .oui-dialog-min {
@@ -65,13 +65,12 @@
     padding:0; margin:0;
     border: none 0;
     width: 100%;
-    height: 32px;
+    height: 30px;
     border-bottom: solid 1px #ddd;
     box-sizing: border-box;
     clear:both; overflow:hidden;
 
     /*cursor: move;*/
-
     -moz-user-select:none;
     -khtml-user-select:none;
     user-select:none;
@@ -80,13 +79,13 @@
 
 .oui-dialog .top .title {
     margin: 0; 
-    padding: 6px 8px; 
+    padding: 5px 5px; 
     font-weight: bold;
     float: left;
 }
 
 .oui-dialog .dialog-btn-panel {
-    margin: 4px 3px 0 0;
+    margin: 2px 2px 0 0;
 }
 
 .oui-dialog .top .btn {
@@ -102,7 +101,7 @@
 
 .oui-dialog .top .btn:hover {
     background-color: #909090;
-    border: solid 1px #808080;
+    border: solid 1px #909090;
 }
 
 .oui-dialog .top .btn-min {
@@ -152,23 +151,25 @@
     border: none 0;
     clear:both; overflow: hidden;
     width: 100%;
-    height: 40px;
+    height: 38px;
     -moz-user-select:none;
     -khtml-user-select:none;
     user-select:none;
 }
 
 .oui-dialog .bottom {
+    background: #fff;
     border: none 0;
     box-sizing: border-box;
     border-top: solid 1px #ddd;
     text-align: center;
-    margin: 0 3px;
+    height: 34px;
+    margin: 0 4px;
     padding: 0;
 }
 
-.oui-dialog .bottom .btn {    
-    margin: 7px 0 0;
+.oui-dialog .btn {    
+    margin: 5px 0 0;
     color: #fff;
     background: #337ab7;
     border: solid 1px #2e6da4;
@@ -192,28 +193,64 @@
     text-align: center;
 }
 
-.oui-dialog .bottom .btn-primary {
+.oui-dialog .btn-primary {
     color: #fff;
     background-color: #337ab7;
     border-color: #2e6da4;
 }
 
-.oui-dialog .bottom .btn-primary:hover {
+.oui-dialog .btn-primary:hover {
     color: #fff;
     background-color: #286090;
     border-color: #204d74;
 }
 
-.oui-dialog .bottom .btn-default {
+.oui-dialog .btn-default {
     color: #333;
     background: #fff;
     border: solid 1px #ccc;
 }
 
-.oui-dialog .bottom .btn-default:hover {
+.oui-dialog .btn-default:hover {
+    color: #333;
+    background-color: #e6e6e6;
+    border-color: #adadad;
+}
+
+.oui-dialog .btn-success {
     color: #fff;
-    background-color: #286090;
-    border-color: #204d74;
+    background: #5cb85c;
+    border: solid 1px #4cae4c;
+}
+
+.oui-dialog .btn-success:hover {
+    color: #fff;
+    background-color: #449d44;
+    border-color: #398439;
+}
+
+.oui-dialog .btn-warning {
+    color: #fff;
+    background: #f0ad4e;
+    border: solid 1px #eea236;
+}
+
+.oui-dialog .btn-warning:hover {
+    color: #fff;
+    background-color: #ec971f;
+    border-color: #d58512;
+}
+
+.oui-dialog .btn-danger {
+    color: #fff;
+    background: #d9534f;
+    border: solid 1px #d43f3a;
+}
+
+.oui-dialog .btn-danger:hover {
+    color: #fff;
+    background-color: #c9302c;
+    border-color: #c9302c;
 }
 
 .oui-dialog .bottom .btn-ml {
@@ -261,9 +298,9 @@
 .oui-dialog .border-switch {
     background: transparent;
     margin: 0; padding: 0; 
-    display: inline-block;
     position: absolute;
-    z-index:999999;
+    box-sizing: border-box;
+    display: inline-block;
 }
 
 .oui-dialog .top-switch,.oui-dialog .bottom-switch {
@@ -288,6 +325,7 @@
     width: 10px; height: 10px;
     border-radius: 3px;
     background: transparent;
+    margin: 0; padding: 0;
 }
 
 .oui-dialog .top-left-switch {
@@ -325,15 +363,15 @@
 }
 
 
-.dialog-overflow-hidden {
+.out-dialog .overflow-hidden {
     overflow: hidden;
 }
 
-.dialog-overflow-auto {
+.out-dialog .overflow-auto {
     overflow: auto;
 }
 
-.oui-dialog-fixed {
+.out-dialog .fixed {
     position: fixed;
 }
 

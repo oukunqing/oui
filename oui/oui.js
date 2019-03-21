@@ -1064,6 +1064,9 @@
         getQueryString: function (name) {
             return $.getQueryString(this, name);
         },
+        setUrlParam: function(data, value) {
+            return $.setQueryString(this, data, value);
+        },
         getUrlHost: function () {
             return $.getUrlHost(this);
         }
@@ -1939,14 +1942,34 @@
             return this;
         },
         addEventListener = function (elem, ev, func, useCapture) {
-            if (isElement(elem)) {
-                elem.addEventListener ? elem.addEventListener(ev, func, useCapture || false) : elem.attachEvent('on' + ev, func);
+            var elems = elem;
+            if(!$.isArray(elem)) {
+                elems = [elem];
+            }
+            for(var i in elems) {
+                if(isElement(elems[i])) {
+                    if(elems[i].addEventListener) {
+                        elems[i].addEventListener(ev, func, useCapture || false);
+                    } else {
+                        elems[i].attachEvent('on' + ev, func);
+                    }
+                }
             }
             return this;
         },
         removeEventListener = function (elem, ev, func, useCapture) {
-            if (isElement(elem)) {
-                elem.removeEventListener ? elem.removeEventListener(ev, func, useCapture || false) : elem.detachEvent('on' + ev, func);
+            var elems = elem;
+            if(!$.isArray(elem)) {
+                elems = [elem];
+            }
+            for(var i in elems) {
+                if(isElement(elems[i])) {
+                    if(elems[i].addEventListener) {
+                        elems[i].removeEventListener(ev, func, useCapture || false);
+                    } else {
+                        elems[i].detachEvent('on' + ev, func);
+                    }
+                }
             }
             return this;
         },

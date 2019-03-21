@@ -55,7 +55,7 @@
         _.controls = {
             shade: null, container: null, box: null, 
             top: null, title: null, panel: null,
-            body: null, content: null, 
+            body: null, content: null, iframe: null,
             bottom: null
         };
 
@@ -115,7 +115,7 @@
             return obj.opt.id === this.opt.id && obj.controls.box.id === this.controls.box.id;
         },
         build: function(options){
-            var _ = this, _ctls = this.controls, opt = options;
+            var _ = this, ctl = this.controls, opt = options;
 
             if(_.opt.lock) {
                 _.hideDocOverflow();
@@ -127,16 +127,16 @@
                 //不需要遮罩层
                 
             } else {
-                if(_.opt.lock) {
+                if(opt.lock) {
                     //遮罩层
-                    _ctls.shade = document.createElement('div');
-                    _ctls.shade.className = 'oui-dialog-shade';
-                    _ctls.shade.style.zIndex = opt.zindex;
+                    ctl.shade = document.createElement('div');
+                    ctl.shade.className = 'oui-dialog-shade';
+                    ctl.shade.style.zIndex = opt.zindex;
 
                     //对话框容器
-                    _ctls.container = document.createElement('div');
-                    _ctls.container.className = 'oui-dialog-container';
-                    _ctls.container.style.zIndex = opt.zindex;
+                    ctl.container = document.createElement('div');
+                    ctl.container.className = 'oui-dialog-container';
+                    ctl.container.style.zIndex = opt.zindex;
                 }
             }
             /*
@@ -146,42 +146,37 @@
             */
 
             //对话框
-            _ctls.box = document.createElement('div');
-            _ctls.box.className = 'oui-dialog';
-            _ctls.box.style.zIndex = opt.zindex;
-            _ctls.box.id = _.dialogId;
+            ctl.box = document.createElement('div');
+            ctl.box.className = 'oui-dialog';
+            ctl.box.style.zIndex = opt.zindex;
+            ctl.box.id = _.dialogId;
 
-            _ctls.box.cache = {};
+            ctl.box.cache = {};
 
-            if(_.opt.showTitle) {
-                _ctls.top = _.buildTop(opt.title);
-                _ctls.box.appendChild(_ctls.top);
+            if(opt.showTitle) {
+                ctl.top = _.buildTop(opt.title, ctl.box);
             }
 
-            _ctls.body = _.buildBody(opt.content);
-            _ctls.box.appendChild(_ctls.body);
+            ctl.body = _.buildBody(opt.content, ctl.box);
 
-            if(_.opt.showBottom) {
-                _ctls.bottom = _.buildBottom();
-                _ctls.box.appendChild(_ctls.bottom);
+            if(opt.showBottom) {
+                ctl.bottom = _.buildBottom(ctl.box);
             }
             
             if(opt.type !== 'message' && opt.type !== 'tooltip') {
-                //_ctls.bottom = _.buildBottom();
-                //_ctls.box.appendChild(_ctls.bottom);
                 _.setDragSize();
             }
 
-            if(_ctls.shade) {
-                document.body.appendChild(_ctls.shade);
+            if(ctl.shade) {
+                document.body.appendChild(ctl.shade);
             }
 
-            if(_ctls.container !== null) {
-                _ctls.container.appendChild(_ctls.box);
-                document.body.appendChild(_ctls.container);
+            if(ctl.container !== null) {
+                ctl.container.appendChild(ctl.box);
+                document.body.appendChild(ctl.container);
             } else {
-                //$.addClass(_ctls.box, 'oui-dialog-fixed');
-                document.body.appendChild(_ctls.box);
+                //$.addClass(ctl.box, 'oui-dialog-fixed');
+                document.body.appendChild(ctl.box);
             }
 
             _.setSize({type: _.opt.status, width: _.opt.width, height: _.opt.height});
@@ -190,7 +185,7 @@
             _.setCache().dragPosition().dragSize();
 
             if(opt.clickBgClose.in(['dblclick', 'click'])) {
-                $.addEventListener(_ctls.container, opt.clickBgClose, function() {
+                $.addEventListener(ctl.container, opt.clickBgClose, function() {
                     _.close();
                 });
             }
@@ -200,17 +195,17 @@
             }
             $.Dialog.setWindowResize();
 
-            if(_.opt.topMost) {
-                $.addEventListener(_ctls.box, 'mousedown', function() {
+            if(opt.topMost) {
+                $.addEventListener(ctl.box, 'mousedown', function() {
                     _.setTopMost();
                 });
             }
 
-            $.addEventListener(_ctls.box, 'click', function(){
+            $.addEventListener(ctl.box, 'click', function(){
                 $.cancelBubble();
             });
 
-            $.addEventListener(_ctls.box, 'dblclick', function(){
+            $.addEventListener(ctl.box, 'dblclick', function(){
                 $.cancelBubble();
             });
 
@@ -235,19 +230,28 @@
         getControls: function(className) {
             return $('#' + this.dialogId + ' ' + className);
         },
-        buildTop: function(title){
+        appendChild: function(elem, parentNode) {
+            if($.isUndefined(parentNode)) {
+                parentNode = this.controls.content;
+            }
+            if($.isElement(parentNode) && $.isElement(elem)) {
+                parentNode.appendChild(elem);
+            }
+            return this;
+        },
+        buildTop: function(title, parentNode){
             var _ = this, p = _.opt;
-            var top = document.createElement('div');
-            top.className = 'top';
+            var elem = document.createElement('div');
+            elem.className = 'top';
 
-            $.addEventListener(top, 'dblclick', function() {
+            $.addEventListener(elem, 'dblclick', function() {
                 if(p.maxAble) {
                     _.max();
                 }
                 $.cancelBubble();
             });
 
-            $.addEventListener(top, 'mousedown', function() {
+            $.addEventListener(elem, 'mousedown', function() {
                 if(p.topMost) {
                     _.setTopMost();
                 }
@@ -257,18 +261,21 @@
             var div = document.createElement('div');
             div.className = 'title';
             div.innerHTML =  title || p.title;
-            top.appendChild(div);
+            elem.appendChild(div);
 
             _.controls.title = div;
 
+            var isMin = p.minAble && p.showMin,
+                isMax = p.maxAble && p.showMax;
+
             var panel = document.createElement('div');
             panel.className = 'dialog-btn-panel';
-            panel.innerHTML = (p.minAble && p.showMin ? '<a class="btn btn-min" code="min"></a>' : '')
-                + (p.maxAble && p.showMax ? '<a class="btn btn-max" code="max"></a>' : '')
+            panel.innerHTML = (isMin ? '<a class="btn btn-min" code="min"></a>' : '')
+                + (isMax || isMin? '<a class="btn btn-max" code="max"></a>' : '')
                 + (p.closeAble && p.showClose ? '<a class="btn btn-close" code="close"></a>' : '');
             panel.style.cssText = 'float:right;';
 
-            top.appendChild(panel);
+            elem.appendChild(panel);
 
             _.controls.panel = panel;
 
@@ -279,87 +286,75 @@
 
             _.setEvent(panel.childNodes, 'click', false);
 
-            return top;
+            return _.appendChild(elem, parentNode), elem;
         },
-        buildBody: function(content) {
-            var _ = this;
-            var div = document.createElement('div');
-            div.className = 'body';
-            /*
-            var con = document.createElement('div');
-            con.className = 'content';
-            con.innerHTML = content;
-            */
+        buildBody: function(content, parentNode) {
+            var _ = this, ctl = _.controls, elem = document.createElement('div');
+            elem.className = 'body';
 
-            var con = _.buildContent(content);
+            ctl.content = _.buildContent(content, elem);
 
-            _.controls.content = con;
+            if(ctl.iframe) {
+                elem.style.overflow = 'hidden';
+                ctl.content.style.padding = '0px';
+            }
 
-            div.appendChild(con);
-
-            $.addEventListener(div, 'mousedown', function() {
+            $.addEventListener(elem, 'mousedown', function() {
                 if(_.opt.topMost) {
                     _.setTopMost();
                 }
                 $.cancelBubble();
             });
-
-            return div;
+            return _.appendChild(elem, parentNode), elem;
         },
-        buildContent: function(content) {
-            var _ = this, ctls = this.controls, op = this.opt, con = ctls.content;
-            if(con === null) {
-                con = document.createElement('div');
-                con.className = 'content';
+        buildContent: function(content, parentNode) {
+            var _ = this, ctl = this.controls, op = this.opt, elem = ctl.content;
+            if(elem === null) {
+                elem = document.createElement('div');
+                elem.className = 'content';
             }
-
             if(['url', 'iframe', 'load'].indexOf(op.type) >= 0) {
-                if(con){
-                    console.log('tagName: ', con.tagName);
+                if(elem){
+                    console.log('tagName: ', elem.tagName);
                 }
-                con.innerHTML = _.buildIframe(content);
+                elem.innerHTML = _.buildIframe(content);
+                ctl.iframe = elem.childNodes[0] || null;
             } else {
-                con.innerHTML = content;
+                elem.innerHTML = content;
             }
-
-            return con;
+            return _.appendChild(elem, parentNode || null), elem;
         },
         buildIframe: function(url) {
             var height = '100%';
             return ['<iframe class="iframe" width="100%"',
-                ' height="', height, '"',
-                ' src="', url, '"',
-                ' frameborder="0" scrolling="auto">',
-                '</iframe>'
-            ].join('');
+                ' id="{0}-iframe" height="{1}" src="{2}"',
+                ' frameborder="0" scrolling="auto"></iframe>'
+            ].join('').format(this.dialogId, height, url.setUrlParam());
         },
-        buildBottom: function(type) {
-            var _ = this;
-            var panel = document.createElement('div');
-            panel.className = 'bottom-panel';
+        buildBottom: function(parentNode) {
+            var _ = this, elem = document.createElement('div');
+            elem.className = 'bottom-panel';
 
             var div = document.createElement('div');
             div.className = 'bottom';
             div.innerHTML = _.buildButtons();
-            panel.appendChild(div);
+            elem.appendChild(div);
 
             for(var i = 0; i < div.childNodes.length; i++) {
                 var obj = div.childNodes[i], key = obj.getAttribute('code');
                 _.buttons[key] = obj;
             }
 
-            $.addEventListener(panel, 'mousedown', function() {
+            $.addEventListener(elem, 'mousedown', function() {
                 if(_.opt.topMost) {
                     _.setTopMost();
                 }
                 $.cancelBubble();
             });
 
-            _.setEvent(div.childNodes, 'click', true);
+            _.setEvent(div.childNodes, 'click', true).setShortcutKeyEvent(div.childNodes);
 
-            _.setShortcutKeyEvent(div.childNodes);
-
-            return panel;
+            return _.appendChild(elem, parentNode), elem;
         },
         buildButtons: function() {
             var _ = this, keys = $.DialogButtons, html = [];
@@ -367,11 +362,10 @@
                 return '';
             }
             var keys = ButtonMaps[_.opt.buttons];
-            console.log('keys:', _.opt.buttons, keys);
             for(var i in keys) {
                 var config = ButtonConfig[keys[i]];
                 if(config) {
-                    html.push('<a class="btn {css} btn-mr" code="{code}" result="{result}" href="{{0}}">{text}</a>'.format(config));
+                    html.push('<a class="btn {css} btn-mr" code="{code}" result="{result}" href="{{0}}" shortcut-key="{skey}">{text}</a>'.format(config));
                 }
             }
             return html.join('').format('javascript:void(0);');
@@ -416,7 +410,7 @@
                 isHide = title;
                 title = undefined;
             }
-            var _ = this, _ctls = this.controls, display = isHide ? 'none' : '';
+            var _ = this, ctl = this.controls, display = isHide ? 'none' : '';
 
             if(isHide && !_.opt.closeAble) {
                 return this;
@@ -425,19 +419,19 @@
             this.closed = isHide || false;
 
             if(!$.isUndefined(content)) {
-                _ctls.body.innerHTML = content;
+                ctl.body.innerHTML = content;
             }
             if(!$.isUndefined(title)) {
-                _ctls.title.innerHTML = title;
+                ctl.title.innerHTML = title;
             }
 
-            if(_ctls.container) {
-                _ctls.container.style.display = display;
+            if(ctl.container) {
+                ctl.container.style.display = display;
             } else {
-                _ctls.box.style.display = display;
+                ctl.box.style.display = display;
             }
-            if(_ctls.shade) {
-                _ctls.shade.style.display = display;
+            if(ctl.shade) {
+                ctl.shade.style.display = display;
             }
 
             if(_.opt.lock && !isHide) {
@@ -451,7 +445,7 @@
             return this.show(true);
         },
         close: function(action, dialogResult) {
-            var _ = this, _ctls = this.controls;
+            var _ = this, ctl = this.controls;
 
             if(!$.isString(action)) {
                 action = 'None';
@@ -462,10 +456,10 @@
             if(!_.opt.closeAble || _.closed) {
                 return false;
             }
-            document.body.removeChild(_ctls.container || _ctls.box);
+            document.body.removeChild(ctl.container || ctl.box);
 
-            if(_ctls.shade) {
-                document.body.removeChild(_ctls.shade);
+            if(ctl.shade) {
+                document.body.removeChild(ctl.shade);
             }
             $.Dialog.remove(_.opt.id);
 
@@ -474,12 +468,17 @@
             return _.callback(action, dialogResult).hideDocOverflow(true).dispose();
         },
         callback: function(action, dialogResult) {
-            if($.isFunction(this.opt.callback)) {
-                var par = {}, parameter = this.opt.parameter || this.opt.param;                
-                par[action] = dialogResult;
-                this.opt.callback(par, this, parameter);
+            var _ = this, op = this.opt;
+            var dr = {}, parameter = op.parameter || op.param;
+            dr[action] = dialogResult;
+            if($.isFunction(op.success)) {
+                if([1, 6].indexOf(dialogResult) >= 0) {
+                    op.success(dr, _, parameter);
+                }
+            } else if($.isFunction(op.callback)) {
+                op.callback(dr, _, parameter);
             }
-            return this;
+            return _;
         },
         dispose: function(){
             for(var i in this.controls){
@@ -517,36 +516,46 @@
                 title: title,
             }, options);
 
-            var _ = this, _ctls = this.controls;
-            if(_ctls.content){
+            var _ = this, ctl = this.controls;
+            if(ctl.content) {
                 if(opt.width === 'auto') {
-                    _ctls.box.style.width = 'auto';
-                    _ctls.body.style.width = 'auto';
-                    _ctls.content.style.width = 'auto';
+                    ctl.box.style.width = 'auto';
+                    ctl.body.style.width = 'auto';
+                    ctl.content.style.width = 'auto';
                 }
                 if(opt.height === 'auto') {
-                    _ctls.box.style.height = 'auto';
-                    _ctls.body.style.height = 'auto';
-                    _ctls.content.style.height = 'auto';
+                    ctl.box.style.height = 'auto';
+                    ctl.body.style.height = 'auto';
+                    ctl.content.style.height = 'auto';
                 }
 
-                //_ctls.content.innerHTML = opt.content;
-                _ctls.content = _.buildContent(opt.content);
+                //ctl.content.innerHTML = opt.content;
+                ctl.content = _.buildContent(opt.content);
 
-                if(_ctls.title && opt.title) {
-                    _ctls.title.innerHTML = opt.title;
+                if(ctl.title && opt.title) {
+                    ctl.title.innerHTML = opt.title;
                 }
 
-                _.setBodySize().setCache().setPosition();
+                _.setBodySize().setCache();
+
+                if(!opt.fixed) {
+                    _.setPosition();
+                }
             }
 
             return _;
         },
         append: function(content, title, options) {
+            if(!this.controls.content) {
+                return this;
+            }
             var html = this.controls.content.innerHTML;
             return this.update(html + content, title, options);
         },
         insert: function(content, title, options) {
+            if(!this.controls.content) {
+                return this;
+            }
             var html = this.controls.content.innerHTML;
             return this.update(content + html, title, options);
         },
@@ -637,7 +646,8 @@
                     $.addEventListener(obj, 'keypress', function(e){
                         var keyCode = $.getKeyCode(e);
                         var strKeyCode = String.fromCharCode(keyCode).toUpperCase();
-                        var shortcutKey = this.getAttribute('shortcutKey') || '';
+                        var shortcutKey = this.getAttribute('shortcut-key') || '';
+                        console.log('keypress: ', keyCode, strKeyCode, shortcutKey);
                         //if(32 == keyCode || (shkey >= 3 && strKeyCode == cg.shortcutKey[2].toUpperCase())){FuncCancel();}
                         // 判断是否为空格键 或 是否按下快捷键
                         if(KEY_CODE.Space === keyCode || strKeyCode === shortcutKey) {
@@ -646,6 +656,7 @@
                     });
                 }
             }
+            return _;
         },
         setShortcutKeyEvent: function(controls) {
             var _ = this;
@@ -655,7 +666,7 @@
                 if(obj.tagName !== 'A') {
                     continue;
                 }
-                var shortcutKey = obj.getAttribute('shortcutKey') || '';
+                var shortcutKey = obj.getAttribute('shortcut-key') || '';
                 if(shortcutKey) {
                     _.dic[shortcutKey] = obj;
                 }
@@ -665,9 +676,9 @@
                 if(!e.shiftKey) {
                     return false;
                 }
-                var keyCode = $.getKeyCode(e);
-                var strKeyCode = String.fromCharCode(keyCode).toUpperCase();
-                var btn = _.dic[strKeyCode];
+                var keyCode = $.getKeyCode(e),
+                    strKeyCode = String.fromCharCode(keyCode).toUpperCase(),
+                    btn = _.dic[strKeyCode];
 
                 if($.isElement(btn)) {
                     _.action(btn);
@@ -711,8 +722,8 @@
             return this;
         },
         setSize: function(options) {
-            var _ = this, _ctls = _.controls, _btns = _.buttons, obj = _ctls.box, par = {};
-            var isSetBodySize = false;
+            var _ = this, ctl = _.controls, _btns = _.buttons, obj = ctl.box, par = {};
+            var isSetBodySize = false, isFullScreen = false;
 
             if($.isString(options)) {
                 options = { type: options };
@@ -736,24 +747,28 @@
                 _.setCache();
             }
 
-            if(_.status.max && opt.type !== 'max' && _ctls.container) {
-                $.removeClass(_ctls.container, 'dialog-overflow-hidden');
+            if(_.status.max && opt.type !== 'max' && ctl.container) {
+                $.removeClass(ctl.container, 'dialog-overflow-hidden');
             } else if(opt.type !== 'min') {
-                $.removeClass(_ctls.bottom, 'display-none');
+                $.removeClass(ctl.bottom, 'display-none');
             }
             if(opt.type !== 'max' && !_.opt.lock) {
                 _.hideDocOverflow(true);
             }
 
             if(opt.type === 'max') {
+                if(!_.opt.maxAble) {
+                    return _;
+                }
                 var scrollTop = _.opt.lock ? 0 : document.documentElement.scrollTop;
                 par = {width: '100%', height: '100%', top: scrollTop, left: 0, right: 0, bottom: 0};
                 isSetBodySize = true;
+                isFullScreen = true;
 
                 $.addClass(obj, 'oui-dialog-max').addClass(_btns.max, 'btn-normal');
 
                 if(_.controls.container) {
-                    $.addClass(_ctls.container, 'dialog-overflow-hidden');
+                    $.addClass(ctl.container, 'dialog-overflow-hidden');
                 }
                 if(_.status.min) {
                     $.removeClass(obj, 'oui-dialog-min');
@@ -761,11 +776,14 @@
 
                 _.hideDocOverflow().hideSwitch().setStatus('max');
             } else if(opt.type === 'min') {
+                if(!_.opt.minAble) {
+                    return _;
+                }
                 var minW = parseInt(_.opt.minWidth, 10), minH = 36;
                 if(isNaN(minW)) { minW = 180; }
 
                 par = {width: minW, height: minH};
-                $.addClass(_ctls.bottom, 'display-none').addClass(obj, 'oui-dialog-min').removeClass(_btns.max, 'btn-normal');
+                $.addClass(ctl.bottom, 'display-none').addClass(obj, 'oui-dialog-min').removeClass(_btns.max, 'btn-normal');
                 if(_.status.max) {
                     $.removeClass(obj, 'oui-dialog-max');
                 }
@@ -787,9 +805,8 @@
                     isSetBodySize = false;
                     _.setScale(options);
                 } else {  //opt.type === 'normal'
-                console.log('opt.type === \'norma\'',_.lastSize);
                     if(!$.isUndefined(_.lastSize)) {
-                        $.setStyle(_ctls.box, _.lastSize, 'px');
+                        $.setStyle(ctl.box, _.lastSize, 'px');
                     } else {
                         par = {width: opt.width, height: opt.height};
                     }
@@ -803,19 +820,19 @@
                 }
             }
             if(isSetBodySize) {
-                _.setBodySize();
+                _.setBodySize(isFullScreen);
             }
             return _;
         },
         setDragSize: function(dir) {
-            var _ = this, _ctls = this.controls;
+            var _ = this, ctl = this.controls;
             var arr = ['top', 'bottom', 'left', 'right', 'top-left', 'top-right', 'bottom-left', 'bottom-right'];
             
             dir = $.isString(dir) ? [dir] : arr;
 
             if(_.opt.dragSize) {                
                 for(var i in dir) {
-                    _ctls.box.appendChild(_.buildSwitch(dir[i]));
+                    ctl.box.appendChild(_.buildSwitch(dir[i]));
                 }
                 _.showSwitch();
             } else {
@@ -929,24 +946,36 @@
             }
             return _.setBodySize();
         },
-        setBodySize: function() {
-            var _ = this, obj = _.controls.box, bs = $.getBodySize();
+        setBodySize: function(isFullScreen) {
+            var _ = this, opt = _.opt, obj = _.controls.box, ctl = _.controls, bs = $.getBodySize();
 
-            var topHeight = _.controls.top ? _.controls.top.offsetHeight + 1 : 0, 
-                bottomHeight = _.controls.bottom ? _.controls.bottom.offsetHeight + 1 : 0,
+            var topHeight = ctl.top ? ctl.top.offsetHeight + 1 : 0, 
+                bottomHeight = ctl.bottom ? ctl.bottom.offsetHeight + 1 : 0,
                 paddingHeight = parseInt('0' + $.getElementStyle(obj, 'paddingTop'), 10),
-                conPaddingHeight = parseInt('0' + $.getElementStyle(_.controls.content, 'padding'), 10)
+                conPaddingHeight = parseInt('0' + $.getElementStyle(ctl.content, 'padding'), 10),
+                boxWidth = obj.offsetWidth,
                 boxHeight = obj.offsetHeight;
 
             //boxHeight = this.lastSize ? this.lastSize.height : obj.offsetHeight;
+            //console.log('this.lastSize: ', this.lastSize);
 
-            console.log('this.lastSize: ', this.lastSize);
-
-            if(_.opt.height !== 'auto') {
-                if(boxHeight < _.opt.height) {
-                    boxHeight = _.opt.height;
+            if(opt.height !== 'auto') {
+                if(boxHeight < opt.height) {
+                    boxHeight = opt.height;
                     obj.style.height = boxHeight + 'px';
+                } else if(!isFullScreen) {
+                    if(isNumberSize(opt.maxHeight)) {
+                        var mh = parseInt(opt.maxHeight, 10);
+                        if(boxHeight > mh) {
+                            boxHeight = mh;
+                            obj.style.height = boxHeight + 'px';
+                        }
+                    }
                 }
+            }
+            if(boxWidth > bs.width) {
+                boxWidth = bs.width - 20;
+                obj.style.width = boxWidth + 'px';
             }
 
             if(boxHeight > bs.height) {
@@ -954,17 +983,22 @@
                 obj.style.height = boxHeight + 'px';
             }
 
+            boxWidth = obj.offsetWidth;
+            boxHeight = obj.offsetHeight;
+
             var size = {
                 width: '100%',
-                height: (boxHeight - topHeight - bottomHeight - paddingHeight - conPaddingHeight + 1) + 'px'
+                height: (boxHeight - topHeight - bottomHeight - paddingHeight) + 'px'
             };
-            if(_.controls.bottom){
-                size.marginBottom = _.controls.bottom.offsetHeight + 'px';
+
+            if(ctl.bottom){
+                size.marginBottom = ctl.bottom.offsetHeight + 'px';
             }
 
-            console.log('size:', boxHeight, _.opt.id, size);
-
-            return $.setStyle(_.controls.body, size), _;
+            if(ctl.iframe) {
+                $.setStyle(ctl.iframe, {height: (parseInt(size.height,10) - paddingHeight) + 'px'});
+            }
+            return $.setStyle(ctl.body, size), _;
         },
         clearPositionStyle: function(obj) {
             var arr = obj.style.cssText.split(';');
@@ -1072,19 +1106,19 @@
             return this.setZindex(zindex);
         },
         setZindex: function(zindex) {
-            var _ctls = this.controls;
+            var ctl = this.controls;
             if(typeof zindex !== 'number') {
                 zindex = this.buildZindex();
             }
-            if(_ctls.container) {
-                _ctls.container.style.zIndex = zindex;
+            if(ctl.container) {
+                ctl.container.style.zIndex = zindex;
             } else {
-                _ctls.box.style.zIndex = zindex;
+                ctl.box.style.zIndex = zindex;
             }
             return this.setOption('zindex', zindex);
         },
         dragToNormal: function(evt, bs, moveX, moveY) {
-            var _ = this, _ctls = _.controls, obj = _ctls.box;
+            var _ = this, ctl = _.controls, obj = ctl.box;
 
             //对话框最大化时，拖动对话框，先切换到标准模式（尺寸、定位）
             _.setSize({type: 'normal'})
@@ -1092,7 +1126,7 @@
             var offsetRateX = (evt.clientX / bs.width),
                 offsetX = evt.clientX,
                 offsetY = evt.clientY - moveY,
-                btnPanelWidth = _ctls.panel ? _ctls.panel.offsetWidth : 0;
+                btnPanelWidth = ctl.panel ? ctl.panel.offsetWidth : 0;
 
             if(offsetRateX > 0.5) {
                 offsetX = evt.clientX - obj.offsetWidth + (obj.offsetWidth) * (1 - offsetRateX) + btnPanelWidth * offsetRateX;
@@ -1110,7 +1144,8 @@
         dragPosition: function () {
             var _ = this,
                 op = this.opt,
-                obj = _.controls.box,
+                ctl = this.controls,
+                obj = ctl.box,
                 bs = $.getBodySize(),
                 clientWidth = bs.width,
                 clientHeight = bs.height,
@@ -1118,21 +1153,21 @@
                 docMouseUpEvent = document.onmouseup;
 
             function moveDialog() {
+                $.cancelBubble();
+
                 if(!op.dragPosition) {
                     return false;
                 }
                 var evt = $.getEvent(),
+                    cp = $.getScrollPosition(),
                     moveX = evt.clientX,
                     moveY = evt.clientY,
                     moveTop = obj.offsetTop,
                     moveLeft = obj.offsetLeft,
-                    moveAble = true;
-
-                var isToNormal = false;
-
-                var cp = $.getScrollPosition();
-                var posX = posXOld = evt.clientX;
-                var posY = posYOld = evt.clientY;
+                    moveAble = true,
+                    isToNormal = false,
+                    posX = posXOld = evt.clientX,
+                    posY = posYOld = evt.clientY;
                 
                 document.onmousemove = function(){
                     if(!moveAble) {
@@ -1170,8 +1205,6 @@
                         }
                     }
 
-                    console.log('posX: ', cp, posX, posY);
-
                     $.setStyle(obj, {left: posX, top: posY}, 'px');
                 };
                 document.onmouseup = function(){
@@ -1196,10 +1229,17 @@
                 };
             }
 
-            return $.addEventListener(_.controls.top, 'mousedown', function(){
-                moveDialog();
-                $.cancelBubble();
-            }), this;
+            if(op.showTitle && ctl.top) {
+                $.addEventListener(ctl.top, 'mousedown', function(){
+                    moveDialog();
+                });
+            } else {
+                $.addEventListener([ctl.box, ctl.body, ctl.content], 'mousedown', function() {
+                    moveDialog();
+                });
+            }
+
+            return this;
         },
         dragSize: function() {
             var _ = this,
@@ -1209,6 +1249,8 @@
                 docMouseUpEvent = document.onmouseup;
 
             function _dragSize(dir) {
+                $.cancelBubble();
+
                 if(!op.dragSize) {
                     return false;
                 }
@@ -1227,8 +1269,7 @@
                     minWidth: parseInt(op.minWidth, 10),
                     minHeight: parseInt(op.minHeight, 10)
                 };
-
-                document.onmousemove = function(){
+                docMouseMoveEvent = function() {
                     if(!moveAble) {
                         return false;
                     }
@@ -1238,6 +1279,23 @@
 
                     _.setScale({ dir: dir, x: x, y: y }, true, par);
                 };
+
+
+                if(_.controls.iframe) {
+                    _.controls.iframe.onmousemove = docMouseMoveEvent;
+                    console.log('iframe:', window.frames[_.dialogId+'-iframe'].document);
+                }
+
+                document.onmousemove = docMouseMoveEvent;/*function(){
+                    if(!moveAble) {
+                        return false;
+                    }
+                    var e = $.getEvent(),
+                        x = (e.clientX - moveX) * (dir.indexOf('left') >= 0 ? -1 : 1), 
+                        y = (e.clientY - moveY) * (dir.indexOf('top') >= 0 ? -1 : 1);
+
+                    _.setScale({ dir: dir, x: x, y: y }, true, par);
+                };*/
                 document.onmouseup = _.controls.box.onmouseup = function(){
                     moveAble = false;
                 };
@@ -1245,7 +1303,6 @@
 
             _.getSwicths().each(function(i, obj){
                 $.addEventListener(obj, 'mousedown', function() {
-                    $.cancelBubble();
                     _.setTopMost();
                     _dragSize(obj.pos);
                 });
@@ -1276,14 +1333,14 @@
         No: 7
     },
     ButtonConfig = {
-        None: { code: 'None', text: '\u5173\u95ed', result: 0, css: 'btn-default'},
-        OK: { code: 'OK', text: '\u786e\u5b9a', result: 1, css: 'btn-primary' },
-        Cancel: { code: 'Cancel', text: '\u53d6\u6d88', result: 2, css: 'btn-default' },
-        Abort: { code: 'Abort', text: '\u4e2d\u6b62', result: 3, css: 'btn-primary' },
-        Retry: { code: 'Retry', text: '\u91cd\u8bd5', result: 4, css: 'btn-primary' }, 
-        Ignore: { code: 'Ignore', text: '\u5ffd\u7565', result: 5, css: 'btn-default' },
-        Yes: { code: 'Yes', text: '\u662f', result: 6, css: 'btn-primary' },
-        No: { code: 'No', text: '\u5426', result: 7, css: 'btn-default' }
+        None: { code: 'None', text: '\u5173\u95ed', result: 0, skey: '', css: 'btn-default'},
+        OK: { code: 'OK', text: '\u786e\u5b9a', result: 1, skey: 'Y', css: 'btn-primary' },
+        Cancel: { code: 'Cancel', text: '\u53d6\u6d88', result: 2, skey: 'N', css: 'btn-default' },
+        Abort: { code: 'Abort', text: '\u4e2d\u6b62', result: 3, skey: 'A', css: 'btn-danger' },
+        Retry: { code: 'Retry', text: '\u91cd\u8bd5', result: 4, skey: 'R', css: 'btn-warning' }, 
+        Ignore: { code: 'Ignore', text: '\u5ffd\u7565', result: 5, skey: 'I', css: 'btn-default' },
+        Yes: { code: 'Yes', text: '\u662f', result: 6, skey: 'Y', css: 'btn-primary' },
+        No: { code: 'No', text: '\u5426', result: 7, skey: 'N', css: 'btn-default' }
     },
     DialogButtons = {
         None: -1,
@@ -1323,6 +1380,10 @@
             return s + 'px';
         }
         return s;
+    }
+
+    function isNumberSize(num) {
+        return num !== 'auto' && num !== '100%' && !isNaN(parseInt(num, 10));
     }
  
 
