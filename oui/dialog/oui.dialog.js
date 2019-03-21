@@ -1,4 +1,72 @@
 !function($){
+
+    var KEY_CODE = {
+        Enter: 13,
+        Esc: 27,
+        Space: 32
+    },
+    DialogResult = {
+        None: 0,
+        OK: 1,
+        Cancel: 2,
+        Abort: 3,
+        Retry: 4,
+        Ignore: 5,
+        Yes: 6,
+        No: 7
+    },
+    ButtonConfig = {
+        None: { code: 'None', text: '\u5173\u95ed', result: 0, skey: '', css: 'btn-default'},
+        OK: { code: 'OK', text: '\u786e\u5b9a', result: 1, skey: 'Y', css: 'btn-primary' },
+        Cancel: { code: 'Cancel', text: '\u53d6\u6d88', result: 2, skey: 'N', css: 'btn-default' },
+        Abort: { code: 'Abort', text: '\u4e2d\u6b62', result: 3, skey: 'A', css: 'btn-danger' },
+        Retry: { code: 'Retry', text: '\u91cd\u8bd5', result: 4, skey: 'R', css: 'btn-warning' }, 
+        Ignore: { code: 'Ignore', text: '\u5ffd\u7565', result: 5, skey: 'I', css: 'btn-default' },
+        Yes: { code: 'Yes', text: '\u662f', result: 6, skey: 'Y', css: 'btn-primary' },
+        No: { code: 'No', text: '\u5426', result: 7, skey: 'N', css: 'btn-default' }
+    },
+    DialogButtons = {
+        None: -1,
+        OK: 0,
+        OKCancel: 1,
+        AbortRetryIgnore: 2,
+        YesNoCancel: 3,
+        YesNo: 4,
+        RetryCancel: 5
+    },
+    ButtonMaps = [
+        ['OK'],
+        ['OK', 'Cancel'],
+        ['Abort', 'Retry', 'Ignore'],
+        ['Yes', 'No', 'Cancel'],
+        ['Yes', 'No'],
+        ['Retry', 'Cancel']
+    ],
+    checkStyleUnit = function(s) {
+        if($.isString(s, true)) {
+            s = s.toLowerCase();
+            var arr = ['px', '%', 'em', 'auto', 'pt'];
+            for(var i in arr) {
+                if(s.endsWith(arr[i])) {
+                    return s;
+                }
+            }
+            return s + 'px';
+        } else if($.isNumber(s)) {
+            return s + 'px';
+        }
+        return s;
+    },
+    isNumberSize = function(num) {
+        return num !== 'auto' && num !== '100%' && !isNaN(parseInt(num, 10));
+    };
+
+    $.DialogButtons = DialogButtons;
+
+    var thisFilePath = $.getScriptSelfPath(true);
+    //先加载样式文件
+    $.loadLinkStyle($.getFilePath(thisFilePath) + $.getFileName(thisFilePath, true).replace('.min', '') + '.css');
+
     function MyDialog(content, title, options){
         if($.isObject(content)) {
             options = content;
@@ -40,6 +108,7 @@
             maxAble: true,
             minAble: true,
             callback: null,
+            success: null,
             parameter: null,
             buttons: $.DialogButtons.OKCancel,
             showTitle: true,
@@ -50,8 +119,6 @@
 
         }, options);
 
-        console.log('_.opt:', _.opt, options);
-
         _.controls = {
             shade: null, container: null, box: null, 
             top: null, title: null, panel: null,
@@ -61,6 +128,10 @@
 
         _.buttons = {
             close: null, min: null, max: null
+        };
+
+        _.events = {
+            btnMouseDown: false
         };
 
         _.status = {
@@ -119,7 +190,7 @@
             return obj.opt.id === this.opt.id && obj.controls.box.id === this.controls.box.id;
         },
         build: function(options){
-            var _ = this, ctl = this.controls, opt = options;
+            var _ = this, ctls = this.controls, opt = options;
 
             if(_.opt.lock) {
                 _.hideDocOverflow();
@@ -133,14 +204,14 @@
             } else {
                 if(opt.lock) {
                     //遮罩层
-                    ctl.shade = document.createElement('div');
-                    ctl.shade.className = 'oui-dialog-shade';
-                    ctl.shade.style.zIndex = opt.zindex;
+                    ctls.shade = document.createElement('div');
+                    ctls.shade.className = 'oui-dialog-shade';
+                    ctls.shade.style.zIndex = opt.zindex;
 
                     //对话框容器
-                    ctl.container = document.createElement('div');
-                    ctl.container.className = 'oui-dialog-container';
-                    ctl.container.style.zIndex = opt.zindex;
+                    ctls.container = document.createElement('div');
+                    ctls.container.className = 'oui-dialog-container';
+                    ctls.container.style.zIndex = opt.zindex;
                 }
             }
             /*
@@ -150,46 +221,45 @@
             */
 
             //对话框
-            ctl.box = document.createElement('div');
-            ctl.box.className = 'oui-dialog';
-            ctl.box.style.zIndex = opt.zindex;
-            ctl.box.id = _.dialogId;
+            ctls.box = document.createElement('div');
+            ctls.box.className = 'oui-dialog';
+            ctls.box.style.zIndex = opt.zindex;
+            ctls.box.id = _.dialogId;
 
-            ctl.box.cache = {};
+            ctls.box.cache = {};
 
             if(opt.showTitle) {
-                ctl.top = _.buildTop(opt.title, ctl.box);
+                ctls.top = _.buildTop(opt.title, ctls.box);
             }
 
-            ctl.body = _.buildBody(opt.content, ctl.box);
+            ctls.body = _.buildBody(opt.content, ctls.box);
 
             if(opt.showBottom) {
-                ctl.bottom = _.buildBottom(ctl.box);
+                ctls.bottom = _.buildBottom(ctls.box);
             }
             
             if(opt.type !== 'message' && opt.type !== 'tooltip') {
                 _.setDragSize();
             }
 
-            if(ctl.shade) {
-                document.body.appendChild(ctl.shade);
+            if(ctls.shade) {
+                document.body.appendChild(ctls.shade);
             }
 
-            if(ctl.container !== null) {
-                ctl.container.appendChild(ctl.box);
-                document.body.appendChild(ctl.container);
+            if(ctls.container !== null) {
+                ctls.container.appendChild(ctls.box);
+                document.body.appendChild(ctls.container);
             } else {
-                //$.addClass(ctl.box, 'oui-dialog-fixed');
-                document.body.appendChild(ctl.box);
+                //$.addClass(ctls.box, 'oui-dialog-fixed');
+                document.body.appendChild(ctls.box);
             }
 
             _.setSize({type: _.opt.status, width: _.opt.width, height: _.opt.height});
             _.setPosition({pos: _.opt.position, x: _.opt.x, y: _.opt.y});
-
             _.setCache().dragPosition().dragSize();
 
             if(opt.clickBgClose.in(['dblclick', 'click'])) {
-                $.addEventListener(ctl.container, opt.clickBgClose, function() {
+                $.addEventListener(ctls.container, opt.clickBgClose, function() {
                     _.close();
                 });
             }
@@ -200,16 +270,16 @@
             $.Dialog.setWindowResize();
 
             if(opt.topMost) {
-                $.addEventListener(ctl.box, 'mousedown', function() {
+                $.addEventListener(ctls.box, 'mousedown', function() {
                     _.setTopMost();
                 });
             }
 
-            $.addEventListener(ctl.box, 'click', function(){
+            $.addEventListener(ctls.box, 'click', function(){
                 $.cancelBubble();
             });
 
-            $.addEventListener(ctl.box, 'dblclick', function(){
+            $.addEventListener(ctls.box, 'dblclick', function(){
                 $.cancelBubble();
             });
 
@@ -269,9 +339,9 @@
 
             var panel = document.createElement('div');
             panel.className = 'dialog-btn-panel';
-            panel.innerHTML = (isMin ? '<a class="btn btn-min" code="min"></a>' : '')
-                + (isMax || isMin? '<a class="btn btn-max" code="max"></a>' : '')
-                + (p.closeAble && p.showClose ? '<a class="btn btn-close" code="close"></a>' : '');
+            panel.innerHTML = (isMin ? '<a class="btn btn-min" code="min" title="Minimize"></a>' : '')
+                + (isMax || isMin? '<a class="btn btn-max" code="max" title="Maximize"></a>' : '')
+                + (p.closeAble && p.showClose ? '<a class="btn btn-close" code="close" title="Close"></a>' : '');
             panel.style.cssText = 'float:right;';
 
             elem.appendChild(panel);
@@ -283,7 +353,7 @@
                 _.buttons[key] = obj;
             }
 
-            _.setEvent(panel.childNodes, 'click', false);
+            _.setButtonEvent(panel.childNodes, 'click', false);
 
             return _.appendChild(elem, parentNode), elem;
         },
@@ -292,11 +362,10 @@
             if(!op.autoClose || !op.closeAble) {
                 return _;
             }
-            if(_.timer.timingTimer) {
-                window.clearInterval(_.timer.timingTimer);
-            }
+            _.clearTimer();
+
             var i = op.closeTiming / 100;
-            if(i > 20) {
+            if(i > 20 && op.showTitle) {
                 this.controls.top.appendChild($.createElement('label', 'timing', function(elem) {
                     elem.innerHTML = '';
                     elem.className = 'timing';
@@ -321,16 +390,17 @@
                     this.timer[i] = null;
                 }
             }
+            return this;
         },
         buildBody: function(content, parentNode) {
-            var _ = this, ctl = _.controls, elem = document.createElement('div');
+            var _ = this, ctls = _.controls, elem = document.createElement('div');
             elem.className = 'body';
 
-            ctl.content = _.buildContent(content, elem);
+            ctls.content = _.buildContent(content, elem);
 
-            if(ctl.iframe) {
+            if(ctls.iframe) {
                 elem.style.overflow = 'hidden';
-                ctl.content.style.padding = '0px';
+                ctls.content.style.padding = '0px';
             }
 
             $.addEventListener(elem, 'mousedown', function() {
@@ -342,7 +412,7 @@
             return _.appendChild(elem, parentNode), elem;
         },
         buildContent: function(content, parentNode) {
-            var _ = this, ctl = this.controls, op = this.opt, elem = ctl.content;
+            var _ = this, ctls = this.controls, op = this.opt, elem = ctls.content;
             if(elem === null) {
                 elem = document.createElement('div');
                 elem.className = 'content';
@@ -352,7 +422,7 @@
                     console.log('tagName: ', elem.tagName);
                 }
                 elem.innerHTML = _.buildIframe(content);
-                ctl.iframe = elem.childNodes[0] || null;
+                ctls.iframe = elem.childNodes[0] || null;
             } else {
                 elem.innerHTML = content;
             }
@@ -386,7 +456,7 @@
                 $.cancelBubble();
             });
 
-            _.setEvent(div.childNodes, 'click', true).setShortcutKeyEvent(div.childNodes);
+            _.setButtonEvent(div.childNodes, 'click', true).setShortcutKeyEvent(div.childNodes);
 
             return _.appendChild(elem, parentNode), elem;
         },
@@ -444,7 +514,7 @@
                 isHide = title;
                 title = undefined;
             }
-            var _ = this, ctl = this.controls, display = isHide ? 'none' : '';
+            var _ = this, ctls = this.controls, display = isHide ? 'none' : '';
 
             if(isHide && !_.opt.closeAble) {
                 return this;
@@ -453,19 +523,19 @@
             this.closed = isHide || false;
 
             if(!$.isUndefined(content)) {
-                ctl.body.innerHTML = content;
+                ctls.body.innerHTML = content;
             }
             if(!$.isUndefined(title)) {
-                ctl.title.innerHTML = title;
+                ctls.title.innerHTML = title;
             }
 
-            if(ctl.container) {
-                ctl.container.style.display = display;
+            if(ctls.container) {
+                ctls.container.style.display = display;
             } else {
-                ctl.box.style.display = display;
+                ctls.box.style.display = display;
             }
-            if(ctl.shade) {
-                ctl.shade.style.display = display;
+            if(ctls.shade) {
+                ctls.shade.style.display = display;
             }
 
             if(_.opt.lock && !isHide) {
@@ -479,7 +549,7 @@
             return this.show(true);
         },
         close: function(action, dialogResult) {
-            var _ = this, ctl = this.controls;
+            var _ = this, ctls = this.controls;
 
             if(!$.isString(action)) {
                 action = 'None';
@@ -490,10 +560,10 @@
             if(!_.opt.closeAble || _.closed) {
                 return false;
             }
-            document.body.removeChild(ctl.container || ctl.box);
+            document.body.removeChild(ctls.container || ctls.box);
 
-            if(ctl.shade) {
-                document.body.removeChild(ctl.shade);
+            if(ctls.shade) {
+                document.body.removeChild(ctls.shade);
             }
             $.Dialog.remove(_.opt.id);
 
@@ -550,22 +620,22 @@
                 title: title,
             }, options);
 
-            var _ = this, ctl = this.controls;
-            if(ctl.content) {
+            var _ = this, ctls = this.controls;
+            if(ctls.content) {
                 if(opt.width === 'auto') {
-                    ctl.box.style.width = 'auto';
-                    ctl.body.style.width = 'auto';
-                    ctl.content.style.width = 'auto';
+                    ctls.box.style.width = 'auto';
+                    ctls.body.style.width = 'auto';
+                    ctls.content.style.width = 'auto';
                 }
                 if(opt.height === 'auto') {
-                    ctl.box.style.height = 'auto';
-                    ctl.body.style.height = 'auto';
-                    ctl.content.style.height = 'auto';
+                    ctls.box.style.height = 'auto';
+                    ctls.body.style.height = 'auto';
+                    ctls.content.style.height = 'auto';
                 }
-                ctl.content = _.buildContent(opt.content);
+                ctls.content = _.buildContent(opt.content);
 
-                if(ctl.title && opt.title) {
-                    ctl.title.innerHTML = opt.title;
+                if(ctls.title && opt.title) {
+                    ctls.title.innerHTML = opt.title;
                 }
                 _.setBodySize().setCache();
 
@@ -661,7 +731,7 @@
         setOption: function(key, value) {
             return this.setConfig(key, value);
         },
-        setEvent: function(controls, eventName, keypress) {
+        setButtonEvent: function(controls, eventName, keypress) {
             var _ = this;
             for(var i = 0; i < controls.length; i++) {
                 var obj = controls[i];
@@ -671,6 +741,14 @@
                 $.addEventListener(obj, eventName || 'click', function() {
                     _.action(this);
                     $.cancelBubble();
+                });
+
+                $.addEventListener(obj, 'mousedown', function() {
+                    _.events.btnMouseDown = true;
+                });
+
+                $.addEventListener(obj, 'mouseup', function() {
+                    _.events.btnMouseDown = false;
                 });
 
                 if(keypress) {
@@ -753,22 +831,22 @@
             return this;
         },
         setSize: function(options) {
-            var _ = this, ctl = _.controls, _btns = _.buttons, obj = ctl.box, par = {};
+            var _ = this, op = _.opt, ctls = _.controls, btns = _.buttons, obj = ctls.box, par = {};
             var isSetBodySize = false, isFullScreen = false;
 
             if($.isString(options)) {
                 options = { type: options };
             }
-            var opt = $.extend({
+            var p = $.extend({
                 type: 'normal',
                 width: 0,
                 height: 0
             }, options);
 
-            opt.width = parseInt(opt.width, 10);
-            opt.height = parseInt(opt.height, 10);
+            p.width = parseInt(p.width, 10);
+            p.height = parseInt(p.height, 10);
 
-            if(opt.type === '' || (isNaN(opt.width) && isNaN(opt.height)) || _.getStatus() === opt.type) {
+            if(p.type === '' || (isNaN(p.width) && isNaN(p.height)) || _.getStatus() === p.type) {
                 return this;
             }
 
@@ -778,50 +856,52 @@
                 _.setCache();
             }
 
-            if(_.status.max && opt.type !== 'max' && ctl.container) {
-                $.removeClass(ctl.container, 'dialog-overflow-hidden');
-            } else if(opt.type !== 'min') {
-                $.removeClass(ctl.bottom, 'display-none');
+            if(_.status.max && p.type !== 'max' && ctls.container) {
+                $.removeClass(ctls.container, 'dialog-overflow-hidden');
+            } else if(p.type !== 'min') {
+                $.removeClass(ctls.bottom, 'display-none');
             }
-            if(opt.type !== 'max' && !_.opt.lock) {
+            if(p.type !== 'max' && !op.lock) {
                 _.hideDocOverflow(true);
             }
 
-            if(opt.type === 'max') {
-                if(!_.opt.maxAble) {
+            btns.max.title = p.type === 'max' ? 'Restore Down' : 'Maximize';
+
+            if(p.type === 'max') {
+                if(!op.maxAble) {
                     return _;
                 }
-                var scrollTop = _.opt.lock ? 0 : document.documentElement.scrollTop;
+                var scrollTop = op.lock ? 0 : document.documentElement.scrollTop;
                 par = {width: '100%', height: '100%', top: scrollTop, left: 0, right: 0, bottom: 0};
-                isSetBodySize = true;
-                isFullScreen = true;
+                isSetBodySize = isFullScreen = true;
 
-                $.addClass(obj, 'oui-dialog-max').addClass(_btns.max, 'btn-normal');
+                $.addClass(obj, 'oui-dialog-max').addClass(btns.max, 'btn-normal');
 
                 if(_.controls.container) {
-                    $.addClass(ctl.container, 'dialog-overflow-hidden');
+                    $.addClass(ctls.container, 'dialog-overflow-hidden');
                 }
                 if(_.status.min) {
                     $.removeClass(obj, 'oui-dialog-min');
                 }
 
                 _.hideDocOverflow().hideSwitch().setStatus('max');
-            } else if(opt.type === 'min') {
-                if(!_.opt.minAble) {
+            } else if(p.type === 'min') {
+                if(!op.minAble) {
                     return _;
                 }
-                var minW = parseInt(_.opt.minWidth, 10), minH = 36;
+                var minW = parseInt(op.minWidth, 10), minH = 36;
                 if(isNaN(minW)) { minW = 180; }
 
                 par = {width: minW, height: minH};
-                $.addClass(ctl.bottom, 'display-none').addClass(obj, 'oui-dialog-min').removeClass(_btns.max, 'btn-normal');
+                $.addClass(ctls.bottom, 'display-none').addClass(obj, 'oui-dialog-min').removeClass(btns.max, 'btn-normal');
                 if(_.status.max) {
                     $.removeClass(obj, 'oui-dialog-max');
                 }
-                _.hideSwitch().setStatus('min').setPosition({pos: _.opt.position});
+                _.hideSwitch().setStatus('min').setPosition({pos: op.position});
             } else {
                 isSetBodySize = true;
-                $.removeClass(_btns.max, 'btn-normal');
+
+                $.removeClass(btns.max, 'btn-normal');
 
                 if(_.status.max) {
                     $.removeClass(obj, 'oui-dialog-max');
@@ -830,16 +910,16 @@
                 }
                 _.showSwitch().setStatus('normal');
 
-                if(opt.type === 'resize' || opt.type === 'size') {
-                    par = {width: opt.width, height: opt.height};
-                } else if(opt.type === 'scale') {
+                if(p.type === 'resize' || p.type === 'size') {
+                    par = {width: p.width, height: p.height};
+                } else if(p.type === 'scale') {
                     isSetBodySize = false;
                     _.setScale(options);
-                } else {  //opt.type === 'normal'
+                } else {  //p.type === 'normal'
                     if(!$.isUndefined(_.lastSize)) {
-                        $.setStyle(ctl.box, _.lastSize, 'px');
+                        $.setStyle(ctls.box, _.lastSize, 'px');
                     } else {
-                        par = {width: opt.width, height: opt.height};
+                        par = {width: p.width, height: p.height};
                     }
                 }
             }
@@ -856,14 +936,14 @@
             return _;
         },
         setDragSize: function(dir) {
-            var _ = this, ctl = this.controls;
+            var _ = this, ctls = this.controls;
             var arr = ['top', 'bottom', 'left', 'right', 'top-left', 'top-right', 'bottom-left', 'bottom-right'];
             
             dir = $.isString(dir) ? [dir] : arr;
 
             if(_.opt.dragSize) {                
                 for(var i in dir) {
-                    ctl.box.appendChild(_.buildSwitch(dir[i]));
+                    ctls.box.appendChild(_.buildSwitch(dir[i]));
                 }
                 _.showSwitch();
             } else {
@@ -978,12 +1058,12 @@
             return _.setBodySize();
         },
         setBodySize: function(isFullScreen) {
-            var _ = this, opt = _.opt, obj = _.controls.box, ctl = _.controls, bs = $.getBodySize();
+            var _ = this, opt = _.opt, obj = _.controls.box, ctls = _.controls, bs = $.getBodySize();
 
-            var titleHeight = ctl.top ? ctl.top.offsetHeight + 1 : 0, 
-                bottomHeight = ctl.bottom ? ctl.bottom.offsetHeight + 1 : 0,
+            var titleHeight = ctls.top ? ctls.top.offsetHeight + 1 : 0, 
+                bottomHeight = ctls.bottom ? ctls.bottom.offsetHeight + 1 : 0,
                 paddingHeight = parseInt('0' + $.getElementStyle(obj, 'paddingTop'), 10),
-                conPaddingHeight = parseInt('0' + $.getElementStyle(ctl.content, 'padding'), 10),
+                conPaddingHeight = parseInt('0' + $.getElementStyle(ctls.content, 'padding'), 10),
                 boxWidth = obj.clientWidth,
                 boxHeight = obj.clientHeight;
 
@@ -1019,13 +1099,13 @@
                 height: (boxHeight - titleHeight - bottomHeight - paddingHeight * 2) + 'px'
             };
 
-            if(ctl.bottom){
-                size.marginBottom = ctl.bottom.offsetHeight + 'px';
+            if(ctls.bottom){
+                size.marginBottom = ctls.bottom.offsetHeight + 'px';
             }
-            if(ctl.iframe) {
-                $.setStyle(ctl.iframe, {height: size.height});
+            if(ctls.iframe) {
+                $.setStyle(ctls.iframe, {height: size.height});
             }
-            return $.setStyle(ctl.body, size), _;
+            return $.setStyle(ctls.body, size), _;
         },
         clearPositionStyle: function(obj) {
             var arr = obj.style.cssText.split(';');
@@ -1133,19 +1213,19 @@
             return this.setZindex(zindex);
         },
         setZindex: function(zindex) {
-            var ctl = this.controls;
+            var ctls = this.controls;
             if(typeof zindex !== 'number') {
                 zindex = this.buildZindex();
             }
-            if(ctl.container) {
-                ctl.container.style.zIndex = zindex;
+            if(ctls.container) {
+                ctls.container.style.zIndex = zindex;
             } else {
-                ctl.box.style.zIndex = zindex;
+                ctls.box.style.zIndex = zindex;
             }
             return this.setOption('zindex', zindex);
         },
         dragToNormal: function(evt, bs, moveX, moveY) {
-            var _ = this, ctl = _.controls, obj = ctl.box;
+            var _ = this, ctls = _.controls, obj = ctls.box;
 
             //对话框最大化时，拖动对话框，先切换到标准模式（尺寸、定位）
             _.setSize({type: 'normal'})
@@ -1153,7 +1233,7 @@
             var offsetRateX = (evt.clientX / bs.width),
                 offsetX = evt.clientX,
                 offsetY = evt.clientY - moveY,
-                btnPanelWidth = ctl.panel ? ctl.panel.offsetWidth : 0;
+                btnPanelWidth = ctls.panel ? ctls.panel.offsetWidth : 0;
 
             if(offsetRateX > 0.5) {
                 offsetX = evt.clientX - obj.offsetWidth + (obj.offsetWidth) * (1 - offsetRateX) + btnPanelWidth * offsetRateX;
@@ -1171,8 +1251,8 @@
         dragPosition: function () {
             var _ = this,
                 op = this.opt,
-                ctl = this.controls,
-                obj = ctl.box,
+                ctls = this.controls,
+                obj = ctls.box,
                 bs = $.getBodySize(),
                 clientWidth = bs.width,
                 clientHeight = bs.height,
@@ -1192,31 +1272,26 @@
                     moveTop = obj.offsetTop,
                     moveLeft = obj.offsetLeft,
                     moveAble = true,
-                    isToNormal = false,
-                    posX = posXOld = evt.clientX,
-                    posY = posYOld = evt.clientY;
+                    isToNormal = false;
                 
                 document.onmousemove = function(){
-                    if(!moveAble) {
+                    if(!moveAble || _.events.btnMouseDown) {
                         return false;
                     }
-                    var evt = $.getEvent();
+                    var evt = $.getEvent(),
+                        x = moveLeft + evt.clientX - moveX,
+                        y = moveTop + evt.clientY - moveY,
+                        w = obj.offsetWidth,
+                        h = obj.offsetHeight,
+                        posX = x,
+                        posY = y;
 
-                    if(!isToNormal && _.status.max) {
+                    if(!isToNormal && _.status.max && (posX > 2 || posY > 2)) {
                         isToNormal = true;
                         _.dragToNormal(evt, bs, moveX, moveY);
                         moveTop = obj.offsetTop;
                         moveLeft = obj.offsetLeft;
                     }
-
-                    var x = moveLeft + evt.clientX - moveX,
-                        y = moveTop + evt.clientY - moveY,
-                        w = obj.offsetWidth,
-                        h = obj.offsetHeight;
-
-                    posX = x;
-                    posY = y;
-
                     if(op.dragRangeLimit) {
                         if(posX < 0) {
                             posX = 0;
@@ -1231,11 +1306,12 @@
                             posY = bs.height - h;
                         }
                     }
-
                     $.setStyle(obj, {left: posX, top: posY}, 'px');
                 };
                 document.onmouseup = function(){
                     moveAble = false;
+                    _.events.btnMouseDown = false;
+
                     /*
                     if(moveAble){
                         document.onmousemove = docMouseMoveEvent;
@@ -1256,12 +1332,12 @@
                 };
             }
 
-            if(op.showTitle && ctl.top) {
-                $.addEventListener(ctl.top, 'mousedown', function(){
+            if(op.showTitle && ctls.top) {
+                $.addEventListener(ctls.top, 'mousedown', function(){
                     moveDialog();
                 });
             } else {
-                $.addEventListener([ctl.box, ctl.body, ctl.content], 'mousedown', function() {
+                $.addEventListener([ctls.box, ctls.body, ctls.content], 'mousedown', function() {
                     moveDialog();
                 });
             }
@@ -1326,6 +1402,10 @@
                 document.onmouseup = _.controls.box.onmouseup = function(){
                     moveAble = false;
                 };
+                $.addEventListener(obj, 'blur', function(){
+                    console.log('onblur:');
+                    moveAble = false;
+                });
             }
 
             _.getSwicths().each(function(i, obj){
@@ -1341,78 +1421,6 @@
     var DialogType = {
 
     };
-
-
-
-    var KEY_CODE = {
-        Enter: 13,
-        Esc: 27,
-        Space: 32
-    },
-    DialogResult = {
-        None: 0,
-        OK: 1,
-        Cancel: 2,
-        Abort: 3,
-        Retry: 4,
-        Ignore: 5,
-        Yes: 6,
-        No: 7
-    },
-    ButtonConfig = {
-        None: { code: 'None', text: '\u5173\u95ed', result: 0, skey: '', css: 'btn-default'},
-        OK: { code: 'OK', text: '\u786e\u5b9a', result: 1, skey: 'Y', css: 'btn-primary' },
-        Cancel: { code: 'Cancel', text: '\u53d6\u6d88', result: 2, skey: 'N', css: 'btn-default' },
-        Abort: { code: 'Abort', text: '\u4e2d\u6b62', result: 3, skey: 'A', css: 'btn-danger' },
-        Retry: { code: 'Retry', text: '\u91cd\u8bd5', result: 4, skey: 'R', css: 'btn-warning' }, 
-        Ignore: { code: 'Ignore', text: '\u5ffd\u7565', result: 5, skey: 'I', css: 'btn-default' },
-        Yes: { code: 'Yes', text: '\u662f', result: 6, skey: 'Y', css: 'btn-primary' },
-        No: { code: 'No', text: '\u5426', result: 7, skey: 'N', css: 'btn-default' }
-    },
-    DialogButtons = {
-        None: -1,
-        OK: 0,
-        OKCancel: 1,
-        AbortRetryIgnore: 2,
-        YesNoCancel: 3,
-        YesNo: 4,
-        RetryCancel: 5
-    },
-    ButtonMaps = [
-        ['OK'],
-        ['OK', 'Cancel'],
-        ['Abort', 'Retry', 'Ignore'],
-        ['Yes', 'No', 'Cancel'],
-        ['Yes', 'No'],
-        ['Retry', 'Cancel']
-    ];
-
-    $.DialogButtons = DialogButtons;
-
-    var thisFilePath = $.getScriptSelfPath(true);
-    //先加载样式文件
-    $.loadLinkStyle($.getFilePath(thisFilePath) + $.getFileName(thisFilePath, true).replace('.min', '') + '.css');
-
-    function checkStyleUnit(s) {
-        if($.isString(s, true)) {
-            s = s.toLowerCase();
-            var arr = ['px', '%', 'em', 'auto', 'pt'];
-            for(var i in arr) {
-                if(s.endsWith(arr[i])) {
-                    return s;
-                }
-            }
-            return s + 'px';
-        } else if($.isNumber(s)) {
-            return s + 'px';
-        }
-        return s;
-    }
-
-    function isNumberSize(num) {
-        return num !== 'auto' && num !== '100%' && !isNaN(parseInt(num, 10));
-    }
- 
 
     function Dialog(){
         this.caches = {};

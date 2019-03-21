@@ -28,7 +28,7 @@
 function alert2(){
     var dialog = $.alert('Hello!对话框', {
         id: 3, position: 5, maxHeight: 360, maxWidth: 500, lock: true, clickBgClose: 'dblclick', 
-        escClose: true, autoClose: true, closeTiming: 5000,
+        escClose: true, autoClose: true, closeTiming: 10000,
         maxAble: true, minAble: true, closeAble: true,
         //buttons: $.DialogButtons.YesNo, 
         showTitle: true,
@@ -94,11 +94,11 @@ function win(){
 }
 
 function load(){
-    var win = $.dialog.load('pagination.html');
+    var win = $.dialog.load('pagination.html', {maxWidth:800, maxHeight:500});
 }
 
 function msg(){
-    var win = $.msg('这是普通窗口模式');
+    var win = $.msg('这是普通窗口模式', {autoClose: true});
 
     window.setTimeout(function() {
         win.update('请注意：提示信息改变了。请注意：提示信息改变了', {width:'auto'});
