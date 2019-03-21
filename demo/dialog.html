@@ -15,6 +15,7 @@
     <button onclick="paging();">分页</button>
     <button onclick="showTable();">显示表格</button>
     <button onclick="showDialog();">对话框</button>
+    <button onclick="win();">Win</button>
     <button onclick="update();">更新对话框</button>
 </body>
 </html>
@@ -64,6 +65,10 @@ function showDialog(){
 
         dialog.setOption('topMost', true);
     }, 3000);
+}
+
+function win(){
+    var win = $.dialog.win('这是普通窗口模式');
 }
 
 function update() {

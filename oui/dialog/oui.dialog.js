@@ -1,4 +1,3 @@
-
 !function($){
 
     var KEY_CODE = {
@@ -88,7 +87,8 @@
         var _ = this;
         _.options = _.opt = $.extend({
             id: '',
-            type: 'alert', //alert,confirm,message,tooltip,window
+            group: '',
+            type: 'alert', //alert,confirm,message,tooltip,window,iframe
             status: 'normal',
             zindex: _.buildZindex(),
             minWidth: '180px',
@@ -110,7 +110,7 @@
             escClose: false,
             autoClose: false,
             closeTiming: 5000,
-            dragRangeLimit: false,                  //窗体拖动范围限制 true,false
+            dragRangeLimit: true,                  //窗体拖动范围限制 true,false
             dragPosition: true,
             dragSize: true,
             maxAble: true,
@@ -119,7 +119,10 @@
             parameter: null,
             buttons: $.DialogButtons.OKCancel,
             showTitle: true,
-            showBottom: true
+            showBottom: true,
+            showClose: true,
+            showMin: true,
+            showMax: true
 
         }, options);
 
@@ -309,19 +312,19 @@
             return $('#' + this.dialogId + ' ' + className);
         },
         buildTop: function(title){
-            var _ = this;
+            var _ = this, p = _.opt;
             var top = document.createElement('div');
             top.className = 'top';
 
             $.addEventListener(top, 'dblclick', function() {
-                if(_.opt.maxAble) {
+                if(p.maxAble) {
                     _.max();
                 }
                 $.cancelBubble();
             });
 
             $.addEventListener(top, 'mousedown', function() {
-                if(_.opt.topMost) {
+                if(p.topMost) {
                     _.setTopMost();
                 }
                 $.cancelBubble();
@@ -329,16 +332,16 @@
 
             var div = document.createElement('div');
             div.className = 'title';
-            div.innerHTML =  title || _.opt.title;
+            div.innerHTML =  title || p.title;
             top.appendChild(div);
 
             _.controls.title = div;
 
             var panel = document.createElement('div');
             panel.className = 'dialog-btn-panel';
-            panel.innerHTML = (_.opt.minAble ? '<a class="btn btn-min" code="min"></a>' : '')
-                + (_.opt.maxAble ? '<a class="btn btn-max" code="max"></a>' : '')
-                + (_.opt.closeAble ? '<a class="btn btn-close" code="close"></a>' : '');
+            panel.innerHTML = (p.minAble && p.showMin ? '<a class="btn btn-min" code="min"></a>' : '')
+                + (p.maxAble && p.showMax ? '<a class="btn btn-max" code="max"></a>' : '')
+                + (p.closeAble && p.showClose ? '<a class="btn btn-close" code="close"></a>' : '');
             panel.style.cssText = 'float:right;';
 
             top.appendChild(panel);
@@ -1047,10 +1050,8 @@
             }
             console.log('setPosition: ', options, opt);
             
-            var scrollTop = document.documentElement.scrollTop, 
-                scrollLeft = document.documentElement.scrollLeft;
-
             var bs = $.getBodySize(),
+                cp = $.getScrollPosition(),
                 width = obj.offsetWidth,
                 height = obj.offsetHeight,
                 posX = _.checkPosition('center', opt.pos) ? bs.width / 2 - width / 2 : opt.x,
@@ -1058,14 +1059,14 @@
 
             if(!_.opt.lock) {
                 if(_.checkPosition('center', opt.pos)) {
-                    posX += scrollLeft;
+                    posX += cp.left;
                 } else {
-                    posX += _.checkPosition('right', opt.pos) ? - scrollLeft : scrollLeft;
+                    posX += _.checkPosition('right', opt.pos) ? - cp.left : cp.left;
                 }
                 if(_.checkPosition('middle', opt.pos)) {
-                    posY += scrollTop;
+                    posY += cp.top;
                 } else {
-                    posY += _.checkPosition('bottom', opt.pos) ? - scrollTop : scrollTop;
+                    posY += _.checkPosition('bottom', opt.pos) ? - cp.top : cp.top;
                 }
             }
 
@@ -1152,6 +1153,7 @@
         },
         dragPosition: function () {
             var _ = this,
+                op = this.opt,
                 obj = _.controls.box,
                 bs = $.getBodySize(),
                 clientWidth = bs.width,
@@ -1160,7 +1162,7 @@
                 docMouseUpEvent = document.onmouseup;
 
             function moveDialog() {
-                if(!_.opt.dragPosition) {
+                if(!op.dragPosition) {
                     return false;
                 }
                 var evt = $.getEvent(),
@@ -1180,7 +1182,6 @@
                     if(!moveAble) {
                         return false;
                     }
-
                     var evt = $.getEvent();
 
                     if(!isToNormal && _.status.max) {
@@ -1197,6 +1198,23 @@
 
                     posX = x;
                     posY = y;
+
+                    if(op.dragRangeLimit) {
+                        if(posX < 0) {
+                            posX = 0;
+                        }
+                        if(posY < 0) {
+                            posY = 0;
+                        }
+                        if((posX + w) > bs.width) {
+                            posX = bs.width - w;
+                        }
+                        if((posY + h) > bs.height) {
+                            posY = bs.height - h;
+                        }
+                    }
+
+                    console.log('posX: ', cp, posX, posY);
 
                     $.setStyle(obj, {left: posX, top: posY}, 'px');
                 };
@@ -1229,12 +1247,13 @@
         },
         dragSize: function() {
             var _ = this,
+                op = this.opt,
                 obj = _.controls.box,
                 docMouseMoveEvent = document.onmousemove,
                 docMouseUpEvent = document.onmouseup;
 
             function _dragSize(dir) {
-                if(!_.opt.dragSize) {
+                if(!op.dragSize) {
                     return false;
                 }
                 var evt = $.getEvent(),
@@ -1249,8 +1268,8 @@
                     left: obj.offsetLeft,
                     right: obj.offsetWidth + obj.offsetLeft,
                     bottom: obj.offsetHeight + obj.offsetTop,
-                    minWidth: parseInt(_.opt.minWidth, 10),
-                    minHeight: parseInt(_.opt.minHeight, 10)
+                    minWidth: parseInt(op.minWidth, 10),
+                    minHeight: parseInt(op.minHeight, 10)
                 };
 
                 document.onmousemove = function(){
@@ -1337,6 +1356,9 @@
                 options = title;
                 title = '';
             }
+            if(!$.isObject(options)) {
+                options = {};
+            }
             if(typeof type === 'string') {
                 options.type = type;
             }
@@ -1350,10 +1372,15 @@
                     break;
                 case 'dialog':
                     break;
+                case 'url':
+                case 'load':
+                    opt.showBottom = false;
+                    break;
                 default:
                     opt.buttons = DialogButtons.None;
                     opt.showTitle = opt.showBottom = opt.dragSize = false;
                     opt.height = opt.minHeight = 'auto';
+                    opt.minAble = opt.maxAble = false;
                     break;
             }
             var d = this.get($.extend(opt, options).id);
@@ -1438,6 +1465,15 @@
         },
         tooltip: function(content, options){
             return $.Dialog.show(content, undefined, options, 'tooltip');
+        }
+    });
+
+    $.extend($.dialog, {
+        win: function(content, title, options){
+            return $.Dialog.show(content, title, options, 'dialog');
+        },
+        load: function(url, title, options) {
+            return $.Dialog.show(url, title, options, 'load');
         }
     });
 }(OUI);
