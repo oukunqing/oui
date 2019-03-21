@@ -528,14 +528,11 @@
                     ctl.body.style.height = 'auto';
                     ctl.content.style.height = 'auto';
                 }
-
-                //ctl.content.innerHTML = opt.content;
                 ctl.content = _.buildContent(opt.content);
 
                 if(ctl.title && opt.title) {
                     ctl.title.innerHTML = opt.title;
                 }
-
                 _.setBodySize().setCache();
 
                 if(!opt.fixed) {
@@ -949,15 +946,12 @@
         setBodySize: function(isFullScreen) {
             var _ = this, opt = _.opt, obj = _.controls.box, ctl = _.controls, bs = $.getBodySize();
 
-            var topHeight = ctl.top ? ctl.top.offsetHeight + 1 : 0, 
+            var titleHeight = ctl.top ? ctl.top.offsetHeight + 1 : 0, 
                 bottomHeight = ctl.bottom ? ctl.bottom.offsetHeight + 1 : 0,
                 paddingHeight = parseInt('0' + $.getElementStyle(obj, 'paddingTop'), 10),
                 conPaddingHeight = parseInt('0' + $.getElementStyle(ctl.content, 'padding'), 10),
-                boxWidth = obj.offsetWidth,
-                boxHeight = obj.offsetHeight;
-
-            //boxHeight = this.lastSize ? this.lastSize.height : obj.offsetHeight;
-            //console.log('this.lastSize: ', this.lastSize);
+                boxWidth = obj.clientWidth,
+                boxHeight = obj.clientHeight;
 
             if(opt.height !== 'auto') {
                 if(boxHeight < opt.height) {
@@ -983,20 +977,19 @@
                 obj.style.height = boxHeight + 'px';
             }
 
-            boxWidth = obj.offsetWidth;
-            boxHeight = obj.offsetHeight;
+            boxWidth = obj.clientWidth;
+            boxHeight = obj.clientHeight;
 
             var size = {
                 width: '100%',
-                height: (boxHeight - topHeight - bottomHeight - paddingHeight) + 'px'
+                height: (boxHeight - titleHeight - bottomHeight - paddingHeight * 2) + 'px'
             };
 
             if(ctl.bottom){
                 size.marginBottom = ctl.bottom.offsetHeight + 'px';
             }
-
             if(ctl.iframe) {
-                $.setStyle(ctl.iframe, {height: (parseInt(size.height,10) - paddingHeight) + 'px'});
+                $.setStyle(ctl.iframe, {height: size.height});
             }
             return $.setStyle(ctl.body, size), _;
         },
