@@ -67,6 +67,10 @@
             min: false, max: false, normal: false
         };
 
+        _.timer = {
+
+        };
+
         _.lastStatus = ''; //normal
         _.closed = false;
 
@@ -285,11 +289,11 @@
         },
         buildCloseTiming: function() {
             var _ = this, op = _.opt;
-            if(!op.autoClose) {
+            if(!op.autoClose || !op.closeAble) {
                 return _;
             }
-            if(_._closeTimingTimer) {
-                window.clearInterval(_._closeTimingTimer);
+            if(_.timer.timingTimer) {
+                window.clearInterval(_.timer.timingTimer);
             }
             var i = op.closeTiming / 100;
             if(i > 20) {
@@ -298,16 +302,25 @@
                     elem.className = 'timing';
                 }));
 
-                this._closeTimingTimer = window.setInterval(function(){
+                _.timer.timingTimer = window.setInterval(function(){
                     $('#timing').html((i--) / 10 + ' 秒后关闭');
                 }, 100);
             }
 
-            window.setTimeout(function() {
+            _.timer.closeTimer = window.setInterval(function() {
+                _.clearTimer();
                 _.close();
             }, op.closeTiming);
 
             return this;
+        },
+        clearTimer: function() {
+            for(var i in this.timer){
+                if(this.timer[i]) {
+                    window.clearInterval(this.timer[i]);
+                    this.timer[i] = null;
+                }
+            }
         },
         buildBody: function(content, parentNode) {
             var _ = this, ctl = _.controls, elem = document.createElement('div');
@@ -486,7 +499,7 @@
 
             this.closed = true;
 
-            return _.callback(action, dialogResult).hideDocOverflow(true).dispose();
+            return _.clearTimer().callback(action, dialogResult).hideDocOverflow(true).dispose();
         },
         callback: function(action, dialogResult) {
             var _ = this, op = this.opt;
