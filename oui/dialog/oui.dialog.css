@@ -84,6 +84,17 @@
     float: left;
 }
 
+.oui-dialog .top .timing {
+    margin: 0; 
+    padding: 5px 5px;
+    font-size: 14px;
+    line-height: 1.25em;
+    color: #999;
+    float: right;
+    text-align: right;
+    width: auto;
+}
+
 .oui-dialog .dialog-btn-panel {
     margin: 2px 2px 0 0;
 }
