@@ -35,6 +35,7 @@ function alert2(){
         escClose: true, autoClose: true, closeTiming: 10000,
         maxAble: true, minAble: true, closeAble: true,
         //buttons: $.DialogButtons.OK, 
+        //opacity: 0.2,
         showTitle: true,
         callback: function(dialogResult, d, param) {
             console.log(dialogResult, d, param);
@@ -100,7 +101,7 @@ function win(){
 }
 
 function load(){
-    var win = $.dialog.load('pagination.html', {maxWidth:800, maxHeight:500});
+    var win = $.dialog.load('pagination.html', {maxWidth:800, maxHeight:500, width:400, height:300});
 }
 
 function msg(){
@@ -160,14 +161,14 @@ function update2() {
     window.setTimeout(function(){
         dialog.update(getCon(2), {width:'auto', height:'auto'});
     }, 8000);
-/*
+
     window.setTimeout(function(){
         dialog.update(getCon(7), '第2次改变');
     }, 10000);
 
     window.setTimeout(function(){
         dialog.update(getCon(32), '', 'autosize');
-    }, 10000);*/
+    }, 10000);
 }
 
 

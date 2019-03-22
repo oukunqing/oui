@@ -125,12 +125,13 @@
             type: 'alert', //alert,confirm,message,tooltip,window,iframe
             status: 'normal',
             zindex: buildZindex(),
-            minWidth: '180px',
-            minHeight: '160px',
+            minWidth: '192px',
+            minHeight: '128px',
             maxWidth: '100%',
             maxHeight: '100%',
             width: '300px',
             height: '200px',
+            opacity: null,
             lock: true,                             //是否锁屏
             title: '\u6807\u9898\u680f',
             content: '',
@@ -173,7 +174,8 @@
         };
 
         _.events = {
-            btnMouseDown: false
+            btnMouseDown: false,
+            dragingSize: false
         };
 
         _.status = {
@@ -250,10 +252,7 @@
                 _.opt.lock = opt.lock = false;
                 
             } else if(opt.lock) {
-                //遮罩层
-                ctls.shade = document.createElement('div');
-                ctls.shade.className = 'oui-dialog-shade';
-                ctls.shade.style.zIndex = opt.zindex;
+                _.buildShade();
 
                 //对话框容器
                 ctls.container = document.createElement('div');
@@ -353,6 +352,22 @@
             }
             $.appendChild(parentNode, elem);
             return this;
+        },
+        buildShade: function() {
+            var _ = this, opt = _.opt, ctls = _.controls;
+
+            ctls.shade = document.createElement('div');
+            ctls.shade.className = 'oui-dialog-shade';
+            ctls.shade.style.zIndex = opt.zindex;
+
+            var cssText = [];
+            if($.isNumber(opt.opacity)) {
+                cssText.push('opacity:{0};'.format(opt.opacity));
+            }
+            if(cssText.length > 0) {
+                ctls.shade.style.cssText = cssText.join('');
+            }
+            return _;
         },
         buildTop: function(title, parentNode){
             var _ = this, p = _.opt;
@@ -1107,10 +1122,13 @@
                 boxHeight = obj.clientHeight;
 
             if(opt.height !== 'auto') {
-                if(boxHeight < opt.height) {
+                /*
+                if(boxHeight < opt.height && !_.events.dragingSize) {
                     boxHeight = opt.height;
                     obj.style.height = boxHeight + 'px';
-                } else if(!isFullScreen) {
+                } else 
+                */
+                if(!isFullScreen) {
                     if(isNumberSize(opt.maxHeight)) {
                         var mh = parseInt(opt.maxHeight, 10);
                         if(boxHeight > mh) {
@@ -1399,24 +1417,26 @@
                     console.log('iframe:', window.frames[_.dialogId+'-iframe'].document);
                 }
 
+                $.addEventListener(obj, 'blur', function(){
+                    console.log('onblur:');
+                    moveAble = false;
+                });
+
                 $.addEventListener([document, ctls.box], 'mouseup', function() {
                     moveAble = false;
+                    _.events.dragingSize = false;
                     _.showIframeShade(false);
                 }).addEventListener(document, 'mousemove', function() {
                     if(!moveAble) {
                         return false;
                     }
+                    _.events.dragingSize = true;
                     var e = $.getEvent(),
                         x = (e.clientX - moveX) * (dir.indexOf('left') >= 0 ? -1 : 1), 
                         y = (e.clientY - moveY) * (dir.indexOf('top') >= 0 ? -1 : 1);
 
                     _.showIframeShade(true);
                     _.setScale({ dir: dir, x: x, y: y }, true, par);
-                });
-
-                $.addEventListener(obj, 'blur', function(){
-                    console.log('onblur:');
-                    moveAble = false;
                 });
             }
 
@@ -1463,7 +1483,6 @@
             var max = -1, key = '';
             for(var i=this.keys.length-1; i>=0; i--) {
                 var k = this.keys[i], d = this.caches[k];
-                //console.log('d.opt.zindex: ', i, d.opt.zindex);
                 if(d && !d.closed && d.opt.zindex > max) {
                     max = d.opt.zindex;
                     key = k;
