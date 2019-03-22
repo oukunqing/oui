@@ -1,65 +1,104 @@
 !function($){
 
-    var KEY_CODE = {
-        Enter: 13,
-        Esc: 27,
-        Space: 32
-    },
-    DialogResult = {
-        None: 0,
-        OK: 1,
-        Cancel: 2,
-        Abort: 3,
-        Retry: 4,
-        Ignore: 5,
-        Yes: 6,
-        No: 7
-    },
-    ButtonConfig = {
-        None: { code: 'None', text: '\u5173\u95ed', result: 0, skey: '', css: 'btn-default'},
-        OK: { code: 'OK', text: '\u786e\u5b9a', result: 1, skey: 'Y', css: 'btn-primary' },
-        Cancel: { code: 'Cancel', text: '\u53d6\u6d88', result: 2, skey: 'N', css: 'btn-default' },
-        Abort: { code: 'Abort', text: '\u4e2d\u6b62', result: 3, skey: 'A', css: 'btn-danger' },
-        Retry: { code: 'Retry', text: '\u91cd\u8bd5', result: 4, skey: 'R', css: 'btn-warning' }, 
-        Ignore: { code: 'Ignore', text: '\u5ffd\u7565', result: 5, skey: 'I', css: 'btn-default' },
-        Yes: { code: 'Yes', text: '\u662f', result: 6, skey: 'Y', css: 'btn-primary' },
-        No: { code: 'No', text: '\u5426', result: 7, skey: 'N', css: 'btn-default' }
-    },
-    DialogButtons = {
-        None: -1,
-        OK: 0,
-        OKCancel: 1,
-        AbortRetryIgnore: 2,
-        YesNoCancel: 3,
-        YesNo: 4,
-        RetryCancel: 5
-    },
-    ButtonMaps = [
-        ['OK'],
-        ['OK', 'Cancel'],
-        ['Abort', 'Retry', 'Ignore'],
-        ['Yes', 'No', 'Cancel'],
-        ['Yes', 'No'],
-        ['Retry', 'Cancel']
-    ],
-    checkStyleUnit = function(s) {
-        if($.isString(s, true)) {
-            s = s.toLowerCase();
-            var arr = ['px', '%', 'em', 'auto', 'pt'];
-            for(var i in arr) {
-                if(s.endsWith(arr[i])) {
-                    return s;
+    var dialogIndex = 1,
+        KEY_CODE = {
+            Enter: 13,
+            Esc: 27,
+            Space: 32
+        },
+        DialogStatus = {
+            Close: 'close',
+            Max: 'max',
+            Min: 'min',
+            Normal: 'normal'
+        },
+        DialogResult = {
+            None: 0,
+            OK: 1,
+            Cancel: 2,
+            Abort: 3,
+            Retry: 4,
+            Ignore: 5,
+            Yes: 6,
+            No: 7
+        },
+        ButtonConfig = {
+            None: { code: 'None', text: '\u5173\u95ed', result: 0, skey: '', css: 'btn-default'},
+            OK: { code: 'OK', text: '\u786e\u5b9a', result: 1, skey: 'Y', css: 'btn-primary' },
+            Cancel: { code: 'Cancel', text: '\u53d6\u6d88', result: 2, skey: 'N', css: 'btn-default' },
+            Abort: { code: 'Abort', text: '\u4e2d\u6b62', result: 3, skey: 'A', css: 'btn-danger' },
+            Retry: { code: 'Retry', text: '\u91cd\u8bd5', result: 4, skey: 'R', css: 'btn-warning' }, 
+            Ignore: { code: 'Ignore', text: '\u5ffd\u7565', result: 5, skey: 'I', css: 'btn-default' },
+            Yes: { code: 'Yes', text: '\u662f', result: 6, skey: 'Y', css: 'btn-primary' },
+            No: { code: 'No', text: '\u5426', result: 7, skey: 'N', css: 'btn-default' }
+        },
+        DialogButtons = {
+            None: -1,
+            OK: 0,
+            OKCancel: 1,
+            AbortRetryIgnore: 2,
+            YesNoCancel: 3,
+            YesNo: 4,
+            RetryCancel: 5
+        },
+        ButtonMaps = [
+            ['OK'],
+            ['OK', 'Cancel'],
+            ['Abort', 'Retry', 'Ignore'],
+            ['Yes', 'No', 'Cancel'],
+            ['Yes', 'No'],
+            ['Retry', 'Cancel']
+        ],
+        checkStyleUnit = function(s) {
+            if($.isString(s, true)) {
+                s = s.toLowerCase();
+                var arr = ['px', '%', 'em', 'auto', 'pt'];
+                for(var i in arr) {
+                    if(s.endsWith(arr[i])) {
+                        return s;
+                    }
                 }
+                return s + 'px';
+            } else if($.isNumber(s)) {
+                return s + 'px';
             }
-            return s + 'px';
-        } else if($.isNumber(s)) {
-            return s + 'px';
-        }
-        return s;
-    },
-    isNumberSize = function(num) {
-        return num !== 'auto' && num !== '100%' && !isNaN(parseInt(num, 10));
-    };
+            return s;
+        },
+        isNumberSize = function(num) {
+            return num !== 'auto' && num !== '100%' && !isNaN(parseInt(num, 10));
+        },
+        getTs = function(start, len) {
+            var tick = new Date().getTime();
+            return parseInt(('' + tick).substr(start || 4, len || 8), 10);
+        },
+        getId = function(id) {
+            if(!$.isString(id, true) && !$.isNumber(id)) {
+                return getTs(5, 8) + '-' + dialogIndex++;
+            }
+            return id;
+        },
+        buildId = function(id) {
+            return 'out-dialog-' + id;
+        },
+        buildZindex = function(start, len) {
+            return getTs(start, len);
+        },
+        checkOptions = function(content, title, options) {
+            if($.isObject(content)) {
+                options = content;
+                content = title = '';
+            } else if($.isObject(title)) {
+                options = title;
+                title = '';
+            }
+            if(!$.isObject(options)) {
+                options = {};
+            }
+            options.content = content || options.content || undefined;
+            options.title = title || options.title || undefined;
+
+            return options;
+        };
 
     $.DialogButtons = DialogButtons;
 
@@ -68,21 +107,13 @@
     $.loadLinkStyle($.getFilePath(thisFilePath) + $.getFileName(thisFilePath, true).replace('.min', '') + '.css');
 
     function MyDialog(content, title, options){
-        if($.isObject(content)) {
-            options = content;
-            content = '';
-            title = '';
-        } else if($.isObject(title)) {
-            options = title;
-            title = '';
-        }
-        var _ = this;
+        var _ = this, op = checkOptions(content, title, options);
         _.options = _.opt = $.extend({
-            id: '',
+            id: null,
             group: '',
             type: 'alert', //alert,confirm,message,tooltip,window,iframe
             status: 'normal',
-            zindex: _.buildZindex(),
+            zindex: buildZindex(),
             minWidth: '180px',
             minHeight: '160px',
             maxWidth: '100%',
@@ -90,12 +121,13 @@
             width: '300px',
             height: '200px',
             lock: true,                             //是否锁屏
-            title: title || '\u6807\u9898\u680f',
-            content: content || '',
+            title: '\u6807\u9898\u680f',
+            content: '',
             url: '',
             position: 5,
             x: 0,
             y: 0,
+            fixed: false,
             topMost: false,
             closeAble: true,
             clickBgClose: 'dblclick', // dblclick | click
@@ -117,7 +149,7 @@
             showMin: true,
             showMax: true
 
-        }, options);
+        }, op);
 
         _.controls = {
             shade: null, container: null, box: null, 
@@ -145,7 +177,7 @@
         _.lastStatus = ''; //normal
         _.closed = false;
 
-        _.dialogId = _.buildId(_.opt.id);
+        console.log('opt: ', _.opt);
 
         _.initial(_.opt);
     }
@@ -166,6 +198,8 @@
             return this;
         },
         initial: function(options){
+            this.dialogId = buildId(this.opt.id);
+
             return this.build(options);
         },
         isShow: function(key) {
@@ -189,17 +223,17 @@
             }
             return obj.opt.id === this.opt.id && obj.controls.box.id === this.controls.box.id;
         },
+        getId: function() {
+            return this.opt.id;
+        },
         build: function(options){
             var _ = this, ctls = this.controls, opt = options;
 
-            if(_.opt.lock) {
-                _.hideDocOverflow();
-            }
+            _.identifier = 'oui-dialog-identifier-' + buildZindex();
 
-            _.identifier = 'oui-dialog-identifier-' + _.buildZindex();
-
-            if(opt.type === 'tooltip') {
+            if(['tooltip', 'tips'].indexOf(opt.type) >= 0) {
                 //不需要遮罩层
+                _.opt.lock = opt.lock = false;
                 
             } else {
                 if(opt.lock) {
@@ -214,6 +248,11 @@
                     ctls.container.style.zIndex = opt.zindex;
                 }
             }
+
+            if(_.opt.lock) {
+                _.hideDocOverflow();
+            }
+
             /*
             document.onkeypress = function(e) {
                 console.log('onkeypress:', $.getKeyCode(e));
@@ -225,6 +264,9 @@
             ctls.box.className = 'oui-dialog';
             ctls.box.style.zIndex = opt.zindex;
             ctls.box.id = _.dialogId;
+            if(opt.fixed) {
+                ctls.box.style.position = 'fixed';
+            }
 
             ctls.box.cache = {};
 
@@ -286,16 +328,6 @@
             //this.setPosition(3);
             return this.buildCloseTiming();
         },
-        buildId: function(id) {
-            if(!$.isString(id) && !$.isNumber(id)) {
-                id = buildZindex(0, 13);
-            }
-            return 'out-dialog-' + id;
-        },
-        buildZindex: function(start, len) {
-            var tick = new Date().getTime();
-            return parseInt(('' + tick).substr(start || 4, len || 8), 10);
-        },
         getControls: function(className) {
             return $('#' + this.dialogId + ' ' + className);
         },
@@ -303,9 +335,7 @@
             if($.isUndefined(parentNode)) {
                 parentNode = this.controls.content;
             }
-            if($.isElement(parentNode) && $.isElement(elem)) {
-                parentNode.appendChild(elem);
-            }
+            $.appendChild(parentNode, elem);
             return this;
         },
         buildTop: function(title, parentNode){
@@ -597,14 +627,7 @@
             return this;
         },
         update: function(content, title, options) {
-            if($.isObject(content)) {
-                options = content;
-                content = '';
-                title = '';
-            } else if($.isObject(title)) {
-                options = title;
-                title = '';
-            } else if($.isString(options)){
+            if($.isString(options)){
                 if(options === 'autosize') {
                     options = {width: 'auto', height: 'auto'};
                 } else if(options === 'autoheight') {
@@ -615,11 +638,7 @@
                     options = {};
                 }
             }
-            var opt = $.extend({
-                content: content,
-                title: title,
-            }, options);
-
+            var opt = checkOptions(content, title, options);
             var _ = this, ctls = this.controls;
             if(ctls.content) {
                 if(opt.width === 'auto') {
@@ -665,17 +684,17 @@
             return this;
         },
         min: function() {
-            return this.setSize({type: 'min'});
+            return this.setSize({type: DialogStatus.Min});
         },
         normal: function() {
-            return this.setSize({type: 'normal'});
+            return this.setSize({type: DialogStatus.Normal});
         },
         max: function() {
             var _ = this;
-            if(_.status.max || (_.status.min && _.lastStatus === 'normal')) {
-                return _.setSize({type: 'normal'});                
+            if(_.status.max || (_.status.min && _.lastStatus === DialogStatus.Normal)) {
+                return _.setSize({type: DialogStatus.Normal});                
             } else {
-                return _.setSize({type: 'max'});
+                return _.setSize({type: DialogStatus.Max});
             }
         },
         check: function(obj) {
@@ -701,11 +720,11 @@
                 }
                 code = obj.getAttribute('code');
             }
-            if(code === 'min') {
+            if(code === DialogStatus.Min) {
                 _.min();
-            } else if(code === 'max') {
+            } else if(code === DialogStatus.Max) {
                 _.max();
-            } else if(code === 'close') {
+            } else if(code === DialogStatus.Close) {
                 _.close();
             } else {
                 var result = parseInt(obj.getAttribute('result'), 10);
@@ -838,7 +857,7 @@
                 options = { type: options };
             }
             var p = $.extend({
-                type: 'normal',
+                type: DialogStatus.Normal, 
                 width: 0,
                 height: 0
             }, options);
@@ -850,24 +869,24 @@
                 return this;
             }
 
-            console.log('setSize:', options);
-
             if(_.status.normal) {
                 _.setCache();
             }
 
-            if(_.status.max && p.type !== 'max' && ctls.container) {
+            if(_.status.max && p.type !== DialogStatus.Max && ctls.container) {
                 $.removeClass(ctls.container, 'dialog-overflow-hidden');
-            } else if(p.type !== 'min') {
+            } else if(p.type !== DialogStatus.Min) {
                 $.removeClass(ctls.bottom, 'display-none');
             }
-            if(p.type !== 'max' && !op.lock) {
+            if(p.type !== DialogStatus.Max && !op.lock) {
                 _.hideDocOverflow(true);
             }
 
-            btns.max.title = p.type === 'max' ? 'Restore Down' : 'Maximize';
+            if(btns.max) {
+                btns.max.title = p.type === DialogStatus.Max ? 'Restore Down' : 'Maximize';
+            }
 
-            if(p.type === 'max') {
+            if(p.type === DialogStatus.Max) {
                 if(!op.maxAble) {
                     return _;
                 }
@@ -884,8 +903,8 @@
                     $.removeClass(obj, 'oui-dialog-min');
                 }
 
-                _.hideDocOverflow().hideSwitch().setStatus('max');
-            } else if(p.type === 'min') {
+                _.hideDocOverflow().hideSwitch().setStatus(DialogStatus.Max);
+            } else if(p.type === DialogStatus.Min) {
                 if(!op.minAble) {
                     return _;
                 }
@@ -897,7 +916,7 @@
                 if(_.status.max) {
                     $.removeClass(obj, 'oui-dialog-max');
                 }
-                _.hideSwitch().setStatus('min').setPosition({pos: op.position});
+                _.hideSwitch().setStatus(DialogStatus.Min).setPosition({pos: op.position});
             } else {
                 isSetBodySize = true;
 
@@ -1441,10 +1460,9 @@
         getTop: function() {
             var max = -1, key = '';
             for(var i=this.keys.length-1; i>=0; i--) {
-                var k = this.keys[i];
-                var d = this.caches[k];
+                var k = this.keys[i], d = this.caches[k];
                 //console.log('d.opt.zindex: ', i, d.opt.zindex);
-                if(null !== d && !d.closed && d.opt.zindex > max) {
+                if(d && !d.closed && d.opt.zindex > max) {
                     max = d.opt.zindex;
                     key = k;
                 }
@@ -1453,9 +1471,8 @@
         },
         getLast: function() {
             for(var i=this.keys.length-1; i>=0; i--) {
-                var key = this.keys[i];
-                var d = this.caches[key];
-                if(null !== d && !d.closed) {
+                var k = this.keys[i], d = this.caches[k];
+                if(d && !d.closed) {
                     return d;
                 }
             }
@@ -1468,21 +1485,11 @@
             return dialog;
         },
         show: function(content, title, options, type) {
-            if($.isObject(content)) {
-                options = content;
-                content = '';
-                title = '';
-            } else if($.isObject(title)) {
-                options = title;
-                title = '';
-            }
-            if(!$.isObject(options)) {
-                options = {};
-            }
+            options = checkOptions(content, title, options);
             if(typeof type === 'string') {
                 options.type = type;
             }
-            var opt = {id: 0};
+            var opt = {id: getId(options.id)};
             switch(options.type) {
                 case 'alert':
                     opt.buttons = DialogButtons.OK;
@@ -1521,14 +1528,30 @@
             if(idx >= 0) {
                 this.keys.splice(idx, 1);
             }
+            return this;
         },
-        closeAll: function() {
-            for(var k in this.caches) {
-                var d = this.caches[k];
-                if(d && !d.closed) {
+        close: function(options) {
+            var op = $.isObject(options) ? options : {id: options};
+            if(op.type) {
+                this.closeAll(op.type);
+            } else if(op.id) {
+                var d = this.get(op.id);
+                if(d && d.opt.closeAble) {
                     d.close();
                 }
             }
+            return this;
+        },
+        closeAll: function(type) {
+            var isType = $.isString(type);
+            for(var k in this.caches) {
+                var d = this.caches[k];
+                if(d && !d.closed && d.opt.closeAble && 
+                    (!isType || (isType && d.opt.type === type))) {
+                    d.close();
+                }
+            }
+            return this;
         },
         setEscClose: function() {
             if(this.escClose) {
@@ -1538,16 +1561,17 @@
             $.addEventListener(document, 'keyup', function(e) {
                 if(KEY_CODE.Esc === $.getKeyCode(e)) {
                     var d = $.Dialog.getLast();
-                    if(d !== null && !d.closed) {
+                    if(d !== null && !d.closed && d.opt.escClose) {
                         d.close();
                     }
                 }
             });
+            return this;
         },
         setWindowResize: function() {
             var _ = this;
             if(_.resizeEvent) {
-                return false;
+                return this;
             }
             _.resizeEvent = true;
             $.addEventListener(window, 'resize', function(e) {
@@ -1559,6 +1583,7 @@
                     }
                 }
             });
+            return this;
         }
     };
 

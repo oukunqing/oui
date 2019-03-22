@@ -90,7 +90,7 @@ function confirm2(){
 }
 
 function win(){
-    var win = $.dialog.win('这是普通窗口模式');
+    var win = $.dialog.win({content:'这是普通窗口模式'});
 }
 
 function load(){
@@ -98,10 +98,11 @@ function load(){
 }
 
 function msg(){
-    var win = $.msg('这是普通窗口模式', {autoClose: true});
+    var win = $.msg('这是普通窗口模式', {autoClose: false, closeTiming: 15000, fixed: false, position: 5, lock: false});
 
     window.setTimeout(function() {
-        win.update('请注意：提示信息改变了。请注意：提示信息改变了', {width:'auto'});
+        //win.update('请注意：提示信息改变了。请注意：提示信息改变了', {width:'auto'});
+        win.update('请注意：提示信息改变了。请注意：提示信息改变了', '', 'autosize');
     }, 3000);
 }
 

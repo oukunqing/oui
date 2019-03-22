@@ -153,10 +153,15 @@ console.log($.contains(str,'name'));
 
 console.log(new Date().format('ts'))
 
-var d = '2019-03-19 16:25:08'.toDate().format('ts')
-
+var d = '1970-01-01 8:0:12.123'.toDate().format('ts');
+console.log(d);
+var d = '1970-01-01 9:0:12.123'.toDate().format('ts');
+console.log(d);
+var d = '1970-01-01 10:0:12.123'.toDate().format('ts');
+console.log(d);
+var d = '2010-01-02 10:0:12.123'.toDate().format('ts');
 console.log(d);
 
 
 var str = '确定,取消,标题栏,是,否,中止,重试,忽略,关闭';
-console.log(str.toUnicode());
+//console.log(str.toUnicode());

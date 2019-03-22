@@ -1744,11 +1744,11 @@
             return false;
         },
         setClassValue = function (cur, css, action) {
-            if (0 === action) {
+            if ('add' === action) {
                 if (cur.indexOf(css.space()) < 0) {
                     cur += css + ' ';
                 }
-            } else if (1 === action) {
+            } else if ('remove' === action) {
                 while (cur.indexOf(css.space()) > -1) {
                     cur = cur.replace(css.space(), ' ');
                 }
@@ -1771,8 +1771,8 @@
                     cur = elem[i].nodeType === 1 && stripAndCollapse(curValue).space();
                     if (cur) {
                         while ((css = classes[j++])) {
-                            if (2 === action) {
-                                cur = setClassValue(cur, css, hasClass(elem[i], css) ? 1 : 0);
+                            if ('toggle' === action) {
+                                cur = setClassValue(cur, css, hasClass(elem[i], css) ? 'remove' : 'add');
                             } else {
                                 cur = setClassValue(cur, css, action);
                             }
@@ -1787,25 +1787,27 @@
             return this;
         },
         addClass = function (elem, value) {
-            return setClass(elem, value, 0), this;
+            return setClass(elem, value, 'add'), this;
         },
         removeClass = function (elem, value) {
-            return setClass(elem, value, 1), this;
+            return setClass(elem, value, 'remove'), this;
         },
         toggleClass = function (elem, value) {
-            return setClass(elem, value, 2), this;
+            return setClass(elem, value, 'toggle'), this;
         },
-        appendChild = function (parent, elem) {
-            if ($.isElement(parent) && $.isElement(elem)) {
-                parent.appendChild(elem);
+        appendChild = function (parent, elem, isRemove) {
+            if ($.isElement(parent)) {
+                var elems = $.isArray(elem) ? elem : [elem], 
+                    evName = isRemove ? 'removeChild' : 'appendChild';
+                for(var i in elems) {
+                    var node = isElement(elems[i]) ? parent[evName](elems[i]) : null;
+                }
             }
             return this;
         },
         removeChild = function (parent, elem) {
-            if ($.isElement(parent) && $.isElement(elem)) {
-                parent.removeChild(elem);
-            }
-            return this;
+            var isRemove = true;
+            return appendChild(parent, elem, isRemove);
         },
         loadStaticFile = function (path, id, callback, parent, nodeName, attributes) {
             if (!$.isString(id, true)) {
@@ -1941,37 +1943,22 @@
             if (ev.preventDefault) { ev.preventDefault(); } else { ev.returnValue = false; }
             return this;
         },
-        addEventListener = function (elem, ev, func, useCapture) {
-            var elems = elem;
-            if(!$.isArray(elem)) {
-                elems = [elem];
-            }
+        addEventListener = function (elem, ev, func, useCapture, isRemove) {
+            var elems = $.isArray(elem) ? elem : [elem],
+                name = isRemove ? 'removeEventListener' : 'addEventListener',
+                other = isRemove ? 'detachEvent' : 'attachEvent',
+                normal = typeof doc.addEventListener !== 'undefined';
+
             for(var i in elems) {
                 if(isElement(elems[i])) {
-                    if(elems[i].addEventListener) {
-                        elems[i].addEventListener(ev, func, useCapture || false);
-                    } else {
-                        elems[i].attachEvent('on' + ev, func);
-                    }
+                    normal ? elems[i][name](ev, func, useCapture || false) : elems[i][other]('on' + ev, func);
                 }
             }
             return this;
         },
         removeEventListener = function (elem, ev, func, useCapture) {
-            var elems = elem;
-            if(!$.isArray(elem)) {
-                elems = [elem];
-            }
-            for(var i in elems) {
-                if(isElement(elems[i])) {
-                    if(elems[i].addEventListener) {
-                        elems[i].removeEventListener(ev, func, useCapture || false);
-                    } else {
-                        elems[i].detachEvent('on' + ev, func);
-                    }
-                }
-            }
-            return this;
+            var isRemove = true;            
+            return addEventListener(elem, ev, func, useCapture, isRemove);
         },
         bindEventListener = function (obj, func) {
             if (!$.isObject(obj) || !$.isFunction(func)) {
@@ -2235,8 +2222,9 @@
             if ($.isBoolean(action)) {
                 return action;
             } else {
-                var checked = false;
-                switch (parseInt(action, 10)) {
+                var checked = false, 
+                    dic = {cancel:0, all:1, reverse:2};
+                switch (parseInt(dic[('' + action).toLowerCase()] || action, 10)) {
                     case 0: checked = false; break;
                     case 1: checked = true; break;
                     case 2: checked = !obj.checked; break;
