@@ -83,21 +83,25 @@
         buildZindex = function(start, len) {
             return getTs(start, len);
         },
-        checkOptions = function(content, title, options) {
+        checkOptions = function(content, title, opt) {
+            var host = null;
             if(content && $.isObject(content)) {
-                options = content;
+                opt = content;
                 content = title = '';
-            } else if(title && $.isObject(title)) {
-                options = title;
+            } else if(title && $.isObject(title) && !$.isElement(title)) {
+                opt = title;
                 title = '';
+            } else if($.isElement(title)) {
+                host = title;
             }
-            if(!$.isObject(options)) {
-                options = {};
+            if(!$.isObject(opt)) {
+                opt = {};
             }
-            options.content = content || options.content || undefined;
-            options.title = title || options.title || undefined;
+            opt.content = content || opt.content || undefined;
+            opt.title = title || opt.title || undefined;
+            opt.host = host || opt.host || undefined;
 
-            return options;
+            return opt;
         },
         checkType = function(type, isBuild) {
             if(!$.isString(type, true) && !isBuild) {
@@ -139,6 +143,7 @@
             position: 5,
             x: 0,
             y: 0,
+            host: null,         //宿主控件，用于 tooltip
             fixed: false,
             topMost: false,
             closeAble: true,
@@ -212,11 +217,13 @@
             opt.type = checkType(opt.type, true);
 
             if(!opt.showTitle && !opt.showBottom && !opt.lock && 
-                $.isBoolean(opt.closeAble, true)) {
+                $.isBoolean(opt.closeAble, true) && 
+                opt.type !== 'tooltip') {
                 opt.escClose = true;
                 opt.clickBgClose = opt.clickBgClose || 'click';
             }
-            return this.build((this.opt = opt));
+
+            return this.build(opt);
         },
         isShow: function(key) {
             switch(key) {
@@ -250,7 +257,7 @@
             if(opt.type === 'tooltip') {
                 //不需要遮罩层
                 _.opt.lock = opt.lock = false;
-                
+                return _.buildTooltip(options);
             } else if(opt.lock) {
                 _.buildShade();
 
@@ -271,8 +278,8 @@
             ctls.box.id = _.dialogId;
             if(opt.fixed) {
                 //ctls.box.style.position = 'fixed';
+                //TODO:
             }
-
             //ctls.box.cache = {};
 
             if(opt.showTitle) {
@@ -297,7 +304,6 @@
                 ctls.container.appendChild(ctls.box);
                 document.body.appendChild(ctls.container);
             } else {
-                //$.addClass(ctls.box, 'oui-dialog-fixed');
                 document.body.appendChild(ctls.box);
             }
 
@@ -318,9 +324,7 @@
 
             $.addEventListener(ctls.box, 'click', function(){
                 $.cancelBubble();
-            });
-
-            $.addEventListener(ctls.box, 'dblclick', function(){
+            }).addEventListener(ctls.box, 'dblclick', function(){
                 $.cancelBubble();
             });
 
@@ -626,10 +630,10 @@
             if(!_.opt.closeAble || _.closed) {
                 return false;
             }
-            document.body.removeChild(ctls.container || ctls.box);
 
+            $.removeChild(document.body, ctls.container || ctls.box);
             if(ctls.shade) {
-                document.body.removeChild(ctls.shade);
+                $.removeChild(document.body, ctls.shade);
             }
             DialogCenter.remove(_.opt.id);
 
@@ -676,6 +680,11 @@
             }
             var opt = checkOptions(content, title, options);
             var _ = this, ctls = this.controls, isAutoSize = false;
+
+            if($.extend(_.opt, opt).type === 'tooltip') {
+                _.updateTooltip(content, opt.host, opt);
+                return _;
+            }
             if(ctls.content) {
                 if(opt.width === 'auto') {
                     ctls.box.style.width = 'auto';
@@ -700,7 +709,6 @@
                     _.setPosition();
                 }
             }
-
             return _;
         },
         append: function(content, title, options) {
@@ -1436,7 +1444,7 @@
                     minWidth: parseInt(op.minWidth, 10),
                     minHeight: parseInt(op.minHeight, 10)
                 };
-                
+
                 $.addEventListener([document, ctls.box], 'mouseup', function() {
                     moveAble = false;
                     _.events.dragingSize = false;
@@ -1462,9 +1470,103 @@
                 });
             });
             return this;
+        },
+        //以下方法为tooltip
+        buildTooltip: function(options) {
+            var _ = this, ctls = _.controls, opt = options, host = opt.host;
+            console.log(host);
+            var tipId = null, d = null;
+            try{ tipId = host.getAttribute('tipid');}catch(e){}
+            console.log('tipId: ', tipId);
+            if(tipId && (d = DialogCenter.get(tipId)) !== null) {
+                _.controls = d.controls;
+                _.updateTooltip(opt.content, host, opt, _);
+            } else {
+                //对话框
+                ctls.box = document.createElement('div');
+                ctls.box.className = 'out-tooltip';
+                ctls.box.style.zIndex = opt.zindex;
+                ctls.box.id = _.dialogId;
+
+                ctls.body = _.buildBody(opt.content, ctls.box);
+
+                $.setAttribute(host, 'tipid', _.opt.id);
+                document.body.appendChild(ctls.box);
+            }
+
+            return _.setTooltipPosition(_);
+        },
+        updateTooltip: function(content, host, options, _) {
+            _ = _ || this;
+            if(_.controls.content) {
+                _.controls.content.innerHTML = content;
+            }
+            return _.setTooltipPosition();
+        },
+        setTooltipPosition: function(_) {
+            var _ = _ || this, obj = _.controls.box, opt = _.opt, host = opt.host;
+            var dir = opt.position;
+            if(!obj) {
+                return false;
+            }
+            var ps = {
+                w: host.offsetWidth,
+                h: host.offsetHeight,
+                x: host.offsetLeft,
+                y: host.offsetTop
+            };
+
+            switch(dir){
+                case 2:
+                case 'top':
+                    obj.style.left = (ps.x) + 'px';
+                    obj.style.top = (ps.y - obj.offsetHeight) + 'px';
+                    break;
+                case 6:
+                case 'right':
+                    obj.style.left = (ps.x + ps.w) + 'px';
+                    obj.style.top = (ps.y) + 'px';
+                    break;
+                case 8:
+                case 'bottom':
+                    obj.style.left = (ps.x) + 'px';
+                    obj.style.top = (ps.y + ps.h) + 'px';
+                    break;
+                case 4:
+                case 'left':
+                    obj.style.left = (ps.x - obj.offsetLeft) + 'px';
+                    obj.style.top = (ps.y) + 'px';
+                    break;
+            }
+            return _;
         }
     };
+/*
+    //创建 MyTooltip 对象，继承于 MyDialog
+    function MyTooltip(content, title, options) {
+        MyDialog.call(this, content, title, options);
 
+        this.buildTooltip();
+    }
+
+    MyTooltip.prototype = MyDialog.prototype;
+
+    $.extend(MyTooltip.prototype, {
+        buildTooltip: function() {
+            var _ = this, opt = _.opt, ctls = _.controls;
+            console.log('build: ', this.opt.content);
+            //对话框
+            ctls.box = document.createElement('div');
+            ctls.box.className = 'oui-dialog';
+            ctls.box.style.zIndex = opt.zindex;
+            ctls.box.id = _.dialogId;
+            ctls.box.innerHTML = opt.content;
+            document.body.appendChild
+        }
+    });
+
+    console.log(MyTooltip);
+*/
     var DialogType = {
 
     };
@@ -1520,12 +1622,14 @@
             this.caches[id] = dialog;
             return dialog;
         },
-        show: function(content, title, options, type) {
+        show: function(content, title, options, type, host) {
             options = checkOptions(content, title, options);
             var opt = {
                 id: getId(options.id), 
                 type: checkType(type || options.type, true)
             };
+            $.extend(options, {host: host});
+
             switch(opt.type) {
                 case 'alert':
                     opt.buttons = DialogButtons.OK;
@@ -1549,6 +1653,9 @@
                     break;
             }
             var d = this.get($.extend(opt, options).id);
+            if(opt.type === 'tooltip' && !opt.position) {
+                opt.position = 8; //bottom
+            }
             if(d === null) {
                 d = this.set(opt.id, new MyDialog(opt.content, opt.title, opt));
             } else {
@@ -1656,11 +1763,11 @@
         message: function(content, options){
             return DialogCenter.show(content, undefined, options, 'message');
         },
-        tips: function(content, options){
-            return DialogCenter.show(content, undefined, options, 'tooltip');
+        tips: function(content, host, options){
+            return DialogCenter.show(content, undefined, options, 'tooltip', host);
         },
-        tooltip: function(content, options){
-            return DialogCenter.show(content, undefined, options, 'tooltip');
+        tooltip: function(content, host, options){
+            return DialogCenter.show(content, undefined, options, 'tooltip', host);
         }
     });
 

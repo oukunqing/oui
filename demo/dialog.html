@@ -8,7 +8,9 @@
 </head>
 </head>
 <body>
-    <div id="p1" style="height:400px;"></div>
+    <div id="p1" style="height:400px;">
+        <input type="input" name="" id="txtTips" style="margin:100px;"/>
+    </div>
     <div id="t1"></div>
     <input id="txt2" type="input" />
     <input id="txt1" type="input" />
@@ -116,13 +118,32 @@ function msg(){
 }
 
 function tips(){
-    var win = $.dialog('tips: 提示信息', {type:'tips',position: 6});
+    var win = $.tips('tips: 提示信息' + new Date().getTime(), $I('txtTips'), {type:'tips',position: 8});
 
     tips2();
+
+    window.setTimeout(function() {
+        win.update('tips: 请注意：提示信息已经更新。', {position:6})
+    },3000);
+
+    window.setTimeout(function() {
+        win.update('tips: 请注意：提示信息已经再次更新。', {position:2})
+    },5000);
+
+    window.setTimeout(function() {
+        win.update('tips: 请注意：提示信息更新。', {position:4})
+    },8000);
+
+    window.setTimeout(function() {
+        //win.close();
+    }, 5000);
 }
 
 function tips2(){
     var win = $.tips('tips: 提示信息2', {position: 3});
+    window.setTimeout(function() {
+        //$.tooltip.closeAll();
+    }, 6000);
 }
 
 function update() {

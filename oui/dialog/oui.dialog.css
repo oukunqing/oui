@@ -34,7 +34,6 @@
     box-shadow: 0 2px 3px 0 rgba(0,0,0,.32);
     font-size: 14px;
     line-height: 1.25em;
-
     background: #fff;G
 
     -webkit-box-sizing: border-box;
@@ -68,7 +67,6 @@
     border-bottom: solid 1px #ddd;
     box-sizing: border-box;
     clear:both; overflow:hidden;
-
     /*cursor: move;*/
     -moz-user-select:none;
     -khtml-user-select:none;
@@ -136,16 +134,13 @@
     text-align: left;
     /*overflow: visible;*/
     overflow: auto;
-
     box-sizing: border-box;
-
     -moz-user-select:none;
     -khtml-user-select:none;
     user-select:none;
     -ms-user-select: none; /*IE10*/
     
     /*margin-bottom: 40px;*/
-
 }
 
 .oui-dialog .body .content {
@@ -202,10 +197,8 @@
     cursor: pointer;
     padding: 0 15px;
     height: 24px;
-
     line-height: 1.8em;
     text-decoration: none;
-
     display: inline-block;
     font-style: normal;
     font-family: inherit;
@@ -287,38 +280,6 @@
     margin-right: 5px;
 }
 
-
-/*
-.oui-dialog .bottom .btn {
-    margin: 7px 0 0;
-    color: #fff;
-    background: #337ab7;
-    border: solid 1px #2e6da4;
-    cursor: pointer;
-    padding: 0 15px;
-    height: 24px;
-
-    display: inline-block;
-    font-style: normal;
-    font-family: inherit;
-    -webkit-transition: all .3s ease-out;
-    -o-transition: all .3s ease-out;
-    transition: all .3s ease-out;
-    -webkit-box-shadow: none;
-    box-shadow: none;
-    border-radius: 3px;
-    border-style: solid;
-    text-align: center;
-}
-
-.oui-dialog .bottom .btn-ok {
-
-}
-
-.oui-dialog .bottom .btn-cancel {
-
-}
-*/
 /*关于拖放开关*/
 
 .oui-dialog .border-switch {
@@ -412,4 +373,16 @@
 
 .dialog-margin-middle {
     margin-top: auto; margin-bottom: auto;
+}
+
+
+/*oui-tooltip*/
+
+.out-tooltip {
+    position: absolute;
+    border: solid 1px #ccc;
+    font-size: 14px;
+    margin: 0; padding: 0;
+    line-height: 1.5em;
+    border: solid 1px #f00;
 }
