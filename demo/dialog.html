@@ -25,6 +25,10 @@
 </html>
 <script type="text/javascript">
 
+document.onclick = function() {
+    console.log('document.onclick');
+};
+
 function alert2(){
     var dialog = $.alert('Hello!对话框', {
         id: 3, position: 5, maxHeight: 360, maxWidth: 500, lock: true, clickBgClose: 'dblclick', 
@@ -143,7 +147,7 @@ function getCon(rows, txt) {
 
 function update2() {
     var str = getCon(3);
-    var dialog = $.alert('Hello!对话框22<br />' + str, {
+    var dialog = $.dialog('Hello!对话框22<br />' + str, {
         id:12, lock: false, minAble: true, maxAble: true, escClose: true, autoClose: false
     });
 
@@ -156,14 +160,14 @@ function update2() {
     window.setTimeout(function(){
         dialog.update(getCon(2), {width:'auto', height:'auto'});
     }, 8000);
-
+/*
     window.setTimeout(function(){
         dialog.update(getCon(7), '第2次改变');
     }, 10000);
 
     window.setTimeout(function(){
         dialog.update(getCon(32), '', 'autosize');
-    }, 10000);
+    }, 10000);*/
 }
 
 
