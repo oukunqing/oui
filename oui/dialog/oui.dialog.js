@@ -1007,23 +1007,23 @@
             }
         },
         setScale: function(options, isDrag, dp) {
-            var _ = this, obj = _.controls.box;
-            if(!_.opt.dragSize && isDrag) {
+            var _ = this, opt = _.opt, obj = _.controls.box;
+            if(!obj || (!opt.dragSize && isDrag)) {
                 return this;
             }
-            var opt = $.extend({
+            var par = $.extend({
                 type: '',
                 dir: 'bottom-right',
                 x: 0,
                 y: 0
             }, options);
 
-            opt.x = parseInt(opt.x, 10);
-            opt.y = parseInt(opt.y, 10);
+            par.x = parseInt(par.x, 10);
+            par.y = parseInt(par.y, 10);
 
-            if(opt.dir === '' || isNaN(opt.x) || isNaN(opt.y)) {
+            if(par.dir === '' || isNaN(par.x) || isNaN(par.y)) {
                 return this;
-            } else if(opt.x === 0 && opt.y === 0) {
+            } else if(par.x === 0 && par.y === 0) {
                 return this;
             }
 
@@ -1035,13 +1035,14 @@
                     left: obj.offsetLeft,
                     right: obj.offsetWidth + obj.offsetLeft,
                     bottom: obj.offsetHeight + obj.offsetTop,
-                    minWidth: parseInt(_.opt.minWidth, 10),
-                    minHeight: parseInt(_.opt.minHeight, 10)
+                    minWidth: parseInt(opt.minWidth, 10),
+                    minHeight: parseInt(opt.minHeight, 10)
                 };
             }
 
-            var w = dp.width + opt.x,
-                h = dp.height + opt.y,
+            var bs = $.getBodySize(),
+                w = dp.width + par.x,
+                h = dp.height + par.y,
                 newWidth = w < dp.minWidth ? dp.minWidth : w, 
                 newHeight = h < dp.minHeight ? dp.minHeight : h,
                 newLeft = 0,
@@ -1049,37 +1050,50 @@
                 x = 0,
                 y = 0;
 
-            var mw = parseInt(_.opt.maxWidth, 10);
-            if(_.opt.maxWidth !== '100%' && !isNaN(mw) && newWidth > mw) {
+            var mw = parseInt(opt.maxWidth, 10);
+            if(opt.maxWidth !== '100%' && !isNaN(mw) && newWidth > mw) {
                 newWidth = mw;
             } else {
-                x = opt.x;
+                x = par.x;
             }
 
-            var mh = parseInt(_.opt.maxHeight, 10);
-            if(_.opt.maxHeight !== '100%' && !isNaN(mh) && newHeight > mh) {
+            var mh = parseInt(opt.maxHeight, 10);
+            if(opt.maxHeight !== '100%' && !isNaN(mh) && newHeight > mh) {
                 newHeight = mh;
             } else {
-                y = opt.y;
+                y = par.y;
             }
 
-            if(opt.dir === 'center') {
+            if(par.dir === 'center') {
                 x = parseInt(Math.abs(x) / 2, 10);
                 y = parseInt(Math.abs(y) / 2, 10);
-                newLeft = dp.left - opt.x;
-                newTop = dp.top - opt.y;
+                newLeft = dp.left - par.x;
+                newTop = dp.top - par.y;
             } else {
-                x *= opt.dir.indexOf('left') >= 0 ? -1 : 1;
-                y *= opt.dir.indexOf('top') >= 0 ? -1 : 1;
+                x *= par.dir.indexOf('left') >= 0 ? -1 : 1;
+                y *= par.dir.indexOf('top') >= 0 ? -1 : 1;
                 newLeft = (dp.left + x + newWidth) > dp.right ? dp.right - newWidth : dp.left + x;
                 newTop = (dp.top + y + newHeight) > dp.bottom ? dp.bottom - newHeight : dp.top + y;
             }
 
-            if(opt.dir.indexOf('-') >= 0 || opt.dir === 'center') {
+            //拖动缩放尺寸，窗口范围限制
+            if(isDrag && opt.dragRangeLimit) {
+                if(newWidth > bs.width - obj.offsetLeft) {
+                    newWidth = bs.width - obj.offsetLeft;
+                }
+                if(newHeight > bs.height - obj.offsetTop) {
+                    newHeight = bs.height - obj.offsetTop;
+                }
+                if(newTop < 0) {
+                    newTop = 0;
+                }
+            }
+
+            if(par.dir.indexOf('-') >= 0 || par.dir === 'center') {
                 $.setStyle(obj, {width: newWidth, height: newHeight}, 'px');
             }
 
-            switch(opt.dir) {
+            switch(par.dir) {
                 case 'bottom-right':
                 case 'right-bottom': //不用处理
                     break;
@@ -1109,11 +1123,19 @@
                     $.setStyle(obj, {left: newLeft}, 'px');
                     break;
             }
-            return _.setBodySize();
-        },
-        setBodySize: function(isFullScreen) {
-            var _ = this, opt = _.opt, obj = _.controls.box, ctls = _.controls, bs = $.getBodySize();
+            _.setBodySize(false);
 
+            if(!isDrag && par.dir === 'center') {
+                _.setPosition(par);
+            }
+
+            return _;
+        },
+        setBodySize: function(isFullScreen, isDrag) {
+            var _ = this, opt = _.opt, obj = _.controls.box, ctls = _.controls, bs = $.getBodySize();
+            if(!obj) {
+                return false;
+            }
             var titleHeight = ctls.top ? ctls.top.offsetHeight : 0, 
                 bottomHeight = ctls.bottom ? ctls.bottom.offsetHeight : 0,
                 paddingHeight = parseInt('0' + $.getElementStyle(obj, 'paddingTop'), 10),
@@ -1138,6 +1160,7 @@
                     }
                 }
             }
+
             if(boxWidth > bs.width) {
                 boxWidth = bs.width - 20;
                 obj.style.width = boxWidth + 'px';
@@ -1189,13 +1212,16 @@
         },
         setPosition: function(options) {
             var _ = this, obj = _.controls.box;
-
+            if(!obj) {
+                return false;
+            }
             if($.isString(options) || $.isNumber(options)) {
                 options = { pos: options };
             } else if($.isUndefined(options)) {
                 options = { pos: _.opt.position };
             }
             var opt = $.extend({
+                event: '',
                 pos: 5,
                 x: 0,
                 y: 0
@@ -1254,7 +1280,7 @@
             return this;
         },
         setTopMost: function() {
-            if(!this.opt.dragSize) {
+            if(this.closed || !this.opt.dragSize) {
                 return false;
             }
             var topBox = DialogCenter.getTop(), 
@@ -1300,7 +1326,7 @@
             }
 
             //移动对话框到当前鼠标位置
-            _.setPosition({pos: 'custom', x: offsetX, y: offsetY});
+            _.setPosition({pos: 'custom', event: 'drag', x: offsetX, y: offsetY});
 
             return this;
         },
@@ -1410,18 +1436,7 @@
                     minWidth: parseInt(op.minWidth, 10),
                     minHeight: parseInt(op.minHeight, 10)
                 };
-                if(ctls.iframe) {
-                    ctls.iframe.onmousemove = function() {
-                        console.log('iframe')
-                    };
-                    console.log('iframe:', window.frames[_.dialogId+'-iframe'].document);
-                }
-
-                $.addEventListener(obj, 'blur', function(){
-                    console.log('onblur:');
-                    moveAble = false;
-                });
-
+                
                 $.addEventListener([document, ctls.box], 'mouseup', function() {
                     moveAble = false;
                     _.events.dragingSize = false;
@@ -1618,7 +1633,7 @@
                 for(var i=_.keys.length-1; i>=0; i--) {
                     var k = _.keys[i], d = _.caches[k];
                     if(d && !d.closed && d.checkPosition('center') || d.checkPosition('middle')) {
-                        d.setPosition();
+                        d.setPosition({event: 'resize'});
                     }
                 }
             });

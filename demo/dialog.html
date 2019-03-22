@@ -31,8 +31,10 @@ document.onclick = function() {
 
 function alert2(){
     var dialog = $.alert('Hello!对话框', {
-        id: 3, position: 5, maxHeight: 360, maxWidth: 500, lock: true, clickBgClose: 'dblclick', 
-        escClose: true, autoClose: true, closeTiming: 10000,
+        id: 3, position: 5, maxHeight: 360, maxWidth: 500, 
+        lock: true, clickBgClose: 'dblclick', 
+        escClose: true, 
+        autoClose: true, closeTiming: 15000,
         maxAble: true, minAble: true, closeAble: true,
         //buttons: $.DialogButtons.OK, 
         //opacity: 0.2,
@@ -49,24 +51,24 @@ function alert2(){
     });
 
     //console.log('dialog: ', dialog);
-    /*
+    
     window.setTimeout(function(){
         dialog.setScale({
             dir: 'bottom-right',
-            x: 100,
-            y: 80
+            x: 40,
+            y: 50
         });
-    }, 8000);
+    }, 6000);
 
 
     window.setTimeout(function(){
         dialog.setScale({
             dir: 'center',
-            x: 120,
-            y: 88
+            x: 50,
+            y: 60
         });
-    }, 15000);
-*/
+    }, 4000);
+
 
     //dialog.setZindex(1000);
 
