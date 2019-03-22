@@ -164,7 +164,7 @@
         _.controls = {
             shade: null, container: null, box: null, 
             top: null, title: null, panel: null,
-            body: null, content: null, iframe: null,
+            body: null, content: null, iframe: null, iframeShade: null,
             bottom: null
         };
 
@@ -466,6 +466,7 @@
             if(['url', 'iframe', 'load'].indexOf(op.type) >= 0) {
                 elem.innerHTML = _.buildIframe(content);
                 ctls.iframe = elem.childNodes[0] || null;
+                ctls.iframeShade = elem.childNodes[1] || null;
             } else {
                 elem.innerHTML = content;
             }
@@ -475,8 +476,15 @@
             var height = '100%';
             return ['<iframe class="iframe" width="100%"',
                 ' id="{0}-iframe" height="{1}" src="{2}"',
-                ' frameborder="0" scrolling="auto"></iframe>'
+                ' frameborder="0" scrolling="auto"></iframe>',
+                '<div id="{0}-iframe-shade" class="iframe-shade"></div>'
             ].join('').format(this.dialogId, height, url.setUrlParam());
+        },
+        showIframeShade: function(isShow) {
+            if(this.controls.iframeShade) {
+                this.controls.iframeShade.style.display = isShow ? 'block' : 'none';
+            }
+            return this;
         },
         buildBottom: function(parentNode) {
             var _ = this, elem = document.createElement('div');
@@ -1307,10 +1315,12 @@
                 $.addEventListener(document, 'mouseup', function() {
                     moveAble = false;
                     _.events.btnMouseDown = false;
+                    _.showIframeShade(false);
                 }).addEventListener(document, 'mousemove', function() {
                     if(!moveAble || _.events.btnMouseDown) {
                         return false;
                     }
+                    _.showIframeShade(true);
                     var evt = $.getEvent(),
                         x = moveLeft + evt.clientX - moveX,
                         y = moveTop + evt.clientY - moveY,
@@ -1383,12 +1393,15 @@
                     minHeight: parseInt(op.minHeight, 10)
                 };
                 if(ctls.iframe) {
-                    ctls.iframe.onmousemove = docMouseMoveEvent;
+                    ctls.iframe.onmousemove = function() {
+                        console.log('iframe')
+                    };
                     console.log('iframe:', window.frames[_.dialogId+'-iframe'].document);
                 }
 
                 $.addEventListener([document, ctls.box], 'mouseup', function() {
                     moveAble = false;
+                    _.showIframeShade(false);
                 }).addEventListener(document, 'mousemove', function() {
                     if(!moveAble) {
                         return false;
@@ -1397,6 +1410,7 @@
                         x = (e.clientX - moveX) * (dir.indexOf('left') >= 0 ? -1 : 1), 
                         y = (e.clientY - moveY) * (dir.indexOf('top') >= 0 ? -1 : 1);
 
+                    _.showIframeShade(true);
                     _.setScale({ dir: dir, x: x, y: y }, true, par);
                 });
 
