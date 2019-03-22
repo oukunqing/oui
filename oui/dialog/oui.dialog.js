@@ -84,10 +84,10 @@
             return getTs(start, len);
         },
         checkOptions = function(content, title, options) {
-            if($.isObject(content)) {
+            if(content && $.isObject(content)) {
                 options = content;
                 content = title = '';
-            } else if($.isObject(title)) {
+            } else if(title && $.isObject(title)) {
                 options = title;
                 title = '';
             }
@@ -98,6 +98,17 @@
             options.title = title || options.title || undefined;
 
             return options;
+        },
+        checkType = function(type, isBuild) {
+            if(!$.isString(type, true) && !isBuild) {
+                return type;
+            }
+            if(['message', 'msg'].indexOf(type) >= 0) {
+                return 'message';
+            } else if(['tooltip', 'tips'].indexOf(type) >= 0) {
+                return 'tooltip';
+            }
+            return type || (isBuild ? 'dialog' : '');
         };
 
     $.DialogButtons = DialogButtons;
@@ -106,7 +117,7 @@
     //先加载样式文件
     $.loadLinkStyle($.getFilePath(thisFilePath) + $.getFileName(thisFilePath, true).replace('.min', '') + '.css');
 
-    function MyDialog(content, title, options){
+    function MyDialog(content, title, options) {
         var _ = this, op = checkOptions(content, title, options);
         _.options = _.opt = $.extend({
             id: null,
@@ -130,7 +141,7 @@
             fixed: false,
             topMost: false,
             closeAble: true,
-            clickBgClose: 'dblclick', // dblclick | click
+            clickBgClose: null, //'dblclick', // dblclick | click
             escClose: false,
             autoClose: false,
             closeTiming: 5000,
@@ -142,13 +153,12 @@
             callback: null,
             success: null,
             parameter: null,
-            buttons: $.DialogButtons.OKCancel,
+            buttons: DialogButtons.OKCancel,
             showTitle: true,
             showBottom: true,
             showClose: true,
             showMin: true,
             showMax: true
-
         }, op);
 
         _.controls = {
@@ -177,8 +187,6 @@
         _.lastStatus = ''; //normal
         _.closed = false;
 
-        console.log('opt: ', _.opt);
-
         _.initial(_.opt);
     }
 
@@ -197,10 +205,16 @@
             }
             return this;
         },
-        initial: function(options){
-            this.dialogId = buildId(this.opt.id);
+        initial: function(opt){
+            this.dialogId = buildId(opt.id);
+            opt.type = checkType(opt.type, true);
 
-            return this.build(options);
+            if(!opt.showTitle && !opt.showBottom && !opt.lock && 
+                $.isBoolean(opt.closeAble, true)) {
+                opt.escClose = true;
+                opt.clickBgClose = opt.clickBgClose || 'click';
+            }
+            return this.build((this.opt = opt));
         },
         isShow: function(key) {
             switch(key) {
@@ -231,33 +245,25 @@
 
             _.identifier = 'oui-dialog-identifier-' + buildZindex();
 
-            if(['tooltip', 'tips'].indexOf(opt.type) >= 0) {
+            if(opt.type === 'tooltip') {
                 //不需要遮罩层
                 _.opt.lock = opt.lock = false;
                 
-            } else {
-                if(opt.lock) {
-                    //遮罩层
-                    ctls.shade = document.createElement('div');
-                    ctls.shade.className = 'oui-dialog-shade';
-                    ctls.shade.style.zIndex = opt.zindex;
+            } else if(opt.lock) {
+                //遮罩层
+                ctls.shade = document.createElement('div');
+                ctls.shade.className = 'oui-dialog-shade';
+                ctls.shade.style.zIndex = opt.zindex;
 
-                    //对话框容器
-                    ctls.container = document.createElement('div');
-                    ctls.container.className = 'oui-dialog-container';
-                    ctls.container.style.zIndex = opt.zindex;
-                }
+                //对话框容器
+                ctls.container = document.createElement('div');
+                ctls.container.className = 'oui-dialog-container';
+                ctls.container.style.zIndex = opt.zindex;
             }
 
             if(_.opt.lock) {
                 _.hideDocOverflow();
             }
-
-            /*
-            document.onkeypress = function(e) {
-                console.log('onkeypress:', $.getKeyCode(e));
-            }
-            */
 
             //对话框
             ctls.box = document.createElement('div');
@@ -265,10 +271,10 @@
             ctls.box.style.zIndex = opt.zindex;
             ctls.box.id = _.dialogId;
             if(opt.fixed) {
-                ctls.box.style.position = 'fixed';
+                //ctls.box.style.position = 'fixed';
             }
 
-            ctls.box.cache = {};
+            //ctls.box.cache = {};
 
             if(opt.showTitle) {
                 ctls.top = _.buildTop(opt.title, ctls.box);
@@ -280,7 +286,7 @@
                 ctls.bottom = _.buildBottom(ctls.box);
             }
             
-            if(opt.type !== 'message' && opt.type !== 'tooltip') {
+            if(opt.dragSize) {
                 _.setDragSize();
             }
 
@@ -298,18 +304,12 @@
 
             _.setSize({type: _.opt.status, width: _.opt.width, height: _.opt.height});
             _.setPosition({pos: _.opt.position, x: _.opt.x, y: _.opt.y});
-            _.setCache().dragPosition().dragSize();
-
-            if(opt.clickBgClose.in(['dblclick', 'click'])) {
-                $.addEventListener(ctls.container, opt.clickBgClose, function() {
-                    _.close();
-                });
-            }
+            _.setCache().dragPosition().dragSize().setClickBgClose();
 
             if(opt.escClose) {
-                $.Dialog.setEscClose();
+                DialogCenter.setEscClose();
             }
-            $.Dialog.setWindowResize();
+            DialogCenter.setWindowResize();
 
             if(opt.topMost) {
                 $.addEventListener(ctls.box, 'mousedown', function() {
@@ -327,6 +327,22 @@
 
             //this.setPosition(3);
             return this.buildCloseTiming();
+        },
+        setClickBgClose: function() {
+            var _ = this, op = _.opt, ctls = _.controls;
+            if(!('' + op.clickBgClose).toLowerCase().in(['dblclick', 'click'])) {
+                return this;
+            }
+            if(op.lock && ctls.container) {
+                $.addEventListener(ctls.container, op.clickBgClose, function() {
+                    _.close();
+                });
+            } else {
+                window.setTimeout(function(){
+                    DialogCenter.setClickDocClose(op.id, op.clickBgClose);
+                }, 100);
+            }
+            return this;
         },
         getControls: function(className) {
             return $('#' + this.dialogId + ' ' + className);
@@ -448,9 +464,6 @@
                 elem.className = 'content';
             }
             if(['url', 'iframe', 'load'].indexOf(op.type) >= 0) {
-                if(elem){
-                    console.log('tagName: ', elem.tagName);
-                }
                 elem.innerHTML = _.buildIframe(content);
                 ctls.iframe = elem.childNodes[0] || null;
             } else {
@@ -491,8 +504,8 @@
             return _.appendChild(elem, parentNode), elem;
         },
         buildButtons: function() {
-            var _ = this, keys = $.DialogButtons, html = [];
-            if(!$.isNumber(_.opt.buttons) || _.opt.button < 0) {
+            var _ = this, keys = DialogButtons, html = [];
+            if(!$.isNumber(_.opt.buttons) || _.opt.buttons < 0) {
                 return '';
             }
             var keys = ButtonMaps[_.opt.buttons];
@@ -595,7 +608,7 @@
             if(ctls.shade) {
                 document.body.removeChild(ctls.shade);
             }
-            $.Dialog.remove(_.opt.id);
+            DialogCenter.remove(_.opt.id);
 
             this.closed = true;
 
@@ -775,7 +788,6 @@
                         var keyCode = $.getKeyCode(e);
                         var strKeyCode = String.fromCharCode(keyCode).toUpperCase();
                         var shortcutKey = this.getAttribute('shortcut-key') || '';
-                        console.log('keypress: ', keyCode, strKeyCode, shortcutKey);
                         //if(32 == keyCode || (shkey >= 3 && strKeyCode == cg.shortcutKey[2].toUpperCase())){FuncCancel();}
                         // 判断是否为空格键 或 是否按下快捷键
                         if(KEY_CODE.Space === keyCode || strKeyCode === shortcutKey) {
@@ -1038,8 +1050,6 @@
                 newTop = (dp.top + y + newHeight) > dp.bottom ? dp.bottom - newHeight : dp.top + y;
             }
 
-            console.log(newWidth, newHeight, x, y, newLeft, newTop);
-
             if(opt.dir.indexOf('-') >= 0 || opt.dir === 'center') {
                 $.setStyle(obj, {width: newWidth, height: newHeight}, 'px');
             }
@@ -1168,8 +1178,7 @@
             if(isNaN(opt.pos) || isNaN(opt.x) || isNaN(opt.y)) {
                 return this;
             }
-            console.log('setPosition: ', options, opt);
-            
+
             var bs = $.getBodySize(),
                 cp = $.getScrollPosition(),
                 width = obj.offsetWidth,
@@ -1220,7 +1229,7 @@
             if(!this.opt.dragSize) {
                 return false;
             }
-            var topBox = $.Dialog.getTop(), 
+            var topBox = DialogCenter.getTop(), 
                 isDialog = this.isDialog(topBox), 
                 isSelf = this.isSelf(topBox);
             if(!isDialog || isSelf) {
@@ -1391,6 +1400,7 @@
                     minWidth: parseInt(op.minWidth, 10),
                     minHeight: parseInt(op.minHeight, 10)
                 };
+                /*
                 docMouseMoveEvent = function() {
                     if(!moveAble) {
                         return false;
@@ -1401,14 +1411,13 @@
 
                     _.setScale({ dir: dir, x: x, y: y }, true, par);
                 };
-
-
+*/
                 if(_.controls.iframe) {
                     _.controls.iframe.onmousemove = docMouseMoveEvent;
                     console.log('iframe:', window.frames[_.dialogId+'-iframe'].document);
                 }
 
-                document.onmousemove = docMouseMoveEvent;/*function(){
+                document.onmousemove = function(){
                     if(!moveAble) {
                         return false;
                     }
@@ -1417,10 +1426,11 @@
                         y = (e.clientY - moveY) * (dir.indexOf('top') >= 0 ? -1 : 1);
 
                     _.setScale({ dir: dir, x: x, y: y }, true, par);
-                };*/
+                };
                 document.onmouseup = _.controls.box.onmouseup = function(){
                     moveAble = false;
                 };
+
                 $.addEventListener(obj, 'blur', function(){
                     console.log('onblur:');
                     moveAble = false;
@@ -1441,12 +1451,21 @@
 
     };
 
-    function Dialog(){
+    function DialogUtil(){
         this.caches = {};
         this.keys = [];
+        this.docCloses = [];
+        this.events = {};
     }
 
-    Dialog.prototype = {
+    DialogUtil.prototype = {
+        isRepeat: function(name) {
+            if(this.events[name]) {
+                return true;
+            }
+            this.events[name] = true;
+            return false;
+        },
         buildId: function(id) {
             return 'd_' + id;
         },
@@ -1486,35 +1505,37 @@
         },
         show: function(content, title, options, type) {
             options = checkOptions(content, title, options);
-            if(typeof type === 'string') {
-                options.type = type;
-            }
-            var opt = {id: getId(options.id)};
-            switch(options.type) {
+            var opt = {
+                id: getId(options.id), 
+                type: checkType(type || options.type, true)
+            };
+            switch(opt.type) {
                 case 'alert':
                     opt.buttons = DialogButtons.OK;
                     break;
                 case 'confirm':
                     opt.buttons = DialogButtons.OKCancel;
                     break;
+                case 'win':
                 case 'dialog':
                     break;
                 case 'url':
                 case 'load':
+                case 'iframe':
                     opt.showBottom = false;
                     break;
                 default:
                     opt.buttons = DialogButtons.None;
                     opt.showTitle = opt.showBottom = opt.dragSize = false;
                     opt.height = opt.minHeight = 'auto';
-                    opt.minAble = opt.maxAble = false;
+                    opt.minAble = opt.maxAble = opt.lock = false;
                     break;
             }
             var d = this.get($.extend(opt, options).id);
             if(d === null) {
-                d = this.set(opt.id, new MyDialog(content, title, opt));
+                d = this.set(opt.id, new MyDialog(opt.content, opt.title, opt));
             } else {
-                d.update(content, title, opt);
+                d.update(opt.content, opt.title, opt);
             }
 
             return d;
@@ -1543,7 +1564,7 @@
             return this;
         },
         closeAll: function(type) {
-            var isType = $.isString(type);
+            var isType = $.isString(checkType(type), true);
             for(var k in this.caches) {
                 var d = this.caches[k];
                 if(d && !d.closed && d.opt.closeAble && 
@@ -1554,71 +1575,103 @@
             return this;
         },
         setEscClose: function() {
-            if(this.escClose) {
+            if(this.isRepeat('escClose')) {
                 return false;
             }
-            this.escClose = true;
             $.addEventListener(document, 'keyup', function(e) {
                 if(KEY_CODE.Esc === $.getKeyCode(e)) {
-                    var d = $.Dialog.getLast();
-                    if(d !== null && !d.closed && d.opt.escClose) {
+                    var d = DialogCenter.getLast();
+                    if(d && !d.closed && d.opt.escClose) {
                         d.close();
                     }
                 }
             });
             return this;
         },
+        setClickDocClose: function(id, eventName) {
+            var _ = this;
+            _.docCloses.push(id);
+
+            if(_.isRepeat('doc' + eventName)) {
+                return false;
+            }
+            $.addEventListener(document, eventName, function(e) {
+                for(var i=_.docCloses.length-1; i>=0; i--) {
+                    var d = _.get(_.docCloses[i]);
+                    if(d && !d.closed) {
+                        _.docCloses.splice(i, 1);
+                        d.close();
+                        break;
+                    }
+                }
+            });
+            return _;
+        },
         setWindowResize: function() {
             var _ = this;
-            if(_.resizeEvent) {
-                return this;
+            if(_.isRepeat('resize')) {
+                return false;
             }
-            _.resizeEvent = true;
             $.addEventListener(window, 'resize', function(e) {
                 for(var i=_.keys.length-1; i>=0; i--) {
-                    var key = _.keys[i];
-                    var d = _.caches[key];
-                    if(null !== d && !d.closed && d.checkPosition('center') || d.checkPosition('middle')) {
+                    var k = _.keys[i], d = _.caches[k];
+                    if(d && !d.closed && d.checkPosition('center') || d.checkPosition('middle')) {
                         d.setPosition();
                     }
                 }
             });
-            return this;
+            return _;
         }
     };
 
-    $.Dialog = new Dialog();
+    var DialogCenter = new DialogUtil();
 
     $.extend({
         dialog: function(content, title, options) {
-            return $.Dialog.show(content, title, options, 'dialog');
+            return DialogCenter.show(content, title, options);
         },
         alert: function(content, title, options){
-            return $.Dialog.show(content, title, options, 'alert');
+            return DialogCenter.show(content, title, options, 'alert');
         },
         confirm: function(content, title, options){
-            return $.Dialog.show(content, title, options, 'confirm');
+            return DialogCenter.show(content, title, options, 'confirm');
         },
         message: function(content, options){
-            return $.Dialog.show(content, undefined, options, 'message');
-        },
-        msg: function(content, options){
-            return $.Dialog.show(content, undefined, options, 'msg');
+            return DialogCenter.show(content, undefined, options, 'message');
         },
         tips: function(content, options){
-            return $.Dialog.show(content, undefined, options, 'tips');
+            return DialogCenter.show(content, undefined, options, 'tooltip');
         },
         tooltip: function(content, options){
-            return $.Dialog.show(content, undefined, options, 'tooltip');
+            return DialogCenter.show(content, undefined, options, 'tooltip');
         }
     });
 
     $.extend($.dialog, {
+        msg: function(content, options){
+            return DialogCenter.show(content, undefined, options, 'message');
+        },
         win: function(content, title, options){
-            return $.Dialog.show(content, title, options, 'dialog');
+            return DialogCenter.show(content, title, options, 'dialog');
         },
         load: function(url, title, options) {
-            return $.Dialog.show(url, title, options, 'load');
+            return DialogCenter.show(url, title, options, 'load');
+        },
+        close: function(id) {
+            return DialogCenter.close(id), $;
+        },
+        closeAll: function(type) {
+            return DialogCenter.closeAll(type), $;
         }
     });
+
+    $.extend($.tooltip, {
+        close: function(id) {
+            return DialogCenter.close(id), $;
+        },
+        closeAll: function(type) {
+            return DialogCenter.closeAll(type || 'tooltip'), $;
+        }
+    });
+
 }(OUI);

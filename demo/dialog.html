@@ -30,7 +30,7 @@ function alert2(){
         id: 3, position: 5, maxHeight: 360, maxWidth: 500, lock: true, clickBgClose: 'dblclick', 
         escClose: true, autoClose: true, closeTiming: 10000,
         maxAble: true, minAble: true, closeAble: true,
-        //buttons: $.DialogButtons.YesNo, 
+        //buttons: $.DialogButtons.OK, 
         showTitle: true,
         callback: function(dialogResult, d, param) {
             console.log(dialogResult, d, param);
@@ -76,6 +76,7 @@ function alert2(){
 function confirm2(){
     var win = $.confirm('确定要保存内容吗？', '保存', {
         buttons: $.DialogButtons.OKCancel,
+        type: 'confirm',
         success: function() {
             alert('success: ');
         },
@@ -91,6 +92,7 @@ function confirm2(){
 
 function win(){
     var win = $.dialog.win({content:'这是普通窗口模式'});
+    $.dialog.closeAll('tooltip').dialog('你好');
 }
 
 function load(){
@@ -98,7 +100,7 @@ function load(){
 }
 
 function msg(){
-    var win = $.msg('这是普通窗口模式', {autoClose: false, closeTiming: 15000, fixed: false, position: 5, lock: false});
+    var win = $.dialog.msg('msg: 这是普通窗口模式', {id: 'msg', autoClose: false, closeTiming: 15000, fixed: false, position: 5, lock: false});
 
     window.setTimeout(function() {
         //win.update('请注意：提示信息改变了。请注意：提示信息改变了', {width:'auto'});
@@ -107,7 +109,13 @@ function msg(){
 }
 
 function tips(){
-    var win = $.tips('这是普通窗口模式');
+    var win = $.dialog('tips: 提示信息', {type:'tips',position: 6});
+
+    tips2();
+}
+
+function tips2(){
+    var win = $.tips('tips: 提示信息2', {position: 3});
 }
 
 function update() {
