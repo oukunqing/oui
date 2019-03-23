@@ -1800,7 +1800,7 @@
                 var elems = $.isArray(elem) ? elem : [elem], 
                     evName = isRemove ? 'removeChild' : 'appendChild';
                 for(var i in elems) {
-                    var node = isElement(elems[i]) ? parent[evName](elems[i]) : null;
+                    var node = $.isElement(elems[i]) ? parent[evName](elems[i]) : null;
                 }
             }
             return this;
@@ -1943,22 +1943,33 @@
             if (ev.preventDefault) { ev.preventDefault(); } else { ev.returnValue = false; }
             return this;
         },
-        addEventListener = function (elem, ev, func, useCapture, isRemove) {
+        addEventListener = function (elem, evName, func, useCapture, isRemove) {
             var elems = $.isArray(elem) ? elem : [elem],
+                events = $.isArray(evName) ? evName : [evName],
                 name = isRemove ? 'removeEventListener' : 'addEventListener',
                 other = isRemove ? 'detachEvent' : 'attachEvent',
                 normal = typeof doc.addEventListener !== 'undefined';
-
-            for(var i in elems) {
-                if(isElement(elems[i])) {
-                    normal ? elems[i][name](ev, func, useCapture || false) : elems[i][other]('on' + ev, func);
+            for(var i in events) {
+                var evn = events[i];
+                if(!$.isString(evn, true)) {
+                    continue;
+                }
+                for(var j in elems) {
+                    if($.isElement(elems[j]) && $.isFunction(func)) {
+                        normal ? elems[j][name](evn, func, useCapture || false) : elems[j][other]('on' + evn, func);
+                    }
                 }
             }
             return this;
         },
-        removeEventListener = function (elem, ev, func, useCapture) {
+        removeEventListener = function (elem, evName, func, useCapture) {
             var isRemove = true;            
-            return addEventListener(elem, ev, func, useCapture, isRemove);
+            return addEventListener(elem, evName, func, useCapture, isRemove);
+        },
+        bind = function(obj, func, args) {
+            return function() {
+                return func.apply(obj, args || []);
+            };
         },
         bindEventListener = function (obj, func) {
             if (!$.isObject(obj) || !$.isFunction(func)) {
@@ -2033,11 +2044,15 @@
         parseXML: parseXML,
         cancelBubble: cancelBubble,
         addEventListener: addEventListener,
+        addListener: addEventListener,
         removeEventListener: removeEventListener,
+        removeListener: removeEventListener,
+        bind: bind,
         bindEventListener: bindEventListener,
         setFocus: setFocus,
         getEvent: getEvent,
         getScrollPosition: getScrollPosition,
+        getScrollPos: getScrollPosition,
         getKeyCode: getKeyCode,
         filterHtmlCode: filterHtmlCode
     }, '$');

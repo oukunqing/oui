@@ -28,7 +28,31 @@
 <script type="text/javascript">
 
 document.onclick = function() {
-    console.log('document.onclick');
+    console.log('document.onclick-' + new Date().getMinutes() +'-' + new Date().getSeconds());
+};
+
+document.onmousedown = function() {
+    console.log('document.onmousedown-' + new Date().getMinutes() +'-' + new Date().getSeconds());
+};
+
+document.onmousemove = function() {
+    console.log('document.onmousemove-' + new Date().getMinutes() +'-' + new Date().getSeconds());
+};
+
+document.onmouseup = function() {
+    console.log('document.onmouseup-' + new Date().getMinutes() +'-' + new Date().getSeconds());
+};
+
+document.onkeydown = function() {
+    console.log('document.onkeydown-' + new Date().getMinutes() +'-' + new Date().getSeconds());
+};
+
+document.onkeyup = function() {
+    console.log('document.onkeyup-' + new Date().getMinutes() +'-' + new Date().getSeconds());
+};
+
+document.onkeypress = function() {
+    console.log('document.onkeypress-' + new Date().getMinutes() +'-' + new Date().getSeconds());
 };
 
 function alert2(){
@@ -85,6 +109,8 @@ function alert2(){
 function confirm2(){
     var win = $.confirm('确定要保存内容吗？', '保存', {
         buttons: $.DialogButtons.OKCancel,
+        clickBgClose: 'dblclick',
+        cancelBubble: true,
         type: 'confirm',
         success: function() {
             alert('success: ');

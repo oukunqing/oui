@@ -164,7 +164,8 @@
             showBottom: true,
             showClose: true,
             showMin: true,
-            showMax: true
+            showMax: true,
+            cancelBubble: false,                    //是否阻止背景层事件冒泡
         }, op);
 
         _.controls = {
@@ -317,16 +318,20 @@
             DialogCenter.setWindowResize();
 
             if(opt.topMost) {
-                $.addEventListener(ctls.box, 'mousedown', function() {
+                $.addListener(ctls.box, 'mousedown', function() {
                     _.setTopMost();
                 });
             }
 
-            $.addEventListener(ctls.box, 'click', function(){
-                $.cancelBubble();
-            }).addEventListener(ctls.box, 'dblclick', function(){
+            $.addListener(ctls.box, ['click', 'dblclick', 'mousedown'], function(){
                 $.cancelBubble();
             });
+
+            if(ctls.container && opt.cancelBubble) {
+                $.addListener(ctls.container, ['click', 'mousedown'], function() {
+                    $.cancelBubble();
+                });
+            }
 
             //this.setPosition(3);
             return this.buildCloseTiming();
@@ -337,7 +342,7 @@
                 return this;
             }
             if(op.lock && ctls.container) {
-                $.addEventListener(ctls.container, op.clickBgClose, function() {
+                $.addListener(ctls.container, op.clickBgClose, function() {
                     _.close();
                 });
             } else {
@@ -378,14 +383,14 @@
             var elem = document.createElement('div');
             elem.className = 'top';
 
-            $.addEventListener(elem, 'dblclick', function() {
+            $.addListener(elem, 'dblclick', function() {
                 if(p.maxAble) {
                     _.max();
                 }
                 $.cancelBubble();
             });
 
-            $.addEventListener(elem, 'mousedown', function() {
+            $.addListener(elem, 'mousedown', function() {
                 if(p.topMost) {
                     _.setTopMost();
                 }
@@ -468,7 +473,7 @@
                 ctls.content.style.padding = '0px';
             }
 
-            $.addEventListener(elem, 'mousedown', function() {
+            $.addListener(elem, 'mousedown', function() {
                 if(_.opt.topMost) {
                     _.setTopMost();
                 }
@@ -519,7 +524,7 @@
                 _.buttons[key] = obj;
             }
 
-            $.addEventListener(elem, 'mousedown', function() {
+            $.addListener(elem, 'mousedown', function() {
                 if(_.opt.topMost) {
                     _.setTopMost();
                 }
@@ -803,21 +808,21 @@
                 if(obj.tagName !== 'A') {
                     continue;
                 }
-                $.addEventListener(obj, eventName || 'click', function() {
+                $.addListener(obj, eventName || 'click', function() {
                     _.action(this);
                     $.cancelBubble();
                 });
 
-                $.addEventListener(obj, 'mousedown', function() {
+                $.addListener(obj, 'mousedown', function() {
                     _.events.btnMouseDown = true;
                 });
 
-                $.addEventListener(obj, 'mouseup', function() {
+                $.addListener(obj, 'mouseup', function() {
                     _.events.btnMouseDown = false;
                 });
 
                 if(keypress) {
-                    $.addEventListener(obj, 'keypress', function(e){
+                    $.addListener(obj, 'keypress', function(e){
                         var keyCode = $.getKeyCode(e);
                         var strKeyCode = String.fromCharCode(keyCode).toUpperCase();
                         var shortcutKey = this.getAttribute('shortcut-key') || '';
@@ -845,7 +850,7 @@
                 }
             }
 
-            $.addEventListener(document, 'keypress', function(e){
+            $.addListener(document, 'keypress', function(e){
                 if(!e.shiftKey) {
                     return false;
                 }
@@ -1346,14 +1351,12 @@
                 bs = $.getBodySize(),
                 clientWidth = bs.width,
                 clientHeight = bs.height,
-                docMouseMoveEvent = document.onmousemove,
-                docMouseUpEvent = document.onmouseup;
+                docMouseMove = document.onmousemove,
+                docMouseUp = document.onmouseup;
 
             function moveDialog() {
-                $.cancelBubble();
-
                 if(!op.dragPosition) {
-                    return false;
+                    return $.cancelBubble(), false;
                 }
                 var evt = $.getEvent(),
                     cp = $.getScrollPosition(),
@@ -1363,12 +1366,8 @@
                     moveLeft = obj.offsetLeft,
                     moveAble = true,
                     isToNormal = false;
-                
-                $.addEventListener(document, 'mouseup', function() {
-                    moveAble = false;
-                    _.events.btnMouseDown = false;
-                    _.showIframeShade(false);
-                }).addEventListener(document, 'mousemove', function() {
+
+                document.onmousemove = function() {
                     if(!moveAble || _.events.btnMouseDown) {
                         return false;
                     }
@@ -1402,15 +1401,25 @@
                         }
                     }
                     $.setStyle(obj, {left: posX, top: posY}, 'px');
-                });
+                };
+                document.onmouseup = function() {
+                    if(!moveAble) {
+                        return false;
+                    }
+                    document.onmousemove = docMouseMove;
+                    document.onmouseup = docMouseUp;
+                    moveAble = false;
+                    _.events.btnMouseDown = false;
+                    _.showIframeShade(false);
+                };
             }
 
             if(op.showTitle && ctls.top) {
-                $.addEventListener(ctls.top, 'mousedown', function(){
+                $.addListener(ctls.top, 'mousedown', function(){
                     moveDialog();
                 });
             } else {
-                $.addEventListener([ctls.box, ctls.body, ctls.content], 'mousedown', function() {
+                $.addListener([ctls.box, ctls.body, ctls.content], 'mousedown', function() {
                     moveDialog();
                 });
             }
@@ -1421,13 +1430,13 @@
             var _ = this,
                 op = this.opt,
                 ctls = this.controls,
-                obj = _.controls.box;
+                obj = _.controls.box,
+                docMouseMove = document.onmousemove,
+                docMouseUp = document.onmouseup;
 
-            function _dragSize(dir) {
-                $.cancelBubble();
-
+            function resizeDialog(dir) {
                 if(!op.dragSize) {
-                    return false;
+                    return $.cancelBubble(), false;
                 }
                 var evt = $.getEvent(),
                     moveX = evt.clientX,
@@ -1444,12 +1453,7 @@
                     minWidth: parseInt(op.minWidth, 10),
                     minHeight: parseInt(op.minHeight, 10)
                 };
-
-                $.addEventListener([document, ctls.box], 'mouseup', function() {
-                    moveAble = false;
-                    _.events.dragingSize = false;
-                    _.showIframeShade(false);
-                }).addEventListener(document, 'mousemove', function() {
+                document.onmousemove = function() {
                     if(!moveAble) {
                         return false;
                     }
@@ -1460,13 +1464,23 @@
 
                     _.showIframeShade(true);
                     _.setScale({ dir: dir, x: x, y: y }, true, par);
-                });
+                };
+                document.onmouseup = function() {
+                    if(!moveAble) {
+                        return false;
+                    }
+                    document.onmousemove = docMouseMove;
+                    document.onmouseup = docMouseUp;
+                    moveAble = false;
+                    _.events.dragingSize = false;
+                    _.showIframeShade(false);
+                };
             }
 
             _.getSwicths().each(function(i, obj){
-                $.addEventListener(obj, 'mousedown', function() {
+                $.addListener(obj, 'mousedown', function() {
                     _.setTopMost();
-                    _dragSize(obj.pos);
+                    resizeDialog(obj.pos);
                 });
             });
             return this;
@@ -1702,7 +1716,7 @@
             if(this.isRepeat('escClose')) {
                 return false;
             }
-            $.addEventListener(document, 'keyup', function(e) {
+            $.addListener(document, 'keyup', function(e) {
                 if(KEY_CODE.Esc === $.getKeyCode(e)) {
                     var d = DialogCenter.getLast();
                     if(d && !d.closed && d.opt.escClose) {
@@ -1719,7 +1733,7 @@
             if(_.isRepeat('doc' + eventName)) {
                 return false;
             }
-            $.addEventListener(document, eventName, function(e) {
+            $.addListener(document, eventName, function(e) {
                 for(var i=_.docCloses.length-1; i>=0; i--) {
                     var d = _.get(_.docCloses[i]);
                     if(d && !d.closed) {
@@ -1736,7 +1750,7 @@
             if(_.isRepeat('resize')) {
                 return false;
             }
-            $.addEventListener(window, 'resize', function(e) {
+            $.addListener(window, 'resize', function(e) {
                 for(var i=_.keys.length-1; i>=0; i--) {
                     var k = _.keys[i], d = _.caches[k];
                     if(d && !d.closed && d.checkPosition('center') || d.checkPosition('middle')) {
