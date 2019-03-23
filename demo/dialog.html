@@ -111,6 +111,7 @@ function confirm2(){
         buttons: $.DialogButtons.OKCancel,
         clickBgClose: 'dblclick',
         cancelBubble: true,
+        buttonPosition: 'right',
         type: 'confirm',
         success: function() {
             alert('success: ');
@@ -126,12 +127,21 @@ function confirm2(){
 }
 
 function win(){
-    var win = $.dialog.win({content:'这是普通窗口模式'});
+    var win = $.dialog.win({
+        content:'这是普通窗口模式',
+        //bodyStyle: {border: 'solid 1px #eee;', 'border-radius':'4px;'},
+        bodyStyle: {border: 'solid 1px #eee;'},
+        titleStyle: {color: '#f00'},
+        contentStyle: {color: '#00f'}
+    });
     $.dialog.closeAll('tooltip').dialog('你好');
 }
 
 function load(){
-    var win = $.dialog.load('pagination.html', {maxWidth:800, maxHeight:500, width:400, height:300});
+    var url = 'pagination.html';
+    var url = 'https://www.csdn.net';
+    var url = 'http://122.227.179.90:81';
+    var win = $.dialog.load(url, {maxWidth:800, maxHeight:500, width:600, height:360});
 }
 
 function msg(){
@@ -216,7 +226,7 @@ function update2() {
     }, 10000);
 
     window.setTimeout(function(){
-        dialog.update(getCon(32), '', 'autosize');
+        dialog.update(getCon(12), '', 'autosize');
     }, 10000);
 }
 

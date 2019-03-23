@@ -232,7 +232,7 @@
                     } else {
                         op.element = $.createElement('DIV', function (ele) {
                             ele.id = new Date().getTime();
-                        });
+                        }, document.body);
                     }
                 }
                 if (!texts[op.markType]) {

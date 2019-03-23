@@ -1594,9 +1594,9 @@
             elem = doc.createElement(nodeName);
 
             if (hasId) { elem.id = id; }
-            if (!exempt && !isElement(parent)) { parent = doc.body; }
+            if (!exempt && !isElement(parent)) { parent = undefined; }
 
-            return $.isFunction(func) && func(elem), parent.appendChild(elem), elem;
+            return $.isFunction(func) && func(elem), parent && parent.appendChild(elem), elem;
         },
         createJsScript = function (data, id, func, parent) {
             if ($.isFunction(id)) {
@@ -1694,6 +1694,16 @@
                 }
             }
             return this;
+        },
+        toCssText = function(obj) {
+            var cssText = [];
+            for(var i in obj) {
+                var val = obj[i];
+                if($.isString(val) || $.isNumber(val)) {
+                    cssText.push(i + ':' + (''+ val).trim() + ';');
+                }
+            }
+            return cssText.join(' ');
         },
         setStyle = function (elem, styles, value, exempt) {
             if ($.isBoolean(value)) {
@@ -2026,6 +2036,7 @@
         merge: merge,
         makeArray: makeArray,
         setAttribute: setAttribute,
+        toCssText: toCssText,
         setStyle: setStyle,
         addClass: addClass,
         removeClass: removeClass,

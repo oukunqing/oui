@@ -29,13 +29,15 @@
     /*
     border: solid 1px #204d74;
     */
-    border: solid 1px #ccc;
+    border: solid 1px #99bbe8;
+    background: #b8cfee;
+    border: solid 1px #ddd;
+    background: #fff;
     border-radius: 5px;
     box-sizing: border-box;
     box-shadow: 0 2px 3px 0 rgba(0,0,0,.32);
     font-size: 14px;
     line-height: 1.25em;
-    background: #fff;G
 
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
@@ -65,7 +67,7 @@
     border: none 0;
     width: 100%;
     height: 30px;
-    border-bottom: solid 1px #ddd;
+    /*border-bottom: solid 1px #ddd;*/
     box-sizing: border-box;
     clear:both; overflow:hidden;
     /*cursor: move;*/
@@ -100,7 +102,7 @@
 .oui-dialog .top .btn {
     border: solid 1px #eee;
     border-radius: 3px;
-    background-color: transparent;
+    background-color: #fff;
 
     cursor: pointer;
     width: 20px; height: 20px;
@@ -114,26 +116,30 @@
 }
 
 .oui-dialog .top .btn-min {
-    background: url('imgs/icon.png') no-repeat 0 0;
+    background: #fff url('imgs/icon.png') no-repeat 0 0;
 }
 
 .oui-dialog .top .btn-max {
-    background: url('imgs/icon.png') no-repeat -20px 0;
+    background: #fff url('imgs/icon.png') no-repeat -20px 0;
 }
 
 .oui-dialog .top .btn-normal {
-    background: url('imgs/icon.png') no-repeat -40px 0;
+    background: #fff url('imgs/icon.png') no-repeat -40px 0;
 }
 
 .oui-dialog .top .btn-close {
-    background: url('imgs/icon.png') no-repeat -60px 0;
+    background: #fff url('imgs/icon.png') no-repeat -60px 0;
 }
 
 .oui-dialog .body,.oui-dialog-max .body {
     border: none 0; margin: 0; padding: 0;
     position: relative;
     text-align: left;
-    /*overflow: visible;*/
+    background: #fff;
+    /*
+    border: solid 1px #eee;
+    border-radius: 4px;
+    */
     overflow: auto;
     box-sizing: border-box;
     -moz-user-select:none;
@@ -155,16 +161,32 @@
 .oui-dialog .body .iframe {
     width: 100%; height: 100%;
     margin: 0px; padding: 0px;
+    background: transparent;
 }
 
 .oui-dialog .body .iframe-shade {
     width: 100%; height: 100%;
     margin: 0px; padding: 0px;
     background: #fff;
+    color: #666; 
+    line-height: 2em; text-indent: 10px;
     opacity: 0.05; 
     filter: alpha(opacity=5);
-    position: absolute; display: none;
+    position: absolute; display: block;
     top: 0; left: 0; bottom: 0; right: 0;
+}
+
+.oui-dialog .body .loading{
+    background: #fff;
+    color: #666;
+    border-radius: 3px;
+    border: solid 1px #ddd;
+    display: inline-block;
+    margin: 5px 1px; padding: 5px;
+    line-height: 1.5em;
+    position: absolute;
+    top: 0; left: 0;
+    float: left;
 }
 
 .oui-dialog .bottom-panel {
@@ -173,31 +195,29 @@
     border: none 0;
     clear:both; overflow: hidden;
     width: 100%;
-    height: 38px;
+    height: 40px;
     -moz-user-select:none;
     -khtml-user-select:none;
     user-select:none;
 }
 
 .oui-dialog .bottom {
-    background: #fff;
     border: none 0;
     box-sizing: border-box;
-    border-top: solid 1px #ddd;
-    text-align: center;
-    height: 34px;
+    /*border-top: solid 1px #ddd;*/
+    text-align: right;
     margin: 0 4px;
-    padding: 0;
+    padding: 5px 5px 0;
 }
 
 .oui-dialog .btn {    
-    margin: 5px 0 0;
+    margin: 0 0 0;
     color: #fff;
     background: #337ab7;
     border: solid 1px #2e6da4;
     cursor: pointer;
-    padding: 0 15px;
-    height: 24px;
+    padding: 0 20px;
+    height: 26px;
     line-height: 1.8em;
     text-decoration: none;
     display: inline-block;
@@ -274,11 +294,11 @@
 }
 
 .oui-dialog .bottom .btn-ml {
-    margin-left: 5px;
+    margin-left: 8px;
 }
 
 .oui-dialog .bottom .btn-mr {
-    margin-right: 5px;
+    margin-right: 8px;
 }
 
 /*关于拖放开关*/
@@ -309,7 +329,8 @@
     bottom: 0; right: 0;
 }
 
-.oui-dialog .top-left-switch,.oui-dialog .top-right-switch,.oui-dialog .bottom-left-switch,.oui-dialog .bottom-right-switch {
+.oui-dialog .top-left-switch,.oui-dialog .top-right-switch,
+.oui-dialog .bottom-left-switch,.oui-dialog .bottom-right-switch {
     width: 10px; height: 10px;
     border-radius: 3px;
     background: transparent;

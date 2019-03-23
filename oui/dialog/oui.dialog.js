@@ -113,6 +113,9 @@
                 return 'tooltip';
             }
             return type || (isBuild ? 'dialog' : '');
+        },
+        toCssText = function(styles, type) {
+            return $.toCssText(styles);
         };
 
     $.DialogButtons = DialogButtons;
@@ -160,18 +163,26 @@
             success: null,
             parameter: null,
             buttons: DialogButtons.OKCancel,
+            buttonPosition: 'center',               //按钮位置 left center right
             showTitle: true,
             showBottom: true,
             showClose: true,
             showMin: true,
             showMax: true,
             cancelBubble: false,                    //是否阻止背景层事件冒泡
+            dialogStyle: '',        //对话框样式
+            bodyStyle: '',          //主体样式
+            contentStyle: '',       //内容样式
+            topStyle: '',           //顶部样式
+            titleStyle: '',         //标题样式
+            bottomStyle: ''         //底部样式
         }, op);
 
         _.controls = {
             shade: null, container: null, box: null, 
             top: null, title: null, panel: null,
-            body: null, content: null, iframe: null, iframeShade: null,
+            body: null, content: null, loading: null,
+            iframe: null, iframeShade: null,
             bottom: null
         };
 
@@ -260,37 +271,14 @@
                 _.opt.lock = opt.lock = false;
                 return _.buildTooltip(options);
             } else if(opt.lock) {
-                _.buildShade();
-
-                //对话框容器
-                ctls.container = document.createElement('div');
-                ctls.container.className = 'oui-dialog-container';
-                ctls.container.style.zIndex = opt.zindex;
+                _.hideDocOverflow().buildShade().buildContainer();
             }
 
-            if(_.opt.lock) {
-                _.hideDocOverflow();
-            }
+            _.buildBox().buildTop(opt.title, ctls.box).buildBody(opt.content, ctls.box).buildBottom(ctls.box);
 
-            //对话框
-            ctls.box = document.createElement('div');
-            ctls.box.className = 'oui-dialog';
-            ctls.box.style.zIndex = opt.zindex;
-            ctls.box.id = _.dialogId;
             if(opt.fixed) {
                 //ctls.box.style.position = 'fixed';
                 //TODO:
-            }
-            //ctls.box.cache = {};
-
-            if(opt.showTitle) {
-                ctls.top = _.buildTop(opt.title, ctls.box);
-            }
-
-            ctls.body = _.buildBody(opt.content, ctls.box);
-
-            if(opt.showBottom) {
-                ctls.bottom = _.buildBottom(ctls.box);
             }
             
             if(opt.dragSize) {
@@ -363,60 +351,86 @@
             return this;
         },
         buildShade: function() {
-            var _ = this, opt = _.opt, ctls = _.controls;
-
-            ctls.shade = document.createElement('div');
+            var _ = this, opt = _.opt, ctls = _.controls, css;
+            if(!opt.lock) {
+                return _;
+            }
+            ctls.shade = $.createElement('div');
             ctls.shade.className = 'oui-dialog-shade';
             ctls.shade.style.zIndex = opt.zindex;
 
-            var cssText = [];
-            if($.isNumber(opt.opacity)) {
-                cssText.push('opacity:{0};'.format(opt.opacity));
+            if((css = toCssText({opacity: opt.opacity}))) {
+                ctls.shade.style.cssText = css;
             }
-            if(cssText.length > 0) {
-                ctls.shade.style.cssText = cssText.join('');
+            return _;
+        },
+        buildContainer: function () {
+            var _ = this, opt = _.opt, ctls = _.controls;
+            if(!opt.lock) {
+                return _;
+            }
+            ctls.container = $.createElement('div');            
+            ctls.container.className = 'oui-dialog-container';
+            ctls.container.style.zIndex = this.opt.zindex;
+
+            return _;
+        },
+        buildBox: function() {
+            var _ = this, opt = _.opt, ctls = _.controls, css;
+            ctls.box = $.createElement('div');
+            ctls.box.className = 'oui-dialog';
+            ctls.box.style.zIndex = opt.zindex;
+            ctls.box.id = _.dialogId;
+
+            if((css = toCssText(opt.dialogStyle || opt.boxStyle, 'box'))) {
+                ctls.box.style.cssText = css;
             }
             return _;
         },
         buildTop: function(title, parentNode){
-            var _ = this, p = _.opt;
-            var elem = document.createElement('div');
+            var _ = this, opt = _.opt, ctls = _.controls, elem = $.createElement('div'), css;
+            if(!opt.showTitle) {
+                return _;
+            }
             elem.className = 'top';
 
+            if((css = toCssText(opt.topStyle || opt.titleStyle, 'top'))) {
+                elem.style.cssText = css;
+            }
+
             $.addListener(elem, 'dblclick', function() {
-                if(p.maxAble) {
+                if(opt.maxAble) {
                     _.max();
                 }
                 $.cancelBubble();
             });
 
             $.addListener(elem, 'mousedown', function() {
-                if(p.topMost) {
+                if(opt.topMost) {
                     _.setTopMost();
                 }
                 $.cancelBubble();
             });
 
-            var div = document.createElement('div');
+            var div = $.createElement('div');
             div.className = 'title';
-            div.innerHTML =  title || p.title;
-            elem.appendChild(div);
+            div.innerHTML =  title || opt.title;
+            if((css = toCssText(opt.titleStyle, 'title'))) {
+                div.style.cssText = css;
+            }
+            elem.appendChild((ctls.title = div));
 
-            _.controls.title = div;
+            var isMin = opt.minAble && opt.showMin,
+                isMax = opt.maxAble && opt.showMax;
 
-            var isMin = p.minAble && p.showMin,
-                isMax = p.maxAble && p.showMax;
-
-            var panel = document.createElement('div');
+            var panel = $.createElement('div');
             panel.className = 'dialog-btn-panel';
             panel.innerHTML = (isMin ? '<a class="btn btn-min" code="min" title="Minimize"></a>' : '')
                 + (isMax || isMin? '<a class="btn btn-max" code="max" title="Maximize"></a>' : '')
-                + (p.closeAble && p.showClose ? '<a class="btn btn-close" code="close" title="Close"></a>' : '');
+                + (opt.closeAble && opt.showClose ? '<a class="btn btn-close" code="close" title="Close"></a>' : '');
             panel.style.cssText = 'float:right;';
 
-            elem.appendChild(panel);
-
-            _.controls.panel = panel;
+            elem.appendChild((ctls.panel = panel));
 
             for(var i = 0; i < panel.childNodes.length; i++) {
                 var obj = panel.childNodes[i], key = obj.getAttribute('code');
@@ -425,7 +439,7 @@
 
             _.setButtonEvent(panel.childNodes, 'click', false);
 
-            return _.appendChild(elem, parentNode), elem;
+            return _.appendChild((ctls.top = elem), parentNode), _;
         },
         buildCloseTiming: function() {
             var _ = this, op = _.opt;
@@ -463,10 +477,18 @@
             return this;
         },
         buildBody: function(content, parentNode) {
-            var _ = this, ctls = _.controls, elem = document.createElement('div');
+            var _ = this, opt = _.opt, ctls = _.controls, elem = $.createElement('div'), css;
             elem.className = 'body';
 
+            if((css = toCssText(opt.bodyStyle, 'body'))) {
+                elem.style.cssText = css;
+            }
+            
             ctls.content = _.buildContent(content, elem);
+
+            if((css = toCssText(opt.contentStyle, 'content'))) {
+                ctls.content.style.cssText = css;
+            }
 
             if(ctls.iframe) {
                 elem.style.overflow = 'hidden';
@@ -479,18 +501,26 @@
                 }
                 $.cancelBubble();
             });
-            return _.appendChild(elem, parentNode), elem;
+            return _.appendChild((ctls.body = elem), parentNode), _;
         },
         buildContent: function(content, parentNode) {
             var _ = this, ctls = this.controls, op = this.opt, elem = ctls.content;
             if(elem === null) {
-                elem = document.createElement('div');
+                elem = $.createElement('div');
                 elem.className = 'content';
             }
             if(['url', 'iframe', 'load'].indexOf(op.type) >= 0) {
                 elem.innerHTML = _.buildIframe(content);
                 ctls.iframe = elem.childNodes[0] || null;
                 ctls.iframeShade = elem.childNodes[1] || null;
+                ctls.loading = elem.childNodes[2] || null;
+                ctls.iframe.onload = ctls.iframe.onreadystatechange = function() {
+                        console.log('readyState: ', this.readyState);
+                    if (!this.readyState || this.readyState == "complete") {
+                        _.showIframeShade(false);
+                        _.showLoading(false);
+                    } 
+                };
             } else {
                 elem.innerHTML = content;
             }
@@ -501,7 +531,8 @@
             return ['<iframe class="iframe" width="100%"',
                 ' id="{0}-iframe" height="{1}" src="{2}"',
                 ' frameborder="0" scrolling="auto"></iframe>',
-                '<div id="{0}-iframe-shade" class="iframe-shade"></div>'
+                '<div id="{0}-iframe-shade" class="iframe-shade"></div>',
+                '<div id="{0}-loading" class="loading">正在努力加载，请稍候</div>'
             ].join('').format(this.dialogId, height, url.setUrlParam());
         },
         showIframeShade: function(isShow) {
@@ -510,13 +541,29 @@
             }
             return this;
         },
+        showLoading: function(isShow) {
+            if(this.controls.loading) {
+                this.controls.loading.style.display = isShow ? 'block' : 'none';
+            }
+            return this;
+        },
         buildBottom: function(parentNode) {
-            var _ = this, elem = document.createElement('div');
+            var _ = this, opt = _.opt, ctls = _.controls, elem = $.createElement('div'), css;
+            if(!opt.showBottom) {
+                return _;
+            }
             elem.className = 'bottom-panel';
 
-            var div = document.createElement('div');
+            if((css = toCssText(opt.bottomStyle, 'bottom'))) {
+                elem.style.cssText = css;
+            }
+
+            var div = $.createElement('div');
             div.className = 'bottom';
             div.innerHTML = _.buildButtons();
+            if(['left','center','right'].indexOf(_.opt.buttonPosition) >= 0) {
+                div.style.cssText = 'text-align:{0};'.format(_.opt.buttonPosition);
+            }
             elem.appendChild(div);
 
             for(var i = 0; i < div.childNodes.length; i++) {
@@ -533,7 +580,7 @@
 
             _.setButtonEvent(div.childNodes, 'click', true).setShortcutKeyEvent(div.childNodes);
 
-            return _.appendChild(elem, parentNode), elem;
+            return _.appendChild((ctls.bottom = elem), parentNode), _;
         },
         buildButtons: function() {
             var _ = this, keys = DialogButtons, html = [];
@@ -542,9 +589,11 @@
             }
             var keys = ButtonMaps[_.opt.buttons];
             for(var i in keys) {
-                var config = ButtonConfig[keys[i]];
+                var config = ButtonConfig[keys[i]], 
+                    css = i > 0 ? ' btn-ml' : '';
+                    text = '<a class="btn {css}{1}" code="{code}" result="{result}" href="{{0}}" shortcut-key="{skey}">{text}</a>';
                 if(config) {
-                    html.push('<a class="btn {css} btn-mr" code="{code}" result="{result}" href="{{0}}" shortcut-key="{skey}">{text}</a>'.format(config));
+                    html.push(text.format(config, css));
                 }
             }
             return html.join('').format('javascript:void(0);');
@@ -557,7 +606,7 @@
             if(document.getElementById(id) !== null) {
                 return false;
             }
-            var div = document.createElement('div');
+            var div = $.createElement('div');
             div.className = 'border-switch';
             div.pos = dir;
             div.id = id;
@@ -1185,15 +1234,14 @@
             }
 
             boxWidth = obj.clientWidth;
-            boxHeight = obj.clientHeight;
+            boxHeight = ctls.top && ctls.bottom ? obj.offsetHeight : obj.clientHeight;
 
             var size = {
                 width: '100%',
                 height: (boxHeight - titleHeight - bottomHeight - paddingHeight * 2) + 'px'
             };
-
             if(ctls.bottom){
-                size.marginBottom = ctls.bottom.offsetHeight + 'px';
+                size.marginBottom = ctls.bottom.clientHeight + 'px';
             }
             if(ctls.iframe) {
                 $.setStyle(ctls.iframe, {height: size.height});
@@ -1348,9 +1396,6 @@
                 op = this.opt,
                 ctls = this.controls,
                 obj = ctls.box,
-                bs = $.getBodySize(),
-                clientWidth = bs.width,
-                clientHeight = bs.height,
                 docMouseMove = document.onmousemove,
                 docMouseUp = document.onmouseup;
 
@@ -1360,6 +1405,9 @@
                 }
                 var evt = $.getEvent(),
                     cp = $.getScrollPosition(),
+                    bs = $.getBodySize(),
+                    clientWidth = bs.width,
+                    clientHeight = bs.height,
                     moveX = evt.clientX,
                     moveY = evt.clientY,
                     moveTop = obj.offsetTop,
@@ -1497,7 +1545,7 @@
                 _.updateTooltip(opt.content, host, opt, _);
             } else {
                 //对话框
-                ctls.box = document.createElement('div');
+                ctls.box = $.createElement('div');
                 ctls.box.className = 'out-tooltip';
                 ctls.box.style.zIndex = opt.zindex;
                 ctls.box.id = _.dialogId;
@@ -1570,7 +1618,7 @@
             var _ = this, opt = _.opt, ctls = _.controls;
             console.log('build: ', this.opt.content);
             //对话框
-            ctls.box = document.createElement('div');
+            ctls.box = $.createElement('div');
             ctls.box.className = 'oui-dialog';
             ctls.box.style.zIndex = opt.zindex;
             ctls.box.id = _.dialogId;
