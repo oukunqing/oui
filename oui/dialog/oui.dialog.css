@@ -108,6 +108,7 @@
     width: 20px; height: 20px;
     display: inline-block;
     margin: 0 0 0 5px; padding: 0;
+    box-sizing: content-box;
 }
 
 .oui-dialog .top .btn:hover {
@@ -218,7 +219,9 @@
     cursor: pointer;
     padding: 0 20px;
     height: 26px;
+    font-size: 14px;
     line-height: 1.8em;
+    line-height: 25px;
     text-decoration: none;
     display: inline-block;
     font-style: normal;
@@ -399,12 +402,89 @@
 
 
 /*oui-tooltip*/
-
-.out-tooltip {
+.oui-tooltip {
     position: absolute;
     border: solid 1px #ccc;
+    border-radius: 3px;
     font-size: 14px;
-    margin: 0; padding: 0;
+    margin: 0; padding: 2px 5px;
     line-height: 1.5em;
     border: solid 1px #f00;
+
+    border: 1px solid #f60;
+    border-radius: 5px;
+    background-color: #fff;
+        border: solid 1px #ffb4a8;
+    background: #fef2f2;
+}
+
+.oui-tooltip:after,.oui-tooltip:before{
+    content: " ";
+    position:absolute;
+    width: 0;
+    height: 0;
+    left: 50%;
+    border: solid transparent;
+    border-width: 6px;
+}
+
+.oui-tooltip .content{
+    white-space:nowrap;
+}
+
+.oui-tip-bottom:after{
+    top: -12px;
+    border-width: 6px;
+    border-bottom-color: #fef2f2;
+    margin-left: -6px;
+}
+.oui-tip-bottom:before{
+    top: -14px;
+    border-width: 7px;
+    border-bottom-color: #ffb4a8;
+    margin-left: -7px;
+}
+
+.oui-tip-top:after{
+    bottom: -12px;
+    border-width: 6px;
+    border-top-color: #fef2f2;
+    margin-left: -6px;
+}
+.oui-tip-top:before{
+    bottom: -14px;
+    border-width: 7px;
+    border-top-color: #ffb4a8;
+    margin-left: -7px;
+}
+
+.oui-tip-right:after{
+    top: 50%;
+    left: -12px;
+    border-width: 6px;
+    border-right-color: #fef2f2;
+    margin-top: -6px;
+}
+.oui-tip-right:before{
+    top: 50%;
+    left: -14px;
+    border-width: 7px;
+    border-right-color: #ffb4a8;
+    margin-top: -7px;
+}
+
+.oui-tip-left:after{
+    left: 100%;
+    top: 50%;
+    border-width: 6px;
+    border-left-color: #fef2f2;
+    margin-top: -6px;
+}
+.oui-tip-left:before{
+    top: 50%;
+    left: 100%;
+    right: -14px;
+    border-width: 7px;
+    border-left-color: #ffb4a8;
+    margin-top: -7px;
 }

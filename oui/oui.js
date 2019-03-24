@@ -1596,7 +1596,7 @@
             if (hasId) { elem.id = id; }
             if (!exempt && !isElement(parent)) { parent = undefined; }
 
-            return $.isFunction(func) && func(elem), parent && parent.appendChild(elem), elem;
+            return $.isFunction(func) && func(elem), parent &&  parent.appendChild(elem), elem;
         },
         createJsScript = function (data, id, func, parent) {
             if ($.isFunction(id)) {
@@ -1625,6 +1625,29 @@
             }
             var style = elem.currentStyle || document.defaultView.getComputedStyle(elem, null);
             return $.isString(styleName) ? style[styleName] : style;
+        },
+        getElementPosition = function(elem) {
+            var par = {}, left, top;
+            if (!isElement(elem)) {
+                return pos;
+            }
+            par = {
+                offsetWidth: elem.offsetWidth, 
+                offsetHeight: elem.offsetHeight,
+                offsetLeft: elem.offsetLeft, 
+                offsetTop: elem.offsetTop
+            };
+            while((elem = elem.parentNode)) {
+                left = elem.offsetLeft;
+                top = elem.offsetTop;
+                if(left > par.offsetLeft) {
+                    par.offsetLeft = left;
+                }
+                if(top > par.offsetTop) {
+                    par.offsetTop = top;
+                }
+            }
+            return par;
         },
         getBodySize = function () {
             if (typeof document.compatMode !== 'undefined' && document.compatMode === 'CSS1Compat') {
@@ -2030,6 +2053,7 @@
         createJsScript: createJsScript,
         createCssStyle: createCssStyle,
         getElementStyle: getElementStyle,
+        getElementPosition: getElementPosition,
         getBodySize: getBodySize,
         isWindow: isWindow,
         isArrayLike: isArrayLike,
