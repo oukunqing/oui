@@ -1605,15 +1605,15 @@
                 return false;
             }
             var dir = opt.position,
-                p = $.getElementPosition(host),
+                p = $.getOffset(host),
                 w = obj.offsetWidth,
                 h = obj.offsetHeight,
                 bs = $.getBodySize(),
                 fs = {
-                    w: p.offsetWidth,
-                    h: p.offsetHeight,
-                    x: p.offsetLeft,
-                    y: p.offsetTop
+                    w: p.width,
+                    h: p.height,
+                    x: p.left,
+                    y: p.top
                 },
                 arrowSize = 7,
                 left = fs.x,

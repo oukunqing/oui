@@ -1544,6 +1544,7 @@
 
     var win = function () { try { return window } catch (e) { return null } }(),
         doc = function () { try { return document } catch (e) { return null } }(),
+        docElem = doc.documentElement,
         head = doc ? doc.getElementsByTagName('head')[0] : null,
         redirect = function (url) {
             $.isString(url, true) ? location.href = url : null;
@@ -1626,28 +1627,57 @@
             var style = elem.currentStyle || document.defaultView.getComputedStyle(elem, null);
             return $.isString(styleName) ? style[styleName] : style;
         },
-        getElementPosition = function(elem) {
-            var par = {}, left, top;
+        getOffset = function(elem) {
             if (!isElement(elem)) {
-                return pos;
+                return {};
             }
-            par = {
-                offsetWidth: elem.offsetWidth, 
-                offsetHeight: elem.offsetHeight,
-                offsetLeft: elem.offsetLeft, 
-                offsetTop: elem.offsetTop
-            };
-            while((elem = elem.parentNode)) {
-                left = elem.offsetLeft;
+            var par = {
+                width: elem.offsetWidth, 
+                heihgt: elem.offsetHeight
+            },  computedStyle,
+                offsetParent = elem.offsetParent,
+                prevOffsetParent = elem,
+                doc = elem.ownerDocument,
+                docElem = doc.documentElement,
+                body = doc.body,
+                defaultView = doc.defaultView,
+                prevComputedStyle = getElementStyle(elem),
+                left = elem.offsetLeft,
                 top = elem.offsetTop;
-                if(left > par.offsetLeft) {
-                    par.offsetLeft = left;
+
+            while((elem = elem.parentNode) && elem !== body && elem !== docElem) {
+                if(prevComputedStyle.position === 'fixed') {
+                    break;
                 }
-                if(top > par.offsetTop) {
-                    par.offsetTop = top;
+                computedStyle = getElementStyle(elem);
+                top -= elem.scrollTop;
+                left -= elem.scrollLeft;
+
+                if(elem === offsetParent) {
+                    top += elem.offsetTop;
+                    left += elem.offsetLeft;
+
+                    prevOffsetParent = offsetParent;
+                    offsetParent = elem.offsetParent;
                 }
+
+                if(computedStyle.overflow !== 'visible') {
+                    top += parseFloat(computedStyle.borderTopWidth) || 0;
+                    left += parseFloat(computedStyle.borderLeftWidth) || 0;
+                }
+                prevComputedStyle = computedStyle;
             }
-            return par;
+
+            if(prevComputedStyle.position === 'relative' || prevComputedStyle.position === 'static') {
+                top += body.offsetTop;
+                left += body.offsetLeft;
+            }
+
+            if (prevComputedStyle.position === 'fixed') {
+                top += Math.max(docElem.scrollTop, body.scrollTop);
+                left += Math.max(docElem.scrollLeft, body.scrollLeft);
+            }
+            return $.extend(par, {left: left, top: top});
         },
         getBodySize = function () {
             if (typeof document.compatMode !== 'undefined' && document.compatMode === 'CSS1Compat') {
@@ -2053,7 +2083,8 @@
         createJsScript: createJsScript,
         createCssStyle: createCssStyle,
         getElementStyle: getElementStyle,
-        getElementPosition: getElementPosition,
+        getOffset: getOffset,
+        offset: getOffset,
         getBodySize: getBodySize,
         isWindow: isWindow,
         isArrayLike: isArrayLike,
@@ -2693,6 +2724,14 @@
             } else {
                 return self.each(function (i, obj) { obj.setAttribute(name, value); }), self;
             }
+        },
+        offset: function() {
+            var self = this, elem = self[0] || {};
+            return $.offset(elem);
+        },
+        getOffset: function() {
+            var self = this, elem = self[0] || {};
+            return $.getOffset(elem);
         },
         removeAttr: function (name) {
             return this.each(function (i, obj) {
