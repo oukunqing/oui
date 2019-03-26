@@ -159,19 +159,30 @@ function confirm2(){
         }
     });
 
+    window.setTimeout(function(){
+        win.showBottom(true, 'alert').setOption('closeAble',false).showTitle(true, true);
+    }, 6000);
+
     console.log(win.buttons);
 }
 
 function win(){
     var win = $.dialog.win({
         //content:'这是普通窗口模式',
-        type: 'url',
+        type: 'win',
         content: 'http://122.227.179.90:81',
         //bodyStyle: {border: 'solid 1px #eee;', 'border-radius':'4px;'},
         bodyStyle: {border: 'solid 1px #eee;'},
         titleStyle: {color: '#f00'},
         contentStyle: {color: '#00f'}
     });
+    window.setTimeout(function(){
+        win.showBottom().showTitle(false);
+    }, 4000);
+
+    window.setTimeout(function(){
+        win.showBottom(false).showTitle();
+    }, 8000);
     //$.dialog.closeAll('tooltip').dialog('你好');
 }
 

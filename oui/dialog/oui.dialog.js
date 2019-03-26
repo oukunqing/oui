@@ -39,6 +39,14 @@
             YesNo: 4,
             RetryCancel: 5
         },
+        ButtonMaps = [
+            ['OK'],
+            ['OK', 'Cancel'],
+            ['Abort', 'Retry', 'Ignore'],
+            ['Yes', 'No', 'Cancel'],
+            ['Yes', 'No'],
+            ['Retry', 'Cancel']
+        ],
         DialogIcons = {
             None: 0,
             Hand: 16,
@@ -61,14 +69,15 @@
             Yes: { code: 'Yes', text: '\u662f', result: 6, skey: 'Y', css: 'btn-primary' },
             No: { code: 'No', text: '\u5426', result: 7, skey: 'N', css: 'btn-default' }
         },
-        ButtonMaps = [
-            ['OK'],
-            ['OK', 'Cancel'],
-            ['Abort', 'Retry', 'Ignore'],
-            ['Yes', 'No', 'Cancel'],
-            ['Yes', 'No'],
-            ['Retry', 'Cancel']
-        ],
+        getDialogButtons = function(type) {
+            var buttons = DialogButtons.None;
+            switch(type) {
+                case 'alert': buttons = DialogButtons.OK; break;
+                case 'confirm': buttons = DialogButtons.OKCancel; break;
+                case 'dialog': buttons = DialogButtons.OKCancel; break;
+            }
+            return buttons;
+        },
         checkStyleUnit = function (s) {
             if ($.isString(s, true)) {
                 s = s.toLowerCase();
@@ -299,7 +308,7 @@
                 $.isBoolean(opt.closeAble, true) &&
                 opt.type !== 'tooltip') {
                 opt.escClose = true;
-                //opt.clickBgClose = opt.clickBgClose || 'click';
+                opt.clickBgClose = opt.clickBgClose || 'click';
             }
             if(opt.lock) {
                 opt.fixed = false;
@@ -344,7 +353,7 @@
                 _.hideDocOverflow().buildShade().buildContainer();
             }
 
-            _.buildBox().buildTop(opt.title, ctls.box).buildBody(opt.content, ctls.box).buildBottom(ctls.box);
+            _.buildBox().buildTop(ctls.box).buildBody(ctls.box).buildBottom(ctls.box);
 
             if (opt.fixed) {
                 ctls.box.style.position = 'fixed';
@@ -455,32 +464,40 @@
             }
             return _;
         },
-        buildTop: function (title, parentNode) {
-            var _ = this, opt = _.opt, ctls = _.controls, elem = $.createElement('div'), css;
-            if (!opt.showTitle) {
+        buildTop: function (parentNode, rebuild) {
+            var _ = this, opt = _.opt, ctls = _.controls, elem, css;
+            if (!opt.showTitle || (ctls.top && !rebuild)) {
                 return _;
             }
-            elem.className = 'top';
-
-            if ((css = toCssText(opt.topStyle || opt.titleStyle, 'top'))) {
-                elem.style.cssText = css;
+            if(rebuild && ctls.top) {
+                ctls.top.removeChild(ctls.title);
+                ctls.top.removeChild(ctls.panel);
+                elem = ctls.top;
             }
+            if(!rebuild) {
+                elem = $.createElement('div');
+                elem.className = 'top';
 
-            $.addListener(elem, 'dblclick', function () {
-                $.cancelBubble();
-                if (opt.maxAble) {
-                    _.max();
+                if ((css = toCssText(opt.topStyle || opt.titleStyle, 'top'))) {
+                    elem.style.cssText = css;
                 }
-            });
 
-            $.addListener(elem, ['mousedown', 'click'], function () {
-                $.cancelBubble();
-                _.setTopMost();
-            });
+                $.addListener(elem, 'dblclick', function () {
+                    $.cancelBubble();
+                    if (opt.maxAble) {
+                        _.max();
+                    }
+                });
 
+                $.addListener(elem, ['mousedown', 'click'], function () {
+                    $.cancelBubble();
+                    _.setTopMost();
+                });
+            }
+           
             var div = $.createElement('div');
             div.className = 'title';
-            div.innerHTML = title || opt.title;
+            div.innerHTML = opt.title;
             if ((css = toCssText(opt.titleStyle, 'title'))) {
                 div.style.cssText = css;
             }
@@ -505,7 +522,29 @@
 
             _.setButtonEvent(panel.childNodes, 'click', false);
 
-            return _.appendChild((ctls.top = elem), parentNode), _;
+            return !rebuild ? _.appendChild((ctls.top = elem), parentNode) : null, _;
+        },
+        showTitle: function(isShow, type, rebuild) {
+            if($.isString(isShow, true)) {
+                rebuild = type;
+                type = isShow;
+                isShow = true;
+            } else if($.isBoolean(type)) {
+                rebuild = type;
+                type = null;
+            }
+            var _ = this, opt = _.opt, ctls = _.controls, show = $.isBoolean(isShow, true);
+            if(show) {
+                rebuild = rebuild || (type && opt.type !== type);
+                if(ctls.top && !rebuild) {
+                    ctls.top.style.display = '';
+                } else {
+                    return _.setOption('showTitle', true).buildTop(ctls.box, rebuild);
+                }
+            } else if(ctls.top) {
+                ctls.top.style.display = 'none';
+            }
+            return _.setBodySize();
         },
         buildCloseTiming: function () {
             var _ = this, opt = _.opt;
@@ -544,7 +583,7 @@
             }
             return this;
         },
-        buildBody: function (content, parentNode) {
+        buildBody: function (parentNode) {
             var _ = this, opt = _.opt, ctls = _.controls, elem = $.createElement('div'), css;
             elem.className = 'body';
 
@@ -554,10 +593,6 @@
 
             ctls.content = _.buildContent(elem);
 
-            if (ctls.iframe) {
-                //elem.style.overflow = 'hidden';
-                //ctls.content.style.padding = '0px';
-            }
             return _.appendChild((ctls.body = elem), parentNode), _;
         },
         buildContent: function (parentNode) {
@@ -625,11 +660,16 @@
             }
             return this;
         },
-        buildBottom: function (parentNode) {
-            var _ = this, opt = _.opt, ctls = _.controls, elem = $.createElement('div'), css;
-            if (!opt.showBottom) {
+        buildBottom: function (parentNode, rebuild) {
+            var _ = this, opt = _.opt, ctls = _.controls, css;
+            if (!opt.showBottom || (ctls.bottom && !rebuild)) {
                 return _;
             }
+            if(rebuild && ctls.bottom) {
+                ctls.box.removeChild(ctls.bottom);
+                ctls.bottom = null;
+            }
+            var elem = $.createElement('div');
             elem.className = 'bottom-panel';
 
             if ((css = toCssText(opt.bottomStyle, 'bottom'))) {
@@ -657,6 +697,31 @@
             _.setButtonEvent(div.childNodes, 'click', true).setShortcutKeyEvent(div.childNodes);
 
             return _.appendChild((ctls.bottom = elem), parentNode), _;
+        },
+        showBottom: function(isShow, type, rebuild) {
+            if($.isString(isShow, true)) {
+                rebuild = type;
+                type = isShow;
+                isShow = true;
+            } else if($.isBoolean(type)) {
+                rebuild = type;
+                type = null;
+            }
+            var _ = this, opt = _.opt, ctls = _.controls, show = $.isBoolean(isShow, true);
+            if(show) {
+                if(type && opt.type !== type) {
+                    opt.buttons = getDialogButtons(type);
+                    rebuild = true;
+                }
+                if(ctls.bottom && !rebuild) {
+                    ctls.bottom.style.display = '';
+                } else {
+                    return _.setOption('showBottom', true).buildBottom(ctls.box, rebuild);
+                }
+            } else if(ctls.bottom) {
+                ctls.bottom.style.display = 'none';
+            }
+            return _.setBodySize();
         },
         buildButtons: function () {
             var _ = this, keys = DialogButtons, html = [];
@@ -813,6 +878,9 @@
             }
             var opt = checkOptions(content, title, options);
             var _ = this, ctls = this.controls, isAutoSize = false;
+            if(opt.type && !opt.buttons) {
+                opt.buttons = getDialogButtons(opt.type);
+            }
 
             if ($.extend(_.opt, opt).type === 'tooltip') {
                 _.updateTooltip(content, opt.host, opt);
