@@ -30,6 +30,27 @@
             Yes: 6,
             No: 7
         },
+        DialogButtons = {
+            None: -1,
+            OK: 0,
+            OKCancel: 1,
+            AbortRetryIgnore: 2,
+            YesNoCancel: 3,
+            YesNo: 4,
+            RetryCancel: 5
+        },
+        DialogIcons = {
+            None: 0,
+            Hand: 16,
+            Stop: 16,
+            Error: 16,
+            Warning: 48,
+            Question: 32,
+            Exclamation: 48,
+            Warning: 48,
+            Asterisk: 64,
+            Infomation: 64
+        },
         ButtonConfig = {
             None: { code: 'None', text: '\u5173\u95ed', result: 0, skey: '', css: 'btn-default' },
             OK: { code: 'OK', text: '\u786e\u5b9a', result: 1, skey: 'Y', css: 'btn-primary' },
@@ -39,15 +60,6 @@
             Ignore: { code: 'Ignore', text: '\u5ffd\u7565', result: 5, skey: 'I', css: 'btn-default' },
             Yes: { code: 'Yes', text: '\u662f', result: 6, skey: 'Y', css: 'btn-primary' },
             No: { code: 'No', text: '\u5426', result: 7, skey: 'N', css: 'btn-default' }
-        },
-        DialogButtons = {
-            None: -1,
-            OK: 0,
-            OKCancel: 1,
-            AbortRetryIgnore: 2,
-            YesNoCancel: 3,
-            YesNo: 4,
-            RetryCancel: 5
         },
         ButtonMaps = [
             ['OK'],
@@ -91,8 +103,19 @@
         buildZindex = function (start, len) {
             return getTs(start, len);
         },
+        checkTiming = function(opt) {
+            if(!$.isNumber(opt.closeTiming)) {
+                opt.closeTiming = opt.timeout || opt.timing || opt.time;
+            }
+            opt.closeTiming = Math.abs(parseInt('0' + opt.closeTiming, 10));
+            return opt;
+        },
         checkOptions = function (content, title, opt) {
-            var host = null;
+            var host = null, elem = null;
+            if(content && $.isElement(content)) {
+                elem = content;
+                content = '';
+            }
             if (content && $.isObject(content)) {
                 opt = content;
                 content = title = '';
@@ -105,11 +128,12 @@
             if (!$.isObject(opt)) {
                 opt = {};
             }
+            opt.element = elem || opt.element || undefined;
             opt.content = content || opt.content || undefined;
             opt.title = title || opt.title || undefined;
             opt.host = host || opt.host || undefined;
 
-            return opt;
+            return checkTiming(opt);
         },
         checkType = function (type, isBuild) {
             if (!$.isString(type, true) && !isBuild) {
@@ -144,24 +168,27 @@
             minHeight: '128px',
             maxWidth: '100%',
             maxHeight: '100%',
-            width: '300px',
-            height: '200px',
+            width: '400px',
+            height: '240px',
             opacity: null,
             lock: true,                             //是否锁屏
             title: '\u6807\u9898\u680f',
-            content: '',
-            url: '',
+            content: '',        //文字内容
+            url: '',            //加载的URL
+            element: null,      //加载的Element元素
+            loading: '正在努力加载，请稍候',          //loading提示文字
             position: 5,
             x: 0,
             y: 0,
-            host: null,         //宿主控件，用于 tooltip
+            host: null,             //宿主控件，用于 tooltip
             fixed: false,
             topMost: false,
             closeAble: true,
-            clickBgClose: null, //'dblclick', // dblclick | click
+            clickBgClose: null,     //'dblclick', // dblclick | click
             escClose: false,
             autoClose: false,
-            closeTiming: 5000,
+            closeTiming: 5000,      // closeTiming timeout time timing 四个字段
+            showTimer: false,       // 是否显示定时关闭倒计时
             dragRangeLimit: true,                  //窗体拖动范围限制 true,false
             dragPosition: true,
             dragSize: true,
@@ -448,28 +475,30 @@
             return _.appendChild((ctls.top = elem), parentNode), _;
         },
         buildCloseTiming: function () {
-            var _ = this, op = _.opt;
-            if (!op.autoClose || !op.closeAble) {
+            var _ = this, opt = _.opt;
+            if (!opt.autoClose || !opt.closeAble) {
                 return _;
             }
             _.clearTimer();
 
-            var i = op.closeTiming / 100;
-            if (i > 20 && op.showTitle) {
-                this.controls.top.appendChild($.createElement('label', 'timing', function (elem) {
-                    elem.innerHTML = '';
-                    elem.className = 'timing';
-                }));
+            if(opt.showTimer) {
+                var i = opt.closeTiming / 100;
+                if (i > 20 && opt.showTitle) {
+                    this.controls.top.appendChild($.createElement('label', 'timing', function (elem) {
+                        elem.innerHTML = '';
+                        elem.className = 'timing';
+                    }));
 
-                _.timer.timingTimer = window.setInterval(function () {
-                    $('#timing').html((i--) / 10 + ' 秒后关闭');
-                }, 100);
+                    _.timer.timingTimer = window.setInterval(function () {
+                        $('#timing').html((i--) / 10 + ' 秒后关闭');
+                    }, 100);
+                }
             }
 
             _.timer.closeTimer = window.setInterval(function () {
                 _.clearTimer();
                 _.close();
-            }, op.closeTiming);
+            }, opt.closeTiming);
 
             return this;
         },
@@ -490,15 +519,11 @@
                 elem.style.cssText = css;
             }
 
-            ctls.content = _.buildContent(content, elem);
-
-            if ((css = toCssText(opt.contentStyle, 'content'))) {
-                ctls.content.style.cssText = css;
-            }
+            ctls.content = _.buildContent(elem);
 
             if (ctls.iframe) {
-                elem.style.overflow = 'hidden';
-                ctls.content.style.padding = '0px';
+                //elem.style.overflow = 'hidden';
+                //ctls.content.style.padding = '0px';
             }
 
             $.addListener(elem, 'mousedown', function () {
@@ -509,31 +534,47 @@
             });
             return _.appendChild((ctls.body = elem), parentNode), _;
         },
-        buildContent: function (content, parentNode) {
-            var _ = this, ctls = this.controls, op = this.opt, elem = ctls.content;
-            if (elem === null) {
+        buildContent: function (parentNode) {
+            var _ = this, ctls = this.controls, opt = this.opt, elem = ctls.content;
+            if (!elem) {
                 elem = $.createElement('div');
                 elem.className = 'content';
             }
-            if (['url', 'iframe', 'load'].indexOf(op.type) >= 0) {
-                elem.innerHTML = _.buildIframe(content);
-                ctls.iframe = elem.childNodes[0] || null;
-                ctls.iframeShade = elem.childNodes[1] || null;
-                ctls.loading = elem.childNodes[2] || null;
-                var isLoaded = false;
-                ctls.iframe.onload = ctls.iframe.onreadystatechange = function () {
-                    if (!this.readyState || this.readyState == "complete") {
-                        _.showIframeShade(false).showLoading(false);
-                        isLoaded = true;
-                    }
-                };
-                window.setTimeout(function () {
-                    if (!isLoaded) {
-                        _.showIframeShade(false).showLoading(false);
-                    }
-                }, 15 * 1000);
+
+            if ((css = toCssText(opt.contentStyle, 'content'))) {
+                elem.style.cssText = css;
+            }
+
+            if (['url', 'iframe', 'load'].indexOf(opt.type) >= 0) {
+                if($.isElement(opt.element) && opt.type === 'load') {
+                    elem.innerHTML = opt.element.innerHTML || opt.element.value || '';
+                } else {
+                    elem.innerHTML = _.buildIframe(opt.content);
+                    //隐藏dialog.body的滚动条（启用iframe滚动条，防止出现双滚动）
+                    parentNode.style.overflow = 'hidden';
+                    //清除dialog.content边距
+                    elem.style.padding = '0px';
+                    elem.style.margin = '0px';
+
+                    var isLoaded = false, childs = elem.childNodes;
+
+                    $.extend(ctls, {iframe: childs[0], iframeShade: childs[1], loading: childs[2]});
+
+                    ctls.iframe.onload = ctls.iframe.onreadystatechange = function () {
+                        if (!this.readyState || this.readyState == "complete") {
+                            _.showIframeShade(false).showLoading(false);
+                            isLoaded = true;
+                        }
+                    };
+                    //若15秒还没有加载完成，则隐藏Iframe遮罩
+                    window.setTimeout(function () {
+                        if (!isLoaded) {
+                            _.showIframeShade(false).showLoading(false);
+                        }
+                    }, 15 * 1000);
+                }
             } else {
-                elem.innerHTML = content;
+                elem.innerHTML = opt.content;
             }
             return _.appendChild(elem, parentNode || null), elem;
         },
@@ -766,7 +807,7 @@
                     ctls.content.style.height = 'auto';
                     isAutoSize = true;
                 }
-                ctls.content = _.buildContent(opt.content);
+                ctls.content = _.buildContent();
 
                 if (ctls.title && opt.title) {
                     ctls.title.innerHTML = opt.title;
@@ -1729,13 +1770,15 @@
                 case 'confirm':
                     opt.buttons = DialogButtons.OKCancel;
                     break;
-                case 'win':
                 case 'dialog':
+                    break;
+                case 'win':
+                    opt.showBottom = $.isBoolean(options.showBottom, false);
                     break;
                 case 'url':
                 case 'load':
                 case 'iframe':
-                    opt.showBottom = false;
+                    opt.showBottom = $.isBoolean(options.showBottom, false);
                     break;
                 default:
                     opt.buttons = DialogButtons.None;
@@ -1745,6 +1788,8 @@
                     break;
             }
             var d = this.get($.extend(opt, options).id);
+
+            //设置 tooltip 默认位置为 right
             if (opt.type === 'tooltip' && !opt.position) {
                 opt.position = 6; //right
             }
@@ -1881,10 +1926,16 @@
             return DialogCenter.show(content, undefined, options, 'message');
         },
         win: function (content, title, options) {
-            return DialogCenter.show(content, title, options, 'dialog');
+            return DialogCenter.show(content, title, options, 'win');
         },
-        load: function (url, title, options) {
-            return DialogCenter.show(url, title, options, 'load');
+        load: function (urlOrElement, title, options) {
+            return DialogCenter.show(urlOrElement, title, options, 'load');
+        },
+        iframe: function(url, title, options) {
+            return DialogCenter.show(url, title, options, 'iframe');
+        },
+        url: function(url, title, options) {
+            return DialogCenter.show(url, title, options, 'url');
         },
         close: function (id) {
             return DialogCenter.close(id), $;

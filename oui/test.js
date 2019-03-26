@@ -166,7 +166,7 @@ console.log(d);
 var str = '确定,取消,标题栏,是,否,中止,重试,忽略,关闭';
 //console.log(str.toUnicode());
 
-        var styles = {};
+        var styles = {width:'200px', border: 'solid 1px #fff'};
 
         var css = $.toCssText(styles);
 

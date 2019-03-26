@@ -115,6 +115,7 @@
                                 isJoin: true,
                                 joinSeparate: ',',
                                 focusInvalid: false,
+                                sameTo: '',
                                 //提示信息回调 function(status, message, element){}
                                 //status 验证状态：true-表示通过，false-表示失败
                                 tooltip: null,
@@ -254,6 +255,9 @@
                                             }
                                             return result(false, msg);
                                         }
+                                    }
+                                    if(configs.sameTo) {
+                                        alert('sameTo:');
                                     }
                                 }
                                 return result(true, value);
@@ -448,6 +452,7 @@
                     return list;
                 },
                 getElementsData = function (warns, arr, op) {
+                    
                     var data = {}, configs = op.configs, len = arr.length;
                     for (var i = 0; i < len; i++) {
                         var obj = arr[i], tag = obj.tagName, type = obj.type;
@@ -644,7 +649,10 @@
             var id = element.id || '',
                 table = findElement($(this), 'TABLE'),
                 handler = findElement($(this), 'BUTTON'),
-                submitHandler = options.submitHandler || options.submit,
+                callback = options.submitHandler || options.submit,
+                debounce = options.debounce || false,       //是否防抖节流，默认不启用
+                delay = options.delay || 320,               //延时时长，默认320毫秒
+                timeLimit = options.timeLimit || 5000,      //防抖时限，默认5000毫秒
                 isForm = element.tagName === 'FORM',
                 isTable = isElement(table) && table.tagName === 'TABLE',
                 formData = filterData(options),
@@ -662,20 +670,43 @@
             //2.设置验证规则
             elements = setFormVerify(element, options, elements);
 
+            //设置定时器，防抖
+            var timer = null, first = true, lastSubmit = undefined,
+                isFirst = function() {
+                    var ts = new Date().getTime();
+                    //上次点击若超过5秒钟，则不启用延时
+                    if(!lastSubmit || (ts - lastSubmit > timeLimit)) {
+                        return lastSubmit = ts, first = true, true;
+                    }
+                    return false;
+                },
+                delayCallback = function(func, formData, tableData) {
+                    if(isFirst()) {
+                        return func(formData, tableData), false;
+                    }
+                    if(timer) {
+                        window.clearTimeout(timer);
+                    }
+                    return timer = window.setTimeout(function() {
+                        func(formData, tableData);
+                    }, delay), false;
+                };
+
             //3.创建取值事件
-            if ($.isFunction(submitHandler)) {
+            if ($.isFunction(callback)) {
                 if (isForm) {
                     $(this).submit(function () {
-                        return submitHandler(getFormData(element, options, elements));
+                        var formData = getFormData(element, options, elements);
+                        return debounce ? delayCallback(callback, formData) : callback(formData), false;
                     });
                 } else if (handler) {
                     $(handler).click(function () {
                         var formData = getFormData(element, options, elements);
                         if (isTable) {
-                            var tableData = !formData ? [] : getTableData(table, options);
-                            return submitHandler(formData, tableData);
+                            var tableData = !formData ? [] : getTableData(table, options);                            
+                            return debounce ? delayCallback(callback, formData, tableData) : callback(formData, tableData), false;
                         } else {
-                            return submitHandler(formData);
+                            return debounce ? delayCallback(callback, formData) : callback(formData), false;
                         }
                     });
                 }

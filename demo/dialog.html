@@ -4,12 +4,12 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>对话框插件测试（未完） - OUI</title>
     <script type="text/javascript" src="../oui/oui.js?1"></script>
-    <script type="text/javascript" src="../oui/dialog/oui.dialog.min.js?1"></script>
+    <script type="text/javascript" src="../oui/dialog/oui.dialog.js?1"></script>
 </head>
 </head>
 <body>
     <div id="p1" style="height:400px;">
-        <input type="input" name="" id="txtTips" style="margin:100px;"/>
+        <input type="input" name="" id="txtTips" style="margin:100px;" value="这是文本输入框的内容" />
     </div>
     <div id="t1"></div>
     <input id="txt2" type="input" />
@@ -20,13 +20,28 @@
     <button onclick="confirm2();">Confirm</button>
     <button onclick="win();">Win</button>
     <button onclick="load();">Load</button>
+    <button onclick="load2('divArticle');">Load Element</button>
     <button onclick="msg();">Msg</button>
     <button onclick="tips();">Tips</button>
     <button onclick="update();">更新对话框</button>
+
+    <div id="divArticle" style="display: none;">
+        这是来自 DIV #divArticle 的内容
+        <br />
+        OUI - JS代码库
+        <br />
+        oui.js
+        <br />
+        oui.dialog.js
+        <br />
+        $.alert('Hello World!');
+        <br />
+    </div>
 </body>
 </html>
 <script type="text/javascript">
 
+/*
 document.onclick = function() {
     console.log('document.onclick-' + new Date().getMinutes() +'-' + new Date().getSeconds());
 };
@@ -55,12 +70,17 @@ document.onkeypress = function() {
     console.log('document.onkeypress-' + new Date().getMinutes() +'-' + new Date().getSeconds());
 };
 
+*/
+
 function alert2(){
     var dialog = $.alert('Hello!对话框', {
         id: 3, position: 5, maxHeight: 360, maxWidth: 500, 
         lock: true, clickBgClose: 'dblclick', 
         escClose: true, 
-        autoClose: true, closeTiming: 15000,
+        autoClose: true, 
+        //closeTiming: 15000,
+        timing: 15000,
+        showTimer: false,
         maxAble: true, minAble: true, closeAble: true,
         //buttons: $.DialogButtons.OK, 
         //opacity: 0.2,
@@ -132,20 +152,27 @@ function confirm2(){
 
 function win(){
     var win = $.dialog.win({
-        content:'这是普通窗口模式',
+        //content:'这是普通窗口模式',
+        type: 'url',
+        content: 'http://122.227.179.90:81',
         //bodyStyle: {border: 'solid 1px #eee;', 'border-radius':'4px;'},
         bodyStyle: {border: 'solid 1px #eee;'},
         titleStyle: {color: '#f00'},
         contentStyle: {color: '#00f'}
     });
-    $.dialog.closeAll('tooltip').dialog('你好');
+    //$.dialog.closeAll('tooltip').dialog('你好');
 }
-
+alert('a');
 function load(){
-    var url = 'pagination.html';
-    var url = 'https://www.csdn.net';
+    //var url = 'pagination.html';
+    //var url = 'http://122.227.179.90:81';
     var url = 'http://122.227.179.90:81';
     var win = $.dialog.load(url, {maxWidth:800, maxHeight:500, width:600, height:360});
+}
+
+function load2(id){
+    var elem = document.getElementById(id);
+    var win = $.dialog.load(elem, {maxWidth:800, maxHeight:500, width:600, height:360});
 }
 
 function msg(){

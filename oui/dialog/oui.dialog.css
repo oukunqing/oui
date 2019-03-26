@@ -404,17 +404,16 @@
 /*oui-tooltip*/
 .oui-tooltip {
     position: absolute;
-    border: solid 1px #ccc;
     border-radius: 3px;
     font-size: 14px;
-    margin: 0; padding: 2px 5px;
+    margin: 0; 
+    padding: 2px 5px;
     line-height: 1.5em;
-    border: solid 1px #f00;
-
+    /*
     border: 1px solid #f60;
-    border-radius: 5px;
     background-color: #fff;
-        border: solid 1px #ffb4a8;
+    */
+    border: solid 1px #ffb4a8;
     background: #fef2f2;
 }
 
