@@ -232,6 +232,7 @@
                                     } else if (pattern && !pattern.test(value)) {   // 正则表达式验证
                                         return result(false, (messages.pattern || configs.messages.pattern).format(title));
                                     }
+
                                 } else {
                                     // 验证数字输入，大小值范围限定，其中 type="hidden" 默认值至少为0
                                     var numType = '数字';
@@ -256,8 +257,19 @@
                                             return result(false, msg);
                                         }
                                     }
-                                    if(configs.sameTo) {
-                                        alert('sameTo:');
+                                }
+                                //相同内容检测
+                                if($.isObject(field.same)) {
+                                    var target = document.getElementById(field.same.id);
+                                    if(target && target.value !== value) {
+                                        return result(false, field.same.message || field.same.msg || '两次输入的内容不一样');
+                                    }
+                                }
+                                //重复内容检测
+                                if($.isObject(field.distinct)) {
+                                    var target = document.getElementById(field.distinct.id);
+                                    if(target && target.value === value) {
+                                        return result(false, field.distinct.message || field.distinct.msg || '内容不能重复');
                                     }
                                 }
                                 return result(true, value);
@@ -270,7 +282,6 @@
                                 var configs = element.configs;
                                 var tooltip = element.field.tooltip || configs.tooltip || function (status, message, element) {
                                     if (status) {
-                                        console.log('status: ', status);
                                         $.tooltip.close(element);
                                         $(element).removeClass(highLight.className);
                                     } else {
@@ -341,7 +352,8 @@
                                         //外部验证回调函数 function(value, element){} 返回值为 boolean （true|false）
                                         //返回 true - 表示验证通过，false-表示验证失败
                                         validate: null,
-                                        messages: {}    //验证失败时显示的提示信息（为空则显示默认的信息）
+                                        messages: {},    //验证失败时显示的提示信息（为空则显示默认的信息）
+                                        sameTo: ''
                                     }, $.isString(keyField) ? {} : keyField)));
 
                                 if (!$.isObject(field.messages)) {
@@ -452,7 +464,6 @@
                     return list;
                 },
                 getElementsData = function (warns, arr, op) {
-                    
                     var data = {}, configs = op.configs, len = arr.length;
                     for (var i = 0; i < len; i++) {
                         var obj = arr[i], tag = obj.tagName, type = obj.type;
@@ -522,7 +533,9 @@
                         arr = op.formElement.getElementsByTagName(configs.tagName || "*");
                     }
                     var data = getElementsData(warns, arr, op);
-                    console.log('data: ', data, ', warns: ', warns);
+                    if ($.isDebug()) {
+                        console.log('data: ', data, ', warns: ', warns);
+                    }
                     return data;
                 },
                 filterData = function (options, formData) {
