@@ -353,7 +353,7 @@
                 _.hideDocOverflow().buildShade().buildContainer();
             }
 
-            _.buildBox().buildTop(ctls.box).buildBody(ctls.box).buildBottom(ctls.box);
+            _.buildBox().buildTop(ctls.box, false).buildBody(ctls.box).buildBottom(ctls.box, false);
 
             if (opt.fixed) {
                 ctls.box.style.position = 'fixed';
@@ -1724,7 +1724,7 @@
                 ctls.box.style.zIndex = opt.zindex;
                 ctls.box.id = _.dialogId;
 
-                ctls.body = _.buildBody(opt.content, ctls.box);
+                ctls.body = _.buildBody(ctls.box);
 
                 $.setAttribute(host, 'tipid', _.opt.id);
                 document.body.appendChild(ctls.box);
