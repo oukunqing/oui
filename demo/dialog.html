@@ -127,13 +127,25 @@ function alert2(){
 }
 
 function confirm2(){
-    var win = $.confirm('确定要保存内容吗？', '保存', {
+    var html = '<span style="color:#f00;">确定要保存内容吗？</span>'
+        //+ '<iframe src="http://122.227.179.90:81"></iframe>'    
+        + '<button>按钮</button>'
+        + '<textarea></textarea>'
+        + '<input type="text" id="t1" value="abc" />'
+        + '<a href="http://www.baidu.com" target="_blank">baidu</a>'
+        + '<div><a href="http://www.163.com">163</a><span onclick="alert(126);">126</span></div>';
+    var win = $.confirm(html, '保存', {
         buttons: $.DialogButtons.OKCancel,
-        clickBgClose: 'dblclick',
+        //clickBgClose: 'dblclick',
         cancelBubble: true,
         buttonPosition: 'right',
-        position: 9,
-        lock: true,
+        position: 3,
+        lock: false,
+        //maxAble: false,
+        topMost: true,
+        //fixed: true, 
+        y: 10,
+        x: 15,
         type: 'confirm',
         success: function() {
             alert('success: ');
@@ -162,7 +174,7 @@ function win(){
     });
     //$.dialog.closeAll('tooltip').dialog('你好');
 }
-alert('a');
+
 function load(){
     //var url = 'pagination.html';
     //var url = 'http://122.227.179.90:81';
@@ -176,9 +188,10 @@ function load2(id){
 }
 
 function msg(){
-    var win = $.dialog.msg('msg: 这是普通窗口模式', {
-        id: 'msg', autoClose: false, closeTiming: 15000, fixed: false, 
-        position: 5, lock: false
+    var win = $.dialog.msg('msg: 这是普通窗口模式。', {
+        id: 'msg', autoClose: false, closeTiming: 15000, fixed: true, 
+        position: 9, lock: false, clickBgClose: false, y: 40, x: 50,
+        dragSize: false
     });
 
     window.setTimeout(function() {

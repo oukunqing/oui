@@ -148,6 +148,40 @@
         },
         toCssText = function (styles, type) {
             return $.toCssText(styles);
+        },
+        hasEvent = function(elem) {
+            var keys = ['onclick', 'ondblclick', 'mousedown'], attr;
+            for(var i in keys) {
+                attr = elem.getAttribute(keys[i]);
+                if(attr) {
+                    return true;
+                }
+            }
+            return false;
+        },
+        isPlainText = function(obj) {
+            var childs = obj.getElementsByTagName('*'), 
+                len = childs.length,
+                pass = ['BR', 'IFRAME', 'P', 'FONT'],
+                tags = ['INPUT', 'A', 'TEXTAREA', 'BUTTON'],
+                isText = true,
+                elem, tag, attr;
+
+            if(len === 0) {
+                return isText;
+            }
+            for(var i = 0; i < len; i++) {
+                elem = childs[i];
+                tag = elem.tagName;
+                if(pass.indexOf(tag) >= 0) {
+                    continue;
+                }
+                if(tags.indexOf(tag) >= 0 || hasEvent(elem)) {
+                    isText = false;
+                    break;
+                }
+            }
+            return isText;
         };
 
     $.DialogButtons = DialogButtons;
@@ -265,7 +299,10 @@
                 $.isBoolean(opt.closeAble, true) &&
                 opt.type !== 'tooltip') {
                 opt.escClose = true;
-                opt.clickBgClose = opt.clickBgClose || 'click';
+                //opt.clickBgClose = opt.clickBgClose || 'click';
+            }
+            if(opt.lock) {
+                opt.fixed = false;
             }
 
             return this.build(opt);
@@ -310,8 +347,7 @@
             _.buildBox().buildTop(opt.title, ctls.box).buildBody(opt.content, ctls.box).buildBottom(ctls.box);
 
             if (opt.fixed) {
-                //ctls.box.style.position = 'fixed';
-                //TODO:
+                ctls.box.style.position = 'fixed';
             }
 
             if (opt.dragSize) {
@@ -338,23 +374,22 @@
             }
             DialogCenter.setWindowResize();
 
-            if (opt.topMost) {
-                $.addListener(ctls.box, 'mousedown', function () {
+            if(!opt.showTitle || ctls.iframe || isPlainText(ctls.content)) {
+                $.addListener([ctls.body, ctls.box], 'mousedown', function () {
                     _.setTopMost();
                 });
-            }
 
-            $.addListener(ctls.box, ['click', 'dblclick', 'mousedown'], function () {
-                $.cancelBubble();
-            });
-
-            if (ctls.container && opt.cancelBubble) {
-                $.addListener(ctls.container, ['click', 'mousedown'], function () {
+                $.addListener(ctls.box, ['click', 'dblclick', 'mousedown'], function () {
                     $.cancelBubble();
                 });
             }
 
-            //this.setPosition(3);
+            if (ctls.container && opt.cancelBubble) {
+                // 取消背景层 mousedown，防止冒泡 document.mousedown
+                $.addListener(ctls.container, ['click', 'mousedown'], function () {
+                    $.cancelBubble();
+                });
+            }
             return this.buildCloseTiming().focus();
         },
         setClickBgClose: function () {
@@ -432,17 +467,15 @@
             }
 
             $.addListener(elem, 'dblclick', function () {
+                $.cancelBubble();
                 if (opt.maxAble) {
                     _.max();
                 }
-                $.cancelBubble();
             });
 
-            $.addListener(elem, 'mousedown', function () {
-                if (opt.topMost) {
-                    _.setTopMost();
-                }
+            $.addListener(elem, ['mousedown', 'click'], function () {
                 $.cancelBubble();
+                _.setTopMost();
             });
 
             var div = $.createElement('div');
@@ -525,13 +558,6 @@
                 //elem.style.overflow = 'hidden';
                 //ctls.content.style.padding = '0px';
             }
-
-            $.addListener(elem, 'mousedown', function () {
-                if (_.opt.topMost) {
-                    _.setTopMost();
-                }
-                $.cancelBubble();
-            });
             return _.appendChild((ctls.body = elem), parentNode), _;
         },
         buildContent: function (parentNode) {
@@ -623,11 +649,9 @@
                 _.buttons[key] = obj;
             }
 
-            $.addListener(elem, 'mousedown', function () {
-                if (_.opt.topMost) {
-                    _.setTopMost();
-                }
+            $.addListener(elem, ['mousedown','dblclick', 'click'], function () {
                 $.cancelBubble();
+                _.setTopMost();
             });
 
             _.setButtonEvent(div.childNodes, 'click', true).setShortcutKeyEvent(div.childNodes);
@@ -1359,11 +1383,13 @@
             var p = $.extend({
                 event: '',
                 pos: opt.position,
-                x: 0,
-                y: 0
+                x: opt.x,
+                y: opt.y
             }, options);
 
             p.pos = p.pos === 'custom' ? 10 : parseInt(p.pos, 10);
+            p.x = Math.abs(p.x);
+            p.y = Math.abs(p.y);
 
             if (isNaN(p.pos) || isNaN(p.x) || isNaN(p.y)) {
                 return this;
@@ -1378,16 +1404,21 @@
 
             if (!opt.lock) {
                 if (_.checkPosition('center', p.pos)) {
-                    posX += cp.left;
+                    posX += opt.fixed ? 0 : cp.left;
                 } else {
-                    posX += _.checkPosition('right', p.pos) ? - cp.left : cp.left;
+                    posX += opt.fixed ? 0 : (_.checkPosition('right', p.pos) ? - cp.left : cp.left);
                 }
                 if (_.checkPosition('middle', p.pos)) {
-                    posY += cp.top;
+                    posY += opt.fixed ? 0 : cp.top;
                 } else {
-                    posY += _.checkPosition('bottom', p.pos) ? - cp.top : cp.top;
+                    //posY += opt.fixed ? 0 : (_.checkPosition('bottom', p.pos) ? - cp.top : cp.top);
+                    //启用top，不用bottom
+                    posY = (_.checkPosition('bottom', p.pos) ? bs.height - p.y - height - (opt.fixed ? 0 : cp.top) : cp.top + p.y);
+
                 }
             }
+            posX = Math.abs(posX);
+            posY = Math.abs(posY);
 
             //清除cssText上下左右4个样式
             _.clearPositionStyle(obj);
@@ -1407,16 +1438,17 @@
                     break;
                 case 7:
                 case 8:
-                    $.setStyle(obj, { left: posX, bottom: posY }, 'px');
+                    $.setStyle(obj, { left: posX, top: posY }, 'px');
                     break;
                 case 9:
-                    $.setStyle(obj, { right: posX, bottom: posY }, 'px');
+                    $.setStyle(obj, { right: posX, top: posY }, 'px');
                     break;
             }
+
             return this;
         },
         setTopMost: function () {
-            if (this.closed || !this.opt.dragSize) {
+            if (this.closed || !this.opt.topMost) {
                 return false;
             }
             var topBox = DialogCenter.getTop(),
@@ -1491,7 +1523,7 @@
                     isToNormal = false;
 
                 document.onmousemove = function () {
-                    if (!moveAble || _.events.btnMouseDown) {
+                    if (!op.dragPosition || !moveAble || _.events.btnMouseDown) {
                         return false;
                     }
                     _.showIframeShade(true);
@@ -1523,10 +1555,10 @@
                             posY = bs.height - h;
                         }
                     }
-                    $.setStyle(obj, { left: posX, top: posY }, 'px');
+                    $.setStyle(obj, { width: w, height: h, left: posX, top: posY }, 'px');
                 };
                 document.onmouseup = function () {
-                    if (!moveAble) {
+                    if (!op.dragPosition || !moveAble) {
                         return false;
                     }
                     document.onmousemove = docMouseMove;
@@ -1577,7 +1609,7 @@
                     minHeight: parseInt(op.minHeight, 10)
                 };
                 document.onmousemove = function () {
-                    if (!moveAble) {
+                    if (!op.dragSize || !moveAble) {
                         return false;
                     }
                     _.events.dragingSize = true;
@@ -1589,7 +1621,7 @@
                     _.setScale({ dir: dir, x: x, y: y }, true, par);
                 };
                 document.onmouseup = function () {
-                    if (!moveAble) {
+                    if (!op.dragSize || !moveAble) {
                         return false;
                     }
                     document.onmousemove = docMouseMove;
