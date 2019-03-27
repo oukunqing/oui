@@ -258,7 +258,7 @@
         }, op);
 
         _.controls = {
-            shade: null, container: null, box: null,
+            shade: null, container: null, box: null, main: null,
             top: null, logo: null, title: null, panel: null,
             body: null, content: null, loading: null,
             iframe: null, iframeShade: null,
@@ -354,7 +354,7 @@
                 _.hideDocOverflow().buildShade().buildContainer();
             }
 
-            _.buildBox().buildTop(ctls.box, false).buildBody(ctls.box).buildBottom(ctls.box, false);
+            _.buildBox().buildMain(ctls.box).buildTop(ctls.main, false).buildBody(ctls.main).buildBottom(ctls.main, false);
 
             if (opt.fixed) {
                 ctls.box.style.position = 'fixed';
@@ -465,6 +465,20 @@
             }
             return _;
         },
+        buildMain: function(parentNode) {
+            var _ = this;
+            if(_.closed) {
+                return _;
+            }
+            var opt = _.opt, ctls = _.controls, elem = $.createElement('div'), css;
+            elem.className = 'main';
+
+            if ((css = toCssText(opt.mainStyle, 'main'))) {
+                elem.style.cssText = css;
+            }
+
+            return _.appendChild((ctls.main = elem), parentNode), _;
+        },
         buildTop: function (parentNode, rebuild) {
             if(this.closed) {
                 return this;
@@ -551,7 +565,7 @@
                 if(ctls.top && !rebuild) {
                     ctls.top.style.display = '';
                 } else {
-                    return _.setOption('showTitle', true).buildTop(ctls.box, rebuild);
+                    return _.setOption('showTitle', true).buildTop(ctls.main, rebuild);
                 }
             } else if(ctls.top) {
                 ctls.top.style.display = 'none';
@@ -742,7 +756,7 @@
                 if(ctls.bottom && !rebuild) {
                     ctls.bottom.style.display = '';
                 } else {
-                    return _.setOption('showBottom', true).buildBottom(ctls.box, rebuild);
+                    return _.setOption('showBottom', true).buildBottom(ctls.main, rebuild);
                 }
             } else if(ctls.bottom) {
                 ctls.bottom.style.display = 'none';
@@ -1113,19 +1127,22 @@
             }
         },
         setCache: function () {
-            var obj = this.controls.box;
+            var obj = this.controls.box,
+                bs = $.getBodySize();
 
             var size = {
                 width: obj.offsetWidth,
                 height: obj.offsetHeight,
-                bs: $.getBodySize()
+                bs: bs
             };
 
             this.lastSize = this.opt.height === 'auto' ? size : $.extend({
                 top: obj.offsetTop,
                 left: obj.offsetLeft,
-                right: (obj.offsetLeft + obj.offsetWidth),
-                bottom: (obj.offsetTop + obj.offsetHeight)
+                //right: (obj.offsetLeft + obj.offsetWidth),
+                //bottom: (obj.offsetTop + obj.offsetHeight)
+                right: bs.width - (obj.offsetLeft + obj.offsetWidth),
+                bottom: bs.height - (obj.offsetTop + obj.offsetHeight)
             }, size);
 
             return this;
@@ -1148,7 +1165,6 @@
             if (p.type === '' || (isNaN(p.width) && isNaN(p.height)) || _.getStatus() === p.type) {
                 return this;
             }
-
             if (_.status.normal) {
                 _.setCache();
             }
@@ -1219,7 +1235,7 @@
                     _.setScale(options);
                 } else {  //p.type === 'normal'
                     if (!$.isUndefined(_.lastSize)) {
-                        isSetPosition = bs.width !== _.lastSize.bs.width || bs.height !== _.lastSize.bs.height;
+                        isSetPosition = bs.width !== _.lastSize.bs.width || bs.height !== _.lastSize.bs.height;                        
                         $.setStyle(ctls.box, _.lastSize, 'px');
                     } else {
                         par = { width: p.width, height: p.height };
@@ -1386,12 +1402,10 @@
             if (!obj) {
                 return false;
             }
-            var titleHeight = ctls.top ? ctls.top.offsetHeight : 0,
-                bottomHeight = ctls.bottom ? ctls.bottom.offsetHeight : 0,
-                paddingHeight = parseInt('0' + $.getElementStyle(obj, 'paddingTop'), 10),
-                conPaddingHeight = parseInt('0' + $.getElementStyle(ctls.content, 'padding'), 10),
-                boxWidth = obj.clientWidth,
-                boxHeight = obj.clientHeight;
+            var boxWidth = obj.clientWidth,
+                boxHeight = obj.clientHeight,
+                paddingHeight = parseInt('0' + $.getElementStyle(obj, 'padding'), 10),
+                conPaddingHeight = parseInt('0' + $.getElementStyle(ctls.content, 'padding'), 10);
 
             if (opt.height !== 'auto') {
                 /*
@@ -1422,12 +1436,18 @@
             }
 
             boxWidth = obj.clientWidth;
-            boxHeight = ctls.top && ctls.bottom ? obj.offsetHeight : obj.clientHeight;
+            boxHeight = obj.clientHeight;
 
-            var size = {
-                width: '100%',
-                height: (boxHeight - titleHeight - bottomHeight - paddingHeight * 2) + 'px'
-            };
+            $.setStyle(ctls.main, { height: boxHeight - paddingHeight * 2 }, 'px');
+
+            var maxHeight = ctls.main.clientHeight,
+                titleHeight = ctls.top ? ctls.top.offsetHeight : 0,
+                bottomHeight = ctls.bottom ? ctls.bottom.offsetHeight : 0,
+                size = {
+                    width: '100%',
+                    height: (ctls.main.clientHeight - titleHeight - bottomHeight) + 'px'
+                };
+
             if (ctls.bottom) {
                 size.marginBottom = ctls.bottom.clientHeight + 'px';
             }
@@ -1634,6 +1654,7 @@
                         _.dragToNormal(evt, bs, moveX, moveY);
                         moveTop = obj.offsetTop;
                         moveLeft = obj.offsetLeft;
+                        return false;
                     }
                     if (op.dragRangeLimit) {
                         if (posX < 0) {

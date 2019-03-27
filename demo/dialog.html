@@ -140,7 +140,7 @@ function confirm2(){
         cancelBubble: true,
         buttonPosition: 'right',
         position: 3,
-        lock: false,
+        lock: true,
         //maxAble: false,
         topMost: true,
         //showLogo: true,
@@ -162,7 +162,7 @@ function confirm2(){
     });
 
     window.setTimeout(function(){
-        win.showBottom(true, 'alert').setOption('showClose',false).showTitle(true, true);
+        //win.showBottom(true, 'alert').setOption('showClose',false).showTitle(true, true);
     }, 6000);
 
     console.log(win.buttons);
@@ -174,7 +174,7 @@ function win(){
         type: 'win',
         content: 'http://122.227.179.90:81',
         //bodyStyle: {border: 'solid 1px #eee;', 'border-radius':'4px;'},
-        bodyStyle: {border: 'solid 1px #eee;'},
+        //bodyStyle: {border: 'solid 1px #00f;'},
         titleStyle: {color: '#f00'},
         contentStyle: {color: '#00f'}
     });
