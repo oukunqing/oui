@@ -219,6 +219,22 @@
                 maxHeight: getSizeNumber(opt.maxHeight)
             };
             return size;
+        },
+        checkCallback = function(opt) {
+            var callback = $.isFunction(opt.callback) ? opt.callback : undefined,
+                ok =  $.isFunction(opt.ok) ? opt.ok : ($.isFunction(opt.success) ? opt.success : callback),
+                cancel = $.isFunction(opt.cancel) ? opt.cancel : callback;
+            return ok || cancel ? {callback: callback, ok: ok, cancel: cancel} : undefined;
+        },
+        redirect = function(url) {
+            if($.isString(url, true)) {
+                var str = url.toLowerCase();
+                if(str.startsWith('http:') || str.startsWith('https:')) {
+                    location.href = url.setUrlParam('_t_s_', new Date().getMilliseconds());
+                    return true;
+                }
+            }
+            return false;
         };
 
     $.DialogButtons = DialogButtons;
@@ -264,24 +280,29 @@
             autoClose: false,
             closeTiming: 5000,      // closeTiming timeout time timing 四个字段
             showTimer: false,       // 是否显示定时关闭倒计时
-            dragRangeLimit: true,                  //窗体拖动范围限制 true,false
+            dragRangeLimit: true,   //窗体拖动范围限制 true,false
             dragPosition: true,
             dragSize: true,
             maxAble: true,
             minAble: true,
-            callback: null,
-            success: null,
-            parameter: null,
+            delayClose: false,      //是否延时关闭，启用延时关闭，则点击“确定按钮”关闭时不会关闭，在callback回调中处理关闭
+            callback: null,         //回调参数
+            ok: null,               //点击确定按钮后的回调函数
+            cancel: null,           //点击取消按钮后的回调函数
+            parameter: null,        //回调返回的参数
+            redirect: null,         //重定向跳转到指定的URL [target]
             buttons: DialogButtons.OKCancel,
             buttonPosition: 'center',               //按钮位置 left center right
+            buttonText: null,       // {OK: '确定', Cancel: '取消'}  ｛OK: '提交'}
             showTitle: true,
             showBottom: true,
             showLogo: true,
             showClose: true,
             showMin: true,
             showMax: true,
-            cancelBubble: false,                    //是否阻止背景层事件冒泡
+            cancelBubble: false,    //是否阻止背景层事件冒泡
             dialogStyle: '',        //对话框样式
+            mainStyle: '',          //主体框样式
             bodyStyle: '',          //主体样式
             contentStyle: '',       //内容样式
             topStyle: '',           //顶部样式
@@ -822,10 +843,19 @@
             if (!$.isNumber(_.opt.buttons) || _.opt.buttons < 0) {
                 return '';
             }
-            var keys = ButtonMaps[_.opt.buttons];
+            var keys = ButtonMaps[_.opt.buttons], txts = {};
+            //自定义按钮文字
+            if($.isObject(_.opt.buttonText)) {
+                txts = _.opt.buttonText;
+            } else if($.isString(_.opt.buttonText, true)) {
+                txts = {OK: _.opt.buttonText};
+            }
+
             for (var i in keys) {
                 var config = ButtonConfig[keys[i]],
                     css = i > 0 ? ' btn-ml' : '';
+                $.extend(config, {text: txts[config.code]});
+
                 text = '<a class="btn {css}{1}" code="{code}" result="{result}" href="{{0}}" shortcut-key="{skey}">{text}</a>';
                 if (config) {
                     html.push(text.format(config, css));
@@ -908,7 +938,8 @@
             return this.show(true);
         },
         close: function (action, dialogResult) {
-            var _ = this, ctls = this.controls;
+            var _ = this, opt = _.opt, ctls = this.controls,
+                url = opt.redirect || opt.target;
 
             if (!$.isString(action)) {
                 action = 'None';
@@ -916,31 +947,46 @@
             if (!$.isNumber(dialogResult)) {
                 dialogResult = DialogResult.None;
             }
-            if (!_.opt.closeAble || _.closed) {
+            if (!opt.closeAble || _.closed) {
                 return false;
+            }
+
+            var func = checkCallback(opt);
+            // 点击确定按钮时，若延时关闭，则仅回调而不关闭
+            if(opt.delayClose && [1, 6].indexOf(dialogResult) >= 0 && func && (func.callback || func.ok)) {
+                return _.callback(action, dialogResult);
             }
 
             $.removeChild(document.body, ctls.container || ctls.box);
             if (ctls.shade) {
                 $.removeChild(document.body, ctls.shade);
             }
-            DialogCenter.remove(_.opt.id);
+            DialogCenter.remove(opt.id);
 
-            this.closed = true;
+            _.closed = true;
 
-            return _.clearTimer().callback(action, dialogResult).hideDocOverflow(true).dispose();
+            _.clearTimer().callback(action, dialogResult).hideDocOverflow(true).dispose();
+
+            return redirect(url), _;
         },
         callback: function (action, dialogResult) {
-            var _ = this, op = this.opt;
-            var dr = {}, parameter = op.parameter || op.param;
-            dr[action] = dialogResult;
-            if ($.isFunction(op.success)) {
-                if ([1, 6].indexOf(dialogResult) >= 0) {
-                    op.success(dr, _, parameter);
-                }
-            } else if ($.isFunction(op.callback)) {
-                op.callback(dr, _, parameter);
+            var _ = this, opt = this.opt, func = checkCallback(opt);
+            if(!func) {
+                return _;
             }
+            var dr = {}, parameter = opt.parameter || opt.param;
+            dr[action] = dr[action.toLowerCase()] = true;
+            dr['key'] = action;
+            dr['value'] = dialogResult;
+
+            if ([1, 6].indexOf(dialogResult) >= 0) {
+                func.ok && func.ok(dr, _, parameter);
+            } else if([2,5,7].indexOf(dialogResult) >= 0) {
+                func.cancel && func.cancel(dr, _, parameter);
+            } else {
+                func.callback && func.callback(dr, _, parameter);
+            }
+
             return _;
         },
         dispose: function () {
@@ -2043,9 +2089,15 @@
                     opt.showMin = opt.showMax = false;
                     break;
                 case 'dialog':
+                    opt.height = 'auto';
                     break;
                 case 'win':
                     opt.showBottom = $.isBoolean(options.showBottom, false);
+                    opt.height = 'auto';
+                    break;
+                case 'form':
+                    opt.height = 'auto';
+                    opt.delayClose = true;
                     break;
                 case 'url':
                 case 'load':
@@ -2199,6 +2251,9 @@
         },
         win: function (content, title, options) {
             return DialogCenter.show(content, title, options, 'win');
+        },
+        form: function (content, title, options) {
+            return DialogCenter.show(content, title, options, 'form');
         },
         load: function (urlOrElement, title, options) {
             return DialogCenter.show(urlOrElement, title, options, 'load');

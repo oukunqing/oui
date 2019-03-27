@@ -59,6 +59,12 @@
         }
     });
 
+    $.extend($, {
+        getFormData: function(formOrElement, options) {
+
+        }
+    });
+
     // formValidate
     $.extend($.fn, {
         formValidate: function (options) {

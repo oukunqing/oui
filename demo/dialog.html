@@ -19,6 +19,7 @@
     <button onclick="alert2();">Alert</button>
     <button onclick="confirm2();">Confirm</button>
     <button onclick="win();">Win</button>
+    <button onclick="form2();">Form</button>
     <button onclick="load();">Load</button>
     <button onclick="load2('divArticle');">Load Element</button>
     <button onclick="msg();">Msg</button>
@@ -130,7 +131,7 @@ function alert2(){
 function confirm2(){
     var html = '<span style="color:#f00;">确定要保存内容吗？</span>'
         //+ '<iframe src="http://122.227.179.90:81"></iframe>'    
-        + '<button>按钮</button>'
+        + '<label>内容：</label>'
         + '<input type="text" id="t1" value="abc" />';
         /*
         + '<a href="http://www.baidu.com" target="_blank">baidu</a>'
@@ -140,6 +141,7 @@ function confirm2(){
         //clickBgClose: 'dblclick',
         cancelBubble: true,
         buttonPosition: 'right',
+        buttonText: {OK: '提交', Cancel: '算了'},
         position: 9,
         lock: false,
         //maxAble: false,
@@ -150,12 +152,32 @@ function confirm2(){
         y: 10,
         x: 15,
         type: 'confirm',
-        success: function() {
+        delayClose: true,
+        //redirect: 'http://www.baidu.com',
+        //target: 'http://www.baidu.com',
+        /*
+        success: function(dialogResult) {
+            console.log(dialogResult);
             alert('success: ');
         },
+        */
+        ok: function(dialogResult, d) {
+            console.log(dialogResult);
+            alert('ok: ');
+            if(d.opt.delayClose) {
+                alert('延迟关闭');
+            }
+        },
+        cancel: function(dialogResult, d) {
+            console.log(dialogResult);
+            alert('cancel:' );
+        },
         callback: function(dialogResult, d) {
+            console.log(dialogResult);
             if(dialogResult.OK || dialogResult.Yes) {
                 alert('点击了确定按钮');
+            } else if(dialogResult.None) {
+                alert('点击了关闭按钮');
             } else {
                 alert('点击了取消按钮');
             }
@@ -197,6 +219,29 @@ function win(){
         win.showTitle(true);
     }, 10000);
     //$.dialog.closeAll('tooltip').dialog('你好');
+}
+
+function form2() {
+    var win = $.dialog.form('登录窗口', '登录', {
+        callback: function(dialogResult, d, param) {
+            console.log('form2: ', dialogResult);
+            
+            if(dialogResult.OK || dialogResult.Yes) {
+                console.log('form2: ', '点击了确定按钮');
+                //to do something:
+                console.log('form2: ', 'to do someing');
+
+                if(d.opt.delayClose) {
+                    console.log('form2: ', '延迟关闭');
+                    d.close();
+                }
+            } else if(dialogResult.None) {
+                console.log('form2: ', '点击了关闭按钮');
+            } else {
+                console.log('form2: ', '点击了取消按钮');
+            }
+        }
+    });
 }
 
 function load(){
