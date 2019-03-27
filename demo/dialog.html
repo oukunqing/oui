@@ -78,6 +78,7 @@ function alert2(){
         lock: true, clickBgClose: 'dblclick', 
         escClose: true, 
         autoClose: true, 
+        width: 'auto',
         //closeTiming: 15000,
         timing: 15000,
         showTimer: false,
@@ -130,21 +131,21 @@ function confirm2(){
     var html = '<span style="color:#f00;">确定要保存内容吗？</span>'
         //+ '<iframe src="http://122.227.179.90:81"></iframe>'    
         + '<button>按钮</button>'
-        + '<textarea></textarea>'
-        + '<input type="text" id="t1" value="abc" />'
+        + '<input type="text" id="t1" value="abc" />';
+        /*
         + '<a href="http://www.baidu.com" target="_blank">baidu</a>'
-        + '<div><a href="http://www.163.com">163</a><span onclick="alert(126);">126</span></div>';
+        + '<div><a href="http://www.163.com">163</a><span onclick="alert(126);">126</span></div>';*/
     var win = $.confirm(html, '保存', {
         buttons: $.DialogButtons.OKCancel,
         //clickBgClose: 'dblclick',
         cancelBubble: true,
         buttonPosition: 'right',
-        position: 3,
-        lock: true,
+        position: 9,
+        lock: false,
         //maxAble: false,
         topMost: true,
         //showLogo: true,
-        //fixed: true, 
+        fixed: true, 
         titleStyle: {'font-weight':'normal'},
         y: 10,
         x: 15,
@@ -172,19 +173,29 @@ function win(){
     var win = $.dialog.win({
         //content:'这是普通窗口模式',
         type: 'win',
-        content: 'http://122.227.179.90:81',
+        position: 5,
+        width: 'auto',
+        content: 'http://122.227.179.90:81<br />hello world<br />您好<br />大家好啊',
         //bodyStyle: {border: 'solid 1px #eee;', 'border-radius':'4px;'},
         //bodyStyle: {border: 'solid 1px #00f;'},
         titleStyle: {color: '#f00'},
         contentStyle: {color: '#00f'}
     });
     window.setTimeout(function(){
-        win.showBottom().showTitle(false);
+        win.showBottom();
     }, 4000);
 
     window.setTimeout(function(){
-        win.showBottom(false).showTitle();
+        win.showBottom(false);
+    }, 6000);
+
+    window.setTimeout(function(){
+        win.showTitle(false);
     }, 8000);
+
+    window.setTimeout(function(){
+        win.showTitle(true);
+    }, 10000);
     //$.dialog.closeAll('tooltip').dialog('你好');
 }
 
@@ -197,7 +208,7 @@ function load(){
 
 function load2(id){
     var elem = document.getElementById(id);
-    var win = $.dialog.load(elem, {maxWidth:800, maxHeight:500, width:600, height:360});
+    var win = $.dialog.load(elem, {maxWidth:800, maxHeight:500});
 }
 
 function msg(){
@@ -287,6 +298,10 @@ function update2() {
 
     window.setTimeout(function(){
         dialog.update(getCon(12), '', 'autosize');
+    }, 10000);
+
+    window.setTimeout(function(){
+        dialog.update(getCon(15), '', '');
     }, 10000);
 }
 

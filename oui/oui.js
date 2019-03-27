@@ -1620,12 +1620,12 @@
             }, parent);
             return $.isFunction(func) && func(elem), elem;
         },
-        getElementStyle = function (elem, styleName) {
+        getElementStyle = function (elem, styleName, defaultValue) {
             if (!isElement(elem)) {
                 return false;
             }
             var style = elem.currentStyle || document.defaultView.getComputedStyle(elem, null);
-            return $.isString(styleName) ? style[styleName] : style;
+            return $.isString(styleName) ? style[styleName] || defaultValue: style;
         },
         getOffset = function(elem) {
             if (!isElement(elem)) {
