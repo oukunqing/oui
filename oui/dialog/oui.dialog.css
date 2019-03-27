@@ -62,6 +62,11 @@
     box-sizing: border-box;
 }
 
+.oui-dialog .box {
+    border: solid 1px #f00;
+    overflow: auto;
+}
+
 .oui-dialog .top{
     padding:0; margin:0;
     border: none 0;
@@ -79,9 +84,24 @@
 
 .oui-dialog .top .title {
     margin: 0; 
-    padding: 5px 5px; 
+    padding: 5px 5px 0; 
+    letter-spacing: 
     font-weight: bold;
     float: left;
+}
+
+.oui-dialog .top .logo {
+    width: 20px; height: 20px;
+    margin: 2px 0 0 2px;
+    padding: 0;
+    border: solid 1px #f5f5f5;
+    border-radius: 3px;
+    float: left;
+    background:#fff url('imgs/icon.png') no-repeat 0px 0;
+}
+
+.oui-dialog .top .logo:hover {
+    border: solid 1px #ddd;
 }
 
 .oui-dialog .top .timing {
@@ -95,7 +115,7 @@
     width: auto;
 }
 
-.oui-dialog .dialog-btn-panel {
+.oui-dialog .top .btn-panel {
     margin: 2px 2px 0 0;
 }
 
@@ -117,19 +137,19 @@
 }
 
 .oui-dialog .top .btn-min {
-    background: #fff url('imgs/icon.png') no-repeat 0 0;
-}
-
-.oui-dialog .top .btn-max {
     background: #fff url('imgs/icon.png') no-repeat -20px 0;
 }
 
-.oui-dialog .top .btn-normal {
+.oui-dialog .top .btn-max {
     background: #fff url('imgs/icon.png') no-repeat -40px 0;
 }
 
-.oui-dialog .top .btn-close {
+.oui-dialog .top .btn-normal {
     background: #fff url('imgs/icon.png') no-repeat -60px 0;
+}
+
+.oui-dialog .top .btn-close {
+    background: #fff url('imgs/icon.png') no-repeat -80px 0;
 }
 
 .oui-dialog .body,.oui-dialog-max .body {
@@ -190,7 +210,7 @@
     float: left;
 }
 
-.oui-dialog .bottom-panel {
+.oui-dialog .bottom {
     position: absolute;
     left: 0; bottom: 0;
     border: none 0;
@@ -202,7 +222,7 @@
     user-select:none;
 }
 
-.oui-dialog .bottom {
+.oui-dialog .bottom .button-panel {
     border: none 0;
     box-sizing: border-box;
     /*border-top: solid 1px #ddd;*/
@@ -216,12 +236,13 @@
     color: #fff;
     background: #337ab7;
     border: solid 1px #2e6da4;
+    box-sizing: border-box;
     cursor: pointer;
     padding: 0 20px;
-    height: 26px;
+    height: 30px;
     font-size: 14px;
     line-height: 1.8em;
-    line-height: 25px;
+    line-height: 30px;
     text-decoration: none;
     display: inline-block;
     font-style: normal;

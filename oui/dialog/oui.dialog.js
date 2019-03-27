@@ -207,12 +207,12 @@
             type: 'alert', //alert,confirm,message,tooltip,window,iframe
             status: 'normal',
             zindex: buildZindex(),
-            minWidth: '192px',
-            minHeight: '128px',
+            minWidth: '200px',
+            minHeight: '125px',
             maxWidth: '100%',
             maxHeight: '100%',
-            width: '400px',
-            height: '240px',
+            width: '360px',
+            height: '225px',
             opacity: null,
             lock: true,                             //是否锁屏
             title: '\u6807\u9898\u680f',
@@ -244,6 +244,7 @@
             buttonPosition: 'center',               //按钮位置 left center right
             showTitle: true,
             showBottom: true,
+            showLogo: true,
             showClose: true,
             showMin: true,
             showMax: true,
@@ -258,10 +259,10 @@
 
         _.controls = {
             shade: null, container: null, box: null,
-            top: null, title: null, panel: null,
+            top: null, logo: null, title: null, panel: null,
             body: null, content: null, loading: null,
             iframe: null, iframeShade: null,
-            bottom: null
+            bottom: null, button: null
         };
 
         _.btns = { close: null, min: null, max: null };
@@ -465,13 +466,15 @@
             return _;
         },
         buildTop: function (parentNode, rebuild) {
+            if(this.closed) {
+                return this;
+            }
             var _ = this, opt = _.opt, ctls = _.controls, elem, css;
             if (!opt.showTitle || (ctls.top && !rebuild)) {
                 return _;
             }
             if(rebuild && ctls.top) {
-                ctls.top.removeChild(ctls.title);
-                ctls.top.removeChild(ctls.panel);
+                $.removeChild(ctls.top, [ctls.logo, ctls.title, ctls.panel]);
                 elem = ctls.top;
             }
             if(!rebuild) {
@@ -494,6 +497,12 @@
                     _.setTopMost();
                 });
             }
+
+            if(opt.showLogo) {
+                var logo = $.createElement('div');
+                logo.className = 'logo';
+                elem.appendChild((ctls.logo = logo));
+            }
            
             var div = $.createElement('div');
             div.className = 'title';
@@ -507,7 +516,7 @@
                 isMax = opt.maxAble && opt.showMax;
 
             var panel = $.createElement('div');
-            panel.className = 'dialog-btn-panel';
+            panel.className = 'btn-panel';
             panel.innerHTML = (isMin ? '<a class="btn btn-min" code="min" title="Minimize"></a>' : '')
                 + (isMax || isMin ? '<a class="btn btn-max" code="max" title="Maximize"></a>' : '')
                 + (opt.closeAble && opt.showClose ? '<a class="btn btn-close" code="close" title="Close"></a>' : '');
@@ -525,6 +534,9 @@
             return !rebuild ? _.appendChild((ctls.top = elem), parentNode) : null, _;
         },
         showTitle: function(isShow, type, rebuild) {
+            if(this.closed) {
+                return this;
+            }
             if($.isString(isShow, true)) {
                 rebuild = type;
                 type = isShow;
@@ -584,6 +596,9 @@
             return this;
         },
         buildBody: function (parentNode) {
+            if(this.closed) {
+                return this;
+            }
             var _ = this, opt = _.opt, ctls = _.controls, elem = $.createElement('div'), css;
             elem.className = 'body';
 
@@ -596,6 +611,9 @@
             return _.appendChild((ctls.body = elem), parentNode), _;
         },
         buildContent: function (parentNode) {
+            if(this.closed) {
+                return this;
+            }
             var _ = this, ctls = this.controls, opt = this.opt, elem = ctls.content;
             if (!elem) {
                 elem = $.createElement('div');
@@ -661,28 +679,33 @@
             return this;
         },
         buildBottom: function (parentNode, rebuild) {
-            var _ = this, opt = _.opt, ctls = _.controls, css;
+            if(this.closed) {
+                return this;
+            }
+            var _ = this, opt = _.opt, ctls = _.controls, elem, css;
             if (!opt.showBottom || (ctls.bottom && !rebuild)) {
                 return _;
             }
             if(rebuild && ctls.bottom) {
-                ctls.box.removeChild(ctls.bottom);
-                ctls.bottom = null;
+                $.removeChild(ctls.bottom, [ctls.button]);
+                elem = ctls.bottom;
             }
-            var elem = $.createElement('div');
-            elem.className = 'bottom-panel';
+            if(!rebuild) {
+                elem = $.createElement('div');
+                elem.className = 'bottom';
 
-            if ((css = toCssText(opt.bottomStyle, 'bottom'))) {
-                elem.style.cssText = css;
+                if ((css = toCssText(opt.bottomStyle, 'bottom'))) {
+                    elem.style.cssText = css;
+                }
             }
 
             var div = $.createElement('div');
-            div.className = 'bottom';
+            div.className = 'button-panel';
             div.innerHTML = _.buildButtons();
             if (['left', 'center', 'right'].indexOf(_.opt.buttonPosition) >= 0) {
                 div.style.cssText = 'text-align:{0};'.format(_.opt.buttonPosition);
             }
-            elem.appendChild(div);
+            elem.appendChild((ctls.button = div));
 
             for (var i = 0; i < div.childNodes.length; i++) {
                 var obj = div.childNodes[i], key = obj.getAttribute('code');
@@ -696,9 +719,12 @@
 
             _.setButtonEvent(div.childNodes, 'click', true).setShortcutKeyEvent(div.childNodes);
 
-            return _.appendChild((ctls.bottom = elem), parentNode), _;
+            return !rebuild ? _.appendChild((ctls.bottom = elem), parentNode) : null, _;
         },
         showBottom: function(isShow, type, rebuild) {
+            if(this.closed) {
+                return this;
+            }
             if($.isString(isShow, true)) {
                 rebuild = type;
                 type = isShow;

@@ -143,7 +143,9 @@ function confirm2(){
         lock: false,
         //maxAble: false,
         topMost: true,
+        //showLogo: true,
         //fixed: true, 
+        titleStyle: {'font-weight':'normal'},
         y: 10,
         x: 15,
         type: 'confirm',
@@ -160,7 +162,7 @@ function confirm2(){
     });
 
     window.setTimeout(function(){
-        win.showBottom(true, 'alert').setOption('closeAble',false).showTitle(true, true);
+        win.showBottom(true, 'alert').setOption('showClose',false).showTitle(true, true);
     }, 6000);
 
     console.log(win.buttons);
