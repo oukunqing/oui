@@ -1913,9 +1913,11 @@
             switch (opt.type) {
                 case 'alert':
                     opt.buttons = DialogButtons.OK;
+                    opt.showMin = opt.showMax = false;
                     break;
                 case 'confirm':
                     opt.buttons = DialogButtons.OKCancel;
+                    opt.showMin = opt.showMax = false;
                     break;
                 case 'dialog':
                     break;

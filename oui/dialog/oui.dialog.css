@@ -85,7 +85,7 @@
 
 .oui-dialog .top .title {
     margin: 0; 
-    padding: 5px 5px 0; 
+    padding: 4px 4px 0; 
     letter-spacing: 1px;
     font-weight: bold;
     float: left;
@@ -98,7 +98,7 @@
     padding: 0;
     border: solid 1px #f5f5f5;
     border-radius: 3px;
-    box-sizing: border-box;
+    box-sizing: content-box;
     float: left;
     background:#fff url('imgs/icon.png') no-repeat 0px 0;
 }
@@ -123,7 +123,7 @@
 }
 
 .oui-dialog .top .btn {
-    border: solid 1px #eee;
+    border: solid 1px #f1f1f1;
     border-radius: 3px;
     background-color: #fff;
 
@@ -135,8 +135,8 @@
 }
 
 .oui-dialog .top .btn:hover {
-    background-color: #909090;
-    border: solid 1px #909090;
+    background-color: #f8f8f8;
+    border: solid 1px #ddd;
 }
 
 .oui-dialog .top .btn-min {
