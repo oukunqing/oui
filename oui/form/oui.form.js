@@ -605,15 +605,12 @@
     $.extend({
         form: {
             isElement: isElement,
-            initFormConfig: initFormConfig,
             setFormVerify: setFormVerify,
-            getElementsData: getElementsData,
             getFormData: getFormData,
-            filterData: filterData,
-            setElementsData: setElementsData,
             setFormData: setFormData,
             getTableData: getTableData,
             setTableData: setTableData,
+            filterData: filterData,
             findElement: findElement
         }
     });
