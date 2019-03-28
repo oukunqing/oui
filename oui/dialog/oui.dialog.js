@@ -71,7 +71,7 @@
             min: {english: 'Minimize', chinese: '\u6700\u5c0f\u5316'},                  //最小化
             max: {english: 'Maximize', chinese: '\u6700\u5927\u5316'},                  //最大化
             close: {english: 'Close', chinese: '\u5173\u95ed'},                         //关闭
-            restore: {english: 'Restore Down', chinese: '\u5411\u4e0b\u8fd8\u539f'}     //向下还原
+            restore: {english: 'Restore', chinese: '\u8fd8\u539f'}                      //还原
         },
         DialogResult = {
             None: 0,
@@ -386,8 +386,8 @@
             //width: 'auto',
             width: ds.width + 'px',
             height: ds.height + 'px',
-            opacity: null,
-            lock: true,                             //是否锁屏
+            opacity: null,          //背景层透明度，默认为 0.2
+            lock: true,             //是否锁屏
             title: null,            //标题
             content: null,          //文字内容
             url: null,              //加载的URL
