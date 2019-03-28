@@ -1,9 +1,11 @@
 
 /*
- @Title: OUI
- @Description：JS通用代码库
- @Author: oukunqing
- @License：MIT
+    @Title: OUI
+    @Description：JS通用代码库
+    @Author: oukunqing
+    @License：MIT
+
+    $.dialog 对话框插件
 */
 
 !function ($) {
