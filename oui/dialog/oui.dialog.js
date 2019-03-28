@@ -8,19 +8,70 @@
 
 !function ($) {
 
-    var dialogIndex = 1,
+    var DialogIndex = 1,
         TitleHeight = 30,
         BottomHeight = 40,
+        Identifier = 'oui-dialog-identifier-',
         KEY_CODE = {
             Enter: 13,
             Esc: 27,
             Space: 32
         },
+        Lang = {
+            Chinese: 'chinese',
+            English: 'english'
+        },
+        DialogType = {
+            Dialog: 'dialog',
+            Alert: 'alert',
+            Confirm: 'confirm',
+            Form: 'form',
+            Win: 'win',
+            Window: 'window',
+            Iframe: 'iframe',
+            Url: 'url',
+            Load: 'load',
+            Tooltip: 'tooltip',
+            Tips: 'tips',
+            Message: 'message',
+            Msg: 'msg',
+            Info: 'info'
+        },
         DialogStatus = {
             Close: 'close',
             Max: 'max',
             Min: 'min',
-            Normal: 'normal'
+            Normal: 'normal',
+            Tooltip: 'tooltip'
+        },
+        Position = {
+            Top: 'top',
+            Right: 'right',
+            Bottom: 'bottom',
+            Left: 'left',
+            Center: 'center',
+            Middle: 'middle'
+        },
+        Direction = {
+            Top: 'top',
+            Right: 'right',
+            Bottom: 'bottom',
+            Left: 'left',
+            TopLeft: 'top-left',
+            LeftTop: 'top-left',
+            TopRight: 'top-right',
+            RightTop: 'top-right',
+            BottomRight: 'bottom-right',
+            RightBottom: 'bottom-right',
+            BottomLeft: 'bottom-left',
+            LeftBottom: 'bottom-left',
+            Center: 'center'
+        },
+        DialogStatusText = {
+            min: {english: 'Minimize', chinese: '\u6700\u5c0f\u5316'},                  //最小化
+            max: {english: 'Maximize', chinese: '\u6700\u5927\u5316'},                  //最大化
+            close: {english: 'Close', chinese: '\u5173\u95ed'},                         //关闭
+            restore: {english: 'Restore Down', chinese: '\u5411\u4e0b\u8fd8\u539f'}     //向下还原
         },
         DialogResult = {
             None: 0,
@@ -62,21 +113,81 @@
             Infomation: 64
         },
         ButtonConfig = {
-            None: { code: 'None', text: '\u5173\u95ed', result: 0, skey: '', css: 'btn-default' },
-            OK: { code: 'OK', text: '\u786e\u5b9a', result: 1, skey: 'Y', css: 'btn-primary' },
-            Cancel: { code: 'Cancel', text: '\u53d6\u6d88', result: 2, skey: 'N', css: 'btn-default' },
-            Abort: { code: 'Abort', text: '\u4e2d\u6b62', result: 3, skey: 'A', css: 'btn-danger' },
-            Retry: { code: 'Retry', text: '\u91cd\u8bd5', result: 4, skey: 'R', css: 'btn-warning' },
-            Ignore: { code: 'Ignore', text: '\u5ffd\u7565', result: 5, skey: 'I', css: 'btn-default' },
-            Yes: { code: 'Yes', text: '\u662f', result: 6, skey: 'Y', css: 'btn-primary' },
-            No: { code: 'No', text: '\u5426', result: 7, skey: 'N', css: 'btn-default' }
+            None: { key: 'None', text: '\u5173\u95ed', result: 0, skey: '', css: 'btn-default' },
+            OK: { key: 'OK', text: '\u786e\u5b9a', result: 1, skey: 'Y', css: 'btn-primary' },
+            Cancel: { key: 'Cancel', text: '\u53d6\u6d88', result: 2, skey: 'N', css: 'btn-default' },
+            Abort: { key: 'Abort', text: '\u4e2d\u6b62', result: 3, skey: 'A', css: 'btn-danger' },
+            Retry: { key: 'Retry', text: '\u91cd\u8bd5', result: 4, skey: 'R', css: 'btn-warning' },
+            Ignore: { key: 'Ignore', text: '\u5ffd\u7565', result: 5, skey: 'I', css: 'btn-default' },
+            Yes: { key: 'Yes', text: '\u662f', result: 6, skey: 'Y', css: 'btn-primary' },
+            No: { key: 'No', text: '\u5426', result: 7, skey: 'N', css: 'btn-default' }
+        },
+        ButtonText = {
+            close: { english: 'Close', chinese: '\u5173\u95ed' },
+            ok: { english: 'OK', chinese: '\u786e\u5b9a' },
+            cancel: { english: 'Cancel', chinese: '\u53d6\u6d88' },
+            abort: { english: 'Abort', chinese: '\u4e2d\u6b62' },
+            retry: { english: 'Retry', chinese: '\u91cd\u8bd5' },
+            ignore: { english: 'Ignore', chinese: '\u5ffd\u7565' },
+            yes: { english: 'Yes', chinese: '\u662f' },
+            no: { english: 'No', chinese: '\u5426' }
+        },
+        EventName = {
+            Click: 'click',
+            Dblclick: 'dblclick',
+            Clicks: ['click', 'dblclick'],
+            MouseDown: 'mousedown',
+            MouseMove: 'mousemove',
+            MouseUp: 'mouseup'
+        },
+        DialogText = {
+            //对话框标题
+            Title: {
+                english: 'Dialog Title', chinese: '\u5bf9\u8bdd\u6846\u6807\u9898'
+            },
+            //自动关闭定时提示： 倒计时结束后关闭
+            CloseTiming: {
+                english: 'Close after the countdown is over.', chinese: '\u5012\u8ba1\u65f6\u7ed3\u675f\u540e\u5173\u95ed'
+            },
+            //iframe加载提示： 正在努力加载，请稍候
+            Loading: {
+                english: 'Loading, please wait a moment.', 
+                chinese: '\u6b63\u5728\u52aa\u529b\u52a0\u8f7d\uff0c\u8bf7\u7a0d\u5019'
+            }
+        },
+        getDialogText = function(key, lang) {
+            var txt = DialogText[key];
+            if(txt) {
+                return txt[(lang || '').toLowerCase()];
+            }
+            return '';
+        },
+        getStatusText = function(key, lang) {
+            var txt = DialogStatusText[(key || '').toLowerCase()];
+            if(txt) {
+                return txt[(lang || '').toLowerCase()];
+            }
+            return '';
+        },
+        getButtonText = function(key, lang) {
+            var txt = ButtonText[(key || '').toLowerCase()];
+            if(txt) {
+                return txt[(lang || '').toLowerCase()];
+            }
+            return '';
         },
         getDialogButtons = function(type) {
             var buttons = DialogButtons.None;
             switch(type) {
-                case 'alert': buttons = DialogButtons.OK; break;
-                case 'confirm': buttons = DialogButtons.OKCancel; break;
-                case 'dialog': buttons = DialogButtons.OKCancel; break;
+                case DialogType.Alert:
+                    buttons = DialogButtons.OK;
+                    break;
+                case DialogType.Confirm:
+                    buttons = DialogButtons.OKCancel;
+                    break;
+                case DialogType.Dialog:
+                    buttons = DialogButtons.OKCancel;
+                    break;
             }
             return buttons;
         },
@@ -104,7 +215,7 @@
         },
         getId = function (id) {
             if (!$.isString(id, true) && !$.isNumber(id)) {
-                return getTs(5, 8) + '-' + dialogIndex++;
+                return getTs(5, 8) + '-' + DialogIndex++;
             }
             return id;
         },
@@ -150,18 +261,18 @@
             if (!$.isString(type, true) && !isBuild) {
                 return type;
             }
-            if (['message', 'msg'].indexOf(type) >= 0) {
-                return 'message';
-            } else if (['tooltip', 'tips'].indexOf(type) >= 0) {
-                return 'tooltip';
+            if ([DialogType.Message, DialogType.Msg].indexOf(type) >= 0) {
+                return DialogType.Message;
+            } else if ([DialogType.Tooltip, DialogType.Tips].indexOf(type) >= 0) {
+                return DialogType.Tooltip;
             }
-            return type || (isBuild ? 'dialog' : '');
+            return type || (isBuild ? DialogType.Dialog : '');
         },
         toCssText = function (styles, type) {
             return $.toCssText(styles);
         },
         hasEvent = function(elem) {
-            var keys = ['onclick', 'ondblclick', 'mousedown'], attr;
+            var keys = ['onclick', 'ondblclick', 'onmousedown'], attr;
             for(var i in keys) {
                 attr = elem.getAttribute(keys[i]);
                 if(attr) {
@@ -220,6 +331,21 @@
             };
             return size;
         },
+        getTitleSize = function(txt) {
+            var id = 'div-oui-dialog-text-size-01';
+            var div = document.getElementById(id);
+            if(!div) {
+                div = document.createElement('div');
+                div.id = id;
+                div.className = 'oui-dialog-title-size';
+                document.body.appendChild(div);
+            }
+            div.innerHTML = txt;
+
+            var size = {width: div.offsetWidth, height: div.offsetHeight};
+
+            return div.innerHTML = '', size;
+        },
         checkCallback = function(opt) {
             var callback = $.isFunction(opt.callback) ? opt.callback : undefined,
                 ok =  $.isFunction(opt.ok) ? opt.ok : ($.isFunction(opt.success) ? opt.success : callback),
@@ -243,14 +369,13 @@
     //先加载样式文件
     $.loadLinkStyle($.getFilePath(thisFilePath) + $.getFileName(thisFilePath, true).replace('.min', '') + '.css');
 
-    function MyDialog(content, title, options) {
-        console.log('window.screen.width: ', window.screen.width);
+    function MyDialog(content, title, options) {        
         var _ = this, op = checkOptions(content, title, options), ds = getDefaultSize();
         _.options = _.opt = $.extend({
             id: null,
-            group: '',
-            type: 'alert', //alert,confirm,message,tooltip,window,iframe
-            status: 'normal',
+            lang: Lang.Chinese,    //语言 Chinese,English
+            type: DialogType.Alert, //alert,confirm,message,tooltip,window,iframe
+            status: DialogStatus.Normal,
             zindex: buildZindex(),
             minWidth: '240px',
             minHeight: '125px',
@@ -263,11 +388,11 @@
             height: ds.height + 'px',
             opacity: null,
             lock: true,                             //是否锁屏
-            title: '\u6807\u9898\u680f',
-            content: '',        //文字内容
-            url: '',            //加载的URL
-            element: null,      //加载的Element元素
-            loading: '正在努力加载，请稍候',          //loading提示文字
+            title: null,            //标题
+            content: null,          //文字内容
+            url: null,              //加载的URL
+            element: null,          //加载的Element元素
+            loading: '',            //loading提示文字
             position: 5,
             x: 0,
             y: 0,
@@ -275,7 +400,7 @@
             fixed: false,
             topMost: false,
             closeAble: true,
-            clickBgClose: null,     //'dblclick', // dblclick | click
+            clickBgClose: false,     //'dblclick', // dblclick | click
             escClose: false,
             autoClose: false,
             closeTiming: 5000,      // closeTiming timeout time timing 四个字段
@@ -292,7 +417,7 @@
             parameter: null,        //回调返回的参数
             redirect: null,         //重定向跳转到指定的URL [target]
             buttons: DialogButtons.OKCancel,
-            buttonPosition: 'center',               //按钮位置 left center right
+            buttonPosition: Position.Center,               //按钮位置 left center right
             buttonText: null,       // {OK: '确定', Cancel: '取消'}  ｛OK: '提交'}
             showTitle: true,
             showBottom: true,
@@ -312,10 +437,10 @@
 
         _.controls = {
             shade: null, container: null, box: null, main: null,
-            top: null, logo: null, title: null, panel: null,
+            top: null, logo: null, title: null, timer: null, btnPanel: null,
             body: null, content: null, loading: null,
             iframe: null, iframeShade: null,
-            bottom: null, button: null
+            bottom: null, buttonPanel: null
         };
 
         _.btns = { close: null, min: null, max: null };
@@ -358,11 +483,17 @@
             this.dialogId = buildId(opt.id);
             opt.type = checkType(opt.type, true);
 
+            if(!$.isString(opt.title) && !$.isNumber(opt.title)) {
+                opt.title = getDialogText('Title', opt.lang);
+            }
+
             if (!opt.showTitle && !opt.showBottom && !opt.lock &&
                 $.isBoolean(opt.closeAble, true) &&
-                opt.type !== 'tooltip') {
+                opt.type !== DialogType.Tooltip) {
                 opt.escClose = true;
-                opt.clickBgClose = opt.clickBgClose || 'click';
+                if(!$.isBoolean(opt.clickBgClose)) {
+                    opt.clickBgClose = opt.clickBgClose || 'click';
+                }
             }
             if(opt.lock) {
                 opt.fixed = false;
@@ -370,6 +501,7 @@
 
             return this.build(opt);
         },
+        /*
         isShow: function (key) {
             switch (key) {
                 case 'shade':
@@ -379,8 +511,9 @@
             }
             return true;
         },
+        */
         isDialog: function (obj) {
-            if (null !== obj && obj.identifier.startsWith('oui-dialog-identifier-')) {
+            if (null !== obj && obj.identifier.startsWith(Identifier)) {
                 return true;
             }
             return false;
@@ -395,11 +528,15 @@
             return this.opt.id;
         },
         build: function (options) {
-            var _ = this, ctls = this.controls, opt = options;
+            var _ = this, ctls = this.controls, opt = options, status = opt.status || DialogStatus.Normal;
 
-            _.identifier = 'oui-dialog-identifier-' + buildZindex();
+            if(status !== DialogStatus.Normal) {
+                opt.status = DialogStatus.Normal;
+            }
 
-            if (opt.type === 'tooltip') {
+            _.identifier = Identifier + buildZindex();
+
+            if (opt.type === DialogType.Tooltip) {
                 //不需要遮罩层
                 _.opt.lock = opt.lock = false;
                 return _.buildTooltip(options);
@@ -457,6 +594,11 @@
                 $.addListener(ctls.container, ['click', 'mousedown'], function () {
                     $.cancelBubble();
                 });
+            }
+
+            //初始最小化或最大化对话框
+            if([DialogStatus.Min, DialogStatus.Max].indexOf(status) >= 0) {
+                this[status]();
             }
 
             return this.buildCloseTiming().focus();
@@ -547,7 +689,7 @@
                 return _;
             }
             if(rebuild && ctls.top) {
-                $.removeChild(ctls.top, [ctls.logo, ctls.title, ctls.panel]);
+                $.removeChild(ctls.top, [ctls.logo, ctls.title, ctls.btnPanel]);
                 elem = ctls.top;
             }
             if(!rebuild) {
@@ -586,16 +728,19 @@
             elem.appendChild((ctls.title = div));
 
             var isMin = opt.minAble && opt.showMin,
-                isMax = opt.maxAble && opt.showMax;
+                isMax = opt.maxAble && opt.showMax,
+                min = getStatusText('min', opt.lang),
+                max = getStatusText('max', opt.lang),
+                close = getStatusText('close', opt.lang);
 
             var panel = $.createElement('div');
             panel.className = 'btn-panel';
-            panel.innerHTML = (isMin ? '<a class="btn btn-min" code="min" title="Minimize"></a>' : '')
-                + (isMax || isMin ? '<a class="btn btn-max" code="max" title="Maximize"></a>' : '')
-                + (opt.closeAble && opt.showClose ? '<a class="btn btn-close" code="close" title="Close"></a>' : '');
+            panel.innerHTML = (isMin ? '<a class="btn btn-min" code="min" title="' + min + '"></a>' : '')
+                + (isMax || isMin ? '<a class="btn btn-max" code="max" title="' + max + '"></a>' : '')
+                + (opt.closeAble && opt.showClose ? '<a class="btn btn-close" code="close" title="' + close + '"></a>' : '');
             panel.style.cssText = 'float:right;';
 
-            elem.appendChild((ctls.panel = panel));
+            elem.appendChild((ctls.btnPanel = panel));
 
             for (var i = 0; i < panel.childNodes.length; i++) {
                 var obj = panel.childNodes[i], key = obj.getAttribute('code');
@@ -636,12 +781,12 @@
             }
 
             if(th !== 0) {
-                _.setScale({dir: 'top', y: show ? th : -th});
+                _.setScale({dir: Direction.Top, y: show ? th : -th});
             }
             return _.setBodySize();
         },
         buildCloseTiming: function () {
-            var _ = this, opt = _.opt;
+            var _ = this, opt = _.opt, ctls = _.controls;
             if (!opt.autoClose || !opt.closeAble) {
                 return _;
             }
@@ -650,13 +795,14 @@
             if(opt.showTimer) {
                 var i = opt.closeTiming / 100;
                 if (i > 20 && opt.showTitle) {
-                    this.controls.top.appendChild($.createElement('label', 'timing', function (elem) {
-                        elem.innerHTML = '';
+                    var div = $.createElement('label', 'timing', function (elem) {
                         elem.className = 'timing';
-                    }));
+                        elem.title = getDialogText('CloseTiming', opt.lang) || '';
+                    });
+                    ctls.top.appendChild((ctls.timer = div));
 
                     _.timer.timingTimer = window.setInterval(function () {
-                        $('#timing').html((i--) / 10 + ' 秒后关闭');
+                        ctls.timer.innerHTML = (i--) / 10;
                     }, 100);
                 }
             }
@@ -705,8 +851,8 @@
                 elem.style.cssText = css;
             }
 
-            if (['url', 'iframe', 'load'].indexOf(opt.type) >= 0) {
-                if($.isElement(opt.element) && opt.type === 'load') {
+            if ([DialogType.Url, DialogType.Iframe, DialogType.Load].indexOf(opt.type) >= 0) {
+                if($.isElement(opt.element) && opt.type === DialogType.Load) {
                     elem.innerHTML = opt.element.innerHTML || opt.element.value || '';
                 } else {
                     elem.innerHTML = _.buildIframe(opt.content);
@@ -739,13 +885,14 @@
             return _.appendChild((ctls.content = elem), parentNode || null), _;
         },
         buildIframe: function (url) {
-            var height = '100%';
-            return ['<iframe class="iframe" width="100%"',
+            var opt = this.opt, height = '100%';
+            var html = ['<iframe class="iframe" width="100%"',
                 ' id="{0}-iframe" height="{1}" src="{2}"',
                 ' frameborder="0" scrolling="auto"></iframe>',
                 '<div id="{0}-iframe-shade" class="iframe-shade"></div>',
-                '<div id="{0}-loading" class="loading">正在努力加载，请稍候</div>'
-            ].join('').format(this.dialogId, height, url.setUrlParam());
+                '<div id="{0}-loading" class="loading">{3}</div>'
+            ].join('');
+            return html.format(this.dialogId, height, url.setUrlParam(), opt.loading || getDialogText('Loading', opt.lang));
         },
         showIframeShade: function (isShow) {
             if (this.controls.iframeShade) {
@@ -780,16 +927,16 @@
                 }
             }
 
-            var div = $.createElement('div');
-            div.className = 'button-panel';
-            div.innerHTML = _.buildButtons();
-            if (['left', 'center', 'right'].indexOf(_.opt.buttonPosition) >= 0) {
-                div.style.cssText = 'text-align:{0};'.format(_.opt.buttonPosition);
+            var panel = $.createElement('div');
+            panel.className = 'button-panel';
+            panel.innerHTML = _.buildButtons();
+            if ([Position.Left, Position.Center, Position.Right].indexOf(_.opt.buttonPosition) >= 0) {
+                panel.style.cssText = 'text-align:{0};'.format(_.opt.buttonPosition);
             }
-            elem.appendChild((ctls.button = div));
+            elem.appendChild((ctls.buttonPanel = panel));
 
-            for (var i = 0; i < div.childNodes.length; i++) {
-                var obj = div.childNodes[i], key = obj.getAttribute('code');
+            for (var i = 0; i < panel.childNodes.length; i++) {
+                var obj = panel.childNodes[i], key = obj.getAttribute('code');
                 _.buttons[key] = obj;
             }
 
@@ -798,7 +945,7 @@
                 _.setTopMost();
             });
 
-            _.setButtonEvent(div.childNodes, 'click', true).setShortcutKeyEvent(div.childNodes);
+            _.setButtonEvent(panel.childNodes, 'click', true).setShortcutKeyEvent(panel.childNodes);
 
             return !rebuild ? _.appendChild((ctls.bottom = elem), parentNode) : null, _;
         },
@@ -834,29 +981,34 @@
                 ctls.bottom.style.display = 'none';
             }
             if(bh !== 0){
-                _.setScale({dir: 'bottom', y: show ? bh : -bh});
+                _.setScale({dir: Direction.Bottom, y: show ? bh : -bh});
             }
             return _.setBodySize().setPosition();
         },
         buildButtons: function () {
-            var _ = this, keys = DialogButtons, html = [];
-            if (!$.isNumber(_.opt.buttons) || _.opt.buttons < 0) {
+            var _ = this, opt = _.opt, keys = DialogButtons, html = [];
+            if (!$.isNumber(opt.buttons) || opt.buttons < 0) {
                 return '';
             }
-            var keys = ButtonMaps[_.opt.buttons], txts = {};
+            var keys = ButtonMaps[opt.buttons], txts = {};
             //自定义按钮文字
-            if($.isObject(_.opt.buttonText)) {
-                txts = _.opt.buttonText;
-            } else if($.isString(_.opt.buttonText, true)) {
-                txts = {OK: _.opt.buttonText};
+            if($.isObject(opt.buttonText)) {
+                txts = opt.buttonText;
+            } else if($.isString(opt.buttonText, true)) {
+                txts = {OK: opt.buttonText};
             }
 
             for (var i in keys) {
                 var config = ButtonConfig[keys[i]],
                     css = i > 0 ? ' btn-ml' : '';
+
+                //根据语言获取相应的按钮文字
+                config.text = getButtonText(config.key, opt.lang) || config.text;
+
+                //启用外部参数中的按钮文字
                 $.extend(config, {text: txts[config.code]});
 
-                text = '<a class="btn {css}{1}" code="{code}" result="{result}" href="{{0}}" shortcut-key="{skey}">{text}</a>';
+                text = '<a class="btn {css}{1}" code="{key}" result="{result}" href="{{0}}" shortcut-key="{skey}">{text}</a>';
                 if (config) {
                     html.push(text.format(config, css));
                 }
@@ -865,7 +1017,7 @@
         },
         buildSwitch: function (dir) {
             if ($.isUndefined(dir)) {
-                dir = 'bottom-right';
+                dir = Direction.BottomRight;
             }
             var id = this.opt.id + '-switch-' + dir;
             if (document.getElementById(id) !== null) {
@@ -931,7 +1083,6 @@
                 _.hideDocOverflow(isHide);
             }
 
-            //return _.hideDocOverflow(isHide), _;
             return _;
         },
         hide: function () {
@@ -1022,7 +1173,7 @@
                 opt.buttons = getDialogButtons(opt.type);
             }
 
-            if ($.extend(_.opt, opt).type === 'tooltip') {
+            if ($.extend(_.opt, opt).type === DialogType.Tooltip) {
                 _.updateTooltip(content, opt.host, opt);
                 return _;
             }
@@ -1237,7 +1388,7 @@
             return this;
         },
         setSize: function (options) {
-            var _ = this, op = _.opt, ctls = _.controls, btns = _.btns, obj = ctls.box, par = {};
+            var _ = this, opt = _.opt, ctls = _.controls, btns = _.btns, obj = ctls.box, par = {};
 
             if ($.isString(options)) {
                 options = { type: options };
@@ -1264,21 +1415,22 @@
                 $.removeClass(ctls.bottom, 'display-none');
             }
 
-            if (p.type !== DialogStatus.Max && !op.lock) {
+            if (p.type !== DialogStatus.Max && !opt.lock) {
                 _.hideDocOverflow(true);
             }
 
             if (btns.max) {
-                btns.max.title = p.type === DialogStatus.Max ? 'Restore Down' : 'Maximize';
+                //btns.max.title = p.type === DialogStatus.Max ? 'Restore Down' : 'Maximize';
+                btns.max.title = getStatusText(p.type === DialogStatus.Max ? 'restore' : 'max', opt.lang);
             }
 
             var bs = $.getBodySize(), isSetBodySize = false, isSetPosition = false, isFullScreen = false;
 
             if (p.type === DialogStatus.Max) {
-                if (!op.maxAble) {
+                if (!opt.maxAble) {
                     return _;
                 }
-                var scrollTop = op.lock ? 0 : document.documentElement.scrollTop;
+                var scrollTop = opt.lock ? 0 : document.documentElement.scrollTop;
                 par = { width: '100%', height: '100%', top: scrollTop, left: 0, right: 0, bottom: 0 };
                 isSetBodySize = isFullScreen = true;
 
@@ -1293,10 +1445,10 @@
 
                 _.hideDocOverflow().hideSwitch().setStatus(DialogStatus.Max);
             } else if (p.type === DialogStatus.Min) {
-                if (!op.minAble) {
+                if (!opt.minAble) {
                     return _;
                 }
-                var minW = parseInt(op.minWidth, 10), minH = 36;
+                var minW = parseInt(opt.minWidth, 10), minH = 36;
                 if (isNaN(minW)) { minW = 180; }
 
                 par = { width: minW, height: minH };
@@ -1304,7 +1456,7 @@
                 if (_.status.max) {
                     $.removeClass(obj, 'oui-dialog-max');
                 }
-                _.hideSwitch().setStatus(DialogStatus.Min).setPosition({ pos: op.position });
+                _.hideSwitch().setStatus(DialogStatus.Min).setPosition({ pos: opt.position });
             } else {
                 isSetBodySize = true;
 
@@ -1315,7 +1467,7 @@
                 } else if (_.status.min) {
                     $.removeClass(obj, 'oui-dialog-min');
                 }
-                _.showSwitch().setStatus('normal');
+                _.showSwitch().setStatus(DialogStatus.Normal);
 
                 if (p.type === 'resize' || p.type === 'size') {
                     par = { width: p.width, height: p.height };
@@ -1348,7 +1500,8 @@
         },
         setDragSize: function (dir) {
             var _ = this, ctls = this.controls;
-            var arr = ['top', 'bottom', 'left', 'right', 'top-left', 'top-right', 'bottom-left', 'bottom-right'];
+            var arr = [ Direction.Top, Direction.Right, Direction.Bottom, Direction.Left,
+                Direction.TopLeft, Direction.TopRight, Direction.BottomLeft, Direction.BottomRight];
 
             dir = $.isString(dir) ? [dir] : arr;
 
@@ -1368,7 +1521,7 @@
             }
             var par = $.extend({
                 type: '',
-                dir: 'bottom-right',
+                dir: Direction.BottomRight,
                 x: 0,
                 y: 0
             }, options);
@@ -1419,14 +1572,14 @@
                 y = par.y;
             }
 
-            if (par.dir === 'center') {
+            if (par.dir === Direction.Center) {
                 x = parseInt(Math.abs(x) / 2, 10);
                 y = parseInt(Math.abs(y) / 2, 10);
                 newLeft = dp.left - par.x;
                 newTop = dp.top - par.y;
             } else {
-                x *= par.dir.indexOf('left') >= 0 ? -1 : 1;
-                y *= par.dir.indexOf('top') >= 0 ? -1 : 1;
+                x *= par.dir.indexOf(Direction.Left) >= 0 ? -1 : 1;
+                y *= par.dir.indexOf(Direction.Top) >= 0 ? -1 : 1;
                 newLeft = (dp.left + x + newWidth) > dp.right ? dp.right - newWidth : dp.left + x;
                 newTop = (dp.top + y + newHeight) > dp.bottom ? dp.bottom - newHeight : dp.top + y;
             }
@@ -1458,43 +1611,43 @@
             }
 
 
-            if (par.dir.indexOf('-') >= 0 || par.dir === 'center') {
+            if (par.dir.indexOf('-') >= 0 || par.dir === Direction.Center) {
                 $.setStyle(obj, { width: newWidth, height: newHeight }, 'px');
             }
 
             switch (par.dir) {
-                case 'bottom-right':
-                case 'right-bottom': //不用处理
+                case Direction.BottomRight:
+                case Direction.RightBottom: //不用处理
                     break;
-                case 'right':
+                case Direction.Right:
                     $.setStyle(obj, { width: newWidth, height: dp.height }, 'px');
                     break;
-                case 'bottom':
+                case Direction.Bottom:
                     $.setStyle(obj, { width: dp.width, height: newHeight }, 'px');
                     break;
-                case 'left':
+                case Direction.Left:
                     $.setStyle(obj, { width: newWidth, height: dp.height, left: newLeft }, 'px');
                     break;
-                case 'top':
+                case Direction.Top:
                     $.setStyle(obj, { width: dp.width, height: newHeight, top: newTop }, 'px');
                     break;
-                case 'top-left':
-                case 'left-top':
-                case 'center':
+                case Direction.TopLeft:
+                case Direction.LeftTop:
+                case Direction.Center:
                     $.setStyle(obj, { left: newLeft, top: newTop }, 'px');
                     break;
-                case 'top-right':
-                case 'right-top':
+                case Direction.TopRight:
+                case Direction.RightTop:
                     $.setStyle(obj, { top: newTop }, 'px');
                     break;
-                case 'bottom-left':
-                case 'left-bottom':
+                case Direction.BottomLeft:
+                case Direction.LeftBottom:
                     $.setStyle(obj, { left: newLeft }, 'px');
                     break;
             }
             _.setBodySize(false);
 
-            if (!isDrag && par.dir === 'center') {
+            if (!isDrag && par.dir === Direction.Center) {
                 _.setPosition(par);
             }
 
@@ -1553,17 +1706,13 @@
                     s.height = mh;
                 }
             }
-
-            console.log('getBodySize: ', s);
-
             return s;
         },
         setBodySize: function (isFullScreen, isDrag) {
             var _ = this, opt = _.opt, obj = _.controls.box, ctls = _.controls, bs = $.getBodySize();
             if (!obj) {
-                return false;
+                return this;
             }
-            console.log('setBodySize: ', obj.offsetHeight, ctls.main.offsetHeight, ctls.content.offsetHeight);
 
             var boxWidth = obj.clientWidth,
                 boxHeight = obj.clientHeight,
@@ -1631,7 +1780,32 @@
             if (ctls.iframe) {
                 $.setStyle(ctls.iframe, { height: size.height });
             }
-            return $.setStyle(ctls.body, size), _;
+            return $.setStyle(ctls.body, size), _.setTitleSize();
+        },
+        setTitleSize: function() {
+            var _ = this, opt = _.opt, ctls = _.controls;
+
+            if(_.closed || !ctls.top) {
+                return _;
+            }
+
+            var topWidth = ctls.top.clientWidth,
+                logoWidth = ctls.logo ? ctls.logo.offsetWidth : 0,
+                btnWidth = ctls.btnPanel ? ctls.btnPanel.offsetWidth : 0,
+                timerWidth = ctls.timer ? ctls.timer.offsetWidth : 0,
+                titleWidth = topWidth - logoWidth - timerWidth - btnWidth - 10;
+
+            if(ctls.title) {
+                ctls.title.style.maxWidth = (titleWidth) + 'px';
+                var realSize = getTitleSize(ctls.title.innerHTML,'');
+
+                if(realSize.width > titleWidth) {
+                    ctls.title.title = $.filterHtmlCode(opt.title);
+                } else {
+                    ctls.title.title = '';
+                }
+            }
+            return _;
         },
         clearPositionStyle: function (obj) {
             var arr = obj.style.cssText.split(';');
@@ -1692,20 +1866,21 @@
                 height = obj.offsetHeight,
                 posX, posY;
 
-            if (_.checkPosition('center', p.pos)) {
+            if (_.checkPosition(Position.Center, p.pos)) {
                 posX = (bs.width / 2 - width / 2) + (opt.fixed ? 0 : cp.left);
             } else {
-                posX = (_.checkPosition('right', p.pos) ? bs.width - p.x - width - (opt.fixed ? 0 : cp.left) : cp.left + p.x);
+                posX = (_.checkPosition(Position.Right, p.pos) ? bs.width - p.x - width - (opt.fixed ? 0 : cp.left) : cp.left + p.x);
             }
-            if (_.checkPosition('middle', p.pos)) {
+            if (_.checkPosition(Position.Middle, p.pos)) {
                 posY = bs.height / 2 - height / 2 + (opt.fixed ? 0 : cp.top);
             } else {
-                posY = (_.checkPosition('bottom', p.pos) ? bs.height - p.y - height - (opt.fixed ? 0 : cp.top) : cp.top + p.y);
+                posY = (_.checkPosition(Position.Bottom, p.pos) ? bs.height - p.y - height - (opt.fixed ? 0 : cp.top) : cp.top + p.y);
             }
 
             //清除cssText上下左右4个样式
             _.clearPositionStyle(obj);
 
+            /*
             switch (p.pos) {
                 case 0:
                 case 1:
@@ -1727,8 +1902,9 @@
                     $.setStyle(obj, { left: posX, top: posY }, 'px');
                     break;
             }
+            */
 
-            return this;
+            return $.setStyle(obj, { left: posX, top: posY }, 'px'), this;
         },
         setTopMost: function () {
             if (this.closed || !this.opt.topMost) {
@@ -1761,12 +1937,12 @@
             var _ = this, ctls = _.controls, obj = ctls.box;
 
             //对话框最大化时，拖动对话框，先切换到标准模式（尺寸、定位）
-            _.setSize({ type: 'normal' });
+            _.setSize({ type: DialogStatus.Normal });
 
             var offsetRateX = (evt.clientX / bs.width),
                 offsetX = evt.clientX,
                 offsetY = evt.clientY - moveY,
-                btnPanelWidth = ctls.panel ? ctls.panel.offsetWidth : 0;
+                btnPanelWidth = ctls.btnPanel ? ctls.btnPanel.offsetWidth : 0;
 
             if (offsetRateX > 0.5) {
                 offsetX = evt.clientX - obj.offsetWidth + (obj.offsetWidth) * (1 - offsetRateX) + btnPanelWidth * offsetRateX;
@@ -1898,8 +2074,8 @@
                     }
                     _.events.dragingSize = true;
                     var e = $.getEvent(),
-                        x = (e.clientX - moveX) * (dir.indexOf('left') >= 0 ? -1 : 1),
-                        y = (e.clientY - moveY) * (dir.indexOf('top') >= 0 ? -1 : 1);
+                        x = (e.clientX - moveX) * (dir.indexOf(Direction.Left) >= 0 ? -1 : 1),
+                        y = (e.clientY - moveY) * (dir.indexOf(Direction.Top) >= 0 ? -1 : 1);
 
                     _.showIframeShade(true);
                     _.setScale({ dir: dir, x: x, y: y }, true, par);
@@ -1979,33 +2155,33 @@
 
             switch (dir) {
                 case 2:
-                case 'top':
+                case Position.Top:
                     top = fs.y - h - arrowSize;
-                    css = 'top';
+                    css = Position.Top;
                     break;
                 case 6:
-                case 'right':
+                case Position.Right:
                     if ((fs.x + fs.w + w + arrowSize) > bs.width) {
                         left = fs.x - w - arrowSize;
-                        css = 'left';
+                        css = Position.Left;
                     } else {
                         left = fs.x + fs.w + arrowSize;
-                        css = 'right';
+                        css = Position.Right;
                     }
                     break;
                 case 8:
-                case 'bottom':
+                case Position.Bottom:
                     top = fs.y + fs.h + arrowSize;
-                    css = 'bottom';
+                    css = Position.Bottom;
                     break;
                 case 4:
-                case 'left':
+                case Position.Left:
                     if ((fs.x - w - arrowSize) < 0) {
                         left = fs.x + fs.w + arrowSize;
-                        css = 'right';
+                        css = Position.Right;
                     } else {
                         left = fs.x - w - arrowSize;
-                        css = 'left';
+                        css = Position.Left;
                     }
                     break;
             }
@@ -2014,10 +2190,6 @@
 
             return _;
         }
-    };
-
-    var DialogType = {
-
     };
 
     function DialogUtil() {
@@ -2080,28 +2252,28 @@
             $.extend(options, { host: host });
 
             switch (opt.type) {
-                case 'alert':
+                case DialogType.Alert:
                     opt.buttons = DialogButtons.OK;
                     opt.showMin = opt.showMax = false;
                     break;
-                case 'confirm':
+                case DialogType.Confirm:
                     opt.buttons = DialogButtons.OKCancel;
                     opt.showMin = opt.showMax = false;
                     break;
-                case 'dialog':
+                case DialogType.Dialog:
                     opt.height = 'auto';
                     break;
-                case 'win':
+                case DialogType.Win:
                     opt.showBottom = $.isBoolean(options.showBottom, false);
                     opt.height = 'auto';
                     break;
-                case 'form':
+                case DialogType.Form:
                     opt.height = 'auto';
                     opt.delayClose = true;
                     break;
-                case 'url':
-                case 'load':
-                case 'iframe':
+                case DialogType.Url:
+                case DialogType.Load:
+                case DialogType.Iframe:
                     opt.showBottom = $.isBoolean(options.showBottom, false);
                     break;
                 default:
@@ -2114,7 +2286,7 @@
             var d = this.get($.extend(opt, options).id);
 
             //设置 tooltip 默认位置为 right
-            if (opt.type === 'tooltip' && !opt.position) {
+            if (opt.type === DialogType.Tooltip && !opt.position) {
                 opt.position = 6; //right
             }
 
@@ -2202,7 +2374,7 @@
                 for (var i = _.keys.length - 1; i >= 0; i--) {
                     var k = _.keys[i], d = _.caches[k];
                     if (d && !d.closed) {
-                        if (d.opt.type === 'tooltip') {
+                        if (d.opt.type === DialogType.Tooltip) {
                             d.setTooltipPosition();
                         } else {
                             if (d.status.max) {
@@ -2229,40 +2401,40 @@
             return DialogCenter.show(content, title, options);
         },
         alert: function (content, title, options) {
-            return DialogCenter.show(content, title, options, 'alert');
+            return DialogCenter.show(content, title, options, DialogType.Alert);
         },
         confirm: function (content, title, options) {
-            return DialogCenter.show(content, title, options, 'confirm');
+            return DialogCenter.show(content, title, options, DialogType.Confirm);
         },
         message: function (content, options) {
-            return DialogCenter.show(content, undefined, options, 'message');
+            return DialogCenter.show(content, undefined, options, DialogType.Message);
         },
         tips: function (content, element, options) {
-            return DialogCenter.show(content, undefined, options, 'tooltip', element);
+            return DialogCenter.show(content, undefined, options, DialogType.Tips, element);
         },
         tooltip: function (content, element, options) {
-            return DialogCenter.show(content, undefined, options, 'tooltip', element);
+            return DialogCenter.show(content, undefined, options, DialogType.Tooltip, element);
         }
     });
 
     $.extend($.dialog, {
         msg: function (content, options) {
-            return DialogCenter.show(content, undefined, options, 'message');
+            return DialogCenter.show(content, undefined, options, DialogType.Msg);
         },
         win: function (content, title, options) {
-            return DialogCenter.show(content, title, options, 'win');
+            return DialogCenter.show(content, title, options, DialogType.Win);
         },
         form: function (content, title, options) {
-            return DialogCenter.show(content, title, options, 'form');
+            return DialogCenter.show(content, title, options, DialogType.Form);
         },
         load: function (urlOrElement, title, options) {
-            return DialogCenter.show(urlOrElement, title, options, 'load');
+            return DialogCenter.show(urlOrElement, title, options, DialogType.Load);
         },
         iframe: function(url, title, options) {
-            return DialogCenter.show(url, title, options, 'iframe');
+            return DialogCenter.show(url, title, options, DialogType.Iframe);
         },
         url: function(url, title, options) {
-            return DialogCenter.show(url, title, options, 'url');
+            return DialogCenter.show(url, title, options, DialogType.Url);
         },
         close: function (id) {
             return DialogCenter.close(id), $;
@@ -2280,7 +2452,7 @@
             return DialogCenter.close(id), $;
         },
         closeAll: function (type) {
-            return DialogCenter.closeAll(type || 'tooltip'), $;
+            return DialogCenter.closeAll(type || DialogType.Tooltip), $;
         }
     });
 

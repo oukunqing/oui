@@ -163,11 +163,5 @@ var d = '2010-01-02 10:0:12.123'.toDate().format('ts');
 console.log(d);
 
 
-var str = '确定,取消,标题栏,是,否,中止,重试,忽略,关闭';
-//console.log(str.toUnicode());
-
-        var styles = {width:'200px', border: 'solid 1px #fff'};
-
-        var css = $.toCssText(styles);
-
-        console.log(css);
+var str = '倒计时结束后关闭';
+console.log(str.toUnicode());

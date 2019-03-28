@@ -1544,7 +1544,7 @@
 
     var win = function () { try { return window } catch (e) { return null } }(),
         doc = function () { try { return document } catch (e) { return null } }(),
-        docElem = doc.documentElement,
+        docElem = function () { try { return document.documentElement } catch (e) { return null } }(),
         head = doc ? doc.getElementsByTagName('head')[0] : null,
         redirect = function (url) {
             $.isString(url, true) ? location.href = url : null;

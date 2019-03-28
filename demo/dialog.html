@@ -79,10 +79,11 @@ function alert2(){
         lock: true, clickBgClose: 'dblclick', 
         escClose: true, 
         autoClose: true, 
-        width: 'auto',
-        //closeTiming: 15000,
+        //width: 'auto',
+        closeTiming: 15000,
         timing: 15000,
-        showTimer: false,
+        showTimer: true,
+        //lang: 'english',
         maxAble: true, minAble: true, closeAble: true,
         //buttons: $.DialogButtons.OK, 
         //opacity: 0.2,
@@ -165,7 +166,7 @@ function confirm2(){
             console.log(dialogResult);
             alert('ok: ');
             if(d.opt.delayClose) {
-                alert('延迟关闭');
+                alert('延迟关闭，在外部回调函数中执行完业务逻辑后，再由外部函数关闭窗口');
             }
         },
         cancel: function(dialogResult, d) {
@@ -222,7 +223,11 @@ function win(){
 }
 
 function form2() {
-    var win = $.dialog.form('登录窗口', '登录', {
+    var win = $.dialog.form('登录窗口', '登录窗口 <span style="color:#f00;">中华人民共和国万岁</span> 中国人民从此站起来了', {
+        //lang: 'Chinese',
+        lang: 'English',
+        status: 'max',
+        //dialogStyle: {'font-family': '宋体'},
         callback: function(dialogResult, d, param) {
             console.log('form2: ', dialogResult);
             
@@ -233,8 +238,13 @@ function form2() {
 
                 if(d.opt.delayClose) {
                     console.log('form2: ', '延迟关闭');
-                    d.close();
                 }
+                //延时2秒，模拟表单提交任务
+                window.setTimeout(function() {
+                    console.log('form2: ', '表单内容已提交到后台服务端，关闭登录窗口');
+                    d.close();
+                }, 2000);
+
             } else if(dialogResult.None) {
                 console.log('form2: ', '点击了关闭按钮');
             } else {
@@ -248,7 +258,11 @@ function load(){
     //var url = 'pagination.html';
     //var url = 'http://122.227.179.90:81';
     var url = 'http://122.227.179.90:81';
-    var win = $.dialog.load(url, {maxWidth:800, maxHeight:500, width:600, height:360});
+    var win = $.dialog.load(url, '加载URL 限制最大最小值', {
+        maxWidth:800, maxHeight:500,
+        width:600, height:360,
+        minWidth: 300, minHeight: 150
+    });
 }
 
 function load2(id){
