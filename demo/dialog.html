@@ -235,7 +235,6 @@ function form2() {
         moveAble: true,
         dragMove: true,
         topMost: true,
-        target: $I('txtTips'),
         //dialogStyle: {'font-family': '宋体'},
         callback: function(dialogResult, d, param) {
             console.log('form2: ', dialogResult);
@@ -313,7 +312,8 @@ function load2(id){
 function msg(){
     var win = $.dialog.msg('msg: 这是普通窗口模式。', {
         id: 'msg', autoClose: false, closeTiming: 15000, fixed: true, 
-        position: 9, lock: false, clickBgClose: true, y: 40, x: 50,
+        position: 8, lock: false, clickBgClose: true, y: 0, x: 0,
+        target: $I('txtTips'),
         dragSize: false
     });
 
@@ -329,9 +329,14 @@ function tips(){
     tips2();
 
     window.setTimeout(function() {
-        win.update('tips: 请注意：提示信息已经更新。', {position:6})
+        var html = 'tips: 请注意：提示信息已经更新。<br />大家好<br />好啊<br />'
+            + '<img src="http://122.227.179.90:81/skin/default/images/home/welcome.jpg" />';
+        win.update(html, {
+            position: 6,
+            tooltipStyle: {'background': '#ffffff'}
+        })
     },3000);
-
+    
     window.setTimeout(function() {
         win.update('tips: 请注意：提示信息已经再次更新。', {position:2})
     },5000);
@@ -343,6 +348,7 @@ function tips(){
     window.setTimeout(function() {
         //win.close();
     }, 5000);
+    
 }
 
 function tips2(){

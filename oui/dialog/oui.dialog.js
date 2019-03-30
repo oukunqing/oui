@@ -619,9 +619,10 @@
             return Factory.getOptions(_.id, key, defaultValue);
         },
         setStatus: function(_, key) {
-            var obj = {};
+            var obj = {key: key};
             obj[key] = true;
-            return this.setOptions(_, 'status', obj);
+            var lastStatus = this.getCache(_, 'status').key;
+            return this.setOptions(_, 'lastStatus', lastStatus).setOptions(_, 'status', obj);
         },
         hideDocOverflow: function (_, isShow) {
             var overflow;
@@ -640,10 +641,10 @@
             return this;
         },
         build: function(_, options) {
-            var util = this,
-                opt = options || Factory.getOptions(_.id, 'options'),
-                ctls = Factory.getOptions(_.id, 'controls'),
-                status = opt.status || Config.DialogStatus.Normal;
+            var util = this, p = Util.getParam(_), opt = p.options, ctls = p.controls;
+            var status = opt.status || Config.DialogStatus.Normal;
+
+            opt.type = Common.checkType(opt.type, true);
 
             if(status !== Config.DialogStatus.Normal) {
                 opt.status = Config.DialogStatus.Normal;
@@ -652,7 +653,7 @@
             if (opt.type === Config.DialogType.Tooltip) {
                 //不需要遮罩层
                 opt.lock = false;
-                return util.buildTooltip(_, options);
+                return util.buildTooltip(_, options), util;
             } else if (opt.lock) {
                 util.hideDocOverflow(_)
                     .buildShade(_)
@@ -1258,7 +1259,7 @@
                 _.getStatus()[sp.type]) {
                 return util;
             }
-            console.log(p, p.status);
+
             if (p.status.normal) {
                 util.setCache(_);
             }
@@ -1317,6 +1318,10 @@
                 util.hideZoomSwitch(_)
                     .setStatus(_, Config.DialogStatus.Min)
                     .setPosition(_, { position: opt.position });
+
+                var pSize = $.getPaddingSize(obj), 
+                    topWidth = minW - pSize.left - pSize.right;                    
+                util.setTitleSize(_, topWidth);
             } else {
                 isSetBodySize = true;
 
@@ -1360,14 +1365,14 @@
 
             return this;
         },
-        setTitleSize: function(_) {
+        setTitleSize: function(_, width) {
             var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls;
             if(p.none) { return this; }
 
             if(_.isClosed() || !ctls.top) {
                 return this;
             }
-            var topWidth = ctls.top.clientWidth,
+            var topWidth = width || ctls.top.clientWidth,
                 logoWidth = ctls.logo ? ctls.logo.offsetWidth : 0,
                 btnWidth = ctls.btnPanel ? ctls.btnPanel.offsetWidth : 0,
                 timerWidth = ctls.timer ? ctls.timer.offsetWidth : 0,
@@ -1527,7 +1532,7 @@
 
             return util;
         },
-        setTargetPosition: function(options, obj) {
+        setTargetPosition: function(options, obj, isFixedSize) {
             var par = $.extend({
                 target: null,
                 parent: null,
@@ -1539,6 +1544,7 @@
             if(!$.isElement(par.target) || !$.isElement(obj)) {
                 return {};
             }
+            //TODO:
 
             var pos = par.position || par.pos || 7,  //方向位置，默认为左下方（7）
                 p = $.getOffset(par.target),
@@ -1575,7 +1581,6 @@
                 case 8:
                 case Config.Position.Bottom:
                     top = fs.y + fs.h + par.y;
-                    console.log('top:', p, fs.y, fs.h, par.y, top)
                     css = Config.Position.Bottom;
                     break;
                 case 4:
@@ -1589,7 +1594,12 @@
                     }
                     break;
             }
-            $.setStyle(obj, { width: w, height: h, left: left, top: top }, 'px');
+
+            if(isFixedSize) {
+                $.setStyle(obj, {width: w, height: h }, 'px');
+            }
+
+            $.setStyle(obj, { left: left, top: top }, 'px');
 
             return css;
         },
@@ -1843,6 +1853,9 @@
             if(ctls.bottom){
                 s.height += ctls.bottom.offsetHeight;
             }
+
+            //增加20px高度留白
+            s.height += 20;
 
             if(isLimit) {
                 var mw = parseInt('0' + opt.minWidth, 10),
@@ -2176,72 +2189,20 @@
                 target: opt.target,
                 parent: opt.parent,
                 position: opt.position,    //默认停靠在目标控件左下方位置
-                x: opt.x,
-                y: opt.y
+                x: opt.x || 7,
+                y: opt.y || 7
             };
 
-            var css = util.setTargetPosition(par, obj);
-            obj.className = 'oui-tooltip oui-tip-' + css;
+            //设置自定义的样式
+            var cssText = Common.toCssText(opt.tooltipStyle || opt.tipStyle, 'tooltip');            
+            if (cssText) {
+                obj.style.cssText = cssText;
+            }
+
+            var dir = util.setTargetPosition(par, obj);
+            obj.className = 'oui-tooltip oui-tip-' + dir;
 
             return util;
-
-/*
-            if (!$.isElement(obj) || !$.isElement(host)) {
-                return false;
-            }
-            var dir = opt.position,
-                p = $.getOffset(host),
-                w = obj.offsetWidth,
-                h = obj.offsetHeight,
-                bs = $.getBodySize(),
-                fs = {
-                    w: p.width,
-                    h: p.height,
-                    x: p.left,
-                    y: p.top
-                },
-                arrowSize = 7,
-                left = fs.x,
-                top = fs.y,
-                css = '';
-
-            switch (dir) {
-                case 2:
-                case Position.Top:
-                    top = fs.y - h - arrowSize;
-                    css = Position.Top;
-                    break;
-                case 6:
-                case Position.Right:
-                    if ((fs.x + fs.w + w + arrowSize) > bs.width) {
-                        left = fs.x - w - arrowSize;
-                        css = Position.Left;
-                    } else {
-                        left = fs.x + fs.w + arrowSize;
-                        css = Position.Right;
-                    }
-                    break;
-                case 8:
-                case Position.Bottom:
-                    top = fs.y + fs.h + arrowSize;
-                    css = Position.Bottom;
-                    break;
-                case 4:
-                case Position.Left:
-                    if ((fs.x - w - arrowSize) < 0) {
-                        left = fs.x + fs.w + arrowSize;
-                        css = Position.Right;
-                    } else {
-                        left = fs.x - w - arrowSize;
-                        css = Position.Left;
-                    }
-                    break;
-            }
-            obj.className = 'oui-tooltip oui-tip-' + css;
-            $.setStyle(obj, { left: left, top: top }, 'px');
-
-            return _;
-            */
         }
     };
 
@@ -2313,7 +2274,8 @@
                 contentStyle: '',       //内容样式
                 topStyle: '',           //顶部样式
                 titleStyle: '',         //标题样式
-                bottomStyle: ''         //底部样式
+                bottomStyle: '',        //底部样式
+                tipStyle: ''
             }, Common.checkOptions(content, title, options));
 
         return this.initial(opt);
@@ -2326,16 +2288,18 @@
             if(!$.isString(opt.title) && !$.isNumber(opt.title)) {
                 opt.title = Common.getDialogText('Title', opt.lang);
             }
-            if($.isBoolean(opt.clickBgClose)) {
 
+            if($.isBoolean(opt.clickBgClose)) {
+                opt.clickBgClose = opt.clickBgClose ? 'click' : '';
             }
+
             if (!opt.showTitle && !opt.showBottom && !opt.lock &&
                 $.isBoolean(opt.closeAble, true) &&
                 opt.type !== Config.DialogType.Tooltip) {
                 opt.escClose = true;
-                if(!$.isBoolean(opt.clickBgClose)) {
-                    opt.clickBgClose = opt.clickBgClose || 'click';
-                }
+                opt.clickBgClose = opt.clickBgClose || 'click';
+                //没有标题没有底部的消息框，设置内容边距为1px
+                opt.contentStyle = $.extend({'padding': '1px'}, opt.contentStyle);
             }
             if(opt.lock) {
                 opt.fixed = false;
@@ -2549,7 +2513,9 @@
             if(p.none) { return _; }
 
             var type = Config.DialogStatus.Max, status = p.status, lastStatus = p.lastStatus;
-            if (status.max || (status.min && lastStatus === Config.DialogStatus.Normal)) {
+            console.log('max: ', p.status, p.lastStatus, status, lastStatus);
+
+            if (p.status.max || (p.status.min && lastStatus === Config.DialogStatus.Normal)) {
                 type = Config.DialogStatus.Normal;
             }
             return Util.setSize(_, { type: type });

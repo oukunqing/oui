@@ -1627,6 +1627,18 @@
             var style = elem.currentStyle || document.defaultView.getComputedStyle(elem, null);
             return $.isString(styleName) ? style[styleName] || defaultValue: style;
         },
+        getPaddingSize = function(elem) {
+            if (!isElement(elem)) {
+                return {};
+            }            
+            var style = elem.currentStyle || document.defaultView.getComputedStyle(elem, null);
+            return {
+                left: parseInt('0' + style['paddingLeft'], 10),
+                right: parseInt('0' + style['paddingRight'], 10),
+                top: parseInt('0' + style['paddingTop'], 10),
+                bottom: parseInt('0' + style['paddingBottom'], 10)
+            };            
+        },
         getOffset = function(elem) {
             if (!isElement(elem)) {
                 return {};
@@ -2085,6 +2097,7 @@
         getElementStyle: getElementStyle,
         getOffset: getOffset,
         offset: getOffset,
+        getPaddingSize: getPaddingSize,
         getBodySize: getBodySize,
         isWindow: isWindow,
         isArrayLike: isArrayLike,

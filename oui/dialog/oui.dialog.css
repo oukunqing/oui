@@ -100,6 +100,7 @@
     text-indent: 6px;
     line-height: 28px;
     text-overflow: ellipsis;
+    overflow: hidden;
 }
 
 .oui-dialog-title-size {
@@ -464,14 +465,15 @@
     border-radius: 3px;
     font-size: 14px;
     margin: 0; 
-    padding: 2px 5px;
-    line-height: 1.5em;
+    padding: 5px;
+    line-height: 1.2em;
     /*
     border: 1px solid #f60;
     background-color: #fff;
     */
     border: solid 1px #ffb4a8;
     background: #fef2f2;
+    box-sizing: content-box;
 }
 
 .oui-tooltip:after,.oui-tooltip:before{
@@ -485,7 +487,16 @@
 }
 
 .oui-tooltip .content{
-    white-space:nowrap;
+    white-space: nowrap;
+    margin: 0; padding: 0;
+    border: none;
+    display: block;
+}
+
+.oui-tooltip .content img{
+    display: block;
+    margin: 0; padding: 0;
+    border: none 0;
 }
 
 .oui-tip-bottom:after{
