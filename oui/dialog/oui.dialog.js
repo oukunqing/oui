@@ -599,7 +599,7 @@
             var p = Factory.getOptions(_.id);
             return p || {
                 none: true,
-                options: {}, controls: {}
+                options: {}, controls: {}, status: {}, events: {}, buttons: {}, btns: {}
             };
         },
         setOptions: function (_, key, subKey, value) {
@@ -691,7 +691,7 @@
                 $.extend(opt, util.getAutoSize(_, true));
                 util.setSize(_, { type: opt.status, width: opt.width, height: opt.height });
             }            
-            util.setPosition(_, { pos: opt.position, x: opt.x, y: opt.y });
+            util.setPosition(_, { position: opt.position, x: opt.x, y: opt.y });
 
             util.setCache(_)
                 .dragPosition(_)
@@ -1239,49 +1239,48 @@
                 ctls = p.controls, 
                 btns = p.btns, 
                 obj = ctls.box, 
-                status = p.status,
-                lastSize = p.lastSize,
                 par = {};
 
             if ($.isString(options)) {
                 options = { type: options };
             }
-            var p = $.extend({
+            var sp = $.extend({
                 type: Config.DialogStatus.Normal,
                 width: 0,
                 height: 0
             }, options);
 
-            p.width = parseInt(p.width, 10);
-            p.height = parseInt(p.height, 10);
+            sp.width = parseInt(sp.width, 10);
+            sp.height = parseInt(sp.height, 10);
 
-            if (p.type === '' || 
-                (isNaN(p.width) && isNaN(p.height)) ||
-                _.getStatus()[p.type]) {
+            if (sp.type === '' || 
+                (isNaN(sp.width) && isNaN(sp.height)) ||
+                _.getStatus()[sp.type]) {
                 return util;
             }
-            if (status.normal) {
+            console.log(p, p.status);
+            if (p.status.normal) {
                 util.setCache(_);
             }
 
-            if (status.max && p.type !== Config.DialogStatus.Max && ctls.container) {
+            if (p.status.max && sp.type !== Config.DialogStatus.Max && ctls.container) {
                 $.removeClass(ctls.container, 'dialog-overflow-hidden');
-            } else if (p.type !== Config.DialogStatus.Min) {
+            } else if (sp.type !== Config.DialogStatus.Min) {
                 $.removeClass(ctls.bottom, 'display-none');
             }
 
-            if (p.type !== Config.DialogStatus.Max && !opt.lock) {
+            if (sp.type !== Config.DialogStatus.Max && !opt.lock) {
                 util.hideDocOverflow(_, true);
             }
 
             if (btns.max) {
-                //btns.max.title = p.type === DialogStatus.Max ? 'Restore Down' : 'Maximize';
-                btns.max.title = Common.getStatusText(p.type === Config.DialogStatus.Max ? 'restore' : 'max', opt.lang);
+                //btns.max.title = sp.type === DialogStatus.Max ? 'Restore Down' : 'Maximize';
+                btns.max.title = Common.getStatusText(sp.type === Config.DialogStatus.Max ? 'restore' : 'max', opt.lang);
             }
 
             var bs = $.getBodySize(), isSetBodySize = false, isSetPosition = false, isFullScreen = false;
 
-            if (p.type === Config.DialogStatus.Max) {
+            if (sp.type === Config.DialogStatus.Max) {
                 if (!opt.maxAble) {
                     return this;
                 }
@@ -1294,14 +1293,14 @@
                 if (ctls.container) {
                     $.addClass(ctls.container, 'dialog-overflow-hidden');
                 }
-                if (status.min) {
+                if (p.status.min) {
                     $.removeClass(obj, 'oui-dialog-min');
                 }
                 util.hideDocOverflow(_)
                     .hideZoomSwitch(_)
                     .setStatus(_, Config.DialogStatus.Max);
 
-            } else if (p.type === Config.DialogStatus.Min) {
+            } else if (sp.type === Config.DialogStatus.Min) {
                 if (!opt.minAble) {
                     return this;
                 }
@@ -1312,36 +1311,36 @@
                 $.addClass(ctls.bottom, 'display-none')
                     .addClass(obj, 'oui-dialog-min')
                     .removeClass(btns.max, 'btn-normal');
-                if (status.max) {
+                if (p.status.max) {
                     $.removeClass(obj, 'oui-dialog-max');
                 }
                 util.hideZoomSwitch(_)
                     .setStatus(_, Config.DialogStatus.Min)
-                    .setPosition(_, { pos: opt.position });
+                    .setPosition(_, { position: opt.position });
             } else {
                 isSetBodySize = true;
 
                 $.removeClass(btns.max, 'btn-normal');
 
-                if (status.max) {
+                if (p.status.max) {
                     $.removeClass(obj, 'oui-dialog-max');
-                } else if (status.min) {
+                } else if (p.status.min) {
                     $.removeClass(obj, 'oui-dialog-min');
                 }
                 util.showZoomSwitch(_)
                     .setStatus(_, Config.DialogStatus.Normal);
 
-                if (p.type === 'resize' || p.type === 'size') {
-                    par = { width: p.width, height: p.height };
-                } else if (p.type === 'scale') {
+                if (sp.type === 'resize' || sp.type === 'size') {
+                    par = { width: sp.width, height: sp.height };
+                } else if (sp.type === 'scale') {
                     isSetBodySize = false;
                     util.changeSize(_, options);
-                } else {  //p.type === 'normal'
-                    if (!$.isUndefined(lastSize)) {
-                        isSetPosition = bs.width !== lastSize.bs.width || bs.height !== lastSize.bs.height;                        
-                        $.setStyle(ctls.box, lastSize, 'px');
+                } else {  //sp.type === 'normal'
+                    if (!$.isUndefined(p.lastSize)) {
+                        isSetPosition = bs.width !== p.lastSize.bs.width || bs.height !== p.lastSize.bs.height;                        
+                        $.setStyle(ctls.box, p.lastSize, 'px');
                     } else {
-                        par = { width: p.width, height: p.height };
+                        par = { width: sp.width, height: sp.height };
                     }
                 }
             }
@@ -1359,7 +1358,6 @@
                 util.setPosition(_);
             }
 
-            console.log('setSize: ', status);
             return this;
         },
         setTitleSize: function(_) {
@@ -1421,51 +1419,57 @@
             if(p.none || !obj) { return this; }
 
             if ($.isString(options) || $.isNumber(options)) {
-                options = { pos: options };
+                options = { position: options };
             } else if ($.isUndefined(options)) {
-                options = { pos: opt.position };
+                options = { position: opt.position };
             }
-            var p = $.extend({
+            var par = $.extend({
                 event: '',
                 target: opt.target,
-                pos: opt.position,
+                parent: opt.parent,
+                position: opt.position,
                 x: opt.x,
                 y: opt.y
             }, options);
 
-            p.pos = p.pos === 'custom' ? 10 : parseInt(p.pos, 10);
-            p.x = Math.abs(p.x);
-            p.y = Math.abs(p.y);
+            if($.isElement(par.target)) {
+                //目标位置停靠
+                return util.setTargetPosition(par, obj), util;
+            }
 
-            if (isNaN(p.pos) || isNaN(p.x) || isNaN(p.y)) {
-                return this;
+            par.position = par.position === 'custom' ? 10 : parseInt(par.position, 10);
+            par.x = Math.abs(par.x);
+            par.y = Math.abs(par.y);
+
+            if (isNaN(par.position) || isNaN(par.x) || isNaN(par.y)) {
+                return util;
             }
 
             var bs = $.getBodySize(),
                 cp = $.getScrollPosition(),
-                width = obj.offsetWidth,
-                height = obj.offsetHeight,
+                w = obj.offsetWidth,
+                h = obj.offsetHeight,
                 //锁定界面相当于固定位置
                 fixed = opt.lock || opt.fixed,
                 posX, posY,
                 cpTop = fixed ? 0 : cp.top,
                 cpLeft = fixed ? 0 : cp.left,
-                isCenter = util.checkPosition(_, Config.Position.Center, p.pos),
-                isMiddle = util.checkPosition(_, Config.Position.Middle, p.pos),
+                isCenter = util.checkPosition(_, Config.Position.Center, par.position),
+                isMiddle = util.checkPosition(_, Config.Position.Middle, par.position),
                 isBottom = false,
                 isRight = false;
 
             if (isCenter) {
-                posX = (bs.width / 2 - width / 2) + cpLeft;
+                posX = (bs.width / 2 - w / 2) + cpLeft;
             } else {
-                isRight = util.checkPosition(_, Config.Position.Right, p.pos)
-                posX = isRight ? (bs.width - p.x - width + cpLeft) : cpLeft + p.x;
+                isRight = util.checkPosition(_, Config.Position.Right, par.position)
+                posX = isRight ? (bs.width - par.x - w + cpLeft) : cpLeft + par.x;
             }
             if (isMiddle) {
-                posY = bs.height / 2 - height / 2 + cpTop;
+                posY = bs.height / 2 - h / 2 + cpTop;
             } else {
-                isBottom = util.checkPosition(_, Config.Position.Bottom, p.pos);
-                posY = isBottom ? (bs.height - p.y - height + cpTop) : cpTop + p.y;
+                isBottom = util.checkPosition(_, Config.Position.Bottom, par.position);
+                posY = isBottom ? (bs.height - par.y - h + cpTop) : cpTop + par.y;
             }
 
             //清除cssText上下左右4个样式
@@ -1474,30 +1478,30 @@
             return $.setStyle(obj, { left: posX, top: posY }, 'px'), this;
         },
         movePosition: function(_, options, isMoveTo) {
-            var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls;
-            if(p.none) { return this; }
+            var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls, obj = ctls.box;
+            if(p.none || !obj || !opt.moveAble) { return this; }
 
             var par = $.extend({
                 target: null,
+                parent: null,
                 position: 7,    //默认停靠在目标控件左下方位置
                 x: null,
                 y: null
             }, options);
 
+            if($.isElement(par.target)) {
+                //目标位置停靠
+                return util.setTargetPosition(par, obj), util;
+            }
+
             var moveTo = $.isBoolean(isMoveTo, false),
                 bs = $.getBodySize(),
-                target = $.isElement(par.target),
-                obj = ctls.box,
                 left = obj.offsetLeft,
                 top = obj.offsetTop,
                 w = obj.offsetWidth,
                 h = obj.offsetHeight,
                 x = parseInt(par.x || par.left, 10),
                 y = parseInt(par.y || par.top, 10);
-
-            if(target) {
-                //目标位置停靠
-            }
 
             if(isNaN(x)) { x = moveTo ? left : 0; }
             if(isNaN(y)) { y = moveTo ? top : 0; }
@@ -1523,24 +1527,82 @@
 
             return util;
         },
-        getTargetPosition: function(target, position, x, y) {
-            var pos = {};
-//TODO:
-            $.isElement(par.target)
+        setTargetPosition: function(options, obj) {
+            var par = $.extend({
+                target: null,
+                parent: null,
+                position: 7,    //默认停靠在目标控件左下方位置
+                x: null,
+                y: null
+            }, options);
 
-            return pos;
+            if(!$.isElement(par.target) || !$.isElement(obj)) {
+                return {};
+            }
+
+            var pos = par.position || par.pos || 7,  //方向位置，默认为左下方（7）
+                p = $.getOffset(par.target),
+                w = obj.offsetWidth,
+                h = obj.offsetHeight,
+                bs = $.getBodySize(),
+                fs = {
+                    w: p.width,
+                    h: p.height,
+                    x: p.left,
+                    y: p.top
+                },
+                left = fs.x,
+                top = fs.y,
+                css = '';
+
+            switch (pos) {
+                case 2:
+                case Config.Position.Top:
+                    top = fs.y - h - par.y;
+                    css = Config.Position.Top;
+                    break;
+                case 6:
+                case Config.Position.Right:
+                    if ((fs.x + fs.w + w + par.x) > bs.width) {
+                        left = fs.x - w - par.x;
+                        css = Config.Position.Left;
+                    } else {
+                        left = fs.x + fs.w + par.x;
+                        css = Config.Position.Right;
+                    }
+                    break;
+                case 7:
+                case 8:
+                case Config.Position.Bottom:
+                    top = fs.y + fs.h + par.y;
+                    console.log('top:', p, fs.y, fs.h, par.y, top)
+                    css = Config.Position.Bottom;
+                    break;
+                case 4:
+                case Config.Position.Left:
+                    if ((fs.x - w - par.x) < 0) {
+                        left = fs.x + fs.w + par.x;
+                        css = Config.Position.Right;
+                    } else {
+                        left = fs.x - w - par.x;
+                        css = Config.Position.Left;
+                    }
+                    break;
+            }
+            $.setStyle(obj, { width: w, height: h, left: left, top: top }, 'px');
+
+            return css;
         },
         dragPosition: function (_) {
             var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls;
             if(p.none) { return this; }
 
             var obj = ctls.box,
-                events = p.events,
                 docMouseMove = document.onmousemove,
                 docMouseUp = document.onmouseup;
 
             function moveDialog() {
-                if (!opt.dragPosition) {
+                if (!opt.moveAble || !opt.dragMove) {
                     return $.cancelBubble(), false;
                 }
                 var evt = $.getEvent(),
@@ -1550,47 +1612,37 @@
                     clientHeight = bs.height,
                     moveX = evt.clientX,
                     moveY = evt.clientY,
-                    moveTop = obj.offsetTop,
-                    moveLeft = obj.offsetLeft,
+                    top = obj.offsetTop,
+                    left = obj.offsetLeft,
                     moveAble = true,
-                    isToNormal = false,
-                    status = p.status;
-
-                console.log('status: ', status);
+                    isToNormal = false;
 
                 document.onmousemove = function () {
-                    if (!opt.dragPosition || !moveAble || events.btnMouseDown) {
+                    if (!opt.moveAble || !opt.dragMove || !moveAble || p.events.btnMouseDown) {
                         return false;
                     }
-
-                console.log('status22: ', status);
-
                     util.showIframeShade(ctls, true);
-                    var evt = $.getEvent(),
-                        x = moveLeft + evt.clientX - moveX,
-                        y = moveTop + evt.clientY - moveY,
-                        w = obj.offsetWidth,
-                        h = obj.offsetHeight,
-                        posX = x,
-                        posY = y;
+                    var e = $.getEvent(),
+                        x = left + e.clientX - moveX,
+                        y = top + e.clientY - moveY;
 
-                    if (!isToNormal && status.max && (posX > 2 || posY > 2)) {
+                    if (!isToNormal && p.status.max && (x > 2 || y > 2)) {
                         isToNormal = true;
-                        util.dragToNormal(_, evt, bs, moveX, moveY);
-                        moveTop = obj.offsetTop;
-                        moveLeft = obj.offsetLeft;
+                        util.dragToNormal(_, e, bs, moveX, moveY);
+                        top = obj.offsetTop;
+                        left = obj.offsetLeft;
                         return false;
                     }
-                    util.movePosition(_, {x: posX, y: posY}, true);
+                    util.movePosition(_, {x: x, y: y}, true);
                 };
                 document.onmouseup = function () {
-                    if (!opt.dragPosition || !moveAble) {
+                    if (!opt.moveAble || !opt.dragMove || !moveAble) {
                         return false;
                     }
                     document.onmousemove = docMouseMove;
                     document.onmouseup = docMouseUp;
                     moveAble = false;
-                    events.btnMouseDown = false;
+                    p.events.btnMouseDown = false;
                     util.showIframeShade(ctls, false);
                 };
             }
@@ -1611,7 +1663,7 @@
             var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls, obj = ctls.box;
             if(p.none) { return this; }
 
-            if (!obj || (!opt.dragSize && isDrag)) {
+            if (!obj || !opt.sizeAble || (!opt.dragSize && isDrag)) {
                 return util;
             }
             var par = $.extend({
@@ -1886,8 +1938,6 @@
             var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls, obj = ctls.box;
             if(p.none) { return this; }
 
-            console.log('dragToNormal:', moveX, moveY);
-
             //对话框最大化时，拖动对话框，先切换到标准模式（尺寸、定位）
             util.setSize(_, { type: Config.DialogStatus.Normal });
 
@@ -1903,25 +1953,21 @@
             } else {
                 offsetX = evt.clientX - moveX;
             }
-
-            console.log('dragToNormal:', moveX, moveY, { pos: 'custom', event: 'drag', x: offsetX, y: offsetY });
-
             //移动对话框到当前鼠标位置
-            util.setPosition(_, { pos: 'custom', event: 'drag', x: offsetX, y: offsetY });
+            util.setPosition(_, { position: 'custom', event: 'drag', x: offsetX, y: offsetY });
 
             return this;
         },
         dragSize: function (_) {
             var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls;
-            if(p.none) { return this; }
+            if(p.none || !opt.sizeAble || !opt.dragSize) { return this; }
 
             var obj = ctls.box,
-                events = p.events,
                 docMouseMove = document.onmousemove,
                 docMouseUp = document.onmouseup;
 
             function resizeDialog(dir) {
-                if (!opt.dragSize) {
+                if (!opt.sizeAble || !opt.dragSize) {
                     return $.cancelBubble(), false;
                 }
                 var evt = $.getEvent(),
@@ -1940,10 +1986,10 @@
                     minHeight: parseInt(opt.minHeight, 10)
                 };
                 document.onmousemove = function () {
-                    if (!opt.dragSize || !moveAble) {
+                    if (!opt.sizeAble || !opt.dragSize || !moveAble) {
                         return false;
                     }
-                    events.dragingSize = true;
+                    p.events.dragingSize = true;
                     var e = $.getEvent(),
                         x = (e.clientX - moveX) * (dir.indexOf(Config.Direction.Left) >= 0 ? -1 : 1),
                         y = (e.clientY - moveY) * (dir.indexOf(Config.Direction.Top) >= 0 ? -1 : 1);
@@ -1952,13 +1998,13 @@
                     util.changeSize(_, { dir: dir, x: x, y: y }, true, par);
                 };
                 document.onmouseup = function () {
-                    if (!opt.dragSize || !moveAble) {
+                    if (!opt.sizeAble || !opt.dragSize || !moveAble) {
                         return false;
                     }
                     document.onmousemove = docMouseMove;
                     document.onmouseup = docMouseUp;
                     moveAble = false;
-                    events.dragingSize = false;
+                    p.events.dragingSize = false;
                     util.showIframeShade(ctls, false);
                 };
             }
@@ -2024,6 +2070,20 @@
             }
             return util.setBodySize(_), this;
         },
+        setZindex: function (_, zindex) {
+            var url = this, p = Util.getParam(_), ctls = p.controls;
+            if(p.none || !ctls.box) { return this; }
+
+            if (typeof zindex !== 'number') {
+                zindex = Common.buildZindex();
+            }
+            if (ctls.container) {
+                ctls.container.style.zIndex = zindex;
+            } else {
+                ctls.box.style.zIndex = zindex;
+            }
+            return p.options.zindex = zindex, this;
+        },
         callback: function (_, opt, action, dialogResult) {
             var func = this.checkCallback(opt);
             if(!func) {
@@ -2064,6 +2124,124 @@
                 }
             }
             return false;
+        },
+        //以下方法为 tooltip        
+        buildTooltip: function (_, options) {
+            var util = this, p = util.getParam(_), opt = p.options, ctls = p.controls;
+            if(p.none || _.isClosed()) { return util; }
+
+            if(!$.isElement(opt.target) && $.isString(opt.target, true)){
+                opt.target = document.getElementById(opt.target);
+            }
+            if(!$.isElement(opt.target)){
+                return false;
+            }
+            console.log('buildTooltip');
+            var tipId = null, d = null;
+            try { tipId = opt.target.getAttribute('tipid'); } catch (e) { }
+
+            if (tipId && (d = Factory.getDialog(tipId)) !== null) {
+                p.controls = util.getParam(d).controls;
+                util.updateTooltip(_, opt.content, opt.target, opt);
+            } else {
+                //对话框
+                ctls.box = $.createElement('div');
+                ctls.box.className = 'oui-tooltip';
+                ctls.box.style.zIndex = opt.zindex;
+                ctls.box.id = _.getDialogId();
+
+                ctls.body = util.buildBody(_, ctls.box);
+
+                $.setAttribute(p.target, 'tipid', opt.id);
+                document.body.appendChild(ctls.box);
+            }
+            Factory.setWindowResize();
+
+            return util.setTooltipPosition(_);
+        },
+        updateTooltip: function (_, options) {
+            var util = this, p = util.getParam(_), opt = p.options, ctls = p.controls;
+            if(p.none || _.isClosed()) { return util; }
+
+            if (ctls.content) {
+                ctls.content.innerHTML = opt.content;
+            }
+            return util.setTooltipPosition(_);
+        },        
+        setTooltipPosition: function (_) {
+            var util = this, p = util.getParam(_), opt = p.options, obj = p.controls.box;
+            if(p.none || _.isClosed()) { return util; }
+
+            var par = {
+                target: opt.target,
+                parent: opt.parent,
+                position: opt.position,    //默认停靠在目标控件左下方位置
+                x: opt.x,
+                y: opt.y
+            };
+
+            var css = util.setTargetPosition(par, obj);
+            obj.className = 'oui-tooltip oui-tip-' + css;
+
+            return util;
+
+/*
+            if (!$.isElement(obj) || !$.isElement(host)) {
+                return false;
+            }
+            var dir = opt.position,
+                p = $.getOffset(host),
+                w = obj.offsetWidth,
+                h = obj.offsetHeight,
+                bs = $.getBodySize(),
+                fs = {
+                    w: p.width,
+                    h: p.height,
+                    x: p.left,
+                    y: p.top
+                },
+                arrowSize = 7,
+                left = fs.x,
+                top = fs.y,
+                css = '';
+
+            switch (dir) {
+                case 2:
+                case Position.Top:
+                    top = fs.y - h - arrowSize;
+                    css = Position.Top;
+                    break;
+                case 6:
+                case Position.Right:
+                    if ((fs.x + fs.w + w + arrowSize) > bs.width) {
+                        left = fs.x - w - arrowSize;
+                        css = Position.Left;
+                    } else {
+                        left = fs.x + fs.w + arrowSize;
+                        css = Position.Right;
+                    }
+                    break;
+                case 8:
+                case Position.Bottom:
+                    top = fs.y + fs.h + arrowSize;
+                    css = Position.Bottom;
+                    break;
+                case 4:
+                case Position.Left:
+                    if ((fs.x - w - arrowSize) < 0) {
+                        left = fs.x + fs.w + arrowSize;
+                        css = Position.Right;
+                    } else {
+                        left = fs.x - w - arrowSize;
+                        css = Position.Left;
+                    }
+                    break;
+            }
+            obj.className = 'oui-tooltip oui-tip-' + css;
+            $.setStyle(obj, { left: left, top: top }, 'px');
+
+            return _;
+            */
         }
     };
 
@@ -2107,10 +2285,12 @@
                 closeTiming: 5000,      // closeTiming timeout time timing 四个字段
                 showTimer: false,       // 是否显示定时关闭倒计时
                 dragRangeLimit: true,   //窗体拖动范围限制 true,false
-                dragPosition: true,
-                dragSize: true,
-                maxAble: true,
-                minAble: true,
+                sizeAble: true,         //是否允许改变大小
+                dragSize: true,         //是否允许拖动改变大小
+                moveAble: true,         //是否允许移动位置
+                dragMove: true,         //是否允许拖动改变位置
+                maxAble: true,          //是否允许最大化
+                minAble: true,          //是否允许最小化
                 delayClose: false,      //是否延时关闭，启用延时关闭，则点击“确定按钮”关闭时不会关闭，在callback回调中处理关闭
                 callback: null,         //回调参数
                 ok: null,               //点击确定按钮后的回调函数
@@ -2175,16 +2355,17 @@
             return $.isString(key, true) ? opt[key] : opt;
         },
         setOptions: function(key, value) {
-            var opt = this.getOptions();
+            var p = Util.getParam(this).options;
+            if(!$.isObject(p)) { return this; }
             if ($.isObject(key)) {
                 for (var k in key) {
-                    if ($.containsKey(opt, k)) {
-                        opt[k] = key[k];
+                    if ($.containsKey(p, k)) {
+                        p[k] = key[k];
                     }
                 }
             } else if ($.isString(key, true)) {
-                if ($.containsKey(opt, key)) {
-                    opt[key] = value;
+                if ($.containsKey(p, key)) {
+                    p[key] = value;
                 }
             }
             return this;
@@ -2311,7 +2492,7 @@
             }
 
             if ($.extend(p.options, opt).type === Config.DialogType.Tooltip) {
-                _.updateTooltip(content, opt.target, opt);
+                Util.updateTooltip(_, opt);
                 return _;
             }
             if (ctls.content) {
@@ -2402,36 +2583,33 @@
         appendChild: function (elem, pNode) {
             return $.appendChild(pNode || this.getControls().content, elem), this;
         },
-        setZindex: function (zindex) {
-            var ctls = this.getControls();
-            if (typeof zindex !== 'number') {
-                zindex = Common.buildZindex();
+        zindex: function (zindex) {
+            if($.isUndefined(zindex)) {
+                return this.getOptions().zindex;
             }
-            if (ctls.container) {
-                ctls.container.style.zIndex = zindex;
-            } else {
-                ctls.box.style.zIndex = zindex;
-            }
-            return this.setOptions('zindex', zindex);
+            return Util.setZindex(this, zindex), this;
         },
         topMost: function () {
-            if (this.isClosed() || !this.getOptions().topMost) {
+            var _ = this, p = Util.getParam(_);
+            console.log('topMost2', p.options, p.options.topMost)
+            if (p.none || _.isClosed() || !p.options.topMost) {
                 return false;
             }
+            console.log('topMost3')
             var d = Factory.getTop();
-            if (d && !Util.isSelf(this, d)) {
+            if (d && !Util.isSelf(_, d)) {
                 var zindex = d.getOptions().zindex;
-                d.setZindex(this.getOptions().zindex);
-                return this.setZindex(zindex);
+                Util.setZindex(d, _.getOptions().zindex);
+                return Util.setZindex(_, zindex);
             }
-            return this;
+            return _;
         },
         showTitle: function(isShow, type, rebuild) {
             return Util.showTopBottom(this, isShow, type, rebuild, 'top');
         },
         showBottom: function(isShow, type, rebuild) {
             Util.showTopBottom(this, isShow, type, rebuild, 'bottom');
-            return this.setPosition(), this;
+            return this.position(), this;
         }
     };
 
@@ -2453,11 +2631,11 @@
         message: function (content, options) {
             return Factory.show(content, undefined, options, Config.DialogType.Message);
         },
-        tips: function (content, element, options) {
-            return Factory.show(content, undefined, options, Config.DialogType.Tips, element);
+        tips: function (content, target, options) {
+            return Factory.show(content, undefined, options, Config.DialogType.Tips, target);
         },
-        tooltip: function (content, element, options) {
-            return Factory.show(content, undefined, options, Config.DialogType.Tooltip, element);
+        tooltip: function (content, target, options) {
+            return Factory.show(content, undefined, options, Config.DialogType.Tooltip, target);
         }
     });
 

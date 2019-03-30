@@ -7,17 +7,19 @@
 </head>
 <body>
     <div id="p1" style="height:400px;">
-        <input type="input" name="" id="txtTips" style="margin:100px;" value="这是文本输入框的内容" />
+        <input type="input" name="" id="txtTips" style="margin:240px 100px;" value="这是文本输入框的内容" />
     </div>
     <div id="t1"></div>
     <input id="txt2" type="input" />
     <input id="txt1" type="input" />
+    <br />
     <button onclick="paging();">分页</button>
     <button onclick="showTable();">显示表格</button>
     <button onclick="alert2();">Alert</button>
     <button onclick="confirm2();">Confirm</button>
     <button onclick="win();">Win</button>
     <button onclick="form2();">Form</button>
+    <br />
     <button onclick="load();">Load</button>
     <button onclick="load2('divArticle');">Load Element</button>
     <button onclick="msg();">Msg</button>
@@ -230,6 +232,9 @@ function form2() {
         y: 10,
         lock: false,
         fixed: true,
+        moveAble: true,
+        dragMove: true,
+        topMost: true,
         target: $I('txtTips'),
         //dialogStyle: {'font-family': '宋体'},
         callback: function(dialogResult, d, param) {
@@ -257,7 +262,9 @@ function form2() {
         }
     });
 
-    win.getOptions().showClose = false;
+    //getOptoins 为只读
+    //win.getOptions().showClose = false;
+    //win.setOptions('showClose', false);
 
     win.showTitle(true, true);
 
@@ -271,6 +278,20 @@ function form2() {
         win.move({x:0, y:-10});
 
     }, 10);
+/*
+    window.setTimeout(function() {
+        win.min();
+    }, 2000);
+
+    window.setTimeout(function() {
+        win.max();
+    }, 4000);
+
+    window.setTimeout(function() {
+        win.restore();
+        win.moveTo({target: $I('txtTips')});
+    }, 6000);
+    */
 }
 
 function load(){

@@ -1633,7 +1633,7 @@
             }
             var par = {
                 width: elem.offsetWidth, 
-                heihgt: elem.offsetHeight
+                height: elem.offsetHeight
             },  computedStyle,
                 offsetParent = elem.offsetParent,
                 prevOffsetParent = elem,
