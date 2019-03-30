@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>对话框插件测试（未完） - OUI</title>
     <script type="text/javascript" src="../oui/oui.js?1"></script>
-    <script type="text/javascript" src="../oui/dialog/oui.dialog.js"></script>
+    <script type="text/javascript" src="../oui/dialog/oui.dialog.js?1"></script>
+</head>
 </head>
 <body>
     <div id="p1" style="height:400px;">
@@ -100,7 +102,7 @@ function alert2(){
     //console.log('dialog: ', dialog);
     
     window.setTimeout(function(){
-        dialog.resize({
+        dialog.setScale({
             dir: 'bottom-right',
             x: 40,
             y: 50
@@ -109,7 +111,7 @@ function alert2(){
 
 
     window.setTimeout(function(){
-        dialog.resize({
+        dialog.setScale({
             dir: 'center',
             x: 50,
             y: 60
@@ -123,7 +125,7 @@ function alert2(){
         //dialog.setZindex(2000);
         dialog.append(getCon(16, '大家好'), {height:'auto'});
 
-        dialog.setOptions('topMost', true);
+        dialog.setOption('topMost', true);
     }, 3000);
 }
 
@@ -163,7 +165,7 @@ function confirm2(){
         ok: function(dialogResult, d) {
             console.log(dialogResult);
             alert('ok: ');
-            if(d.getOptions().delayClose) {
+            if(d.opt.delayClose) {
                 alert('延迟关闭，在外部回调函数中执行完业务逻辑后，再由外部函数关闭窗口');
             }
         },
@@ -184,7 +186,7 @@ function confirm2(){
     });
 
     window.setTimeout(function(){
-        //win.showBottom(true, 'alert').setOptions('showClose',false).showTitle(true, true);
+        //win.showBottom(true, 'alert').setOption('showClose',false).showTitle(true, true);
     }, 6000);
 
     console.log(win.buttons);
@@ -224,13 +226,7 @@ function form2() {
     var win = $.dialog.form('登录窗口', '登录窗口 <span style="color:#f00;">中华人民共和国万岁</span> 中国人民从此站起来了', {
         //lang: 'Chinese',
         //lang: 'English',
-        //status: 'max',
-        position: 9,
-        x: 20,
-        y: 10,
-        lock: false,
-        fixed: true,
-        target: $I('txtTips'),
+        status: 'max',
         //dialogStyle: {'font-family': '宋体'},
         callback: function(dialogResult, d, param) {
             console.log('form2: ', dialogResult);
@@ -240,7 +236,7 @@ function form2() {
                 //to do something:
                 console.log('form2: ', 'to do someing');
 
-                if(d.getOptions().delayClose) {
+                if(d.opt.delayClose) {
                     console.log('form2: ', '延迟关闭');
                 }
                 //延时2秒，模拟表单提交任务
@@ -256,21 +252,6 @@ function form2() {
             }
         }
     });
-
-    win.getOptions().showClose = false;
-
-    win.showTitle(true, true);
-
-    console.log('win:', win);
-    var i = 0;
-    var timer = window.setInterval(function() {
-        if(i >= 10) {
-            window.clearInterval(timer);
-        }
-        i++;
-        win.move({x:0, y:-10});
-
-    }, 10);
 }
 
 function load(){
@@ -292,7 +273,7 @@ function load2(id){
 function msg(){
     var win = $.dialog.msg('msg: 这是普通窗口模式。', {
         id: 'msg', autoClose: false, closeTiming: 15000, fixed: true, 
-        position: 9, lock: false, clickBgClose: true, y: 40, x: 50,
+        position: 9, lock: false, clickBgClose: false, y: 40, x: 50,
         dragSize: false
     });
 
@@ -340,7 +321,7 @@ function update() {
 
     //dialog.setZindex(1005);
 
-    dialog.setOptions('topMost', true);
+    dialog.setOption('topMost', true);
 
     update2();
 }
@@ -360,7 +341,7 @@ function update2() {
         id:12, lock: false, minAble: true, maxAble: true, escClose: true, autoClose: false
     });
 
-    dialog.setOptions('topMost', true);
+    dialog.setOption('topMost', true);
 
     window.setTimeout(function(){
         dialog.update(getCon(5), '第1次改变','autoheight');
