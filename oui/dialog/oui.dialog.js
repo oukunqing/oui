@@ -253,6 +253,27 @@
 
             return this.checkTiming(opt);
         },
+        getMargin: function(val) {
+            var margin = {};
+            if(typeof val === 'number' || typeof val === 'string') {
+                margin = {
+                    top: val, right: val, bottom: val, left: val
+                };
+            } else if($.isArray(val)) {
+                margin.top = val[0] || 0;
+                margin.right = val.length >= 2 ? val[1] : margin.top;
+                margin.bottom = val.length >= 3 ? val[2] : margin.top;
+                margin.left = val.length >= 4 ? val[3] : margin.right;
+            } else if($.isObject(val)) {
+                margin = {
+                    top: val.top || 0, right: val.right || 0, bottom: val.bottom || 0, left: val.left || 0
+                };
+            }
+            for(var i in margin) {
+                margin[i] = parseInt('0' + margin[i], 10);
+            }
+            return margin;
+        },
         checkType: function (type, isBuild) {
             if (!$.isString(type, true) && !isBuild) {
                 return type;
@@ -265,7 +286,7 @@
             return type || (isBuild ? Config.DialogType.Dialog : '');
         },
         isPercentSize: function(width, height) {
-            return $.isPercent(width) || $.isPercent(height);
+            return $.isPercent(width) || (typeof height !== 'undefined' && $.isPercent(height));
         },
         toCssText: function (styles, type) {
             //TODO:
@@ -518,19 +539,15 @@
                 return this;
             }
             $.addListener(window, 'resize', function (e) {
-                console.log('e: ', e)
                 for (var i = Cache.ids.length - 1; i >= 0; i--) {
-                    var p = Factory.getOptions(Cache.ids[i].id) || {}, d = p.dialog;
-                    if(!p || !d) {
-                        continue;
-                    }
-                    if (!d.isClosed()) {
+                    var d = Factory.getDialog(Cache.ids[i].id);
+                    if (d && !d.isClosed()) {
                         if (d.getOptions().type === Config.DialogType.Tooltip) {
                             d.setTooltipPosition();
                         } else {
-                            var par = { event: 'window.resize' };
-                            if (p.status.max || p.options.percent) {
-                                Util.setBodySize(d, $.extend(par, {fullScreen: true}));
+                            var par = { event: 'window.resize' }, fullScreen = d.isMaximized();
+                            if (fullScreen || d.isPercent()) {
+                                Util.setBodySize(d, $.extend(par, {fullScreen: fullScreen}));
                             }
                             Util.setPosition(d, par);
                         }
@@ -913,7 +930,6 @@
                     btns[key] = obj;
                 }
 
-                console.log('html: ', html);
                 return this.setButtonEvent(_, panel.childNodes, 'click', false), this;
             }
             return this;
@@ -1240,9 +1256,12 @@
 
             var obj = ctls.box,
                 bs = $.getBodySize(),
+                w = obj.offsetWidth,
+                h = obj.offsetHeight,
                 size = {
-                    width: obj.offsetWidth,
-                    height: obj.offsetHeight,
+                    percent: Common.isPercentSize(opt.width, opt.height),
+                    width: w,
+                    height: h,
                     bs: bs
                 },
                 lastSize = opt.height === 'auto' ? size : $.extend({
@@ -1275,12 +1294,7 @@
                 height: 0
             }, options);
 
-            //sp.width = parseInt(sp.width, 10);
-            //sp.height = parseInt(sp.height, 10);
-
-            if (sp.type === '' || 
-                (isNaN(parseInt(sp.width, 10)) && isNaN(parseInt(sp.height, 10))) ||
-                _.getStatus()[sp.type]) {
+            if (sp.type === '' || (sp.width.isNaN() && sp.height.isNaN()) || _.getStatus()[sp.type]) {
                 return util;
             }
 
@@ -1358,8 +1372,7 @@
                 } else if (p.status.min) {
                     $.removeClass(obj, 'oui-dialog-min');
                 }
-                util.showZoomSwitch(_)
-                    .setStatus(_, Config.DialogStatus.Normal);
+                util.showZoomSwitch(_).setStatus(_, Config.DialogStatus.Normal);
 
                 if (sp.type === 'resize' || sp.type === 'size') {
                     par = { width: sp.width, height: sp.height };
@@ -1369,7 +1382,11 @@
                 } else {  //sp.type === 'normal'
                     if (!$.isUndefined(p.lastSize)) {
                         isSetPosition = bs.width !== p.lastSize.bs.width || bs.height !== p.lastSize.bs.height;
-                        $.setStyle(obj, p.lastSize, 'px');
+                        if(p.lastSize.percent && isSetPosition) {
+                            par = $.extend({}, p.lastSize, {width: opt.width, height: opt.height});
+                        } else {
+                            $.setStyle(obj, p.lastSize, 'px');
+                        }
                     } else {
                         par = { width: sp.width, height: sp.height };
                     }
@@ -1500,8 +1517,6 @@
                 isBottom = false,
                 isRight = false;
 
-                console.log('w,h: ', w, h);
-
             if (isCenter) {
                 posX = (bs.width / 2 - w / 2) + cpLeft;
             } else {
@@ -1517,6 +1532,9 @@
 
             //清除cssText上下左右4个样式
             util.clearPositionStyle(obj);
+
+            //TODO: margin setting
+
 
             return $.setStyle(obj, { left: posX, top: posY }, 'px'), util;
         },
@@ -1840,21 +1858,13 @@
                     $.setStyle(obj, { left: newLeft }, 'px');
                     break;
             }
-            util.setBodySize(_, { fullScreen : false });
+            util.setBodySize(_, { fullScreen : false, drag: isDrag });
 
             if (!isDrag && par.dir === Config.Direction.Center) {
                 util.setPosition(_, par);
             }
 
             return util;
-        },
-        isPercentSize: function(_, options) {
-            var util = this, opt = options;
-            if(!opt) {
-                var p = this.getParam(_);
-                opt = p.options;
-            }
-            return Common.isPercentSize(opt.width, opt.height);
         },
         isAutoSize: function(_) {
             var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls;
@@ -1923,7 +1933,6 @@
 
             var par = $.extend({
                 event: '',          //window.resize
-                fullScreen: false,
                 drag: false
             }, options);
 
@@ -1934,7 +1943,20 @@
             var boxWidth = obj.clientWidth,
                 boxHeight = obj.clientHeight,
                 paddingHeight = parseInt('0' + $.getElementStyle(obj, 'padding'), 10),
-                conPaddingHeight = parseInt('0' + $.getElementStyle(ctls.content, 'padding'), 10);
+                conPaddingHeight = parseInt('0' + $.getElementStyle(ctls.content, 'padding'), 10),
+                maxSize = Common.getMaxSize(opt),
+                margin = Common.getMargin(opt.margin);
+
+            //在非拖动大小并且常态状态时，设置对话框百分比尺寸
+            if(!par.drag && _.isNormal() && Common.isPercentSize(opt.width, opt.height)) {
+                if($.isPercent(opt.width)) {
+                    boxWidth = bs.width * parseInt(opt.width, 10) / 100 - margin.left - margin.right;
+                }
+                if($.isPercent(opt.height)) {
+                    boxHeight = bs.height * parseInt(opt.height, 10) / 100 - margin.top - margin.bottom;
+                }
+                $.setStyle(ctls.box, { width: boxWidth, height: boxHeight }, 'px');
+            }
 
             if (opt.height !== 'auto') {
                 /*
@@ -1953,8 +1975,6 @@
                     }
                 }
             }
-
-            var maxSize = Common.getMaxSize(opt);
 
             if (boxWidth > bs.width) {
                 boxWidth = bs.width - 20;
@@ -1980,6 +2000,16 @@
 
             boxWidth = obj.clientWidth;
             boxHeight = obj.clientHeight;
+
+            //拖动大小时，重新设置尺寸百分比
+            if(par.drag) {
+                if($.isPercent(opt.width)) {
+                    opt.width = parseInt(((obj.offsetWidth + margin.left + margin.right) * 100 / bs.width), 10) + '%';
+                }
+                if($.isPercent(opt.height)) {
+                    opt.height =  parseInt(((obj.offsetHeight + margin.top + margin.bottom) * 100 / bs.height), 10) + '%';
+                }
+            }
 
             $.setStyle(ctls.main, { height: boxHeight - paddingHeight * 2 }, 'px');
 
@@ -2272,8 +2302,9 @@
                 minHeight: '125px',         //最小高度
                 maxWidth: '100%',           //最大宽度
                 maxHeight: '100%',          //最大高度
-                width: ds.width + 'px',     //初始宽度
-                height: ds.height + 'px',   //初始高度
+                width: ds.width + 'px',     //初始宽度      px, auto, %
+                height: ds.height + 'px',   //初始高度      px, auto, %
+                margin: 0,              //当宽度或高度设置为 % 百分比时，启用 margin，margin格式参考css [上右下左] 设置，单位为px
                 parent: null,           //要限制范围的父容器html控件 Element
                 limitRange: true,       //窗体范围(位置、大小)限制 true,false
                 opacity: null,          //背景层透明度，默认为 0.2
@@ -2326,9 +2357,6 @@
                 bottomStyle: '',        //底部样式
                 tipStyle: ''            
             }, Common.checkOptions(content, title, options));
-
-            //是否百分比尺寸
-            opt.percent = Common.isPercentSize(opt.width, opt.height);
 
         return this.id = opt.id, this.initial(opt);
     }
@@ -2400,8 +2428,27 @@
         getStatus: function() {
             return $.extend({}, Factory.getOptions(this.id, 'status'));
         },
+        isPercent: function() {
+            var opt = this.getOptions();
+            return Common.isPercentSize(opt.width, opt.height);
+        },
         isClosed: function() {
             return $.isBoolean(Factory.getOptions(this.id, 'closed'), true);
+        },
+        isMaximized: function() {
+            return this.getStatus().max;
+        },
+        isMax: function() {
+            return this.isMaximized();
+        },
+        isMinimized: function() {
+            return this.getStatus().min;
+        },
+        isMin: function() {
+            return this.isMinimized();
+        },
+        isNormal: function() {
+            return this.getStatus().normal;
         },
         show: function (content, title, isHide) {
             if ($.isBoolean(content)) {

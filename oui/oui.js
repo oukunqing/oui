@@ -155,7 +155,7 @@
         isNullOrUndefined = function (o) { return isUndefined(o) || isNull(o); },
         isProperty = function (o, property) { return o.hasOwnProperty(property) && (property in o); },
         isPercent = function(val) {
-            return (!isNaN(parseInt(val, 10)) && ('' + val).endsWith('%'));
+            return (!isNaN(parseFloat(val, 10)) && ('' + val).endsWith('%'));
         },
         toDecimal = function (s, defaultValue, decimalLen) {
             var v = parseFloat(s, 10);
@@ -936,6 +936,7 @@
         isPercent: function() { return $.isPercent(this); },
         isMobile: function () { return $.isMobile(this); },
         isEmail: function () { return $.isEmail(this); },
+        isNaN: function() { return isNaN(parseFloat(this, 10)); },
         /*
         toNumber: function(defaultValue, isFloat, decimalLen) {
             //这里判断是否是数字的正则规则是 判断从数字开始到非数字结束，根据 parseFloat 的规则
@@ -1115,6 +1116,7 @@
         isFloat: function () { return $.isDecimal(this); },
         isInt: function () { return $.isInteger(this); },
         isHexNumber: function () { return $.isHexNumeric(this); },
+        isNaN: function() { return isNaN(parseFloat(this, 10)); },
         toHex: function () { return this.toString(16).toUpperCase(); },
         toThousand: function (delimiter, len) { return this.toString().toThousand(delimiter, len); },
         toChineseNumber: function (isMoney) { return $.numberToChinese(this, isMoney); },
