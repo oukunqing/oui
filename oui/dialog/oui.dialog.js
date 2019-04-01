@@ -479,7 +479,7 @@
             if (op.type) {
                 this.closeAll(op.type);
             } else if (op.id) {
-                var cache = this.getCache(op.id);
+                var cache = this.getOptions(op.id);
                 if (cache && cache.dialog.getOptions().closeAble) {
                     cache.dialog.close();
                 }
@@ -489,7 +489,7 @@
         closeAll: function (type) {
             var isType = $.isString(Common.checkType(type), true);
             for (var k in Cache.dialogs) {
-                var d = Cache.dialogs[k];
+                var d = Cache.dialogs[k].dialog;
                 if (d && !d.isClosed() && d.getOptions().closeAble &&
                     (!isType || (isType && d.getOptions().type === type))) {
                     d.close();
@@ -1520,7 +1520,7 @@
             if (isCenter) {
                 posX = (bs.width / 2 - w / 2) + cpLeft;
             } else {
-                isRight = util.checkPosition(_, Config.Position.Right, par.position)
+                isRight = util.checkPosition(_, Config.Position.Right, par.position);
                 posX = isRight ? (bs.width - par.x - w + cpLeft) : cpLeft + par.x;
             }
             if (isMiddle) {
@@ -2246,7 +2246,7 @@
 
                 ctls.body = util.buildBody(_, ctls.box);
 
-                $.setAttribute(p.target, 'tipid', opt.id);
+                $.setAttribute(opt.target, 'tipid', opt.id);
                 document.body.appendChild(ctls.box);
             }
             Factory.setWindowResize();
@@ -2736,7 +2736,7 @@
             return Factory.close(id), $;
         },
         closeAll: function (type) {
-            return Factory.closeAll(type || DialogType.Tooltip), $;
+            return Factory.closeAll(type || Config.DialogType.Tooltip), $;
         }
     });
 

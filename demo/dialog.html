@@ -206,6 +206,7 @@ function win(){
         titleStyle: {color: '#f00'},
         contentStyle: {color: '#00f'}
     });
+    $.tooltip.close($I('txtTips'));
     window.setTimeout(function(){
         win.showBottom();
     }, 4000);
@@ -386,7 +387,7 @@ function tips(){
 }
 
 function tips2(){
-    var win = $.tips('tips: 提示信息2', {position: 3});
+    var win = $.tips('tips: 提示信息2', $I('txtTips'), {position: 2});
     window.setTimeout(function() {
         //$.tooltip.closeAll();
     }, 6000);
