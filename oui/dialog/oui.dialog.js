@@ -976,10 +976,10 @@
 
                     var isLoaded = false, childs = elem.childNodes;
                     $.extend(ctls, {iframe: childs[0], iframeShade: childs[1], loading: childs[2]});
-
+                    
                     ctls.iframe.onload = ctls.iframe.onreadystatechange = function () {
                         if (!this.readyState || this.readyState == "complete") {
-                            util.showIframeShade(false).showLoading(ctls, false);
+                            util.showIframeShade(ctls, false).showLoading(ctls, false);
                             isLoaded = true;
                         }
                     };
