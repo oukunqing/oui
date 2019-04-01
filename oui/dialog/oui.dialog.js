@@ -6,8 +6,11 @@
         Index: 1,
         IdIndex: 1,
         Identifier: 'oui-dialog-identifier-',
-        TitleHeight: 30,
-        BottomHeight: 40,
+        TitleHeight: 30,        //标题栏高度，单位：px
+        BottomHeight: 40,       //底部栏高度，单位：px
+        SwitchWidth: 4,         //拖动边框宽度，单位：px
+        MinSwitchWidth: 1,      //拖动边框最小宽度，单位：px
+        MaxSwitchWidth: 10,     //拖动边框最大宽度，单位：px
         KEY_CODE: {
             Enter: 13,
             Esc: 27,
@@ -799,6 +802,7 @@
             if ((css = Common.toCssText(opt.dialogStyle || opt.boxStyle, 'box'))) {
                 ctls.box.style.cssText = css;
             }
+            ctls.box.style.padding = opt.switchWidth + 'px';
             return this;
         },
         buildMain: function(_, pNode) {
@@ -1127,6 +1131,16 @@
             div.id = id;
             div.dialogId = opt.id;
             $.addClass(div, dir + '-switch');
+            switch(dir) {
+                case 'top':
+                case 'bottom':
+                div.style.height = opt.switchWidth + 'px';
+                    break;
+                case 'left':
+                case 'right':
+                div.style.width = opt.switchWidth + 'px';
+                    break;
+            }
             return div;
         },
         getElements: function (_, className) {
@@ -2328,6 +2342,7 @@
                 showTimer: false,       //是否显示定时关闭倒计时
                 sizeAble: true,         //是否允许改变大小
                 dragSize: true,         //是否允许拖动改变大小
+                switchWidth: 4,         //拖放边框宽度，默认为4px
                 moveAble: true,         //是否允许移动位置
                 dragMove: true,         //是否允许拖动改变位置
                 maxAble: true,          //是否允许最大化
@@ -2371,6 +2386,11 @@
 
             if($.isBoolean(opt.clickBgClose)) {
                 opt.clickBgClose = opt.clickBgClose ? 'click' : '';
+            }
+
+            opt.switchWidth = Math.abs(parseInt('0' + opt.switchWidth, 10));
+            if(opt.switchWidth > Config.MaxSwitchWidth || (opt.dragSize && opt.switchWidth < Config.MinSwitchWidth)) {
+                opt.switchWidth = Config.SwitchWidth;
             }
 
             if (!opt.showTitle && !opt.showBottom && !opt.lock &&

@@ -8,7 +8,13 @@
 </head>
 <body>
     <div id="p1" style="height:400px;">
-        <input type="input" name="" id="txtTips" style="margin:240px 100px;" value="这是文本输入框的内容" />
+        <input type="input" name="" id="txtTips" style="margin:240px 0 0 100px;" value="这是文本输入框的内容" />
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <input type="input" name="" id="txtTips2" style="" value="这是文本输入框的内容" />
     </div>
     <div id="t1"></div>
     <input id="txt2" type="input" />
@@ -226,11 +232,12 @@ function win(){
 }
 
 function form2() {
-    var win = $.dialog.form('登录窗口', '登录窗口 <span style="color:#f00;">标题栏文字比较多</span> 隐藏文字显示', {
+    var html = '<div class="form">登录窗口<br />帐号<input type="text" /><br />密码<input type="text" /></div>';
+    var win = $.dialog.form(html, '登录窗口 <span style="color:#f00;">标题栏文字比较多</span> 隐藏文字显示', {
         //lang: 'Chinese',
         //lang: 'English',
         //status: 'max',
-        position: 1,
+        position: 9,
         x: 5,
         y: 5,
         lock: false,
@@ -263,6 +270,7 @@ function form2() {
             }
         }
     });
+    $.dialog.closeAll('tooltip');
 
     //getOptoins 为只读
     //win.getOptions().showClose = false;
@@ -332,7 +340,10 @@ function load(){
         width: '100%',
         height: '100%',
         margin: [10],
-        minWidth: 300, minHeight: 150
+        minWidth: 300,
+        minHeight: 150,
+        //switchWidth: 3,
+        //dragSize: false
     });
 }
 
@@ -387,7 +398,7 @@ function tips(){
 }
 
 function tips2(){
-    var win = $.tips('tips: 提示信息2', $I('txtTips'), {position: 2});
+    var win = $.tips('tips: 提示信息2', $I('txtTips2'), {position: 2});
     window.setTimeout(function() {
         //$.tooltip.closeAll();
     }, 6000);
