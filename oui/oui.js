@@ -1553,9 +1553,41 @@
         redirect = function (url) {
             $.isString(url, true) ? location.href = url : null;
         },
+        /*
         isElement = function (elem, tagName) {
             var b = elem === doc || elem === win || ($.isObject(elem) && $.isNumber(elem.nodeType) && $.isString(elem.tagName));
             return b && $.isString(tagName) ? elem.tagName === tagName : b;
+        },
+        */
+        isDocument = function(doc) {
+            return doc &&
+                //typeof doc === 'object' &&
+                doc.nodeType === 9 &&
+                doc.nodeName === '#document' &&
+                typeof doc.body === 'object' && 
+                typeof doc.tagName === 'undefined' &&
+                doc.nodeValue === null &&
+                doc.rootElement === null &&
+                doc.ownerDocument === null;
+        },
+        isWindow = function (win) {
+            return win &&
+                //typeof win === 'object' &&
+                win === win.window &&
+                isDocument(win.document);
+        },
+        isElement = function(elem, tagName) {
+            var isElem = elem &&
+                //typeof elem === 'object' &&
+                elem.nodeType === 1 &&
+                typeof elem.nodeName === 'string' &&
+                typeof elem.tagName === 'string';
+            return isElem && ($.isString(tagName, true) ? elem.tagName === tagName : isElem);
+        },
+        isForm = function(form) {
+            return isElement(form) &&
+                form.nodeName === 'FORM' &&
+                form.tagName === 'FORM';
         },
         getLocationPath = function () {
             return location.href.substring(0, location.href.lastIndexOf('/') + 1);
@@ -1599,7 +1631,7 @@
             elem = doc.createElement(nodeName);
 
             if (hasId) { elem.id = id; }
-            if (!exempt && !isElement(parent)) { parent = undefined; }
+            if (!exempt && !isElement(parent) && !isDocument(parent)) { parent = undefined; }
 
             return $.isFunction(func) && func(elem), parent &&  parent.appendChild(elem), elem;
         },
@@ -1608,6 +1640,7 @@
                 parent = func, func = id, id = null;
             }
             //parent = parent || head;
+            //创建到body中而不是head中，是为了便于获取js自身所在的文件路径
             parent = parent || doc.body;
             var elem = createElement('script', id, function (elem) {
                 elem.innerHTML = data, setAttribute(elem, { type: 'text/javascript', charset: 'utf-8' }, true);
@@ -1698,9 +1731,6 @@
             } else if (typeof document.body !== 'undefined') {
                 return { width: document.body.clientWidth, height: document.body.clientHeight };
             }
-        },
-        isWindow = function (obj) {
-            return obj != null && obj === obj.window;
         },
         isArrayLike = function (obj) {
             if ($.isString(obj)) {
@@ -1872,7 +1902,7 @@
             return setClass(elem, value, 'toggle'), this;
         },
         appendChild = function (parent, elem, isRemove) {
-            if ($.isElement(parent)) {
+            if ($.isElement(parent) || $.isDocument(parent)) {
                 var elems = $.isArray(elem) ? elem : [elem], 
                     evName = isRemove ? 'removeChild' : 'appendChild';
                 for(var i in elems) {
@@ -2031,8 +2061,9 @@
                     continue;
                 }
                 for(var j in elems) {
-                    if($.isElement(elems[j]) && $.isFunction(func)) {
-                        normal ? elems[j][name](evn, func, useCapture || false) : elems[j][other]('on' + evn, func);
+                    var o = elems[j];
+                    if(($.isElement(o) || $.isDocument(o) || $.isWindow(o)) && $.isFunction(func)) {
+                        normal ? o[name](evn, func, useCapture || false) : o[other]('on' + evn, func);
                     }
                 }
             }
@@ -2091,7 +2122,10 @@
         getFilePath: getFilePath,
         getFileName: getFileName,
         getExtension: getExtension,
+        isDocument: isDocument,
+        isWindow: isWindow,
         isElement: isElement,
+        isForm: isForm,
         createElement: createElement,
         createJsScript: createJsScript,
         createCssStyle: createCssStyle,
@@ -2101,6 +2135,7 @@
         getPaddingSize: getPaddingSize,
         getBodySize: getBodySize,
         isWindow: isWindow,
+        isDocument: isDocument,
         isArrayLike: isArrayLike,
         merge: merge,
         makeArray: makeArray,
@@ -2167,7 +2202,7 @@
                         values = values.join(',').split(',');
                     }
                 }
-                var checkParent = $.isElement(parent),
+                var checkParent = $.isElement(parent) || $.isDocument(parent),
                     checkTag = ($.isString(tagNames, true) && tagNames !== '*') || $.isArray(tagNames),
                     checkType = $.isString(types, true) || $.isArray(types),
                     checkValue = $.isArray(values) && !$.isEmpty(values),
@@ -2233,7 +2268,7 @@
                 return (parent || doc).querySelector(selectors);
             },
             $QA: function (selectors, options, parent) {
-                if ($.isElement(options)) {
+                if ($.isElement(options) || $.isDocument(options)) {
                     parent = options, options = null;
                 }
                 var arr = (parent || doc).querySelectorAll(selectors);
@@ -2254,7 +2289,7 @@
                 return $.matchCondition(arr, options);
             },
             $T: function (tagName, options, parent) {
-                if ($.isElement(options)) {
+                if ($.isElement(options) || $.isDocument(options)) {
                     parent = options, options = null;
                 }
                 if (tagName !== '*') {
@@ -2270,7 +2305,7 @@
                 if (className.indexOf('.') === 0) {
                     className = className.substr(1);
                 }
-                if ($.isElement(options)) {
+                if ($.isElement(options) || $.isDocument(options)) {
                     parent = options, options = null;
                 }
                 var arr = (parent || doc).getElementsByClassName(className);

@@ -185,6 +185,25 @@
     background: #fff url('imgs/icon.png') no-repeat -80px 0;
 }
 
+.oui-dialog .body .btn-panel {
+    margin: 2px 2px 0 0;
+    float: right;
+}
+
+.oui-dialog .body .btn-close {
+    border: solid 1px #f1f1f1;
+    border-radius: 3px;
+    background-color: #fff;
+
+    cursor: pointer;
+    width: 20px; height: 20px;
+    display: inline-block;
+    margin: 0 0 0 5px; padding: 0;
+    box-sizing: content-box;
+
+    background: #fff url('imgs/icon.png') no-repeat -80px 0;
+}
+
 .oui-dialog .body,.oui-dialog-max .body {
     position: relative;
     text-align: left;

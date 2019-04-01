@@ -26,6 +26,7 @@
     <button onclick="msg();">Msg</button>
     <button onclick="tips();">Tips</button>
     <button onclick="update();">更新对话框</button>
+    <button onclick="percent();">百分比尺寸</button>
 
     <div id="divArticle" style="display: none;">
         这是来自 DIV #divArticle 的内容
@@ -294,6 +295,28 @@ function form2() {
     */
 }
 
+function percent() {
+    var win = $.dialog.form('百分比尺寸的窗口', '登录窗口 <span style="color:#f00;">标题栏文字比较多</span> 隐藏文字显示', {
+        //lang: 'Chinese',
+        //lang: 'English',
+        //status: 'max',
+        position: 5,
+        x: 5,
+        y: 5,
+        width: '50%',
+        height: '80%',
+        lock: false,
+        fixed: true,
+        moveAble: true,
+        dragMove: true,
+        topMost: true,
+        //dialogStyle: {'font-family': '宋体'},
+        callback: function(dialogResult, d, param) {
+            console.log('form2: ', dialogResult);
+        }
+    });
+}
+
 function load(){
     //var url = 'pagination.html';
     //var url = 'http://122.227.179.90:81';
@@ -315,9 +338,12 @@ function msg(){
         id: 'msg', autoClose: false, closeTiming: 15000, fixed: true, 
         position: 8, lock: false, clickBgClose: true, y: 0, x: 0,
         target: $I('txtTips'),
-        dragSize: false
+        dragSize: false,
+        callback: function() {
+            console.log('msg close');
+        }
     });
-
+    console.log(win.getOptions());
     window.setTimeout(function() {
         //win.update('请注意：提示信息改变了。请注意：提示信息改变了', {width:'auto'});
         win.update('请注意：提示信息改变了。请注意：提示信息改变了', '', 'autosize');

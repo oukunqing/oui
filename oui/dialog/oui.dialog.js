@@ -490,25 +490,28 @@
             });
             return this;
         },
+        allowClose: function(curTime, buildTime) {
+            return curTime - buildTime > 500;
+        },
         setClickDocClose: function (id, eventName) {
+            var _ = this;
             Cache.docCloses[eventName].push(id);
 
-            if (this.isRepeat('doc' + eventName)) {
-                return this;
+            if (_.isRepeat('doc' + eventName)) {
+                return _;
             }
             $.addListener(document, eventName, function (e) {
-                var list = Cache.docCloses[eventName];
-                console.log('setClickDocClose: ', eventName, list);
+                var list = Cache.docCloses[eventName], ts = new Date().getTime();
                 for (var i = list.length - 1; i >= 0; i--) {
-                    var d = Factory.getDialog(list[i]);
-                    if (d && !d.isClosed()) {
+                    var p = Factory.getOptions(list[i]) || {}, d = p.dialog;
+                    if (d && !d.isClosed() && _.allowClose(ts, p.buildTime)) {
                         list.splice(i, 1);
                         d.close();
                         break;
                     }
                 }
             });
-            return this;
+            return _;
         },
         setWindowResize: function () {
             if (this.isRepeat('resize')) {
@@ -525,11 +528,6 @@
                         if (d.getOptions().type === Config.DialogType.Tooltip) {
                             d.setTooltipPosition();
                         } else {
-                            /*
-                            if(d.checkPosition(['center','middle'])) {
-                                d.setPosition({event: 'window.resize'});
-                            }
-                            */
                             var par = { event: 'window.resize' };
                             if (p.status.max || p.options.percent) {
                                 Util.setBodySize(d, $.extend(par, {fullScreen: true}));
@@ -841,27 +839,7 @@
             }
             elem.appendChild((ctls.title = div));
 
-            var isMin = opt.minAble && opt.showMin,
-                isMax = opt.maxAble && opt.showMax,
-                min = Common.getStatusText('min', opt.lang),
-                max = Common.getStatusText('max', opt.lang),
-                close = Common.getStatusText('close', opt.lang);
-
-            var panel = $.createElement('div');
-            panel.className = 'btn-panel';
-            panel.innerHTML = (isMin ? '<a class="btn btn-min" code="min" title="' + min + '"></a>' : '')
-                + (isMax || isMin ? '<a class="btn btn-max" code="max" title="' + max + '"></a>' : '')
-                + (opt.closeAble && opt.showClose ? '<a class="btn btn-close" code="close" title="' + close + '"></a>' : '');
-            panel.style.cssText = 'float:right;';
-
-            elem.appendChild((ctls.btnPanel = panel));
-
-            for (var i = 0; i < panel.childNodes.length; i++) {
-                var obj = panel.childNodes[i], key = obj.getAttribute('code');
-                btns[key] = obj;
-            }
-
-            this.setButtonEvent(_, panel.childNodes, 'click', false);
+            this.buildClose(_, elem, true);
 
             return !rebuild ? this.appendChild((ctls.top = elem), pNode) : null, this;
         },
@@ -900,12 +878,55 @@
             }
             return this;
         },
+        buildClose: function(_, pNode, isTop) {
+            var p = this.getParam(_), opt = p.options, ctls = p.controls, html = [];
+            if(!ctls.box) {
+                return this;
+            }
+            if(isTop) {
+                var isMin = opt.minAble && opt.showMin,
+                    isMax = opt.maxAble && opt.showMax,                
+                    min = Common.getStatusText('min', opt.lang),
+                    max = Common.getStatusText('max', opt.lang);
+
+                if(isMin) {
+                    html.push('<a class="btn btn-min" code="min" title="' + min + '"></a>');
+                }
+                if(isMax || isMin) {
+                    html.push('<a class="btn btn-max" code="max" title="' + max + '"></a>');
+                }
+            }
+            if(opt.closeAble && opt.showClose) {
+                var close = Common.getStatusText('close', opt.lang);
+                html.push('<a class="btn btn-close" code="close" title="' + close + '"></a>');
+            }
+
+            if(html.length > 0) {
+                var panel = $.createElement('div'), ctls = p.controls, btns = p.btns;
+                panel.className = 'btn-panel';
+                panel.innerHTML = html.join('');
+                panel.style.cssText = 'float:right';
+                pNode.appendChild((ctls.btnPanel = panel));
+
+                for (var i = 0; i < panel.childNodes.length; i++) {
+                    var obj = panel.childNodes[i], key = obj.getAttribute('code');
+                    btns[key] = obj;
+                }
+
+                console.log('html: ', html);
+                return this.setButtonEvent(_, panel.childNodes, 'click', false), this;
+            }
+            return this;
+        },
         buildBody: function(_, pNode) {
             var p = this.getParam(_), opt = p.options, ctls = p.controls;
             if(p.none || _.isClosed()) { return this; }
             var elem = $.createElement('div'), css;
             elem.className = 'body';
 
+            if(!opt.showTitle) {
+                this.buildClose(_, elem, false);
+            }
             if ((css = Common.toCssText(opt.bodyStyle, 'body'))) {
                 elem.style.cssText = css;
             }
@@ -1169,9 +1190,6 @@
                 var keyCode = $.getKeyCode(e),
                     strKeyCode = String.fromCharCode(keyCode).toUpperCase(),
                     btn = dics[strKeyCode];
-
-                    console.log('setShortcutKeyEvent: ', btn);
-
                 if ($.isElement(btn)) {
                     util.setAction(_, btn);
                 }
@@ -1257,11 +1275,11 @@
                 height: 0
             }, options);
 
-            sp.width = parseInt(sp.width, 10);
-            sp.height = parseInt(sp.height, 10);
+            //sp.width = parseInt(sp.width, 10);
+            //sp.height = parseInt(sp.height, 10);
 
             if (sp.type === '' || 
-                (isNaN(sp.width) && isNaN(sp.height)) ||
+                (isNaN(parseInt(sp.width, 10)) && isNaN(parseInt(sp.height, 10))) ||
                 _.getStatus()[sp.type]) {
                 return util;
             }
@@ -1448,11 +1466,12 @@
 
             //window.resize
             if(par.event === 'window.resize') {
-            console.log('status: ', p.status);
                 if(p.status.max) {
                     return $.setStyle(obj, { left: 0, top: 0 }, 'px'), util;
                 } else {
                     //return util;
+                    //TODO:
+
                 }
             }
             if($.isElement(par.target)) {
@@ -1533,7 +1552,7 @@
             var posX = moveTo ? x : left + x,
                 posY = moveTo ? y : top + y;
 
-            if (opt.dragRangeLimit) {
+            if (opt.limitRange) {
                 if (posX < 0) {
                     posX = 0;
                 }
@@ -1762,7 +1781,7 @@
             }
 
             //拖动缩放尺寸，窗口范围限制
-            if (isDrag && opt.dragRangeLimit) {
+            if (isDrag && opt.limitRange) {
                 if (newWidth > bs.width - obj.offsetLeft) {
                     newWidth = bs.width - obj.offsetLeft;
                 }
@@ -1828,6 +1847,14 @@
             }
 
             return util;
+        },
+        isPercentSize: function(_, options) {
+            var util = this, opt = options;
+            if(!opt) {
+                var p = this.getParam(_);
+                opt = p.options;
+            }
+            return Common.isPercentSize(opt.width, opt.height);
         },
         isAutoSize: function(_) {
             var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls;
@@ -2174,7 +2201,6 @@
             if(!$.isElement(opt.target)){
                 return false;
             }
-            console.log('buildTooltip');
             var tipId = null, d = null;
             try { tipId = opt.target.getAttribute('tipid'); } catch (e) { }
 
@@ -2237,40 +2263,38 @@
     function Dialog (content, title, options) {
         var ds = Common.getDefaultSize(),
             opt = $.extend({
-                id: null,
-                lang: Config.Lang.Chinese,    //语言 Chinese,English
-                type: Config.DialogType.Alert, //alert,confirm,message,tooltip,window,iframe
-                status: Config.DialogStatus.Normal,
-                zindex: Common.buildZindex(),
-                minWidth: '240px',
-                minHeight: '125px',
-                maxWidth: '100%',
-                maxHeight: '100%',
-                //width: '360px',
-                //height: '225px',
-                //width: 'auto',
-                width: ds.width + 'px',
-                height: ds.height + 'px',
+                id: null,                       //id
+                lang: Config.Lang.Chinese,      //语言 Chinese,English
+                type: Config.DialogType.Alert,  //alert,confirm,message,tooltip,window,iframe
+                status: Config.DialogStatus.Normal,     //初始状态  normal, min, max 三种状态
+                zindex: Common.buildZindex(),   //css z-index值，控制显示层级
+                minWidth: '240px',          //最小宽度
+                minHeight: '125px',         //最小高度
+                maxWidth: '100%',           //最大宽度
+                maxHeight: '100%',          //最大高度
+                width: ds.width + 'px',     //初始宽度
+                height: ds.height + 'px',   //初始高度
+                parent: null,           //要限制范围的父容器html控件 Element
+                limitRange: true,       //窗体范围(位置、大小)限制 true,false
                 opacity: null,          //背景层透明度，默认为 0.2
                 lock: true,             //是否锁屏
                 title: null,            //标题
                 content: null,          //文字内容
                 url: null,              //加载的URL
-                element: null,          //加载的Element元素
+                element: null,          //要加载内容的html控件 Element
                 loading: '',            //loading提示文字
-                position: 5,
-                x: 0,
-                y: 0,
-                target: null,           //要跟随位置的目标控件
-                fixed: false,
-                topMost: false,
-                closeAble: true,
+                position: 5,            //对话框初始位置, 0,1,2,3,4,5,6,7,8,9，共10种位置设置
+                x: 0,                   //x轴(left)偏移量，单位：px
+                y: 0,                   //y轴(top)偏移量，单位：px
+                target: null,           //要跟随位置的html控件 Element
+                fixed: false,           //是否固定位置
+                topMost: false,         //是否允许置顶显示
+                closeAble: true,        //是否允许关闭
                 clickBgClose: false,    //'dblclick', // dblclick | click
-                escClose: false,
-                autoClose: false,
-                closeTiming: 5000,      // closeTiming timeout time timing 四个字段
-                showTimer: false,       // 是否显示定时关闭倒计时
-                dragRangeLimit: true,   //窗体拖动范围限制 true,false
+                escClose: false,        //是否允许按Esc关闭
+                autoClose: false,       //是否自动关闭
+                closeTiming: 5000,      //closeTiming timeout time timing 四个字段
+                showTimer: false,       //是否显示定时关闭倒计时
                 sizeAble: true,         //是否允许改变大小
                 dragSize: true,         //是否允许拖动改变大小
                 moveAble: true,         //是否允许移动位置
@@ -2283,15 +2307,15 @@
                 cancel: null,           //点击取消按钮后的回调函数
                 parameter: null,        //回调返回的参数
                 redirect: null,         //重定向跳转到指定的URL [target]
-                buttons: Config.DialogButtons.OKCancel,
+                buttons: Config.DialogButtons.OKCancel,               //按钮类型编码
                 buttonPosition: Config.Position.Center,               //按钮位置 left center right
                 buttonText: null,       // {OK: '确定', Cancel: '取消'}  ｛OK: '提交'}
-                showTitle: true,
-                showBottom: true,
-                showLogo: true,
-                showClose: true,
-                showMin: true,
-                showMax: true,
+                showTitle: true,        //是否显示顶部标题栏 
+                showLogo: true,         //是否显示logo图标
+                showMin: true,          //是否显示最小化按钮
+                showMax: true,          //是否显示最大化按钮
+                showClose: true,        //是否显示关闭按钮
+                showBottom: true,       //是否显示底部按钮栏
                 cancelBubble: false,    //是否阻止背景层事件冒泡
                 dialogStyle: '',        //对话框样式
                 mainStyle: '',          //主体框样式
@@ -2300,19 +2324,18 @@
                 topStyle: '',           //顶部样式
                 titleStyle: '',         //标题样式
                 bottomStyle: '',        //底部样式
-                tipStyle: ''
+                tipStyle: ''            
             }, Common.checkOptions(content, title, options));
 
+            //是否百分比尺寸
             opt.percent = Common.isPercentSize(opt.width, opt.height);
 
-        return this.initial(opt);
+        return this.id = opt.id, this.initial(opt);
     }
 
     Dialog.prototype = {
         initial: function(options) {
-            var opt = options || this.getOptions(), id = opt.id;
-
-            console.log('opt: ', opt);
+            var p = Util.getParam(this), opt = options || p.options, id = opt.id;
 
             if(!$.isString(opt.title) && !$.isNumber(opt.title)) {
                 opt.title = Common.getDialogText('Title', opt.lang);
@@ -2334,14 +2357,14 @@
                 opt.fixed = false;
             }
 
-            var dialog = Factory.getDialog((this.id = id));
+            var dialog = Factory.getDialog(id);
             if(!dialog) {
                 Factory.setDialog(id, this)
                     .setOptions(id, opt)
                     .setOptions(id, 'dialogId', Common.buildId(id, 'd-'));
             }
 
-            return Util.build(this, opt), this;
+            return Util.build(this, opt), p.buildTime = new Date().getTime(), this;
         },
         getOptions: function(key) {
             var opt = $.extend({}, Factory.getOptions(this.id, 'options'));
@@ -2542,7 +2565,6 @@
             if(p.none) { return _; }
 
             var type = Config.DialogStatus.Max, status = p.status, lastStatus = p.lastStatus;
-            console.log('max: ', p.status, p.lastStatus, status, lastStatus);
 
             if (p.status.max || (p.status.min && lastStatus === Config.DialogStatus.Normal)) {
                 type = Config.DialogStatus.Normal;
@@ -2586,11 +2608,9 @@
         },
         topMost: function () {
             var _ = this, p = Util.getParam(_);
-            console.log('topMost2', p.options, p.options.topMost)
             if (p.none || _.isClosed() || !p.options.topMost) {
                 return false;
             }
-            console.log('topMost3')
             var d = Factory.getTop();
             if (d && !Util.isSelf(_, d)) {
                 var zindex = d.getOptions().zindex;
