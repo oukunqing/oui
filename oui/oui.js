@@ -154,6 +154,9 @@
         isNull = function (o) { return o === null; },
         isNullOrUndefined = function (o) { return isUndefined(o) || isNull(o); },
         isProperty = function (o, property) { return o.hasOwnProperty(property) && (property in o); },
+        isPercent = function(val) {
+            return (!isNaN(parseInt(val, 10)) && ('' + val).endsWith('%'));
+        },
         toDecimal = function (s, defaultValue, decimalLen) {
             var v = parseFloat(s, 10);
             v = !isNaN(v) && $.isInteger(decimalLen) ? v.round(Math.abs(decimalLen)) : v;
@@ -452,7 +455,7 @@
     $.extendNative($, {
         trim: trim, isUndefined: isUndefined, isString: isString, isNumber: isNumber, isFunction: isFunction,
         isObject: isObject, isArray: isArray, isBoolean: isBoolean, isNull: isNull,
-        isProperty: isProperty, version: version,
+        isProperty: isProperty, isPercent: isPercent, version: version,
         isNumeric: isNumeric, isDecimal: isDecimal, isInteger: isInteger, isFloat: isDecimal, isInt: isInteger,
         isHexNumeric: isHexNumeric, isHexNumber: isHexNumber, isMobile: isMobile, isEmail: isEmail,
         isRegexp: isRegexp, isNullOrUndefined: isNullOrUndefined,
@@ -930,6 +933,7 @@
         isFloat: function () { return $.isDecimal(this); },
         isInt: function () { return $.isInteger(this); },
         isHexNumeric: function () { return $.isHexNumeric(this); },
+        isPercent: function() { return $.isPercent(this); },
         isMobile: function () { return $.isMobile(this); },
         isEmail: function () { return $.isEmail(this); },
         /*
@@ -1628,16 +1632,13 @@
             return $.isString(styleName) ? style[styleName] || defaultValue: style;
         },
         getPaddingSize = function(elem) {
-            if (!isElement(elem)) {
-                return {};
-            }            
-            var style = elem.currentStyle || document.defaultView.getComputedStyle(elem, null);
-            return {
+            var style = getElementStyle(elem);
+            return style ? {
                 left: parseInt('0' + style['paddingLeft'], 10),
                 right: parseInt('0' + style['paddingRight'], 10),
                 top: parseInt('0' + style['paddingTop'], 10),
                 bottom: parseInt('0' + style['paddingBottom'], 10)
-            };            
+            } : {};            
         },
         getOffset = function(elem) {
             if (!isElement(elem)) {

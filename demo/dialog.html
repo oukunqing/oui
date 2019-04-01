@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
     <title></title>
     <script type="text/javascript" src="../oui/oui.js?1"></script>
     <script type="text/javascript" src="../oui/dialog/oui.dialog.js"></script>
@@ -223,13 +224,13 @@ function win(){
 }
 
 function form2() {
-    var win = $.dialog.form('登录窗口', '登录窗口 <span style="color:#f00;">中华人民共和国万岁</span> 中国人民从此站起来了', {
+    var win = $.dialog.form('登录窗口', '登录窗口 <span style="color:#f00;">标题栏文字比较多</span> 隐藏文字显示', {
         //lang: 'Chinese',
         //lang: 'English',
         //status: 'max',
-        position: 9,
-        x: 20,
-        y: 10,
+        position: 1,
+        x: 5,
+        y: 5,
         lock: false,
         fixed: true,
         moveAble: true,
@@ -274,7 +275,7 @@ function form2() {
             window.clearInterval(timer);
         }
         i++;
-        win.move({x:0, y:-10});
+        //win.move({x:0, y:-10});
 
     }, 10);
 /*
@@ -333,7 +334,7 @@ function tips(){
             + '<img src="http://122.227.179.90:81/skin/default/images/home/welcome.jpg" />';
         win.update(html, {
             position: 6,
-            tooltipStyle: {'background': '#ffffff'}
+            //tooltipStyle: {'background': '#ffffff'}
         })
     },3000);
     

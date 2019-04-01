@@ -264,6 +264,9 @@
             }
             return type || (isBuild ? Config.DialogType.Dialog : '');
         },
+        isPercentSize: function(width, height) {
+            return $.isPercent(width) || $.isPercent(height);
+        },
         toCssText: function (styles, type) {
             //TODO:
             return $.toCssText(styles);
@@ -512,21 +515,26 @@
                 return this;
             }
             $.addListener(window, 'resize', function (e) {
+                console.log('e: ', e)
                 for (var i = Cache.ids.length - 1; i >= 0; i--) {
-                    var d = Factory.getDialog(Cache.ids[i]);
-                    if (d && !d.isClosed()) {
+                    var p = Factory.getOptions(Cache.ids[i].id) || {}, d = p.dialog;
+                    if(!p || !d) {
+                        continue;
+                    }
+                    if (!d.isClosed()) {
                         if (d.getOptions().type === Config.DialogType.Tooltip) {
                             d.setTooltipPosition();
                         } else {
-                            if (d.status.max) {
-                                d.setBodySize();
-                            }
                             /*
                             if(d.checkPosition(['center','middle'])) {
-                                d.setPosition({event: 'resize'});
+                                d.setPosition({event: 'window.resize'});
                             }
                             */
-                            d.setPosition({ event: 'resize' });
+                            var par = { event: 'window.resize' };
+                            if (p.status.max || p.options.percent) {
+                                Util.setBodySize(d, $.extend(par, {fullScreen: true}));
+                            }
+                            Util.setPosition(d, par);
                         }
                     }
                 }
@@ -1213,22 +1221,20 @@
             if(p.none) { return util; }
 
             var obj = ctls.box,
-                bs = $.getBodySize();
-
-            var size = {
-                width: obj.offsetWidth,
-                height: obj.offsetHeight,
-                bs: bs
-            };
-
-            var lastSize = opt.height === 'auto' ? size : $.extend({
-                top: obj.offsetTop,
-                left: obj.offsetLeft,
-                //right: (obj.offsetLeft + obj.offsetWidth),
-                //bottom: (obj.offsetTop + obj.offsetHeight)
-                right: bs.width - (obj.offsetLeft + obj.offsetWidth),
-                bottom: bs.height - (obj.offsetTop + obj.offsetHeight)
-            }, size);
+                bs = $.getBodySize(),
+                size = {
+                    width: obj.offsetWidth,
+                    height: obj.offsetHeight,
+                    bs: bs
+                },
+                lastSize = opt.height === 'auto' ? size : $.extend({
+                    top: obj.offsetTop,
+                    left: obj.offsetLeft,
+                    //right: (obj.offsetLeft + obj.offsetWidth),
+                    //bottom: (obj.offsetTop + obj.offsetHeight)
+                    right: bs.width - (obj.offsetLeft + obj.offsetWidth),
+                    bottom: bs.height - (obj.offsetTop + obj.offsetHeight)
+                }, size);
 
             return util.setOptions(_, 'lastSize', lastSize), this;
         },
@@ -1315,6 +1321,8 @@
                 if (p.status.max) {
                     $.removeClass(obj, 'oui-dialog-max');
                 }
+                $.setStyle(obj, { width: minW, height: minH }, 'px');
+
                 util.hideZoomSwitch(_)
                     .setStatus(_, Config.DialogStatus.Min)
                     .setPosition(_, { position: opt.position });
@@ -1342,8 +1350,8 @@
                     util.changeSize(_, options);
                 } else {  //sp.type === 'normal'
                     if (!$.isUndefined(p.lastSize)) {
-                        isSetPosition = bs.width !== p.lastSize.bs.width || bs.height !== p.lastSize.bs.height;                        
-                        $.setStyle(ctls.box, p.lastSize, 'px');
+                        isSetPosition = bs.width !== p.lastSize.bs.width || bs.height !== p.lastSize.bs.height;
+                        $.setStyle(obj, p.lastSize, 'px');
                     } else {
                         par = { width: sp.width, height: sp.height };
                     }
@@ -1357,7 +1365,7 @@
                 }
             }
             if (isSetBodySize) {
-                util.setBodySize(_, isFullScreen);
+                util.setBodySize(_, {fullScreen: isFullScreen});
             }
             if (isSetPosition) {
                 util.setPosition(_);
@@ -1429,14 +1437,24 @@
                 options = { position: opt.position };
             }
             var par = $.extend({
-                event: '',
+                event: '',              //window.resize
+                fullScreen: false,
                 target: opt.target,
                 parent: opt.parent,
                 position: opt.position,
                 x: opt.x,
                 y: opt.y
-            }, options);
+            }, options), posX, posY;
 
+            //window.resize
+            if(par.event === 'window.resize') {
+            console.log('status: ', p.status);
+                if(p.status.max) {
+                    return $.setStyle(obj, { left: 0, top: 0 }, 'px'), util;
+                } else {
+                    //return util;
+                }
+            }
             if($.isElement(par.target)) {
                 //目标位置停靠
                 return util.setTargetPosition(par, obj), util;
@@ -1456,13 +1474,14 @@
                 h = obj.offsetHeight,
                 //锁定界面相当于固定位置
                 fixed = opt.lock || opt.fixed,
-                posX, posY,
                 cpTop = fixed ? 0 : cp.top,
                 cpLeft = fixed ? 0 : cp.left,
                 isCenter = util.checkPosition(_, Config.Position.Center, par.position),
                 isMiddle = util.checkPosition(_, Config.Position.Middle, par.position),
                 isBottom = false,
                 isRight = false;
+
+                console.log('w,h: ', w, h);
 
             if (isCenter) {
                 posX = (bs.width / 2 - w / 2) + cpLeft;
@@ -1480,11 +1499,11 @@
             //清除cssText上下左右4个样式
             util.clearPositionStyle(obj);
 
-            return $.setStyle(obj, { left: posX, top: posY }, 'px'), this;
+            return $.setStyle(obj, { left: posX, top: posY }, 'px'), util;
         },
         movePosition: function(_, options, isMoveTo) {
             var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls, obj = ctls.box;
-            if(p.none || !obj || !opt.moveAble) { return this; }
+            if(p.none || !obj || !opt.moveAble) { return util; }
 
             var par = $.extend({
                 target: null,
@@ -1802,7 +1821,7 @@
                     $.setStyle(obj, { left: newLeft }, 'px');
                     break;
             }
-            util.setBodySize(_, false);
+            util.setBodySize(_, { fullScreen : false });
 
             if (!isDrag && par.dir === Config.Direction.Center) {
                 util.setPosition(_, par);
@@ -1871,9 +1890,15 @@
             }
             return s;
         },
-        setBodySize: function (_, isFullScreen, isDrag) {
+        setBodySize: function (_, options) {
             var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls;
             if(p.none) { return this; }
+
+            var par = $.extend({
+                event: '',          //window.resize
+                fullScreen: false,
+                drag: false
+            }, options);
 
             var obj = ctls.box, bs = $.getBodySize();
             if (!obj) {
@@ -1891,7 +1916,7 @@
                     obj.style.height = boxHeight + 'px';
                 } else 
                 */
-                if (!isFullScreen) {
+                if (!par.fullScreen) {
                     if (Common.isNumberSize(opt.maxHeight)) {
                         var mh = parseInt(opt.maxHeight, 10);
                         if (boxHeight > mh) {
@@ -2278,12 +2303,16 @@
                 tipStyle: ''
             }, Common.checkOptions(content, title, options));
 
+            opt.percent = Common.isPercentSize(opt.width, opt.height);
+
         return this.initial(opt);
     }
 
     Dialog.prototype = {
         initial: function(options) {
             var opt = options || this.getOptions(), id = opt.id;
+
+            console.log('opt: ', opt);
 
             if(!$.isString(opt.title) && !$.isNumber(opt.title)) {
                 opt.title = Common.getDialogText('Title', opt.lang);
