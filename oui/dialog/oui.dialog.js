@@ -1,4 +1,13 @@
 
+/*
+    @Title: OUI
+    @Description：JS通用代码库
+    @Author: oukunqing
+    @License：MIT
+
+    $.dialog 对话框插件
+*/
+
 !function ($) {
 
     var Config = {
@@ -8,9 +17,9 @@
         Identifier: 'oui-dialog-identifier-',
         TitleHeight: 30,        //标题栏高度，单位：px
         BottomHeight: 40,       //底部栏高度，单位：px
-        SwitchWidth: 4,         //拖动边框宽度，单位：px
-        MinSwitchWidth: 1,      //拖动边框最小宽度，单位：px
-        MaxSwitchWidth: 10,     //拖动边框最大宽度，单位：px
+        Padding: 4,             //拖动边框宽度，单位：px
+        MinPadding: 0,          //拖动边框最小宽度，单位：px
+        MaxPadding: 10,         //拖动边框最大宽度，单位：px
         KEY_CODE: {
             Enter: 13,
             Esc: 27,
@@ -193,22 +202,19 @@
             return buttons;
         },
         checkStyleUnit: function (s) {
-            if ($.isString(s, true)) {
-                s = s.toLowerCase();
-                var arr = ['px', '%', 'em', 'auto', 'pt'];
-                for (var i in arr) {
-                    if (s.endsWith(arr[i])) {
-                        return s;
-                    }
-                }
+            if ($.isNumber(s)) {
                 return s + 'px';
-            } else if ($.isNumber(s)) {
+            }
+            if($.isString(s, true)) {
+                if(s.toLowerCase() === 'auto' || $.isStyleUnit(s)) {
+                    return s;
+                }
                 return s + 'px';
             }
             return s;
         },
         isNumberSize: function (num) {
-            return num !== 'auto' && num !== '100%' && !isNaN(parseInt(num, 10));
+            return $.isNumberSize(num);
         },
         getTs: function (start, len) {
             var tick = new Date().getTime();
@@ -256,26 +262,18 @@
 
             return this.checkTiming(opt);
         },
-        getMargin: function(val) {
-            var margin = {};
-            if(typeof val === 'number' || typeof val === 'string') {
-                margin = {
-                    top: val, right: val, bottom: val, left: val
-                };
-            } else if($.isArray(val)) {
-                margin.top = val[0] || 0;
-                margin.right = val.length >= 2 ? val[1] : margin.top;
-                margin.bottom = val.length >= 3 ? val[2] : margin.top;
-                margin.left = val.length >= 4 ? val[3] : margin.right;
-            } else if($.isObject(val)) {
-                margin = {
-                    top: val.top || 0, right: val.right || 0, bottom: val.bottom || 0, left: val.left || 0
-                };
-            }
-            for(var i in margin) {
-                margin[i] = parseInt('0' + margin[i], 10);
-            }
-            return margin;
+        getCssAttrSize: function(val, options) {
+            var p = $.extend({
+                attr: 'margin',      //margin, padding, border
+                unit: '',
+                isArray: false,
+                isLimit: false,
+                min: Config.MinPadding,
+                max: Config.MaxPadding,
+                val: Config.Padding
+            }, options);
+
+            return $.getCssAttrSize(val, p);
         },
         checkType: function (type, isBuild) {
             if (!$.isString(type, true) && !isBuild) {
@@ -802,7 +800,10 @@
             if ((css = Common.toCssText(opt.dialogStyle || opt.boxStyle, 'box'))) {
                 ctls.box.style.cssText = css;
             }
-            ctls.box.style.padding = opt.switchWidth + 'px';
+            //ctls.box.style.padding = opt.padding + 'px';
+            ctls.box.style.padding = Common.getCssAttrSize(opt.padding, {
+                attr: 'padding', unit:'px', isArray: true, isLimit: true, max: 10, val: 4
+            }).join(' ');
             return this;
         },
         buildMain: function(_, pNode) {
@@ -1106,8 +1107,9 @@
             dir = $.isString(dir) ? [dir] : arr;
 
             if (opt.dragSize) {
+                var padding = Common.getCssAttrSize(opt.padding, {attr:'padding', unit: 'px', isLimit: true});
                 for (var i in dir) {
-                    ctls.box.appendChild(this.buildZoomSwitch(_, dir[i]));
+                    ctls.box.appendChild(this.buildZoomSwitch(_, dir[i], padding));
                 }
                 this.showZoomSwitch(_);
             } else {
@@ -1115,7 +1117,7 @@
             }
             return this;
         },
-        buildZoomSwitch: function(_, dir) {
+        buildZoomSwitch: function(_, dir, padding) {
             var p = this.getParam(_), opt = p.options, ctls = p.controls;
             if(p.none) { return this; }
             if ($.isUndefined(dir)) {
@@ -1134,11 +1136,13 @@
             switch(dir) {
                 case 'top':
                 case 'bottom':
-                div.style.height = opt.switchWidth + 'px';
+                //div.style.height = opt.padding + 'px';
+                div.style.height = padding[dir]; 
                     break;
                 case 'left':
                 case 'right':
-                div.style.width = opt.switchWidth + 'px';
+                //div.style.width = opt.padding + 'px';
+                div.style.width = padding[dir];
                     break;
             }
             return div;
@@ -1956,10 +1960,13 @@
             }
             var boxWidth = obj.clientWidth,
                 boxHeight = obj.clientHeight,
-                paddingHeight = parseInt('0' + $.getElementStyle(obj, 'padding'), 10),
+                padding = Common.getCssAttrSize(opt.padding, {attr: 'padding', isLimit: true}),
+                //paddingHeight = parseInt('0' + $.getElementStyle(obj, 'padding'), 10),
+                paddingHeight = padding.top + padding.bottom,
                 conPaddingHeight = parseInt('0' + $.getElementStyle(ctls.content, 'padding'), 10),
                 maxSize = Common.getMaxSize(opt),
-                margin = Common.getMargin(opt.margin);
+                margin = Common.getCssAttrSize(opt.margin, {attr: 'margin'}),
+                marginHeight = margin.top + margin.bottom;
 
             //在非拖动大小并且常态状态时，设置对话框百分比尺寸
             if(!par.drag && _.isNormal() && Common.isPercentSize(opt.width, opt.height)) {
@@ -2025,7 +2032,7 @@
                 }
             }
 
-            $.setStyle(ctls.main, { height: boxHeight - paddingHeight * 2 }, 'px');
+            $.setStyle(ctls.main, { height: boxHeight - paddingHeight }, 'px');
 
             var mainHeight = ctls.main.offsetHeight,
                 titleHeight = ctls.top ? ctls.top.offsetHeight : 0,
@@ -2319,6 +2326,7 @@
                 width: ds.width + 'px',     //初始宽度      px, auto, %
                 height: ds.height + 'px',   //初始高度      px, auto, %
                 margin: 0,              //当宽度或高度设置为 % 百分比时，启用 margin，margin格式参考css [上右下左] 设置，单位为px
+                padding: 4,             //内边距（拖动边框）宽度，格式参考css设置,单位为px
                 parent: null,           //要限制范围的父容器html控件 Element
                 limitRange: true,       //窗体范围(位置、大小)限制 true,false
                 opacity: null,          //背景层透明度，默认为 0.2
@@ -2342,7 +2350,6 @@
                 showTimer: false,       //是否显示定时关闭倒计时
                 sizeAble: true,         //是否允许改变大小
                 dragSize: true,         //是否允许拖动改变大小
-                switchWidth: 4,         //拖放边框宽度，默认为4px
                 moveAble: true,         //是否允许移动位置
                 dragMove: true,         //是否允许拖动改变位置
                 maxAble: true,          //是否允许最大化
@@ -2388,10 +2395,7 @@
                 opt.clickBgClose = opt.clickBgClose ? 'click' : '';
             }
 
-            opt.switchWidth = Math.abs(parseInt('0' + opt.switchWidth, 10));
-            if(opt.switchWidth > Config.MaxSwitchWidth || (opt.dragSize && opt.switchWidth < Config.MinSwitchWidth)) {
-                opt.switchWidth = Config.SwitchWidth;
-            }
+            //检测padding
 
             if (!opt.showTitle && !opt.showBottom && !opt.lock &&
                 $.isBoolean(opt.closeAble, true) &&

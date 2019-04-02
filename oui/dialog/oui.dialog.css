@@ -24,7 +24,7 @@
     position: absolute;
     border: solid 1px #ddd;
     background: #fff;
-    border-radius: 5px;
+    border-radius: 4px;
     box-sizing: border-box;
     box-shadow: 0 2px 3px 0 rgba(0,0,0,.32);
     font-size: 14px;
@@ -485,7 +485,7 @@
 }
 
 .oui-dialog .form .table {
-    
+
 }
 
 /*oui-tooltip*/

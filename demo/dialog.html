@@ -3,11 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <title></title>
-    <script type="text/javascript" src="../oui/oui.js?1"></script>
-    <script type="text/javascript" src="../oui/dialog/oui.dialog.js"></script>
+    <style type="text/css">
+        body{line-height: 1.8em;}
+    </style>
+    <script type="text/javascript" src="../oui/oui.min.js?1"></script>
+    <script type="text/javascript" src="../oui/dialog/oui.dialog.min.js"></script>
 </head>
 <body>
-    <div id="p1" style="height:400px;">
+    <div id="p1"></div>
+    <div id="p2" style="height:400px;border-radius: 5px 10px 3px 6px;margin:0 0 5px 0;
+            border: none;
+            display:block;left:5px; top: 10px;">
         <input type="input" name="" id="txtTips" style="margin:240px 0 0 100px;" value="这是文本输入框的内容" />
         <br />
         <br />
@@ -49,6 +55,20 @@
 </body>
 </html>
 <script type="text/javascript">
+
+var obj = document.getElementById('txtTips');
+console.log('getMarginSize: ', $.getMarginSize(obj));
+console.log('getPaddingSize: ', $.getPaddingSize(obj));
+console.log('getBorderSize: ', $.getBorderSize(obj, {attr: 'border'}));
+
+var div = document.getElementById('p2');
+console.log('getCssAttrSize: ', $.getCssAttrSize(div, {attr: 'radius'}));
+console.log('getCssAttrSize width: ', $.getCssAttrSize(div, {attr: 'width'}));
+console.log('getCssAttrSize height: ', $.getCssAttrSize(div, {attr: 'height'}));
+console.log('getCssAttrSize left: ', $.getCssAttrSize(div, {attr: 'left'}));
+console.log('getCssAttrSize top: ', $.getCssAttrSize(div, {attr: 'top'}));
+console.log('getOffsetSize: ', $.getOffsetSize(div));
+console.log('offset: ', $.offset(div));
 
 /*
 document.onclick = function() {
@@ -342,7 +362,9 @@ function load(){
         margin: [10],
         minWidth: 300,
         minHeight: 150,
-        //switchWidth: 3,
+        //padding: [4, 5, 6, 7],
+        padding: 4
+        //padding: [10, 5, 3, 6],
         //dragSize: false
     });
 }

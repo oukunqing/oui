@@ -423,6 +423,13 @@
         },
         isEmail = function (email) {
             return /^[A-Z0-9\u4e00-\u9fa5]+@[A-Z0-9_-]+(\.[A-Z0-9_-]+)+$/gi.test(email);
+        },
+        padLeft = function(s, totalWidth, paddingChar, isRight) {
+            var char = paddingChar || '0', c = totalWidth - s.length;
+            for (var i = 0; i < c; i++) {
+                s = isRight ? s + char : char + s;
+            }
+            return s;
         };
 
     var counter = 1, debug = isBoolean(isDebug(), true);
@@ -455,7 +462,7 @@
     $.extendNative($, {
         trim: trim, isUndefined: isUndefined, isString: isString, isNumber: isNumber, isFunction: isFunction,
         isObject: isObject, isArray: isArray, isBoolean: isBoolean, isNull: isNull,
-        isProperty: isProperty, isPercent: isPercent, version: version,
+        isProperty: isProperty, isPercent: isPercent, isPercentSize: isPercent, version: version,
         isNumeric: isNumeric, isDecimal: isDecimal, isInteger: isInteger, isFloat: isDecimal, isInt: isInteger,
         isHexNumeric: isHexNumeric, isHexNumber: isHexNumber, isMobile: isMobile, isEmail: isEmail,
         isRegexp: isRegexp, isNullOrUndefined: isNullOrUndefined,
@@ -467,18 +474,10 @@
             return false;
         },
         padLeft: function (s, totalWidth, paddingChar) {
-            var char = paddingChar || '0', c = totalWidth - s.length;
-            for (var i = 0; i < c; i++) {
-                s = char + s;
-            }
-            return s;
+            return padLeft(s, totalWidth, paddingChar, false);
         },
         padRight: function (s, totalWidth, paddingChar) {
-            var char = paddingChar || '0', c = totalWidth - s.length;
-            for (var i = 0; i < c; i++) {
-                s += char;
-            }
-            return s;
+            return padLeft(s, totalWidth, paddingChar, true);
         },
         toDecimal: toDecimal, toFloat: toDecimal, checkNumber: checkNumber,
         toInteger: toInteger, toInt: toInteger, toNumber: toNumber, toNumberList: toNumberList,
@@ -1591,6 +1590,25 @@
                 form.nodeName === 'FORM' &&
                 form.tagName === 'FORM';
         },
+        isStyleUnit = function(val, units) {
+            if($.isNumber(val) || isNaN(parseFloat(val, 10))) {
+                return false;
+            }
+            var s = ('' + val).toLowerCase();
+            var arr = units || ['px', '%', 'em', 'rem', 'pt'];
+            for (var i in arr) {
+                if (s.endsWith(arr[i])) {
+                    return true;
+                }
+            }
+            return false;
+        },
+        isNumberSize = function (val) {
+            if(isNaN(parseFloat(val, 10))) {
+                return false;
+            }
+            return !('' + val).endsWith('%');
+        },
         getLocationPath = function () {
             return location.href.substring(0, location.href.lastIndexOf('/') + 1);
         },
@@ -1661,23 +1679,132 @@
         },
         getElementStyle = function (elem, styleName, defaultValue) {
             if (!isElement(elem)) {
-                return false;
+                return null;
             }
             var style = elem.currentStyle || document.defaultView.getComputedStyle(elem, null);
             return $.isString(styleName) ? style[styleName] || defaultValue: style;
         },
-        getPaddingSize = function(elem) {
-            var style = getElementStyle(elem);
-            return style ? {
-                left: parseInt('0' + style['paddingLeft'], 10),
-                right: parseInt('0' + style['paddingRight'], 10),
-                top: parseInt('0' + style['paddingTop'], 10),
-                bottom: parseInt('0' + style['paddingBottom'], 10)
-            } : {};            
+        getElementStyleSize = function(elem, styleName) {
+            var attr = ('' + styleName).toLowerCase(),
+                style = getElementStyle(elem),
+                postfix = attr === 'border' ? 'Width' : attr == 'radius' ? 'Radius' : '';
+
+            if(!$.isString(attr, true) || !style) {
+                return 0;
+            }
+
+            if(['padding', 'margin', 'border', 'radius'].indexOf(attr) < 0) {
+                return parseInt('0' + style[attr], 10);
+            }
+
+            var data = attr == 'radius' ? {
+                topLeft: parseInt('0' + style['borderTopLeft' + postfix], 10),
+                topRight: parseInt('0' + style['borderTopRight' + postfix], 10),
+                bottomLeft: parseInt('0' + style['borderBottomLeft' + postfix], 10),
+                bottomRight: parseInt('0' + style['borderBottomRight' + postfix], 10),
+            } : {
+                top: parseInt('0' + style[attr + 'Top' + postfix], 10),
+                right: parseInt('0' + style[attr + 'Right' + postfix], 10),
+                bottom: parseInt('0' + style[attr + 'Bottom' + postfix], 10),
+                left: parseInt('0' + style[attr + 'Left' + postfix], 10)
+            };
+            return data;
         },
-        getOffset = function(elem) {
+        checkMinMax = function(p) {
+            p.min = parseInt('0' + p.min, 10);
+            p.max = parseInt('0' + p.max, 10);
+            p.val = parseInt('0' + p.val, 10);
+
+            if(p.min > p.max) {
+                var tmp = p.min;
+                p.min = p.max;
+                p.max = tmp;
+            }
+            if(p.val < p.min || p.val > p.max) {
+                p.val = parseInt((p.min + p.max) / 2, 10);
+            }
+            return p;
+        },
+        getCssAttrSize = function(val, options) {
+            var p = checkMinMax($.extend({
+                    attr: '',      //margin, padding, border
+                    unit: '',
+                    isArray: false,
+                    isLimit: false,
+                    min: 0,
+                    max: 10,
+                    val: 4
+                }, options)),
+                isElem = $.isElement(val),
+                data = {}, list = [];
+
+            if(['px', 'pt', 'em'].indexOf(('' + p.unit).toLowerCase()) < 0) {
+                p.unit = '';
+            }
+            p.attr = ('' + (p.attr || p.styleName)).toLowerCase();
+
+            if(!p.attr) {
+                return null;
+            }
+
+            if(['padding', 'margin', 'border', 'radius'].indexOf(p.attr) < 0) {
+                var v = isElem ? getElementStyleSize(val, p.attr) : parseInt('0' + val, 10);
+                if(p.unit) {
+                    v += p.unit;
+                }
+                return v;
+            }
+
+            if(isElem) {
+                data = getElementStyleSize(val, p.attr);
+            } else if(typeof val === 'number' || typeof val === 'string') {
+                data = {
+                    top: val, right: val, bottom: val, left: val
+                };
+            } else if($.isArray(val)) {
+                data.top = val[0] || 0;
+                data.right = val.length >= 2 ? val[1] : data.top;
+                data.bottom = val.length >= 3 ? val[2] : data.top;
+                data.left = val.length >= 4 ? val[3] : data.right;
+            } else if($.isObject(val)) {
+                data = {
+                    top: val.top || 0, right: val.right || 0, bottom: val.bottom || 0, left: val.left || 0
+                };
+            }
+            for(var i in data) {
+                data[i] = Math.abs(parseInt('0' + data[i], 10));
+                if(p.isLimit) {
+                    data[i] = data[i] > p.max || data[i] < p.min ? p.val : data[i];
+                }
+                if(p.unit) {
+                    data[i] += p.unit;
+                }
+                if(p.isArray) {
+                    list.push(data[i]);
+                }
+            }
+            if(p.isArray) {
+                return list;
+            }
+            if(p.attr !== 'radius') {
+                data[p.attr + 'Width'] = parseInt(data.left, 10) + parseInt(data.right, 10);
+                data[p.attr + 'Height'] = parseInt(data.top, 10) + parseInt(data.bottom, 10);
+            }
+
+            return p.isArray ? list : data;
+        },
+        getPaddingSize = function(elem, options) {
+            return getCssAttrSize(elem, $.extend({}, options, {attr:'padding'}));
+        },
+        getMarginSize = function(elem, options) {
+            return getCssAttrSize(elem, $.extend({}, options, {attr:'margin'}));
+        },
+        getBorderSize = function(elem, options) {
+            return getCssAttrSize(elem, $.extend({}, options, {attr:'border'}));
+        },
+        getOffsetSize = function(elem) {
             if (!isElement(elem)) {
-                return {};
+                return null;
             }
             var par = {
                 width: elem.offsetWidth, 
@@ -1726,6 +1853,11 @@
                 left += Math.max(docElem.scrollLeft, body.scrollLeft);
             }
             return $.extend(par, {left: left, top: top});
+        },
+        getElementSize = function(elem) {
+            if (!isElement(elem)) {
+                return {};
+            }
         },
         getBodySize = function () {
             if (typeof document.compatMode !== 'undefined' && document.compatMode === 'CSS1Compat') {
@@ -2128,14 +2260,21 @@
         isWindow: isWindow,
         isElement: isElement,
         isForm: isForm,
+        isStyleUnit: isStyleUnit,
+        isNumberSize: isNumberSize,
         createElement: createElement,
         createJsScript: createJsScript,
         createCssStyle: createCssStyle,
         getElementStyle: getElementStyle,
-        getOffset: getOffset,
-        offset: getOffset,
+        getElementStyleSize: getElementStyleSize,
+        getCssAttrSize: getCssAttrSize,
         getPaddingSize: getPaddingSize,
+        getMarginSize: getMarginSize,
+        getBorderSize: getBorderSize,
         getBodySize: getBodySize,
+        getOffset: getOffsetSize,
+        getOffsetSize: getOffsetSize,
+        offset: getOffsetSize,
         isWindow: isWindow,
         isDocument: isDocument,
         isArrayLike: isArrayLike,
