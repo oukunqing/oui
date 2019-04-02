@@ -82,7 +82,8 @@
             restore: {english: 'Restore', chinese: '\u8fd8\u539f'}                      //还原
         },
         DialogResult: {
-            None: 0,
+            None: -1,
+            Close: 0,
             OK: 1,
             Cancel: 2,
             Abort: 3,
@@ -90,6 +91,14 @@
             Ignore: 5,
             Yes: 6,
             No: 7
+        },
+        DefaultResult: {
+            code: 'Close',
+            result: 0
+        },
+        CodeResult: {
+            code: 'None',
+            result: -1
         },
         DialogButtons: {
             None: -1,
@@ -401,6 +410,8 @@
                 status: {},
                 lastStatus: undefined,
                 lastSize: undefined,
+                hideSize: undefined,        //隐藏之前的对话框尺寸
+                actions: {},                //按钮事件
                 events: {},
                 timers: {},
                 dics: {}
@@ -664,6 +675,29 @@
             }
             return this;
         },
+        showDialog: function(ctls, isShow, content, title) {
+            var display = isShow ? '' : 'none';
+            if (ctls.container) {
+                ctls.container.style.display = display;
+            } else {
+                ctls.box.style.display = display;
+            }
+            if (ctls.shade) {
+                ctls.shade.style.display = display;
+            }
+
+            if ($.isString(content, true)) {
+                ctls.content.innerHTML = content;
+            }
+            if ($.isString(title, true)) {
+                ctls.title.innerHTML = title;
+            }
+
+            return this;
+        },
+        close: function(_) {
+            return _.close(), this;
+        },
         build: function(_, options) {
             var util = this, p = Util.getParam(_), opt = p.options, ctls = p.controls;
             var status = opt.status || Config.DialogStatus.Normal;
@@ -887,8 +921,7 @@
                 }
             }
             return timers.closeTimer = window.setInterval(function () {
-                Util.clearTimer(timers);
-                _.close();
+                Util.clearTimer(timers).close(_);
             }, opt.closeTiming), this;
         },
         clearTimer: function (timers) {
@@ -1247,12 +1280,12 @@
             return false;
         },
         setAction: function (_, obj) {
-            var code = '';
+            var util = this, code = '', p = util.getParam(_);
             if (typeof obj === 'string') {
                 code = obj;
             } else {
-                if (!this.checkEventObj(_, obj)) {
-                    return false;
+                if (!util.checkEventObj(_, obj)) {
+                    return util;
                 }
                 code = obj.getAttribute('code');
             }
@@ -1261,12 +1294,25 @@
             } else if (code === Config.DialogStatus.Max) {
                 _.max();
             } else if (code === Config.DialogStatus.Close) {
+                p.actions = Config.DefaultResult;
                 _.close();
             } else {
                 var result = parseInt(obj.getAttribute('result'), 10);
-                _.close(code, result);
+                p.actions = { code: code, result: result };
+                _.close();
             }
-            return this;
+            return util;
+        },
+        getAction: function(_) {
+            var p = this.getParam(_);
+            if(p.options.codeCallback || p.options.alwaysCallback) {
+                return $.extend({}, Config.CodeResult, p.actions);
+            }
+            return $.extend({}, p.actions);
+        },
+        delAction: function(_) {
+            var p = this.getParam(_);
+            return p.actions = undefined, this;
         },
         setCache: function(_) {
             var util = this, p = util.getParam(_), opt = p.options, ctls = p.controls;
@@ -1884,9 +1930,9 @@
 
             return util;
         },
-        isAutoSize: function(_) {
-            var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls;
-            if(p.none) { return this; }
+        isAutoSize: function(_, options) {
+            var util = this, p = this.getParam(_), opt = options || p.options, ctls = p.controls;
+            if(p.none) { return false; }
 
             var isAutoSize = false;
             if (_.isClosed()) {
@@ -1950,14 +1996,16 @@
             if(p.none) { return this; }
 
             var par = $.extend({
-                event: '',          //window.resize
-                drag: false
+                event: '',          //window.resize, show
+                drag: false,
+                lastSize: undefined
             }, options);
 
             var obj = ctls.box, bs = $.getBodySize();
             if (!obj) {
                 return this;
             }
+
             var boxWidth = obj.clientWidth,
                 boxHeight = obj.clientHeight,
                 padding = Common.getCssAttrSize(opt.padding, {attr: 'padding', isLimit: true}),
@@ -1967,6 +2015,13 @@
                 maxSize = Common.getMaxSize(opt),
                 margin = Common.getCssAttrSize(opt.margin, {attr: 'margin'}),
                 marginHeight = margin.top + margin.bottom;
+
+            if(par.event === 'show' && $.isObject(par.lastSize)) {
+                boxWidth = par.lastSize.width;
+                boxHeight = par.lastSize.height;
+                obj.style.width = boxWidth + 'px';
+                obj.style.height = boxHeight + 'px';
+            }
 
             //在非拖动大小并且常态状态时，设置对话框百分比尺寸
             if(!par.drag && _.isNormal() && Common.isPercentSize(opt.width, opt.height)) {
@@ -2202,7 +2257,7 @@
         },
         callback: function (_, opt, action, dialogResult) {
             var func = this.checkCallback(opt);
-            if(!func) {
+            if(!func || !action) {
                 return this;
             }
             var dr = {}, parameter = opt.parameter || opt.param;
@@ -2222,8 +2277,10 @@
         dispose: function (_) {
             //TODO:
 
-
             return this;
+        },
+        remove: function(_) {
+            return Factory.remove(_.id), this;
         },
         checkCallback: function(opt) {
             var callback = $.isFunction(opt.callback) ? opt.callback : undefined,
@@ -2343,6 +2400,7 @@
                 fixed: false,           //是否固定位置
                 topMost: false,         //是否允许置顶显示
                 closeAble: true,        //是否允许关闭
+                closeType: 'close',     //关闭方式， close | hide
                 clickBgClose: false,    //'dblclick', // dblclick | click
                 escClose: false,        //是否允许按Esc关闭
                 autoClose: false,       //是否自动关闭
@@ -2355,7 +2413,8 @@
                 maxAble: true,          //是否允许最大化
                 minAble: true,          //是否允许最小化
                 delayClose: false,      //是否延时关闭，启用延时关闭，则点击“确定按钮”关闭时不会关闭，在callback回调中处理关闭
-                callback: null,         //回调参数
+                callback: null,         //回调参数，默认情况下，只有点击按钮关闭时才会回调
+                codeCallback: false,  //始终回调（当使用代码关闭窗口时也会回调）
                 ok: null,               //点击确定按钮后的回调函数
                 cancel: null,           //点击取消按钮后的回调函数
                 parameter: null,        //回调返回的参数
@@ -2459,6 +2518,9 @@
         isClosed: function() {
             return $.isBoolean(Factory.getOptions(this.id, 'closed'), true);
         },
+        isHide: function() {
+            return $.isBoolean(Factory.getOptions(this.id, 'hide'), false);
+        },
         isMaximized: function() {
             return this.getStatus().max;
         },
@@ -2474,90 +2536,73 @@
         isNormal: function() {
             return this.getStatus().normal;
         },
-        show: function (content, title, isHide) {
-            if ($.isBoolean(content)) {
-                isHide = content;
-                title = undefined;
-                content = undefined;
-            } else if ($.isBoolean(title)) {
-                isHide = title;
-                title = undefined;
+        show: function (content, title) {
+            var _ = this, p = Util.getParam(_);
+            if(_.isClosed() || !p || !_.isHide()) {
+                return _;
             }
-            var _ = this, cache = Factory.getOptions(_.id);
-            if(!cache) {
-                return this;
-            }
-            var opt = cache.options, ctls = cache.controls, display = isHide ? 'none' : '';
-            if (isHide && !opt.closeAble) {
-                return this;
-            }
-
-            Util.setOptions(_, 'closed', isHide || false);
-
-            if (!$.isUndefined(content)) {
-                ctls.body.innerHTML = content;
-            }
-            if (!$.isUndefined(title)) {
-                ctls.title.innerHTML = title;
-            }
-
-            if (ctls.container) {
-                ctls.container.style.display = display;
-            } else {
-                ctls.box.style.display = display;
-            }
-            if (ctls.shade) {
-                ctls.shade.style.display = display;
-            }
-
-            if (opt.lock && !isHide) {
-                Util.hideDocOverflow(_, isHide);
-            }
+            Util.setOptions(_, 'hide', false)
+                .hideDocOverflow(_, false)
+                .showDialog(p.controls, true, content, title)
+                .setBodySize(_, {event: 'show', lastSize: p.hideSize});
 
             return _;
         },
-        hide: function () {
-            return this.show(true);
-        },
-        close: function (action, dialogResult) {
-            var _ = this, cache = Factory.getOptions(_.id);
-            if(_.isClosed() || !cache) {
-                return this;
+        hide: function (action, dialogResult) {
+            var _ = this, p = Util.getParam(_), opt = p.options;
+            if(_.isClosed() || _.isHide() || !p || !opt.closeAble) {
+                return _;   
             }
-            var opt = cache.options, ctls = cache.controls,
-                timers = cache.timers,
-                url = opt.redirect || opt.target;
+            var ctls = p.controls,
+                timers = p.timers,
+                url = opt.redirect || opt.target,
+                actions = Util.getAction(_);
 
-            if (!$.isString(action)) {
-                action = 'None';
+            //记录隐藏之前的对话框尺寸大小，以便再次显示时，还原尺寸大小
+            Util.setOptions(_, 'hideSize', {width: ctls.box.offsetWidth, height: ctls.box.offsetHeight});
+            
+            Util.showDialog(ctls, false)
+                .setOptions(_, 'hide', true)
+                .delAction(_)
+                .clearTimer(timers)
+                .hideDocOverflow(_, true)
+                .callback(_, opt, actions.code, actions.result)
+                .redirect(url);
+
+            return _;
+        },
+        close: function () {
+            var _ = this, p = Util.getParam(_), opt = p.options;
+            if(_.isClosed() || !p || !opt.closeAble) {
+                return _;
             }
-            if (!$.isNumber(dialogResult)) {
-                dialogResult = Config.DialogResult.None;
-            }
-            if (!opt.closeAble || _.closed) {
-                return false;
-            }
+            var ctls = p.controls,
+                timers = p.timers,
+                url = opt.redirect || opt.target,
+                actions = Util.getAction(_);
 
             var func = Util.checkCallback(opt);
             // 点击确定按钮时，若延时关闭，则仅回调而不关闭
-            if(opt.delayClose && [1, 6].indexOf(dialogResult) >= 0 && func && (func.callback || func.ok)) {
-                return Util.callback(_, opt, action, dialogResult);
+            if(opt.delayClose && [1, 6].indexOf(actions.result) >= 0 && func && (func.callback || func.ok)) {
+                return Util.delAction(_).callback(_, opt, actions.code, actions.result);
             }
 
-            $.removeChild(document.body, ctls.container || ctls.box);
-            if (ctls.shade) {
-                $.removeChild(document.body, ctls.shade);
+            if(opt.closeType === 'hide') {
+                return _.hide();
             }
-            Factory.remove(opt.id);
+
+            $.removeChild(document.body, [ctls.container || ctls.box, ctls.shade]);
 
             Util.setOptions(_, 'closed', true)
+                .delAction(_)
                 .clearTimer(timers)
-                .callback(_, opt, action, dialogResult)
                 .hideDocOverflow(_, true)
+                .callback(_, opt, actions.code, actions.result)
                 .dispose(_)
+                .remove(_)
                 .redirect(url);
 
-            return this;
+            return _;
         },
         update: function (content, title, options) {
             if ($.isString(options)) {

@@ -2,12 +2,12 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>对话框插件测试</title>
     <style type="text/css">
         body{line-height: 1.8em;}
     </style>
     <script type="text/javascript" src="../oui/oui.min.js?1"></script>
-    <script type="text/javascript" src="../oui/dialog/oui.dialog.min.js"></script>
+    <script type="text/javascript" src="../oui/dialog/oui.dialog.js"></script>
 </head>
 <body>
     <div id="p1"></div>
@@ -158,7 +158,8 @@ function alert2(){
 }
 
 function confirm2(){
-    var html = '<span style="color:#f00;">确定要保存内容吗？</span>'
+    var html = '<span style="color:#f00;">确定要保存内容吗？</span>';
+    /*
         //+ '<iframe src="http://122.227.179.90:81"></iframe>'    
         + '<label>内容：</label>'
         + '<input type="text" id="t1" value="abc" />';
@@ -172,7 +173,7 @@ function confirm2(){
         buttonPosition: 'right',
         buttonText: {OK: '提交', Cancel: '算了'},
         position: 9,
-        lock: false,
+        lock: true,
         //maxAble: false,
         topMost: true,
         //showLogo: true,
@@ -181,6 +182,7 @@ function confirm2(){
         y: 10,
         x: 15,
         type: 'confirm',
+        //closeType: 'hide',
         delayClose: true,
         //redirect: 'http://www.baidu.com',
         //target: 'http://www.baidu.com',
@@ -191,33 +193,38 @@ function confirm2(){
         },
         */
         ok: function(dialogResult, d) {
-            console.log(dialogResult);
-            alert('ok: ');
+            console.log('ok: 点击了确定按钮, ', dialogResult);
             if(d.getOptions().delayClose) {
-                alert('延迟关闭，在外部回调函数中执行完业务逻辑后，再由外部函数关闭窗口');
+                console.log('延迟关闭，在外部回调函数中执行完业务逻辑后，再由外部函数关闭窗口');
+                win.hide().append('这是追加的内容');
             }
+            window.setTimeout(function(){
+                //win.showBottom(true, 'alert').setOptions('showClose',false).showTitle(true, true);
+                console.log('win.show:')
+                win.show();
+            }, 4000);
         },
         cancel: function(dialogResult, d) {
-            console.log(dialogResult);
-            alert('cancel:' );
+            console.log('cancel: 点击了取消按钮, ', dialogResult);
         },
         callback: function(dialogResult, d) {
-            console.log(dialogResult);
+            console.log('callback: ', dialogResult);
             if(dialogResult.OK || dialogResult.Yes) {
-                alert('点击了确定按钮');
+                console.log('点击了确定按钮');
+            } else if(dialogResult.Close) {
+                console.log('点击了关闭按钮');
             } else if(dialogResult.None) {
-                alert('点击了关闭按钮');
+                console.log('代码调用关闭');
             } else {
-                alert('点击了取消按钮');
+                console.log('点击了取消按钮');
             }
-        }
+        },
+        codeCallback: true
     });
 
     window.setTimeout(function(){
-        //win.showBottom(true, 'alert').setOptions('showClose',false).showTitle(true, true);
-    }, 6000);
-
-    console.log(win.buttons);
+        win.hide();
+    }, 2000);
 }
 
 function win(){
