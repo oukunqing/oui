@@ -36,6 +36,7 @@
     <button onclick="load();">Load</button>
     <button onclick="load2('divArticle');">Load Element</button>
     <button onclick="msg();">Msg</button>
+    <button onclick="msg(true);">Msg(固定宽度)</button>
     <button onclick="tips();">Tips</button>
     <button onclick="update();">更新对话框</button>
     <button onclick="percent();">百分比尺寸</button>
@@ -55,21 +56,22 @@
 </body>
 </html>
 <script type="text/javascript">
+if($.isDebug()) {
+    var obj = document.getElementById('txtTips');
+    console.log('getMarginSize: ', $.getMarginSize(obj));
+    console.log('getPaddingSize: ', $.getPaddingSize(obj));
+    console.log('getBorderSize: ', $.getBorderSize(obj, {attr: 'border'}));
 
-var obj = document.getElementById('txtTips');
-console.log('getMarginSize: ', $.getMarginSize(obj));
-console.log('getPaddingSize: ', $.getPaddingSize(obj));
-console.log('getBorderSize: ', $.getBorderSize(obj, {attr: 'border'}));
+    var div = document.getElementById('p2');
+    console.log('getCssAttrSize: ', $.getCssAttrSize(div, {attr: 'radius'}));
+    console.log('getCssAttrSize width: ', $.getCssAttrSize(div, {attr: 'width'}));
+    console.log('getCssAttrSize height: ', $.getCssAttrSize(div, {attr: 'height'}));
+    console.log('getCssAttrSize left: ', $.getCssAttrSize(div, {attr: 'left'}));
+    console.log('getCssAttrSize top: ', $.getCssAttrSize(div, {attr: 'top'}));
+    console.log('getOffsetSize: ', $.getOffsetSize(div));
+    console.log('offset: ', $.offset(div));
 
-var div = document.getElementById('p2');
-console.log('getCssAttrSize: ', $.getCssAttrSize(div, {attr: 'radius'}));
-console.log('getCssAttrSize width: ', $.getCssAttrSize(div, {attr: 'width'}));
-console.log('getCssAttrSize height: ', $.getCssAttrSize(div, {attr: 'height'}));
-console.log('getCssAttrSize left: ', $.getCssAttrSize(div, {attr: 'left'}));
-console.log('getCssAttrSize top: ', $.getCssAttrSize(div, {attr: 'top'}));
-console.log('getOffsetSize: ', $.getOffsetSize(div));
-console.log('offset: ', $.offset(div));
-
+}
 /*
 document.onclick = function() {
     console.log('document.onclick-' + new Date().getMinutes() +'-' + new Date().getSeconds());
@@ -166,7 +168,7 @@ function confirm2(){
         /*
         + '<a href="http://www.baidu.com" target="_blank">baidu</a>'
         + '<div><a href="http://www.163.com">163</a><span onclick="alert(126);">126</span></div>';*/
-    var win = $.confirm(html, '保存', {
+    var win = $.confirm(html, '确认提示信息', {
         buttons: $.DialogButtons.OKCancel,
         //clickBgClose: 'dblclick',
         cancelBubble: true,
@@ -177,8 +179,7 @@ function confirm2(){
         //maxAble: false,
         topMost: true,
         //showLogo: true,
-        fixed: true, 
-        titleStyle: {'font-weight':'normal'},
+        fixed: true,
         y: 10,
         x: 15,
         type: 'confirm',
@@ -219,11 +220,17 @@ function confirm2(){
                 console.log('点击了取消按钮');
             }
         },
+        //两种自定义样式设置，同时启用
+        styles: {
+            title: { color: '#00f'},
+            shade: {'background': '#00f'}
+        },
+        titleStyle: {'font-weight': 'bold'},
         codeCallback: true
     });
 
     window.setTimeout(function(){
-        win.hide();
+        //win.hide();
     }, 2000);
 }
 
@@ -234,10 +241,12 @@ function win(){
         position: 5,
         width: 'auto',
         content: 'http://122.227.179.90:81<br />hello world<br />您好<br />大家好啊',
-        //bodyStyle: {border: 'solid 1px #eee;', 'border-radius':'4px;'},
-        //bodyStyle: {border: 'solid 1px #00f;'},
-        titleStyle: {color: '#f00'},
-        contentStyle: {color: '#00f'}
+        styles: {
+            //body: {border: 'solid 1px #eee;', 'border-radius':'4px;'},
+            //body: {border: 'solid 1px #00f;'},
+            title: {color: '#f00'},
+            content: {color: '#00f'}
+        }
     });
     $.tooltip.close($I('txtTips'));
     window.setTimeout(function(){
@@ -272,7 +281,9 @@ function form2() {
         moveAble: true,
         dragMove: true,
         topMost: true,
-        //dialogStyle: {'font-family': '宋体'},
+        styles: {
+            dialog: {'font-family': '宋体'}
+        },
         callback: function(dialogResult, d, param) {
             console.log('form2: ', dialogResult);
             
@@ -290,7 +301,7 @@ function form2() {
                     d.close();
                 }, 2000);
 
-            } else if(dialogResult.None) {
+            } else if(dialogResult.Close) {
                 console.log('form2: ', '点击了关闭按钮');
             } else {
                 console.log('form2: ', '点击了取消按钮');
@@ -350,7 +361,9 @@ function percent() {
         moveAble: true,
         dragMove: true,
         topMost: true,
-        //dialogStyle: {'font-family': '宋体'},
+        styles: {
+            dialog: {'font-family': '宋体'}
+        },
         callback: function(dialogResult, d, param) {
             console.log('form2: ', dialogResult);
         }
@@ -381,10 +394,11 @@ function load2(id){
     var win = $.dialog.load(elem, {maxWidth:800, maxHeight:500});
 }
 
-function msg(){
-    var win = $.dialog.msg('msg: 这是普通窗口模式。', {
+function msg(isFixWidth){
+    var win = $.dialog.msg('msg: Message提示信息演示' + (isFixWidth ? '(固定宽度)' : ''), {
         id: 'msg', autoClose: false, closeTiming: 15000, fixed: true, 
         position: 8, lock: false, clickBgClose: true, y: 0, x: 0,
+        //width: 300,
         target: $I('txtTips'),
         dragSize: false,
         callback: function() {
@@ -394,7 +408,8 @@ function msg(){
     console.log(win.getOptions());
     window.setTimeout(function() {
         //win.update('请注意：提示信息改变了。请注意：提示信息改变了', {width:'auto'});
-        win.update('请注意：提示信息改变了。请注意：提示信息改变了', '', 'autosize');
+        //win.update('请注意：提示信息改变了。请注意：提示信息改变了', '', 'autosize');
+        win.update('Message提示信息演示：可以固定宽度高度，也可以自适应宽度高度。', '', isFixWidth ? 'autoheight' : 'autosize');
     }, 3000);
 }
 
@@ -408,7 +423,9 @@ function tips(){
             + '<img src="http://122.227.179.90:81/skin/default/images/home/welcome.jpg" />';
         win.update(html, {
             position: 6,
-            //tooltipStyle: {'background': '#ffffff'}
+            styles: {
+                tooltip: {'background': '#ffffff'}
+            }
         })
     },3000);
     

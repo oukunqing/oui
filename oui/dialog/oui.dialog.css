@@ -15,6 +15,7 @@
     opacity: 1;
     overflow: auto;
     text-align: center;
+    border-top-left-radius: 0;
 }
 
 .oui-dialog {
@@ -152,6 +153,7 @@
 
 .oui-dialog .top .btn-panel {
     margin: 2px 2px 0 0;
+    float: right;
 }
 
 .oui-dialog .top .btn {
@@ -189,7 +191,6 @@
 
 .oui-dialog .body .btn-panel {
     margin: 2px 2px 0 0;
-    float: right;
 }
 
 .oui-dialog .body .btn-close {

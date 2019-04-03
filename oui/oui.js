@@ -1926,6 +1926,12 @@
             return this;
         },
         toCssText = function(obj) {
+            if($.isString(obj)) {
+                return obj;
+            }
+            if(!obj || !$.isObject(obj)) {
+                return '';
+            }
             var cssText = [];
             for(var i in obj) {
                 var val = obj[i];

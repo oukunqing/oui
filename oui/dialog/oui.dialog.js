@@ -1,4 +1,3 @@
-
 /*
     @Title: OUI
     @Description：JS通用代码库
@@ -20,6 +19,17 @@
         Padding: 4,             //拖动边框宽度，单位：px
         MinPadding: 0,          //拖动边框最小宽度，单位：px
         MaxPadding: 10,         //拖动边框最大宽度，单位：px
+        CustomStyles: {
+            shade: {},          //遮罩层样式
+            dialog: {},         //对话框样式
+            main: {},           //主体框样式
+            body: {},           //主体样式
+            content: {},        //内容样式
+            top: {},            //顶部样式
+            title: {},          //标题样式
+            bottom: {},         //底部样式
+            tooltip: {}         //Tooltip样式
+        },
         KEY_CODE: {
             Enter: 13,
             Esc: 27,
@@ -245,6 +255,17 @@
             opt.closeTiming = Math.abs(parseInt('0' + opt.closeTiming, 10));
             return opt;
         },
+        checkCustomStyle: function(opt) {
+            //检测自定义样式设置
+            if(!opt.styles || !$.isObject(opt.styles)) {
+                opt.styles = Config.CustomStyles;
+            }
+            //合并自定义的样式
+            for(var k in opt.styles) {
+                $.extend(opt.styles[k], opt[k + 'Style']);
+            }
+            return this;
+        },
         checkOptions: function (content, title, opt) {
             var target = null,  //目标控件，用于位置停靠
                 elem = null;    //内容控件，用于加载内容
@@ -269,7 +290,7 @@
             opt.title = title || opt.title || undefined;
             opt.target = target || opt.target || undefined;
 
-            return this.checkTiming(opt);
+            return this.checkCustomStyle(opt).checkTiming(opt);
         },
         getCssAttrSize: function(val, options) {
             var p = $.extend({
@@ -281,7 +302,6 @@
                 max: Config.MaxPadding,
                 val: Config.Padding
             }, options);
-
             return $.getCssAttrSize(val, p);
         },
         checkType: function (type, isBuild) {
@@ -300,6 +320,13 @@
         },
         toCssText: function (styles, type) {
             //TODO:
+            switch(type) {
+                case 'shade':
+                    break;
+                case 'dialog':
+                    break;
+
+            }
             return $.toCssText(styles);
         },
         hasEvent: function(elem) {
@@ -580,10 +607,12 @@
                 case Config.DialogType.Alert:
                     opt.buttons = Config.DialogButtons.OK;
                     opt.showMin = opt.showMax = false;
+                    opt.buttonPosition = 'right';
                     break;
                 case Config.DialogType.Confirm:
                     opt.buttons = Config.DialogButtons.OKCancel;
                     opt.showMin = opt.showMax = false;
+                    opt.buttonPosition = 'right';
                     break;
                 case Config.DialogType.Dialog:
                     opt.height = 'auto';
@@ -809,8 +838,10 @@
             ctls.shade = $.createElement('div');
             ctls.shade.className = 'oui-dialog-shade';
             ctls.shade.style.zIndex = opt.zindex;
-            var css;
-            if ((css = Common.toCssText({ opacity: opt.opacity }))) {
+            var css, 
+                shadeStyle = $.extend({ opacity: opt.opacity }, opt.styles.shade);
+
+            if ((css = Common.toCssText(shadeStyle, 'shade'))) {
                 ctls.shade.style.cssText = css;
             }
             return this;
@@ -831,7 +862,7 @@
             ctls.box.className = 'oui-dialog';
             ctls.box.style.zIndex = opt.zindex;
             ctls.box.id = _.getDialogId();
-            if ((css = Common.toCssText(opt.dialogStyle || opt.boxStyle, 'box'))) {
+            if ((css = Common.toCssText(opt.styles.dialog || opt.styles.box, 'dialog'))) {
                 ctls.box.style.cssText = css;
             }
             //ctls.box.style.padding = opt.padding + 'px';
@@ -845,7 +876,7 @@
             if(p.none || _.isClosed()) { return this; }
             var elem = $.createElement('div'), css;
             elem.className = 'main';
-            if ((css = Common.toCssText(opt.mainStyle, 'main'))) {
+            if ((css = Common.toCssText(opt.styles.main, 'main'))) {
                 elem.style.cssText = css;
             }
             return this.appendChild((ctls.main = elem), pNode);
@@ -864,7 +895,7 @@
                 elem = $.createElement('div');
                 elem.className = 'top';
 
-                if ((css = Common.toCssText(opt.topStyle || opt.titleStyle, 'top'))) {
+                if ((css = Common.toCssText(opt.styles.top, 'top'))) {
                     elem.style.cssText = css;
                 }
 
@@ -890,7 +921,7 @@
             var div = $.createElement('div');
             div.className = 'title';
             div.innerHTML = opt.title;
-            if ((css = Common.toCssText(opt.titleStyle, 'title'))) {
+            if ((css = Common.toCssText(opt.styles.title, 'title'))) {
                 div.style.cssText = css;
             }
             elem.appendChild((ctls.title = div));
@@ -981,7 +1012,7 @@
             if(!opt.showTitle) {
                 this.buildClose(_, elem, false);
             }
-            if ((css = Common.toCssText(opt.bodyStyle, 'body'))) {
+            if ((css = Common.toCssText(opt.styles.body, 'body'))) {
                 elem.style.cssText = css;
             }
             return this.buildContent(_, elem).appendChild((ctls.body = elem), pNode);
@@ -994,7 +1025,7 @@
                 elem = $.createElement('div');
                 elem.className = 'content';
             }
-            if ((css = Common.toCssText(opt.contentStyle, 'content'))) {
+            if ((css = Common.toCssText(opt.styles.content, 'content'))) {
                 elem.style.cssText = css;
             }
             if ([Config.DialogType.Url, Config.DialogType.Iframe, Config.DialogType.Load].indexOf(opt.type) >= 0) {
@@ -1026,6 +1057,9 @@
                 }
             } else {
                 elem.innerHTML = opt.content;
+                if(!opt.showTitle && ctls.btnPanel) {
+                    elem.style.marginRight = ctls.btnPanel.offsetWidth + 'px';
+                }
             }
             return this.appendChild((ctls.content = elem), pNode || null);
         },
@@ -1066,7 +1100,7 @@
                 elem = $.createElement('div');
                 elem.className = 'bottom';
 
-                if ((css = Common.toCssText(opt.bottomStyle, 'bottom'))) {
+                if ((css = Common.toCssText(opt.styles.bottom, 'bottom'))) {
                     elem.style.cssText = css;
                 }
             }
@@ -2353,7 +2387,7 @@
             };
 
             //设置自定义的样式
-            var cssText = Common.toCssText(opt.tooltipStyle || opt.tipStyle, 'tooltip');            
+            var cssText = Common.toCssText(opt.styles.tooltip || opt.styles.tips, 'tooltip');            
             if (cssText) {
                 obj.style.cssText = cssText;
             }
@@ -2429,6 +2463,20 @@
                 showClose: true,        //是否显示关闭按钮
                 showBottom: true,       //是否显示底部按钮栏
                 cancelBubble: false,    //是否阻止背景层事件冒泡
+                //自定义样式
+                styles: {
+                    shade: {},          //遮罩层样式
+                    dialog: {},         //对话框样式
+                    main: {},           //主体框样式
+                    body: {},           //主体样式
+                    content: {},        //内容样式 
+                    top: {},            //顶部样式
+                    title: {},          //标题样式
+                    bottom: {},         //底部样式
+                    tooltip: {}         //Tooltip样式
+                },
+                //样式也可以采用单独设置，会自动合并到styles中
+                shadeStyle: '',         //遮罩层样式
                 dialogStyle: '',        //对话框样式
                 mainStyle: '',          //主体框样式
                 bodyStyle: '',          //主体样式
@@ -2436,7 +2484,7 @@
                 topStyle: '',           //顶部样式
                 titleStyle: '',         //标题样式
                 bottomStyle: '',        //底部样式
-                tipStyle: ''            
+                tooltipStyle: ''        //Tooltip样式    
             }, Common.checkOptions(content, title, options));
 
         return this.id = opt.id, this.initial(opt);
@@ -2495,6 +2543,9 @@
                     p[key] = value;
                 }
             }
+            //检测参数
+            Common.checkOptions(p.options);
+
             return this;
         },
         getDialogId: function() {
