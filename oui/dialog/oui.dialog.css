@@ -63,17 +63,17 @@
     border-radius: 4px;
 }
 
-.oui-dialog .main {
+.oui-dialog .dialog-main {
     border: none 0;
     background: #fff;
     margin: 0px; padding: 0px;
     position: relative;
     overflow: hidden;
     box-sizing: border-box;
-    border-radius: 4px;
+    /*border-radius: 4px;*/
 }
 
-.oui-dialog .top{
+.oui-dialog .dialog-head{
     padding:0; margin:0;
     border: none 0;
     width: 100%;
@@ -90,7 +90,7 @@
     -ms-user-select: none; /*IE10*/
 }
 
-.oui-dialog .top .title {
+.oui-dialog .dialog-head .dialog-title {
     margin: 0; 
     padding: 0;
     width: auto;
@@ -125,7 +125,7 @@
     line-height: 28px;
 }
 
-.oui-dialog .top .logo {
+.oui-dialog .dialog-head .dialog-logo {
     width: 20px; height: 20px;
     margin: 2px 0 0 2px;
     padding: 0;
@@ -136,11 +136,11 @@
     background:#fff url('imgs/icon.png') no-repeat 0px 0;
 }
 
-.oui-dialog .top .logo:hover {
+.oui-dialog .dialog-head .dialog-logo:hover {
     border: solid 1px #ddd;
 }
 
-.oui-dialog .top .timing {
+.oui-dialog .dialog-head .dialog-timing {
     margin: 0; 
     padding: 5px 5px;
     font-size: 14px;
@@ -151,12 +151,12 @@
     width: auto;
 }
 
-.oui-dialog .top .btn-panel {
+.oui-dialog .dialog-head .btn-panel {
     margin: 2px 2px 0 0;
     float: right;
 }
 
-.oui-dialog .top .btn {
+.oui-dialog .dialog-head .dialog-btn {
     border: solid 1px #f1f1f1;
     border-radius: 3px;
     background-color: #fff;
@@ -168,32 +168,32 @@
     box-sizing: content-box;
 }
 
-.oui-dialog .top .btn:hover {
+.oui-dialog .dialog-head .dialog-btn:hover {
     background-color: #f8f8f8;
     border: solid 1px #ddd;
 }
 
-.oui-dialog .top .btn-min {
+.oui-dialog .dialog-head .btn-min {
     background: #fff url('imgs/icon.png') no-repeat -20px 0;
 }
 
-.oui-dialog .top .btn-max {
+.oui-dialog .dialog-head .btn-max {
     background: #fff url('imgs/icon.png') no-repeat -40px 0;
 }
 
-.oui-dialog .top .btn-normal {
+.oui-dialog .dialog-head .btn-normal {
     background: #fff url('imgs/icon.png') no-repeat -60px 0;
 }
 
-.oui-dialog .top .btn-close {
+.oui-dialog .dialog-head .btn-close {
     background: #fff url('imgs/icon.png') no-repeat -80px 0;
 }
 
-.oui-dialog .body .btn-panel {
+.oui-dialog .dialog-body .btn-panel {
     margin: 2px 2px 0 0;
 }
 
-.oui-dialog .body .btn-close {
+.oui-dialog .dialog-body .btn-close {
     border: solid 1px #f1f1f1;
     border-radius: 3px;
     background-color: #fff;
@@ -207,7 +207,7 @@
     background: #fff url('imgs/icon.png') no-repeat -80px 0;
 }
 
-.oui-dialog .body,.oui-dialog-max .body {
+.oui-dialog .dialog-body, .oui-dialog-max .dialog-body {
     position: relative;
     text-align: left;
     background: #fff;
@@ -227,7 +227,7 @@
     /*margin-bottom: 40px;*/
 }
 
-.oui-dialog .body .content {
+.oui-dialog .dialog-body .dialog-content {
     border: none 0;
     padding: 4px; margin: 0px;
     line-height: 24px;
@@ -235,14 +235,14 @@
     box-sizing: border-box;
 }
 
-.oui-dialog .body .iframe {
+.oui-dialog .dialog-body .dialog-iframe {
     width: 100%; height: 100%;
     margin: 0px; padding: 0px;
     background: transparent;
     box-sizing: border-box;
 }
 
-.oui-dialog .body .iframe-shade {
+.oui-dialog .dialog-body .iframe-shade {
     width: 100%; height: 100%;
     margin: 0px; padding: 0px;
     background: #fff;
@@ -254,7 +254,7 @@
     top: 0; left: 0; bottom: 0; right: 0;
 }
 
-.oui-dialog .body .loading{
+.oui-dialog .dialog-body .dialog-loading{
     background: #fff;
     color: #666;
     border-radius: 3px;
@@ -267,7 +267,7 @@
     float: left;
 }
 
-.oui-dialog .bottom {
+.oui-dialog .dialog-foot {
     position: absolute;
     left: 0; bottom: 0;
     border: none 0;
@@ -282,7 +282,7 @@
     user-select:none;
 }
 
-.oui-dialog .bottom .button-panel {
+.oui-dialog .dialog-foot .button-panel {
     border: none 0;
     box-sizing: border-box;
     /*border-top: solid 1px #ddd;*/
@@ -291,7 +291,7 @@
     padding: 0;
 }
 
-.oui-dialog .btn {    
+.oui-dialog .dialog-btn {    
     margin: 0 0 0;
     color: #fff;
     background: #337ab7;
@@ -377,17 +377,17 @@
     border-color: #c9302c;
 }
 
-.oui-dialog .bottom .btn-ml {
+.oui-dialog .dialog-foot .btn-ml {
     margin-left: 8px;
 }
 
-.oui-dialog .bottom .btn-mr {
+.oui-dialog .dialog-foot .btn-mr {
     margin-right: 8px;
 }
 
 /*关于拖放开关*/
 
-.oui-dialog .border-switch {
+.oui-dialog .drag-switch {
     background: transparent;
     margin: 0; padding: 0; 
     position: absolute;
@@ -516,7 +516,7 @@
     border-width: 6px;
 }
 
-.oui-tooltip .content{
+.oui-tooltip .dialog-content{
     white-space: nowrap;
     margin: 0; padding: 0;
     border: none;
@@ -524,7 +524,7 @@
     display: block;
 }
 
-.oui-tooltip .content img{
+.oui-tooltip .dialog-content img{
     display: block;
     margin: 0; padding: 0;
     border: none 0;
@@ -555,7 +555,7 @@
     border-top-color: #ffb4a8;
     margin-left: -7px;
 }
-
+/*
 .oui-tip-right:after{
     top: 50%;
     left: -12px;
@@ -565,6 +565,24 @@
 }
 .oui-tip-right:before{
     top: 50%;
+    left: -14px;
+    border-width: 7px;
+    border-right-color: #ffb4a8;
+    margin-top: -7px;
+}
+*/
+
+.oui-tip-right:after{
+    top: 50%;
+    top: 10px;
+    left: -12px;
+    border-width: 6px;
+    border-right-color: #fef2f2;
+    margin-top: -6px;
+}
+.oui-tip-right:before{
+    top: 50%;
+    top: 10px;
     left: -14px;
     border-width: 7px;
     border-right-color: #ffb4a8;

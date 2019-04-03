@@ -25,9 +25,9 @@
             main: {},           //主体框样式
             body: {},           //主体样式
             content: {},        //内容样式
-            top: {},            //顶部样式
+            head: {},           //顶部样式
             title: {},          //标题样式
-            bottom: {},         //底部样式
+            foot: {},           //底部样式
             tooltip: {}         //Tooltip样式
         },
         KEY_CODE: {
@@ -618,7 +618,7 @@
                     opt.height = 'auto';
                     break;
                 case Config.DialogType.Win:
-                    opt.showBottom = $.isBoolean(options.showBottom, false);
+                    opt.showFoot = $.isBoolean(options.showFoot, false);
                     opt.height = 'auto';
                     break;
                 case Config.DialogType.Form:
@@ -628,11 +628,11 @@
                 case Config.DialogType.Url:
                 case Config.DialogType.Load:
                 case Config.DialogType.Iframe:
-                    opt.showBottom = $.isBoolean(options.showBottom, false);
+                    opt.showFoot = $.isBoolean(options.showFoot, false);
                     break;
                 default:
                     opt.buttons = Config.DialogButtons.None;
-                    opt.showTitle = opt.showBottom = opt.dragSize = false;
+                    opt.showHead = opt.showFoot = opt.dragSize = false;
                     opt.height = opt.minHeight = 'auto';
                     opt.minAble = opt.maxAble = opt.lock = false;
                     break;
@@ -709,7 +709,7 @@
             if (ctls.container) {
                 ctls.container.style.display = display;
             } else {
-                ctls.box.style.display = display;
+                ctls.dialog.style.display = display;
             }
             if (ctls.shade) {
                 ctls.shade.style.display = display;
@@ -747,18 +747,18 @@
                     .buildContainer(_);
             }
 
-            util.buildBox(_)
-                .buildMain(_, ctls.box)
-                .buildTop(_, ctls.main, false)
+            util.buildDialog(_)
+                .buildMain(_, ctls.dialog)
+                .buildHead(_, ctls.main, false)
                 .buildBody(_, ctls.main)
-                .buildBottom(_, ctls.main, false);
+                .buildFoot(_, ctls.main, false);
 
             if (opt.fixed) {
-                ctls.box.style.position = 'fixed';
+                ctls.dialog.style.position = 'fixed';
             }
 
             if (opt.dragSize) {
-                util.setZoomSwitch(_);
+                util.setDragSwitch(_);
             }
 
             if (ctls.shade) {
@@ -766,10 +766,10 @@
             }
 
             if (ctls.container) {
-                ctls.container.appendChild(ctls.box);
+                ctls.container.appendChild(ctls.dialog);
                 document.body.appendChild(ctls.container);
             } else {
-                document.body.appendChild(ctls.box);
+                document.body.appendChild(ctls.dialog);
             }
 
             util.setSize(_, { type: opt.status, width: opt.width, height: opt.height });
@@ -791,12 +791,12 @@
             }
             Factory.setWindowResize();
 
-            if(!opt.showTitle || ctls.iframe || Common.isPlainText(ctls.content)) {
-                $.addListener([ctls.body, ctls.box], 'mousedown', function () {
+            if(!opt.showHead || ctls.iframe || Common.isPlainText(ctls.content)) {
+                $.addListener([ctls.body, ctls.dialog], 'mousedown', function () {
                     _.topMost();
                 });
 
-                $.addListener(ctls.box, ['click', 'dblclick', 'mousedown'], function () {
+                $.addListener(ctls.dialog, ['click', 'dblclick', 'mousedown'], function () {
                     $.cancelBubble();
                 });
             }
@@ -854,19 +854,19 @@
             ctls.container.style.zIndex = opt.zindex;
             return this;
         },
-        buildBox: function(_) {
+        buildDialog: function(_) {
             var p = this.getParam(_), opt = p.options, ctls = p.controls;
             if(p.none) { return this; }
             var css;
-            ctls.box = $.createElement('div');
-            ctls.box.className = 'oui-dialog';
-            ctls.box.style.zIndex = opt.zindex;
-            ctls.box.id = _.getDialogId();
-            if ((css = Common.toCssText(opt.styles.dialog || opt.styles.box, 'dialog'))) {
-                ctls.box.style.cssText = css;
+            ctls.dialog = $.createElement('div');
+            ctls.dialog.className = 'oui-dialog';
+            ctls.dialog.style.zIndex = opt.zindex;
+            ctls.dialog.id = _.getDialogId();
+            if ((css = Common.toCssText(opt.styles.dialog, 'dialog'))) {
+                ctls.dialog.style.cssText = css;
             }
-            //ctls.box.style.padding = opt.padding + 'px';
-            ctls.box.style.padding = Common.getCssAttrSize(opt.padding, {
+            //ctls.dialog.style.padding = opt.padding + 'px';
+            ctls.dialog.style.padding = Common.getCssAttrSize(opt.padding, {
                 attr: 'padding', unit:'px', isArray: true, isLimit: true, max: 10, val: 4
             }).join(' ');
             return this;
@@ -875,27 +875,27 @@
             var p = this.getParam(_), opt = p.options, ctls = p.controls;
             if(p.none || _.isClosed()) { return this; }
             var elem = $.createElement('div'), css;
-            elem.className = 'main';
+            elem.className = 'dialog-main';
             if ((css = Common.toCssText(opt.styles.main, 'main'))) {
                 elem.style.cssText = css;
             }
             return this.appendChild((ctls.main = elem), pNode);
         },
-        buildTop: function(_, pNode, rebuild) {
+        buildHead: function(_, pNode, rebuild) {
             var p = this.getParam(_), opt = p.options, ctls = p.controls;
-            if(p.none || _.isClosed() || !opt.showTitle || (ctls.top && !rebuild)) {
+            if(p.none || _.isClosed() || !opt.showHead || (ctls.head && !rebuild)) {
                 return this; 
             }
             var elem, css, btns = p.btns;
-            if(rebuild && ctls.top) {
-                $.removeChild(ctls.top, [ctls.logo, ctls.title, ctls.btnPanel]);
-                elem = ctls.top;
+            if(rebuild && ctls.head) {
+                $.removeChild(ctls.head, [ctls.logo, ctls.title, ctls.btnPanel]);
+                elem = ctls.head;
             }
             if(!rebuild) {
                 elem = $.createElement('div');
-                elem.className = 'top';
+                elem.className = 'dialog-head';
 
-                if ((css = Common.toCssText(opt.styles.top, 'top'))) {
+                if ((css = Common.toCssText(opt.styles.top, 'head'))) {
                     elem.style.cssText = css;
                 }
 
@@ -914,12 +914,12 @@
 
             if(opt.showLogo) {
                 var logo = $.createElement('div');
-                logo.className = 'logo';
+                logo.className = 'dialog-logo';
                 elem.appendChild((ctls.logo = logo));
             }
            
             var div = $.createElement('div');
-            div.className = 'title';
+            div.className = 'dialog-title';
             div.innerHTML = opt.title;
             if ((css = Common.toCssText(opt.styles.title, 'title'))) {
                 div.style.cssText = css;
@@ -928,7 +928,7 @@
 
             this.buildClose(_, elem, true);
 
-            return !rebuild ? this.appendChild((ctls.top = elem), pNode) : null, this;
+            return !rebuild ? this.appendChild((ctls.head = elem), pNode) : null, this;
         },
         buildCloseTiming: function(_) {
             var p = this.getParam(_), opt = p.options, ctls = p.controls, timers = p.timers;
@@ -939,12 +939,12 @@
 
             if(opt.showTimer) {
                 var i = opt.closeTiming / 100;
-                if (i > 20 && opt.showTitle) {
+                if (i > 20 && opt.showHead) {
                     var div = $.createElement('label', 'timing', function (elem) {
-                        elem.className = 'timing';
+                        elem.className = 'dialog-timing';
                         elem.title = Common.getDialogText('CloseTiming', opt.lang) || '';
                     });
-                    ctls.top.appendChild((ctls.timer = div));
+                    ctls.head.appendChild((ctls.timer = div));
 
                     timers.timingTimer = window.setInterval(function () {
                         ctls.timer.innerHTML = (i--) / 10;
@@ -966,7 +966,7 @@
         },
         buildClose: function(_, pNode, isTop) {
             var p = this.getParam(_), opt = p.options, ctls = p.controls, html = [];
-            if(!ctls.box) {
+            if(!ctls.dialog) {
                 return this;
             }
             if(isTop) {
@@ -976,15 +976,15 @@
                     max = Common.getStatusText('max', opt.lang);
 
                 if(isMin) {
-                    html.push('<a class="btn btn-min" code="min" title="' + min + '"></a>');
+                    html.push('<a class="dialog-btn btn-min" code="min" title="' + min + '"></a>');
                 }
                 if(isMax || isMin) {
-                    html.push('<a class="btn btn-max" code="max" title="' + max + '"></a>');
+                    html.push('<a class="dialog-btn btn-max" code="max" title="' + max + '"></a>');
                 }
             }
             if(opt.closeAble && opt.showClose) {
                 var close = Common.getStatusText('close', opt.lang);
-                html.push('<a class="btn btn-close" code="close" title="' + close + '"></a>');
+                html.push('<a class="dialog-btn btn-close" code="close" title="' + close + '"></a>');
             }
 
             if(html.length > 0) {
@@ -1007,9 +1007,9 @@
             var p = this.getParam(_), opt = p.options, ctls = p.controls;
             if(p.none || _.isClosed()) { return this; }
             var elem = $.createElement('div'), css;
-            elem.className = 'body';
+            elem.className = 'dialog-body';
 
-            if(!opt.showTitle) {
+            if(!opt.showHead) {
                 this.buildClose(_, elem, false);
             }
             if ((css = Common.toCssText(opt.styles.body, 'body'))) {
@@ -1023,7 +1023,7 @@
             var elem = ctls.content, css, util = this;
             if (!elem) {
                 elem = $.createElement('div');
-                elem.className = 'content';
+                elem.className = 'dialog-content';
             }
             if ((css = Common.toCssText(opt.styles.content, 'content'))) {
                 elem.style.cssText = css;
@@ -1057,7 +1057,7 @@
                 }
             } else {
                 elem.innerHTML = opt.content;
-                if(!opt.showTitle && ctls.btnPanel) {
+                if(!opt.showHead && ctls.btnPanel) {
                     elem.style.marginRight = ctls.btnPanel.offsetWidth + 'px';
                 }
             }
@@ -1065,11 +1065,11 @@
         },
         buildIframe: function (_, opt, url) {
             var height = '100%';
-            var html = ['<iframe class="iframe" width="100%"',
+            var html = ['<iframe class="dialog-iframe" width="100%"',
                 ' id="{0}-iframe" height="{1}" src="{2}"',
                 ' frameborder="0" scrolling="auto"></iframe>',
                 '<div id="{0}-iframe-shade" class="iframe-shade"></div>',
-                '<div id="{0}-loading" class="loading">{3}</div>'
+                '<div id="{0}-loading" class="dialog-loading">{3}</div>'
             ].join('');
             return html.format(_.getDialogId(), height, url.setUrlParam(), 
                 opt.loading || Common.getDialogText('Loading', opt.lang));
@@ -1086,21 +1086,21 @@
             }
             return this;
         },
-        buildBottom: function(_, pNode, rebuild) {
+        buildFoot: function(_, pNode, rebuild) {
             var p = this.getParam(_), opt = p.options, ctls = p.controls;
-            if(p.none || _.isClosed() || !opt.showBottom || (ctls.bottom && !rebuild)) {
+            if(p.none || _.isClosed() || !opt.showFoot || (ctls.foot && !rebuild)) {
                 return this;
             }
             var elem, css, buttons = p.buttons, util = this;
-            if(rebuild && ctls.bottom) {
-                $.removeChild(ctls.bottom, [ctls.button]);
-                elem = ctls.bottom;
+            if(rebuild && ctls.foot) {
+                $.removeChild(ctls.foot, [ctls.button]);
+                elem = ctls.foot;
             }
             if(!rebuild) {
                 elem = $.createElement('div');
-                elem.className = 'bottom';
+                elem.className = 'dialog-foot';
 
-                if ((css = Common.toCssText(opt.styles.bottom, 'bottom'))) {
+                if ((css = Common.toCssText(opt.styles.foot, 'foot'))) {
                     elem.style.cssText = css;
                 }
             }
@@ -1125,7 +1125,7 @@
             util.setButtonEvent(_, panel.childNodes, 'click', true)
                 .setShortcutKeyEvent(_, panel.childNodes);
 
-            return !rebuild ? util.appendChild((ctls.bottom = elem), pNode) : null, util;
+            return !rebuild ? util.appendChild((ctls.foot = elem), pNode) : null, util;
         },
         buildButtons: function(_) {
             var p = this.getParam(_), opt = p.options, ctls = p.controls;
@@ -1151,14 +1151,14 @@
                 //启用外部参数中的按钮文字
                 $.extend(config, {text: txts[config.code]});
 
-                text = '<a class="btn {css}{1}" code="{key}" result="{result}" href="{{0}}" shortcut-key="{skey}">{text}</a>';
+                text = '<a class="dialog-btn {css}{1}" code="{key}" result="{result}" href="{{0}}" shortcut-key="{skey}">{text}</a>';
                 if (config) {
                     html.push(text.format(config, css));
                 }
             }
             return html.join('').format('javascript:void(0);');
         },
-        setZoomSwitch: function (_, dir) {
+        setDragSwitch: function (_, dir) {
             var p = this.getParam(_), opt = p.options, ctls = p.controls;
             if(p.none) { return this; }
             var arr = [ 
@@ -1176,15 +1176,15 @@
             if (opt.dragSize) {
                 var padding = Common.getCssAttrSize(opt.padding, {attr:'padding', unit: 'px', isLimit: true});
                 for (var i in dir) {
-                    ctls.box.appendChild(this.buildZoomSwitch(_, dir[i], padding));
+                    ctls.dialog.appendChild(this.buildDragSwitch(_, dir[i], padding));
                 }
-                this.showZoomSwitch(_);
+                this.showDragSwitch(_);
             } else {
-                this.hideZoomSwitch(_);
+                this.hideDragSwitch(_);
             }
             return this;
         },
-        buildZoomSwitch: function(_, dir, padding) {
+        buildDragSwitch: function(_, dir, padding) {
             var p = this.getParam(_), opt = p.options, ctls = p.controls;
             if(p.none) { return this; }
             if ($.isUndefined(dir)) {
@@ -1195,7 +1195,7 @@
                 return false;
             }
             var div = $.createElement('div');
-            div.className = 'border-switch';
+            div.className = 'drag-switch';
             div.pos = dir;
             div.id = id;
             div.dialogId = opt.id;
@@ -1218,15 +1218,15 @@
             return $('#' + _.getDialogId() + ' ' + className);
         },
         getZoomSwicths: function (_) {
-            return this.getElements(_, '.border-switch');
+            return this.getElements(_, '.drag-switch');
         },
-        showZoomSwitch: function (_) {
+        showDragSwitch: function (_) {
             this.getZoomSwicths(_).each(function () {
                 $(this).show();
             });
             return this;
         },
-        hideZoomSwitch: function (_) {
+        hideDragSwitch: function (_) {
             this.getZoomSwicths(_).each(function (i, obj, args) {
                 $(this).hide();
             });
@@ -1306,7 +1306,7 @@
             }
             var parent = obj.parentNode;
             while (parent !== null) {
-                if (parent == ctls.box) {
+                if (parent == ctls.dialog) {
                     return true;
                 }
                 parent = parent.parentNode;
@@ -1352,7 +1352,7 @@
             var util = this, p = util.getParam(_), opt = p.options, ctls = p.controls;
             if(p.none) { return util; }
 
-            var obj = ctls.box,
+            var obj = ctls.dialog,
                 bs = $.getBodySize(),
                 w = obj.offsetWidth,
                 h = obj.offsetHeight,
@@ -1380,7 +1380,7 @@
             var opt = p.options, 
                 ctls = p.controls, 
                 btns = p.btns, 
-                obj = ctls.box, 
+                obj = ctls.dialog, 
                 par = {};
 
             if ($.isString(options)) {
@@ -1403,7 +1403,7 @@
             if (p.status.max && sp.type !== Config.DialogStatus.Max && ctls.container) {
                 $.removeClass(ctls.container, 'dialog-overflow-hidden');
             } else if (sp.type !== Config.DialogStatus.Min) {
-                $.removeClass(ctls.bottom, 'display-none');
+                $.removeClass(ctls.foot, 'display-none');
             }
 
             if (sp.type !== Config.DialogStatus.Max && !opt.lock) {
@@ -1434,7 +1434,7 @@
                     $.removeClass(obj, 'oui-dialog-min');
                 }
                 util.hideDocOverflow(_)
-                    .hideZoomSwitch(_)
+                    .hideDragSwitch(_)
                     .setStatus(_, Config.DialogStatus.Max);
 
             } else if (sp.type === Config.DialogStatus.Min) {
@@ -1445,7 +1445,7 @@
                 if (isNaN(minW)) { minW = 180; }
 
                 par = { width: minW, height: minH };
-                $.addClass(ctls.bottom, 'display-none')
+                $.addClass(ctls.foot, 'display-none')
                     .addClass(obj, 'oui-dialog-min')
                     .removeClass(btns.max, 'btn-normal');
                 if (p.status.max) {
@@ -1453,7 +1453,7 @@
                 }
                 $.setStyle(obj, { width: minW, height: minH }, 'px');
 
-                util.hideZoomSwitch(_)
+                util.hideDragSwitch(_)
                     .setStatus(_, Config.DialogStatus.Min)
                     .setPosition(_, { position: opt.position });
 
@@ -1470,7 +1470,7 @@
                 } else if (p.status.min) {
                     $.removeClass(obj, 'oui-dialog-min');
                 }
-                util.showZoomSwitch(_).setStatus(_, Config.DialogStatus.Normal);
+                util.showDragSwitch(_).setStatus(_, Config.DialogStatus.Normal);
 
                 if (sp.type === 'resize' || sp.type === 'size') {
                     par = { width: sp.width, height: sp.height };
@@ -1510,10 +1510,10 @@
             var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls;
             if(p.none) { return this; }
 
-            if(_.isClosed() || !ctls.top) {
+            if(_.isClosed() || !ctls.head) {
                 return this;
             }
-            var topWidth = width || ctls.top.clientWidth,
+            var topWidth = width || ctls.head.clientWidth,
                 logoWidth = ctls.logo ? ctls.logo.offsetWidth : 0,
                 btnWidth = ctls.btnPanel ? ctls.btnPanel.offsetWidth : 0,
                 timerWidth = ctls.timer ? ctls.timer.offsetWidth : 0,
@@ -1561,7 +1561,7 @@
             return false;
         },
         setPosition: function (_, options) {
-            var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls, obj = ctls.box;
+            var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls, obj = ctls.dialog;
             if(p.none || !obj) { return this; }
 
             if ($.isString(options) || $.isNumber(options)) {
@@ -1584,9 +1584,10 @@
                 if(p.status.max) {
                     return $.setStyle(obj, { left: 0, top: 0 }, 'px'), util;
                 } else {
-                    //return util;
-                    //TODO:
 
+                    //TODO:
+                    //在窗口大小改变时
+                    //看是否需要怎么控制对话框位置
                 }
             }
             if($.isElement(par.target)) {
@@ -1637,7 +1638,7 @@
             return $.setStyle(obj, { left: posX, top: posY }, 'px'), util;
         },
         movePosition: function(_, options, isMoveTo) {
-            var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls, obj = ctls.box;
+            var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls, obj = ctls.dialog;
             if(p.none || !obj || !opt.moveAble) { return util; }
 
             var par = $.extend({
@@ -1716,7 +1717,9 @@
                 css = '';
 
             switch (pos) {
+                case 1:
                 case 2:
+                case 3:
                 case Config.Position.Top:
                     top = fs.y - h - par.y;
                     css = Config.Position.Top;
@@ -1730,9 +1733,12 @@
                         left = fs.x + fs.w + par.x;
                         css = Config.Position.Right;
                     }
+                    console.log(obj.style.cssText);    
+                    $.setStyle(obj, {}, '');
                     break;
                 case 7:
                 case 8:
+                case 9:
                 case Config.Position.Bottom:
                     top = fs.y + fs.h + par.y;
                     css = Config.Position.Bottom;
@@ -1761,7 +1767,7 @@
             var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls;
             if(p.none) { return this; }
 
-            var obj = ctls.box,
+            var obj = ctls.dialog,
                 docMouseMove = document.onmousemove,
                 docMouseUp = document.onmouseup;
 
@@ -1811,12 +1817,12 @@
                 };
             }
 
-            if (opt.showTitle && ctls.top) {
-                $.addListener(ctls.top, 'mousedown', function () {
+            if (opt.showHead && ctls.head) {
+                $.addListener(ctls.head, 'mousedown', function () {
                     moveDialog();
                 });
             } else {
-                $.addListener([ctls.box, ctls.body, ctls.content], 'mousedown', function () {
+                $.addListener([ctls.dialog, ctls.body, ctls.content], 'mousedown', function () {
                     moveDialog();
                 });
             }
@@ -1824,7 +1830,7 @@
             return this;
         },
         changeSize: function (_, options, isDrag, dp) {
-            var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls, obj = ctls.box;
+            var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls, obj = ctls.dialog;
             if(p.none) { return this; }
 
             if (!obj || !opt.sizeAble || (!opt.dragSize && isDrag)) {
@@ -1910,17 +1916,9 @@
             }
 
             //检测最小高度，当高度小于最小高度时，隐藏底部按钮栏
-            var minHeight = (ctls.top ? ctls.top.offsetHeight : 0) +
-                (ctls.bottom ? ctls.bottom.offsetHeight : 0) +
+            var minHeight = (ctls.head ? ctls.head.offsetHeight : 0) +
+                (ctls.foot ? ctls.foot.offsetHeight : 0) +
                 ctls.body.offsetHeight;
-
-            if(ctls.bottom && newHeight < minHeight) {
-                ctls.bottom.style.visibility = 'hidden';
-                _.dragScaleHideBottom = true;
-            } else if(_.dragScaleHideBottom) {
-                ctls.bottom.style.visibility = 'visible';
-            }
-
 
             if (par.dir.indexOf('-') >= 0 || par.dir === Config.Direction.Center) {
                 $.setStyle(obj, { width: newWidth, height: newHeight }, 'px');
@@ -1958,6 +1956,13 @@
             }
             util.setBodySize(_, { fullScreen : false, drag: isDrag });
 
+            if(ctls.foot && ctls.dialog.offsetHeight < minHeight) {
+                ctls.foot.style.visibility = 'hidden';
+                _.dragScaleHideBottom = true;
+            } else if(_.dragScaleHideBottom) {
+                ctls.foot.style.visibility = 'visible';
+            }
+
             if (!isDrag && par.dir === Config.Direction.Center) {
                 util.setPosition(_, par);
             }
@@ -1973,14 +1978,14 @@
                 return false;
             }
             if (opt.width === 'auto') {
-                ctls.box.style.width = 'auto';
+                ctls.dialog.style.width = 'auto';
                 ctls.main.style.width = 'auto';
                 ctls.body.style.width = 'auto';
                 ctls.content.style.width = 'auto';
                 isAutoSize = true;
             }
             if (opt.height === 'auto') {
-                ctls.box.style.height = 'auto';
+                ctls.dialog.style.height = 'auto';
                 ctls.main.style.height = 'auto';
                 ctls.body.style.height = 'auto';
                 ctls.content.style.height = 'auto';
@@ -1993,19 +1998,19 @@
             var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls;
             if(p.none) { return this; }
 
-            var pH = parseInt($.getElementStyle(ctls.box, 'padding', 0), 10),
+            var pH = parseInt($.getElementStyle(ctls.dialog, 'padding', 0), 10),
                 cH = parseInt($.getElementStyle(ctls.main, 'padding', 0), 10),
                 s = {
                     width: ctls.content.offsetWidth + pH * 2 + cH * 2,
                     height: ctls.content.offsetHeight + pH * 2 + cH * 2
                 };
 
-            if(ctls.top){
-                s.height += ctls.top.offsetHeight;
+            if(ctls.head){
+                s.height += ctls.head.offsetHeight;
             }
             
-            if(ctls.bottom){
-                s.height += ctls.bottom.offsetHeight;
+            if(ctls.foot){
+                s.height += ctls.foot.offsetHeight;
             }
 
             //增加20px高度留白
@@ -2035,7 +2040,7 @@
                 lastSize: undefined
             }, options);
 
-            var obj = ctls.box, bs = $.getBodySize();
+            var obj = ctls.dialog, bs = $.getBodySize();
             if (!obj) {
                 return this;
             }
@@ -2065,7 +2070,7 @@
                 if($.isPercent(opt.height)) {
                     boxHeight = bs.height * parseInt(opt.height, 10) / 100 - margin.top - margin.bottom;
                 }
-                $.setStyle(ctls.box, { width: boxWidth, height: boxHeight }, 'px');
+                $.setStyle(ctls.dialog, { width: boxWidth, height: boxHeight }, 'px');
             }
 
             if (opt.height !== 'auto') {
@@ -2124,15 +2129,15 @@
             $.setStyle(ctls.main, { height: boxHeight - paddingHeight }, 'px');
 
             var mainHeight = ctls.main.offsetHeight,
-                titleHeight = ctls.top ? ctls.top.offsetHeight : 0,
-                bottomHeight = ctls.bottom ? ctls.bottom.offsetHeight : 0,
+                titleHeight = ctls.head ? ctls.head.offsetHeight : 0,
+                bottomHeight = ctls.foot ? ctls.foot.offsetHeight : 0,
                 size = {
                     width: '100%',
                     height: (mainHeight - titleHeight - bottomHeight) + 'px'
                 };
 
-            if (ctls.bottom) {
-                size.marginBottom = ctls.bottom.offsetHeight + 'px';
+            if (ctls.foot) {
+                size.marginBottom = ctls.foot.offsetHeight + 'px';
             }
             if (ctls.iframe) {
                 $.setStyle(ctls.iframe, { height: size.height });
@@ -2140,7 +2145,7 @@
             return $.setStyle(ctls.body, size), this.setTitleSize(_), this;
         },        
         dragToNormal: function (_, evt, bs, moveX, moveY) {
-            var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls, obj = ctls.box;
+            var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls, obj = ctls.dialog;
             if(p.none) { return this; }
 
             //对话框最大化时，拖动对话框，先切换到标准模式（尺寸、定位）
@@ -2167,7 +2172,7 @@
             var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls;
             if(p.none || !opt.sizeAble || !opt.dragSize) { return this; }
 
-            var obj = ctls.box,
+            var obj = ctls.dialog,
                 docMouseMove = document.onmousemove,
                 docMouseUp = document.onmouseup;
 
@@ -2222,7 +2227,7 @@
             });
             return this;
         },
-        showTopBottom: function(_, isShow, type, rebuild, key) {
+        showHeadFoot: function(_, isShow, type, rebuild, key) {
             var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls;
             if(p.none) { return this; }
 
@@ -2242,13 +2247,13 @@
                 has, obj, h, dir;
 
             if(key === 'top') {
-                has = ctls.top && ctls.top.style.display !== 'none';
-                obj = ctls.top;
+                has = ctls.head && ctls.head.style.display !== 'none';
+                obj = ctls.head;
                 h = has ? obj.offsetHeight : Config.TitleHeight;
                 dir = Config.Direction.Top;
             } else {
-                has = ctls.bottom && ctls.bottom.style.display !== 'none';
-                obj = ctls.bottom;
+                has = ctls.foot && ctls.foot.style.display !== 'none';
+                obj = ctls.foot;
                 h = has ? obj.offsetHeight : Config.BottomHeight;
                 dir = Config.Direction.Bottom;
             }
@@ -2259,11 +2264,11 @@
                 if(obj && !rebuild) {
                     obj.style.display = '';
                 } else {
-                    util.setOptions(_, 'options', key === 'top' ? 'showTitle' : 'showBottom', true);
+                    util.setOptions(_, 'options', key === 'top' ? 'showHead' : 'showFoot', true);
                     if(key === 'top'){
-                        util.buildTop(_, ctls.main, rebuild);
+                        util.buildHead(_, ctls.main, rebuild);
                     } else {
-                        util.buildBottom(_, ctls.main, rebuild);
+                        util.buildFoot(_, ctls.main, rebuild);
                     }
                 }
             } else if(obj) {
@@ -2277,7 +2282,7 @@
         },
         setZindex: function (_, zindex) {
             var url = this, p = Util.getParam(_), ctls = p.controls;
-            if(p.none || !ctls.box) { return this; }
+            if(p.none || !ctls.dialog) { return this; }
 
             if (typeof zindex !== 'number') {
                 zindex = Common.buildZindex();
@@ -2285,7 +2290,7 @@
             if (ctls.container) {
                 ctls.container.style.zIndex = zindex;
             } else {
-                ctls.box.style.zIndex = zindex;
+                ctls.dialog.style.zIndex = zindex;
             }
             return p.options.zindex = zindex, this;
         },
@@ -2351,15 +2356,15 @@
                 util.updateTooltip(_, opt.content, opt.target, opt);
             } else {
                 //对话框
-                ctls.box = $.createElement('div');
-                ctls.box.className = 'oui-tooltip';
-                ctls.box.style.zIndex = opt.zindex;
-                ctls.box.id = _.getDialogId();
+                ctls.dialog = $.createElement('div');
+                ctls.dialog.className = 'oui-tooltip';
+                ctls.dialog.style.zIndex = opt.zindex;
+                ctls.dialog.id = _.getDialogId();
 
-                ctls.body = util.buildBody(_, ctls.box);
+                ctls.body = util.buildBody(_, ctls.dialog);
 
                 $.setAttribute(opt.target, 'tipid', opt.id);
-                document.body.appendChild(ctls.box);
+                document.body.appendChild(ctls.dialog);
             }
             Factory.setWindowResize();
 
@@ -2375,7 +2380,7 @@
             return util.setTooltipPosition(_);
         },        
         setTooltipPosition: function (_) {
-            var util = this, p = util.getParam(_), opt = p.options, obj = p.controls.box;
+            var util = this, p = util.getParam(_), opt = p.options, obj = p.controls.dialog;
             if(p.none || _.isClosed()) { return util; }
 
             var par = {
@@ -2456,34 +2461,24 @@
                 buttons: Config.DialogButtons.OKCancel,               //按钮类型编码
                 buttonPosition: Config.Position.Center,               //按钮位置 left center right
                 buttonText: null,       // {OK: '确定', Cancel: '取消'}  ｛OK: '提交'}
-                showTitle: true,        //是否显示顶部标题栏 
+                showHead: true,        //是否显示顶部标题栏 
                 showLogo: true,         //是否显示logo图标
                 showMin: true,          //是否显示最小化按钮
                 showMax: true,          //是否显示最大化按钮
                 showClose: true,        //是否显示关闭按钮
-                showBottom: true,       //是否显示底部按钮栏
+                showFoot: true,       //是否显示底部按钮栏
                 cancelBubble: false,    //是否阻止背景层事件冒泡
                 //自定义样式
-                styles: {
-                    shade: {},          //遮罩层样式
-                    dialog: {},         //对话框样式
-                    main: {},           //主体框样式
-                    body: {},           //主体样式
-                    content: {},        //内容样式 
-                    top: {},            //顶部样式
-                    title: {},          //标题样式
-                    bottom: {},         //底部样式
-                    tooltip: {}         //Tooltip样式
-                },
+                styles: Config.CustomStyles,
                 //样式也可以采用单独设置，会自动合并到styles中
                 shadeStyle: '',         //遮罩层样式
                 dialogStyle: '',        //对话框样式
                 mainStyle: '',          //主体框样式
+                headStyle: '',          //顶部样式
+                titleStyle: '',         //标题样式
                 bodyStyle: '',          //主体样式
                 contentStyle: '',       //内容样式
-                topStyle: '',           //顶部样式
-                titleStyle: '',         //标题样式
-                bottomStyle: '',        //底部样式
+                footStyle: '',          //底部样式
                 tooltipStyle: ''        //Tooltip样式    
             }, Common.checkOptions(content, title, options));
 
@@ -2504,7 +2499,7 @@
 
             //检测padding
 
-            if (!opt.showTitle && !opt.showBottom && !opt.lock &&
+            if (!opt.showHead && !opt.showFoot && !opt.lock &&
                 $.isBoolean(opt.closeAble, true) &&
                 opt.type !== Config.DialogType.Tooltip) {
                 opt.escClose = true;
@@ -2610,7 +2605,7 @@
                 actions = Util.getAction(_);
 
             //记录隐藏之前的对话框尺寸大小，以便再次显示时，还原尺寸大小
-            Util.setOptions(_, 'hideSize', {width: ctls.box.offsetWidth, height: ctls.box.offsetHeight});
+            Util.setOptions(_, 'hideSize', {width: ctls.dialog.offsetWidth, height: ctls.dialog.offsetHeight});
             
             Util.showDialog(ctls, false)
                 .setOptions(_, 'hide', true)
@@ -2642,7 +2637,7 @@
                 return _.hide();
             }
 
-            $.removeChild(document.body, [ctls.container || ctls.box, ctls.shade]);
+            $.removeChild(document.body, [ctls.container || ctls.dialog, ctls.shade]);
 
             Util.setOptions(_, 'closed', true)
                 .delAction(_)
@@ -2786,11 +2781,11 @@
             }
             return _;
         },
-        showTitle: function(isShow, type, rebuild) {
-            return Util.showTopBottom(this, isShow, type, rebuild, 'top');
+        showHead: function(isShow, type, rebuild) {
+            return Util.showHeadFoot(this, isShow, type, rebuild, 'top');
         },
-        showBottom: function(isShow, type, rebuild) {
-            Util.showTopBottom(this, isShow, type, rebuild, 'bottom');
+        showFoot: function(isShow, type, rebuild) {
+            Util.showHeadFoot(this, isShow, type, rebuild, 'bottom');
             return this.position(), this;
         }
     };

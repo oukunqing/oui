@@ -117,7 +117,7 @@ function alert2(){
         maxAble: true, minAble: true, closeAble: true,
         //buttons: $.DialogButtons.OK, 
         //opacity: 0.2,
-        showTitle: true,
+        showHead: true,
         callback: function(dialogResult, d, param) {
             console.log(dialogResult, d, param);
             if(dialogResult.OK || dialogResult.Yes) {
@@ -200,7 +200,7 @@ function confirm2(){
                 win.hide().append('这是追加的内容');
             }
             window.setTimeout(function(){
-                //win.showBottom(true, 'alert').setOptions('showClose',false).showTitle(true, true);
+                //win.showFoot(true, 'alert').setOptions('showClose',false).showHead(true, true);
                 console.log('win.show:')
                 win.show();
             }, 4000);
@@ -250,19 +250,19 @@ function win(){
     });
     $.tooltip.close($I('txtTips'));
     window.setTimeout(function(){
-        win.showBottom();
+        win.showFoot();
     }, 4000);
 
     window.setTimeout(function(){
-        win.showBottom(false);
+        win.showFoot(false);
     }, 6000);
 
     window.setTimeout(function(){
-        win.showTitle(false);
+        win.showHead(false);
     }, 8000);
 
     window.setTimeout(function(){
-        win.showTitle(true);
+        win.showHead(true);
     }, 10000);
     //$.dialog.closeAll('tooltip').dialog('你好');
 }
@@ -314,7 +314,7 @@ function form2() {
     //win.getOptions().showClose = false;
     //win.setOptions('showClose', false);
 
-    win.showTitle(true, true);
+    win.showHead(true, true);
 
     console.log('win:', win);
     var i = 0;
@@ -424,10 +424,11 @@ function tips(){
         win.update(html, {
             position: 6,
             styles: {
-                tooltip: {'background': '#ffffff'}
+                //tooltip: {'background': '#ffffff'}
             }
         })
-    },3000);
+    },1000);
+    /*
     
     window.setTimeout(function() {
         win.update('tips: 请注意：提示信息已经再次更新。', {position:2})
@@ -440,6 +441,7 @@ function tips(){
     window.setTimeout(function() {
         //win.close();
     }, 5000);
+    */
     
 }
 
