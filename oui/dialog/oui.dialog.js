@@ -2421,11 +2421,14 @@
         },
         redirect: function(url) {
             if($.isString(url, true)) {
+                /*
                 var str = url.toLowerCase();
                 if(str.startsWith('http:') || str.startsWith('https:')) {
                     location.href = url.setUrlParam('_t_s_', new Date().getMilliseconds());
                     return true;
                 }
+                */
+                location.href = url.setUrlParam('_t_s_', new Date().getMilliseconds());
             }
             return false;
         },
@@ -2698,7 +2701,7 @@
             }
             var ctls = p.controls,
                 timers = p.timers,
-                url = opt.redirect || opt.target,
+                url = opt.redirect || opt.targetUrl,
                 actions = Util.getAction(_);
 
             //记录隐藏之前的对话框尺寸大小，以便再次显示时，还原尺寸大小
@@ -2721,7 +2724,7 @@
             }
             var ctls = p.controls,
                 timers = p.timers,
-                url = opt.redirect || opt.target,
+                url = opt.redirect || opt.targetUrl,
                 actions = util.getAction(_);
 
             var func = util.checkCallback(opt);
