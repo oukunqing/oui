@@ -640,12 +640,12 @@
             switch (opt.type) {
                 case Config.DialogType.Alert:
                     opt.buttons = Config.DialogButtons.OK;
-                    opt.showMin = opt.showMax = false;
+                    opt.showMin = opt.showMax = opt.maxAble = false;
                     opt.buttonPosition = 'right';
                     break;
                 case Config.DialogType.Confirm:
                     opt.buttons = Config.DialogButtons.OKCancel;
-                    opt.showMin = opt.showMax = false;
+                    opt.showMin = opt.showMax = opt.maxAble = false;
                     opt.buttonPosition = 'right';
                     break;
                 case Config.DialogType.Dialog:
@@ -1932,7 +1932,7 @@
                 footHeight = (ctls.foot ? ctls.foot.offsetHeight : 0),
                 w, h;
 
-            if(resizeTo && !isDrag) {
+            if(par.resizeTo && !isDrag) {
                 w = par.x;
                 h = par.y;
 
