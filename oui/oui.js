@@ -2057,7 +2057,11 @@
                 var elems = $.isArray(elem) ? elem : [elem], 
                     evName = isRemove ? 'removeChild' : 'appendChild';
                 for(var i in elems) {
-                    var node = $.isElement(elems[i]) ? parent[evName](elems[i]) : null;
+                    try {
+                        var node = $.isElement(elems[i]) ? parent[evName](elems[i]) : null;
+                    } catch(e) {
+                        console.log('evName: ', e);
+                    }
                 }
             }
             return this;

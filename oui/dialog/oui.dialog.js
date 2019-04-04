@@ -539,9 +539,10 @@
         closeAll: function (type) {
             var isType = $.isString(Common.checkType(type), true);
             for (var k in Cache.dialogs) {
-                var d = Cache.dialogs[k].dialog;
-                if (d && !d.isClosed() && d.getOptions().closeAble &&
-                    (!isType || (isType && d.getOptions().type === type))) {
+                var p = Cache.dialogs[k], d = p.dialog;
+                if (p && p.controls.dialog 
+                    && d && !d.isClosed() && d.getOptions().closeAble 
+                    && (!isType || (isType && d.getOptions().type === type))) {
                     d.close();
                 }
             }
@@ -2382,13 +2383,13 @@
         },
         callback: function (_, opt, actions) {
             var func = this.checkCallback(opt);
-            if(!func || !actions) {
+            if(!func || !$.isObject(actions)) {
                 return this;
             }
             var dr = {},
                 parameter = actions.param || opt.parameter || opt.param,
-                code = actions.code,
-                result = actions.result;
+                code = actions.code || '',
+                result = actions.result || 0;
 
             dr[code] = dr[code.toLowerCase()] = true;
             dr['key'] = code;
@@ -2404,6 +2405,13 @@
             return this;
         },
         dispose: function (_) {
+            var url = this, p = Util.getParam(_);
+            for(var k in p.controls) {
+                p.controls[k] = null;
+            }
+            for(var k in p.buttons) {
+                p.buttons[k] = null;
+            }
             //TODO:
 
             return this;

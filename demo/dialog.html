@@ -7,7 +7,7 @@
         body{line-height: 1.8em;}
     </style>
     <script type="text/javascript" src="../oui/oui.min.js?1"></script>
-    <script type="text/javascript" src="../oui/dialog/oui.dialog.min.js"></script>
+    <script type="text/javascript" src="../oui/dialog/oui.dialog.min.js?1"></script>
 </head>
 <body>
     <div id="p1"></div>
@@ -104,6 +104,7 @@ document.onkeypress = function() {
 */
 
 function alert2(){
+    return false;
     var dialog = $.alert('Hello!对话框', {
         id: 3, position: 5, maxHeight: 360, maxWidth: 500, 
         lock: true, clickBgClose: 'dblclick', 
@@ -308,7 +309,9 @@ function form2() {
             }
         }
     });
-    $.dialog.closeAll('tooltip');
+    //$.dialog.closeAll('tooltip');
+
+    $.tooltip.closeAll();
 
     //getOptoins 为只读
     //win.getOptions().showClose = false;
