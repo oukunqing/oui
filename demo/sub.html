@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <style type="text/css">
+        body{font-size: 14px; line-height: 1.8em;}
+        .form{display: block; }
+        .table{border-collapse: collapse; }
+        .table td{border: solid 1px #ccc; padding: 5px 10px;}
+    </style>
+    <script type="text/javascript" src="../oui/oui.min.js?3"></script>
+</head>
+<body>
+    <div id="divMain" class="form">
+        这是Iframe加载的子页面
+        <table class="table" cellpadding="0" cellspacing="0">
+            <tr>
+                <td>用户名：</td>
+                <td><input type="text" id="name" /></td>
+            </tr>
+            <tr>
+                <td>密码：</td>
+                <td><input type="text" id="password" /></td>
+            </tr>
+            <tr>
+                <td>密码确认：</td>
+                <td><input type="text" id="password2" /></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><button onclick="test(1);">确定</button><button onclick="test(0);">取消</button></td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>
+<script type="text/javascript">
+
+    var size = $.getBodySize(true);
+    $.resizeParentDialog(size);
+
+    function test(result) {
+        /*
+        if(window.location != top.window.location) {
+            var funcName = 'closeDialog';
+            //var func = parent.[funcName];
+            var func = parent.$.dialog.close;
+            console.log(func);
+            var dialogId = $.getQueryString(location.href, 'dialog-id');
+            console.log(dialogId);
+            if($.isFunction(func)) {
+                func(dialogId);
+            }
+        }
+        */
+
+        var data = {
+            name: $('#name').val(),
+            password: $('#password').val()
+        };
+
+        var param = { result: result, data: data, time: new Date().getTime() };
+        console.log('test: ', '子页面事务完成后，调用父窗口对话框，并返回参数: ', param);
+        $.closeParentDialog(param);
+    }
+</script>

@@ -1858,13 +1858,24 @@
             if (!isElement(elem)) {
                 return {};
             }
+            return $.extend(getOffsetSize(elem), {
+                clientWidth: elem.clientWidth, clientHeight: elem.clientHeight
+            });
         },
-        getBodySize = function () {
+        getBodySize = function (isOffset) {
+            var doc;
             if (typeof document.compatMode !== 'undefined' && document.compatMode === 'CSS1Compat') {
-                return { width: document.documentElement.clientWidth, height: document.documentElement.clientHeight };
+                doc = document.documentElement;
             } else if (typeof document.body !== 'undefined') {
-                return { width: document.body.clientWidth, height: document.body.clientHeight };
+                doc = document.body;
             }
+            if(isOffset) {
+                return { width: doc.offsetWidth, height: doc.offsetHeight };
+            }
+            return { width: doc.clientWidth, height: doc.clientHeight };
+        },
+        getDocumentSize = function(isOffset) {
+            return getBodySize(isOffset);
         },
         isArrayLike = function (obj) {
             if ($.isString(obj)) {
@@ -2278,8 +2289,10 @@
         getMarginSize: getMarginSize,
         getBorderSize: getBorderSize,
         getBodySize: getBodySize,
+        getDocumentSize: getDocumentSize,
         getOffset: getOffsetSize,
         getOffsetSize: getOffsetSize,
+        getElementSize: getElementSize,
         offset: getOffsetSize,
         isWindow: isWindow,
         isDocument: isDocument,
@@ -2986,4 +2999,30 @@
             return self;
         }
     }, '$.fn');
+}(OUI);
+
+// oui.dialog
+!function ($) {
+    function callParentFunc(funcName, param) {
+        if(window.location != top.window.location) {
+            try{
+                var func = parent.$.dialog[funcName],
+                    id = $.getQueryString(location.href, 'dialog-id');
+                if($.isFunction(func) && !$.isUndefined(id)) {
+                    return func(id, param), this;
+                }
+            } catch(e) {
+                console.log(funcName, e);
+            }
+        }
+        return $;
+    }
+    $.extend($, {
+        closeParentDialog: function(param) {
+            return callParentFunc('closeParent', param);
+        },
+        resizeParentDialog: function(param) {
+            return callParentFunc('resizeParent', param);
+        }
+    });
 }(OUI);
