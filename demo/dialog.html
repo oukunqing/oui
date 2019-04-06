@@ -160,7 +160,7 @@ function alert2(){
 }
 
 function confirm2(){
-    var html = '<span style="color:#f00;">确定要保存内容吗？</span>';
+    var html = '<span style="color:#f00;">确定要保存内容吗？确定要保存内容吗？确定要保存内容吗？确定要保存内容吗？确定要保存内容吗？确定要保存内容吗？</span>';
     /*
         //+ '<iframe src="http://122.227.179.90:81"></iframe>'    
         + '<label>内容：</label>'
@@ -171,6 +171,7 @@ function confirm2(){
     var win = $.confirm(html, '确认提示信息', {
         buttons: $.DialogButtons.OKCancel,
         //clickBgClose: 'dblclick',
+        icon: 'error',
         cancelBubble: true,
         buttonPosition: 'right',
         buttonText: {OK: '提交', Cancel: '算了'},
@@ -179,6 +180,8 @@ function confirm2(){
         //maxAble: false,
         topMost: true,
         //showLogo: true,
+        maxAble: true,
+        showMax:true,
         fixed: true,
         y: 10,
         x: 15,
@@ -435,6 +438,7 @@ function msg(isFixWidth){
         //width: 300,
         //target: $I('txtTips'),
         parent: $I('p2'),
+        //icon: 'error',
         dragSize: false,
         callback: function() {
             console.log('msg close');

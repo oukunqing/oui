@@ -141,15 +141,28 @@
             Hand: 16,
             Stop: 16,
             Error: 16,
-            Warning: 48,
             Question: 32,
             Exclamation: 48,
             Warning: 48,
             Asterisk: 64,
             Infomation: 64
         },
+        DialogIcons: {
+            None: 0,
+            hand: 16,
+            stop: 16,
+            error: 16,
+            warning: 48,
+            question: 32,
+            exclamation: 48,
+            Warning: 48,
+            Asterisk: 64,
+            infomation: 64,
+            info: 64
+        },
         ButtonConfig: {
             None: { key: 'None', text: '\u5173\u95ed', result: 0, skey: '', css: 'btn-default' },
+            Close: { key: 'Close', text: '\u5173\u95ed', result: 0, skey: 'W', css: 'btn-default' },
             OK: { key: 'OK', text: '\u786e\u5b9a', result: 1, skey: 'Y', css: 'btn-primary' },
             Cancel: { key: 'Cancel', text: '\u53d6\u6d88', result: 2, skey: 'N', css: 'btn-default' },
             Abort: { key: 'Abort', text: '\u4e2d\u6b62', result: 3, skey: 'A', css: 'btn-danger' },
@@ -324,6 +337,13 @@
             }
             return type || (isBuild ? Config.DialogType.Dialog : '');
         },
+        checkIcon: function(opt) {
+            if(!$.isString(opt.icon, true)) {
+                return false;
+            }
+
+            return true;
+        },
         isPercentSize: function(width, height) {
             return $.isPercent(width) || (typeof height !== 'undefined' && $.isPercent(height));
         },
@@ -443,6 +463,7 @@
                 controls: {},
                 btns: {},
                 buttons: {},
+                icon: undefined,
                 closed: false,
                 hid: false,
                 status: {},
@@ -1036,8 +1057,11 @@
                 }
             }
             if(opt.closeAble && opt.showClose) {
+                var config = Config.ButtonConfig['Close'];
                 var close = Common.getStatusText('close', opt.lang);
-                html.push('<a class="dialog-btn btn-close" code="close" title="' + close + '"></a>');
+                html.push('<a class="dialog-btn btn-close" code="close" title="{0}" shortcut-key="{1}"></a>'.format(
+                    close, config.skey
+                ));
             }
 
             if(html.length > 0) {
@@ -1047,12 +1071,17 @@
                 panel.style.cssText = 'float:right';
                 pNode.appendChild((ctls.btnPanel = panel));
 
-                for (var i = 0; i < panel.childNodes.length; i++) {
-                    var obj = panel.childNodes[i], key = obj.getAttribute('code');
-                    btns[key] = obj;
-                }
+                var childs = panel.childNodes, c = childs.length, btnClose;
 
-                return this.setButtonEvent(_, panel.childNodes, 'click', false), this;
+                for (var i = 0; i < c; i++) {
+                    var obj = childs[i], key = obj.getAttribute('code');
+                    btns[key] = obj;
+                    if(key === 'close') {
+                        btnClose = obj;
+                    }
+                }
+                this.setButtonEvent(_, childs, 'click', false)
+                    .setShortcutKeyEvent(_, btnClose ? [btnClose] : []);
             }
             return this;
         },
@@ -1109,12 +1138,25 @@
                     }, 15 * 1000);
                 }
             } else {
-                elem.innerHTML = opt.content;
+                //elem.innerHTML = opt.content;
+                util.buildIconContent(_, true, elem);
                 if(!opt.showHead && ctls.btnPanel) {
                     elem.style.marginRight = ctls.btnPanel.offsetWidth + 'px';
                 }
             }
             return util.appendChild((ctls.content = elem), pNode || null);
+        },
+        buildIconContent: function(_, isShow, elem) {
+            var util = this, p = util.getParam(_), opt = p.options, ctls = p.controls;
+            if(p.none || _.isClosed()) { return util; }
+            elem = elem || ctls.content;
+            if(isShow && Common.checkIcon(opt)) {
+                elem.innerHTML = '<div class="dialog-icon icon-' + opt.icon + '"></div>' + opt.content;
+                ctls.icon = elem.childNodes[0];
+            } else {
+                elem.innerHTML = opt.content;
+            }
+            return this;
         },
         buildIframe: function (_, opt, url) {
             var height = '100%';
@@ -1288,11 +1330,11 @@
             });
             return this;
         },
-        setButtonEvent: function (_, elements, evName, keypress) {
+        setButtonEvent: function (_, elements, evName, keyEvent) {
             var p = this.getParam(_), opt = p.options;
             if(p.none) { return this; }
-            var util = this, events = p.events;
-            for (var i = 0; i < elements.length; i++) {
+            var util = this, events = p.events, c = elements.length;
+            for (var i = 0; i < c; i++) {
                 var obj = elements[i];
                 if (obj.tagName !== 'A') {
                     continue;
@@ -1310,47 +1352,59 @@
                     events.btnMouseDown = false;
                 });
 
-                if (keypress) {
-                    $.addListener(obj, 'keypress', function (e) {
-                        var keyCode = $.getKeyCode(e);
-                        var strKeyCode = String.fromCharCode(keyCode).toUpperCase();
-                        var shortcutKey = this.getAttribute('shortcut-key') || '';
+                if (keyEvent) {
+                    $.addListener(obj, 'keyup', function (e) {
+                        var keyCode = $.getKeyCode(e),
+                            strKeyCode = String.fromCharCode(keyCode).toUpperCase(),
+                            shortcutKey = this.getAttribute('shortcut-key') || '',
+                            next;
                         //if(32 == keyCode || (shkey >= 3 && strKeyCode == cg.shortcutKey[2].toUpperCase())){FuncCancel();}
                         // 判断是否为空格键 或 是否按下快捷键
                         if (Config.KEY_CODE.Space === keyCode || strKeyCode === shortcutKey) {
                             util.setAction(_, this);
+                        } else if([37, 39].indexOf(keyCode) >= 0) {
+                            next = keyCode === 37 ? this.previousSibling : this.nextSibling;
+                            if($.isElement(next) && next.className.indexOf('dialog-btn') >= 0) {
+                                next.focus();
+                            }
+                        } else if([38, 40].indexOf(keyCode) >= 0) {
+                            next = keyCode === 38 ? elements[0] : elements[c - 1];
+                            next.focus();
                         }
                     });
                 }
             }
             return this;
         },
-        setShortcutKeyEvent: function (_, ctls) {
-            var util = this, dics = {};
-            util.setOptions(_, 'dics', dics);
-
-            for (var i = 0; i < ctls.length; i++) {
-                var obj = ctls[i];
+        setShortcutKeyEvent: function (_, btns) {
+            var util = this, p = util.getParam(_);
+            if(!p.dics) {
+                p.dics = {};
+            }
+            for (var i = 0; i < btns.length; i++) {
+                var obj = btns[i];
                 if (obj.tagName !== 'A') {
                     continue;
                 }
                 var shortcutKey = obj.getAttribute('shortcut-key') || '';
                 if (shortcutKey) {
-                    dics[shortcutKey] = obj;
+                    p.dics[shortcutKey] = obj;
                 }
             }
-
             $.addListener(document, 'keypress', function (e) {
-                if (!e.shiftKey) {
+                if (!e.shiftKey ) {
                     return false;
                 }
                 var keyCode = $.getKeyCode(e),
                     strKeyCode = String.fromCharCode(keyCode).toUpperCase(),
-                    btn = dics[strKeyCode];
+                    btn = p.dics[strKeyCode];
                 if ($.isElement(btn)) {
                     util.setAction(_, btn);
+                } else if(strKeyCode === 'F') {
+                    _.focus();
                 }
             });
+
             return util;
         },
         checkEventObj: function (_, obj) {
@@ -2223,6 +2277,9 @@
             if (ctls.iframe) {
                 $.setStyle(ctls.iframe, { height: size.height });
             }
+            if(ctls.icon) {
+                $.setStyle(ctls.icon, {height: mainHeight - titleHeight - bottomHeight - 10}, 'px');
+            }
             return $.setStyle(ctls.body, size), this.setTitleSize(_), this;
         },        
         dragToNormal: function (_, evt, bs, moveX, moveY) {
@@ -2526,6 +2583,7 @@
                 content: null,          //文字内容
                 url: null,              //加载的URL
                 element: null,          //Element 要加载内容的html控件
+                icon: '',               //Icon图标  info, warning, question, error, success
                 loading: '',            //loading提示文字
                 position: 5,            //对话框初始位置, 0,1,2,3,4,5,6,7,8,9，共10种位置设置
                 x: 0,                   //x轴(left)偏移量，单位：px

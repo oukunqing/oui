@@ -163,5 +163,5 @@ var d = '2010-01-02 10:0:12.123'.toDate().format('ts');
 console.log(d);
 
 
-var str = '倒计时结束后关闭';
+var str = '关闭';
 console.log(str.toUnicode());
