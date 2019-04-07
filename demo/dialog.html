@@ -147,6 +147,9 @@ function alert2(){
         });
     }, 6000);
 
+    window.setTimeout(function(){
+        dialog.setOptions('icon', 'question').update();
+    }, 5000);
 
     window.setTimeout(function(){
         dialog.setOptions('icon', 'info');
@@ -156,6 +159,14 @@ function alert2(){
             y: -50
         });
     }, 8000);
+
+    window.setTimeout(function(){
+        dialog.setOptions('icon', 'happy').update();
+    }, 10000);
+
+    window.setTimeout(function(){
+        dialog.setOptions('icon', 'sad').update();
+    }, 12000);
 
     window.setTimeout(function(){
         dialog.resize({
@@ -171,7 +182,7 @@ function alert2(){
     window.setTimeout(function() {
         //dialog.setZindex(2000);
         dialog.setOptions('topMost', true).setOptions('icon', 'success');
-        dialog.append(getCon(16, '大家好'), {height:'auto'});
+        dialog.append(getCon(12, '大家好'), {height:'auto'});
 
     }, 3000);
 }
@@ -460,7 +471,8 @@ function msg(isFixWidth){
         //icon: 'cry',
         //icon: 'sad',
         //icon: 'smile',
-        icon: isFixWidth ? 'happy' : 'sad',
+        //icon: isFixWidth ? 'happy' : 'sad',
+        closeIcon: 0,   //0,1,2,3 若不指定则采用默认的样式
         dragSize: false,
         callback: function() {
             console.log('msg close');

@@ -316,6 +316,12 @@
                 opt.shadow = opt.boxShadow;
             }
 
+            if($.isNumeric(opt.closeIcon)) {
+                opt.closeIcon = 'close' + opt.closeIcon;
+            } else {
+                opt.closeIcon = ('' + opt.closeIcon).toLowerCase();
+            }
+
             return this.checkCustomStyle(opt).checkTiming(opt), opt;
         },
         getCssAttrSize: function(val, options) {
@@ -1069,8 +1075,8 @@
             if(opt.closeAble && opt.showClose) {
                 var config = Config.ButtonConfig['Close'];
                 var close = Common.getStatusText('close', opt.lang);
-                html.push('<a class="dialog-btn btn-close" code="close" title="{0}" shortcut-key="{1}"></a>'.format(
-                    close, config.skey
+                html.push('<a class="dialog-btn btn-close {0}" code="close" title="{1}" shortcut-key="{2}"></a>'.format(
+                    opt.closeIcon, close, config.skey
                 ));
             }
 
@@ -2636,6 +2642,7 @@
                 fixed: false,           //是否固定位置
                 topMost: false,         //是否允许置顶显示
                 closeAble: true,        //是否允许关闭
+                closeIcon: '',          //Close关闭按钮图标，close0, close1, close2, close3, 默认为空
                 closeType: 'close',     //关闭方式， close | hide
                 clickBgClose: false,    //'dblclick', // dblclick | click
                 escClose: false,        //是否允许按Esc关闭

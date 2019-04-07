@@ -209,6 +209,26 @@
     background: #fff url('imgs/icon.png') no-repeat -80px 0;
 }
 
+.oui-dialog .dialog-body .close0 {
+    border: none 0;
+    background: #fff url('imgs/icon.png') no-repeat -80px 0;
+}
+
+.oui-dialog .dialog-body .close1 {
+    border: none 0;
+    background: #fff url('imgs/icon.png') no-repeat -100px 0;
+}
+
+.oui-dialog .dialog-body .close2 {
+    border: none 0;
+    background: #fff url('imgs/icon.png') no-repeat -120px 0;
+}
+
+.oui-dialog .dialog-body .close3 {
+    border: none 0;
+    background: #fff url('imgs/icon.png') no-repeat -140px 0;
+}
+
 .oui-dialog .dialog-body, .oui-dialog-max .dialog-body {
     position: relative;
     text-align: left;
@@ -295,35 +315,35 @@
 }
 
 .oui-dialog .dialog-head .icon-warning{
-    background: url('imgs/icon.png') no-repeat -100px 0;
-}
-
-.oui-dialog .dialog-head .icon-error{
-    background: url('imgs/icon.png') no-repeat -120px 0;
-}
-
-.oui-dialog .dialog-head .icon-stop{
-    background: url('imgs/icon.png') no-repeat -140px 0;
-}
-
-.oui-dialog .dialog-head .icon-success{
     background: url('imgs/icon.png') no-repeat -160px 0;
 }
 
-.oui-dialog .dialog-head .icon-question{
+.oui-dialog .dialog-head .icon-error{
     background: url('imgs/icon.png') no-repeat -180px 0;
 }
 
-.oui-dialog .dialog-head .icon-info{
+.oui-dialog .dialog-head .icon-stop{
     background: url('imgs/icon.png') no-repeat -200px 0;
 }
 
-.oui-dialog .dialog-head .icon-cry{
+.oui-dialog .dialog-head .icon-success{
     background: url('imgs/icon.png') no-repeat -220px 0;
 }
 
-.oui-dialog .dialog-head .icon-smile{
+.oui-dialog .dialog-head .icon-question{
     background: url('imgs/icon.png') no-repeat -240px 0;
+}
+
+.oui-dialog .dialog-head .icon-info{
+    background: url('imgs/icon.png') no-repeat -260px 0;
+}
+
+.oui-dialog .dialog-head .icon-cry{
+    background: url('imgs/icon.png') no-repeat -280px 0;
+}
+
+.oui-dialog .dialog-head .icon-smile{
+    background: url('imgs/icon.png') no-repeat -300px 0;
 }
 
 .oui-dialog .dialog-body .dialog-iframe {
