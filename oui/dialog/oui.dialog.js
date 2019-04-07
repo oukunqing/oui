@@ -487,7 +487,8 @@
                 actions: {},                //按钮事件
                 events: {},
                 timers: {},
-                dics: {}
+                dics: {},
+                styleElement: undefined     //动态创建的css样式
             };
             return dialog;
         },
@@ -1866,11 +1867,49 @@
 
             return util;
         },
+        convertPositionKey: function(opt) {
+            var positions = [
+                'bottom',
+                'topleft',
+                'top',
+                'topright',
+                'left',
+                'center',
+                'right',
+                'bottomleft',
+                'bottom',
+                'bottomright'
+            ];
+            var keys = {
+                topleft: 1, lefttop: 1,
+                top: 2,
+                topright: 3, righttop: 3,
+                left: 4,
+                center: 5,
+                right: 6,
+                bottomleft: 7, leftbottom: 7,
+                bottom: 8,
+                bottomright: 9, rightbottom: 9
+            };
+
+            if($.isNumeric(opt.position)) {
+                var pos = parseInt(opt.position, 10);
+                if(pos < 0 || pos >= 10) {
+                    opt.position = 'bottom';
+                } else {
+                    opt.position = positions[pos];
+                }
+            } else {
+                var pos = ('' + opt.position).replace('-', '').toLowerCase();
+                opt.position = !$.isUndefined(keys[pos]) ? pos : 'bottom';
+            }
+            return this;
+        },
         setTargetPosition: function(options, obj, isFixedSize) {
             var par = $.extend({
                 target: null,
                 parent: null,
-                position: 7,    //默认停靠在目标控件左下方位置
+                position: 'bottomleft',    //默认停靠在目标控件左下方位置
                 x: null,
                 y: null
             }, options);
@@ -1880,7 +1919,11 @@
             }
             //TODO:
 
-            var pos = par.position || par.pos || 7,  //方向位置，默认为左下方（7）
+            par.position = (par.position || par.pos);
+
+            this.convertPositionKey(par);
+
+            var pos = par.position,
                 p = $.getOffset(par.target),
                 w = obj.offsetWidth,
                 h = obj.offsetHeight,
@@ -1895,48 +1938,57 @@
                 top = fs.y,
                 result = {};
 
-            switch (pos) {
-                case 1:
-                case 2:
-                case 3:
-                case Config.Position.Top:
-                    top = fs.y - fs.h - par.y;
-                    top = pos === 3 ? fs.y : top;
-                    left = pos === 3 ? fs.x + fs.w + par.x : left;
-                    console.log(fs.y ,fs.h, par.y);
-                    result.dir = pos === 3 ? Config.Position.Right : Config.Position.Top;
+            if(pos.startsWith('top')) {
+                top = fs.y - h - par.y;
+                result.dir = 'top';
+            } else if(pos.startsWith('bottom')) {
+                top = fs.y + fs.h + par.y;
+                result.dir = 'bottom';
+            }
 
-                    result.css = pos === 3 ? 'top:10px;' : '';
-                    break;
-                case 6:
-                case Config.Position.Right:
-                    if ((fs.x + fs.w + w + par.x) > bs.width) {
-                        left = fs.x - w - par.x;
-                        result.dir = Config.Position.Left;
-                    } else {
-                        left = fs.x + fs.w + par.x;
-                        result.dir = Config.Position.Right;
+            if(pos.startsWith('left')) {
+                left = fs.x - w - par.x;
+                result.dir = 'left';
+            } else if(pos.startsWith('right')) {
+                left = fs.x + fs.w + par.x;
+                result.dir = 'right';
+            }
+
+            switch(pos) {
+                case 'topleft':
+                case 'bottomleft':
+                    left = fs.x;
+                    if(fs.w < w) {
+                        result.css = 'left: ' + (fs.w / 2) + 'px;';
                     }
-                    //console.log(obj.style.cssText);    
-                    $.setStyle(obj, {}, '');
                     break;
-                case 7:
-                case 8:
-                case 9:
-                case Config.Position.Bottom:
-                    top = fs.y + fs.h + par.y;
-                    result.dir = Config.Position.Bottom;
-
-                    result.css = pos === 7 ? 'left:10px;' : '';
+                case 'top':
+                case 'bottom':
+                    left = fs.x - (w - fs.w) / 2;
                     break;
-                case 4:
-                case Config.Position.Left:
-                    if ((fs.x - w - par.x) < 0) {
-                        left = fs.x + fs.w + par.x;
-                        result.dir = Config.Position.Right;
-                    } else {
-                        left = fs.x - w - par.x;
-                        result.dir = Config.Position.Left;
+                case 'topright':
+                case 'bottomright':
+                    left = fs.x - (w - fs.w);
+                    if(fs.w < w) {
+                        result.css = 'left: ' + (fs.w / 2 + (w - fs.w)) + 'px;';
+                    }
+                    break;
+                case 'lefttop':
+                case 'righttop':
+                    top = fs.y;
+                    if(fs.h < h) {
+                        result.css = 'top: ' + (fs.h / 2) + 'px;';
+                    }
+                    break;
+                case 'left':
+                case 'right':
+                    top = fs.y - (h - fs.h) / 2;
+                    break;
+                case 'leftbottom':
+                case 'rightbottom':
+                    top = fs.y - (h - fs.h);
+                    if(fs.h < h) {
+                        result.css = 'top: ' + (fs.h / 2 + (h - fs.h)) + 'px;';
                     }
                     break;
             }
@@ -2550,6 +2602,9 @@
             for(var k in p.buttons) {
                 p.buttons[k] = null;
             }
+            if(p.styleElement) {
+                p.styleElement.parentNode.removeChild(p.styleElement);
+            }
             //TODO:
 
             return this;
@@ -2632,9 +2687,11 @@
 
             var res = util.setTargetPosition(par, obj), cssName = '';
             if(res.css) {
-                var cssCon = ['.tip' + _.id + ':after{' + res.css + '}', '.tip' + _.id + ':before{' + res.css + '}'];
-                $.createCssStyle(cssCon.join(''), 'tip-css-01', function() { });
-                cssName = ' tip' + _.id;
+                cssName = ' tip-pos-' + _.id;
+                var cssCon = '.{0}:after,.{0}:before{{{1}}}'.format(cssName, res.css);
+                $.createCssStyle(cssCon, 'tip-css-' + _.id, function(elem) {
+                    p.styleElement = elem;
+                });
             }
             obj.className = 'oui-tooltip oui-tip-' + res.dir + cssName;
 

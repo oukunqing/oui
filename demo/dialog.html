@@ -11,10 +11,10 @@
 </head>
 <body>
     <div id="p1"></div>
-    <div id="p2" style="height:200px;width:600px;border-radius: 5px 10px 3px 6px;margin:0 0 5px 0;
+    <div id="p2" style="height:300px;width:600px;border-radius: 5px 10px 3px 6px;margin:0 0 5px 0;
             border: none;
             display:block;left:5px; top: 10px;">
-        <input type="input" name="" id="txtTips" style="margin:60px 0 0 150px;" value="这是文本输入框的内容" />
+        <input type="input" name="" id="txtTips" style="width:240px;height:30px;margin:160px 0 0 180px;" value="这是文本输入框的内容" />
         <br />
         <br />
         <br />
@@ -466,9 +466,11 @@ function load2(id){
 function msg(isFixWidth){
     var win = $.dialog.msg('msg: Message提示信息演示' + (isFixWidth ? '(固定宽度)' : ''), {
         id: 'msg', autoClose: false, closeTiming: 15000, fixed: false,
-        position: 2, lock: false, clickBgClose: true, y: 5, x: 0,
+        position: 'bottomleft', 
+        shadow: false,
+        lock: false, clickBgClose: true, y: 5, x: 0,
         //width: 300,
-        //target: $I('txtTips'),
+        target: $I('txtTips'),
         parent: $I('p2'),
         //icon: 'cry',
         //icon: 'sad',
@@ -489,20 +491,20 @@ function msg(isFixWidth){
 }
 
 function tips(){
-    var win = $.tips('tips: 提示信息' + new Date().getTime(), $I('txtTips'), {type:'tips',position: 7});
+    var win = $.tips('tips: 请注意：提示信息已经更新。' + new Date().getTime(), $I('txtTips'), {type:'tips',position: 'topleft'});
 
     tips2();
 
     window.setTimeout(function() {
-        var html = 'tips: 请注意：提示信息已经更新。<br />大家好<br />好啊<br />'
-            + '<img src="http://122.227.179.90:81/skin/default/images/home/welcome.jpg" />';
+        var html = 'tips: 请注意：提示信息已经更新。<br />大家好啊';
+            //+ '<img src="http://122.227.179.90:81/skin/default/images/home/welcome.jpg" />';
         win.update(html, {
-            position: 3,
+            position: 'right',
             styles: {
                 //tooltip: {'background': '#ffffff'}
             }
         })
-    },1000);
+    },15000);
     /*
     
     window.setTimeout(function() {
@@ -521,7 +523,7 @@ function tips(){
 }
 
 function tips2(){
-    var win = $.tips('tips: 提示信息2', $I('txtTips2'), {position: 2});
+    var win = $.tips('tips: 提示信息2', $I('txtTips2'), {position: 6});
     window.setTimeout(function() {
         //$.tooltip.closeAll();
     }, 6000);
