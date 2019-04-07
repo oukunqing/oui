@@ -7,7 +7,7 @@
         body{line-height: 1.8em;}
     </style>
     <script type="text/javascript" src="../oui/oui.min.js?1"></script>
-    <script type="text/javascript" src="../oui/dialog/oui.dialog.js?1"></script>
+    <script type="text/javascript" src="../oui/dialog/oui.dialog.js?12"></script>
 </head>
 <body>
     <div id="p1"></div>
@@ -105,14 +105,19 @@ document.onkeypress = function() {
 
 function alert2(){
     var dialog = $.alert('Hello!对话框', {
-        id: 3, position: 5, maxHeight: 360, maxWidth: 500, 
+        id: 3, position: 5, 
+        //maxHeight: 360, maxWidth: 500, 
         lock: true, clickBgClose: 'dblclick', 
+        icon: 'warning',
         escClose: true, 
-        autoClose: true, 
+        showMin:true,
+        fixed: true,
+        //autoClose: true, 
         //width: 'auto',
-        closeTiming: 15000,
+        //closeTiming: 15000,
         timing: 15000,
         showTimer: true,
+        minHeight: 30,
         //lang: 'english',
         maxAble: true, minAble: true, closeAble: true,
         //buttons: $.DialogButtons.OK, 
@@ -132,13 +137,23 @@ function alert2(){
     //console.log('dialog: ', dialog);
     
     window.setTimeout(function(){
+        dialog.setOptions('icon', '');
         dialog.resize({
             dir: 'bottom-right',
             x: 40,
-            y: 50
+            y: -10
         });
     }, 6000);
 
+
+    window.setTimeout(function(){
+        dialog.setOptions('icon', 'info');
+        dialog.resize({
+            dir: 'bottom-right',
+            x: 40,
+            y: -50
+        });
+    }, 8000);
 
     window.setTimeout(function(){
         dialog.resize({
@@ -146,21 +161,21 @@ function alert2(){
             x: 50,
             y: 60
         });
+        dialog.setOptions('icon', 'stop').append('改变icon图标', {height:'stop'});
     }, 4000);
-
 
     //dialog.setZindex(1000);
 
     window.setTimeout(function() {
         //dialog.setZindex(2000);
+        dialog.setOptions('topMost', true).setOptions('icon', 'success');
         dialog.append(getCon(16, '大家好'), {height:'auto'});
 
-        dialog.setOptions('topMost', true);
     }, 3000);
 }
 
 function confirm2(){
-    var html = '<span style="color:#f00;">确定要保存内容吗？确定要保存内容吗？确定要保存内容吗？确定要保存内容吗？确定要保存内容吗？确定要保存内容吗？</span>';
+    var html = '<span style="color:#f00;">内容删除后不可恢复，您确定要删除保存内容吗？</span>';
     /*
         //+ '<iframe src="http://122.227.179.90:81"></iframe>'    
         + '<label>内容：</label>'
@@ -171,7 +186,7 @@ function confirm2(){
     var win = $.confirm(html, '确认提示信息', {
         buttons: $.DialogButtons.OKCancel,
         //clickBgClose: 'dblclick',
-        icon: 'error',
+        icon: 'question',
         cancelBubble: true,
         buttonPosition: 'right',
         buttonText: {OK: '提交', Cancel: '算了'},
@@ -182,6 +197,8 @@ function confirm2(){
         //showLogo: true,
         maxAble: true,
         showMax:true,
+        minAble: true,
+        showMin:true,
         fixed: true,
         y: 10,
         x: 15,
@@ -225,7 +242,7 @@ function confirm2(){
         },
         //两种自定义样式设置，同时启用
         styles: {
-            title: { color: '#00f'},
+            //title: { color: '#00f'},
             shade: {'background': '#00f'}
         },
         titleStyle: {'font-weight': 'bold'},

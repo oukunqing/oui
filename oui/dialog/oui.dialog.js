@@ -19,6 +19,7 @@
         Padding: 4,             //拖动边框宽度，单位：px
         MinPadding: 0,          //拖动边框最小宽度，单位：px
         MaxPadding: 10,         //拖动边框最大宽度，单位：px
+        IconWidth: 50,          //Icon图标宽度
         CustomStyles: {
             shade: {},          //遮罩层样式
             dialog: {},         //对话框样式
@@ -280,8 +281,10 @@
         checkCustomStyle: function(opt) {
             //检测自定义样式设置
             if(!opt.styles || !$.isObject(opt.styles)) {
-                opt.styles = Config.CustomStyles;
+                opt.styles = {};
             }
+            opt.styles = $.extend(Config.CustomStyles, opt.styles);
+
             //合并自定义的样式
             for(var k in opt.styles) {
                 $.extend(opt.styles[k], opt[k + 'Style']);
@@ -1150,13 +1153,35 @@
             var util = this, p = util.getParam(_), opt = p.options, ctls = p.controls;
             if(p.none || _.isClosed()) { return util; }
             elem = elem || ctls.content;
+
             if(isShow && Common.checkIcon(opt)) {
-                elem.innerHTML = '<div class="dialog-icon icon-' + opt.icon + '"></div>' + opt.content;
-                ctls.icon = elem.childNodes[0];
+                if(!ctls.icon) {
+                    ctls.icon = $.createElement('div');
+                }
+                elem.className = 'dialog-content icon-padding';
+                elem.innerHTML = opt.content;
+                elem.appendChild(ctls.icon);
             } else {
                 elem.innerHTML = opt.content;
             }
-            return this;
+            return util.showIcon(_, elem);
+        },
+        showIcon: function(_, elem) {
+            var util = this, p = util.getParam(_), opt = p.options, ctls = p.controls;
+            var isShow = Common.checkIcon(opt),
+                isMin = p.status.min;
+
+            if(!elem) {
+                elem = ctls.content;
+            }
+            if(elem && ctls.icon) {
+                ctls.icon.className = isShow ? 'dialog-icon icon-' + opt.icon : 'dialog-icon-none';                
+                elem.className = isShow ? 'dialog-content icon-padding' : 'dialog-content';
+            }
+            if(ctls.logo) {
+                ctls.logo.className = isShow && isMin ? 'dialog-logo dialog-icon icon-' + opt.icon : 'dialog-logo';
+            }
+            return util;
         },
         buildIframe: function (_, opt, url) {
             var height = '100%';
@@ -1570,7 +1595,8 @@
 
                 util.hideDragSwitch(_)
                     .setStatus(_, Config.DialogStatus.Min)
-                    .setPosition(_, { position: opt.position });
+                    .setPosition(_, { position: opt.position })
+                    .showIcon(_);
 
                 var pSize = $.getPaddingSize(obj), 
                     topWidth = minW - pSize.left - pSize.right;                    
@@ -1619,7 +1645,7 @@
                 util.setPosition(_);
             }
 
-            return this;
+            return util.showIcon(_);
         },
         setTitleSize: function(_, width) {
             var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls;
@@ -1848,7 +1874,7 @@
                         left = fs.x + fs.w + par.x;
                         css = Config.Position.Right;
                     }
-                    console.log(obj.style.cssText);    
+                    //console.log(obj.style.cssText);    
                     $.setStyle(obj, {}, '');
                     break;
                 case 7:
@@ -1951,14 +1977,16 @@
             if (!obj || !opt.sizeAble || (!opt.dragSize && isDrag)) {
                 return util;
             }
+
             var par = $.extend({
-                type: '',
-                resizeTo: false,
-                isBody: false,
-                dir: Config.Direction.BottomRight,
-                x: 0,
-                y: 0
-            }, options);
+                    type: '',
+                    resizeTo: false,
+                    isBody: false,
+                    dir: Config.Direction.BottomRight,
+                    x: 0,
+                    y: 0
+                }, options),
+                isMin = p.status.min;
 
             par.x = parseInt(par.x || par.width, 10);
             par.y = parseInt(par.y || par.height, 10);
@@ -1967,6 +1995,11 @@
                 return util;
             } else if (par.x === 0 && par.y === 0) {
                 return util;
+            }
+
+            //判断对话框当前状态是否被最小化，若最小化，需要先还原大小
+            if(isMin) {
+                util.setSize(_, { type: Config.DialogStatus.Normal });
             }
 
             if (!isDrag) {
@@ -2053,7 +2086,8 @@
             }
 
             //检测最小高度，当高度小于最小高度时，隐藏底部按钮栏
-            var minHeight = headHeight + footHeight + ctls.body.offsetHeight;
+            //var minHeight = headHeight + footHeight + ctls.body.offsetHeight;
+            var minHeight = headHeight + footHeight + 5;
 
             if (par.dir.indexOf('-') >= 0 || par.dir === Config.Direction.Center) {
                 $.setStyle(obj, { width: newWidth, height: newHeight }, 'px');
@@ -2102,7 +2136,12 @@
                 util.setPosition(_, par);
             }
 
-            return util;
+            //判断对话框当前状态是否被最小化，若最小化，设置完尺寸之后需要重新最小化
+            if(isMin) {
+                util.setSize(_, { type: Config.DialogStatus.Min });
+            }
+
+            return util.showIcon(_);
         },
         isAutoSize: function(_, options) {
             var util = this, p = this.getParam(_), opt = options || p.options, ctls = p.controls;
@@ -2277,10 +2316,7 @@
             if (ctls.iframe) {
                 $.setStyle(ctls.iframe, { height: size.height });
             }
-            if(ctls.icon) {
-                $.setStyle(ctls.icon, {height: mainHeight - titleHeight - bottomHeight - 10}, 'px');
-            }
-            return $.setStyle(ctls.body, size), this.setTitleSize(_), this;
+            return $.setStyle(ctls.body, size), util.setTitleSize(_).showIcon(_), util;
         },        
         dragToNormal: function (_, evt, bs, moveX, moveY) {
             var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls, obj = ctls.dialog;
@@ -2836,12 +2872,20 @@
                 return _;
             }
             if (ctls.content) {
-                var isAutoSize = Util.isAutoSize(_);
+                var isAutoSize = Util.isAutoSize(_),
+                    isMin = p.status.min;
 
                 if (ctls.title && opt.title) {
                     ctls.title.innerHTML = opt.title;
                 }
+                if(isMin) {
+                    Util.setSize(_, {type: Config.DialogStatus.Normal});
+                }
                 Util.buildContent(_).setBodySize(_).setCache(_);
+
+                if(isMin) {
+                    Util.setSize(_, {type: Config.DialogStatus.Min});
+                }
 
                 if (isAutoSize) {
                     Util.setPosition(_);
@@ -2854,6 +2898,9 @@
             if (p.none || !ctls.content) {
                 return this;
             }
+            if(ctls.icon) {
+                ctls.content.removeChild(ctls.icon);
+            }
             var html = ctls.content.innerHTML;
             return this.update(html + content, title, options);
         },
@@ -2861,6 +2908,9 @@
             var _ = this, p = Util.getParam(_), ctls = p.controls;
             if (p.none || !ctls.content) {
                 return _;
+            }
+            if(ctls.icon) {
+                ctls.content.removeChild(ctls.icon);
             }
             var html = ctls.content.innerHTML;
             return _.update(content + html, title, options);
