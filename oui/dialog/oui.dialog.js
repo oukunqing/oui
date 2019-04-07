@@ -289,7 +289,6 @@
             for(var k in opt.styles) {
                 $.extend(opt.styles[k], opt[k + 'Style']);
             }
-            console.log(opt.id, opt.styles);
             return this;
         },
         checkOptions: function (content, title, opt) {
