@@ -105,7 +105,8 @@ document.onkeypress = function() {
 
 function alert2(){
     var dialog = $.alert('Hello!对话框', {
-        id: 3, position: 5, 
+        id: 3, 
+        position: 5, 
         //maxHeight: 360, maxWidth: 500, 
         lock: true, clickBgClose: 'dblclick', 
         icon: 'warning',
@@ -204,6 +205,7 @@ function confirm2(){
         buttonPosition: 'right',
         buttonText: {OK: '提交', Cancel: '算了'},
         position: 5,
+        //position: 'righttop',
         lock: true,
         //maxAble: false,
         topMost: true,
@@ -471,7 +473,7 @@ function msg(isFixWidth){
         //icon: 'cry',
         //icon: 'sad',
         //icon: 'smile',
-        //icon: isFixWidth ? 'happy' : 'sad',
+        icon: isFixWidth ? 'happy' : 'sad',
         closeIcon: 0,   //0,1,2,3 若不指定则采用默认的样式
         dragSize: false,
         callback: function() {
@@ -487,7 +489,7 @@ function msg(isFixWidth){
 }
 
 function tips(){
-    var win = $.tips('tips: 提示信息' + new Date().getTime(), $I('txtTips'), {type:'tips',position: 8});
+    var win = $.tips('tips: 提示信息' + new Date().getTime(), $I('txtTips'), {type:'tips',position: 7});
 
     tips2();
 
@@ -495,7 +497,7 @@ function tips(){
         var html = 'tips: 请注意：提示信息已经更新。<br />大家好<br />好啊<br />'
             + '<img src="http://122.227.179.90:81/skin/default/images/home/welcome.jpg" />';
         win.update(html, {
-            position: 6,
+            position: 3,
             styles: {
                 //tooltip: {'background': '#ffffff'}
             }

@@ -1714,6 +1714,30 @@
             }
             return false;
         },
+        convertPositionNumber: function(_, opt) {
+            var keys = {
+                custom: 0,
+                topleft: 1, lefttop: 1,
+                top: 2,
+                topright: 3, righttop: 3,
+                left: 4,
+                center: 5,
+                right: 6,
+                bottomleft: 7, leftbottom: 7,
+                bottom: 8,
+                bottomright: 9, rightbottom: 9
+            };
+            if($.isNumeric(opt.position)) {
+                opt.position = parseInt(opt.position, 10);
+                if(opt.position < 0 || opt.position > 10) {
+                    opt.position = 5;
+                }
+            } else {
+                var pos = ('' + opt.position).replace('-', '').toLowerCase();
+                opt.position = !$.isUndefined(keys[pos]) ? keys[pos] : 5;
+            }
+            return this;
+        },
         setPosition: function (_, options) {
             var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls, obj = ctls.dialog;
             if(p.none || !obj) { return this; }
@@ -1749,7 +1773,8 @@
                 return util.setTargetPosition(par, obj), util;
             }
 
-            par.position = par.position === 'custom' ? 10 : parseInt(par.position, 10);
+            //par.position = par.position === 'custom' ? 10 : parseInt(par.position, 10);
+            util.convertPositionNumber(_, par);
             par.x = Math.abs(par.x);
             par.y = Math.abs(par.y);
 
@@ -1868,24 +1893,29 @@
                 },
                 left = fs.x,
                 top = fs.y,
-                css = '';
+                result = {};
 
             switch (pos) {
                 case 1:
                 case 2:
                 case 3:
                 case Config.Position.Top:
-                    top = fs.y - h - par.y;
-                    css = Config.Position.Top;
+                    top = fs.y - fs.h - par.y;
+                    top = pos === 3 ? fs.y : top;
+                    left = pos === 3 ? fs.x + fs.w + par.x : left;
+                    console.log(fs.y ,fs.h, par.y);
+                    result.dir = pos === 3 ? Config.Position.Right : Config.Position.Top;
+
+                    result.css = pos === 3 ? 'top:10px;' : '';
                     break;
                 case 6:
                 case Config.Position.Right:
                     if ((fs.x + fs.w + w + par.x) > bs.width) {
                         left = fs.x - w - par.x;
-                        css = Config.Position.Left;
+                        result.dir = Config.Position.Left;
                     } else {
                         left = fs.x + fs.w + par.x;
-                        css = Config.Position.Right;
+                        result.dir = Config.Position.Right;
                     }
                     //console.log(obj.style.cssText);    
                     $.setStyle(obj, {}, '');
@@ -1895,16 +1925,18 @@
                 case 9:
                 case Config.Position.Bottom:
                     top = fs.y + fs.h + par.y;
-                    css = Config.Position.Bottom;
+                    result.dir = Config.Position.Bottom;
+
+                    result.css = pos === 7 ? 'left:10px;' : '';
                     break;
                 case 4:
                 case Config.Position.Left:
                     if ((fs.x - w - par.x) < 0) {
                         left = fs.x + fs.w + par.x;
-                        css = Config.Position.Right;
+                        result.dir = Config.Position.Right;
                     } else {
                         left = fs.x - w - par.x;
-                        css = Config.Position.Left;
+                        result.dir = Config.Position.Left;
                     }
                     break;
             }
@@ -1915,7 +1947,7 @@
 
             $.setStyle(obj, { left: left, top: top }, 'px');
 
-            return css;
+            return result;
         },
         dragPosition: function (_) {
             var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls;
@@ -2598,8 +2630,13 @@
                 obj.style.cssText = cssText;
             }
 
-            var dir = util.setTargetPosition(par, obj);
-            obj.className = 'oui-tooltip oui-tip-' + dir;
+            var res = util.setTargetPosition(par, obj), cssName = '';
+            if(res.css) {
+                var cssCon = ['.tip' + _.id + ':after{' + res.css + '}', '.tip' + _.id + ':before{' + res.css + '}'];
+                $.createCssStyle(cssCon.join(''), 'tip-css-01', function() { });
+                cssName = ' tip' + _.id;
+            }
+            obj.className = 'oui-tooltip oui-tip-' + res.dir + cssName;
 
             return util;
         }
