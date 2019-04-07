@@ -283,12 +283,13 @@
             if(!opt.styles || !$.isObject(opt.styles)) {
                 opt.styles = {};
             }
-            opt.styles = $.extend(Config.CustomStyles, opt.styles);
+            opt.styles = $.extend({}, Config.CustomStyles, opt.styles);
 
             //合并自定义的样式
             for(var k in opt.styles) {
                 $.extend(opt.styles[k], opt[k + 'Style']);
             }
+            console.log(opt.id, opt.styles);
             return this;
         },
         checkOptions: function (content, title, opt) {
@@ -315,7 +316,11 @@
             opt.title = title || opt.title || undefined;
             opt.target = target || opt.target || undefined;
 
-            return this.checkCustomStyle(opt).checkTiming(opt);
+            if($.isBoolean(opt.boxShadow) || opt.boxShadow === 'none') {
+                opt.shadow = opt.boxShadow;
+            }
+
+            return this.checkCustomStyle(opt).checkTiming(opt), opt;
         },
         getCssAttrSize: function(val, options) {
             var p = $.extend({
@@ -933,7 +938,7 @@
         buildDialog: function(_) {
             var p = this.getParam(_), opt = p.options, ctls = p.controls;
             if(p.none) { return this; }
-            var css;
+            var css, shadow = opt.shadow;
             ctls.dialog = $.createElement('div');
             ctls.dialog.className = 'oui-dialog';
             ctls.dialog.style.zIndex = opt.zindex;
@@ -941,7 +946,9 @@
             if ((css = Common.toCssText(opt.styles.dialog, 'dialog'))) {
                 ctls.dialog.style.cssText = css;
             }
-            //ctls.dialog.style.padding = opt.padding + 'px';
+            if(!$.isBoolean(shadow, false) || shadow === 'none') {
+                ctls.dialog.style.boxShadow = 'none';
+            }
             ctls.dialog.style.padding = Common.getCssAttrSize(opt.padding, {
                 attr: 'padding', unit:'px', isArray: true, isLimit: true, max: 10, val: 4
             }).join(' ');
@@ -2614,6 +2621,7 @@
                 parent: null,           //Element parentNode DIV
                 limitRange: true,       //窗体范围(位置、大小)限制 true,false
                 opacity: null,          //背景层透明度，默认为 0.2
+                shadow: true,           //是否显示CSS阴影
                 lock: true,             //是否锁屏
                 title: null,            //标题
                 content: null,          //文字内容
