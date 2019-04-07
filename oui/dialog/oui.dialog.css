@@ -280,6 +280,14 @@
     background: url('imgs/icon.png') no-repeat -200px -60px;
 }
 
+.oui-dialog .dialog-body .icon-cry{
+    background: url('imgs/icon.png') no-repeat -240px -60px;
+}
+
+.oui-dialog .dialog-body .icon-smile{
+    background: url('imgs/icon.png') no-repeat -280px -60px;
+}
+
 .oui-dialog .dialog-head .dialog-icon,.oui-dialog .dialog-head .dialog-icon:hover {
     border: none 0;
     width: 20px;
@@ -308,6 +316,14 @@
 
 .oui-dialog .dialog-head .icon-info{
     background: url('imgs/icon.png') no-repeat -200px 0;
+}
+
+.oui-dialog .dialog-head .icon-cry{
+    background: url('imgs/icon.png') no-repeat -220px 0;
+}
+
+.oui-dialog .dialog-head .icon-smile{
+    background: url('imgs/icon.png') no-repeat -240px 0;
 }
 
 .oui-dialog .dialog-body .dialog-iframe {

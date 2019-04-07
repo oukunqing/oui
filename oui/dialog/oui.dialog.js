@@ -152,7 +152,11 @@
             failed: 'warning',
             asterisk: 'info',
             infomation: 'info',
-            info: 'info'
+            info: 'info',
+            cry: 'cry',
+            sad: 'cry',
+            smile: 'smile',
+            happy: 'smile'
         },
         ButtonConfig: {
             None: { key: 'None', text: '\u5173\u95ed', result: 0, skey: '', css: 'btn-default' },

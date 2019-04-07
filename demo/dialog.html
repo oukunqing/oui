@@ -457,7 +457,10 @@ function msg(isFixWidth){
         //width: 300,
         //target: $I('txtTips'),
         parent: $I('p2'),
-        icon: 'success',
+        //icon: 'cry',
+        //icon: 'sad',
+        //icon: 'smile',
+        icon: isFixWidth ? 'happy' : 'sad',
         dragSize: false,
         callback: function() {
             console.log('msg close');
