@@ -19,7 +19,6 @@
         Padding: 4,             //拖动边框宽度，单位：px
         MinPadding: 0,          //拖动边框最小宽度，单位：px
         MaxPadding: 10,         //拖动边框最大宽度，单位：px
-        IconWidth: 50,          //Icon图标宽度
         CustomStyles: {
             shade: {},          //遮罩层样式
             dialog: {},         //对话框样式
