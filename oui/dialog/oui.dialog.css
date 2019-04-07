@@ -330,12 +330,13 @@
 }
 
 .oui-dialog .dialog-body .dialog-loading{
-    background: #fff;
     color: #666;
     border-radius: 3px;
     border: solid 1px #ddd;
     display: inline-block;
-    margin: 5px 1px; padding: 5px;
+    margin: 5px 1px; 
+    padding: 5px 5px 5px 35px;
+    background:#fff url('imgs/loading.gif') no-repeat 2px 2px;
     line-height: 1.5em;
     position: absolute;
     top: 0; left: 0;
