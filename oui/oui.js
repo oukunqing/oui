@@ -2055,13 +2055,16 @@
         appendChild = function (parent, elem, isRemove) {
             if ($.isElement(parent) || $.isDocument(parent)) {
                 var elems = $.isArray(elem) ? elem : [elem], 
-                    evName = isRemove ? 'removeChild' : 'appendChild';
+                    evName = isRemove ? 'removeChild' : 'appendChild',
+                    obj, pObj;
                 for(var i in elems) {
-                    try {
-                        var node = $.isElement(elems[i]) ? parent[evName](elems[i]) : null;
-                    } catch(e) {
-                        console.log('evName: ', e);
+                    obj = elems[i], pObj = (obj || {}).parentNode;
+                    if(!$.isElement(obj) 
+                        || (isRemove && pObj !== parent) 
+                        || (!isRemove && pObj === parent)) {
+                        continue;
                     }
+                    parent[evName](elems[i]);
                 }
             }
             return this;

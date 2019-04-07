@@ -110,15 +110,9 @@
             Code: 9
         },
         DefaultResult: {
-            'close': {
-                code: 'Close', result: 0
-            },
-            'child': {
-                code: 'Child', result: 8
-            },
-            'code': {
-                code: 'Code', result: 9
-            }
+            'close': { code: 'Close', result: 0 },
+            'child': { code: 'Child', result: 8 },
+            'code': { code: 'Code', result: 9 }
         },
         DialogButtons: {
             None: -1,
@@ -148,18 +142,18 @@
             Asterisk: 64,
             Infomation: 64
         },
-        DialogIcons: {
-            None: 0,
-            hand: 16,
-            stop: 16,
-            error: 16,
-            warning: 48,
-            question: 32,
-            exclamation: 48,
-            Warning: 48,
-            Asterisk: 64,
-            infomation: 64,
-            info: 64
+        DialogIconKeys: {
+            hand: 'error',
+            stop: 'stop',
+            error: 'error',
+            question: 'question',
+            warning: 'warning',
+            exclamation: 'warning',
+            success: 'success',
+            failed: 'warning',
+            asterisk: 'info',
+            infomation: 'info',
+            info: 'info'
         },
         ButtonConfig: {
             None: { key: 'None', text: '\u5173\u95ed', result: 0, skey: '', css: 'btn-default' },
@@ -348,8 +342,12 @@
             if(!$.isString(opt.icon, true)) {
                 return false;
             }
-
-            return true;
+            var icon = ('' + opt.icon).toLowerCase();
+            if(Config.DialogIconKeys[icon]) {
+                opt.icon = Config.DialogIconKeys[icon];
+                return true;
+            }
+            return false;
         },
         isPercentSize: function(width, height) {
             return $.isPercent(width) || (typeof height !== 'undefined' && $.isPercent(height));
@@ -2906,7 +2904,7 @@
                 return this;
             }
             if(ctls.icon) {
-                ctls.content.removeChild(ctls.icon);
+                $.removeChild(ctls.content, ctls.icon);
             }
             var html = ctls.content.innerHTML;
             return this.update(html + content, title, options);
@@ -2917,7 +2915,7 @@
                 return _;
             }
             if(ctls.icon) {
-                ctls.content.removeChild(ctls.icon);
+                $.removeChild(ctls.content, ctls.icon);
             }
             var html = ctls.content.innerHTML;
             return _.update(content + html, title, options);
