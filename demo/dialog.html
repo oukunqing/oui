@@ -6,15 +6,15 @@
     <style type="text/css">
         body{line-height: 1.8em;}
     </style>
-    <script type="text/javascript" src="../oui/oui.js?1"></script>
-    <script type="text/javascript" src="../oui/dialog/oui.dialog.js?12"></script>
+    <script type="text/javascript" src="../oui/oui.min.js?1"></script>
+    <script type="text/javascript" src="../oui/dialog/oui.dialog.js?123"></script>
 </head>
 <body>
     <div id="p1"></div>
     <div id="p2" style="height:300px;width:600px;border-radius: 5px 10px 3px 6px;margin:0 0 5px 0;
             border: none;
             display:block;left:5px; top: 10px;">
-        <input type="input" name="" id="txtTips" style="width:240px;height:30px;margin:160px 0 0 180px;" value="这是文本输入框的内容" />
+        <input type="input" name="" id="txtTips" style="width:240px;height:30px;margin:160px 0 0 120px;" value="这是文本输入框的内容" />
         <br />
         <br />
         <br />
@@ -134,7 +134,15 @@ function alert2(){
                 alert('Cancel');
             }
         },
-        param: {id:123, name:'Tom'}
+        param: {id:123, name:'Tom'},
+        styles: {
+            'content': {
+                'background': '#f00',
+                'border': 'solid 1px #00f',
+                'color': '#ffff00',
+                'border-color': '#f00'
+            }
+        },
     });
 
     //console.log('dialog: ', dialog);
@@ -149,8 +157,8 @@ function alert2(){
     }, 6000);
 
     window.setTimeout(function(){
-        dialog.setOptions('icon', 'question').update();
-    }, 5000);
+        dialog.setOptions('icon', 'question').setOptions('styles', null).update('abc');
+    }, 2000);
 
     window.setTimeout(function(){
         dialog.setOptions('icon', 'info');
@@ -211,6 +219,7 @@ function confirm2(){
         topMost: true,
         //showLogo: true,
         maxAble: true,
+        keyClose: false,
         showMax:true,
         minAble: true,
         showMin:true,
@@ -363,7 +372,7 @@ function form2() {
         //win.move({x:0, y:-10});
 
     }, 10);
-/*
+
     window.setTimeout(function() {
         win.min();
     }, 2000);
@@ -376,7 +385,7 @@ function form2() {
         win.restore();
         win.moveTo({target: $I('txtTips')});
     }, 6000);
-    */
+    
 }
 
 function percent() {
@@ -467,7 +476,7 @@ function msg(isFixWidth){
     var win = $.dialog.msg('msg: Message提示信息演示' + (isFixWidth ? '(固定宽度)' : ''), {
         id: 'msg', autoClose: false, closeTiming: 15000, fixed: false,
         position: 'bottomleft', 
-        shadow: false,
+        //shadow: false,
         lock: false, clickBgClose: true, y: 5, x: 0,
         //width: 300,
         target: $I('txtTips'),
@@ -491,34 +500,58 @@ function msg(isFixWidth){
 }
 
 function tips(){
-    var win = $.tips('tips: 请注意：提示信息已经更新。' + new Date().getTime(), $I('txtTips'), {type:'tips',position: 'topleft'});
-
+    var win = $.tips('tips: 请注意：提示信息已经更新。' + new Date().getTime(), $I('txtTips'), {
+        type:'tips',position: 'lefttop',
+        maxWidth: 300,
+        styles: {
+            'tooltip': {
+                'background': '#f00',
+                'border': 'solid 1px #00f',
+                'color': '#ffff00',
+                'border-color': '#f00'
+            }
+        },
+        /*tooltipStyle: {
+            'background': '#f00',
+            'border': 'solid 1px #00f',
+            'border-color': '#f00'
+        }*/
+    });
+    
     tips2();
 
     window.setTimeout(function() {
-        var html = 'tips: 请注意：提示信息已经更新。<br />大家好啊';
-            //+ '<img src="http://122.227.179.90:81/skin/default/images/home/welcome.jpg" />';
-        win.update(html, {
-            position: 'right',
-            styles: {
-                //tooltip: {'background': '#ffffff'}
-            }
-        })
-    },15000);
-    /*
+        var html = 'tips: 请注意：提示信息已经更新。<br />大家好啊'
+        + '<img style="width:200px;" src="http://122.227.179.90:81/skin/default/images/home/welcome.jpg" />'
+        + '<img style="width:100px;" src="http://122.227.179.90:81/skin/default/images/home/welcome.jpg" />';
+        win//.options('styles', null)
+            .update(html, {
+                position: 'right',
+                styles: null
+            })
+    },3000);
+    
     
     window.setTimeout(function() {
-        win.update('tips: 请注意：提示信息已经再次更新。', {position:2})
+        win.update('tips: 请注意：提示信息已经再次更新。', {
+            position:2,            
+            styles: {
+                'tooltip': {
+                    'background': '#00f',
+                    'border-color': '#00f'
+                }
+            }
+        })
     },5000);
 
     window.setTimeout(function() {
-        win.update('tips: 请注意：提示信息更新。', {position:4})
+        win.update('tips: 请注意：提示信息更新。', { position:4 })
     },8000);
 
     window.setTimeout(function() {
         //win.close();
     }, 5000);
-    */
+    
     
 }
 

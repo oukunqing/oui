@@ -275,20 +275,24 @@
             opt.closeTiming = Math.abs(parseInt('0' + opt.closeTiming, 10));
             return opt;
         },
-        checkCustomStyle: function(opt) {
+        checkCustomStyle: function(opt, isUpdate) {
+            if(isUpdate && opt.styles === null) {
+                opt.newStyles = null;
+            }
             //检测自定义样式设置
             if(!opt.styles || !$.isObject(opt.styles)) {
                 opt.styles = {};
             }
-            opt.styles = $.extend({}, Config.CustomStyles, opt.styles);
-
+            if(!isUpdate) {
+                opt.styles = $.extend({}, Config.CustomStyles, opt.styles);
+            }
             //合并自定义的样式
             for(var k in opt.styles) {
                 $.extend(opt.styles[k], opt[k + 'Style']);
             }
             return this;
         },
-        checkOptions: function (content, title, opt) {
+        checkOptions: function (content, title, opt, isUpdate) {
             var target = null,  //目标控件，用于位置停靠
                 elem = null;    //内容控件，用于加载内容
             if(content && $.isElement(content)) {
@@ -321,8 +325,7 @@
             } else {
                 opt.closeIcon = ('' + opt.closeIcon).toLowerCase();
             }
-
-            return this.checkCustomStyle(opt).checkTiming(opt), opt;
+            return this.checkCustomStyle(opt, isUpdate).checkTiming(opt), opt;
         },
         getCssAttrSize: function(val, options) {
             var p = $.extend({
@@ -677,11 +680,13 @@
                 case Config.DialogType.Alert:
                     opt.buttons = Config.DialogButtons.OK;
                     opt.showMin = opt.showMax = opt.maxAble = false;
+                    opt.keyClose = opt.escClose = opt.clickBgClose = false;
                     opt.buttonPosition = 'right';
                     break;
                 case Config.DialogType.Confirm:
                     opt.buttons = Config.DialogButtons.OKCancel;
                     opt.showMin = opt.showMax = opt.maxAble = false;
+                    opt.keyClose = opt.escClose = opt.clickBgClose = false;
                     opt.buttonPosition = 'right';
                     break;
                 case Config.DialogType.Dialog:
@@ -700,10 +705,12 @@
                 case Config.DialogType.Iframe:
                     opt.showFoot = $.isBoolean(options.showFoot, false);
                     opt.codeCallback = true;
+                    opt.keyClose = opt.escClose = opt.clickBgClose = false;
                     break;
                 default:
                     opt.buttons = Config.DialogButtons.None;
                     opt.showHead = opt.showFoot = opt.dragSize = false;
+                    //opt.width = opt.minWidth = 'auto';
                     opt.height = opt.minHeight = 'auto';
                     opt.minAble = opt.maxAble = opt.lock = false;
                     break;
@@ -730,6 +737,7 @@
         }
     },
     Util = {
+        loads: {},
         getParam: function(_) {
             var p = Factory.getOptions(_.id);
             return p || {
@@ -1119,12 +1127,13 @@
         buildContent: function(_, pNode) {
             var util = this, p = util.getParam(_), opt = p.options, ctls = p.controls;
             if(p.none || _.isClosed()) { return util; }
-            var elem = ctls.content, css;
+            var elem = ctls.content, css, isUpdate = pNode === true;
             if (!elem) {
                 elem = $.createElement('div');
                 elem.className = 'dialog-content';
             }
-            if ((css = Common.toCssText(opt.styles.content, 'content'))) {
+
+            if ((css = Common.toCssText(opt.styles.content, 'content')) || (isUpdate)) {
                 elem.style.cssText = css;
             }
             if (util.isIframe(opt)) {
@@ -1436,7 +1445,17 @@
                 }
                 var keyCode = $.getKeyCode(e),
                     strKeyCode = String.fromCharCode(keyCode).toUpperCase(),
-                    btn = p.dics[strKeyCode];
+                    btn = p.dics[strKeyCode],
+                    last = Factory.getLast();
+
+                if(!last || last.id !== p.dialog.id) {
+                    return util;
+                }
+
+                if(btn === p.btns.close && !p.options.keyClose) {
+                    return util;
+                }
+
                 if ($.isElement(btn)) {
                     util.setAction(_, btn);
                 } else if(strKeyCode === 'F') {
@@ -1905,6 +1924,9 @@
             }
             return this;
         },
+        setFinalPosition: function() {
+
+        },
         setTargetPosition: function(options, obj, isFixedSize) {
             var par = $.extend({
                 target: null,
@@ -1936,69 +1958,100 @@
                 },
                 left = fs.x,
                 top = fs.y,
-                result = {};
+                result = {
+                    css: ''
+                },
+                isOver = true;
 
-            if(pos.startsWith('top')) {
-                top = fs.y - h - par.y;
-                result.dir = 'top';
-            } else if(pos.startsWith('bottom')) {
-                top = fs.y + fs.h + par.y;
-                result.dir = 'bottom';
-            }
+            var ys = {top: fs.y - h - par.y, bottom: fs.y + fs.h + par.y},
+                xs = {left: fs.x - w - par.x, right: fs.x + fs.w + par.x},
+                loop = 0, value = 0;
 
-            if(pos.startsWith('left')) {
-                left = fs.x - w - par.x;
-                result.dir = 'left';
-            } else if(pos.startsWith('right')) {
-                left = fs.x + fs.w + par.x;
-                result.dir = 'right';
-            }
+            ys.value = ys.bottom + h - bs.height;
+            xs.value = xs.right + w - bs.width;
 
-            switch(pos) {
-                case 'topleft':
-                case 'bottomleft':
-                    left = fs.x;
-                    if(fs.w < w) {
-                        result.css = 'left: ' + (fs.w / 2) + 'px;';
+            do{
+                isOver = true;
+
+                if(pos.startsWith('top')) {
+                    top = ys.top;
+                    result.dir = 'top';
+                    if(ys.top < 0 && (ys.value < 0 || ys.value < Math.abs(ys.top))) {
+                        isOver = false;
+                        pos = pos.replace('top', 'bottom');
                     }
-                    break;
-                case 'top':
-                case 'bottom':
-                    left = fs.x - (w - fs.w) / 2;
-                    break;
-                case 'topright':
-                case 'bottomright':
-                    left = fs.x - (w - fs.w);
-                    if(fs.w < w) {
-                        result.css = 'left: ' + (fs.w / 2 + (w - fs.w)) + 'px;';
+                } else if(pos.startsWith('bottom')) {
+                    top = ys.bottom;
+                    result.dir = 'bottom';
+                    if(ys.value > 0 && (ys.top >= 0 || Math.abs(ys.top) < ys.value) ) {
+                        isOver = false;
+                        pos = pos.replace('bottom', 'top');
                     }
-                    break;
-                case 'lefttop':
-                case 'righttop':
-                    top = fs.y;
-                    if(fs.h < h) {
-                        result.css = 'top: ' + (fs.h / 2) + 'px;';
+                }
+
+                if(pos.startsWith('left')) {
+                    left = xs.left;
+                    result.dir = 'left';
+                    if(xs.left < 0 && (xs.value < 0 || xs.value < Math.abs(xs.left))) {
+                        isOver = false;
+                        pos = pos.replace('left', 'right');
                     }
-                    break;
-                case 'left':
-                case 'right':
-                    top = fs.y - (h - fs.h) / 2;
-                    break;
-                case 'leftbottom':
-                case 'rightbottom':
-                    top = fs.y - (h - fs.h);
-                    if(fs.h < h) {
-                        result.css = 'top: ' + (fs.h / 2 + (h - fs.h)) + 'px;';
+                } else if(pos.startsWith('right')) {
+                    left = xs.right;
+                    result.dir = 'right';
+                    if(xs.value > 0 && (xs.left >= 0 || Math.abs(xs.left) < xs.value) ) {
+                        isOver = false;
+                        pos = pos.replace('right', 'left');
                     }
-                    break;
-            }
+                }
+
+                switch(pos) {
+                    case 'topleft':
+                    case 'bottomleft':
+                        left = fs.x;
+                        if(fs.w < w) {
+                            result.css = 'left: ' + (fs.w / 2) + 'px;';
+                        }
+                        break;
+                    case 'top':
+                    case 'bottom':
+                        left = fs.x - (w - fs.w) / 2;
+                        break;
+                    case 'topright':
+                    case 'bottomright':
+                        left = fs.x - (w - fs.w);
+                        if(fs.w < w) {
+                            result.css = 'left: ' + (fs.w / 2 + (w - fs.w)) + 'px;';
+                        }
+                        break;
+                    case 'lefttop':
+                    case 'righttop':
+                        top = fs.y;
+                        if(fs.h < h) {
+                            result.css = 'top: ' + (fs.h / 2) + 'px;';
+                        }
+                        break;
+                    case 'left':
+                    case 'right':
+                        top = fs.y - (h - fs.h) / 2;
+                        break;
+                    case 'leftbottom':
+                    case 'rightbottom':
+                        top = fs.y - (h - fs.h);
+                        if(fs.h < h) {
+                            result.css = 'top: ' + (fs.h / 2 + (h - fs.h)) + 'px;';
+                        }
+                        break;
+                }
+                loop++;
+            } while(!isOver && loop < 3);
 
             if(isFixedSize) {
                 $.setStyle(obj, {width: w, height: h }, 'px');
             }
 
             $.setStyle(obj, { left: left, top: top }, 'px');
-
+            
             return result;
         },
         dragPosition: function (_) {
@@ -2666,9 +2719,69 @@
                 ctls.content.innerHTML = opt.content;
             }
             return util.setTooltipPosition(_);
-        },        
+        },
+        setTooltipStyle: function(_, opt, keys) {
+            var styles = {};
+            for(var i in keys) {
+                var k = keys[i];
+                if(opt[k] !== 'auto') {
+                    styles[k] = opt[k];
+                }
+            }
+            return styles;
+        },
+        setTooltipSize: function(_) {
+            var util = this, p = util.getParam(_), opt = p.options, ctls = p.controls;
+            var styles = util.setTooltipStyle(_, opt, [
+                'width', 'height', 'maxWidth', 'maxHeight', 'minWidth', 'minHeight'
+            ]);
+            $.setStyle(ctls.dialog, styles, 'px');
+            return util;
+        },
+        buildTooltipStyle: function(_, par, p) {
+            var util = this, 
+                opt = p.options,
+                obj = p.controls.dialog;
+            //设置自定义的样式
+            var styles = opt.styles.tooltip || opt.styles.tips || {},
+                cssText = Common.toCssText(styles, 'tooltip');
+            obj.style.cssText = cssText;
+
+            var res = util.setTooltipSize(_).setTargetPosition(par, obj), cssName = '';
+            if(res.css || styles['border-color']) {
+                if(styles['border-color']) {
+                    res.css += 'border-' + res.dir + '-color:' + styles['border-color'] + ';';
+                }
+                cssName = 'tip-pos-' + _.id;
+                var cssCon = '.{0}:after,.{0}:before{{{1}}}'.format(cssName, res.css);
+                $.createCssStyle(cssCon, 'tip-css-' + _.id, function(elem) {
+                    p.styleElement = elem;
+                });
+            }
+            obj.className = 'oui-tooltip oui-tip-' + res.dir + ' ' + cssName;
+        },
+        loadComplete: function(c, i, func) {
+            if(i >= c) {
+                func();
+            }
+        },
+        loadImg: function(_, imgs, func) {
+            var util = this, c = imgs.length;
+            util.loads[_.id] = {idx: 0};
+
+            for(var i=0; i<c; i++) {
+                imgs[i].onload = function() {
+                    util.loads[_.id].idx += 1;
+                    util.loadComplete(c, util.loads[_.id].idx, func);
+                };
+            }
+        },
         setTooltipPosition: function (_) {
-            var util = this, p = util.getParam(_), opt = p.options, obj = p.controls.dialog;
+            var util = this, 
+                p = util.getParam(_), 
+                opt = p.options, 
+                ctls = p.controls, 
+                obj = p.controls.dialog;
             if(p.none || _.isClosed()) { return util; }
 
             var par = {
@@ -2679,21 +2792,14 @@
                 y: opt.y || 7
             };
 
-            //设置自定义的样式
-            var cssText = Common.toCssText(opt.styles.tooltip || opt.styles.tips, 'tooltip');            
-            if (cssText) {
-                obj.style.cssText = cssText;
-            }
-
-            var res = util.setTargetPosition(par, obj), cssName = '';
-            if(res.css) {
-                cssName = ' tip-pos-' + _.id;
-                var cssCon = '.{0}:after,.{0}:before{{{1}}}'.format(cssName, res.css);
-                $.createCssStyle(cssCon, 'tip-css-' + _.id, function(elem) {
-                    p.styleElement = elem;
+            var imgs = ctls.content.getElementsByTagName('img');
+            if(imgs.length > 0) {
+                util.loadImg(_, imgs, function() {
+                    util.buildTooltipStyle(_, par, p);
                 });
+            } else {
+                util.buildTooltipStyle(_, par, p);
             }
-            obj.className = 'oui-tooltip oui-tip-' + res.dir + cssName;
 
             return util;
         }
@@ -2740,6 +2846,7 @@
                 closeType: 'close',     //关闭方式， close | hide
                 clickBgClose: false,    //'dblclick', // dblclick | click
                 escClose: false,        //是否允许按Esc关闭
+                keyClose: true,         //是否允许快捷键关闭
                 autoClose: false,       //是否自动关闭
                 closeTiming: 5000,      //closeTiming timeout time timing 四个字段
                 showTimer: false,       //是否显示定时关闭倒计时
@@ -2845,6 +2952,12 @@
             Common.checkOptions(p.options);
 
             return this;
+        },
+        options: function(key, value) {
+            if($.isUndefined(value)) {
+                return this.getOptions(key);
+            }
+            return this.setOptions(key, value);
         },
         getDialogId: function() {
             return Factory.getOptions(this.id, 'dialogId', '');
@@ -2969,15 +3082,24 @@
                     options = {};
                 }
             }
-            var opt = Common.checkOptions(content, title, options);
+            var opt = Common.checkOptions(content, title, options, true);
             var _ = this, p = Util.getParam(_), ctls = p.controls;
 
             if(opt.type && !opt.buttons) {
                 opt.buttons = Common.getDialogButtons(opt.type);
             }
 
+            //更新时，若样式设置为null,则清除之前的样式设置
+            if(opt.newStyles === null) {
+                this.setOptions('styles', {});
+            }
+            //更新时，若没有设置新的样式，则复制之前的样式设置
+            if($.isUndefined(opt.styles) || $.isEmpty(opt.styles)) {
+                $.extend(opt.styles, p.options.styles);
+            }
+
             if ($.extend(p.options, opt).type === Config.DialogType.Tooltip) {
-                Util.updateTooltip(_, opt);
+                Util.updateTooltip(_, p.options);
                 return _;
             }
             if (ctls.content) {
@@ -2990,7 +3112,7 @@
                 if(isMin) {
                     Util.setSize(_, {type: Config.DialogStatus.Normal});
                 }
-                Util.buildContent(_).setBodySize(_).setCache(_);
+                Util.buildContent(_, true).setBodySize(_).setCache(_);
 
                 if(isMin) {
                     Util.setSize(_, {type: Config.DialogStatus.Min});

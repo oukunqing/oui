@@ -629,7 +629,7 @@
 }
 
 .oui-tooltip .dialog-content{
-    white-space: nowrap;
+    /*white-space: nowrap;*/
     margin: 0; padding: 0;
     border: none;
     border-radius: 3px;
