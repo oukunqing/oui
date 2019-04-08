@@ -62,6 +62,7 @@
                     joinSeparate: ',',
                     focusInvalid: false,
                     empty: false,
+                    md5: false,
                     same: {id: '', msg: ''},
                     distinct: {id: '', msg: ''},
                     //提示信息回调 function(status, message, element){}
@@ -289,6 +290,7 @@
                             minValue: '', maxValue: '',   //最小值、最大值（用于验证输入的数字大小）
                             required: false,            //是否必填项
                             empty: false,               //是否允许空值
+                            md5: false,                 //是否MD5加密
                             minLength: '', maxLength: '', //字符长度
                             pattern: '',                //正则表达式（内部验证）
                             //提示信息回调 function(status, message, element){}
@@ -445,7 +447,11 @@
                         return false;
                     }
                 } else if (obj.isSingle) {
-                    data[fc.key] = result.value;
+                    if(fc.field.md5) {
+                        data[fc.key] = $.md5(result.value);
+                    } else {
+                        data[fc.key] = result.value;
+                    }
                 } else {
                     if ($.isUndefined(data[fc.nameKey || fc.key])) {
                         data[fc.nameKey || fc.key] = [];
@@ -616,7 +622,8 @@
             setTableData: setTableData,
             filterData: filterData,
             findElement: findElement
-        }
+        },
+        md5: md5
     });
 
 
