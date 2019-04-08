@@ -61,7 +61,9 @@
                     isJoin: true,
                     joinSeparate: ',',
                     focusInvalid: false,
-                    sameTo: '',
+                    empty: false,
+                    same: {id: '', msg: ''},
+                    distinct: {id: '', msg: ''},
                     //提示信息回调 function(status, message, element){}
                     //status 验证状态：true-表示通过，false-表示失败
                     tooltip: null,
@@ -159,7 +161,7 @@
                         },
                         title = getTitle(field, '');
 
-                    if (field.required && '' === value) {   // 空值验证
+                    if (field.required && !field.empty && '' === value) {   // 空值验证
                         if (field.tag === 'SELECT' || op.isLegalName(field.attribute)) {
                             return result(false, (messages.select || messages.required || configs.messages.select).format(title));
                         } else {
@@ -205,14 +207,14 @@
                         }
                     }
                     //相同内容检测
-                    if($.isObject(field.same)) {
+                    if($.isObject(field.same) && field.same.id) {
                         var target = document.getElementById(field.same.id);
                         if(target && target.value !== value) {
                             return result(false, field.same.message || field.same.msg || '两次输入的内容不一样');
                         }
                     }
                     //重复内容检测
-                    if($.isObject(field.distinct)) {
+                    if($.isObject(field.distinct) && field.distinct.id) {
                         var target = document.getElementById(field.distinct.id);
                         if(target && target.value === value) {
                             return result(false, field.distinct.message || field.distinct.msg || '内容不能重复');
@@ -278,16 +280,17 @@
                         isAppointId = fields[op.getKey(id)] || false,
                         isSingle = isAppointId || document.getElementsByName(name || '').length <= 1,
                         field = checkField(op.swap($.extend({
-                            title: '',       //字段名称（用于提示信息）
-                            type: '',       //字段类型（email,url等），用于格式验证
+                            title: '',                  //字段名称（用于提示信息）
+                            type: '',                   //字段类型（email,url等），用于格式验证
                             dataType: $.isString(keyField) ? keyField : 'string', //值类型（string,int,float)
-                            defaultValue: '',        //默认值 (val, value, defaultValue)
-                            value: '',      //获取到的字段内容
-                            attribute: '',  //获取指定的属性值作为value
+                            defaultValue: '',           //默认值 (val, value, defaultValue)
+                            value: '',                  //获取到的字段内容
+                            attribute: '',              //获取指定的属性值作为value
                             minValue: '', maxValue: '',   //最小值、最大值（用于验证输入的数字大小）
-                            required: false,    //是否必填项
+                            required: false,            //是否必填项
+                            empty: false,               //是否允许空值
                             minLength: '', maxLength: '', //字符长度
-                            pattern: '',    //正则表达式（内部验证）
+                            pattern: '',                //正则表达式（内部验证）
                             //提示信息回调 function(status, message, element){}
                             //status 验证状态：true-表示通过，false-表示失败
                             tooltip: null,
@@ -298,8 +301,9 @@
                             //外部验证回调函数 function(value, element){} 返回值为 boolean （true|false）
                             //返回 true - 表示验证通过，false-表示验证失败
                             validate: null,
-                            messages: {},    //验证失败时显示的提示信息（为空则显示默认的信息）
-                            sameTo: ''
+                            messages: {},               //验证失败时显示的提示信息（为空则显示默认的信息）
+                            same: {id: '', msg: ''},
+                            distinct: {id: '', msg: ''}
                         }, $.isString(keyField) ? {} : keyField)));
 
                     if (!$.isObject(field.messages)) {
@@ -622,7 +626,7 @@
         if (12031 === jqXHR.status || jqXHR.status > 12000) { return false; }
 
         var html = ['应用程序异常，详细信息如下：', 'status:' + jqXHR.status, 'errorThrown:' + errorThrown, 'textStatus:' + textStatus];
-        $.alert(html.join('<br />'), { title: '错误信息', content: html.join('<br />') });
+        $.alert(html.join('<br />'), '错误信息', { icon: 'error' });
     },
     showAjaxFail = function (data, textStatus, jqXHR) {
         var html = [data.msg];
@@ -630,7 +634,7 @@
             html.push('可能的原因：');
             html.push(data.error);
         }
-        $.alert(html.join('<br />'), '提示信息');
+        $.alert(html.join('<br />'), '提示信息', { icon: 'warning' });
     };
 
     $.extend($, {

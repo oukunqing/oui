@@ -651,10 +651,12 @@
                 return this;
             }
             $.addListener(window, 'resize', function (e) {
-                for (var i = Cache.ids.length - 1; i >= 0; i--) {
+                //for (var i = Cache.ids.length - 1; i >= 0; i--) {
+                for (var i = 0; i < Cache.ids.length; i++) {
                     var d = Factory.getDialog(Cache.ids[i].id);
                     if (d && !d.isClosed()) {
-                        if (d.getOptions().type === Config.DialogType.Tooltip) {
+                        var p = Util.getParam(d), opt = p.options;
+                        if (opt.type === Config.DialogType.Tooltip) {
                             Util.setTooltipPosition(d);
                         } else {
                             var par = { event: 'window.resize' }, fullScreen = d.isMaximized();
@@ -2746,6 +2748,7 @@
             var styles = opt.styles.tooltip || opt.styles.tips || {},
                 cssText = Common.toCssText(styles, 'tooltip');
             obj.style.cssText = cssText;
+            obj.style.zIndex = opt.zindex;
 
             var res = util.setTooltipSize(_).setTargetPosition(par, obj), cssName = '';
             if(res.css || styles['border-color']) {
