@@ -597,6 +597,9 @@
     $.extend($, {
         pagination: function(options, dataCount) {
             return Factory.show(options, dataCount);
+        },
+        paging: function(options, dataCount) {
+            return Factory.show(options, dataCount);
         }
     });
 
