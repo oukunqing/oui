@@ -164,6 +164,8 @@
             op.element.innerHTML = html.join('');
 
             createEvent(that, op.minuend);
+
+            return this;
         }
     };
 
@@ -180,7 +182,7 @@
         },
         minPageSize = 1,                //pageSize最小值
         //默认的每页显示条数选项
-        defaultPageSizeItems = [5, 10, 20, 30, 50, 100],
+        defaultPageSizeItems = [1, 5, 10, 20, 30, 50, 100, 200],
         defaultInputWidth = 50,         //输入框默认宽度，单位px
         defaultDebounceTime = 50,       //防抖最小时长，单位：毫秒
         defaultLongPressTime = 1024,    //长按最小时长，单位：毫秒
@@ -224,8 +226,6 @@
                 setNumber(op, ['dataCount', 'pageIndex']);
             } else {
                 $.extend(op, options || {});
-                //父容器参数字段名称
-                op.element = op.element || op.parent || op.container || op.obj;
                 if (!$.isElement(op.element)) {
                     if ($.isString(op.element)) {
                         op.element = document.getElementById(op.element);
@@ -566,5 +566,38 @@
             return that;
         };
 
-    $.extendNative($, { Pagination: Pagination }, '$');
+    var Factory = {
+        caches: {},
+        buildKey: function(elem) {
+            var key = elem.id || elem.className || elem.tagName;
+            return key;
+        },
+        setCache: function(elem, obj) {
+            var key = this.buildKey(elem);
+            this.caches[key] = obj;
+            return this;
+        },
+        getCache: function(elem) {
+            var key = this.buildKey(elem);
+            return this.caches[key];
+        },
+        show: function(options, dataCount) {
+            var elem = options.element || options.parent || options.container || options.obj,
+                p = this.getCache(elem);
+            options.element = elem;
+            if(!p) {
+                p = new Pagination(options, dataCount);
+                this.setCache(elem, p);
+                return p;
+            }
+            return p.paging(options, dataCount), p;
+        }
+    };
+
+    $.extend($, {
+        pagination: function(options, dataCount) {
+            return Factory.show(options, dataCount);
+        }
+    });
+
 }(OUI);

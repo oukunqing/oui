@@ -325,6 +325,10 @@
             } else {
                 opt.closeIcon = ('' + opt.closeIcon).toLowerCase();
             }
+
+            if($.isUndefined(opt.parameter) && !$.isUndefined(opt.param)) {
+                opt.parameter = opt.param;
+            }
             return this.checkCustomStyle(opt, isUpdate).checkTiming(opt), opt;
         },
         getCssAttrSize: function(val, options) {
@@ -1216,9 +1220,10 @@
                 '<div id="{0}-iframe-shade" class="iframe-shade"></div>',
                 '<div id="{0}-loading" class="dialog-loading">{4}</div>'
             ].join('');
+            var param = $.isObject(opt.parameter) ? $.toJsonString(opt.parameter) : opt.parameter;
             return html.format(_.getDialogId(), 
                 height, 
-                url.setUrlParam('dialog-id', _.id), 
+                url.setUrlParam('dialog-id', _.id).setUrlParam('dialog-param', param), 
                 opt.iframeScroll || opt.iframeScrolling ? 'auto' : 'no',
                 opt.loading || Common.getDialogText('Loading', opt.lang));
         },
@@ -2632,7 +2637,7 @@
                 return this;
             }
             var dr = {},
-                parameter = actions.param || opt.parameter || opt.param,
+                parameter = actions.param || opt.parameter,
                 code = actions.code || '',
                 result = actions.result || 0;
 

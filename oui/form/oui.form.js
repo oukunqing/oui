@@ -447,7 +447,7 @@
                         return false;
                     }
                 } else if (obj.isSingle) {
-                    if(fc.field.md5) {
+                    if(fc.field.md5 && $.isString(result.value, true)) {
                         data[fc.key] = $.md5(result.value);
                     } else {
                         data[fc.key] = result.value;

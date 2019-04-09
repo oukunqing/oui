@@ -26,7 +26,7 @@
     
     var pageIndex = $.getQueryString()['pageIndex'] || 1;
     var timer = null;
-    var p1 = new OUI.Pagination({
+    var p1 = $.pagination({
         parent: $('#p1')[0],
         dataCount: 11912,
         markCount: 10,
@@ -56,7 +56,7 @@
     //p1.paging(5555);
 
    console.log('p1: ', p1);
-   var p2 = new OUI.Pagination({
+   var p2 = $.pagination({
         element: document.getElementById('p2'),
         dataCount: 520,
         pageIndex: 0,
@@ -78,7 +78,7 @@
 
     
 
-   var p3 = new OUI.Pagination({
+   var p3 = $.pagination({
         element: document.getElementById('p3'),
         dataCount: 666,
         pageIndex: 0,
@@ -96,7 +96,7 @@
     });
 
 
-   var p4 = new OUI.Pagination({
+   var p4 = $.pagination({
         element: document.getElementById('p4'),
         dataCount: 812,
         pageIndex: 0,
@@ -114,7 +114,7 @@
         }
     });
 
-   var p5 = new OUI.Pagination({
+   var p5 = $.pagination({
         element: document.getElementById('p5'),
         dataCount: 911,
         pageIndex: 1,
@@ -131,7 +131,7 @@
         }
     });
    
-   var p6 = new OUI.Pagination({
+   var p6 = $.pagination({
         element: document.getElementById('p6'),
         dataCount: 89,
         pageIndex: 0,

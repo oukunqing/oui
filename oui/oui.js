@@ -2520,7 +2520,7 @@
                 return action;
             } else {
                 var checked = false, 
-                    dic = {cancel:0, all:1, reverse:2};
+                    dic = {cancel: 0, checked: 1, all: 1, reverse: 2};
                 switch (parseInt(dic[('' + action).toLowerCase()] || action, 10)) {
                     case 0: checked = false; break;
                     case 1: checked = true; break;
@@ -2559,6 +2559,21 @@
             }
             return this;
         },
+        setCheckedClass: function(selector, className) {
+            var arr = isName(selector) ? $N(selector) : $QA(selector), c = arr.length;
+            for(var i = 0; i < c; i++) {
+                var obj = arr[i];
+                if(obj.checked) {
+                    $.addClass(obj.parentNode, className);
+                } else {
+                    $.removeClass(obj.parentNode, className);
+                }
+            }
+            return this;
+        },
+        setCheckedCss: function(selector, className) {
+            return this.setCheckedClass(selector, className);
+        },
         getChecked: function (selector) {
             if (isName(selector)) {
                 return $N(selector, { attribute: { checked: true } });
@@ -2568,6 +2583,24 @@
                 }
                 return $QA(selector);
             }
+        },
+        getCheckedValues: function(selector, targetElement) {
+            var elements = $.getChecked(selector), len = elements.length;
+            var values = [];
+            for(var i = 0; i < len; i++) {
+                var val = elements[i].value;
+                values.push(val);
+            }
+            if($.isString(targetElement, true)) {
+                targetElement = document.getElementById(targetElement);
+            }
+            if($.isElement(targetElement)) {
+                targetElement.value = values.join(',');
+            }
+            return values;
+        },
+        getCheckedValue: function(selector, targetElement) {
+            return this.getCheckedValues(selector);
         },
         getTextCursorPosition: function (elem) {
             try {
