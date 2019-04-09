@@ -2697,7 +2697,7 @@
                 return false;
             }
             var tipId = null, d = null;
-            try { tipId = opt.target.getAttribute('tipid'); } catch (e) { }
+            try { tipId = opt.target.getAttribute('tooltip-id'); } catch (e) { }
 
             if (tipId && (d = Factory.getDialog(tipId)) !== null) {
                 p.controls = util.getParam(d).controls;
@@ -2711,7 +2711,7 @@
 
                 ctls.body = util.buildBody(_, ctls.dialog);
 
-                $.setAttribute(opt.target, 'tipid', opt.id);
+                $.setAttribute(opt.target, 'tooltip-id', opt.id);
                 p.parent.appendChild(ctls.dialog);
             }
             Factory.setWindowResize();
@@ -3303,7 +3303,7 @@
     $.extend($.tooltip, {
         close: function (id) {
             if ($.isElement(id)) {
-                id = id.getAttribute('tipId');
+                id = id.getAttribute('tooltip-id');
             }
             return Factory.close(id), $;
         },
