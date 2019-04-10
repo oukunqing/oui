@@ -295,7 +295,8 @@
         },
         checkOptions: function (content, title, opt, isUpdate) {
             var target = null,  //目标控件，用于位置停靠
-                elem = null;    //内容控件，用于加载内容
+                elem = null,    //内容控件，用于加载内容
+                func = null;    //回调函数
             if(content && $.isElement(content)) {
                 elem = content;
                 content = '';
@@ -308,14 +309,22 @@
                 title = '';
             } else if ($.isElement(title)) {
                 target = title;
+                title = '';
+            } else if($.isFunction(title)) {
+                func = title;
+                title = '';
+            }
+            if($.isFunction(opt)) {
+                opt = { callback: opt };
             }
             if (!$.isObject(opt)) {
                 opt = {};
             }
-            opt.element = elem || opt.element || undefined;
-            opt.content = content || opt.content || undefined;
-            opt.title = title || opt.title || undefined;
-            opt.target = target || opt.target || undefined;
+            opt.element = elem || opt.element;
+            opt.content = content || opt.content;
+            opt.title = title || opt.title;
+            opt.target = target || opt.target;
+            opt.callback = func || opt.callback;
 
             if($.isBoolean(opt.boxShadow) || opt.boxShadow === 'none') {
                 opt.shadow = opt.boxShadow;
