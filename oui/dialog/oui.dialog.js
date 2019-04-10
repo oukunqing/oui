@@ -1429,12 +1429,12 @@
                 if (keyEvent) {
                     $.addListener(obj, 'keyup', function (e) {
                         var keyCode = $.getKeyCode(e),
-                            strKeyCode = String.fromCharCode(keyCode).toUpperCase(),
+                            keyChar = String.fromCharCode(keyCode).toUpperCase(),
                             shortcutKey = this.getAttribute('shortcut-key') || '',
                             next;
-                        //if(32 == keyCode || (shkey >= 3 && strKeyCode == cg.shortcutKey[2].toUpperCase())){FuncCancel();}
+                        //if(32 == keyCode || (shkey >= 3 && keyChar == cg.shortcutKey[2].toUpperCase())){FuncCancel();}
                         // 判断是否为空格键 或 是否按下快捷键
-                        if (Config.KEY_CODE.Space === keyCode || strKeyCode === shortcutKey) {
+                        if (Config.KEY_CODE.Space === keyCode || keyChar === shortcutKey) {
                             util.setAction(_, this);
                         } else if([37, 39].indexOf(keyCode) >= 0) {
                             next = keyCode === 37 ? this.previousSibling : this.nextSibling;
@@ -1470,8 +1470,8 @@
                     return false;
                 }
                 var keyCode = $.getKeyCode(e),
-                    strKeyCode = String.fromCharCode(keyCode).toUpperCase(),
-                    btn = p.dics[strKeyCode],
+                    keyChar = String.fromCharCode(keyCode).toUpperCase(),
+                    btn = p.dics[keyChar],
                     last = Factory.getLast();
 
                 if(!last || last.id !== p.dialog.id) {
@@ -1484,7 +1484,7 @@
 
                 if ($.isElement(btn)) {
                     util.setAction(_, btn);
-                } else if(strKeyCode === 'F') {
+                } else if(keyChar === 'F') {
                     _.focus();
                 }
             });

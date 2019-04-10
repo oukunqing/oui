@@ -47,7 +47,8 @@
             skin: defaultSkin,                      //样式，若skin=null则不启用内置样式
             inputWidth: defaultInputWidth,          //输入框宽度，默认为50px
             debounce: true,                         //是否启用防抖功能（或者值为number，且大于50即为启用）
-            debounceTime: defaultDebounceTime       //抖动时长，单位：毫秒
+            debounceTime: defaultDebounceTime,      //抖动时长，单位：毫秒
+            focus: false                            //是否锁定焦点
         }, options, dataCount);
 
         that.paging();
@@ -188,6 +189,7 @@
         defaultLongPressTime = 1024,    //长按最小时长，单位：毫秒
         defaultLongPressInterval = 50,          //长按分页间隔，单位：毫秒
         minLongPressInterval = 20,              //长按分页最小间隔，单位：毫秒
+        isKeyPressPaging = false,               //是否方向键分页中
         setNumber = function (op, keys) {
             for (var i in keys) {
                 var key = keys[i], num = parseInt(op[key], 10);
@@ -421,6 +423,9 @@
             if ($.isUndefined(obj)) { return false; }
             $.addEventListener(obj, eventName, function (ev) {
                 //判断是否是键盘按钮事件 keyup keydown keypress 等
+                if(ev.type === 'keydown') {
+                    that.isKeyPressPaging = true;
+                }
                 if (eventName.indexOf('key') >= 0) {
                     var kp = keyPaging(ev, that, this);
                     val = kp ? kp.value : 'None';
@@ -513,8 +518,23 @@
                     focusInput = inputs[i];
                 }
             }
-            //设置输入框获取焦点
-            $.setFocus(focusInput);
+
+            $.addListener(document, 'keypress', function (e) {
+                if (!e.shiftKey ) {
+                    return false;
+                }
+                var keyCode = $.getKeyCode(e),
+                    keyChar = String.fromCharCode(keyCode).toUpperCase();
+
+                if(keyChar === 'P') {
+                    $.setFocus(focusInput);
+                }
+            });
+
+            if(op.focus || that.isKeyPressPaging) {
+                //设置输入框获取焦点
+                $.setFocus(focusInput);
+            }
         },
         getValue = function (obj) {
             return parseInt(obj.value || obj.getAttribute('value'), 10);
