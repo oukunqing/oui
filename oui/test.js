@@ -151,13 +151,12 @@ for(var k in str){
 console.log(str);
 console.log($.contains(str,'name'));
 
-console.log(new Date().format('ts'))
 
 var d = '1970-01-01 8:0:12.123'.toDate().format('ts');
 console.log(d);
 var d = '1970-01-01 9:0:12.123'.toDate().format('ts');
 console.log(d);
-var d = '1970-01-01 10:0:12.123'.toDate().format('ts');
+var d = '2010-01-01 10:0:12.123'.toDate().format('ts');
 console.log(d);
 var d = '2010-01-02 10:0:12.123'.toDate().format('ts');
 console.log(d);
@@ -165,3 +164,4 @@ console.log(d);
 
 var str = '关闭';
 console.log(str.toUnicode());
+

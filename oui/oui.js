@@ -355,10 +355,14 @@
         toJsonString = function (o) { return JSON.stringify(o); },
         toJson = function (s) { return JSON.parse(s); },
         toEncode = function (s) { return encodeURIComponent(s); },
-        param = function (a, v) {
+        buildParam = function (a, v, strict) {
+            strict = isBoolean(strict, true);
+            if(isNullOrUndefined(a) || (strict && isNullOrUndefined(v))) {
+                return '';
+            }
             var s = [];
             if (isString(a)) {
-                if (!isUndefined(v)) {
+                if (!isNullOrUndefined(v)) {
                     a = [{ key: a, value: v }];
                 } else {
                     return a;
@@ -377,19 +381,23 @@
                     var val = isObject(a[key]) ? toJsonString(a[key]) : a[key];
                     s.push(key + '=' + toEncode(val));
                 }
-            } else if (!isUndefined(a)) {
+            } else {
                 s.push(a);
             }
             return s.join('&');
         },
-        setUrlParam = function (a, v) {
-            return param(a, v);
+        setUrlParam = function (a, v, strict) {
+            return buildParam(a, v, strict);
+        },
+        getTime = function() {
+            return ('' + new Date().getTime()).substr(-9);
         },
         setQueryString = function (url, data, value) {
             if (!isString(url)) {
                 return url;
             }
-            return url + (url.indexOf('?') > -1 ? '&' : '?') + (!isUndefined(data) ? param(data, value) : new Date().getTime());
+            var param = buildParam(data, value, true) || buildParam('up_ts_0', getTime());
+            return url + (url.indexOf('?') > -1 ? '&' : '?') + param;
         },
         getQueryString = function (url, name) {
             var str = isString(url) ? url : location.href, params = str.substr(str.indexOf('?')), obj = {};
@@ -402,7 +410,7 @@
                     }
                 }
             }
-            return !isUndefined(name) ? obj[name] : obj;
+            return !isNullOrUndefined(name) ? obj[name] : obj;
         },
         getUrlHost = function (url) {
             var pos = url.indexOf('//'),
@@ -413,7 +421,7 @@
         isDebug = function (key) {
             try {
                 var debug = getQueryString()[key || 'debug'];
-                return !isUndefined(debug) && debug === '1';
+                return !isNullOrUndefined(debug) && debug === '1';
             } catch (e) {
                 return false;
             }
@@ -484,7 +492,7 @@
         containsKey: containsKey, containsValue: containsValue, contains: contains, distinctList: distinctList,
         collapseNumberList: collapseNumberList, expandNumberList: expandNumberList,
         toJsonString: toJsonString, toJson: toJson, toEncode: toEncode,
-        param: param, setUrlParam: setUrlParam,
+        param: buildParam, setUrlParam: setUrlParam,
         setQueryString: setQueryString, getQueryString: getQueryString, getUrlHost: getUrlHost,
         isDebug: isDebug,
         quickSort: function (arr, key) {
@@ -2602,6 +2610,12 @@
         getCheckedValue: function(selector, targetElement) {
             return this.getCheckedValues(selector);
         },
+        getCheckedText: function(elem) {
+            if(!$.isElement(elem)) {
+                return '';
+            }
+            return obj.options[obj.selectedIndex].text;           
+        },
         getTextCursorPosition: function (elem) {
             try {
                 if (!$.isElement(elem)) {
@@ -2704,6 +2718,9 @@
             }
 
             return this;
+        },
+        appendOption: function(obj, val, txt) {
+            return obj.options.add(new Option(txt, val)), this;
         }
     }, '$');
 }(OUI);
@@ -3047,7 +3064,7 @@
         if(window.location != top.window.location) {
             try{
                 var func = parent.$.dialog[funcName],
-                    id = $.getQueryString(location.href, 'dialog-id');
+                    id = $.getQueryString(location.href, 'dialog_id');
                 if($.isFunction(func) && !$.isUndefined(id)) {
                     return func(id, param), this;
                 }

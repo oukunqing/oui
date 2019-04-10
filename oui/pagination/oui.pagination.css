@@ -2,9 +2,9 @@
     display: block;
     font-size:14px;
     font-family: Arial;
+    color: #333;
     overflow: hidden;
     border: none 0 #ccc;
-    color: #333;
     margin:0;
     padding:2px 5px;
 
@@ -17,8 +17,17 @@
     -ms-user-select:none;
     user-select:none;
 }
+
+.oui-pagination .label,.oui-pagination span {	
+    font-size:14px;
+    font-family: Arial;
+	font-weight: normal;
+    color: #333;
+}
+
 .oui-pagination .left, .oui-pagination .label {
     float: left;
+	color: #333;
 }
 
 .oui-pagination .right {
@@ -62,7 +71,7 @@
 }
 
 .oui-pagination .label {
-    float: left; padding: 0 2px; line-height: 22px;
+    float: left; padding: 0 2px; line-height: 22px; color: #333;
 }
 
 /*链接文字颜色默认为蓝色*/

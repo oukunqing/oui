@@ -1213,17 +1213,18 @@
             return util;
         },
         buildIframe: function (_, opt, url) {
-            var height = '100%';
-            var html = ['<iframe class="dialog-iframe" width="100%"',
-                ' id="{0}-iframe" height="{1}" src="{2}"',
-                ' frameborder="0" scrolling="{3}"></iframe>',
-                '<div id="{0}-iframe-shade" class="iframe-shade"></div>',
-                '<div id="{0}-loading" class="dialog-loading">{4}</div>'
-            ].join('');
-            var param = $.isObject(opt.parameter) ? $.toJsonString(opt.parameter) : opt.parameter;
+            var height = '100%',
+                html = ['<iframe class="dialog-iframe" width="100%"',
+                    ' id="{0}-iframe" height="{1}" src="{2}"',
+                    ' frameborder="0" scrolling="{3}"></iframe>',
+                    '<div id="{0}-iframe-shade" class="iframe-shade"></div>',
+                    '<div id="{0}-loading" class="dialog-loading">{4}</div>'
+                ].join(''),
+                param = $.isObject(opt.parameter) ? $.toJsonString(opt.parameter) : opt.parameter;
+                
             return html.format(_.getDialogId(), 
                 height, 
-                url.setUrlParam('dialog-id', _.id).setUrlParam('dialog-param', param), 
+                url.setUrlParam('dialog_id', _.id).setUrlParam('dialog_param', param), 
                 opt.iframeScroll || opt.iframeScrolling ? 'auto' : 'no',
                 opt.loading || Common.getDialogText('Loading', opt.lang));
         },
