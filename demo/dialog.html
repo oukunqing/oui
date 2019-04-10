@@ -229,6 +229,8 @@ function confirm2(){
         type: 'confirm',
         //closeType: 'hide',
         delayClose: true,
+        //clickBgClose: true,
+        closeType: 'hide',
         //redirect: 'http://www.baidu.com',
         //target: 'http://www.baidu.com',
         /*
@@ -284,6 +286,7 @@ function win(){
         type: 'win',
         position: 5,
         width: 'auto',
+        closeType: 'hide',
         content: 'http://122.227.179.90:81<br />hello world<br />您好<br />大家好啊',
         styles: {
             //body: {border: 'solid 1px #eee;', 'border-radius':'4px;'},
@@ -475,28 +478,35 @@ function load2(id){
 function msg(isFixWidth){
     var win = $.dialog.msg('msg: Message提示信息演示' + (isFixWidth ? '(固定宽度)' : ''), {
         id: 'msg', autoClose: false, closeTiming: 15000, fixed: false,
-        position: 'bottomleft', 
+        //position: 'bottomleft', 
+        position: 5, 
         //shadow: false,
-        lock: false, clickBgClose: true, y: 5, x: 0,
+        lock: false, 
+        clickBgClose: true, 
+        y: 5, x: 0,
         //width: 300,
-        target: $I('txtTips'),
-        parent: $I('p2'),
+        //target: $I('txtTips'),
+        //parent: $I('p2'),
         //icon: 'cry',
         //icon: 'sad',
         //icon: 'smile',
-        icon: isFixWidth ? 'happy' : 'sad',
+        //icon: isFixWidth ? 'happy' : 'sad',
+        icon: 'loading',
+        closeType: 'hide',
         closeIcon: 0,   //0,1,2,3 若不指定则采用默认的样式
         dragSize: false,
         callback: function() {
             console.log('msg close');
         }
     });
-    console.log(win.getOptions());
+    //win.update('更新了', {clickBgClose: true});
+    //console.log(win.getOptions());
     window.setTimeout(function() {
+        //win.show();
         //win.update('请注意：提示信息改变了。请注意：提示信息改变了', {width:'auto'});
         //win.update('请注意：提示信息改变了。请注意：提示信息改变了', '', 'autosize');
-        win.update('Message提示信息演示：可以固定宽度高度，也可以自适应宽度高度。', '', isFixWidth ? 'autoheight' : 'autosize');
-    }, 3000);
+        //win.update('Message提示信息演示：可以固定宽度高度，也可以自适应宽度高度。', '', isFixWidth ? 'autoheight' : 'autosize');
+    }, 5000);
 }
 
 function tips(){

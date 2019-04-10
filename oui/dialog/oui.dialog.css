@@ -276,36 +276,40 @@
     display: none;
 }
 
-.oui-dialog .dialog-body .icon-warning{
+.oui-dialog .dialog-body .icon-warning {
     background: url('imgs/icon.png') no-repeat 0px -60px;
 }
 
-.oui-dialog .dialog-body .icon-error{
+.oui-dialog .dialog-body .icon-error {
     background: url('imgs/icon.png') no-repeat -40px -60px;
 }
 
-.oui-dialog .dialog-body .icon-stop{
+.oui-dialog .dialog-body .icon-stop {
     background: url('imgs/icon.png') no-repeat -80px -60px;
 }
 
-.oui-dialog .dialog-body .icon-success{
+.oui-dialog .dialog-body .icon-success {
     background: url('imgs/icon.png') no-repeat -120px -60px;
 }
 
-.oui-dialog .dialog-body .icon-question{
+.oui-dialog .dialog-body .icon-question {
     background: url('imgs/icon.png') no-repeat -160px -60px;
 }
 
-.oui-dialog .dialog-body .icon-info{
+.oui-dialog .dialog-body .icon-info {
     background: url('imgs/icon.png') no-repeat -200px -60px;
 }
 
-.oui-dialog .dialog-body .icon-cry{
+.oui-dialog .dialog-body .icon-cry {
     background: url('imgs/icon.png') no-repeat -240px -60px;
 }
 
-.oui-dialog .dialog-body .icon-smile{
+.oui-dialog .dialog-body .icon-smile {
     background: url('imgs/icon.png') no-repeat -280px -60px;
+}
+
+.oui-dialog .dialog-body .icon-loading {
+    background: url('imgs/loading.gif') no-repeat center;
 }
 
 .oui-dialog .dialog-head .dialog-icon,.oui-dialog .dialog-head .dialog-icon:hover {
@@ -314,35 +318,35 @@
     height: 20px;
 }
 
-.oui-dialog .dialog-head .icon-warning{
+.oui-dialog .dialog-head .icon-warning {
     background: url('imgs/icon.png') no-repeat -160px 0;
 }
 
-.oui-dialog .dialog-head .icon-error{
+.oui-dialog .dialog-head .icon-error {
     background: url('imgs/icon.png') no-repeat -180px 0;
 }
 
-.oui-dialog .dialog-head .icon-stop{
+.oui-dialog .dialog-head .icon-stop {
     background: url('imgs/icon.png') no-repeat -200px 0;
 }
 
-.oui-dialog .dialog-head .icon-success{
+.oui-dialog .dialog-head .icon-success {
     background: url('imgs/icon.png') no-repeat -220px 0;
 }
 
-.oui-dialog .dialog-head .icon-question{
+.oui-dialog .dialog-head .icon-question {
     background: url('imgs/icon.png') no-repeat -240px 0;
 }
 
-.oui-dialog .dialog-head .icon-info{
+.oui-dialog .dialog-head .icon-info {
     background: url('imgs/icon.png') no-repeat -260px 0;
 }
 
-.oui-dialog .dialog-head .icon-cry{
+.oui-dialog .dialog-head .icon-cry {
     background: url('imgs/icon.png') no-repeat -280px 0;
 }
 
-.oui-dialog .dialog-head .icon-smile{
+.oui-dialog .dialog-head .icon-smile {
     background: url('imgs/icon.png') no-repeat -300px 0;
 }
 
@@ -365,7 +369,7 @@
     top: 0; left: 0; bottom: 0; right: 0;
 }
 
-.oui-dialog .dialog-body .dialog-loading{
+.oui-dialog .dialog-body .dialog-loading {
     color: #666;
     border-radius: 3px;
     border: solid 1px #ddd;

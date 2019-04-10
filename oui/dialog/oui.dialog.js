@@ -156,7 +156,8 @@
             cry: 'cry',
             sad: 'cry',
             smile: 'smile',
-            happy: 'smile'
+            happy: 'smile',
+            loading: 'loading'
         },
         ButtonConfig: {
             None: { key: 'None', text: '\u5173\u95ed', result: 0, skey: '', css: 'btn-default' },
@@ -329,6 +330,17 @@
             if($.isUndefined(opt.parameter) && !$.isUndefined(opt.param)) {
                 opt.parameter = opt.param;
             }
+
+            if($.isBoolean(opt.clickBgClose)) {
+                if(opt.clickBgClose) {
+                    opt.clickBgClose = 'click';
+                }
+            } else {
+                if(!('' + opt.clickBgClose).toLowerCase().in(['dblclick', 'click'])) {
+                    opt.clickBgClose = false;
+                }
+            }
+
             return this.checkCustomStyle(opt, isUpdate).checkTiming(opt), opt;
         },
         getCssAttrSize: function(val, options) {
@@ -632,8 +644,9 @@
         },
         setClickDocClose: function (id, eventName) {
             var _ = this;
-            Cache.docCloses[eventName].push(id);
-
+            if(Cache.docCloses[eventName].indexOf(id) < 0) {
+                Cache.docCloses[eventName].push(id);
+            }
             if (_.isRepeat('doc' + eventName)) {
                 return _;
             }
@@ -641,7 +654,7 @@
                 var list = Cache.docCloses[eventName], ts = new Date().getTime();
                 for (var i = list.length - 1; i >= 0; i--) {
                     var p = Factory.getOptions(list[i]) || {}, d = p.dialog;
-                    if (d && !d.isClosed() && _.allowClose(ts, p.buildTime)) {
+                    if (d && !d.isClosed() && !d.isHide() && _.allowClose(ts, p.buildTime)) {
                         list.splice(i, 1);
                         d.close();
                         break;
@@ -732,7 +745,7 @@
                 this.initCache(opt.id, null);
                 d = new Dialog(opt.content, opt.title, opt);
             } else {
-                d.update(opt.content, opt.title, opt);
+                d.update(opt.content, opt.title, opt).show();
             }
 
             return d;
@@ -849,6 +862,9 @@
                     .buildContainer(_);
             }
 
+            //设置创建时间，防止被document事件关闭
+            p.buildTime = new Date().getTime();
+
             util.buildDialog(_)
                 .buildMain(_, ctls.dialog)
                 .buildHead(_, ctls.main, false)
@@ -920,7 +936,8 @@
         setClickBgClose: function (_) {
             var p = this.getParam(_), opt = p.options, ctls = p.controls;
             if(p.none) { return this; }
-            if (!('' + opt.clickBgClose).toLowerCase().in(['dblclick', 'click'])) {
+
+            if (!opt.clickBgClose) {
                 return this;
             }
             if (opt.lock && ctls.container) {
@@ -964,6 +981,7 @@
             ctls.dialog.className = 'oui-dialog';
             ctls.dialog.style.zIndex = opt.zindex;
             ctls.dialog.id = _.getDialogId();
+
             if ((css = Common.toCssText(opt.styles.dialog, 'dialog'))) {
                 ctls.dialog.style.cssText = css;
             }
@@ -1221,7 +1239,7 @@
                     '<div id="{0}-loading" class="dialog-loading">{4}</div>'
                 ].join(''),
                 param = $.isObject(opt.parameter) ? $.toJsonString(opt.parameter) : opt.parameter;
-                
+
             return html.format(_.getDialogId(), 
                 height, 
                 url.setUrlParam('dialog_id', _.id).setUrlParam('dialog_param', param), 
@@ -2842,7 +2860,7 @@
                 content: null,          //文字内容
                 url: null,              //加载的URL
                 element: null,          //Element 要加载内容的html控件
-                icon: '',               //Icon图标  info, warning, question, error, success
+                icon: '',               //Icon图标  info, warning, question, error, success, loading
                 loading: '',            //loading提示文字
                 position: 5,            //对话框初始位置, 0,1,2,3,4,5,6,7,8,9，共10种位置设置
                 x: 0,                   //x轴(left)偏移量，单位：px
@@ -2914,15 +2932,11 @@
                 opt.title = Common.getDialogText('Title', opt.lang);
             }
 
-            if($.isBoolean(opt.clickBgClose)) {
-                opt.clickBgClose = opt.clickBgClose ? 'click' : '';
-            }
-
             if (!opt.showHead && !opt.showFoot && !opt.lock &&
                 $.isBoolean(opt.closeAble, true) &&
                 opt.type !== Config.DialogType.Tooltip) {
                 opt.escClose = true;
-                opt.clickBgClose = opt.clickBgClose || 'click';
+                //opt.clickBgClose = opt.clickBgClose || 'click';
                 //没有标题没有底部的消息框，设置内容边距为1px
                 opt.contentStyle = $.extend({'padding': '1px'}, opt.contentStyle);
             }
@@ -2937,7 +2951,7 @@
                     .setOptions(id, 'dialogId', Common.buildId(id, 'd-'));
             }
 
-            return Util.build(this, opt), p.buildTime = new Date().getTime(), this;
+            return Util.setOptions(this, 'options', opt).build(this, opt), this;
         },
         getOptions: function(key) {
             var opt = $.extend({}, Factory.getOptions(this.id, 'options'));
@@ -3017,6 +3031,10 @@
                 .showDialog(p.controls, true, content, title)
                 .setBodySize(_, {event: 'show', lastSize: p.hideSize});
 
+            if(!p.options.lock) {
+                Util.setClickBgClose(_);
+            }
+
             return _;
         },
         hide: function (action, dialogResult) {
@@ -3094,6 +3112,9 @@
             var opt = Common.checkOptions(content, title, options, true);
             var _ = this, p = Util.getParam(_), ctls = p.controls;
 
+            //设置创建时间，防止被document事件关闭
+            p.buildTime = new Date().getTime();
+
             if(opt.type && !opt.buttons) {
                 opt.buttons = Common.getDialogButtons(opt.type);
             }
@@ -3120,6 +3141,7 @@
                 }
                 if(isMin) {
                     Util.setSize(_, {type: Config.DialogStatus.Normal});
+                    Util.setPosition(_);
                 }
                 Util.buildContent(_, true).setBodySize(_).setCache(_);
 
@@ -3128,7 +3150,11 @@
                 }
 
                 if (isAutoSize) {
-                    Util.setPosition(_);
+                    window.setTimeout(function() { Util.setPosition(_); }, 10);
+                }
+
+                if(!p.options.lock) {
+                    Util.setClickBgClose(_);
                 }
             }
             return _;
