@@ -130,6 +130,7 @@
             ['Yes', 'No'],
             ['Retry', 'Cancel']
         ],
+        /*
         DialogIcons: {
             None: 0,
             Hand: 16,
@@ -139,7 +140,28 @@
             Exclamation: 48,
             Warning: 48,
             Asterisk: 64,
-            Infomation: 64
+            Infomation: 64,
+            Loading: 
+        },
+        */
+        DialogIcons: {
+            None: '',
+            Hand: 'hand',
+            Stop: 'stop',
+            Error: 'error',
+            Question: 'question',
+            Exclamation: 'warning',
+            Warning: 'warning',
+            Asterisk: 'info',
+            Infomation: 'info',
+            Info: 'info',
+            Success: 'success',
+            Failed: 'warning',
+            Smile: 'smile',
+            Happy: 'smile',
+            Cry: 'cry',
+            Sad: 'cry',
+            Loading: 'loading'
         },
         DialogIconKeys: {
             hand: 'error',
@@ -157,7 +179,7 @@
             sad: 'cry',
             smile: 'smile',
             happy: 'smile',
-            loading: 'loading'
+            loading: 'loading',
         },
         ButtonConfig: {
             None: { key: 'None', text: '\u5173\u95ed', result: 0, skey: '', css: 'btn-default' },
@@ -505,6 +527,8 @@
                 controls: {},
                 btns: {},
                 buttons: {},
+                defaultButton: '',
+                buttonCallback: {},         //自定义按钮回调函数
                 icon: undefined,
                 closed: false,
                 hid: false,
@@ -1311,11 +1335,22 @@
         buildButtons: function(_) {
             var p = this.getParam(_), opt = p.options, ctls = p.controls;
             if(p.none) { return this; }
-            var keys = Config.DialogButtons, html = [];
-            if (!$.isNumber(opt.buttons) || opt.buttons < 0) {
+
+            var keys = [], codes = [], html = [], txts = {}, i = 0, tabindex = 1, isCustom = false;
+
+            if($.isArray(opt.buttons) && opt.buttons.length > 0) {
+                keys = opt.buttons;
+            } else if($.isNumber(opt.buttons) && opt.buttons >= 0) {
+                keys = Config.ButtonMaps[opt.buttons];
+            } else if($.isObject(opt.buttons)) {
+                isCustom = true;
+                keys = opt.buttons;
+            }
+
+            if(keys.length <= 0) {
                 return '';
             }
-            var keys = Config.ButtonMaps[opt.buttons], txts = {}, tabindex = 1;
+
             //自定义按钮文字
             if($.isObject(opt.buttonText)) {
                 txts = opt.buttonText;
@@ -1323,18 +1358,51 @@
                 txts = {OK: opt.buttonText};
             }
 
-            for (var i in keys) {
-                var config = Config.ButtonConfig[keys[i]], css = i > 0 ? ' btn-ml' : '';
-
-                //根据语言获取相应的按钮文字
-                config.text = Common.getButtonText(config.key, opt.lang) || config.text;
-
-                //启用外部参数中的按钮文字
-                $.extend(config, {text: txts[config.code]});
+            for (var k in keys) {
+                var config = {}, key = '', txt = '', func = null;
+                if(isCustom) {
+                    config = Config.ButtonConfig[k], css = i > 0 ? ' btn-ml' : '';
+                    if($.isString(keys[k])) {
+                        txt = keys[k];
+                    } else if($.isObject(keys[k])) {
+                        txt = keys[k].text || '';
+                        func = keys[k]['callback'];
+                    } else if($.isFunction(keys[k])) {
+                        func = keys[k];
+                    }
+                    config.text = txt || config.text;
+                    key = k;
+                    //设置按钮自定义回调函数
+                    if($.isFunction(func)) {
+                        p.buttonCallback[key] = func;
+                    }
+                } else {
+                    config = Config.ButtonConfig[keys[k]], css = i > 0 ? ' btn-ml' : '';
+                    //根据语言获取相应的按钮文字
+                    config.text = Common.getButtonText(config.key, opt.lang) || config.text;
+                    //启用外部参数中的按钮文字
+                    $.extend(config, {text: txts[config.key]});
+                    key = keys[k];
+                }
 
                 if (config) {
-                    text = '<a class="dialog-btn {css}{1}" code="{key}" result="{result}" href="{{0}}" tabindex="{2}" shortcut-key="{skey}">{text}</a>';
+                    text = '<a class="dialog-btn {css}{1}" code="{key}" result="{result}" href="{{0}}"'
+                        + ' tabindex="{2}" shortcut-key="{skey}">{text}</a>';
                     html.push(text.format(config, css, tabindex++));
+
+                    codes.push(key);
+                }
+                i++;
+            }
+            //设置默认按钮
+            if($.isString(opt.defaultButton, true)) {
+                if(codes.indexOf(opt.defaultButton) >= 0) {
+                    p.defaultButton = opt.defaultButton;
+                }
+            } else if($.isNumber(opt.defaultButton)) {
+                var db = codes[opt.defaultButton] || '';
+                if(db) {
+                    p.defaultButton = db;
                 }
             }
             return html.join('').format('javascript:void(0);');
@@ -2660,7 +2728,8 @@
             return ok || cancel ? {callback: callback, ok: ok, cancel: cancel} : undefined;
         },
         callback: function (_, opt, actions) {
-            var func = this.checkCallback(opt);
+            var p = Util.getParam(_),
+                func = this.checkCallback(opt);
             if(!func || !$.isObject(actions)) {
                 return this;
             }
@@ -2672,6 +2741,10 @@
             dr[code] = dr[code.toLowerCase()] = true;
             dr['key'] = code;
             dr['value'] = result;
+
+            if($.isFunction(p.buttonCallback[code])) {
+                return p.buttonCallback[code](dr, _), this;
+            }
 
             if ([Config.DialogResult.OK, Config.DialogResult.Yes].indexOf(result) >= 0) {
                 func.ok && func.ok(dr, _, parameter);
@@ -2902,6 +2975,7 @@
                 buttons: Config.DialogButtons.OKCancel,               //按钮类型编码
                 buttonPosition: Config.Position.Center,               //按钮位置 left center right
                 buttonText: null,       // {OK: '确定', Cancel: '取消'}  ｛OK: '提交'}
+                defaultButton: '',      //默认按钮，数字（按顺序），字符串（按编码）
                 showHead: true,         //是否显示顶部标题栏 
                 showLogo: true,         //是否显示logo图标
                 showMin: true,          //是否显示最小化按钮
@@ -3195,6 +3269,12 @@
             if (p.none) {
                 return _;
             }
+            var dbKey = p.defaultButton;
+            if(dbKey && buttons[dbKey]) {
+                buttons[dbKey].focus();
+                return _;
+            }
+
             if ($.isElement(obj)) {
                 return obj.focus(), _;
             } else if (!_.isClosed()) {
@@ -3278,9 +3358,26 @@
     };
 
     $.extend({
-        DialogType: Config.DialogType,
-        DialogButtons: Config.DialogButtons
+        DialogButtons: $.extend({}, Config.DialogButtons),
+        DialogType: $.extend({}, Config.DialogType),
+        DialogIcon: $.extend({}, Config.DialogIcons),
+        DialogButtonKey: (function() {
+            var keys = {};
+            for(var k in Config.ButtonConfig) {
+                if(k !== 'None') {
+                    keys[k] = k;
+                }
+            }
+            return keys;
+        })()
     });
+
+    if($.getQueryString(location.href, 'dialog_help')) {
+        console.log('$.DialogType: ', $.DialogType);
+        console.log('$.DialogIcon: ', $.DialogIcon);
+        console.log('$.DialogButtons: ', $.DialogButtons);
+        console.log('$.DialogButtonKey: ', $.DialogButtonKey);
+    }
 
     $.extend({
         dialog: function (content, title, options) {

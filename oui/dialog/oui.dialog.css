@@ -50,7 +50,7 @@
     border-radius: 0px;
     box-sizing: border-box;
     top: 0; left: 0;
-    border: none 0;
+    /*border: none 0;*/
 }
 
 .oui-dialog-min {

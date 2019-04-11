@@ -30,6 +30,7 @@
     <button onclick="confirm2();">Confirm</button>
     <button onclick="win();">Win</button>
     <button onclick="form2();">Form</button>
+    <button onclick="buttons();">Button</button>
     <br />
     <button onclick="iframe();">Iframe</button>
     <button onclick="load();">Load</button>
@@ -285,6 +286,25 @@ function confirm2(){
     }, 2000);
 }
 
+function buttons() {
+    $.confirm('确定要保存吗？', '保存', {
+        //buttons: $.DialogButtons.YesNoCancel,
+        //buttons: ['Cancel', 'OK'],
+        //buttons: { Cancel: '取消', OK: '确认提交', Close: '关闭' },
+        buttons: { Cancel: '取消', OK: {text:'确认提交', callback: function(){
+            console.log('这是自定义的按钮回调函数')
+        }}, Close: '关闭' },
+        //defaultButton: 1,
+        defaultButton: 'Cancel',
+        //icon: $.DialogIcons.Warning,
+        //icon: $.DialogIcons.Loading,
+        icon: 'loading',
+        callback: function(dialogResult, d) {
+            console.log('dialogResult: ', dialogResult);
+        }
+    });
+}
+
 function win(){
     var win = $.dialog.win({
         //content:'这是普通窗口模式',
@@ -510,7 +530,7 @@ function msg(isFixWidth){
         //win.show();
         //win.update('请注意：提示信息改变了。请注意：提示信息改变了', {width:'auto'});
         //win.update('请注意：提示信息改变了。请注意：提示信息改变了', '', 'autosize');
-        //win.update('Message提示信息演示：可以固定宽度高度，也可以自适应宽度高度。', '', isFixWidth ? 'autoheight' : 'autosize');
+        win.update('Message提示信息演示：可以固定宽度高度，也可以自适应宽度高度。', '', isFixWidth ? 'autoheight' : 'autosize');
     }, 5000);
 }
 
@@ -646,7 +666,7 @@ console.log($.Pagination);
 function paging(){
     var node = $.loadJsScript('../oui/pagination/oui.pagination.min.js', function(){
         console.log('分页');
-        var p1 = new OUI.Pagination({
+        var p1 = $.pagination({
             parent: $('#p1')[0],
             dataCount: 11912,
             markCount: 10,
