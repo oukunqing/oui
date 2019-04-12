@@ -213,6 +213,25 @@
             }
             return false;
         },
+        isChildFocus: function(elem, parent) {
+            if($.isString(elem, true)) {
+                elem = document.getElementById(elem.replace('#', ''));
+            }
+            if(!$.isElement(elem) || elem === parent || elem.disabled
+                || !this.isInKeys(elem.tagName, ['A', 'INPUT', 'BUTTON', 'SELECT', 'TEXTAREA'])
+                || $.getElementStyle(elem, 'display') === 'none'
+                || $.getElementStyle(elem, 'visibility') === 'hidden') {
+                return false;
+            }
+            var pNode = elem.parentNode;
+            while(pNode) {
+                if(pNode === parent) {
+                    return elem.focus(), true;
+                }
+                pNode = pNode.parentNode;
+            }
+            return false;
+        },
         getDialogText: function(key, lang) {
             var txt = Config.DialogText[key];
             if(txt) {
@@ -1301,8 +1320,10 @@
             elem.appendChild((ctls.buttonPanel = panel));
 
             for (var i = 0; i < panel.childNodes.length; i++) {
-                var obj = panel.childNodes[i], key = obj.getAttribute('code');
-                buttons[key] = obj;
+                var obj = panel.childNodes[i],
+                    code = obj.getAttribute('code'),
+                    key = obj.getAttribute('key');
+                buttons[code || key] = obj;
             }
             $.addListener(elem, ['mousedown','dblclick', 'click'], function () {
                 $.cancelBubble();
@@ -1344,8 +1365,6 @@
                 txts = {ok: opt.buttonText};
             }
 
-            console.log('keys: ', keys);
-
             for (var k in keys) {
                 var config = {}, key = '', code = '', txt = '', 
                     func = null, par = null,
@@ -1368,6 +1387,10 @@
                         key = (cfg.key || key).toLowerCase();
                         func = cfg['callback'] || cfg['func'];
                         par = cfg['parameter'] || cfg['param'];
+                        //若自定义按钮指定了默认选项，则该按钮为默认按钮
+                        if($.isBoolean(cfg['default'], false)) {
+                            opt.defaultButton = code;
+                        }
                         if(!config) {
                             config = Config.CustomButtonConfig(k.toLowerCase(), cfg);
                         }
@@ -2074,7 +2097,9 @@
             return this;
         },
         setFinalPosition: function() {
+            //TODO:
 
+            return this;
         },
         setTargetPosition: function(options, obj, isFixedSize) {
             var par = $.extend({
@@ -3337,25 +3362,25 @@
         },
         focus: function (obj) {
             var _ = this, p = Util.getParam(_), buttons = p.buttons;
-            if (p.none) {
+            if (p.none || _.isClosed() || _.isHide()) {
                 return _;
             }
+
+            if (Common.isChildFocus(obj, p.controls.dialog)) {
+                return _;
+            }
+
             var dbKey = p.defaultButton;
             if(dbKey && buttons[dbKey]) {
                 buttons[dbKey].focus();
                 return _;
             }
 
-            if ($.isElement(obj)) {
-                return obj.focus(), _;
-            } else if (!_.isClosed()) {
-                var btn = null;
-                for (var k in buttons) {
-                    btn = buttons[k];
-                }
-                return btn && btn.focus(), _;
+            var btn = null;
+            for (var k in buttons) {
+                btn = buttons[k];
             }
-            return _;
+            return btn && btn.focus(), _;
         },
         min: function () {
             return Util.setSize(this, { type: Config.DialogStatus.min });

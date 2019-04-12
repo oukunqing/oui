@@ -5,9 +5,13 @@
     <title>对话框插件测试</title>
     <style type="text/css">
         body{line-height: 1.8em;}
+        .dis-none{
+            /*display:none;*/
+            /*visibility: hidden;*/
+        }
     </style>
     <script type="text/javascript" src="../oui/oui.js?1"></script>
-    <script type="text/javascript" src="../oui/dialog/oui.dialog.js?1234"></script>
+    <script type="text/javascript" src="../oui/dialog/oui.dialog.js?1"></script>
 </head>
 <body>
     <div id="p1"></div>
@@ -287,17 +291,25 @@ function confirm2(){
 }
 
 function buttons() {
-    $.dialog('确定要保存吗？', '保存', {
+    var html = '自定义按钮示例：'
+        + '<br />'
+        + '<input type="text" id="txtKeywords" class="dis-none" />';
+    var win = $.dialog(html, '自定义按钮', {
         //buttons: $.DialogButtons.YesNoCancel,
         //buttons: ['cancel', 'ok'],
         //buttons: { cancel: '取消', ok: '确认提交', close: '关闭' },
+        //默认按钮（全局变量）
+        //defaultButton: 1,
+        defaultButton: 'cancel',
         buttons: { 
             cancel: '取消', 
             ok: {
                 text:'确认提交', 
                 callback: function(dialogResult, d, param){
                     console.log('这是按钮[ok]自定义的回调函数\r\ndialogResult: ', dialogResult, ', param: ', param, new Date().getTime());
-                }
+                },
+                //设为默认按钮，若自定义按钮设为默认按钮，则全局变量中的defaultButton设置无效
+                //default: true
             }, 
             close: '关闭', 
             custom: {
@@ -311,13 +323,13 @@ function buttons() {
                 //自定义的快捷键（与shift组合使用）
                 skey: 'C',
                 //自定义的按钮样式
-                css: 'btn-primary'
+                css: 'btn-primary',
+                //设为默认按钮
+                //default: true
             } 
         },
         //这是对话框回调参数
         parameter: { id: 1, name: 'test' },
-        //defaultButton: 1,
-        defaultButton: 'cancel',
         //icon: $.DialogIcons.Warning,
         //icon: $.DialogIcons.Loading,
         width: 500,
@@ -330,6 +342,11 @@ function buttons() {
             console.log('dialogResult: ', dialogResult, ', param: ', param);
         }
     });
+
+    window.setTimeout(function() {
+        console.log('set focus: txtKeywords');
+        win.focus('txtKeywords');
+    }, 3000);
 }
 
 function win(){
