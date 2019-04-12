@@ -723,12 +723,12 @@
             elements = $f.setFormVerify(element, options, elements);
 
             //设置定时器，防抖
-            var timer = null, first = true, lastSubmit = undefined,
+            var timer = null, lastSubmit = undefined,
                 isFirst = function() {
                     var ts = new Date().getTime();
                     //上次点击若超过5秒钟，则不启用延时
                     if(!lastSubmit || (ts - lastSubmit > timeLimit)) {
-                        return lastSubmit = ts, first = true, true;
+                        return lastSubmit = ts, true;
                     }
                     return false;
                 },

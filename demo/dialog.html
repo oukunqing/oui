@@ -7,7 +7,7 @@
         body{line-height: 1.8em;}
     </style>
     <script type="text/javascript" src="../oui/oui.js?1"></script>
-    <script type="text/javascript" src="../oui/dialog/oui.dialog.js?123"></script>
+    <script type="text/javascript" src="../oui/dialog/oui.dialog.js?1234"></script>
 </head>
 <body>
     <div id="p1"></div>
@@ -135,9 +135,9 @@ function alert2(){
         callback: function(dialogResult, d, param) {
             console.log(dialogResult, d, param);
             if(dialogResult.OK || dialogResult.Yes) {
-                alert('OK');
+                alert('ok');
             } else if(dialogResult.Cancel) {
-                alert('Cancel');
+                alert('cancel');
             }
         },
         param: {id:123, name:'Tom'},
@@ -154,7 +154,7 @@ function alert2(){
     //console.log('dialog: ', dialog);
     
     window.setTimeout(function(){
-        dialog.setOptions('icon', '');
+        dialog.setOptions('icon23', '');
         dialog.resize({
             dir: 'bottom-right',
             x: 40,
@@ -217,7 +217,7 @@ function confirm2(){
         icon: 'question',
         cancelBubble: true,
         buttonPosition: 'right',
-        buttonText: {OK: '提交', Cancel: '算了'},
+        buttonText: {ok: '提交', cancel: '算了'},
         position: 5,
         //position: 'righttop',
         lock: true,
@@ -287,20 +287,47 @@ function confirm2(){
 }
 
 function buttons() {
-    $.confirm('确定要保存吗？', '保存', {
+    $.dialog('确定要保存吗？', '保存', {
         //buttons: $.DialogButtons.YesNoCancel,
-        //buttons: ['Cancel', 'OK'],
-        //buttons: { Cancel: '取消', OK: '确认提交', Close: '关闭' },
-        buttons: { Cancel: '取消', OK: {text:'确认提交', callback: function(){
-            console.log('这是自定义的按钮回调函数')
-        }}, Close: '关闭' },
+        //buttons: ['cancel', 'ok'],
+        //buttons: { cancel: '取消', ok: '确认提交', close: '关闭' },
+        buttons: { 
+            cancel: '取消', 
+            ok: {
+                text:'确认提交', 
+                callback: function(dialogResult, d, param){
+                    console.log('这是按钮[ok]自定义的回调函数\r\ndialogResult: ', dialogResult, ', param: ', param, new Date().getTime());
+                }
+            }, 
+            close: '关闭', 
+            custom: {
+                key: 'ok',      //这是自定义按钮的key，关于key的说明，具体参看 $.DialogButtonKey
+                text:'自定义', 
+                callback: function(dialogResult, d, param) {
+                    console.log('这是自定义按钮[custom]的回调函数\r\ndialogResult: ', dialogResult, ', param: ', param, new Date().getTime());
+                },
+                //这是自定义按钮的自定义参数
+                parameter: {id: 123, key: 'abc'},
+                //自定义的快捷键（与shift组合使用）
+                skey: 'C',
+                //自定义的按钮样式
+                css: 'btn-primary'
+            } 
+        },
+        //这是对话框回调参数
+        parameter: { id: 1, name: 'test' },
         //defaultButton: 1,
-        defaultButton: 'Cancel',
+        defaultButton: 'cancel',
         //icon: $.DialogIcons.Warning,
         //icon: $.DialogIcons.Loading,
+        width: 500,
+        height: 200,
+        //是否延迟关闭（延迟到回调函数内），针对 OK 或 Yes 有效
+        delayClose: true,
         icon: 'loading',
-        callback: function(dialogResult, d) {
-            console.log('dialogResult: ', dialogResult);
+        //这是默认的回调函数
+        callback: function(dialogResult, d, param) {
+            console.log('dialogResult: ', dialogResult, ', param: ', param);
         }
     });
 }

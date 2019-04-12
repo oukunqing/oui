@@ -39,29 +39,6 @@
             Chinese: 'chinese',
             English: 'english'
         },
-        DialogType: {
-            Dialog: 'dialog',
-            Alert: 'alert',
-            Confirm: 'confirm',
-            Form: 'form',
-            Win: 'win',
-            Window: 'window',
-            Iframe: 'iframe',
-            Url: 'url',
-            Load: 'load',
-            Tooltip: 'tooltip',
-            Tips: 'tips',
-            Message: 'message',
-            Msg: 'msg',
-            Info: 'info'
-        },
-        DialogStatus: {
-            Close: 'close',
-            Max: 'max',
-            Min: 'min',
-            Normal: 'normal',
-            Tooltip: 'tooltip'
-        },
         Position: {
             Top: 'top',
             Right: 'right',
@@ -85,6 +62,29 @@
             LeftBottom: 'bottom-left',
             Center: 'center'
         },
+        DialogType: {
+            dialog: 'dialog',
+            alert: 'alert',
+            confirm: 'confirm',
+            form: 'form',
+            win: 'win',
+            window: 'window',
+            iframe: 'iframe',
+            url: 'url',
+            load: 'load',
+            tooltip: 'tooltip',
+            tips: 'tips',
+            message: 'message',
+            msg: 'msg',
+            info: 'info'
+        },
+        DialogStatus: {
+            close: 'close',
+            max: 'max',
+            min: 'min',
+            normal: 'normal',
+            tooltip: 'tooltip'
+        },
         DialogStatusText: {
             min: {english: 'Minimize', chinese: '\u6700\u5c0f\u5316'},                  //最小化
             max: {english: 'Maximize', chinese: '\u6700\u5927\u5316'},                  //最大化
@@ -92,26 +92,26 @@
             restore: {english: 'Restore', chinese: '\u8fd8\u539f'}                      //还原
         },
         CloseType: {
-            Close: 'close',
-            Child: 'child',
-            Code: 'code'
+            close: 'Close',
+            child: 'Child',
+            code: 'Code'
         },
         DialogResult: {
-            Close: 0,
-            OK: 1,
-            Cancel: 2,
-            Abort: 3,
-            Retry: 4,
-            Ignore: 5,
-            Yes: 6,
-            No: 7,
-            Child: 8,
-            Code: 9
+            close: 0,
+            ok: 1,
+            cancel: 2,
+            abort: 3,
+            retry: 4,
+            ignore: 5,
+            yes: 6,
+            no: 7,
+            child: 8,
+            code: 9
         },
         DefaultResult: {
-            'close': { code: 'Close', result: 0 },
-            'child': { code: 'Child', result: 8 },
-            'code': { code: 'Code', result: 9 }
+            'close': { key: 'close', code: 'close', result: 0 },
+            'child': { key: 'child', code: 'child', result: 8 },
+            'code': { key: 'code', code: 'code', result: 9 }
         },
         DialogButtons: {
             None: -1,
@@ -123,47 +123,15 @@
             RetryCancel: 5
         },
         ButtonMaps: [
-            ['OK'],
-            ['OK', 'Cancel'],
-            ['Abort', 'Retry', 'Ignore'],
-            ['Yes', 'No', 'Cancel'],
-            ['Yes', 'No'],
-            ['Retry', 'Cancel']
+            ['ok'],
+            ['ok', 'cancel'],
+            ['abort', 'retry', 'ignore'],
+            ['yes', 'no', 'cancel'],
+            ['yes', 'no'],
+            ['retry', 'cancel']
         ],
-        /*
-        DialogIcons: {
-            None: 0,
-            Hand: 16,
-            Stop: 16,
-            Error: 16,
-            Question: 32,
-            Exclamation: 48,
-            Warning: 48,
-            Asterisk: 64,
-            Infomation: 64,
-            Loading: 
-        },
-        */
-        DialogIcons: {
-            None: '',
-            Hand: 'hand',
-            Stop: 'stop',
-            Error: 'error',
-            Question: 'question',
-            Exclamation: 'warning',
-            Warning: 'warning',
-            Asterisk: 'info',
-            Infomation: 'info',
-            Info: 'info',
-            Success: 'success',
-            Failed: 'warning',
-            Smile: 'smile',
-            Happy: 'smile',
-            Cry: 'cry',
-            Sad: 'cry',
-            Loading: 'loading'
-        },
-        DialogIconKeys: {
+        DialogIcon: {
+            none: '',
             hand: 'error',
             stop: 'stop',
             error: 'error',
@@ -182,15 +150,24 @@
             loading: 'loading',
         },
         ButtonConfig: {
-            None: { key: 'None', text: '\u5173\u95ed', result: 0, skey: '', css: 'btn-default' },
-            Close: { key: 'Close', text: '\u5173\u95ed', result: 0, skey: 'W', css: 'btn-default' },
-            OK: { key: 'OK', text: '\u786e\u5b9a', result: 1, skey: 'Y', css: 'btn-primary' },
-            Cancel: { key: 'Cancel', text: '\u53d6\u6d88', result: 2, skey: 'N', css: 'btn-default' },
-            Abort: { key: 'Abort', text: '\u4e2d\u6b62', result: 3, skey: 'A', css: 'btn-danger' },
-            Retry: { key: 'Retry', text: '\u91cd\u8bd5', result: 4, skey: 'R', css: 'btn-warning' },
-            Ignore: { key: 'Ignore', text: '\u5ffd\u7565', result: 5, skey: 'I', css: 'btn-default' },
-            Yes: { key: 'Yes', text: '\u662f', result: 6, skey: 'Y', css: 'btn-primary' },
-            No: { key: 'No', text: '\u5426', result: 7, skey: 'N', css: 'btn-default' }
+            none: { key: 'None', text: '\u5173\u95ed', result: 0, skey: '', css: 'btn-default' },
+            close: { key: 'Close', text: '\u5173\u95ed', result: 0, skey: 'W', css: 'btn-default' },
+            ok: { key: 'OK', text: '\u786e\u5b9a', result: 1, skey: 'Y', css: 'btn-primary' },
+            cancel: { key: 'Cancel', text: '\u53d6\u6d88', result: 2, skey: 'N', css: 'btn-default' },
+            abort: { key: 'Abort', text: '\u4e2d\u6b62', result: 3, skey: 'A', css: 'btn-danger' },
+            retry: { key: 'Retry', text: '\u91cd\u8bd5', result: 4, skey: 'R', css: 'btn-warning' },
+            ignore: { key: 'Ignore', text: '\u5ffd\u7565', result: 5, skey: 'I', css: 'btn-default' },
+            yes: { key: 'Yes', text: '\u662f', result: 6, skey: 'Y', css: 'btn-primary' },
+            no: { key: 'No', text: '\u5426', result: 7, skey: 'N', css: 'btn-default' }
+        },
+        CustomButtonConfig: function(code, opt) {
+            var key = (opt.key || '').toLowerCase(),
+                cfg = this.ButtonConfig[key] || {}, 
+                result = cfg.result || 0;
+            return { 
+                key: (key || 'none').toLowerCase(), text: opt.text || '',
+                result: opt.result || result, skey: opt.skey || '', css: opt.css || 'btn-default' 
+            };
         },
         ButtonText: {
             close: { english: 'Close', chinese: '\u5173\u95ed' },
@@ -227,6 +204,15 @@
         }
     },
     Common = {
+        isInKeys: function(key, keys, config) {
+            var hasConfig = $.isObject(config);
+            for(var i in keys) {
+                if((hasConfig && config[keys[i]] === key) || keys[i] === key) {
+                    return true;
+                }
+            }
+            return false;
+        },
         getDialogText: function(key, lang) {
             var txt = Config.DialogText[key];
             if(txt) {
@@ -251,13 +237,13 @@
         getDialogButtons: function(type) {
             var buttons = Config.DialogButtons.None;
             switch(type) {
-                case Config.DialogType.Alert:
+                case Config.DialogType.alert:
                     buttons = Config.DialogButtons.OK;
                     break;
-                case Config.DialogType.Confirm:
+                case Config.DialogType.confirm:
                     buttons = Config.DialogButtons.OKCancel;
                     break;
-                case Config.DialogType.Dialog:
+                case Config.DialogType.dialog:
                     buttons = Config.DialogButtons.OKCancel;
                     break;
             }
@@ -355,7 +341,7 @@
             if($.isNumeric(opt.closeIcon)) {
                 opt.closeIcon = 'close' + opt.closeIcon;
             } else {
-                opt.closeIcon = ('' + opt.closeIcon).toLowerCase();
+                opt.closeIcon = ('' + (opt.closeIcon || '')).toLowerCase();
             }
 
             if($.isUndefined(opt.parameter) && !$.isUndefined(opt.param)) {
@@ -390,20 +376,20 @@
             if (!$.isString(type, true) && !isBuild) {
                 return type;
             }
-            if ([Config.DialogType.Message, Config.DialogType.Msg].indexOf(type) >= 0) {
-                return Config.DialogType.Message;
-            } else if ([Config.DialogType.Tooltip, Config.DialogType.Tips].indexOf(type) >= 0) {
-                return Config.DialogType.Tooltip;
+            if(Common.isInKeys(type, ['message', 'msg'], Config.DialogType)) {
+                return Config.DialogType.message;
+            } else if(Common.isInKeys(type, ['tooltip', 'tips'], Config.DialogType)) {
+                return Config.DialogType.tooltip;
             }
-            return type || (isBuild ? Config.DialogType.Dialog : '');
+            return type || (isBuild ? Config.DialogType.dialog : '');
         },
         checkIcon: function(opt) {
             if(!$.isString(opt.icon, true)) {
                 return false;
             }
             var icon = ('' + opt.icon).toLowerCase();
-            if(Config.DialogIconKeys[icon]) {
-                opt.icon = Config.DialogIconKeys[icon];
+            if(Config.DialogIcon[icon]) {
+                opt.icon = Config.DialogIcon[icon];
                 return true;
             }
             return false;
@@ -528,7 +514,9 @@
                 btns: {},
                 buttons: {},
                 defaultButton: '',
-                buttonCallback: {},         //自定义按钮回调函数
+                buttonCallback: { //自定义按钮回调函数
+
+                },
                 icon: undefined,
                 closed: false,
                 hid: false,
@@ -539,6 +527,8 @@
                 actions: {},                //按钮事件
                 events: {},
                 timers: {},
+                debounceActions: {},
+                debounceTimers: {},
                 dics: {},
                 styleElement: undefined     //动态创建的css样式
             };
@@ -641,7 +631,7 @@
             if (!$.isUndefined(id)) {
                 var cache = this.getOptions(id), dialog = cache.dialog;
                 if (cache && dialog && dialog.getOptions().closeAble) {
-                    Util.setAction(dialog, Config.CloseType.Child, param);
+                    Util.setAction(dialog, Config.CloseType.child, param);
                 }
             }
             return this;
@@ -706,7 +696,7 @@
                     var d = Factory.getDialog(Cache.ids[i].id);
                     if (d && !d.isClosed()) {
                         var p = Util.getParam(d), opt = p.options;
-                        if (opt.type === Config.DialogType.Tooltip) {
+                        if (opt.type === Config.DialogType.tooltip) {
                             Util.setTooltipPosition(d);
                         } else {
                             var par = { event: 'window.resize' }, fullScreen = d.isMaximized();
@@ -729,32 +719,32 @@
             $.extend(options, { target: target });
 
             switch (opt.type) {
-                case Config.DialogType.Alert:
+                case Config.DialogType.alert:
                     opt.buttons = Config.DialogButtons.OK;
                     opt.showMin = opt.showMax = opt.maxAble = false;
                     opt.keyClose = opt.escClose = opt.clickBgClose = false;
                     opt.buttonPosition = 'right';
                     break;
-                case Config.DialogType.Confirm:
+                case Config.DialogType.confirm:
                     opt.buttons = Config.DialogButtons.OKCancel;
                     opt.showMin = opt.showMax = opt.maxAble = false;
                     opt.keyClose = opt.escClose = opt.clickBgClose = false;
                     opt.buttonPosition = 'right';
                     break;
-                case Config.DialogType.Dialog:
+                case Config.DialogType.dialog:
                     opt.height = 'auto';
                     break;
-                case Config.DialogType.Win:
+                case Config.DialogType.win:
                     opt.showFoot = $.isBoolean(options.showFoot, false);
                     opt.height = 'auto';
                     break;
-                case Config.DialogType.Form:
+                case Config.DialogType.form:
                     opt.height = 'auto';
                     opt.delayClose = true;
                     break;
-                case Config.DialogType.Url:
-                case Config.DialogType.Load:
-                case Config.DialogType.Iframe:
+                case Config.DialogType.url:
+                case Config.DialogType.load:
+                case Config.DialogType.iframe:
                     opt.showFoot = $.isBoolean(options.showFoot, false);
                     opt.codeCallback = true;
                     opt.keyClose = opt.escClose = opt.clickBgClose = false;
@@ -770,7 +760,7 @@
             var d = this.getDialog($.extend(opt, options).id);
 
             //设置 tooltip 默认位置为 right
-            if (opt.type === Config.DialogType.Tooltip && !opt.position) {
+            if (opt.type === Config.DialogType.tooltip && !opt.position) {
                 opt.position = 6; //right
             }
 
@@ -808,21 +798,13 @@
             return dialog.getOptions().id === _.getOptions().id;
         },
         isIframe: function(opt) {
-            return [
-                Config.DialogType.Url, 
-                Config.DialogType.Iframe, 
-                Config.DialogType.Load
-            ].indexOf(opt.type) >= 0;
+            return Common.isInKeys(opt.type, ['url', 'iframe', 'load'], Config.DialogType);
         },
         isSure: function(result) {
-            return [Config.DialogResult.OK, Config.DialogResult.Yes].indexOf(result) >= 0;
+            return [Config.DialogResult.ok, Config.DialogResult.yes].indexOf(result) >= 0;
         },
         isDefaultResult: function(code) {
-            return [
-                Config.CloseType.Close, 
-                Config.CloseType.Child, 
-                Config.CloseType.Code
-            ].indexOf(code) >= 0;
+            return Common.isInKeys(code, ['close', 'child', 'code'], Config.CloseType);
         },
         appendChild: function (elem, pNode) {
             return $.appendChild(pNode, elem), this;
@@ -877,15 +859,15 @@
         },
         build: function(_, options) {
             var util = this, p = Util.getParam(_), opt = p.options, ctls = p.controls;
-            var status = opt.status || Config.DialogStatus.Normal;
+            var status = opt.status || Config.DialogStatus.normal;
 
             opt.type = Common.checkType(opt.type, true);
 
-            if(status !== Config.DialogStatus.Normal) {
-                opt.status = Config.DialogStatus.Normal;
+            if(status !== Config.DialogStatus.normal) {
+                opt.status = Config.DialogStatus.normal;
             }
 
-            if (opt.type === Config.DialogType.Tooltip) {
+            if (opt.type === Config.DialogType.tooltip) {
                 //不需要遮罩层
                 opt.lock = false;
                 return util.buildTooltip(_, options), util;
@@ -960,7 +942,7 @@
             }
 
             //初始最小化或最大化对话框
-            if([Config.DialogStatus.Min, Config.DialogStatus.Max].indexOf(status) >= 0) {
+            if([Config.DialogStatus.min, Config.DialogStatus.max].indexOf(status) >= 0) {
                 _[status]();
             }
 
@@ -1108,7 +1090,7 @@
                 }
             }
             return timers.closeTimer = window.setInterval(function () {
-                Util.setAction(_, Config.CloseType.Close).clearTimer(timers).close(_);
+                Util.setAction(_, Config.CloseType.close).clearTimer(timers).close(_);
             }, opt.closeTiming), this;
         },
         clearTimer: function (timers) {
@@ -1132,18 +1114,18 @@
                     max = Common.getStatusText('max', opt.lang);
 
                 if(isMin) {
-                    html.push('<a class="dialog-btn btn-min" code="min" title="' + min + '"></a>');
+                    html.push('<a class="dialog-btn btn-min" code="min" key="min" title="' + min + '"></a>');
                 }
                 if(isMax || isMin) {
-                    html.push('<a class="dialog-btn btn-max" code="max" title="' + max + '"></a>');
+                    html.push('<a class="dialog-btn btn-max" code="max" key="max" title="' + max + '"></a>');
                 }
             }
             if(opt.closeAble && opt.showClose) {
-                var config = Config.ButtonConfig['Close'];
-                var close = Common.getStatusText('close', opt.lang);
-                html.push('<a class="dialog-btn btn-close {0}" code="close" title="{1}" shortcut-key="{2}"></a>'.format(
-                    opt.closeIcon, close, config.skey
-                ));
+                var config = Config.ButtonConfig['close'],
+                    close = Common.getStatusText('close', opt.lang),
+                    text = '<a class="dialog-btn btn-close {1}" title="{2}" code="close" key="close"'
+                        + ' result="{result}" shortcut-key="{skey}"></a>';
+                html.push(text.format(config, opt.closeIcon, close));
             }
 
             if(html.length > 0) {
@@ -1158,7 +1140,7 @@
                 for (var i = 0; i < c; i++) {
                     var obj = childs[i], key = obj.getAttribute('code');
                     btns[key] = obj;
-                    if(key === 'close') {
+                    if(key === 'Close') {
                         btnClose = obj;
                     }
                 }
@@ -1194,7 +1176,7 @@
                 elem.style.cssText = css;
             }
             if (util.isIframe(opt)) {
-                if($.isElement(opt.element) && opt.type === Config.DialogType.Load) {
+                if($.isElement(opt.element) && opt.type === Config.DialogType.load) {
                     elem.innerHTML = opt.element.innerHTML || opt.element.value || '';
                 } else {
                     elem.innerHTML = util.buildIframe(_, opt, opt.content);
@@ -1313,7 +1295,7 @@
             var panel = $.createElement('div');
             panel.className = 'button-panel';
             panel.innerHTML = util.buildButtons(_);
-            if ([Config.Position.Left, Config.Position.Center, Config.Position.Right].indexOf(opt.buttonPosition) >= 0) {
+            if(Common.isInKeys(opt.buttonPosition, ['Left', 'Center', 'Right'], Config.Position)) {
                 panel.style.cssText = 'text-align:{0};'.format(opt.buttonPosition);
             }
             elem.appendChild((ctls.buttonPanel = panel));
@@ -1353,31 +1335,53 @@
 
             //自定义按钮文字
             if($.isObject(opt.buttonText)) {
-                txts = opt.buttonText;
+                var copy = opt.buttonText;
+                for(var k in copy) {
+                    txts[k.toLowerCase()] = copy[k];
+                }
+
             } else if($.isString(opt.buttonText, true)) {
-                txts = {OK: opt.buttonText};
+                txts = {ok: opt.buttonText};
             }
 
+            console.log('keys: ', keys);
+
             for (var k in keys) {
-                var config = {}, key = '', txt = '', func = null;
+                var config = {}, key = '', code = '', txt = '', 
+                    func = null, par = null,
+                    css = i++ > 0 ? ' btn-ml' : '';
+
                 if(isCustom) {
-                    config = Config.ButtonConfig[k], css = i > 0 ? ' btn-ml' : '';
+                    key = k.toLowerCase();
+                    config = Config.ButtonConfig[key];
+
                     if($.isString(keys[k])) {
                         txt = keys[k];
-                    } else if($.isObject(keys[k])) {
-                        txt = keys[k].text || '';
-                        func = keys[k]['callback'];
                     } else if($.isFunction(keys[k])) {
                         func = keys[k];
+                        code = key;
+                    } else if($.isObject(keys[k])) {
+                        var cfg = keys[k];
+                        //记录code,用于获取自定义的回调函数                        
+                        code = key;
+                        txt = cfg.text || '';
+                        key = (cfg.key || key).toLowerCase();
+                        func = cfg['callback'] || cfg['func'];
+                        par = cfg['parameter'] || cfg['param'];
+                        if(!config) {
+                            config = Config.CustomButtonConfig(k.toLowerCase(), cfg);
+                        }
                     }
-                    config.text = txt || config.text;
-                    key = k;
-                    //设置按钮自定义回调函数
-                    if($.isFunction(func)) {
-                        p.buttonCallback[key] = func;
+                    if(config) {
+                        config.key = key || config.key;
+                        config.text = txt || config.text;
+                        //根据自定义按钮的编码 来设置按钮自定义回调函数
+                        if($.isFunction(func)) {
+                            p.buttonCallback[code] = { func: func, param: par };
+                        }
                     }
                 } else {
-                    config = Config.ButtonConfig[keys[k]], css = i > 0 ? ' btn-ml' : '';
+                    config = Config.ButtonConfig[keys[k].toLowerCase()];
                     //根据语言获取相应的按钮文字
                     config.text = Common.getButtonText(config.key, opt.lang) || config.text;
                     //启用外部参数中的按钮文字
@@ -1386,13 +1390,12 @@
                 }
 
                 if (config) {
-                    text = '<a class="dialog-btn {css}{1}" code="{key}" result="{result}" href="{{0}}"'
-                        + ' tabindex="{2}" shortcut-key="{skey}">{text}</a>';
-                    html.push(text.format(config, css, tabindex++));
+                    text = '<a class="dialog-btn {css}{1}" code="{2}" key="{key}" result="{result}" href="{{0}}"'
+                        + ' tabindex="{3}" shortcut-key="{skey}">{text}</a>';
+                    html.push(text.format(config, css, code, tabindex++));
 
                     codes.push(key);
                 }
-                i++;
             }
             //设置默认按钮
             if($.isString(opt.defaultButton, true)) {
@@ -1496,16 +1499,18 @@
                 });
 
                 $.addListener(obj, 'mousedown', function () {
+                    $.cancelBubble();
                     events.btnMouseDown = true;
                 });
 
                 $.addListener(obj, 'mouseup', function () {
+                    $.cancelBubble();
                     events.btnMouseDown = false;
                 });
 
                 if (keyEvent) {
                     $.addListener(obj, 'keyup', function (e) {
-                        var keyCode = $.getKeyCode(e),
+                        var keyCode = $.cancelBubble().getKeyCode(e),
                             keyChar = String.fromCharCode(keyCode).toUpperCase(),
                             shortcutKey = this.getAttribute('shortcut-key') || '',
                             next;
@@ -1513,12 +1518,12 @@
                         // 判断是否为空格键 或 是否按下快捷键
                         if (Config.KEY_CODE.Space === keyCode || keyChar === shortcutKey) {
                             util.setAction(_, this);
-                        } else if([37, 39].indexOf(keyCode) >= 0) {
+                        } else if(Common.isInKeys(keyCode, [37, 39])) {
                             next = keyCode === 37 ? this.previousSibling : this.nextSibling;
                             if($.isElement(next) && next.className.indexOf('dialog-btn') >= 0) {
                                 next.focus();
                             }
-                        } else if([38, 40].indexOf(keyCode) >= 0) {
+                        } else if(Common.isInKeys(keyCode, [38, 40])) {
                             next = keyCode === 38 ? elements[0] : elements[c - 1];
                             next.focus();
                         }
@@ -1526,6 +1531,16 @@
                 }
             }
             return this;
+        },
+        isPass: function(key, minInterval) {
+            var util = this, ts = new Date().getTime();
+            if(!util[key]) {
+                util[key] = 0;
+            }
+            if(ts - util[key] < minInterval) {
+                return false;
+            }
+            return util[key] = ts, true;
         },
         setShortcutKeyEvent: function (_, btns) {
             var util = this, p = util.getParam(_);
@@ -1542,24 +1557,18 @@
                     p.dics[shortcutKey] = obj;
                 }
             }
-            $.addListener(document, 'keypress', function (e) {
-                if (!e.shiftKey ) {
+            $.addListener(document, 'keyup', function (e) {                
+                if(!e.shiftKey || !util.isPass('ShortcutKeyEvent', 5)) {
                     return false;
                 }
-                var keyCode = $.getKeyCode(e),
+                var keyCode = $.cancelBubble().getKeyCode(e),
                     keyChar = String.fromCharCode(keyCode).toUpperCase(),
                     btn = p.dics[keyChar],
                     last = Factory.getLast();
 
-                if(!last || last.id !== p.dialog.id) {
-                    return util;
-                }
-
-                if(btn === p.btns.close && !p.options.keyClose) {
-                    return util;
-                }
-
-                if ($.isElement(btn)) {
+                if(!last || last.id !== p.dialog.id || (btn === p.btns.close && !p.options.keyClose)) {
+                    return false;
+                } else if ($.isElement(btn)) {
                     util.setAction(_, btn);
                 } else if(keyChar === 'F') {
                     _.focus();
@@ -1585,38 +1594,75 @@
             return false;
         },
         setAction: function (_, obj, param) {
-            var util = this, code = '', p = util.getParam(_);
+            var util = this, p = util.getParam(_), code = '', key = '', click = false;
             if (typeof obj === 'string') {
-                code = obj;
+                key = obj.toLowerCase();
                 obj = null;
             } else {
                 if (!util.checkEventObj(_, obj)) {
                     return util;
                 }
-                code = obj.getAttribute('code');
+                click = true;
+                key = (obj.getAttribute('key') || '').toLowerCase();
+                code = (obj.getAttribute('code') || '').toLowerCase();
             }
-            if (code === Config.DialogStatus.Min) {
+            if (key === Config.DialogStatus.min) {
                 _.min();
-            } else if (code === Config.DialogStatus.Max) {
+            } else if (key === Config.DialogStatus.max) {
                 _.max();
             } else {
-                if(util.isDefaultResult(code)) {
-                   p.actions = Config.DefaultResult[code]; 
+                var cfg = {
+                    obj: obj, code: code, key: key, param: param
+                };
+                //如果采用了延迟关闭，并且启用防抖功能，则延迟调用关闭
+                if(click && p.options.delayClose && p.options.debounce && p.options.debounceDelay > 0) {
+                    util.delayClose(_, p, (code || key), p.options.debounceDelay, cfg);
                 } else {
-                    var result = parseInt(obj.getAttribute('result'), 10);
-                    p.actions = { code: code, result: result };
+                    util.setActionParam(p, cfg);
+                    _.close();
                 }
-                if(param) {
-                    $.extend(p.actions, { param: param });
-                }                
-                _.close();
             }
             return util;
+        },
+        setActionParam: function(p, cfg) {
+            if(this.isDefaultResult(cfg.code || cfg.key)) {
+               p.actions = Config.DefaultResult[cfg.key]; 
+            } else {
+                var result = parseInt(cfg.obj.getAttribute('result'), 10);
+                p.actions = { key: cfg.key, code: cfg.code, result: result };
+            }
+            if(cfg.param) {
+                $.extend(p.actions, { param: cfg.param });
+            }
+            return this;
+        },
+        isFirstAction: function(_, key) {
+            var p = this.getParam(_), opt = p.options, ts = new Date().getTime();
+            //上次点击若超过5秒钟，则不启用延时
+            if(!p.debounceActions[key] || (ts - p.debounceActions[key] > opt.debounceLimit)) {
+                return p.debounceActions[key] = ts, true;
+            }
+            return false;
+        },
+        //延时触发关闭，防止无意义的快速连续点击
+        delayClose: function(_, p, key, delay, cfg) {
+            var util = this;
+            if(!delay || util.isFirstAction(_, key)) {
+                util.setActionParam(p, cfg);
+                return _.close(), util;
+            }
+            if(p.debounceTimers[key]) {
+                window.clearTimeout(p.debounceTimers[key]);
+            }
+            return p.debounceTimers[key] = window.setTimeout(function() {
+                util.setActionParam(p, cfg);
+                _.close();
+            }, delay), util;
         },
         getAction: function(_) {
             var p = this.getParam(_);
             if(p.options.codeCallback || p.options.alwaysCallback) {
-                return $.extend({}, Config.DefaultResult.close, p.actions);
+                return $.extend({}, Config.DefaultResult['close'], p.actions);
             }
             return $.extend({}, p.actions);
         },
@@ -1663,7 +1709,7 @@
                 options = { type: options };
             }
             var sp = $.extend({
-                type: Config.DialogStatus.Normal,
+                type: Config.DialogStatus.normal,
                 width: 0,
                 height: 0
             }, options);
@@ -1676,24 +1722,24 @@
                 util.setCache(_);
             }
 
-            if (p.status.max && sp.type !== Config.DialogStatus.Max && ctls.container) {
+            if (p.status.max && sp.type !== Config.DialogStatus.max && ctls.container) {
                 $.removeClass(ctls.container, 'dialog-overflow-hidden');
-            } else if (sp.type !== Config.DialogStatus.Min) {
+            } else if (sp.type !== Config.DialogStatus.min) {
                 $.removeClass(ctls.foot, 'display-none');
             }
 
-            if (sp.type !== Config.DialogStatus.Max && !opt.lock) {
+            if (sp.type !== Config.DialogStatus.max && !opt.lock) {
                 util.hideDocOverflow(_, true);
             }
 
             if (btns.max) {
                 //btns.max.title = sp.type === DialogStatus.Max ? 'Restore Down' : 'Maximize';
-                btns.max.title = Common.getStatusText(sp.type === Config.DialogStatus.Max ? 'restore' : 'max', opt.lang);
+                btns.max.title = Common.getStatusText(sp.type === Config.DialogStatus.max ? 'restore' : 'max', opt.lang);
             }
 
             var bs = $.getBodySize(), isSetBodySize = false, isSetPosition = false, isFullScreen = false;
 
-            if (sp.type === Config.DialogStatus.Max) {
+            if (sp.type === Config.DialogStatus.max) {
                 if (!opt.maxAble) {
                     return this;
                 }
@@ -1711,9 +1757,9 @@
                 }
                 util.hideDocOverflow(_)
                     .hideDragSwitch(_)
-                    .setStatus(_, Config.DialogStatus.Max);
+                    .setStatus(_, Config.DialogStatus.max);
 
-            } else if (sp.type === Config.DialogStatus.Min) {
+            } else if (sp.type === Config.DialogStatus.min) {
                 if (!opt.minAble) {
                     return this;
                 }
@@ -1730,7 +1776,7 @@
                 $.setStyle(obj, { width: minW, height: minH }, 'px');
 
                 util.hideDragSwitch(_)
-                    .setStatus(_, Config.DialogStatus.Min)
+                    .setStatus(_, Config.DialogStatus.min)
                     .setPosition(_, { position: opt.position })
                     .showIcon(_);
 
@@ -1747,7 +1793,7 @@
                 } else if (p.status.min) {
                     $.removeClass(obj, 'oui-dialog-min');
                 }
-                util.showDragSwitch(_).setStatus(_, Config.DialogStatus.Normal);
+                util.showDragSwitch(_).setStatus(_, Config.DialogStatus.normal);
 
                 if (sp.type === 'resize' || sp.type === 'size') {
                     par = { width: sp.width, height: sp.height };
@@ -2252,7 +2298,7 @@
 
             //判断对话框当前状态是否被最小化，若最小化，需要先还原大小
             if(isMin) {
-                util.setSize(_, { type: Config.DialogStatus.Normal });
+                util.setSize(_, { type: Config.DialogStatus.normal });
             }
 
             if (!isDrag) {
@@ -2391,7 +2437,7 @@
 
             //判断对话框当前状态是否被最小化，若最小化，设置完尺寸之后需要重新最小化
             if(isMin) {
-                util.setSize(_, { type: Config.DialogStatus.Min });
+                util.setSize(_, { type: Config.DialogStatus.min });
             }
 
             return util.showIcon(_);
@@ -2576,7 +2622,7 @@
             if(p.none) { return this; }
 
             //对话框最大化时，拖动对话框，先切换到标准模式（尺寸、定位）
-            util.setSize(_, { type: Config.DialogStatus.Normal });
+            util.setSize(_, { type: Config.DialogStatus.normal });
 
             var offsetRateX = (evt.clientX / bs.width),
                 offsetX = evt.clientX,
@@ -2721,34 +2767,51 @@
             }
             return p.options.zindex = zindex, this;
         },
-        checkCallback: function(opt) {
-            var callback = $.isFunction(opt.callback) ? opt.callback : undefined,
-                ok =  $.isFunction(opt.ok) ? opt.ok : ($.isFunction(opt.success) ? opt.success : callback),
+        checkCallback: function(p, actions) {
+            var opt = p.options,
+                actions = actions || {},
+                callback = $.isFunction(opt.callback) ? opt.callback : undefined;
+
+            //如果没有设置回调函数callback，则查找自定义的回调函数
+            if(!callback) {
+                var custom = p.buttonCallback[(actions.code || '').toLowerCase()];
+                if(custom && $.isFunction(custom.func)) {
+                    callback = custom.func;
+                }
+            }
+            //检测是否设置了 ok | success 以及 cancel 这些指定的回调函数
+            var ok =  $.isFunction(opt.ok) ? opt.ok : ($.isFunction(opt.success) ? opt.success : callback),
                 cancel = $.isFunction(opt.cancel) ? opt.cancel : callback;
-            return ok || cancel ? {callback: callback, ok: ok, cancel: cancel} : undefined;
+
+            return (ok || cancel) ? {callback: callback, ok: ok, cancel: cancel} : undefined;            
         },
-        callback: function (_, opt, actions) {
-            var p = Util.getParam(_),
-                func = this.checkCallback(opt);
+        callback: function (_, p, actions) {
+            var opt = p.options,
+                func = this.checkCallback(p, actions);
+
             if(!func || !$.isObject(actions)) {
                 return this;
             }
             var dr = {},
                 parameter = actions.param || opt.parameter,
-                code = actions.code || '',
+                key = (actions.key || '').toLowerCase(),
+                code = (actions.code || '').toLowerCase(),
                 result = actions.result || 0;
 
-            dr[code] = dr[code.toLowerCase()] = true;
-            dr['key'] = code;
+            dr[key] = true;
+            if(code && code !== key) {
+                dr['code'] = code;
+            }
+            dr['key'] = key;
             dr['value'] = result;
 
-            if($.isFunction(p.buttonCallback[code])) {
-                return p.buttonCallback[code](dr, _), this;
-            }
-
-            if ([Config.DialogResult.OK, Config.DialogResult.Yes].indexOf(result) >= 0) {
+            //根据按钮code 获取自定义的回调函数与参数
+            var custom = p.buttonCallback[code];
+            if(custom && $.isFunction(custom.func)) {
+                custom.func(dr, _, custom.param || parameter);
+            } else if(Common.isInKeys(result, ['ok', 'yes'], Config.DialogResult)) {
                 func.ok && func.ok(dr, _, parameter);
-            } else if([Config.DialogResult.Cancel, Config.DialogResult.Ignore, Config.DialogResult.No].indexOf(result) >= 0) {
+            } else if(Common.isInKeys(result, ['cancel', 'ignore', 'no'], Config.DialogResult)) {
                 func.cancel && func.cancel(dr, _, parameter);
             } else {
                 func.callback && func.callback(dr, _, parameter);
@@ -2765,6 +2828,12 @@
             }
             if(p.styleElement) {
                 p.styleElement.parentNode.removeChild(p.styleElement);
+            }
+            for(var k in p.debounceTimers) {
+                delete p.debounceTimers[k];
+            }
+            for(var k in p.debounceActions) {
+                delete p.debounceActions[k];
             }
             //TODO:
 
@@ -2922,8 +2991,8 @@
             opt = $.extend({
                 id: null,                       //id
                 lang: Config.Lang.Chinese,      //语言 Chinese,English
-                type: Config.DialogType.Alert,  //alert,confirm,message,tooltip,window,iframe
-                status: Config.DialogStatus.Normal,     //初始状态  normal, min, max 三种状态
+                type: Config.DialogType.alert,  //alert,confirm,message,tooltip,window,iframe
+                status: Config.DialogStatus.normal,     //初始状态  normal, min, max 三种状态
                 zindex: Common.buildZindex(),   //css z-index值，控制显示层级
                 minWidth: '240px',          //最小宽度
                 minHeight: '125px',         //最小高度
@@ -2967,7 +3036,10 @@
                 minAble: true,          //是否允许最小化
                 delayClose: false,      //是否延时关闭，启用延时关闭，则点击“确定按钮”关闭时不会关闭，在callback回调中处理关闭
                 callback: null,         //回调参数，默认情况下，只有点击按钮关闭时才会回调
-                codeCallback: false,  //始终回调（当使用代码关闭窗口时也会回调）
+                codeCallback: false,    //始终回调（当使用代码关闭窗口时也会回调）
+                debounce: true,         //是否防抖
+                debounceDelay: 320,     //
+                debounceLimit: 5000,    //
                 ok: null,               //点击确定按钮后的回调函数
                 cancel: null,           //点击取消按钮后的回调函数
                 parameter: null,        //回调返回的参数
@@ -3017,7 +3089,7 @@
 
             if (!opt.showHead && !opt.showFoot && !opt.lock &&
                 $.isBoolean(opt.closeAble, true) &&
-                opt.type !== Config.DialogType.Tooltip) {
+                opt.type !== Config.DialogType.tooltip) {
                 opt.escClose = true;
                 //opt.clickBgClose = opt.clickBgClose || 'click';
                 //没有标题没有底部的消息框，设置内容边距为1px
@@ -3138,7 +3210,7 @@
                 .delAction(_)
                 .clearTimer(timers)
                 .hideDocOverflow(_, true)
-                .callback(_, opt, actions)
+                .callback(_, p, actions)
                 .redirect(url);
 
             return _;
@@ -3151,17 +3223,16 @@
             var ctls = p.controls,
                 timers = p.timers,
                 url = opt.redirect || opt.targetUrl,
-                actions = util.getAction(_);
-
-            var func = util.checkCallback(opt);
+                actions = util.getAction(_),
+                func = util.checkCallback(p, actions);
 
             // 点击确定按钮时，若延时关闭，则仅回调而不关闭
             if(opt.delayClose 
-                && actions.result !== Config.DialogResult.Close
+                && actions.result !== Config.DialogResult.close
                 && (util.isIframe(opt) || util.isSure(actions.result))
                 && func 
                 && (func.callback || func.ok)) {
-                return util.delAction(_).callback(_, opt, actions), _;
+                return util.delAction(_).callback(_, p, actions), _;
             }
             if(opt.closeType === 'hide') {
                 return _.hide();
@@ -3173,7 +3244,7 @@
                 .delAction(_)
                 .clearTimer(timers)
                 .hideDocOverflow(_, true)
-                .callback(_, opt, actions)
+                .callback(_, p, actions)
                 .dispose(_)
                 .remove(_)
                 .redirect(url);
@@ -3211,7 +3282,7 @@
                 $.extend(opt.styles, p.options.styles);
             }
 
-            if ($.extend(p.options, opt).type === Config.DialogType.Tooltip) {
+            if ($.extend(p.options, opt).type === Config.DialogType.tooltip) {
                 Util.updateTooltip(_, p.options);
                 return _;
             }
@@ -3223,13 +3294,13 @@
                     ctls.title.innerHTML = opt.title;
                 }
                 if(isMin) {
-                    Util.setSize(_, {type: Config.DialogStatus.Normal});
+                    Util.setSize(_, {type: Config.DialogStatus.normal});
                     Util.setPosition(_);
                 }
                 Util.buildContent(_, true).setBodySize(_).setCache(_);
 
                 if(isMin) {
-                    Util.setSize(_, {type: Config.DialogStatus.Min});
+                    Util.setSize(_, {type: Config.DialogStatus.min});
                 }
 
                 if (isAutoSize) {
@@ -3287,24 +3358,24 @@
             return _;
         },
         min: function () {
-            return Util.setSize(this, { type: Config.DialogStatus.Min });
+            return Util.setSize(this, { type: Config.DialogStatus.min });
         },
         max: function () {
             var _ = this, p = Util.getParam(_);
             if(p.none) { return _; }
 
-            var type = Config.DialogStatus.Max, status = p.status, lastStatus = p.lastStatus;
+            var type = Config.DialogStatus.max, status = p.status, lastStatus = p.lastStatus;
 
-            if (p.status.max || (p.status.min && lastStatus === Config.DialogStatus.Normal)) {
-                type = Config.DialogStatus.Normal;
+            if (p.status.max || (p.status.min && lastStatus === Config.DialogStatus.normal)) {
+                type = Config.DialogStatus.normal;
             }
             return Util.setSize(_, { type: type });
         },
         restore: function() {
-            return Util.setSize(this, { type: Config.DialogStatus.Normal });
+            return Util.setSize(this, { type: Config.DialogStatus.normal });
         },
         normal: function () {
-            return Util.setSize(this, { type: Config.DialogStatus.Normal });
+            return Util.setSize(this, { type: Config.DialogStatus.normal });
         },
         resize: function(options) {
             $.extend(options, {resizeTo: false});
@@ -3384,40 +3455,40 @@
             return Factory.show(content, title, options);
         },
         alert: function (content, title, options) {
-            return Factory.show(content, title, options, Config.DialogType.Alert);
+            return Factory.show(content, title, options, Config.DialogType.alert);
         },
         confirm: function (content, title, options) {
-            return Factory.show(content, title, options, Config.DialogType.Confirm);
+            return Factory.show(content, title, options, Config.DialogType.confirm);
         },
         message: function (content, options) {
-            return Factory.show(content, undefined, options, Config.DialogType.Message);
+            return Factory.show(content, undefined, options, Config.DialogType.message);
         },
         tips: function (content, target, options) {
-            return Factory.show(content, undefined, options, Config.DialogType.Tips, target);
+            return Factory.show(content, undefined, options, Config.DialogType.tips, target);
         },
         tooltip: function (content, target, options) {
-            return Factory.show(content, undefined, options, Config.DialogType.Tooltip, target);
+            return Factory.show(content, undefined, options, Config.DialogType.tooltip, target);
         }
     });
 
     $.extend($.dialog, {
         msg: function (content, options) {
-            return Factory.show(content, undefined, options, Config.DialogType.Msg);
+            return Factory.show(content, undefined, options, Config.DialogType.msg);
         },
         win: function (content, title, options) {
-            return Factory.show(content, title, options, Config.DialogType.Win);
+            return Factory.show(content, title, options, Config.DialogType.win);
         },
         form: function (content, title, options) {
-            return Factory.show(content, title, options, Config.DialogType.Form);
+            return Factory.show(content, title, options, Config.DialogType.form);
         },
         load: function (urlOrElement, title, options) {
-            return Factory.show(urlOrElement, title, options, Config.DialogType.Load);
+            return Factory.show(urlOrElement, title, options, Config.DialogType.load);
         },
         iframe: function(url, title, options) {
-            return Factory.show(url, title, options, Config.DialogType.Iframe);
+            return Factory.show(url, title, options, Config.DialogType.iframe);
         },
         url: function(url, title, options) {
-            return Factory.show(url, title, options, Config.DialogType.Url);
+            return Factory.show(url, title, options, Config.DialogType.url);
         },
         close: function (id) {
             return Factory.close(id), $;
@@ -3441,7 +3512,7 @@
             return Factory.close(id), $;
         },
         closeAll: function (type) {
-            return Factory.closeAll(type || Config.DialogType.Tooltip), $;
+            return Factory.closeAll(type || Config.DialogType.tooltip), $;
         }
     });
 
