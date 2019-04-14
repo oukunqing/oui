@@ -2823,7 +2823,7 @@
                 code = (actions.code || '').toLowerCase(),
                 result = actions.result || 0;
 
-            dr[key] = true;
+            dr[key] = dr[key.toUpperCase()] = dr[key.firstLetterCapital()] = true;
             if(code && code !== key) {
                 dr['code'] = code;
             }

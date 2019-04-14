@@ -988,6 +988,10 @@
         unicodeToChinese: function (returnArray) { return $.unicodeToChinese(this, returnArray); },
         asciiToUnicode: function (returnArray) { return $.asciiToUnicode(this, returnArray); },
         unicodeToAscii: function (returnArray) { return $.unicodeToAscii(this, returnArray); },
+        firstLetterCapital: function () {
+            var s = this.toLowerCase(), f = s.substr(0, 1).toUpperCase();
+            return f + s.substr(1);
+        },
         toThousand: function (delimiter, len) {
             if ($.isNumber(delimiter)) {
                 len = delimiter;

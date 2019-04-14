@@ -345,7 +345,7 @@ function buttons() {
 
     window.setTimeout(function() {
         console.log('set focus: txtKeywords');
-        win.focus('txtKeywords');
+        win.setOptions('icon', 'success').update().focus('txtKeywords');
     }, 3000);
 }
 
