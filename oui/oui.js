@@ -1597,6 +1597,22 @@
                 typeof elem.tagName === 'string';
             return isElem && ($.isString(tagName, true) ? elem.tagName === tagName : isElem);
         },
+        isChildNode = function(parent, elem, recursion) {
+            if(!$.isElement(parent) || !$.isElement(elem)) {
+                return false;
+            }
+            if(!recursion) {
+                return elem.parentNode === parent;
+            }
+            var pNode = elem.parentNode;
+            while(pNode) {
+                if(pNode === parent) {
+                    return true;
+                }
+                pNode = pNode.parentNode;
+            }
+            return false;
+        },
         isForm = function(form) {
             return isElement(form) &&
                 form.nodeName === 'FORM' &&
@@ -2295,6 +2311,7 @@
         isDocument: isDocument,
         isWindow: isWindow,
         isElement: isElement,
+        isChildNode: isChildNode,
         isForm: isForm,
         isStyleUnit: isStyleUnit,
         isNumberSize: isNumberSize,
@@ -2596,23 +2613,43 @@
                 return $QA(selector);
             }
         },
-        getCheckedValues: function(selector, targetElement) {
-            var elements = $.getChecked(selector), len = elements.length;
-            var values = [];
+        getCheckedValues: function(selector, options) {
+            if(!$.isObject(options)) {
+                options = {};
+            }
+            if($.isString(options.target, true)) {
+                options.target = document.getElementById(options.target);
+            }
+            if($.isString(options.parent, true)) {
+                options.parent = document.getElementById(options.parent);
+            }
+            if($.isString(options.root, true)) {
+                options.root = document.getElementById(options.root);
+            }
+            var elements = $.getChecked(selector),
+                len = elements.length,
+                values = [],
+                hasRoot = options.root && $.isElement(options.root),
+                hasParent = options.parent && $.isElement(options.parent),
+                hasTarget = options.target && $.isElement(options.target);
+
             for(var i = 0; i < len; i++) {
-                var val = elements[i].value;
+                var elem = elements[i];
+                if(hasParent && elem.parentNode !== options.parent) {
+                    continue;
+                } else if(hasRoot && !$.isChildNode(options.root, elem, true)) {
+                    continue;
+                }
+                var val = elem.value;
                 values.push(val);
             }
-            if($.isString(targetElement, true)) {
-                targetElement = document.getElementById(targetElement);
-            }
-            if($.isElement(targetElement)) {
-                targetElement.value = values.join(',');
+            if(hasTarget) {
+                options.target.value = values.join(',');
             }
             return values;
         },
-        getCheckedValue: function(selector, targetElement) {
-            return this.getCheckedValues(selector);
+        getCheckedValue: function(selector, options) {
+            return this.getCheckedValues(selector, options);
         },
         getCheckedText: function(elem) {
             if(!$.isElement(elem)) {

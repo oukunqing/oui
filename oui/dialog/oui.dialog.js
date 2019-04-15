@@ -776,18 +776,19 @@
                     opt.minAble = opt.maxAble = opt.lock = false;
                     break;
             }
-            var d = this.getDialog($.extend(opt, options).id);
-
             //设置 tooltip 默认位置为 right
             if (opt.type === Config.DialogType.tooltip && !opt.position) {
                 opt.position = 6; //right
             }
 
-            if (d === null) {
+            var p = this.getOptions($.extend(opt, options).id),
+                d = p ? p.dialog : undefined;
+
+            if(d && p.controls && p.controls.dialog) {
+                d.update(opt.content, opt.title, opt).show();
+            } else {
                 this.initCache(opt.id, null);
                 d = new Dialog(opt.content, opt.title, opt);
-            } else {
-                d.update(opt.content, opt.title, opt).show();
             }
 
             return d;
@@ -2124,6 +2125,7 @@
                 w = obj.offsetWidth,
                 h = obj.offsetHeight,
                 bs = $.getBodySize(),
+                ps = $.getScrollPosition(),
                 fs = {
                     w: p.width,
                     h: p.height,
@@ -2132,6 +2134,10 @@
                 },
                 left = fs.x,
                 top = fs.y,
+                moveY = 0,
+                moveX = 0,
+                newTop = top,
+                newLeft =left,
                 result = {
                     css: ''
                 },
@@ -2180,16 +2186,36 @@
                 }
 
                 switch(pos) {
+                    case 'top':
+                    case 'bottom':
+                        left = fs.x - (w - fs.w) / 2;
+                        break;
+                    case 'left':
+                    case 'right':
+                        top = fs.y - (h - fs.h) / 2;
+                        console.log('top: ', top);
+                        if(top < ps.top) {
+                            newTop = ps.top;
+                            moveY = top - newTop;
+                            top = newTop;
+                        console.log('top11: ', top, ',moveY: ',moveY);
+                        } else if((top + h) > (bs.height + ps.top)) {
+                            newTop = bs.height + ps.top - h;
+                            moveY = top - newTop;
+                            top = newTop;
+                        console.log('top22: ', top, ',moveY: ',moveY);
+                        }
+                        if(fs.h < h) {
+                            result.css = 'top: ' + (h / 2 + moveY) + 'px;';
+                        }
+                        console.log('top2: ', top, ',moveY: ',moveY);
+                        break;
                     case 'topleft':
                     case 'bottomleft':
                         left = fs.x;
                         if(fs.w < w) {
                             result.css = 'left: ' + (fs.w / 2) + 'px;';
                         }
-                        break;
-                    case 'top':
-                    case 'bottom':
-                        left = fs.x - (w - fs.w) / 2;
                         break;
                     case 'topright':
                     case 'bottomright':
@@ -2204,10 +2230,6 @@
                         if(fs.h < h) {
                             result.css = 'top: ' + (fs.h / 2) + 'px;';
                         }
-                        break;
-                    case 'left':
-                    case 'right':
-                        top = fs.y - (h - fs.h) / 2;
                         break;
                     case 'leftbottom':
                     case 'rightbottom':
@@ -3207,9 +3229,16 @@
                 return _;
             }
             Util.setOptions(_, 'hide', false)
-                .hideDocOverflow(_, false)
-                .showDialog(p.controls, true, content, title)
-                .setBodySize(_, {event: 'show', lastSize: p.hideSize});
+                //.hideDocOverflow(_, false)
+                .showDialog(p.controls, true, content, title);
+
+            if(p.options.lock) {
+                Util.hideDocOverflow(_, false);
+            }
+
+            if(!p.options.type === 'tooltip') {
+                Util.setBodySize(_, {event: 'show', lastSize: p.hideSize});
+            }
 
             if(!p.options.lock) {
                 Util.setClickBgClose(_);
@@ -3234,9 +3263,13 @@
                 .setOptions(_, 'hide', true)
                 .delAction(_)
                 .clearTimer(timers)
-                .hideDocOverflow(_, true)
+                //.hideDocOverflow(_, true)
                 .callback(_, p, actions)
                 .redirect(url);
+
+            if(p.options.lock) {
+                Util.hideDocOverflow(_, true);
+            }
 
             return _;
         },
