@@ -784,7 +784,7 @@
             var p = this.getOptions($.extend(opt, options).id),
                 d = p ? p.dialog : undefined;
 
-            if(d && p.controls && p.controls.dialog) {
+            if(p && d && p.controls && p.controls.dialog) {
                 d.update(opt.content, opt.title, opt).show();
             } else {
                 this.initCache(opt.id, null);
@@ -2150,7 +2150,7 @@
             ys.value = ys.bottom + h - bs.height;
             xs.value = xs.right + w - bs.width;
 
-            do{
+            //do{
                 isOver = true;
 
                 if(pos.startsWith('top')) {
@@ -2189,26 +2189,34 @@
                     case 'top':
                     case 'bottom':
                         left = fs.x - (w - fs.w) / 2;
+                        if(left < ps.left) {
+                            newLeft = ps.left;
+                            moveX = left - newLeft;
+                            left = newLeft;
+                        } else if((left + w) > (bs.width + ps.left)) {
+                            newLeft = bs.width + ps.left - h;
+                            moveX = left - newLeft;
+                            left = newLeft;
+                        }
+                        if(fs.w < w) {
+                            result.css = 'top: ' + (w / 2 + moveX) + 'px;';
+                        }
                         break;
                     case 'left':
                     case 'right':
                         top = fs.y - (h - fs.h) / 2;
-                        console.log('top: ', top);
                         if(top < ps.top) {
                             newTop = ps.top;
                             moveY = top - newTop;
                             top = newTop;
-                        console.log('top11: ', top, ',moveY: ',moveY);
                         } else if((top + h) > (bs.height + ps.top)) {
                             newTop = bs.height + ps.top - h;
                             moveY = top - newTop;
                             top = newTop;
-                        console.log('top22: ', top, ',moveY: ',moveY);
                         }
                         if(fs.h < h) {
                             result.css = 'top: ' + (h / 2 + moveY) + 'px;';
                         }
-                        console.log('top2: ', top, ',moveY: ',moveY);
                         break;
                     case 'topleft':
                     case 'bottomleft':
@@ -2240,7 +2248,7 @@
                         break;
                 }
                 loop++;
-            } while(!isOver && loop < 3);
+            //} while(!isOver && loop < 3);
 
             if(isFixedSize) {
                 $.setStyle(obj, {width: w, height: h }, 'px');
@@ -2913,12 +2921,19 @@
             if(!$.isElement(opt.target)){
                 return false;
             }
-            var tipId = null, d = null;
-            try { tipId = opt.target.getAttribute('tooltip-id'); } catch (e) { }
+            var tipId = undefined, d = undefined;
+            try { 
+                tipId = opt.target.getAttribute('tooltip-id'); 
+            } catch (e) { 
+                tipId = undefined;
+            }
+            if(tipId) {
+                d = Factory.getDialog(tipId);
+            }
 
-            if (tipId && (d = Factory.getDialog(tipId)) !== null) {
+            if (tipId && d && ctls.content) {
                 p.controls = util.getParam(d).controls;
-                util.updateTooltip(_, opt.content, opt.target, opt);
+                util.updateTooltip(_, opt.content, opt.target, opt).show();
             } else {
                 //对话框
                 ctls.dialog = $.createElement('div');
@@ -2966,6 +2981,10 @@
             var util = this, 
                 opt = p.options,
                 obj = p.controls.dialog;
+
+            if(!opt || !obj) {
+                return false;
+            }
             //设置自定义的样式
             var styles = opt.styles.tooltip || opt.styles.tips || {},
                 cssText = Common.toCssText(styles, 'tooltip');
