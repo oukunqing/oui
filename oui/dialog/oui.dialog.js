@@ -2206,11 +2206,11 @@
                     case 'right':
                         top = fs.y - (h - fs.h) / 2;
                         if(top < ps.top) {
-                            newTop = ps.top;
+                            newTop = ps.top + 2;
                             moveY = top - newTop;
                             top = newTop;
                         } else if((top + h) > (bs.height + ps.top)) {
-                            newTop = bs.height + ps.top - h;
+                            newTop = bs.height + ps.top - h - 2;
                             moveY = top - newTop;
                             top = newTop;
                         }
@@ -3018,6 +3018,17 @@
                     util.loads[_.id].idx += 1;
                     util.loadComplete(c, util.loads[_.id].idx, func);
                 };
+                imgs[i].onerror = function() {
+                    util.loads[_.id].idx += 1;
+                    util.loadComplete(c, util.loads[_.id].idx, func);
+                    //尝试加载默认的图片
+                    var defaultSrc = this.getAttribute('default-src');
+                    if(defaultSrc) {
+                        //默认图片只加载一次，不管加载是否成功，都要清除默认图片设置，防止无限循环
+                        this.setAttribute('default-src', '');
+                        this.src = defaultSrc;
+                    }
+                };
             }
         },
         setTooltipPosition: function (_) {
@@ -3255,7 +3266,7 @@
                 Util.hideDocOverflow(_, false);
             }
 
-            if(!p.options.type === 'tooltip') {
+            if(p.options.type !== 'tooltip') {
                 Util.setBodySize(_, {event: 'show', lastSize: p.hideSize});
             }
 

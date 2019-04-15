@@ -1943,6 +1943,12 @@
             }
             return arr;
         },
+        getAttribute = function(elem, attributes) {
+            if(!$.isElement(elem)) {
+                return undefined;
+            }
+            return elem.getAttribute(attributes);
+        },
         setAttribute = function (elem, attributes, exempt, serialize) {
             if ($.isBoolean(exempt, false) || $.isElement(elem)) {
                 if ($.isObject(attributes)) {
@@ -2335,6 +2341,7 @@
         isArrayLike: isArrayLike,
         merge: merge,
         makeArray: makeArray,
+        getAttribute: getAttribute,
         setAttribute: setAttribute,
         toCssText: toCssText,
         setStyle: setStyle,
