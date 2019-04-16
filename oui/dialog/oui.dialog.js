@@ -14,6 +14,7 @@
         Index: 1,
         IdIndex: 1,
         Identifier: 'oui-dialog-identifier-',
+        TargetAttributeName: 'dialog-id',
         TitleHeight: 30,        //标题栏高度，单位：px
         BottomHeight: 40,       //底部栏高度，单位：px
         Padding: 4,             //拖动边框宽度，单位：px
@@ -781,9 +782,15 @@
                 opt.position = 6; //right
             }
 
-            var p = this.getOptions($.extend(opt, options).id),
-                d = p ? p.dialog : undefined;
+            var p = this.getOptions($.extend(opt, options).id);
+            if(!p && (opt.target || opt.type === Config.DialogType.tooltip)) {
+                var tid = $.getAttribute(opt.target, Config.TargetAttributeName);
+                if(tid) {
+                    p = this.getOptions(tid);
+                }
+            }
 
+            var d = p ? p.dialog : undefined;
             if(p && d && p.controls && p.controls.dialog) {
                 d.update(opt.content, opt.title, opt).show();
             } else {
@@ -2923,7 +2930,7 @@
             }
             var tipId = undefined, d = undefined;
             try { 
-                tipId = opt.target.getAttribute('tooltip-id'); 
+                tipId = opt.target.getAttribute(Config.TargetAttributeName); 
             } catch (e) { 
                 tipId = undefined;
             }
@@ -2933,7 +2940,7 @@
 
             if (tipId && d && ctls.content) {
                 p.controls = util.getParam(d).controls;
-                util.updateTooltip(_, opt.content, opt.target, opt).show();
+                util.updateTooltip(_, opt.content, opt.target, opt);
             } else {
                 //对话框
                 ctls.dialog = $.createElement('div');
@@ -2943,7 +2950,7 @@
 
                 ctls.body = util.buildBody(_, ctls.dialog);
 
-                $.setAttribute(opt.target, 'tooltip-id', opt.id);
+                $.setAttribute(opt.target, Config.TargetAttributeName, opt.id);
                 p.parent.appendChild(ctls.dialog);
             }
             Factory.setWindowResize();
@@ -3595,7 +3602,7 @@
     $.extend($.tooltip, {
         close: function (id) {
             if ($.isElement(id)) {
-                id = id.getAttribute('tooltip-id');
+                id = id.getAttribute(Config.TargetAttributeName);
             }
             return Factory.close(id), $;
         },
