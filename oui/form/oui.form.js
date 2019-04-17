@@ -661,6 +661,9 @@
                     showAjaxError(jqXHR, textStatus, errorThrown);
                 },
                 success: function (data, textStatus, jqXHR) {
+                    if($.isDebug()) {
+                        console.log('data: ', data);
+                    }
                     var callback = options.callback || options.success;
                     if ($.isFunction(callback)) {
                         //callback(data, options.param);

@@ -956,16 +956,28 @@
                     _.topMost();
                 });
 
-                $.addListener(ctls.dialog, ['click', 'dblclick', 'mousedown'], function () {
+                $.addListener(ctls.dialog, ['click', 'dblclick'], function () {
                     $.cancelBubble();
                 });
+
+                if(!opt.copyAble) {
+                    $.addListener(ctls.dialog, ['mousedown'], function () {
+                        $.cancelBubble();
+                    });
+                }
             }
 
             if (ctls.container && opt.cancelBubble) {
                 // 取消背景层 mousedown，防止冒泡 document.mousedown
-                $.addListener(ctls.container, ['click', 'mousedown'], function () {
+                $.addListener(ctls.container, ['click'], function () {
                     $.cancelBubble();
                 });
+
+                if(!opt.copyAble) {
+                    $.addListener(ctls.container, ['mousedown'], function () {
+                        $.cancelBubble();
+                    });
+                }
             }
 
             //初始最小化或最大化对话框
@@ -1039,7 +1051,7 @@
             var p = this.getParam(_), opt = p.options, ctls = p.controls;
             if(p.none || _.isClosed()) { return this; }
             var elem = $.createElement('div'), css;
-            elem.className = 'dialog-main';
+            elem.className = 'dialog-main' + (opt.copyAble ? '' : ' dialog-unselect');
             elem.tabIndex = 1;
             if ((css = Common.toCssText(opt.styles.main, 'main'))) {
                 elem.style.cssText = css;
@@ -1180,7 +1192,7 @@
             var p = this.getParam(_), opt = p.options, ctls = p.controls;
             if(p.none || _.isClosed()) { return this; }
             var elem = $.createElement('div'), css;
-            elem.className = 'dialog-body';
+            elem.className = 'dialog-body' + (opt.copyAble ? '' : ' dialog-unselect');
 
             if(!opt.showHead) {
                 this.buildClose(_, elem, false);
@@ -1207,8 +1219,10 @@
                     elem.innerHTML = opt.element.innerHTML || opt.element.value || '';
                 } else {
                     elem.innerHTML = util.buildIframe(_, opt, opt.content);
-                    //隐藏dialog.body的滚动条（启用iframe滚动条，防止出现双滚动）
-                    pNode.style.overflow = 'hidden';
+                    //隐藏dialog.body的滚动条（启用iframe滚动条，防止出现双滚动
+                    if($.isElement(pNode)) {
+                        pNode.style.overflow = 'hidden';
+                    }
                     //清除dialog.content边距
                     elem.style.padding = '0px';
                     elem.style.margin = '0px';
@@ -2984,7 +2998,7 @@
             $.setStyle(ctls.dialog, styles, 'px');
             return util;
         },
-        buildTooltipStyle: function(_, par, p) {
+        buildTooltipStyle: function(_, par, p, isShow) {
             var util = this, 
                 opt = p.options,
                 obj = p.controls.dialog;
@@ -3010,6 +3024,10 @@
                 });
             }
             obj.className = 'oui-tooltip oui-tip-' + res.dir + ' ' + cssName;
+            if(isShow) {
+                //图片加载完之后，显示对话框
+                obj.style.display = '';
+            }
         },
         loadComplete: function(c, i, func) {
             if(i >= c) {
@@ -3056,8 +3074,9 @@
 
             var imgs = ctls.content.getElementsByTagName('img');
             if(imgs.length > 0) {
+                obj.style.display = 'none';
                 util.loadImg(_, imgs, function() {
-                    util.buildTooltipStyle(_, par, p);
+                    util.buildTooltipStyle(_, par, p, true);
                 });
             } else {
                 util.buildTooltipStyle(_, par, p);
@@ -3112,6 +3131,7 @@
                 autoClose: false,       //是否自动关闭
                 closeTiming: 5000,      //closeTiming timeout time timing 四个字段
                 showTimer: false,       //是否显示定时关闭倒计时
+                copyAble: false,        //是否允许复制内容
                 sizeAble: true,         //是否允许改变大小
                 dragSize: true,         //是否允许拖动改变大小
                 moveAble: true,         //是否允许移动位置
@@ -3122,8 +3142,8 @@
                 callback: null,         //回调参数，默认情况下，只有点击按钮关闭时才会回调
                 codeCallback: false,    //始终回调（当使用代码关闭窗口时也会回调）
                 debounce: true,         //是否防抖
-                debounceDelay: 320,     //
-                debounceLimit: 5000,    //
+                debounceDelay: 320,     //防抖间隔，单位：毫秒
+                debounceLimit: 5000,    //防抖时限，单位：毫秒
                 ok: null,               //点击确定按钮后的回调函数
                 cancel: null,           //点击取消按钮后的回调函数
                 parameter: null,        //回调返回的参数

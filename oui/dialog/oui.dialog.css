@@ -38,11 +38,6 @@
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
-
-    -moz-user-select:none;
-    -khtml-user-select:none;
-    user-select:none;
-    -ms-user-select: none; /*IE10*/
 }
 
 .oui-dialog-max {
@@ -71,6 +66,19 @@
     overflow: hidden;
     box-sizing: border-box;
     /*border-radius: 4px;*/
+    /*
+    -moz-user-select:none;
+    -khtml-user-select:none;
+    user-select:none;
+    -ms-user-select: none;
+    */
+}
+
+.oui-dialog .dialog-unselect{
+    -moz-user-select:none;
+    -khtml-user-select:none;
+    user-select:none;
+    -ms-user-select: none; /*IE10*/
 }
 
 .oui-dialog .dialog-head{
@@ -84,10 +92,11 @@
     clear: both; 
     overflow: hidden;
     /*cursor: move;*/
+    
     -moz-user-select:none;
     -khtml-user-select:none;
     user-select:none;
-    -ms-user-select: none; /*IE10*/
+    -ms-user-select: none;
 }
 
 .oui-dialog .dialog-head .dialog-title {
@@ -241,11 +250,13 @@
     */
     box-sizing: border-box;
     overflow: auto;
+
+    /*
     -moz-user-select:none;
     -khtml-user-select:none;
     user-select:none;
-    -ms-user-select: none; /*IE10*/
-    
+    -ms-user-select: none;
+    */
     /*margin-bottom: 40px;*/
 }
 
@@ -393,9 +404,11 @@
     width: 100%;
     height: auto;
     max-height: 50px;
+
     -moz-user-select:none;
     -khtml-user-select:none;
     user-select:none;
+    -ms-user-select: none;
 }
 
 .oui-dialog .dialog-foot .button-panel {
