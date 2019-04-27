@@ -39,6 +39,11 @@
     <button onclick="iframe();">Iframe</button>
     <button onclick="load();">Load</button>
     <button onclick="load2('divArticle');">Load Element</button>
+
+    <button onclick="test01();">Test01</button>
+    <button onclick="show();">Show</button>
+    <button onclick="hide();">Hide</button>
+    <button onclick="update01();">Update</button>
     <br />
     <button onclick="msg();">Msg</button>
     <button onclick="msg(true);">Msg(固定宽度)</button>
@@ -107,6 +112,27 @@ document.onkeypress = function() {
 };
 
 */
+
+var d01;
+function test01(){
+    d01 = $.dialog.win('test01', 'test', {
+        id: 'd01',
+        closeType: 'hide',
+        lock: false
+    });
+}
+
+function hide(){
+    d01.hide();
+}
+
+function show(){
+    d01.show();
+}
+
+function update01(){
+    d01.update('更新对话框');
+}
 
 function alert2(){
     /*

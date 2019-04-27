@@ -419,7 +419,7 @@
     getElementsData = function (warns, arr, op) {
         var data = {}, configs = op.configs, len = arr.length;
         for (var i = 0; i < len; i++) {
-            var obj = arr[i], tag = obj.tagName, type = obj.type;
+            var obj = arr[i], tag = obj.tagName, type = obj.type, key = '';
             if (op.tagPattern.test(tag) && op.typePattern.test(type)) {
                 //获取字段参数配置
                 var fc = op.getFieldConfig(obj, op.fields), result = {};
@@ -447,17 +447,21 @@
                         return false;
                     }
                 } else if (obj.isSingle) {
-                    if(fc.field.md5 && $.isString(result.value, true)) {
-                        data[fc.key] = $.md5(result.value);
-                    } else {
-                        data[fc.key] = result.value;
+                    if(fc.key) {
+                        if(fc.field.md5 && $.isString(result.value, true)) {
+                            data[fc.key] = $.md5(result.value);
+                        } else {
+                            data[fc.key] = result.value;
+                        }
                     }
                 } else {
-                    if ($.isUndefined(data[fc.nameKey || fc.key])) {
-                        data[fc.nameKey || fc.key] = [];
-                    }
-                    if ('' !== $.trim(result.value)) {
-                        data[fc.nameKey || fc.key].push(result.value);
+                    if((key = fc.nameKey || fc.key)) {
+                        if ($.isUndefined(data[key])) {
+                            data[key] = [];
+                        }
+                        if ('' !== $.trim(result.value)) {
+                            data[key].push(result.value);
+                        }
                     }
                 }
             }

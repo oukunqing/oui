@@ -2543,6 +2543,9 @@
 
             return isAutoSize;
         },
+        isChange: function(newContent, oldContent) {
+            return newContent !== oldContent;
+        },
         getAutoSize: function(_, isLimit) {
             var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls;
             if(p.none) { return this; }
@@ -3263,7 +3266,16 @@
             return $.isBoolean(Factory.getOptions(this.id, 'closed'), true);
         },
         isHide: function() {
-            return $.isBoolean(Factory.getOptions(this.id, 'hide'), false);
+            if($.isBoolean(Factory.getOptions(this.id, 'hide'), false)) {
+                return true;
+            }
+            var p = Util.getParam(this), ctls = p.controls || {};
+            if(ctls.container) {
+                return $.getElementStyle(ctls.container, 'display') === 'none';
+            } else if(ctls.dialog) {
+                return $.getElementStyle(ctls.dialog, 'display') === 'none';
+            }
+            return false;
         },
         isMaximized: function() {
             return this.getStatus().max;
@@ -3397,6 +3409,9 @@
                 $.extend(opt.styles, p.options.styles);
             }
 
+            // 判断内容是否改变，以决定是否需要重新设置位置
+            var isChanged = Util.isChange(opt.content, p.options.content);
+
             if ($.extend(p.options, opt).type === Config.DialogType.tooltip) {
                 Util.updateTooltip(_, p.options);
                 return _;
@@ -3408,6 +3423,7 @@
                 if (ctls.title && opt.title) {
                     ctls.title.innerHTML = opt.title;
                 }
+
                 if(isMin) {
                     Util.setSize(_, {type: Config.DialogStatus.normal});
                     Util.setPosition(_);
@@ -3418,12 +3434,16 @@
                     Util.setSize(_, {type: Config.DialogStatus.min});
                 }
 
-                if (isAutoSize) {
+                if (isAutoSize && isChanged) {
                     window.setTimeout(function() { Util.setPosition(_); }, 10);
                 }
 
                 if(!p.options.lock) {
                     Util.setClickBgClose(_);
+                }
+
+                if(_.isHide() && !_.isClosed()) {
+                    _.show();
                 }
             }
             return _;

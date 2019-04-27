@@ -165,3 +165,4 @@ console.log(d);
 var str = '关闭';
 console.log(str.toUnicode());
 
+console.log(new Date().format('ts'))
