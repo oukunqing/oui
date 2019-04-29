@@ -353,6 +353,9 @@
             opt.title = title || opt.title;
             opt.target = target || opt.target;
             opt.callback = func || opt.callback;
+            
+            //对话框关闭后，要获取停止的HTML控件
+            opt.focusTo = opt.focusTo || opt.focus;
 
             if($.isBoolean(opt.boxShadow) || opt.boxShadow === 'none') {
                 opt.shadow = opt.boxShadow;
@@ -2895,6 +2898,10 @@
             } else {
                 func.callback && func.callback(dr, _, parameter);
             }
+
+            if($.isElement(opt.focusTo) || $.isElement((opt.focusTo = $I(opt.focusTo)))) {
+                $.setFocus(opt.focusTo);
+            }
             return this;
         },
         dispose: function (_) {
@@ -3123,6 +3130,7 @@
                 x: 0,                   //x轴(left)偏移量，单位：px
                 y: 0,                   //y轴(top)偏移量，单位：px
                 target: null,           //Element 要跟随位置的html控件
+                focusTo: null,          //要获取焦点的html控件(对话框关闭后获取焦点)
                 fixed: false,           //是否固定位置
                 topMost: false,         //是否允许置顶显示
                 closeAble: true,        //是否允许关闭

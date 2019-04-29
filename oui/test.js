@@ -166,3 +166,15 @@ var str = '关闭';
 console.log(str.toUnicode());
 
 console.log(new Date().format('ts'))
+
+//select  Auto_increment from information_schema.tables where Table_Schema = 'helmet'  and table_name = 'device_data';
+
+
+var mc = {con:'0'};
+
+var con = mc && mc['con'] ? mc['con'] : '';
+
+
+                    //arr[k] && list.push(arr[k]+ (mc && mc[k]? (mc[k] || '') : ''));
+
+console.log(con);
