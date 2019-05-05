@@ -143,7 +143,7 @@
     border-radius: 3px;
     box-sizing: content-box;
     float: left;
-    background:#fff url('imgs/icon.png') no-repeat 0 0;
+    background:transparent url('imgs/icon.png') no-repeat 0 0;
 }
 
 .oui-dialog .dialog-head .dialog-logo:hover {
@@ -170,7 +170,7 @@
 .oui-dialog .dialog-head .dialog-btn {
     border: solid 1px #f1f1f1;
     border-radius: 3px;
-    background-color: #fff;
+    background-color: transparent;
 
     cursor: pointer;
     width: 20px; height: 20px;
@@ -185,19 +185,19 @@
 }
 
 .oui-dialog .dialog-head .btn-min {
-    background: #fff url('imgs/icon.png') no-repeat -20px 0;
+    background:transparent url('imgs/icon.png') no-repeat -20px 0;
 }
 
 .oui-dialog .dialog-head .btn-max {
-    background: #fff url('imgs/icon.png') no-repeat -40px 0;
+    background:transparent url('imgs/icon.png') no-repeat -40px 0;
 }
 
 .oui-dialog .dialog-head .btn-normal {
-    background: #fff url('imgs/icon.png') no-repeat -60px 0;
+    background:transparent url('imgs/icon.png') no-repeat -60px 0;
 }
 
 .oui-dialog .dialog-head .btn-close {
-    background: #fff url('imgs/icon.png') no-repeat -80px 0;
+    background:transparent url('imgs/icon.png') no-repeat -80px 0;
 }
 
 .oui-dialog .dialog-body .btn-panel {
@@ -215,27 +215,27 @@
     margin: 0 0 0 5px; padding: 0;
     box-sizing: content-box;
 
-    background: #fff url('imgs/icon.png') no-repeat -80px 0;
+    background:transparent url('imgs/icon.png') no-repeat -80px 0;
 }
 
 .oui-dialog .dialog-body .close0 {
     border: none 0;
-    background: #fff url('imgs/icon.png') no-repeat -80px 0;
+    background:transparent url('imgs/icon.png') no-repeat -80px 0;
 }
 
 .oui-dialog .dialog-body .close1 {
     border: none 0;
-    background: #fff url('imgs/icon.png') no-repeat -100px 0;
+    background:transparent url('imgs/icon.png') no-repeat -100px 0;
 }
 
 .oui-dialog .dialog-body .close2 {
     border: none 0;
-    background: #fff url('imgs/icon.png') no-repeat -120px 0;
+    background:transparent url('imgs/icon.png') no-repeat -120px 0;
 }
 
 .oui-dialog .dialog-body .close3 {
     border: none 0;
-    background: #fff url('imgs/icon.png') no-repeat -140px 0;
+    background:transparent url('imgs/icon.png') no-repeat -140px 0;
 }
 
 .oui-dialog .dialog-body, .oui-dialog-max .dialog-body {
@@ -278,7 +278,7 @@
     width: 32px;
     height: 32px;
     position: absolute;
-    left: 3px; top: 0;
+    left: 3px; top: 3px;
     display: block;
 }
 

@@ -1046,6 +1046,12 @@
             ctls.container.style.zIndex = opt.zindex;
             return this;
         },
+        buildCover: function(_, obj) {
+            var bs = $.getBodySize();
+            obj.innerHTML = '<iframe src="about:blank" style="position:absolute; visibility:inherit; top:0px; left:-2px;'
+                + ' width:' + (bs.width) + 'px; height:' + (bs.height) + 'px; border:none; z-index:-1;'
+                + ' filter=\'progid:DXImageTransform.Microsoft.Alpha(style=0,opacity=0)\';"></iframe>';    
+        },
         buildDialog: function(_) {
             var p = this.getParam(_), opt = p.options, ctls = p.controls;
             if(p.none) { return this; }
@@ -1057,6 +1063,10 @@
             ctls.dialog.className = className;
             ctls.dialog.style.zIndex = opt.zindex;
             ctls.dialog.id = _.getDialogId();
+
+            if(opt.coverOCX) {
+                Util.buildCover(_, ctls.dialog);
+            }
 
             if ((css = Common.toCssText(opt.styles.dialog, 'dialog'))) {
                 ctls.dialog.style.cssText = css;
