@@ -2107,6 +2107,10 @@
             var isRemove = true;
             return appendChild(parent, elem, isRemove);
         },
+        removeElement = function(elem) {
+            var parent = elem.parentNode;
+            return removeChild(parent, elem);
+        },
         loadStaticFile = function (path, id, callback, parent, nodeName, attributes) {
             if (!$.isString(id, true)) {
                 id = nodeName + '-' + getFileName(path, true).replace(/[.]/, '-') + '-' + $.crc.toCRC16(path).toLowerCase();
@@ -2336,8 +2340,6 @@
         getOffsetSize: getOffsetSize,
         getElementSize: getElementSize,
         offset: getOffsetSize,
-        isWindow: isWindow,
-        isDocument: isDocument,
         isArrayLike: isArrayLike,
         merge: merge,
         makeArray: makeArray,
@@ -2352,6 +2354,7 @@
         hasClass: hasClass,
         appendChild: appendChild,
         removeChild: removeChild,
+        removeElement: removeElement,
         loadLinkStyle: loadLinkStyle,
         loadJsScript: loadJsScript,
         removeJsScript: removeJsScript,

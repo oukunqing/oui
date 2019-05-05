@@ -11,7 +11,7 @@
         }
     </style>
     <script type="text/javascript" src="../oui/oui.js?1"></script>
-    <script type="text/javascript" src="../oui/dialog/oui.dialog.js?1"></script>
+    <script type="text/javascript" src="../oui/dialog/oui.dialog.js?123"></script>
 </head>
 <body>
     <div id="p1"></div>
@@ -142,6 +142,7 @@ function alert2(){
     */
     var dialog = $.alert('Hello!对话框', {
         id: 3, 
+        skin: 'blue',
         position: 5, 
         //maxHeight: 360, maxWidth: 500, 
         lock: true, clickBgClose: 'dblclick', 
@@ -607,7 +608,7 @@ function msg(isFixWidth){
 
 function tips(){
     var win = $.tips('tips: 请注意：提示信息已经更新。' + new Date().getTime(), $I('txtTips'), {
-        type:'tips',position: 'lefttop',
+        type:'tips',position: 'right',
         maxWidth: 300,
         styles: {
             'tooltip': {

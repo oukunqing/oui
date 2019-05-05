@@ -381,6 +381,12 @@
                 }
             }
 
+            if($.isString(opt.skin, true)) {
+                opt.skin = opt.skin.toLowerCase();
+            } else {
+                opt.skin = 'default';
+            }
+
             return this.checkCustomStyle(opt, isUpdate).checkTiming(opt), opt;
         },
         getCssAttrSize: function(val, options) {
@@ -803,9 +809,19 @@
 
             return d;
         },
-        loadCss: function() {
-            var path = Config.FilePath;
-            $.loadLinkStyle($.getFilePath(path) + $.getFileName(path, true).replace('.min', '') + '.css');
+        loadCss: function(skin, func) {
+            var path = Config.FilePath,
+                name = $.getFileName(path, true),
+                dir = $.getFilePath(path);
+
+            if($.isString(skin, true)) {
+                dir += 'skin/' + skin + '/';
+            }
+            $.loadLinkStyle(dir + name.replace('.min', '') + '.css', function() {
+                if($.isFunction(func)) {
+                    func();
+                }
+            });
         }
     },
     Util = {
@@ -1033,9 +1049,12 @@
         buildDialog: function(_) {
             var p = this.getParam(_), opt = p.options, ctls = p.controls;
             if(p.none) { return this; }
-            var css, shadow = opt.shadow;
+            var css, shadow = opt.shadow, className = 'oui-dialog';
+            if(opt.skin !== 'default') {
+                className += ' oui-dialog-' + opt.skin;
+            }
             ctls.dialog = $.createElement('div');
-            ctls.dialog.className = 'oui-dialog';
+            ctls.dialog.className = className;
             ctls.dialog.style.zIndex = opt.zindex;
             ctls.dialog.id = _.getDialogId();
 
@@ -2126,6 +2145,74 @@
 
             return this;
         },
+        setTargetPosition2: function(options, obj, isFixedSize) {
+            var par = $.extend({
+                target: null,
+                parent: null,
+                position: 'bottomleft',    //默认停靠在目标控件左下方位置
+                x: null,
+                y: null
+            }, options);
+
+            if(!$.isElement(par.target) || !$.isElement(obj)) {
+                return {};
+            }
+            par.position = (par.position || par.pos);
+
+            this.convertPositionKey(par);
+
+            var pos = par.position,
+                p = $.getOffset(par.target),
+                w = obj.offsetWidth,
+                h = obj.offsetHeight,
+                bs = $.getBodySize(),
+                ps = $.getScrollPosition(),
+                fs = {
+                    w: p.width,
+                    h: p.height,
+                    x: p.left,
+                    y: p.top
+                },
+                left = fs.x,
+                top = fs.y,
+                moveY = 0,
+                moveX = 0,
+                newTop = top,
+                newLeft =left,
+                result = {
+                    css: ''
+                },
+                isOver = true;
+
+            var ys = {top: fs.y - h - par.y, bottom: fs.y + fs.h + par.y},
+                xs = {left: fs.x - w - par.x, right: fs.x + fs.w + par.x};
+
+
+            switch(pos) {
+                case 'top':
+                    left = fs.x - (w - fs.w) / 2;
+                    if(left < ps.left) {
+                        newLeft = ps.left;
+                        moveX = left - newLeft;
+                        left = newLeft;
+                    } else if((left + w) > (bs.width + ps.left)) {
+                        newLeft = bs.width + ps.left - h;
+                        moveX = left - newLeft;
+                        left = newLeft;
+                    }
+                    if(fs.w < w) {
+                        result.css = 'left: ' + (w / 2 + moveX) + 'px;';
+                    }
+                    break;
+                case 'left':
+                    break;
+                case 'right':
+                    break;
+                case 'bottom':
+                    break;
+            }
+
+        },
         setTargetPosition: function(options, obj, isFixedSize) {
             var par = $.extend({
                 target: null,
@@ -2174,6 +2261,7 @@
             ys.value = ys.bottom + h - bs.height;
             xs.value = xs.right + w - bs.width;
 
+console.log('ys: ', ys, ', xs: ', xs);
             //do{
                 isOver = true;
 
@@ -2223,7 +2311,7 @@
                             left = newLeft;
                         }
                         if(fs.w < w) {
-                            result.css = 'top: ' + (w / 2 + moveX) + 'px;';
+                            result.css = 'left: ' + (w / 2 + moveX) + 'px;';
                         }
                         break;
                     case 'left':
@@ -2899,7 +2987,7 @@
                 func.callback && func.callback(dr, _, parameter);
             }
 
-            if($.isElement(opt.focusTo) || $.isElement((opt.focusTo = $I(opt.focusTo)))) {
+            if($.isElement(opt.focusTo) || (opt.focusTo && $.isElement((opt.focusTo = $I(opt.focusTo))))) {
                 $.setFocus(opt.focusTo);
             }
             return this;
@@ -3096,13 +3184,14 @@
         }
     };
 
-    //先加载样式文件
-    Factory.loadCss();
+    //先加载(默认)样式文件
+    Factory.loadCss('default');
 
     function Dialog (content, title, options) {
         var ds = Common.getDefaultSize(),
             opt = $.extend({
                 id: null,                       //id
+                skin: 'default',                //样式: default, blue
                 lang: Config.Lang.Chinese,      //语言 Chinese,English
                 type: Config.DialogType.alert,  //alert,confirm,message,tooltip,window,iframe
                 status: Config.DialogStatus.normal,     //初始状态  normal, min, max 三种状态
@@ -3182,7 +3271,8 @@
                 bodyStyle: '',          //主体样式
                 contentStyle: '',       //内容样式
                 footStyle: '',          //底部样式
-                tooltipStyle: ''        //Tooltip样式
+                tooltipStyle: '',       //Tooltip样式
+                coverOCX: false         //是否覆盖在OCX控件之上
             }, Common.checkOptions(content, title, options));
 
         return this.id = opt.id, this.initial(opt);
@@ -3190,7 +3280,7 @@
 
     Dialog.prototype = {
         initial: function(options) {
-            var p = Util.getParam(this), opt = options || p.options, id = opt.id;
+            var _ = this, p = Util.getParam(_), opt = options || p.options, id = opt.id;
 
             if($.isElement(opt.parent) && 
                 ['DIV'].indexOf(opt.parent.tagName) >= 0) {
@@ -3216,12 +3306,22 @@
 
             var dialog = Factory.getDialog(id);
             if(!dialog) {
-                Factory.setDialog(id, this)
+                Factory.setDialog(id, _)
                     .setOptions(id, opt)
                     .setOptions(id, 'dialogId', Common.buildId(id, 'd-'));
             }
 
-            return Util.setOptions(this, 'options', opt).build(this, opt), this;
+            Util.setOptions(_, 'options', opt);
+
+            if(opt.skin !== 'default') {
+                Factory.loadCss(opt.skin, function() {
+                    Util.build(_, opt);
+                });
+            } else {
+                Util.build(_, opt);
+            }
+
+            return _;
         },
         getOptions: function(key) {
             var opt = $.extend({}, Factory.getOptions(this.id, 'options'));

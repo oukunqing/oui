@@ -175,6 +175,20 @@ var mc = {con:'0'};
 var con = mc && mc['con'] ? mc['con'] : '';
 
 
-                    //arr[k] && list.push(arr[k]+ (mc && mc[k]? (mc[k] || '') : ''));
 
 console.log(con);
+
+var name = '无人知晓';
+console.log(encodeURI(name));
+
+console.log('abcdd'.startsWith('abc'));
+//https://baike.baidu.com/item/%E8%8B%B1%E5%9B%BD%E7%97%85%E4%BA%BA/5410223
+
+
+var pattern = /<title>(.*)<\/title>/;
+
+var str = '<html><head> <title>这是 标题</title></head></html>';
+
+var mc = str.match(pattern);
+
+console.log(mc);
