@@ -1794,7 +1794,6 @@
             if(p.none) { return util; }
 
             var obj = ctls.dialog,
-                //bs = $.getBodySize(),
                 bs = util.getBoundary(opt.parent),
                 w = obj.offsetWidth,
                 h = obj.offsetHeight,
@@ -1862,7 +1861,6 @@
                 btns.min.title = Common.getStatusText(minKey, opt.lang);
             }
 
-            //var bs = $.getBodySize(),
             var bs = util.getBoundary(opt.parent),
                 isSetBodySize = false, isSetPosition = false, isFullScreen = false;
 
@@ -2140,7 +2138,6 @@
             }
 
             var moveTo = $.isBoolean(isMoveTo, false),
-                //bs = $.getBodySize(),
                 bs = util.getBoundary(opt.parent),
                 left = obj.offsetLeft,
                 top = obj.offsetTop,
@@ -2212,7 +2209,6 @@
             return this;
         },
         setFinalPosition: function(pos, w, h, res, xs, ys, parent) {
-            //var bs = $.getBodySize(), 
             var bs = this.getBoundary(parent), 
                 f = 0, s = 0;
 
@@ -2269,7 +2265,6 @@
                 p = $.getOffset(par.target),
                 w = obj.offsetWidth,
                 h = obj.offsetHeight,
-                //bs = $.getBodySize(),
                 bs = util.getBoundary(par.parent),
                 ps = $.getScrollPosition(),
                 fs = {
@@ -2402,7 +2397,6 @@
                 }
                 var evt = $.getEvent(),
                     cp = $.getScrollPosition(),
-                    //bs = $.getBodySize(),
                     bs = util.getBoundary(opt.parent),
                     clientWidth = bs.width,
                     clientHeight = bs.height,
@@ -2499,7 +2493,6 @@
                     minHeight: parseInt(opt.minHeight, 10)
                 };
             }
-            //var bs = $.getBodySize(),
             var bs = util.getBoundary(opt.parent),
                 headHeight = (ctls.head ? ctls.head.offsetHeight : 0),
                 footHeight = (ctls.foot ? ctls.foot.offsetHeight : 0),
@@ -2707,7 +2700,6 @@
             }, options);
 
             var obj = ctls.dialog,
-                //bs = $.getBodySize();
                 bs = util.getBoundary(opt.parent);
             if (!obj) {
                 return this;
