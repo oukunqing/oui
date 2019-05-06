@@ -1780,12 +1780,12 @@
             };
             if($.isElement(parent)) {
                 var offset = $.getOffset(parent);
-                boundary.x = offset.left;
-                boundary.y = offset.top;
-                boundary.width = offset.left + parent.offsetWidth;
-                boundary.height = offset.top + parent.offsetHeight;
-                console.log('boundary: ', boundary);
-                return boundary;
+                return $.extend(boundary, {
+                    x: offset.left, 
+                    y: offset.top, 
+                    width: offset.left + parent.offsetWidth, 
+                    height: offset.top + parent.offsetHeight
+                });
             }
             return $.extend(boundary, $.getBodySize());
         },
@@ -1794,8 +1794,8 @@
             if(p.none) { return util; }
 
             var obj = ctls.dialog,
-                bs = $.getBodySize(),
-                //bs = util.getBoundary(opt.parent),
+                //bs = $.getBodySize(),
+                bs = util.getBoundary(opt.parent),
                 w = obj.offsetWidth,
                 h = obj.offsetHeight,
                 size = {
@@ -1862,14 +1862,21 @@
                 btns.min.title = Common.getStatusText(minKey, opt.lang);
             }
 
-            var bs = $.getBodySize(), isSetBodySize = false, isSetPosition = false, isFullScreen = false;
+            //var bs = $.getBodySize(),
+            var bs = util.getBoundary(opt.parent),
+                isSetBodySize = false, isSetPosition = false, isFullScreen = false;
 
             if (sp.type === Config.DialogStatus.max) {
                 if (!opt.maxAble) {
                     return this;
                 }
-                var scrollTop = opt.lock ? 0 : document.documentElement.scrollTop;
-                par = { width: '100%', height: '100%', top: scrollTop, left: 0, right: 0, bottom: 0 };
+                var hasParent = $.isElement(opt.parent);
+                var scrollTop = opt.lock || hasParent ? bs.x : document.documentElement.scrollTop;
+                if(hasParent) {
+                    par = { width: opt.parent.offsetWidth + 'px', height: opt.parent.offsetHeight + 'px', top: scrollTop, left: bs.x };
+                } else {
+                    par = { width: '100%', height: '100%', top: scrollTop, left: bs.x };
+                }
                 isSetBodySize = isFullScreen = true;
 
                 $.addClass(obj, 'oui-dialog-max').addClass(btns.max, 'btn-normal');
@@ -2050,12 +2057,13 @@
                 position: opt.position,
                 x: opt.x,
                 y: opt.y
-            }, options), posX, posY;
+            }, options), posX, posY,
+            bs = util.getBoundary(opt.parent);
 
             //window.resize
             if(par.event === 'window.resize') {
                 if(p.status.max) {
-                    return $.setStyle(obj, { left: 0, top: 0 }, 'px'), util;
+                    return $.setStyle(obj, { left: bs.x, top: bs.y }, 'px'), util;
                 } else {
 
                     //TODO:
@@ -2081,14 +2089,13 @@
                 return util;
             }
 
-            var bs = $.getBodySize(),
-                cp = $.getScrollPosition(),
+            var cp = $.getScrollPosition(),
                 w = obj.offsetWidth,
                 h = obj.offsetHeight,
                 //锁定界面相当于固定位置
                 fixed = opt.lock || opt.fixed,
-                cpTop = fixed ? 0 : cp.top,
-                cpLeft = fixed ? 0 : cp.left,
+                cpTop = fixed ? bs.x : cp.top,
+                cpLeft = fixed ? bs.y : cp.left,
                 isCenter = util.checkPosition(_, Config.Position.Center, par.position),
                 isMiddle = util.checkPosition(_, Config.Position.Middle, par.position),
                 isBottom = false,
@@ -2098,20 +2105,19 @@
                 posX = (bs.width / 2 - w / 2) + cpLeft;
             } else {
                 isRight = util.checkPosition(_, Config.Position.Right, par.position);
-                posX = isRight ? (bs.width - par.x - w + cpLeft) : cpLeft + par.x;
+                posX = isRight ? (bs.width - par.x - w + cpLeft - bs.x) : cpLeft + par.x;
             }
             if (isMiddle) {
                 posY = bs.height / 2 - h / 2 + cpTop;
             } else {
                 isBottom = util.checkPosition(_, Config.Position.Bottom, par.position);
-                posY = isBottom ? (bs.height - par.y - h + cpTop) : cpTop + par.y;
+                posY = isBottom ? (bs.height - par.y - h + cpTop - bs.y) : cpTop + par.y;
             }
 
             //清除cssText上下左右4个样式
             util.clearPositionStyle(obj);
 
             //TODO: margin setting
-
 
             return $.setStyle(obj, { left: posX, top: posY }, 'px'), util;
         },
@@ -2134,7 +2140,8 @@
             }
 
             var moveTo = $.isBoolean(isMoveTo, false),
-                bs = $.getBodySize(),
+                //bs = $.getBodySize(),
+                bs = util.getBoundary(opt.parent),
                 left = obj.offsetLeft,
                 top = obj.offsetTop,
                 w = obj.offsetWidth,
@@ -2142,18 +2149,18 @@
                 x = parseInt(par.x || par.left, 10),
                 y = parseInt(par.y || par.top, 10);
 
-            if(isNaN(x)) { x = moveTo ? left : 0; }
-            if(isNaN(y)) { y = moveTo ? top : 0; }
+            if(isNaN(x)) { x = moveTo ? left : bs.x; }
+            if(isNaN(y)) { y = moveTo ? top : bs.y; }
 
             var posX = moveTo ? x : left + x,
                 posY = moveTo ? y : top + y;
 
             if (opt.limitRange) {
-                if (posX < 0) {
-                    posX = 0;
+                if (posX < bs.x) {
+                    posX = bs.x;
                 }
-                if (posY < 0) {
-                    posY = 0;
+                if (posY < bs.y) {
+                    posY = bs.y;
                 }
                 if ((posX + w) > bs.width) {
                     posX = bs.width - w;
@@ -2204,13 +2211,15 @@
             }
             return this;
         },
-        setFinalPosition: function(pos, w, h, res, xs, ys) {
-            var bs = $.getBodySize(), f = 0, s = 0;
+        setFinalPosition: function(pos, w, h, res, xs, ys, parent) {
+            //var bs = $.getBodySize(), 
+            var bs = this.getBoundary(parent), 
+                f = 0, s = 0;
 
             if(pos.indexOf('left') === 0) {
                 res.dir = 'left';
                 res.left = xs.left;
-                if(res.left < 0) {
+                if(res.left < bs.x) {
                     pos = pos.replace('left', 'right');
                 }
             }
@@ -2224,7 +2233,7 @@
             if(pos.indexOf('top') === 0) {
                 res.dir = 'top';
                 res.top = ys.top;
-                if(res.top < 0) {
+                if(res.top < bs.y) {
                     pos = pos.replace('top', 'bottom');
                 }
             }
@@ -2239,27 +2248,29 @@
             return pos;
         },
         setTargetPosition: function(options, obj, isFixedSize) {
-            var par = $.extend({
-                target: null,
-                direction: 'auto',
-                parent: null,
-                position: 'bottomleft',    //默认停靠在目标控件左下方位置
-                x: null,
-                y: null
-            }, options);
+            var util = this,
+                par = $.extend({
+                    target: null,
+                    direction: 'auto',
+                    parent: null,
+                    position: 'bottomleft',    //默认停靠在目标控件左下方位置
+                    x: null,
+                    y: null
+                }, options);
 
             if(!$.isElement(par.target) || !$.isElement(obj)) {
                 return {};
             }
             par.position = (par.position || par.pos);
 
-            this.convertPositionKey(par);
+            util.convertPositionKey(par);
 
             var pos = par.position,
                 p = $.getOffset(par.target),
                 w = obj.offsetWidth,
                 h = obj.offsetHeight,
-                bs = $.getBodySize(),
+                //bs = $.getBodySize(),
+                bs = util.getBoundary(par.parent),
                 ps = $.getScrollPosition(),
                 fs = {
                     w: p.width,
@@ -2283,15 +2294,15 @@
                 distance = 12;
 
             if(par.direction === 'auto') {
-                pos = Util.setFinalPosition(pos, w, h, res, xs, ys);
+                pos = Util.setFinalPosition(pos, w, h, res, xs, ys, par.parent);
             }
 
             if(pos.indexOf('left') === 0) {
                 res.dir = 'left';
                 res.left = xs.left;
-                if(res.left < 0) {
-                    w += res.left - distance;
-                    res.left = 0;
+                if(res.left < bs.x) {
+                    w += res.left - distance - bs.x;
+                    res.left = bs.x;
                     $.setStyle(obj, {width: w }, 'px');
                 }
             } else if(pos.indexOf('right') === 0) {
@@ -2305,10 +2316,10 @@
             } else if(pos.indexOf('top') === 0) {
                 res.dir = 'top';
                 res.top = ys.top;                
-                if(res.top < 0) {
-                    h += res.top - distance;
+                if(res.top < bs.y) {
+                    h += res.top - distance - bs.y;
                     w = Common.getRealSize(par.content).width;
-                    res.top = 0;
+                    res.top = bs.y;
                     $.setStyle(obj, {height: h , width: w}, 'px');
                 }
             } else if(pos.indexOf('bottom') === 0) {
@@ -2391,7 +2402,8 @@
                 }
                 var evt = $.getEvent(),
                     cp = $.getScrollPosition(),
-                    bs = $.getBodySize(),
+                    //bs = $.getBodySize(),
+                    bs = util.getBoundary(opt.parent),
                     clientWidth = bs.width,
                     clientHeight = bs.height,
                     moveX = evt.clientX,
@@ -2487,7 +2499,8 @@
                     minHeight: parseInt(opt.minHeight, 10)
                 };
             }
-            var bs = $.getBodySize(),
+            //var bs = $.getBodySize(),
+            var bs = util.getBoundary(opt.parent),
                 headHeight = (ctls.head ? ctls.head.offsetHeight : 0),
                 footHeight = (ctls.foot ? ctls.foot.offsetHeight : 0),
                 w, h;
@@ -2514,10 +2527,10 @@
 
             var newWidth = w < dp.minWidth ? dp.minWidth : w,
                 newHeight = h < dp.minHeight ? dp.minHeight : h,
-                newLeft = 0,
-                newTop = 0,
-                x = 0,
-                y = 0;
+                newLeft = bs.x,
+                newTop = bs.y,
+                x = bs.x,
+                y = bs.y;
 
             var mw = parseInt(opt.maxWidth, 10);
             if (opt.maxWidth !== '100%' && !isNaN(mw) && newWidth > mw) {
@@ -2553,8 +2566,11 @@
                 if (newHeight > bs.height - obj.offsetTop) {
                     newHeight = bs.height - obj.offsetTop;
                 }
-                if (newTop < 0) {
-                    newTop = 0;
+                if (newTop < bs.y) {
+                    newTop = bs.y;
+                }
+                if (newLeft < bs.x) {
+                    newLeft = bs.x;
                 }
             }
 
@@ -2690,7 +2706,9 @@
                 lastSize: undefined
             }, options);
 
-            var obj = ctls.dialog, bs = $.getBodySize();
+            var obj = ctls.dialog,
+                //bs = $.getBodySize();
+                bs = util.getBoundary(opt.parent);
             if (!obj) {
                 return this;
             }

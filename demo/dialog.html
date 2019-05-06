@@ -11,14 +11,14 @@
         }
     </style>
     <script type="text/javascript" src="../oui/oui.js?1"></script>
-    <script type="text/javascript" src="../oui/dialog/oui.dialog.js?1"></script>
+    <script type="text/javascript" src="../oui/dialog/oui.dialog.js?12"></script>
 </head>
 <body>
     <div id="p1"></div>
     <div id="p2" style="height:300px;width:600px;border-radius: 5px 10px 3px 6px;margin:0 0 5px 0;
             border: solid 1px #f00;
             display:block;left:5px; top: 10px;">
-        <input type="input" name="" id="txtTips" style="width:240px;height:30px;margin:30px 0 0 420px;" value="这是文本输入框的内容" />
+        <input type="input" name="" id="txtTips" style="width:240px;height:30px;margin:30px 0 0 220px;" value="这是文本输入框的内容" />
         <br />
         <br />
         <br />
@@ -422,6 +422,7 @@ function form2() {
         //lang: 'English',
         //status: 'max',
         position: 9,
+        parent: 'p2',
         x: 5,
         y: 5,
         lock: false,
@@ -584,6 +585,7 @@ function msg(isFixWidth){
         //shadow: false,
         lock: false, 
         clickBgClose: true, 
+        parent: 'p2',
         y: 5, x: 0,
         //width: 300,
         //target: $I('txtTips'),
@@ -613,6 +615,7 @@ function msg(isFixWidth){
 function tips(){
     var win = $.tips('tips: 请注意：提示信息已经更新。' + new Date().getTime(), 'txtTips', {
         type:'tips', position: 'topleft',
+        parent: 'p2',
         //direction: 'fixed',
         //width: 200,
         styles: {
