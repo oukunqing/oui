@@ -357,6 +357,8 @@
             //对话框关闭后，要获取停止的HTML控件
             opt.focusTo = opt.focusTo || opt.focus;
 
+            opt.type = this.checkType(opt.type, false);
+
             if($.isBoolean(opt.boxShadow) || opt.boxShadow === 'none') {
                 opt.shadow = opt.boxShadow;
             }
@@ -497,7 +499,7 @@
             };
             return size;
         },
-        getTitleSize: function(txt) {
+        getRealSize: function(txt) {
             var id = 'div-oui-dialog-text-size-01';
             var div = document.getElementById(id);
             if(!div) {
@@ -951,6 +953,11 @@
                 p.parent.appendChild(ctls.dialog);
             }
 
+            var cover = $I(_.getDialogId() + '-cover');
+            if(opt.coverOCX && cover !== null) {
+                ctls.cover = cover;
+            }
+
             util.setSize(_, { type: opt.status, width: opt.width, height: opt.height });
 
             if(util.isAutoSize(_)) {
@@ -1047,10 +1054,20 @@
             return this;
         },
         buildCover: function(_, obj) {
-            var bs = $.getBodySize();
-            obj.innerHTML = '<iframe src="about:blank" style="position:absolute; visibility:inherit; top:0px; left:-2px;'
-                + ' width:' + (bs.width) + 'px; height:' + (bs.height) + 'px; border:none; z-index:-1;'
-                + ' filter=\'progid:DXImageTransform.Microsoft.Alpha(style=0,opacity=0)\';"></iframe>';    
+            obj.innerHTML = '<iframe id="' + _.getDialogId() + '-cover" src="about:blank"'
+                + ' style="position:absolute; visibility:inherit; top:-1px; left:-1px;'
+                + ' width:0px; height:0px; border:none; z-index:-1;'
+                + ' filter=\'progid:DXImageTransform.Microsoft.Alpha(style=0,opacity=0)\';"></iframe>';
+            return this;
+        },
+        setCoverSize: function(_) {
+            var p = this.getParam(_), opt = p.options, ctls = p.controls;
+            if(ctls.cover) {
+                var size = {w: ctls.dialog.offsetWidth, h: ctls.dialog.offsetHeight};
+                ctls.cover.style.width = size.w + 'px';
+                ctls.cover.style.height = size.h + 'px';
+            }
+            return this;
         },
         buildDialog: function(_) {
             var p = this.getParam(_), opt = p.options, ctls = p.controls;
@@ -1187,7 +1204,8 @@
                 if(isMin) {
                     html.push('<a class="dialog-btn btn-min" code="min" key="min" title="' + min + '"></a>');
                 }
-                if(isMax || isMin) {
+                //if(isMax || isMin) {
+                if(isMax) {
                     html.push('<a class="dialog-btn btn-max" code="max" key="max" title="' + max + '"></a>');
                 }
             }
@@ -1810,8 +1828,13 @@
             }
 
             if (btns.max) {
-                //btns.max.title = sp.type === DialogStatus.Max ? 'Restore Down' : 'Maximize';
-                btns.max.title = Common.getStatusText(sp.type === Config.DialogStatus.max ? 'restore' : 'max', opt.lang);
+                var maxKey = sp.type !== Config.DialogStatus.normal ? 'restore' : 'max';
+                btns.max.title = Common.getStatusText(maxKey, opt.lang);
+            }
+
+            if(btns.min) {
+                var minKey = sp.type !== Config.DialogStatus.min ? 'min' : 'restore';
+                btns.min.title = Common.getStatusText(minKey, opt.lang);
             }
 
             var bs = $.getBodySize(), isSetBodySize = false, isSetPosition = false, isFullScreen = false;
@@ -1921,7 +1944,7 @@
 
             if(ctls.title) {
                 ctls.title.style.maxWidth = (titleWidth) + 'px';
-                var realSize = Common.getTitleSize(ctls.title.innerHTML,'');
+                var realSize = Common.getRealSize(ctls.title.innerHTML,'');
 
                 if(realSize.width > titleWidth) {
                     ctls.title.title = $.filterHtmlCode(opt.title);
@@ -1997,6 +2020,7 @@
                 event: '',              //window.resize
                 fullScreen: false,
                 target: opt.target,
+                direction: opt.direction,
                 parent: opt.parent,
                 position: opt.position,
                 x: opt.x,
@@ -2015,6 +2039,10 @@
                 }
             }
             if($.isElement(par.target)) {
+                if(opt.type === Config.DialogType.tooltip) {
+                    par.x = 7;
+                    par.y = 7;
+                }
                 //目标位置停靠
                 return util.setTargetPosition(par, obj), util;
             }
@@ -2068,6 +2096,7 @@
 
             var par = $.extend({
                 target: null,
+                direction: opt.direction,
                 parent: null,
                 position: 7,    //默认停靠在目标控件左下方位置
                 x: null,
@@ -2150,82 +2179,44 @@
             }
             return this;
         },
-        setFinalPosition: function() {
-            //TODO:
+        setFinalPosition: function(pos, w, h, res, xs, ys) {
+            var bs = $.getBodySize(), f = 0, s = 0;
 
-            return this;
-        },
-        setTargetPosition2: function(options, obj, isFixedSize) {
-            var par = $.extend({
-                target: null,
-                parent: null,
-                position: 'bottomleft',    //默认停靠在目标控件左下方位置
-                x: null,
-                y: null
-            }, options);
-
-            if(!$.isElement(par.target) || !$.isElement(obj)) {
-                return {};
+            if(pos.indexOf('left') === 0) {
+                res.dir = 'left';
+                res.left = xs.left;
+                if(res.left < 0) {
+                    pos = pos.replace('left', 'right');
+                }
             }
-            par.position = (par.position || par.pos);
-
-            this.convertPositionKey(par);
-
-            var pos = par.position,
-                p = $.getOffset(par.target),
-                w = obj.offsetWidth,
-                h = obj.offsetHeight,
-                bs = $.getBodySize(),
-                ps = $.getScrollPosition(),
-                fs = {
-                    w: p.width,
-                    h: p.height,
-                    x: p.left,
-                    y: p.top
-                },
-                left = fs.x,
-                top = fs.y,
-                moveY = 0,
-                moveX = 0,
-                newTop = top,
-                newLeft =left,
-                result = {
-                    css: ''
-                },
-                isOver = true;
-
-            var ys = {top: fs.y - h - par.y, bottom: fs.y + fs.h + par.y},
-                xs = {left: fs.x - w - par.x, right: fs.x + fs.w + par.x};
-
-
-            switch(pos) {
-                case 'top':
-                    left = fs.x - (w - fs.w) / 2;
-                    if(left < ps.left) {
-                        newLeft = ps.left;
-                        moveX = left - newLeft;
-                        left = newLeft;
-                    } else if((left + w) > (bs.width + ps.left)) {
-                        newLeft = bs.width + ps.left - h;
-                        moveX = left - newLeft;
-                        left = newLeft;
-                    }
-                    if(fs.w < w) {
-                        result.css = 'left: ' + (w / 2 + moveX) + 'px;';
-                    }
-                    break;
-                case 'left':
-                    break;
-                case 'right':
-                    break;
-                case 'bottom':
-                    break;
+            if(pos.indexOf('right') === 0) {
+                res.dir = 'right';
+                res.left = xs.right;
+                if(res.left + w > bs.width) {
+                    pos = pos.replace('right', 'left');
+                }
+            }
+            if(pos.indexOf('top') === 0) {
+                res.dir = 'top';
+                res.top = ys.top;
+                if(res.top < 0) {
+                    pos = pos.replace('top', 'bottom');
+                }
+            }
+            if(pos.indexOf('bottom') === 0) {
+                res.dir = 'bottom';
+                res.top = ys.bottom;
+                if(res.top + h > bs.height) {
+                    pos = pos.replace('bottom', 'top');
+                }
             }
 
+            return pos;
         },
         setTargetPosition: function(options, obj, isFixedSize) {
             var par = $.extend({
                 target: null,
+                direction: 'auto',
                 parent: null,
                 position: 'bottomleft',    //默认停靠在目标控件左下方位置
                 x: null,
@@ -2235,8 +2226,6 @@
             if(!$.isElement(par.target) || !$.isElement(obj)) {
                 return {};
             }
-            //TODO:
-
             par.position = (par.position || par.pos);
 
             this.convertPositionKey(par);
@@ -2253,132 +2242,115 @@
                     x: p.left,
                     y: p.top
                 },
-                left = fs.x,
-                top = fs.y,
-                moveY = 0,
-                moveX = 0,
-                newTop = top,
-                newLeft =left,
-                result = {
+                res = {
+                    left: fs.x,
+                    top: fs.y,
+                    moveX: 0,
+                    moveY: 0,
                     css: ''
                 },
+                newTop = res.top,
+                newLeft = res.left,
                 isOver = true;
 
             var ys = {top: fs.y - h - par.y, bottom: fs.y + fs.h + par.y},
                 xs = {left: fs.x - w - par.x, right: fs.x + fs.w + par.x},
-                loop = 0, value = 0;
+                distance = 12;
 
-            ys.value = ys.bottom + h - bs.height;
-            xs.value = xs.right + w - bs.width;
+            if(par.direction === 'auto') {
+                pos = Util.setFinalPosition(pos, w, h, res, xs, ys);
+            }
 
-console.log('ys: ', ys, ', xs: ', xs);
-            //do{
-                isOver = true;
-
-                if(pos.startsWith('top')) {
-                    top = ys.top;
-                    result.dir = 'top';
-                    if(ys.top < 0 && (ys.value < 0 || ys.value < Math.abs(ys.top))) {
-                        isOver = false;
-                        pos = pos.replace('top', 'bottom');
-                    }
-                } else if(pos.startsWith('bottom')) {
-                    top = ys.bottom;
-                    result.dir = 'bottom';
-                    if(ys.value > 0 && (ys.top >= 0 || Math.abs(ys.top) < ys.value) ) {
-                        isOver = false;
-                        pos = pos.replace('bottom', 'top');
-                    }
+            if(pos.indexOf('left') === 0) {
+                res.dir = 'left';
+                res.left = xs.left;
+                if(res.left < 0) {
+                    w += res.left - distance;
+                    res.left = 0;
+                    $.setStyle(obj, {width: w }, 'px');
                 }
-
-                if(pos.startsWith('left')) {
-                    left = xs.left;
-                    result.dir = 'left';
-                    if(xs.left < 0 && (xs.value < 0 || xs.value < Math.abs(xs.left))) {
-                        isOver = false;
-                        pos = pos.replace('left', 'right');
-                    }
-                } else if(pos.startsWith('right')) {
-                    left = xs.right;
-                    result.dir = 'right';
-                    if(xs.value > 0 && (xs.left >= 0 || Math.abs(xs.left) < xs.value) ) {
-                        isOver = false;
-                        pos = pos.replace('right', 'left');
-                    }
+            } else if(pos.indexOf('right') === 0) {
+                res.dir = 'right';
+                res.left = xs.right;
+                if(res.left + w > bs.width) {
+                    w += bs.width - (res.left + w) - distance;
+                    res.left = bs.width - w - distance;
+                    $.setStyle(obj, {width: w }, 'px');
                 }
+            } else if(pos.indexOf('top') === 0) {
+                res.dir = 'top';
+                res.top = ys.top;                
+                if(res.top < 0) {
+                    h += res.top - distance;
+                    w = Common.getRealSize(par.content).width;
+                    res.top = 0;
+                    $.setStyle(obj, {height: h , width: w}, 'px');
+                }
+            } else if(pos.indexOf('bottom') === 0) {
+                res.dir = 'bottom';
+                res.top = ys.bottom;                
+                if(res.top + h > bs.height) {
+                    h += bs.height - (res.top + h) - distance;
+                    w = Common.getRealSize(par.content).width;
+                    res.top = bs.height - h - distance;
+                    $.setStyle(obj, {height: h, width: w }, 'px');
+                }
+            }
 
-                switch(pos) {
-                    case 'top':
-                    case 'bottom':
-                        left = fs.x - (w - fs.w) / 2;
-                        if(left < ps.left) {
-                            newLeft = ps.left;
-                            moveX = left - newLeft;
-                            left = newLeft;
-                        } else if((left + w) > (bs.width + ps.left)) {
-                            newLeft = bs.width + ps.left - h;
-                            moveX = left - newLeft;
-                            left = newLeft;
-                        }
-                        if(fs.w < w) {
-                            result.css = 'left: ' + (w / 2 + moveX) + 'px;';
-                        }
-                        break;
-                    case 'left':
-                    case 'right':
-                        top = fs.y - (h - fs.h) / 2;
-                        if(top < ps.top) {
-                            newTop = ps.top + 2;
-                            moveY = top - newTop;
-                            top = newTop;
-                        } else if((top + h) > (bs.height + ps.top)) {
-                            newTop = bs.height + ps.top - h - 2;
-                            moveY = top - newTop;
-                            top = newTop;
+            switch(pos) {
+                case 'top':
+                case 'bottom':
+                    res.left = fs.x - (w - fs.w) / 2;
+                    if(res.left < ps.left || (res.left + w) > (bs.width + ps.left)) {
+                        newLeft = res.left < ps.left ? ps.left : bs.width + ps.left - h;
+                        res.moveX = left - newLeft;
+                        res.left = newLeft;
+                    }
+                    if(fs.w < w) {
+                        res.css = 'left: ' + (w / 2 + res.moveX) + 'px;';
+                    }
+                    break;
+                case 'left':
+                case 'right':
+                        res.top = fs.y - (h - fs.h) / 2;
+                        if(res.top < ps.top || (res.top + h) > (bs.height + ps.top)) {
+                            newTop = res.top < ps.top ? ps.top + 2 : bs.height + ps.top - h - 2;
+                            res.moveY = res.top - newTop;
+                            res.top = newTop;
                         }
                         if(fs.h < h) {
-                            result.css = 'top: ' + (h / 2 + moveY) + 'px;';
+                            res.css = 'top: ' + (h / 2 + res.moveY) + 'px;';
                         }
-                        break;
-                    case 'topleft':
-                    case 'bottomleft':
-                        left = fs.x;
-                        if(fs.w < w) {
-                            result.css = 'left: ' + (fs.w / 2) + 'px;';
-                        }
-                        break;
-                    case 'topright':
-                    case 'bottomright':
-                        left = fs.x - (w - fs.w);
-                        if(fs.w < w) {
-                            result.css = 'left: ' + (fs.w / 2 + (w - fs.w)) + 'px;';
-                        }
-                        break;
-                    case 'lefttop':
-                    case 'righttop':
-                        top = fs.y;
-                        if(fs.h < h) {
-                            result.css = 'top: ' + (fs.h / 2) + 'px;';
-                        }
-                        break;
-                    case 'leftbottom':
-                    case 'rightbottom':
-                        top = fs.y - (h - fs.h);
-                        if(fs.h < h) {
-                            result.css = 'top: ' + (fs.h / 2 + (h - fs.h)) + 'px;';
-                        }
-                        break;
-                }
-                loop++;
-            //} while(!isOver && loop < 3);
+                    break;
+                case 'topleft':
+                case 'bottomleft':
+                    res.left = fs.x;
+                    res.css = 'left: ' + distance + 'px;';
+                    break;
+                case 'topright':
+                case 'bottomright':
+                    res.left = fs.x - (w - fs.w);
+                    res.css = 'left: ' + (w - distance) + 'px;';
+                    break;
+                case 'lefttop':
+                case 'righttop':
+                    res.top = fs.y;
+                    res.css = 'top: ' + distance + 'px;';
+                    break;
+                case 'leftbottom':
+                case 'rightbottom':
+                    res.top = fs.y - (h - fs.h);
+                    res.css = 'top: ' + (h - distance) + 'px;';
+                    break;
+            }
 
             if(isFixedSize) {
                 $.setStyle(obj, {width: w, height: h }, 'px');
             }
 
-            $.setStyle(obj, { left: left, top: top }, 'px');
-            
-            return result;
+            $.setStyle(obj, { left: res.left, top: res.top }, 'px');
+
+            return res;
         },
         dragPosition: function (_) {
             var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls;
@@ -2629,16 +2601,16 @@ console.log('ys: ', ys, ', xs: ', xs);
             }
             if (opt.width === 'auto') {
                 ctls.dialog.style.width = 'auto';
-                ctls.main.style.width = 'auto';
-                ctls.body.style.width = 'auto';
-                ctls.content.style.width = 'auto';
+                ctls.main ? ctls.main.style.width = 'auto' : '';
+                ctls.body ? ctls.body.style.width = 'auto' : '';
+                ctls.content ? ctls.content.style.width = 'auto' : '';
                 isAutoSize = true;
             }
             if (opt.height === 'auto') {
                 ctls.dialog.style.height = 'auto';
-                ctls.main.style.height = 'auto';
-                ctls.body.style.height = 'auto';
-                ctls.content.style.height = 'auto';
+                ctls.main ? ctls.main.style.height = 'auto' : '';
+                ctls.body && ctls.body.style ? ctls.body.style.height = 'auto' : '';
+                ctls.content ? ctls.content.style.height = 'auto' : '';
                 isAutoSize = true;
             }
 
@@ -2781,7 +2753,7 @@ console.log('ys: ', ys, ', xs: ', xs);
 
             $.setStyle(ctls.main, { height: boxHeight - paddingHeight }, 'px');
 
-            var mainHeight = ctls.main.offsetHeight,
+            var mainHeight = ctls.main ? ctls.main.offsetHeight : ctls.dialog.offsetHeight,
                 titleHeight = ctls.head ? ctls.head.offsetHeight : 0,
                 bottomHeight = ctls.foot ? ctls.foot.offsetHeight : 0,
                 size = {
@@ -2795,7 +2767,17 @@ console.log('ys: ', ys, ', xs: ', xs);
             if (ctls.iframe) {
                 $.setStyle(ctls.iframe, { height: size.height });
             }
-            return $.setStyle(ctls.body, size), util.setTitleSize(_).showIcon(_), util;
+            
+            $.setStyle(ctls.body, size);
+
+            if(this.timerCover) {
+                window.clearTimeout(this.timerCover);
+            }
+            this.timerCover = window.setTimeout(function(){
+                util.setCoverSize(_);
+            }, 100);
+
+            return util.setTitleSize(_).showIcon(_), util;
         },        
         dragToNormal: function (_, evt, bs, moveX, moveY) {
             var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls, obj = ctls.dialog;
@@ -3174,6 +3156,8 @@ console.log('ys: ', ys, ', xs: ', xs);
 
             var par = {
                 target: opt.target,
+                content: opt.content,
+                direction: opt.direction,
                 parent: opt.parent,
                 position: opt.position,    //默认停靠在目标控件左下方位置
                 x: opt.x || 7,
@@ -3229,6 +3213,7 @@ console.log('ys: ', ys, ', xs: ', xs);
                 x: 0,                   //x轴(left)偏移量，单位：px
                 y: 0,                   //y轴(top)偏移量，单位：px
                 target: null,           //Element 要跟随位置的html控件
+                direction: 'auto',      //跟随位置的方向 auto | fixed
                 focusTo: null,          //要获取焦点的html控件(对话框关闭后获取焦点)
                 fixed: false,           //是否固定位置
                 topMost: false,         //是否允许置顶显示
@@ -3611,13 +3596,23 @@ console.log('ys: ', ys, ', xs: ', xs);
             return btn && btn.focus(), _;
         },
         min: function () {
-            return Util.setSize(this, { type: Config.DialogStatus.min });
+            //return Util.setSize(this, { type: Config.DialogStatus.min });
+            var _ = this, p = Util.getParam(_);
+            if(p.none) { return _; }
+
+            var type = Config.DialogStatus.min, lastStatus = p.lastStatus;
+            if(p.status.min && lastStatus === Config.DialogStatus.max) {
+                type = Config.DialogStatus.max;
+            } else if (p.status.min) {
+                type = Config.DialogStatus.normal;
+            }
+            return Util.setSize(_, { type: type });
         },
         max: function () {
             var _ = this, p = Util.getParam(_);
             if(p.none) { return _; }
 
-            var type = Config.DialogStatus.max, status = p.status, lastStatus = p.lastStatus;
+            var type = Config.DialogStatus.max, lastStatus = p.lastStatus;
 
             if (p.status.max || (p.status.min && lastStatus === Config.DialogStatus.normal)) {
                 type = Config.DialogStatus.normal;
@@ -3742,6 +3737,16 @@ console.log('ys: ', ys, ', xs: ', xs);
         },
         url: function(url, title, options) {
             return Factory.show(url, title, options, Config.DialogType.url);
+        }
+    });
+
+    $.extend($.dialog, {
+        show: function(id) {
+            var p = Factory.getOptions(id) || {}, dialog = p.dialog;
+            if(dialog && !dialog.isClosed()) {
+                dialog.show();
+            }
+            return $;
         },
         close: function (id) {
             return Factory.close(id), $;

@@ -11,14 +11,14 @@
         }
     </style>
     <script type="text/javascript" src="../oui/oui.js?1"></script>
-    <script type="text/javascript" src="../oui/dialog/oui.dialog.js?123"></script>
+    <script type="text/javascript" src="../oui/dialog/oui.dialog.js?123456"></script>
 </head>
 <body>
     <div id="p1"></div>
     <div id="p2" style="height:300px;width:600px;border-radius: 5px 10px 3px 6px;margin:0 0 5px 0;
             border: none;
             display:block;left:5px; top: 10px;">
-        <input type="input" name="" id="txtTips" style="width:240px;height:30px;margin:160px 0 0 120px;" value="这是文本输入框的内容" />
+        <input type="input" name="" id="txtTips" style="width:240px;height:30px;margin:30px 0 0 420px;" value="这是文本输入框的内容" />
         <br />
         <br />
         <br />
@@ -118,6 +118,8 @@ function test01(){
     d01 = $.dialog.win('test01', 'test', {
         id: 'd01',
         closeType: 'hide',
+        //showMax: false,
+        maxAble: false,
         lock: false
     });
 }
@@ -127,7 +129,8 @@ function hide(){
 }
 
 function show(){
-    d01.show();
+    //d01.show();
+    $.dialog.show('d01');
 }
 
 function update01(){
@@ -608,8 +611,9 @@ function msg(isFixWidth){
 
 function tips(){
     var win = $.tips('tips: 请注意：提示信息已经更新。' + new Date().getTime(), $I('txtTips'), {
-        type:'tips',position: 'right',
-        maxWidth: 300,
+        type:'tips', position: 'bottomright',
+        direction: 'fixed',
+        //width: 200,
         styles: {
             'tooltip': {
                 'background': '#f00',
@@ -626,14 +630,14 @@ function tips(){
     });
     
     tips2();
-
+return false;
     window.setTimeout(function() {
-        var html = 'tips: 请注意：提示信息已经更新。<br />大家好啊'
-        + '<img style="width:200px;" src="http://122.227.179.90:81/skin/default/images/home/welcome.jpg" />'
-        + '<img style="width:100px;" src="http://122.227.179.90:81/skin/default/images/home/welcome.jpg" />';
+        var html = 'tips: 请注意：提示信息已经更新。<br />大家好啊';
+        //+ '<img style="width:200px;" src="http://122.227.179.90:81/skin/default/images/home/welcome.jpg" />'
+        //+ '<img style="width:100px;" src="http://122.227.179.90:81/skin/default/images/home/welcome.jpg" />';
         win//.options('styles', null)
             .update(html, {
-                position: 'right',
+                position: 'lefttop',
                 styles: null
             })
     },3000);
@@ -641,7 +645,7 @@ function tips(){
     
     window.setTimeout(function() {
         win.update('tips: 请注意：提示信息已经再次更新。', {
-            position:2,            
+            position: 'lefttop',            
             styles: {
                 'tooltip': {
                     'background': '#00f',
@@ -652,7 +656,7 @@ function tips(){
     },5000);
 
     window.setTimeout(function() {
-        win.update('tips: 请注意：提示信息更新。', { position:4 })
+        win.update('tips: 请注意：提示信息更新。', { position: 'righttop' })
     },8000);
 
     window.setTimeout(function() {

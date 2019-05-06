@@ -1085,6 +1085,28 @@
         },
         getUrlHost: function () {
             return $.getUrlHost(this);
+        },
+        formatSimple: function (args) {
+            var s = this, sep = '%s', vals = [], rst = [];
+            if (arguments.length > 1) {
+                for (var i = 0, c = arguments.length; i < c; i++) {
+                    if (arguments[i] != undefined) {
+                        vals.push(arguments[i]);
+                    }
+                }
+            } else if (Object.prototype.toString.call(args) === '[object Array]') {
+                vals = args;
+            } else if (args != undefined && args != null) {
+                vals.push(args);
+            }
+            var arr = s.split(sep);
+            for (var i = 0, c = arr.length; i < c; i++) {
+                rst.push(arr[i]);
+                if (i < c - 1) {
+                    rst.push(vals[i]);
+                }
+            }
+            return rst.join('');
         }
     }, 'String.prototype');
 
@@ -1446,12 +1468,17 @@
             throwError(err, str, vals);
         }
         return v;
+    }, isSimpleFormat = function(s) {
+        return s.indexOf('%s') >= 0;
     };
 
     if ($.isUndefined(String.prototype.format)) {
         String.prototype.format = function (args) {
             var s = this, vals = [], rst = [], pattern = /({|})/g, ms = s.match(pattern);
             if ($.isNull(ms)) {
+                if(isSimpleFormat(s)) {
+                    return s.formatSimple(args);
+                }
                 return s.toString() || s;
             }
             var err = [
