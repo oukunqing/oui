@@ -278,7 +278,7 @@
     width: 32px;
     height: 32px;
     position: absolute;
-    left: 3px; top: 3px;
+    left: 3px; top: 0px;
     display: block;
 }
 

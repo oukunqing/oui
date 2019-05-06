@@ -359,6 +359,14 @@
 
             opt.type = this.checkType(opt.type, false);
 
+            if(!$.isElement(opt.target) && $.isString(opt.target, true)) {
+                opt.target = document.getElementById(opt.target);
+            }
+
+            if(!$.isElement(opt.parent) && $.isString(opt.parent, true)) {
+                opt.parent = document.getElementById(opt.parent);
+            }
+
             if($.isBoolean(opt.boxShadow) || opt.boxShadow === 'none') {
                 opt.shadow = opt.boxShadow;
             }
@@ -1765,12 +1773,29 @@
             var p = this.getParam(_);
             return p.actions = null, this;
         },
+        getBoundary: function(parent) {
+            var boundary = {
+                x: 0,
+                y: 0
+            };
+            if($.isElement(parent)) {
+                var offset = $.getOffset(parent);
+                boundary.x = offset.left;
+                boundary.y = offset.top;
+                boundary.width = offset.left + parent.offsetWidth;
+                boundary.height = offset.top + parent.offsetHeight;
+                console.log('boundary: ', boundary);
+                return boundary;
+            }
+            return $.extend(boundary, $.getBodySize());
+        },
         setCache: function(_) {
             var util = this, p = util.getParam(_), opt = p.options, ctls = p.controls;
             if(p.none) { return util; }
 
             var obj = ctls.dialog,
                 bs = $.getBodySize(),
+                //bs = util.getBoundary(opt.parent),
                 w = obj.offsetWidth,
                 h = obj.offsetHeight,
                 size = {
@@ -3026,9 +3051,6 @@
             var util = this, p = util.getParam(_), opt = p.options, ctls = p.controls;
             if(p.none || _.isClosed()) { return util; }
 
-            if(!$.isElement(opt.target) && $.isString(opt.target, true)){
-                opt.target = document.getElementById(opt.target);
-            }
             if(!$.isElement(opt.target)){
                 return false;
             }
