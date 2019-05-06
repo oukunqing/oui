@@ -611,8 +611,8 @@ function msg(isFixWidth){
 
 function tips(){
     var win = $.tips('tips: 请注意：提示信息已经更新。' + new Date().getTime(), $I('txtTips'), {
-        type:'tips', position: 'bottomright',
-        direction: 'fixed',
+        type:'tips', position: 'topleft',
+        //direction: 'fixed',
         //width: 200,
         styles: {
             'tooltip': {
@@ -630,14 +630,14 @@ function tips(){
     });
     
     tips2();
-return false;
+
     window.setTimeout(function() {
-        var html = 'tips: 请注意：提示信息已经更新。<br />大家好啊';
-        //+ '<img style="width:200px;" src="http://122.227.179.90:81/skin/default/images/home/welcome.jpg" />'
-        //+ '<img style="width:100px;" src="http://122.227.179.90:81/skin/default/images/home/welcome.jpg" />';
+        var html = 'tips: 请注意：提示信息已经更新。<br />大家好啊'
+        + '<img style="width:240px;" src="http://122.227.179.90:81/skin/default/images/home/welcome.jpg" />'
+        + '<img style="width:100px;" src="http://122.227.179.90:81/skin/default/images/home/welcome.jpg" />';
         win//.options('styles', null)
             .update(html, {
-                position: 'lefttop',
+                position: 'rightTop',
                 styles: null
             })
     },3000);
