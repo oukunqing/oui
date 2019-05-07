@@ -2694,8 +2694,8 @@
                 return s;
             },
             setBodySize: function (_, options) {
-                var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls;
-                if (p.none) { return this; }
+                var util = this, p = util.getParam(_), opt = p.options, ctls = p.controls;
+                if (p.none) { return util; }
 
                 var par = $.extend({
                     event: '',          //window.resize, show
@@ -2706,7 +2706,7 @@
                 var obj = ctls.dialog,
                     bs = util.getBoundary(opt.parent);
                 if (!obj) {
-                    return this;
+                    return util;
                 }
 
                 var boxWidth = obj.clientWidth,
@@ -2809,14 +2809,24 @@
 
                 $.setStyle(ctls.body, size);
 
-                if (this.timerCover) {
-                    window.clearTimeout(this.timerCover);
+                if (p.timerCover) {
+                    window.clearTimeout(p.timerCover);
                 }
-                this.timerCover = window.setTimeout(function () {
+                p.timerCover = window.setTimeout(function () {
                     util.setCoverSize(_);
                 }, 100);
 
-                return util.setTitleSize(_).showIcon(_).resize(_), util;
+                util.setTitleSize(_).showIcon(_);
+
+                if($.isFunction(opt.resize)) {
+                    if(par.drag && opt.resizeDebounce) {
+                        if(p.timerResize) { window.clearTimeout(p.timerResize); }
+                        p.timerResize = window.setTimeout(function() { util.resize(_); }, 30);
+                    } else {
+                        util.resize(_);
+                    }
+                }
+                return util;
             },
             dragToNormal: function (_, evt, bs, moveX, moveY) {
                 var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls, obj = ctls.dialog;
@@ -3024,14 +3034,33 @@
                 }
                 return util;
             },
+            compare: function(obj1, obj2) {
+                if($.isUndefined(obj1) || $.isUndefined(obj2)) {
+                    return false;
+                }
+                for(var k in obj1) {
+                    if(obj1[k] !== obj2[k]) {
+                        return false;
+                    }
+                }
+                return true;
+            },
             resize: function (_) {
                 var util = this, p = util.getParam(_), opt = p.options, ctls = p.controls;
                 if (p.none || !ctls.dialog) { return util; }
                 var obj = ctls.body;
                 if ($.isFunction(opt.resize) && $.isElement(obj)) {
-                    opt.resize({
-                        width: obj.clientWidth, height: obj.clientHeight 
-                    }, _);
+                    var ps = $.getElementStyleSize(obj, 'padding'),
+                        psCon = $.getElementStyleSize(ctls.content, 'padding'),
+                        size = { 
+                            width: obj.clientWidth - ps.width - psCon.width, 
+                            height: obj.clientHeight - ps.height - psCon.height
+                        };
+                    //判断尺寸是否改变，防止重复回调相同的尺寸
+                    if(!util.compare(p.lastResize, size)) {
+                        p.lastResize = size;
+                        opt.resize(size, _);
+                    }
                 }
                 return util;
             },
@@ -3291,6 +3320,7 @@
                 cancel: null,           //点击取消按钮后的回调函数
                 parameter: null,        //回调返回的参数
                 resize: null,           //对话框大小改变后的回调函数
+                resizeDebounce: false,  //尺寸改变回调防抖
                 redirect: null,         //重定向跳转到指定的URL [target]
                 buttons: Config.DialogButtons.OKCancel,               //按钮类型编码
                 buttonPosition: Config.Position.Center,               //按钮位置 left center right

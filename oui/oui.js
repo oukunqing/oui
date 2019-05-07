@@ -1737,7 +1737,14 @@
         getElementStyleSize = function(elem, styleName) {
             var attr = ('' + styleName).toLowerCase(),
                 style = getElementStyle(elem),
-                postfix = attr === 'border' ? 'Width' : attr == 'radius' ? 'Radius' : '';
+                postfix = attr === 'border' ? 'Width' : attr == 'radius' ? 'Radius' : '',
+                data = {
+                    top: 0, left: 0, right: 0, bottom: 0, width: 0, height: 0
+                };
+                
+            if(!$.isElement(elem)) {
+                return data;
+            }
 
             if(!$.isString(attr, true) || !style) {
                 return 0;
@@ -1747,7 +1754,7 @@
                 return parseInt('0' + style[attr], 10);
             }
 
-            var data = attr == 'radius' ? {
+            data = attr == 'radius' ? {
                 topLeft: parseInt('0' + style['borderTopLeft' + postfix], 10),
                 topRight: parseInt('0' + style['borderTopRight' + postfix], 10),
                 bottomLeft: parseInt('0' + style['borderBottomLeft' + postfix], 10),
@@ -1758,6 +1765,10 @@
                 bottom: parseInt('0' + style[attr + 'Bottom' + postfix], 10),
                 left: parseInt('0' + style[attr + 'Left' + postfix], 10)
             };
+            if(attr !== 'radius') {
+                data.height = data.top + data.bottom;
+                data.width = data.left + data.right;
+            }
             return data;
         },
         checkMinMax = function(p) {
@@ -3085,6 +3096,18 @@
         removeClass: function (value) {
             return this.each(function (i, obj) {
                 $.removeClass(obj, value);
+            });
+        },
+        width: function(w) {
+            var _w = $.isNumeric(w) ? w + 'px' : w;
+            return this.each(function (i, obj) {
+                obj.style.width = _w;
+            });
+        },
+        height: function(h) {
+            var _h = $.isNumeric(h) ? h + 'px' : h;
+            return this.each(function (i, obj) {
+                obj.style.height = _h;
             });
         }
     }, '$.fn');

@@ -8,9 +8,10 @@
         .dis-none{
             /*display:none;*/
             /*visibility: hidden;*/
+
         }
     </style>
-    <script type="text/javascript" src="../oui/oui.js?1"></script>
+    <script type="text/javascript" src="../oui/oui.js?12"></script>
     <script type="text/javascript" src="../oui/dialog/oui.dialog.js?12"></script>
 </head>
 <body>
@@ -115,12 +116,15 @@ document.onkeypress = function() {
 
 var d01;
 function test01(){
-    d01 = $.dialog.win('test01', 'test', {
+    d01 = $.dialog.win('<div id="div001" style="border:solid 2px #f00;box-sizing: border-box;">test01</div>', 'test', {
         id: 'd01',
         closeType: 'hide',
         //showMax: false,
-        maxAble: false,
-        lock: false
+        //maxAble: false,
+        lock: false,
+        resize: function(size, d) {
+            $('#div001').height(size.height);
+        }
     });
 }
 
