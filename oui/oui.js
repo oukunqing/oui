@@ -1468,17 +1468,12 @@
             throwError(err, str, vals);
         }
         return v;
-    }, isSimpleFormat = function(s) {
-        return s.indexOf('%s') >= 0;
     };
 
     if ($.isUndefined(String.prototype.format)) {
         String.prototype.format = function (args) {
             var s = this, vals = [], rst = [], pattern = /({|})/g, ms = s.match(pattern);
             if ($.isNull(ms)) {
-                if(isSimpleFormat(s)) {
-                    return s.formatSimple(args);
-                }
                 return s.toString() || s;
             }
             var err = [
