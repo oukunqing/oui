@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <style type="text/css">
+        body{margin:0; padding:0;}
+        .panel{ float: left; width: 200px; box-sizing: border-box; border: solid 1px #00f; position: absolute;  }
+        .switch{ float:left; height:100%; min-height: 300px; width:5px; background: #ddd; position: absolute; left:200px;}
+        .left {left:0;}
+        .main {width: 600px; right: 0;}
+
+        .no-select {
+            -moz-user-select:none;
+            -khtml-user-select:none;
+            user-select:none;
+            -ms-user-select: none;
+        }
+
+    </style>
+    <script type="text/javascript" src="../oui/oui.js?2"></script>
+</head>
+<body>
+
+    <div id="divLeft" class="left panel">
+        <div class="title">标题栏</div>
+        <div class="content">内容</div>
+    </div>
+    <div id="divSwitch" class="switch">s</div>
+    <div class="main panel" id="divMain">
+        <div class="title">列表标题</div>
+        <div class="list">
+            <table>
+                <tr>
+                    <td>序号</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
+<script type="text/javascript">
+    var s = document.getElementById('divSwitch');
+
+    function getPanel(obj, key) {
+        var panel = obj[key];
+        if(panel.className && panel.className.indexOf('panel')) {
+            return panel;
+        }
+        return getPanel(panel, key);
+    }
+    function initial(obj) {
+        var left = getPanel(obj, 'previousSibling');
+        var right = getPanel(obj, 'nextSibling');
+        var box = left.parentNode;
+
+        var x = box.offsetLeft;
+
+        var bs = {width: box.clientWidth, height: box.offsetHeight};
+        console.log('box:', bs.width, bs.height);
+
+        right.style.width = (bs.width - 5 - left.offsetWidth) + 'px';
+
+        $.addListener(obj, 'mousedown', function(e) {
+            console.log('mousedown');
+            var oldX = obj.offsetLeft;
+
+            var evt = $.getEvent(),
+                moveX = evt.clientX,
+                moveY = evt.clientY;
+            var isMove = true;
+
+        obj.style.position = 'absolute';
+
+
+            document.onmousemove = function () {
+                if(!isMove) {
+                    return false;
+                }
+                var e = $.getEvent(),
+                    moveX = e.clientX,
+                    moveY = e.clientY,
+                    bs = {width: box.clientWidth, height: box.clientHeight};
+
+                $.addClass(left, 'no-select');
+                console.log(moveX, moveY);
+                obj.style.left = moveX + 'px';
+
+                var w = moveX - x;
+
+                console.log('distance:', w);
+
+                left.style.width = w + 'px';
+
+                right.style.left = (moveX + 5) + 'px';
+                right.style.width = (bs.width - w - 5) + 'px';
+                console.log('distance:', left.style.width);
+            };
+            document.onmouseup = function () {
+                isMove = false;
+                $.removeClass(left, 'no-select');
+            };
+        });
+
+        console.log('left: ',left, ', right: ', right);
+    }
+
+initial(s);
+
+    function setBoxSize() {
+        var left = document.getElementById('divLeft');
+        var main = document.getElementById('divMain');
+        var box = left.parentNode;
+        var bs = {width: box.clientWidth, height: box.clientHeight};
+console.log('bs.height:', bs.height)
+        main.style.width = (bs.width - left.offsetWidth - 5) + 'px';
+        left.style.height = (bs.height) + 'px';
+        main.style.height = (bs.height) + 'px';
+    }
+
+    window.onresize = function(){
+        setBoxSize();
+    };
+</script>

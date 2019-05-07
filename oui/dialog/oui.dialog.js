@@ -356,6 +356,10 @@
 
                 //对话框关闭后，要获取停止的HTML控件
                 opt.focusTo = opt.focusTo || opt.focus;
+                if (!$.isElement(opt.focusTo)) {
+                    opt.focusTo = $.isString(opt.focusTo, true) ? $I(opt.focusTo) : undefined;
+                }
+
                 //对话框尺寸改变后，要回调的函数
                 opt.resize = opt.resize || opt.onresize;
 
@@ -3002,6 +3006,9 @@
                     func = util.checkCallback(p, actions);
 
                 if (!func || !$.isObject(actions)) {
+                    if ($.isElement(opt.focusTo)) {
+                        $.setFocus(opt.focusTo);
+                    }
                     return util;
                 }
                 var dr = {},
@@ -3029,7 +3036,7 @@
                     func.callback && func.callback(dr, _, parameter);
                 }
 
-                if ($.isElement(opt.focusTo) || (opt.focusTo && $.isElement((opt.focusTo = $I(opt.focusTo))))) {
+                if ($.isElement(opt.focusTo)) {
                     $.setFocus(opt.focusTo);
                 }
                 return util;
