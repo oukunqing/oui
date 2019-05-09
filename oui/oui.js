@@ -492,7 +492,7 @@
         containsKey: containsKey, containsValue: containsValue, contains: contains, distinctList: distinctList,
         collapseNumberList: collapseNumberList, expandNumberList: expandNumberList,
         toJsonString: toJsonString, toJson: toJson, toEncode: toEncode,
-        param: buildParam, setUrlParam: setUrlParam,
+        param: buildParam, buildParam: buildParam, setUrlParam: setUrlParam,
         setQueryString: setQueryString, getQueryString: getQueryString, getUrlHost: getUrlHost,
         isDebug: isDebug,
         quickSort: function (arr, key) {
@@ -2842,7 +2842,7 @@
         var xhr = new XmlHttpRequest();
 
         if (o.async) {
-            xhr.timeout = o.timeout;
+            try{ xhr.timeout = o.timeout || 4000; } catch(e) {}            
         }
 
         xhr.open(o.method, o.url, o.async);
@@ -2910,7 +2910,7 @@
 
             o.async = $.isBoolean(o.async, true);
             o.method = (o.method || o.type || 'GET').toUpperCase();
-            o.data = $.param(o.data);
+            o.data = $.buildParam(o.data, undefined, false);
             o.dataType = (o.dataType || o.datatype || 'TEXT').toUpperCase();
             o.callback = o.callback || o.success;
             o.timeout = !$.isNumeric(o.timeout) ? 4000 : parseInt(o.timeout, 10);
@@ -2993,6 +2993,10 @@
         },
         getJSON: function (url, data, callback, checkException) {
             var p = build(url, data, callback, checkException, 'GET');
+            return ajax(p.set({ dataType: 'JSON', checkException: $.isBoolean(p.dataType, false) }));
+        },
+        postJSON: function (url, data, callback, checkException) {
+            var p = build(url, data, callback, checkException, 'POST');
             return ajax(p.set({ dataType: 'JSON', checkException: $.isBoolean(p.dataType, false) }));
         },
         getScript: function (url, data, callback, load) {
