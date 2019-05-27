@@ -65,6 +65,8 @@
                     md5: false,
                     same: {id: '', msg: ''},
                     distinct: {id: '', msg: ''},
+                    //检测字段内容是否已存在
+                    exists: null,
                     //提示信息回调 function(status, message, element){}
                     //status 验证状态：true-表示通过，false-表示失败
                     tooltip: null,
@@ -214,12 +216,16 @@
                             return result(false, field.same.message || field.same.msg || '两次输入的内容不一样');
                         }
                     }
-                    //重复内容检测
+                    //内容去重检测
                     if($.isObject(field.distinct) && field.distinct.id) {
                         var target = document.getElementById(field.distinct.id);
                         if(target && target.value === value) {
                             return result(false, field.distinct.message || field.distinct.msg || '内容不能重复');
                         }
+                    }
+                    //检测内容是否存在
+                    if($.isFunction(field.exists)) {
+                        field.exists(element);
                     }
                     return result(true, value);
                 },
@@ -238,7 +244,11 @@
                             if (!$.isNumber(time) || time < -1) {
                                 time = configs.tooltipTime;
                             }
-                            $.tooltip(message, element, { time: $.isNumber(time) ? time : 0, tipsMore: true });
+                            var options = { time: $.isNumber(time) ? time : 0, tipsMore: true };
+                            if($.isString(configs.position, true) || $.isNumber(configs.position)) {
+                                options.position = configs.position;
+                            }
+                            $.tooltip(message, element, options);
                             if (configs.highLight) {
                                 $(element).removeClass(highLight.className);
                                 $(element).addClass(highLight.className);
@@ -305,7 +315,9 @@
                             validate: null,
                             messages: {},               //验证失败时显示的提示信息（为空则显示默认的信息）
                             same: {id: '', msg: ''},
-                            distinct: {id: '', msg: ''}
+                            distinct: {id: '', msg: ''},
+                            //检测字段内容是否已存在
+                            exists: null
                         }, $.isString(keyField) ? {} : keyField)));
 
                     if (!$.isObject(field.messages)) {

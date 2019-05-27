@@ -2296,6 +2296,11 @@
                     xs = { left: fs.x - w - par.x, right: fs.x + fs.w + par.x },
                     distance = 12;
 
+                //如果左右边距小于100px，则将左右位置改为上下位置
+                if(xs.left < 100 && (bs.width - xs.right) < 100 && (pos.startsWith('left') || pos.startsWith('right'))) {
+                    pos = 'bottomleft';
+                }
+
                 if (par.direction === 'auto') {
                     pos = Util.setFinalPosition(pos, w, h, res, xs, ys, par.parent);
                 }

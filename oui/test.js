@@ -197,3 +197,5 @@ console.log(mc);
 var str = 'http://122.227.179.90:81/pic/20190507/751064/20190507171742_01_751064_01_0001_thumb.jpg';
 var pattern = /(_thumb[\.jpg|.gif])/g;
 console.log(pattern.test(str));
+
+console.log((1558053018230).toDate().format())
