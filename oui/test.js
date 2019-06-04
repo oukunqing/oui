@@ -198,4 +198,16 @@ var str = 'http://122.227.179.90:81/pic/20190507/751064/20190507171742_01_751064
 var pattern = /(_thumb[\.jpg|.gif])/g;
 console.log(pattern.test(str));
 
-console.log((1558053018230).toDate().format())
+console.log((1559348527).toDate().format())
+
+console.log(new Date())
+console.log(new Date().format())
+
+var name = {name:'tom'};
+console.log('name: {name}, age: {1}'.format(name, 12));
+
+console.log($.buildParam({action:'getDevice',data: {id:1}}));
+console.log($.buildData('getDevice', {id:1}, 'type=2'));
+console.log($.buildData('getDevice', {id:1}, {type:3}));
+console.log($.buildData('', null, {type:3}));
+console.log($.buildData(null, null, 'type=1&id=4'));

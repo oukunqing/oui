@@ -357,7 +357,8 @@
         toEncode = function (s) { return encodeURIComponent(s); },
         buildParam = function (a, v, strict) {
             strict = isBoolean(strict, true);
-            if(isNullOrUndefined(a) || (strict && isNullOrUndefined(v))) {
+            var isObj = isObject(a);
+            if(isNullOrUndefined(a) || (!isObj && strict && isNullOrUndefined(v))) {
                 return '';
             }
             var s = [];
@@ -376,15 +377,25 @@
                     }
                     s.push(key + '=' + toEncode(val));
                 }
-            } else if (isObject(a)) {
+            } else if (isObj) {
                 for (var key in a) {
-                    var val = isObject(a[key]) ? toJsonString(a[key]) : a[key];
-                    s.push(key + '=' + toEncode(val));
+                    if(!isNullOrUndefined(a[key])) {
+                        var val = isObject(a[key]) ? toJsonString(a[key]) : a[key];
+                        s.push(key + '=' + toEncode(val));
+                    }
                 }
             } else {
                 s.push(a);
             }
             return s.join('&');
+        },
+        buildAjaxData = function(action, formData, param) {
+            var data = { action: action, data: formData };
+            var str = buildParam(data);
+            if($.isString(str, true)) {
+                return str + '&' + buildParam(param, null, false);
+            }
+            return buildParam(param, null, false);
         },
         setUrlParam = function (a, v, strict) {
             return buildParam(a, v, strict);
@@ -492,7 +503,7 @@
         containsKey: containsKey, containsValue: containsValue, contains: contains, distinctList: distinctList,
         collapseNumberList: collapseNumberList, expandNumberList: expandNumberList,
         toJsonString: toJsonString, toJson: toJson, toEncode: toEncode,
-        param: buildParam, buildParam: buildParam, setUrlParam: setUrlParam,
+        param: buildParam, buildParam: buildParam, setUrlParam: setUrlParam, buildAjaxData: buildAjaxData,
         setQueryString: setQueryString, getQueryString: getQueryString, getUrlHost: getUrlHost,
         isDebug: isDebug,
         quickSort: function (arr, key) {

@@ -245,8 +245,9 @@
                                 time = configs.tooltipTime;
                             }
                             var options = { time: $.isNumber(time) ? time : 0, tipsMore: true };
-                            if($.isString(configs.position, true) || $.isNumber(configs.position)) {
-                                options.position = configs.position;
+                            var position = (element.field || {}).position || configs.position;
+                            if($.isString(position, true) || $.isNumber(position)) {
+                                options.position = position;
                             }
                             $.tooltip(message, element, options);
                             if (configs.highLight) {
@@ -314,6 +315,8 @@
                             //返回 true - 表示验证通过，false-表示验证失败
                             validate: null,
                             messages: {},               //验证失败时显示的提示信息（为空则显示默认的信息）
+                            //tooltip position
+                            position: '',
                             same: {id: '', msg: ''},
                             distinct: {id: '', msg: ''},
                             //检测字段内容是否已存在
