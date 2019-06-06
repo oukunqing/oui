@@ -204,7 +204,7 @@ console.log(new Date())
 console.log(new Date().format())
 
 var name = {name:'tom'};
-console.log('name: {name}, age: {1}'.format(name, 12));
+console.log('name: {name}, age: {1}'.format(~name, 12));
 
 console.log($.buildParam({action:'getDevice',data: {id:1}}));
 console.log($.buildData('getDevice', {id:1}, 'type=2'));

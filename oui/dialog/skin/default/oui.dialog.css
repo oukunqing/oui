@@ -119,8 +119,12 @@
 .oui-dialog-title-size {
     display: block;
     position: absolute;
+    /*
     left: 0;
     top: -1000px;
+    */
+    left: -5000px;
+    top: -3000px;
     color: #fff;
     border: none 0;
     margin: 0;

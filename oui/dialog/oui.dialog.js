@@ -514,19 +514,7 @@
                 return size;
             },
             getRealSize: function (txt) {
-                var id = 'div-oui-dialog-text-size-01';
-                var div = document.getElementById(id);
-                if (!div) {
-                    div = document.createElement('div');
-                    div.id = id;
-                    div.className = 'oui-dialog-title-size';
-                    document.body.appendChild(div);
-                }
-                div.innerHTML = txt;
-
-                var size = { width: div.offsetWidth, height: div.offsetHeight };
-
-                return div.innerHTML = '', size;
+                return $.getContentSize(txt, {className: 'oui-dialog-title-size', id: 'div-oui-dialog-text-size-01'});
             }
         },
         Cache = {

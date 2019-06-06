@@ -2353,6 +2353,31 @@
             str = str.replace(/[ | ]*\n/g, '\n'); //去除行尾空白
             //str = str.replace(/\n[\s| | ]*\r/g,'\n'); //去除多余空行
             return str;
+        },
+        getContentSize = function (txt, options) {
+            if(!$.isObject(options)) {
+                options = {};
+            }
+            var id = options.id || 'div-get-content-size-001',
+                //css = ';position:absolute;top:-3000px;left:-5000px;',
+                css = ';position:absolute;top:100px;left:100px;',
+                div = document.getElementById(id);
+            if (!div) {
+                div = document.createElement('div');
+                div.id = id;
+                div.style.cssText = css + 'margin:0;padding:0;font-size:14px;';
+                document.body.appendChild(div);
+            }
+            if($.isString(options.className, true)) {
+                div.className = options.className;
+            }
+            if($.isString(options.cssText, true)) {
+                div.style.cssText = options.cssText + css;
+            }
+            div.innerHTML = txt;
+            var size = { width: div.offsetWidth, height: div.offsetHeight };
+            return size;
+            return div.innerHTML = '', size;
         };
 
     $.extendNative($, {
@@ -2419,7 +2444,8 @@
         getScrollPosition: getScrollPosition,
         getScrollPos: getScrollPosition,
         getKeyCode: getKeyCode,
-        filterHtmlCode: filterHtmlCode
+        filterHtmlCode: filterHtmlCode,
+        getContentSize: getContentSize
     }, '$');
 
 }(OUI);
@@ -2586,6 +2612,32 @@
                 return wsi(f, delay);
             }
             return wsi(func, delay);
+        };
+
+        window.getZoomRatio = function() {
+            var ratio = 0,
+                screen = window.screen,
+                ua = navigator.userAgent.toLowerCase();
+
+            if (window.devicePixelRatio !== undefined) {
+                ratio = window.devicePixelRatio;
+            } else if (ua.indexOf('msie')) {
+                if (screen.deviceXDPI && screen.logicalXDPI) {
+                    ratio = screen.deviceXDPI / screen.logicalXDPI;
+                }
+            } else if (window.outerWidth !== undefined && window.innerWidth !== undefined) {
+                ratio = window.outerWidth / window.innerWidth;
+            }
+
+            if (ratio) {
+                ratio = Math.round(ratio * 100);
+            }
+
+            return ratio;
+        };
+
+        window.isZoom = function() {
+            return window.getZoomRatio() !== 100;
         };
     }
 }(OUI);

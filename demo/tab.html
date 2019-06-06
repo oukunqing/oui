@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <script type="text/javascript" src="../oui/oui.js"></script>
+    <script type="text/javascript" src="../oui/tab/oui.tab.js?12"></script>
+</head>
+<body>
+    <br><br>
+    <br><br>
+    <br><br>
+    <br><br>
+    <div id="nav"></div>
+    <div id="content"></div>
+</body>
+</html>
+<script type="text/javascript">
+    var tab = new $.Tab($I('nav'),$I('content'));
+
+    tab.add({id: 'emap', name: '电子地图', url: 'dialog.html'});
+    tab.add({id: 'data', name: '实时数据', html: '实时数据'});
+
+    tab.show('emap');
+
+</script>
