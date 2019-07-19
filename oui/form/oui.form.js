@@ -18,19 +18,19 @@
         if (!$.isObject(formElement) || !formElement.getElementsByTagName) {
             throw new Error('element 参数错误');
         }
-        var id = formElement.id || '';
-
-        var messages = {
-            required: '请输入{0}',
-            select: '请选择{0}',
-            minLength: '{0}请勿小于{1}个字符',
-            maxLength: '{0}请勿超过{1}个字符',
-            minValue: '{0}请勿小于{1}',
-            maxValue: '{0}请勿大于{1}',
-            minMax: '请输入{0} - {1}之间的{2}',
-            number: '请输入{0}',
-            pattern: '请输入正确的{0}'
-        },
+        var id = formElement.id || '',
+            opt = $.extend({}, options),
+            messages = {
+                required: '请输入{0}',
+                select: '请选择{0}',
+                minLength: '{0}请勿小于{1}个字符',
+                maxLength: '{0}请勿超过{1}个字符',
+                minValue: '{0}请勿小于{1}',
+                maxValue: '{0}请勿大于{1}',
+                minMax: '请输入{0} - {1}之间的{2}',
+                number: '请输入{0}',
+                pattern: '请输入正确的{0}'
+            },
             highLight = {
                 styleId: 'form-validate-css-' + id,
                 className: 'form-validate-css-' + id,
@@ -46,8 +46,8 @@
                     identity: /(^\d{15}$)|(^\d{17}(x|X|\d)$)/
                 },
                 formElement: formElement,
-                submitHandler: options.submitHandler || options.submit,
-                fields: $.extend({}, options.fields, options.rules),
+                submitHandler: opt.submitHandler || opt.submit,
+                fields: $.extend({}, opt.fields, opt.rules),
                 configs: $.extend({
                     defaultValue: '',
                     minValue: '',
@@ -81,8 +81,8 @@
                     ignore: false,
                     dynamic: false,     //表单内容是否动态改变
                     messages: {}
-                }, options.configs),
-                messages: $.extend({}, messages, options.messages),
+                }, opt.configs),
+                messages: $.extend({}, messages, opt.messages),
                 trim: function (s) { return ('' + s).replace(/(^[\s]*)|([\s]*$)/g, ''); },
                 isMatch: function (key, pattern) { return (pattern || /^[a-z0-9]+[A-Z]/).test(key); },
                 checkElement: function (element) {
@@ -652,7 +652,7 @@
         if (12031 === jqXHR.status || jqXHR.status > 12000) { return false; }
 
         var html = ['应用程序异常，详细信息如下：', 'status:' + jqXHR.status, 'errorThrown:' + errorThrown, 'textStatus:' + textStatus];
-        $.alert(html.join('<br />'), '错误信息', { icon: 'error' });
+        $.alert(html.join('<br />'), '错误信息', { icon: 'error', copyAble: true });
     },
     showAjaxFail = function (data, textStatus, jqXHR) {
         var html = [data.msg];
@@ -660,7 +660,8 @@
             html.push('可能的原因：');
             html.push(data.error);
         }
-        $.alert(html.join('<br />'), '提示信息', { icon: 'warning' });
+        var dialogId = data.dialogId || data.dialog || '';
+        $.alert(html.join('<br />'), '提示信息', { icon: 'warning', copyAble: true, id: dialogId });
     };
 
     $.extend($, {

@@ -1118,6 +1118,9 @@
                 }
             }
             return rst.join('');
+        },
+        filterRareWord: function() {
+            return this.replace(/[^\uff01-\uff0e|\u0000-\u9fa5]*/g, '');
         }
     }, 'String.prototype');
 

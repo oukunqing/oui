@@ -165,7 +165,7 @@ console.log(d);
 var str = '关闭';
 console.log(str.toUnicode());
 
-console.log(new Date().format('ts'))
+console.log(new Date().format('ts'));
 
 //select  Auto_increment from information_schema.tables where Table_Schema = 'helmet'  and table_name = 'device_data';
 
@@ -198,11 +198,11 @@ var str = 'http://122.227.179.90:81/pic/20190507/751064/20190507171742_01_751064
 var pattern = /(_thumb[\.jpg|.gif])/g;
 console.log(pattern.test(str));
 
-console.log((1559348527).toDate().format())
+console.log((1559905255).toDate().format());
 
-console.log(new Date())
-console.log(new Date().format())
-
+console.log(new Date());
+console.log(new Date().format());
+/*
 var name = {name:'tom'};
 console.log('name: {name}, age: {1}'.format(~name, 12));
 
@@ -211,3 +211,50 @@ console.log($.buildData('getDevice', {id:1}, 'type=2'));
 console.log($.buildData('getDevice', {id:1}, {type:3}));
 console.log($.buildData('', null, {type:3}));
 console.log($.buildData(null, null, 'type=1&id=4'));
+*/
+
+console.log((1562229347).toDate().format());
+
+var str = 'http://123';
+
+console.log(str.replace('http:', 'https:'));
+
+
+function buildResult(arrActor, arrDub) {
+    var len1 = arrActor.length, 
+        len2 = arrDub.length,
+        reverse = len2 > len1,
+        len = reverse ? len2 : len1,
+        x = 0,
+        y = 0,
+        res = [];
+
+    for(var i = 0; i < len; i++) {
+        res.push({'actor': arrActor[x], 'dub': arrDub[y]});
+        if(++x >= len1 && reverse) {
+            x = 0;
+        }
+        if(++y >= len2) {
+            y = 0;
+        }
+    }
+    return res;
+}
+
+var arr3 = ['Tom', 'Jack', 'John', 'Bill'];
+var arr2 = ['张三', '李四', '王五', '赵六'];
+
+console.log(buildResult(arr3, arr2));
+
+var str = '';
+for(var i=1; i<13;i++) {
+    str += "'" + (i < 10 ? '0'+i : i) + "',";
+}
+    console.log(str);
+
+
+
+
+    var s = 'ag我们𠨰奋斗marray jack多,。！、，-+=!年𠨰'.filterRareWord();
+    console.log(s)
+

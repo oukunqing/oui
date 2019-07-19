@@ -403,11 +403,15 @@
                     opt.skin = 'default';
                 }
 
+                if($.isBoolean(opt.copyAble, false) || $.isBoolean(opt.selectAble || opt.selectable, false)) {
+                    opt.copyAble = true;
+                }
+
                 return this.checkCustomStyle(opt, isUpdate).checkTiming(opt), opt;
             },
             getCssAttrSize: function (val, options) {
                 var p = $.extend({
-                    attr: 'margin',      //margin, padding, border
+                    attr: 'margin',      // margin, padding, border
                     unit: '',
                     isArray: false,
                     isLimit: false,
@@ -1670,6 +1674,8 @@
                     } else if (keyChar === 'F') {
                         _.focus();
                     }
+
+                    //var act = document.activeElement.id;
                 });
 
                 return util;
@@ -3304,6 +3310,7 @@
                 closeTiming: 5000,      //closeTiming timeout time timing 四个字段
                 showTimer: false,       //是否显示定时关闭倒计时
                 copyAble: false,        //是否允许复制内容
+                selectAble: false,      //是否可以选择文字内容
                 sizeAble: true,         //是否允许改变大小
                 dragSize: true,         //是否允许拖动改变大小
                 moveAble: true,         //是否允许移动位置
