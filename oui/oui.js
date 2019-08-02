@@ -1952,6 +1952,17 @@
         getDocumentSize = function(isOffset) {
             return getBodySize(isOffset);
         },
+        getScreenSize = function(avail) {
+            var size = avail ? {
+                width: screen.availWidth,
+                height: screen.availHeight
+            } : {
+                width: screen.width,
+                height: screen.height
+            };
+
+            return size;
+        },
         isArrayLike = function (obj) {
             if ($.isString(obj)) {
                 return false;
@@ -2362,8 +2373,7 @@
                 options = {};
             }
             var id = options.id || 'div-get-content-size-001',
-                //css = ';position:absolute;top:-3000px;left:-5000px;',
-                css = ';position:absolute;top:100px;left:100px;',
+                css = ';position:absolute;top:-3000px;left:-5000px;',
                 div = document.getElementById(id);
             if (!div) {
                 div = document.createElement('div');
@@ -2408,6 +2418,7 @@
         getBorderSize: getBorderSize,
         getBodySize: getBodySize,
         getDocumentSize: getDocumentSize,
+        getScreenSize: getScreenSize,
         getOffset: getOffsetSize,
         getOffsetSize: getOffsetSize,
         getElementSize: getElementSize,
