@@ -157,6 +157,21 @@
         isPercent = function(val) {
             return (!isNaN(parseFloat(val, 10)) && ('' + val).endsWith('%'));
         },
+        toBoolean = function(key, val) {
+            if(isBoolean(val)) {
+                return val;
+            }
+            if(isNumber(val)) {
+                return val === 1;
+            }
+            if(isString(val, true)) {
+                return val.toLowerCase() === 'true';
+            }
+            if(isString(key, true)) {
+                return key.toLowerCase() === 'true';
+            }
+            return false;
+        },
         toDecimal = function (s, defaultValue, decimalLen) {
             var v = parseFloat(s, 10);
             v = !isNaN(v) && $.isInteger(decimalLen) ? v.round(Math.abs(decimalLen)) : v;
@@ -500,6 +515,7 @@
         },
         toDecimal: toDecimal, toFloat: toDecimal, checkNumber: checkNumber,
         toInteger: toInteger, toInt: toInteger, toNumber: toNumber, toNumberList: toNumberList,
+        toBoolean: toBoolean, toBool: toBoolean,
         containsKey: containsKey, containsValue: containsValue, contains: contains, distinctList: distinctList,
         collapseNumberList: collapseNumberList, expandNumberList: expandNumberList,
         toJsonString: toJsonString, toJson: toJson, toEncode: toEncode,
@@ -985,6 +1001,8 @@
             return !isNaN(v) ? v : Number(dv) || 0;
         },
         */
+        toBoolean: function(val) { return $.toBoolean(this, typeof val === 'undefined' ? this : val); },
+        toBool: function(val) { return $.toBoolean(this, typeof val === 'undefined' ? this : val); },
         toNumber: function (defaultValue, isFloat, decimalLen) { return $.toNumber(this, defaultValue, isFloat, decimalLen); },
         toNumberList: function (separator, decimalLen) { return $.toNumberList(this, separator, decimalLen); },
         toInt: function (defaultValue) { return $.toInteger(this, defaultValue); },
@@ -1800,9 +1818,12 @@
             }
             return p;
         },
-        getCssAttrSize = function(val, options) {
+        getCssAttrSize = function(val, options) {            
+            if($.isString(val, true) && val.indexOf(':') < 0) {
+                val = document.getElementById(val.replace('#', ''));
+            }
             var p = checkMinMax($.extend({
-                    attr: '',      //margin, padding, border
+                    attr: '',      //margin, padding, border, radius
                     unit: '',
                     isArray: false,
                     isLimit: false,
@@ -1878,13 +1899,17 @@
             return getCssAttrSize(elem, $.extend({}, options, {attr:'border'}));
         },
         getOffsetSize = function(elem) {
+            if($.isString(elem, true)) {
+                elem = document.getElementById(elem.replace('#', ''));
+            }
             if (!isElement(elem)) {
                 return null;
             }
             var par = {
-                width: elem.offsetWidth, 
-                height: elem.offsetHeight
-            },  computedStyle,
+                    width: elem.offsetWidth, 
+                    height: elem.offsetHeight,
+                },  
+                computedStyle,
                 offsetParent = elem.offsetParent,
                 prevOffsetParent = elem,
                 doc = elem.ownerDocument,
@@ -1927,15 +1952,38 @@
                 top += Math.max(docElem.scrollTop, body.scrollTop);
                 left += Math.max(docElem.scrollLeft, body.scrollLeft);
             }
+
             return $.extend(par, {left: left, top: top});
         },
         getElementSize = function(elem) {
-            if (!isElement(elem)) {
-                return {};
+            if($.isString(elem, true)) {
+                elem = document.getElementById(elem.replace('#', ''));
             }
-            return $.extend(getOffsetSize(elem), {
-                clientWidth: elem.clientWidth, clientHeight: elem.clientHeight
-            });
+            if (!isElement(elem)) {
+                return { 
+                    width: 0, height: 0, 
+                    offsetWidth: 0, offsetHeight: 0, clientWidth: 0, clientHeight: 0,
+                    contentWidth: 0, contentHeight: 0, totalWidth: 0, totalHeight: 0
+                };
+            }
+            var ps = getPaddingSize(elem),
+                ms = getMarginSize(elem),
+                bs = getBorderSize(elem),
+                par = {
+                    offsetWidth: elem.offsetWidth, 
+                    offsetHeight: elem.offsetHeight,
+                    clientWidth: elem.clientWidth, 
+                    clientHeight: elem.clientHeight,
+                    contentWidth: elem.clientWidth - ps.width,
+                    contentHeight: elem.clientWidth - ps.height,
+                    totalWidth: elem.offsetWidth + ms.width ,
+                    totalHeight: elem.offsetHeight + ms.height,
+                    border: bs,
+                    padding: ps,
+                    margin: ms
+                };
+
+            return $.extend(getOffsetSize(elem), par);
         },
         getBodySize = function (isOffset) {
             var doc;
@@ -2391,6 +2439,13 @@
             var size = { width: div.offsetWidth, height: div.offsetHeight };
             return size;
             return div.innerHTML = '', size;
+        },
+        getInnerText = function(elem) {
+            if(typeof elem.innerText === 'string') {
+                return elem.innerText;
+            } else {
+                return elem.textContent;
+            }
         };
 
     $.extendNative($, {
@@ -2459,7 +2514,8 @@
         getScrollPos: getScrollPosition,
         getKeyCode: getKeyCode,
         filterHtmlCode: filterHtmlCode,
-        getContentSize: getContentSize
+        getContentSize: getContentSize,
+        getInnerText: getInnerText
     }, '$');
 
 }(OUI);

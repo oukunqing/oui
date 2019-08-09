@@ -3502,6 +3502,10 @@
                 Util.setClickBgClose(_);
             }
 
+            if($.isBoolean(content, false)) {
+                _.position();
+            }
+
             return _;
         },
         hide: function (action, dialogResult) {
@@ -3721,8 +3725,7 @@
         },
         position: function (options) {
             var _ = this, p = Util.getParam(_);
-            if (_.isClosed() || p.none) { return false; }
-            var opt = _.options, ctls = _.controls;
+            if (_.isClosed() || p.none) { return this; }
             return Util.setPosition(_, options), this;
         },
         move: function (options) {

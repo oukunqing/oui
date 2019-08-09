@@ -25,8 +25,8 @@
                 select: '请选择{0}',
                 minLength: '{0}请勿小于{1}个字符',
                 maxLength: '{0}请勿超过{1}个字符',
-                minValue: '{0}请勿小于{1}',
-                maxValue: '{0}请勿大于{1}',
+                minValue: '请输入大于或等于{0}的{1}',
+                maxValue: '请输入小于或等于{0}的{1}',
                 minMax: '请输入{0} - {1}之间的{2}',
                 number: '请输入{0}',
                 pattern: '请输入正确的{0}'
@@ -61,7 +61,10 @@
                     isJoin: true,
                     joinSeparate: ',',
                     focusInvalid: false,
+                    //是否允许空值
                     empty: false,
+                    //是否严格模式（检测输入内容的类型）
+                    strict: false,
                     md5: false,
                     same: {id: '', msg: ''},
                     distinct: {id: '', msg: ''},
@@ -104,12 +107,25 @@
                     }
                     return o;
                 },
+                getLabels: function() {
+                    var arr = formElement.getElementsByTagName('label'),
+                        labels = {};
+
+                    for(var i=0; i<arr.length; i++) {
+                        var o = arr[i], 
+                            f = o.getAttribute('for'), 
+                            k = op.getKey(f), 
+                            t = $.getInnerText(o);
+                        labels[k] = { title: t, obj: o };
+                    }
+                    return labels;
+                },
                 getKey: function (key, configs) {
                     if (!$.isObject(configs)) {
                         configs = op.configs;
                     }
                     if (configs.removePrefix) {
-                        if (op.isMatch(key)) { return key.replace(/^([a-z]+)|(txt|ddl)/g, ''); }
+                        if (op.isMatch(key)) { return key.replace(/^([a-z]+)|(txt|ddl|lbl|chb)/g, ''); }
                         if ($.isString(configs.prefix) && configs.prefix !== '') {
                             var pos = key.indexOf(configs.prefix);
                             return pos >= 0 ? key.substr(pos + configs.prefix.length) : key;
@@ -134,13 +150,13 @@
                     if (value === 'on') {
                         value = element.checked ? 1 : 0;
                     } else {
-                        if (element.checked && field.dataType !== 'string' && $.isDecimal(value)) {
+                        if (element.checked && field.dataType !== 'string' && $.isNumeric(value)) {
                             switch (field.dataType) {
                                 case 'int': value = parseInt(value, 10); break;
                                 case 'float': case 'decimal': value = parseFloat(value, 10); break;
                             }
                         } else if (!element.checked) {
-                            value = isSingle && $.isDecimal(value) ? 0 : '';
+                            value = isSingle && $.isNumeric(value) ? 0 : '';
                         }
                     }
                     if (field.required && isSingle && !element.checked) {
@@ -156,7 +172,9 @@
                     var len = value.length,
                         messages = $.extend({}, op.messages, field.messages),
                         getTitle = function (field, title) {
-                            return field.title || title || '';
+                            var str = field.title || title,
+                                lbl = op.labels[field.key] || {};
+                            return str || lbl.title || '';
                         },
                         result = function (pass, value, message) {
                             if (!pass && arguments.length <= 2) { message = value; value = ''; }
@@ -186,25 +204,47 @@
 
                     } else {
                         // 验证数字输入，大小值范围限定，其中 type="hidden" 默认值至少为0
-                        var numType = '数字';
+                        var val = value, numType = '数字', strict = field.strict || configs.strict;
                         switch (field.dataType) {
-                            case 'int': value = parseInt(value, 10); numType = '整数'; break;
-                            case 'float': case 'decimal': value = parseFloat(value, 10); numType = '小数'; break;
+                            case 'int':
+                                value = parseInt(value, 10);
+                                numType = '整数';
+                                break;
+                            case 'float':
+                            case 'decimal':
+                                value = parseFloat(value, 10);
+                                numType = '小数';
+                                break;
                         }
                         if (isNaN(value)) {
-                            var dv = $.isDecimal(field.value) ? field.value : ($.isDecimal(configs.defaultValue) ? configs.defaultValuel : (element.type === 'hidden' ? 0 : ''));
-                            if ($.isDecimal(dv)) { value = dv; }
-                            else if (configs.checkNumber) { return result(false, (messages.number || configs.messages.number).format(numType)); }
+                            var dv = $.isNumeric(field.value) ? field.value : 
+                                ($.isNumeric(configs.defaultValue) ? configs.defaultValuel : (element.type === 'hidden' ? 0 : ''));
+                            if ($.isNumeric(dv)) { 
+                                value = dv; 
+                            } else if (configs.checkNumber) { 
+                                return result(false, (messages.number || configs.messages.number).format(numType)); 
+                            }
                         }
                         if (configs.checkNumber) {
-                            var min = field.minValue || configs.minValue, max = field.maxValue || configs.maxValue;
-                            if (($.isDecimal(min) && value < min) || ($.isDecimal(max) && value > max)) {
-                                var msg = (messages.maxValue || configs.messages.maxValue).format(name, max, numType);
-                                if ($.isDecimal(min) && $.isDecimal(max)) {
-                                    msg = (messages.minMax || configs.messages.minMax).format(min, max, numType, name);
-                                } else if ($.isDecimal(min)) {
-                                    msg = (messages.minValue || configs.messages.minValue).format(name, min, numType);
+                            var min = field.minValue || configs.minValue, 
+                                max = field.maxValue || configs.maxValue,
+                                msg = '';
+
+                            if ($.isNumeric(min) && $.isNumeric(max)) {
+                                msg = (messages.minMax || configs.messages.minMax).format(min, max, numType);
+                            } else if ($.isNumeric(min)) {
+                                msg = (messages.minValue || configs.messages.minValue).format(min, numType);
+                            } else if ($.isNumeric(max)) {
+                                msg = (messages.maxValue || configs.messages.maxValue).format(max, numType);
+                            }
+                            //严格模式，需要验证输入的内容格式，比如验证是否是整数
+                            if(strict) {
+                                //验证输入的(原始)内容是否是整数
+                                if(field.dataType === 'int' && !$.isInteger(val)) {
+                                    return result(false, msg);
                                 }
+                            }
+                            if (($.isNumeric(min) && value < min) || ($.isNumeric(max) && value > max)) {
                                 return result(false, msg);
                             }
                         }
@@ -301,6 +341,7 @@
                             minValue: '', maxValue: '',   //最小值、最大值（用于验证输入的数字大小）
                             required: false,            //是否必填项
                             empty: false,               //是否允许空值
+                            strict: false,              //是否严格模式（检测输入内容的类型）
                             md5: false,                 //是否MD5加密
                             minLength: '', maxLength: '', //字符长度
                             pattern: '',                //正则表达式（内部验证）
@@ -326,6 +367,7 @@
                     if (!$.isObject(field.messages)) {
                         field.messages = { required: field.messages };
                     }
+                    field.key = key;
                     //缓存控件Tag类型
                     field.tag = element.tagName;
                     //缓存字段配置
@@ -412,13 +454,18 @@
             op.loadCssCode(op.configs.highLightStyle);
         }
 
+        op.labels = op.getLabels();
+
         return op;
     },
     setFormVerify = function (formElement, options, elements) {
-        var op = initFormConfig(formElement, options), configs = op.configs, list = [],
+        var op = initFormConfig(formElement, options), 
+            configs = op.configs, 
+            list = [],
             arr = ($.isObject(elements) && elements.length > 0 && !configs.dynamic) ? elements : 
                     op.formElement.getElementsByTagName(configs.tagName || "*"),
             len = arr.length;
+
         for (var i = 0; i < len; i++) {
             var obj = arr[i], tag = obj.tagName, type = obj.type;
             //if (tagPattern.test(tag) && (tag != 'input' || typePattern.test(type))) {

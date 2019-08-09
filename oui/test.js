@@ -258,3 +258,22 @@ for(var i=1; i<13;i++) {
     var s = 'ag我们𠨰奋斗marray jack多,。！、，-+=!年𠨰'.filterRareWord();
     console.log(s)
 
+
+
+var d2 = null;
+function showTree() {
+    if(d2 !== null) {
+        d2.show();
+    }
+    d2 = $.dialog('<div id="tree"></div>', '标题', {
+        title: '这也是标题',
+        width: 300,
+        height: 400
+    });
+
+    var o2 = new oTree('o2', document.getElementById('tree'), {});
+}
+
+
+var num = -111.;
+console.log(/^[-+]?(\d+)([.][\d]{0,})?$/.test(num));
