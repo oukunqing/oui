@@ -2900,7 +2900,11 @@
                     arr.push(elements[i].value);
                 }
                 return arr;
-            } else if ($.isElement(elements)) {
+            } 
+            if($.isString(elements, true)) {
+                elements = $I(elements.replace('#', ''));
+            }
+            if ($.isElement(elements)) {
                 var val = (isAttribute ? elements.getAttribute(attributeName) : elements.value) || defaultValue;
                 if ($.isFunction(func)) {
                     return func(val);
