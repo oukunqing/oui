@@ -277,3 +277,13 @@ function showTree() {
 
 var num = -111.;
 console.log(/^[-+]?(\d+)([.][\d]{0,})?$/.test(num));
+
+
+var str = '共';
+console.log(str.toUnicode());
+
+var fd = {id:3, name:'tom'};
+
+console.log(fd, $.toJsonString(fd));
+
+console.log(fd.constructor, typeof fd.constructor);

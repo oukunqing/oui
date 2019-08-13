@@ -1,12 +1,12 @@
 .oui-pagination {
     display: block;
-    font-size:14px;
+    font-size: 14px;
     font-family: Arial;
     color: #333;
     overflow: hidden;
     border: none 0 #ccc;
-    margin:0;
-    padding:2px 5px;
+    margin: 0;
+    padding: 2px 5px;
 
     /*禁止选中内容*/
     moz-user-select: -moz-none;
@@ -28,10 +28,16 @@
 .oui-pagination .left, .oui-pagination .label {
     float: left;
 	color: #333;
+	border: none 0;
+	padding: 0;
+	margin: 0;
 }
 
 .oui-pagination .right {
     float: right;
+	border: none 0;
+	padding: 0;
+	margin: 0;
 }
 
 .oui-pagination ul,.oui-pagination li {

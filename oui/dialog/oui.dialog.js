@@ -77,7 +77,10 @@
             tips: 'tips',
             message: 'message',
             msg: 'msg',
-            info: 'info'
+            info: 'info',
+            about: 'about',
+            toolwindow: 'toolwindow',
+            toolwin: 'toolwin'
         },
         DialogStatus: {
             close: 'close',
@@ -786,6 +789,13 @@
                         opt.codeCallback = true;
                         opt.keyClose = opt.escClose = opt.clickBgClose = false;
                         break;
+                    case Config.DialogType.about:
+                    case Config.DialogType.toolwindow:
+                    case Config.DialogType.toolwin:
+                        opt.minAble = opt.maxAble = opt.sizeAble = opt.dragSize = false;
+                        opt.showLogo = false;
+                        opt.showFoot = false;
+                        break;
                     default:
                         opt.buttons = Config.DialogButtons.None;
                         opt.showHead = opt.showFoot = opt.dragSize = false;
@@ -797,6 +807,10 @@
                 //设置 tooltip 默认位置为 right
                 if (opt.type === Config.DialogType.tooltip && !opt.position) {
                     opt.position = 6; //right
+                }
+
+                if(opt.type === Config.DialogType.about) {
+                    opt.title = '关于';
                 }
 
                 var p = this.getOptions($.extend(opt, options).id);
@@ -1526,7 +1540,7 @@
                 ];
                 dir = $.isString(dir) ? [dir] : arr;
 
-                if (opt.dragSize) {
+                if (opt.sizeAble && opt.dragSize) {
                     var padding = Common.getCssAttrSize(opt.padding, { attr: 'padding', unit: 'px', isLimit: true });
                     for (var i in dir) {
                         ctls.dialog.appendChild(this.buildDragSwitch(_, dir[i], padding));
@@ -3805,6 +3819,12 @@
         },
         tooltip: function (content, target, options) {
             return Factory.show(content, undefined, options, Config.DialogType.tooltip, target);
+        },
+        toolwin: function(content, title, options) {
+            return Factory.show(content, title, options, Config.DialogType.toolwin);
+        },
+        toolwindow: function(content, title, options) {
+            return Factory.show(content, title, options, Config.DialogType.toolwindow);
         }
     });
 
@@ -3826,6 +3846,12 @@
         },
         url: function (url, title, options) {
             return Factory.show(url, title, options, Config.DialogType.url);
+        },
+        about: function(content, title, options) {
+            return Factory.show(content, title, options, Config.DialogType.about);
+        },
+        toolwin: function(content, title, options) {
+            return Factory.show(content, title, options, Config.DialogType.toolwin);
         }
     });
 
