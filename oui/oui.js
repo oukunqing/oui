@@ -1651,6 +1651,12 @@
                 typeof elem.tagName === 'string';
             return isElem && ($.isString(tagName, true) ? elem.tagName === tagName : isElem);
         },
+        toElement = function(elemId) {
+            if($.isString(elemId, true)) {
+                return document.getElementById(elemId.replace('#', ''));
+            }
+            return elemId;
+        },
         isChildNode = function(parent, elem, recursion) {
             if(!$.isElement(parent) || !$.isElement(elem)) {
                 return false;
@@ -1820,7 +1826,7 @@
         },
         getCssAttrSize = function(val, options) {            
             if($.isString(val, true) && val.indexOf(':') < 0) {
-                val = document.getElementById(val.replace('#', ''));
+                val = $.toElement(val);
             }
             var p = checkMinMax($.extend({
                     attr: '',      //margin, padding, border, radius
@@ -1899,9 +1905,7 @@
             return getCssAttrSize(elem, $.extend({}, options, {attr:'border'}));
         },
         getOffsetSize = function(elem) {
-            if($.isString(elem, true)) {
-                elem = document.getElementById(elem.replace('#', ''));
-            }
+            elem = $.toElement(elem);
             if (!isElement(elem)) {
                 return null;
             }
@@ -1956,9 +1960,7 @@
             return $.extend(par, {left: left, top: top});
         },
         getElementSize = function(elem) {
-            if($.isString(elem, true)) {
-                elem = document.getElementById(elem.replace('#', ''));
-            }
+            elem = $.toElement(elem);
             if (!isElement(elem)) {
                 return { 
                     width: 0, height: 0, 
@@ -2458,6 +2460,7 @@
         isDocument: isDocument,
         isWindow: isWindow,
         isElement: isElement,
+        toElement: toElement,
         isChildNode: isChildNode,
         isForm: isForm,
         isStyleUnit: isStyleUnit,
@@ -2664,7 +2667,8 @@
             }
         }, 'window');
 
-        var wst = window.setTimeout, wsi = window.setInterval;
+        var wst = window.setTimeout, wsi = window.setInterval,
+            cwst = window.clearTimeout, cwsi = window.clearInterval;
         window.setTimeout = function (func, delay) {
             if ($.isFunction(func)) {
                 var args = Array.prototype.slice.call(arguments, 2);
@@ -2685,7 +2689,14 @@
             }
             return wsi(func, delay);
         };
+        window.clearTimeout = function(id) {
+            if(id) { cwst(id); }
+        };
+        window.clearInterval = function(id) {
+            if(id) { cwsi(id); }
+        };
 
+        //获取窗口缩放比例
         window.getZoomRatio = function() {
             var ratio = 0,
                 screen = window.screen,
@@ -2708,6 +2719,7 @@
             return ratio;
         };
 
+        //判断窗口是否缩放
         window.isZoom = function() {
             return window.getZoomRatio() !== 100;
         };
@@ -2892,18 +2904,7 @@
             return this;
         },
         getElementValue: function (elements, defaultValue, attributeName, func) {
-            var isAttribute = $.isString(attributeName);
-
-            if ($.isArray(elements) || $.isArrayLike(elements) || elements.length > 1) {
-                var arr = [], len = elements.length;
-                for (var i = 0; i < len; i++) {
-                    arr.push(elements[i].value);
-                }
-                return arr;
-            } 
-            if($.isString(elements, true)) {
-                elements = $I(elements.replace('#', ''));
-            }
+            elements = $.toElement(elements);
             if ($.isElement(elements)) {
                 var val = (isAttribute ? elements.getAttribute(attributeName) : elements.value) || defaultValue;
                 if ($.isFunction(func)) {
@@ -2911,6 +2912,16 @@
                 }
                 return val;
             }
+
+            var isAttribute = $.isString(attributeName);
+            if ($.isArray(elements) || $.isArrayLike(elements) || elements.length > 1) {
+                var arr = [], len = elements.length;
+                for (var i = 0; i < len; i++) {
+                    arr.push(elements[i].value);
+                }
+                return arr;
+            }
+            return '';
         },
         setElementAttribute: function (elem, value, attributeName) {
             if (attributeName === 'value') {
@@ -2926,6 +2937,13 @@
                 attributeName = 'value';
             }
 
+            elements = $.toElement(elements);
+            if ($.isElement(elements)) {
+                var val = $.isArray(values) ? values[0] : $.isUndefined(values) ? '' : values;
+                $.setElementAttribute(elements, val, attributeName);
+                return this;
+            }
+
             if ($.isArray(elements) || $.isArrayLike(elements) || elements.length > 1) {
                 var len = elements.length;
                 if (!$.isArray(values)) {
@@ -2935,16 +2953,22 @@
                     var val = $.isUndefined(values[i]) ? (sameValue ? values[0] : '') : values[i];
                     $.setElementAttribute(elements[i], val, attributeName);
                 }
-            } else if ($.isElement(elements)) {
-                var val = $.isArray(values) ? values[0] : $.isUndefined(values) ? '' : values;
-                $.setElementAttribute(elements, val, attributeName);
+                return this;
             }
-
             return this;
         },
         appendOption: function(obj, val, txt) {
             return obj.options.add(new Option(txt, val)), this;
         }
+    }, '$');
+
+    $.extendNative($, {
+        getElemValue: $.getElementValue,
+        getElemVal: $.getElementValue,
+        setElemValue: $.setElementValue,
+        setElemVal: $.setElementValue,
+        setElemAttribute: $.setElementAttribute,
+        setElemAttr: $.setElementAttribute
     }, '$');
 }(OUI);
 

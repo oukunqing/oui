@@ -287,3 +287,9 @@ var fd = {id:3, name:'tom'};
 console.log(fd, $.toJsonString(fd));
 
 console.log(fd.constructor, typeof fd.constructor);
+
+console.log(Math.round(2/135,2))
+
+console.log((2/135).round(2))
+
+console.log(2.5*0.50)
