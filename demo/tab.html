@@ -8,47 +8,62 @@
 <body>
 	<input type="button" value="关闭全部" onclick="closeAll();" />
 	<input type="button" value="添加" onclick="addTab();" />
+    <input type="text" id="txtId" />
+    <input type="button" value="显示" onclick="show();" />
     <br><br>
     <br><br>
+    <br><br>
+    <br><br>
+    <div style="clear: both;"></div>
     
     <div id="nav" style="width:700px;"></div>
     <div id="content" style="width:700px;"></div>
 </body>
 </html>
 <script type="text/javascript">
-    var tab = new $.Tab($I('nav'),$I('content'), { 
+    var tab = $.tab($I('nav'),$I('content'), { 
         eventName: 'click',
-        height: 30,
+        //dblclickScroll: false,
+        //center: false,
+        //height: 30,
         style: {
             //box: 'margin: 0 5px;',
             //tab: 'margin: 0 5px 0 0;',
-            txt: 'font-size:14px;'
+            //txt: 'font-size:14px;'
         }
     });
 
     tab.add({id: 'emap', name: '电子地图百度地图私有地图谷歌地图22233', url: 'dialog.html', closeAble: true});
-    
-    tab.add({id: 'data', name: '实时', html: '实时数据1', closeAble: false });
+        
+    tab.add({id: 'data1', name: '实时数据1', html: '实时数据1', closeAble: false });
     tab.add({id: 'data2', name: '实时数据2', html: '实时数据2'});
-	
-    tab.insert({id: 'data3', name: '实时数据3', html: '实时数据3'}, 'data');
+    
+    tab.insert({id: 'data3', name: '实时数据3', html: '实时数据3'}, 'data', true);
     tab.add({id: 'data4', name: '实时数据4', html: '实时数据4'});
     tab.add({id: 'data5', name: '实时数据5', html: '实时数据5'});
     tab.add({id: 'data6', name: '实时数据6', html: '实时数据6'});
     tab.add({id: 'data7', name: '实时数据7', html: '实时数据7'});
-	
+    
 
     tab.show('emap');
+  
 
 	function closeAll() {
 		tab.closeAll();
 	}
 
-	var idx = 17;
+	var idx = 7;
 
 	function addTab() {
 		idx += 1;
-		tab.add({id: 'data' + idx, name: '实时数据' + idx, html: '实时数据' + idx});
+		tab.add({id: 'data' + idx, name: '实时数据' + idx, html: '实时数据' + idx, func: function(par) {
+            console.log('par: ', par);
+        }}, true);
 	}
+
+    function show(){
+        var id = $('#txtId').val();
+        tab.show(id);
+    }
 
 </script>

@@ -90,16 +90,6 @@
                     }
                 }, 5);
             });
-            /*
-            var a = $.createElement('a', '', function(elem) {
-                elem.innerHTML = opt.name;
-                elem.href = '#' + opt.id;
-                elem.onclick = function() {
-                    console.log('tab: ', this.innerHTML);
-                    t.show(opt.id);
-                };
-            }, li);
-            */
 
             if($.isNumber(insertIndex)) {
                 t.container.insertBefore(elem, t.container.childNodes[insertIndex]);
@@ -118,11 +108,17 @@
                         $.cancelBubble();
                     };
                 } else {
+                    /*
                     childs[i]['on' + cfg.eventName] = function() {
                         t.show(opt.id);
                     };
+                    */
                 }
             }
+
+            elem['on' + cfg.eventName] = function() {
+                t.show(opt.id);
+            };
 
             var div = $.createElement('div', opt.id, function(elem) {
                 elem.className = 'tab-panel';
@@ -156,7 +152,7 @@
             }
             return this;
         },
-        setSize: function(t) {
+        setSize: function(t, func) {
             window.clearTimeout(this.sizeTimer);
             this.sizeTimer = window.setTimeout(function() {
                 var ts = $.getInnerSize(t.tabContainer),
@@ -166,8 +162,6 @@
                     ars = $.getOuterSize(t.right).width,
                     w = ts.width- s.margin.width - s.padding.width - s.border.width,
                     bw = w - als - ars;
-
-                    console.log('als: ', als, ars);
 
                 $('.oui-tabs .tab-switch').each(function(){
                     $(this)[tw < bw ? 'hide' : 'show']();
@@ -181,11 +175,15 @@
                     tw = bw2;
                 }
 
-                //设置 tab 项实际总宽度
-                t.container.style.width = tw + 'px';
                 //设置 tab box 宽度
                 t.box.style.width = bw2 + 'px';
                 t.box.style.left = als2 + 'px';
+                //设置 tab 项实际总宽度
+                t.container.style.width = tw + 'px';
+
+                if($.isFunction(func)) {
+                    func();
+                }
             }, 20);
             return this;
         },
@@ -195,19 +193,21 @@
                 childs = t.container.childNodes,
                 len = childs.length;
 
-            console.log('childs: ', childs);
-
             for(var i = len - 1; i >= 0; i--) {
                 w += $.getElementSize(childs[i]).outerWidth;
-
-                console.log('childs w: ', $.getElementSize(childs[i]).outerWidth, w);
             }
-            return w + s.padding.width;
+            w += s.padding.width;
+            if(w > $.getScreenSize().width) {
+                w += 17;
+            }
+            return w;
         },
         scrollAction: function(t, btn, dir) {
-            $.addEventListener(btn, 'dblclick', function () {
-                Util.scrollTo(t, dir, 0);
-            });
+            if(t.getOptions.dblclickScroll) {                
+                $.addEventListener(btn, 'dblclick', function () {
+                    Util.scrollTo(t, dir, 0, true);
+                });
+            }
             $.addEventListener(btn, 'mousedown', function () {
                 window.clearTimeout(t.timerLongPress);
                 t.timerLongPress = window.setTimeout(function () {
@@ -239,34 +239,78 @@
             }, Config.defaultLongPressInterval);
             return this;
         },
-        scrollTo: function(t, dir, pos) {
-            console.log('scrollTo: ', dir, pos, t.getOptions())
+        scrollTo: function(t, dir, pos, goto) {
+            var distance = 10;
             if($.isNumber(pos)) {
-                t.box.scrollLeft = dir === 'left' ? pos : t.container.clientWidth - pos;
+                distance = pos;
+            }
+            if($.isBoolean(goto, false)) {                
+                t.box.scrollLeft = dir === 'left' ? distance : t.container.clientWidth - distance;
                 return this;
             }
-            return t.box.scrollLeft += (dir === 'left' ? -10 : 10), this;
+            return t.box.scrollLeft += (dir === 'left' ? -distance : distance), this;
         },
         scrollOver: function(t) {
             return t.box.scrollLeft <= 0 || t.box.scrollLeft >= t.box.scrollWidth;
+        },
+        setTabPosition: function(t, tab) {
+            var bs = $.getInnerSize(t.box),
+                ts = $.getOuterSize(tab),
+                isCenter = t.getOptions().center,
+                centerOffset = isCenter ? ts.width / 2 - bs.width / 2 : 0;
+
+            if(tab.offsetLeft < t.box.scrollLeft) {
+                Util.scrollTo(t, 'left', tab.offsetLeft + centerOffset, true);
+            } else if((tab.offsetLeft + tab.offsetWidth - bs.width) > t.box.scrollLeft) {
+                Util.scrollTo(t, 'right', tab.offsetLeft + tab.offsetWidth - bs.width - t.box.scrollLeft - centerOffset);
+            }
+            return this;
         }
     },
     Cache = {
-        ids: [],
-        tabs: {}
+        count: 0,
+        tabs: {},
+        cur: null
     },
     Factory = {
-        initCache: function(id, options) {
+        initCache: function(id, options, obj) {
             var key = 't_' + id;
-            Cache.ids.push({ key: key, id: id });
             Cache.tabs[key] = {
+                id: id,
+                obj: obj,
                 options: options,
                 tabs: {}
             };
+            Cache.count++;
         },
         getCache: function(id) {
             var key = 't_' + id;
             return Cache.tabs[key] || null;
+        },
+        getCount: function(cache) {
+            return cache ? cache.count : 0;
+        },
+        getTab: function(cache, idx) {
+            if(!cache) {
+                return null;
+            }
+            if(!$.isNumber(idx)) {
+                idx = 0;
+            }
+            var i = 0;
+            for(var k in cache.tabs) {
+                if(i++ === idx) {
+                    return cache.tabs[k];
+                }
+            }
+            return null;
+        },
+        getCur: function() {
+            return Cache.cur;
+        },
+        setCur: function(cur) {
+            Cache.cur = cur;
+            return this;
         },
         getOptions: function(id) {
             var key = 't_' + id;
@@ -292,9 +336,11 @@
                     for(var k in cache.tabs) {
                         delete cache.tabs[k];
                     }
+                    Cache.count = 0;
                 } else {
                     if(cache.tabs[tid]) {
                         delete cache.tabs[tid];
+                        Cache.count--;
                     }
                 }
             }
@@ -312,6 +358,24 @@
                     func();
                 }
             });
+        },
+        buildTab: function(tabContainer, conContainer, options) {
+            var tab = $.toElement(tabContainer),
+                con = $.toElement(conContainer),
+                opt = $.extend({
+                    id: 'oui-tabs-' + new Date().getMilliseconds(),
+                }, options);
+
+            if(!$.isElement(tab) || !$.isElement(con)) {
+                console.log('oui.tab: ', '参数输入错误');
+                return null;
+            }
+
+            var cache = Factory.getCache(opt.id);
+            if(!cache) {
+                return new Tab(tab, con, opt);
+            }
+            return cache.obj;
         }
     };
 
@@ -328,6 +392,7 @@
         options = $.extend({
             id: 'oui-tabs-' + new Date().getMilliseconds(),
             eventName: 'click',
+            dblclickScroll: false,
             maxWidth: 240,
             style: {
                 height: 28
@@ -340,26 +405,36 @@
 
     Tab.prototype = {
         initial: function(options) {
-            Factory.initCache(this.id, options);
+            Factory.initCache(this.id, options, this);
             Util.initialTab(this, options);
             return this;
         },
         getOptions: function() {
             return Factory.getOptions(this.id);
         },
-        add: function(options) {
-            return this.insert(options, null);
+        add: function(options, show) {
+            return this.insert(options, null, show);
         },
-        insert: function(options, insertIndex) {            
+        insert: function(options, insertIndex, show) {
+            var that = this;
             var opt = $.extend({
                 closeAble: true
             }, options);
 
-            Util.buildTab(this, opt, this.getOptions(), insertIndex);
+            Util.buildTab(that, opt, that.getOptions(), insertIndex)
+                .setSize(that, function() {
+                    if($.isBoolean(show, false)) {
+                        that.show(opt.id);
+                    }
+                });
 
-            return Util.setSize(this), this;
+            if($.isFunction(opt.func)) {
+                opt.func(opt);
+            }
+
+            return that;
         },
-        show: function(id) {
+        show: function(id, func) {
             var cache = Factory.getCache(this.id);
             if(null === cache) {
                 return this;
@@ -368,13 +443,24 @@
                 $.removeClass(cache.tabs[k].tab, 'cur');
                 $(cache.tabs[k].con).hide();
             }
-            var cur = cache.tabs[id];
+            var cur = cache.tabs[id] 
+                || (Factory.getCount(cache) === 1 ? Factory.getTab(cache) : null) 
+                || Factory.getCur();
+
             if(cur) {
                 $.addClass(cur.tab, 'cur');
                 $(cur.con).show();
+                Factory.setCur(cur);
+                Util.setTabPosition(this, cur.tab);
             }
 
-            return Util.setSize(this), this;
+            Util.setSize(this);
+
+            if($.isFunction(func)) {
+                func();
+            }
+
+            return this;
         },
         close: function(id) {
             Util.delTab(this, id);
@@ -398,11 +484,9 @@
         
     };
 
-    $.extendNative($, { Tab: Tab }, '$');
-
     $.extend({
         tab: function(tabContainer, conContainer, options) {
-
+            return Factory.buildTab(tabContainer, conContainer, options);
         }
     });
 
