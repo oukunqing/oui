@@ -464,7 +464,7 @@
                 var val = op.pageIndex, add = obj.className.indexOf('next') >= 0;
                 val += add ? 1 : -1;
 
-                if (!checkPageIndex(that, val)) {
+                if (isStop || !checkPageIndex(that, val)) {
                     if (op.timerLongPress2) { window.clearInterval(op.timerLongPress2); }
                     return false;
                 }

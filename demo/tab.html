@@ -10,16 +10,25 @@
 	<input type="button" value="添加" onclick="addTab();" />
     <br><br>
     <br><br>
-    <div id="nav" style="width:600px;"></div>
-    <div id="content"></div>
+    
+    <div id="nav" style="width:700px;"></div>
+    <div id="content" style="width:700px;"></div>
 </body>
 </html>
 <script type="text/javascript">
-    var tab = new $.Tab($I('nav'),$I('content'), { eventName: 'click' });
+    var tab = new $.Tab($I('nav'),$I('content'), { 
+        eventName: 'click',
+        height: 30,
+        style: {
+            //box: 'margin: 0 5px;',
+            //tab: 'margin: 0 5px 0 0;',
+            txt: 'font-size:14px;'
+        }
+    });
 
     tab.add({id: 'emap', name: '电子地图百度地图私有地图谷歌地图22233', url: 'dialog.html', closeAble: true});
     
-    tab.add({id: 'data', name: '实时数据1', html: '实时数据1'});
+    tab.add({id: 'data', name: '实时', html: '实时数据1', closeAble: false });
     tab.add({id: 'data2', name: '实时数据2', html: '实时数据2'});
 	
     tab.insert({id: 'data3', name: '实时数据3', html: '实时数据3'}, 'data');
@@ -35,7 +44,7 @@
 		tab.closeAll();
 	}
 
-	var idx = 7;
+	var idx = 17;
 
 	function addTab() {
 		idx += 1;

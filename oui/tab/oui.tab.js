@@ -11,55 +11,81 @@
 !function($) {
 
     var Config = {
-        FilePath: $.getScriptSelfPath(true)
+        FilePath: $.getScriptSelfPath(true),        
+        defaultLongPressTime: 512,    //长按最小时长，单位：毫秒
+        defaultLongPressInterval: 40,  //长按滚动间隔，单位：毫秒
     },
     Util = {
-        initialTab: function(t, opt) {
-            var left = $.createElement('a', '', function(elem) {
-                elem.className = 'tab-switch tab-switch-left';
-                elem.innerHTML = 'L';
+        buildSwitch: function(t, opt, dir) {
+            var div = $.createElement('div', '', function(elem) {
+                elem.className = 'tab-switch tab-switch-' + dir;
+                var style = '';
+                if(opt.height) {
+                    elem.style.height = opt.height + 'px';
+                    style = 'margin-top:' + (opt.height - 12) / 2 + 'px;';
+                }
+                elem.innerHTML = '<a class="arrow arrow-' + dir + '" style="' + style + '"></a>';
             }, t.tabContainer);
-            t.left = left;
+            return div;
+        },
+        initialTab: function(t, opt) {
+            t.left = Util.buildSwitch(t, opt, 'left');
+            Util.scrollAction(t, t.left, 'left');
 
             var div = $.createElement('div', '', function(elem) {
                 elem.className = 'tab-box';
+                if(opt.style.box) {
+                    elem.style.cssText = opt.style.box;
+                }
+                if(opt.height) {
+                    elem.style.height = opt.height + 'px';
+                }
             }, t.tabContainer);
             t.box = div;
 
-            var ul = $.createElement('div', '', function(elem) {
+            var ul = $.createElement('ul', '', function(elem) {
                 elem.className = 'tab-container';
             }, div);
             t.container = ul;
 
-            var right = $.createElement('a', '', function(elem) {
-                elem.className = 'tab-switch tab-switch-right';
-                elem.innerHTML = 'R';
-            }, t.tabContainer);
-            t.right = right;
+            t.right = Util.buildSwitch(t, opt, 'right');
+            Util.scrollAction(t, t.right, 'right');
 
             return this;
         },
         buildTab: function(t, opt, cfg, insertIndex) {
-            var elem = $.createElement('a', '', function(elem) {
+            var elem = $.createElement('li', '', function(elem) {
                 elem.className = 'tab';
                 elem.id = cfg.id + '-' + opt.id;
-                var con = '<span class="tab-txt" href="#{id}">{name}</span>';
-                if(opt.closeAble) {
-                    con += '<i class="close" title="">×</i>';
+                if(cfg.style.tab) {
+                    elem.style.cssText = cfg.style.tab;
                 }
-                elem.innerHTML = con.format(opt);
+                var txtStyle = '', closeStyle = '';
+                if(cfg.style.txt) {
+                    txtStyle = cfg.style.txt;
+                }
+                if(cfg.height) {
+                    elem.style.height = cfg.height + 'px';
+                    closeStyle = 'margin-top:' + parseInt((cfg.height - 17) / 2, 10) + 'px;';
+                    txtStyle += ';line-height:' + (cfg.height) + 'px;';
+                }
+                var con = '<a class="tab-txt" href="#{id}" style="{1}">{name}</a>';
+                if(opt.closeAble) {
+                    con += '<a class="close" title="" style="{2}">×</a>';
+                }
+                elem.innerHTML = con.format(opt, txtStyle, closeStyle);
                 window.setTimeout(function(){
-                    var es = $.getElementSize(elem);
-                    if($.isNumber(cfg.maxWidth) && cfg.maxWidth > 60 && es.width > cfg.maxWidth) {
-                        var txt = elem.childNodes[0],
-                            btn = elem.childNodes[1],
-                            ps = $.getPaddingSize(txt),
-                            ms = $.getMarginSize(txt),
-                            cs = $.getElementSize(btn).outerWidth;
+                    var txt = elem.childNodes[0],
+                        txtW = $.getOuterSize(txt).width,
+                        btn = opt.closeAble ? elem.childNodes[1] : null,
+                        btnW = $.getOuterSize(btn).width;
 
+                    if($.isNumber(cfg.maxWidth) && cfg.maxWidth > 60 && (txtW + btnW) > cfg.maxWidth) {
+                        var ps = $.getPaddingSize(txt),
+                            ms = $.getMarginSize(txt),
+                            es = $.getElementSize(elem);
                         elem.style.width = cfg.maxWidth + 'px';
-                        txt.style.width = (cfg.maxWidth - ps.width - ms.width - cs - es.border.width) + 'px';
-                        console.log('txt size: ', cfg.maxWidth, cfg.maxWidth, ps.width, ms.width, cs, es.border.width)
+                        txt.style.width = (cfg.maxWidth - ps.width - ms.width - btnW - es.border.width - 2) + 'px';
                         txt.title = $.getInnerText(txt);
                     }
                 }, 5);
@@ -110,7 +136,7 @@
                 elem.innerHTML = html;
                 elem.style.display = 'none';
 
-            }, t.contents);
+            }, t.conContainer);
 
             Factory.setCache(t.id, opt.id, elem, div);
             return this;
@@ -132,28 +158,97 @@
         },
         setSize: function(t) {
             window.clearTimeout(this.sizeTimer);
-            this.sizeTimer = window.setTimeout(function(){
-                var s = $.elemSize(t.box);
-                //设置 tab box 宽度
-                t.box.style.width = (t.tabContainer.clientWidth - s.margin.width - s.padding.width - 32) + 'px';
+            this.sizeTimer = window.setTimeout(function() {
+                var ts = $.getInnerSize(t.tabContainer),
+                    s = $.elemSize(t.box), 
+                    tw = Util.getTabSize(t),
+                    als = $.getOuterSize(t.left).width,
+                    ars = $.getOuterSize(t.right).width,
+                    w = ts.width- s.margin.width - s.padding.width - s.border.width,
+                    bw = w - als - ars;
+
+                    console.log('als: ', als, ars);
+
+                $('.oui-tabs .tab-switch').each(function(){
+                    $(this)[tw < bw ? 'hide' : 'show']();
+                })
+
+                var als2 = $.getOuterSize(t.left).width,
+                    ars2 = $.getOuterSize(t.right).width,
+                    bw2 = w - als2 - ars2;
+
+                if(tw < bw2) {
+                    tw = bw2;
+                }
+
                 //设置 tab 项实际总宽度
-                t.container.style.width = Util.getTabSize(t) + 'px';
-                console.log(Util.getTabSize(t));
-            }, 5);
+                t.container.style.width = tw + 'px';
+                //设置 tab box 宽度
+                t.box.style.width = bw2 + 'px';
+                t.box.style.left = als2 + 'px';
+            }, 20);
             return this;
         },
         getTabSize: function(t) {
             var w = 0, 
                 s = $.elemSize(t.container),
-                childs = t.container.childNodes;
-            for(var i = 0; i < childs.length; i++) {
-                console.log($.getElementSize(childs[i]));
+                childs = t.container.childNodes,
+                len = childs.length;
+
+            console.log('childs: ', childs);
+
+            for(var i = len - 1; i >= 0; i--) {
                 w += $.getElementSize(childs[i]).outerWidth;
+
+                console.log('childs w: ', $.getElementSize(childs[i]).outerWidth, w);
             }
             return w + s.padding.width;
         },
-        scrollTo: function(t) {
+        scrollAction: function(t, btn, dir) {
+            $.addEventListener(btn, 'dblclick', function () {
+                Util.scrollTo(t, dir, 0);
+            });
+            $.addEventListener(btn, 'mousedown', function () {
+                window.clearTimeout(t.timerLongPress);
+                t.timerLongPress = window.setTimeout(function () {
+                    Util.longPressScroll(t, dir, false);
+                }, Config.defaultLongPressTime);
 
+                Util.scrollTo(t, dir);
+            });
+            
+            $.addEventListener(btn, 'mouseup', function () {
+                Util.longPressScroll(t, dir, true);
+            });
+            $.addEventListener(btn, 'mouseout', function () {
+                Util.longPressScroll(t, dir, true);
+            });
+            return this;
+        },
+        longPressScroll: function(t, dir, isStop) {
+            if(isStop) {
+                window.clearTimeout(t.timerLongPress);
+                window.clearInterval(t.timerLongPress2);
+            }
+            t.timerLongPress2 = window.setInterval(function () {
+                if(isStop || Util.scrollOver(t)) {
+                    window.clearInterval(t.timerLongPress2);
+                    return false;
+                }
+                Util.scrollTo(t, dir);
+            }, Config.defaultLongPressInterval);
+            return this;
+        },
+        scrollTo: function(t, dir, pos) {
+            console.log('scrollTo: ', dir, pos, t.getOptions())
+            if($.isNumber(pos)) {
+                t.box.scrollLeft = dir === 'left' ? pos : t.container.clientWidth - pos;
+                return this;
+            }
+            return t.box.scrollLeft += (dir === 'left' ? -10 : 10), this;
+        },
+        scrollOver: function(t) {
+            return t.box.scrollLeft <= 0 || t.box.scrollLeft >= t.box.scrollWidth;
         }
     },
     Cache = {
@@ -233,10 +328,13 @@
         options = $.extend({
             id: 'oui-tabs-' + new Date().getMilliseconds(),
             eventName: 'click',
-            maxWidth: 240
+            maxWidth: 240,
+            style: {
+                height: 28
+            }
         }, options);
 
-        this.id = options.id || '';
+        this.id = options.id || '';        
         this.initial(options);
     }
 
@@ -246,6 +344,9 @@
             Util.initialTab(this, options);
             return this;
         },
+        getOptions: function() {
+            return Factory.getOptions(this.id);
+        },
         add: function(options) {
             return this.insert(options, null);
         },
@@ -254,7 +355,7 @@
                 closeAble: true
             }, options);
 
-            Util.buildTab(this, opt, Factory.getOptions(this.id), insertIndex);
+            Util.buildTab(this, opt, this.getOptions(), insertIndex);
 
             return Util.setSize(this), this;
         },
@@ -267,9 +368,10 @@
                 $.removeClass(cache.tabs[k].tab, 'cur');
                 $(cache.tabs[k].con).hide();
             }
-            if(cache.tabs[id]) {
-                $.addClass(cache.tabs[id].tab, 'cur');
-                $(cache.tabs[id].con).show();
+            var cur = cache.tabs[id];
+            if(cur) {
+                $.addClass(cur.tab, 'cur');
+                $(cur.con).show();
             }
 
             return Util.setSize(this), this;
@@ -282,7 +384,7 @@
         },
         closeAll: function() {
             Util.delTab(this, true);
-            Factory.delCache(this.id, id);
+            Factory.delCache(this.id);
             Util.setSize(this);
             return this;
         }

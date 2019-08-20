@@ -1,5 +1,4 @@
 .oui-tabs {
-    height: 34px;
     padding: 0;
     border: none 0;
     position: relative;
@@ -12,10 +11,10 @@
 .oui-tabs .tab-box {  
     overflow: hidden;
     border: none 0;
-    height: 34px;
-    margin: 0 5px;
+    height: 28px;
+    margin: 0 2px ;
     padding: 0;
-    left: 16px;
+    left: 17px;
     bottom: -1px;
     position: absolute;
 }
@@ -31,26 +30,53 @@
     position: absolute;
     bottom: 0;
     text-align: center;
+    cursor: pointer;
+    font-family: Arial;
+    font-size: 18px;
+    background: #dee1e6;
+    box-sizing: border-box;
 }
 
 .oui-tabs .tab-switch-left {
     left: 0;
     border-right: solid 1px #dee1e6;
+    border-left: solid 1px #dee1e6;
     border-top: solid 1px #dee1e6;
     border-top-right-radius: 5px;
     bottom: -1px;
-
 }
 
 .oui-tabs .tab-switch-right {
     right: 0;
     border-left: solid 1px #dee1e6;
+    border-right: solid 1px #dee1e6;
     border-top: solid 1px #dee1e6;
     border-top-left-radius: 5px;
     bottom: -1px;
 }
 
-.oui-tabs .tab-container {  
+.oui-tabs .tab-switch .arrow {
+    width: 0;
+    height: 0;
+    margin: 0;
+    padding: 0;
+    font-size: 12px;
+    border: 6px solid transparent;
+    position: absolute;
+    content: '';
+}
+
+.oui-tabs .tab-switch .arrow-left {
+    border-right-color: #999;
+    left: -2px;
+}
+
+.oui-tabs .tab-switch .arrow-right {
+    border-left-color: #999;
+    left: 5px;
+}
+
+.oui-tabs .tab-container {
     border: none 0;
     display: block;
     float: left;
@@ -59,6 +85,8 @@
     padding: 0;
     position: absolute;
     bottom: 0;
+    white-space: nowrap;
+    overflow: hidden;
 }
 
 .oui-tabs ul, .oui-tabs li {
@@ -75,14 +103,12 @@
     border-bottom-right-radius: 0;
 	border-bottom: solid 1px #dee1e6;
     border-bottom: none 0;
-    box-sizing: border-box;
     float: left;
     display: block;
-    margin: 0 5px 0 0;
+    margin: 0 2px 0 0;
     padding: 0;
     width: auto;
-    height: 29px;
-    line-height: 29px;
+    height: 28px;
     overflow: hidden;
     box-sizing: border-box;
 
@@ -127,7 +153,7 @@
 }
 
 .oui-tabs .tab .close {
-    float: left;
+    float: right;
     margin: 5px 4px 0 0;
     display: block;
     text-align: center;
