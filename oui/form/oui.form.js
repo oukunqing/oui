@@ -708,7 +708,13 @@
             html.push(data.error);
         }
         var dialogId = data.dialogId || data.dialog || '';
-        $.alert(html.join('<br />'), '提示信息', { icon: 'warning', copyAble: true, id: dialogId });
+        var callback = null;
+        if($.isFunction(window.showAjaxFail)) {
+            callback = function(){
+                window.showAjaxFail(data);
+            };
+        }
+        $.alert(html.join('<br />'), '提示信息', { icon: 'warning', copyAble: true, id: dialogId, callback: callback });
     };
 
     $.extend($, {

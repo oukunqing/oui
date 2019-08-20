@@ -2,24 +2,44 @@
 <html>
 <head>
     <title></title>
-    <script type="text/javascript" src="../oui/oui.js"></script>
-    <script type="text/javascript" src="../oui/tab/oui.tab.js?12"></script>
+    <script type="text/javascript" src="../oui/oui.js?"></script>
+    <script type="text/javascript" src="../oui/tab/oui.tab.js?"></script>
 </head>
 <body>
+	<input type="button" value="关闭全部" onclick="closeAll();" />
+	<input type="button" value="添加" onclick="addTab();" />
     <br><br>
     <br><br>
-    <br><br>
-    <br><br>
-    <div id="nav"></div>
+    <div id="nav" style="width:600px;"></div>
     <div id="content"></div>
 </body>
 </html>
 <script type="text/javascript">
-    var tab = new $.Tab($I('nav'),$I('content'));
+    var tab = new $.Tab($I('nav'),$I('content'), { eventName: 'click' });
 
-    tab.add({id: 'emap', name: '电子地图', url: 'dialog.html'});
-    tab.add({id: 'data', name: '实时数据', html: '实时数据'});
+    tab.add({id: 'emap', name: '电子地图百度地图私有地图谷歌地图22233', url: 'dialog.html', closeAble: true});
+    
+    tab.add({id: 'data', name: '实时数据1', html: '实时数据1'});
+    tab.add({id: 'data2', name: '实时数据2', html: '实时数据2'});
+	
+    tab.insert({id: 'data3', name: '实时数据3', html: '实时数据3'}, 'data');
+    tab.add({id: 'data4', name: '实时数据4', html: '实时数据4'});
+    tab.add({id: 'data5', name: '实时数据5', html: '实时数据5'});
+    tab.add({id: 'data6', name: '实时数据6', html: '实时数据6'});
+    tab.add({id: 'data7', name: '实时数据7', html: '实时数据7'});
+	
 
     tab.show('emap');
+
+	function closeAll() {
+		tab.closeAll();
+	}
+
+	var idx = 7;
+
+	function addTab() {
+		idx += 1;
+		tab.add({id: 'data' + idx, name: '实时数据' + idx, html: '实时数据' + idx});
+	}
 
 </script>

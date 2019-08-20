@@ -292,4 +292,16 @@ console.log(Math.round(2/135,2))
 
 console.log((2/135).round(2))
 
-console.log(2.5*0.50)
+console.log(2.5*0.50);
+
+function distillPlayIndex(con) {
+    var pos = con.indexOf('$http'),
+        txt = con.substr(0, pos),
+        pattern = /(第|集|期|[-]{2,})/gi,
+        idx = txt.replace(pattern, '');
+    return idx.replace(/(^[\s]*)|([\s]*$)/g, '');;
+}
+
+var n22 = 1565399308;
+
+console.log(n22.toDate().format())

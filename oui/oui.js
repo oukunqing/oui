@@ -1828,6 +1828,9 @@
             if($.isString(val, true) && val.indexOf(':') < 0) {
                 val = $.toElement(val);
             }
+            if($.isNullOrUndefined(val)) {
+                return { width:0, height: 0 };
+            }
             var p = checkMinMax($.extend({
                     attr: '',      //margin, padding, border, radius
                     unit: '',
@@ -1904,16 +1907,21 @@
         getBorderSize = function(elem, options) {
             return getCssAttrSize(elem, $.extend({}, options, {attr:'border'}));
         },
-        getOffsetSize = function(elem) {
+        getOffsetSize = function(elem, basic) {
             elem = $.toElement(elem);
             if (!isElement(elem)) {
-                return null;
+                return { width: 0, height: 0, top: 0, left: 0 };
             }
-            var par = {
-                    width: elem.offsetWidth, 
-                    height: elem.offsetHeight,
-                },  
-                computedStyle,
+            var par = { 
+                width: elem.offsetWidth, height: elem.offsetHeight, 
+                left: elem.offsetLeft, top: elem.offsetTop 
+            };
+
+            if($.isBoolean(basic, false)) {
+                return par;
+            }
+
+            var computedStyle,
                 offsetParent = elem.offsetParent,
                 prevOffsetParent = elem,
                 doc = elem.ownerDocument,
@@ -1957,35 +1965,52 @@
                 left += Math.max(docElem.scrollLeft, body.scrollLeft);
             }
 
-            return $.extend(par, {left: left, top: top});
+            return $.extend(par, { left: left, top: top });
         },
-        getElementSize = function(elem) {
+        getClientSize = function(elem) {
             elem = $.toElement(elem);
-            if (!isElement(elem)) {
-                return { 
-                    width: 0, height: 0, 
+            return isElement(elem) ? { width: elem.clientWidth, height: elem.clientHeight } : { width: 0, height: 0 };
+        },
+        getOuterSize = function(elem) {
+            var os = getOffsetSize(elem, true),
+                ms = getMarginSize(elem);
+            return { width: os.width + ms.width, height: os.height + ms.height };
+        },
+        getInnerSize = function(elem) {
+            var cs = getClientSize(elem),
+                ps = getPaddingSize(elem);
+            return { width: cs.width - ps.width, height: cs.height - ps.height };
+        },
+        getElementSize = function(elem, basic) {
+            elem = $.toElement(elem);
+            var ns = { width: 0, height: 0 };
+            if(!$.isElement(elem)) {
+                return {
+                    width: 0, height: 0, totalWidth: 0, totalHeight: 0,
                     offsetWidth: 0, offsetHeight: 0, clientWidth: 0, clientHeight: 0,
-                    contentWidth: 0, contentHeight: 0, totalWidth: 0, totalHeight: 0
+                    innerWidth: 0, innerHeight: 0, outerWidth: 0, outerHeight: 0,                    
+                    inner: ns, outer: ns, client: ns, offset: ns,
+                    border: ns, padding: ns, margin: ns
                 };
             }
             var ps = getPaddingSize(elem),
                 ms = getMarginSize(elem),
                 bs = getBorderSize(elem),
+                os = getOffsetSize(elem),
+                cs = getClientSize(elem),
+                is = getInnerSize(elem),
+                us = getOuterSize(elem),
                 par = {
-                    offsetWidth: elem.offsetWidth, 
-                    offsetHeight: elem.offsetHeight,
-                    clientWidth: elem.clientWidth, 
-                    clientHeight: elem.clientHeight,
-                    contentWidth: elem.clientWidth - ps.width,
-                    contentHeight: elem.clientWidth - ps.height,
-                    totalWidth: elem.offsetWidth + ms.width ,
-                    totalHeight: elem.offsetHeight + ms.height,
-                    border: bs,
-                    padding: ps,
-                    margin: ms
+                    offsetWidth: os.width, offsetHeight: os.height,
+                    clientWidth: cs.width, clientHeight: cs.height,
+                    innerWidth: is.width, innerHeight: is.height,
+                    outerWidth: us.width, outerHeight: us.height,
+                    totalWidth: us.width, totalHeight: us.height,
+                    inner: is, outer: us, client: cs, offset: os,
+                    border: bs, padding: ps, margin: ms
                 };
 
-            return $.extend(getOffsetSize(elem), par);
+            return $.extend(par, os);
         },
         getBodySize = function (isOffset) {
             var doc;
@@ -2439,7 +2464,7 @@
             }
             div.innerHTML = txt;
             var size = { width: div.offsetWidth, height: div.offsetHeight };
-            return size;
+            //return size;
             return div.innerHTML = '', size;
         },
         getInnerText = function(elem) {
@@ -2480,6 +2505,10 @@
         getScreenSize: getScreenSize,
         getOffset: getOffsetSize,
         getOffsetSize: getOffsetSize,
+        getClientSize: getClientSize,
+        getOuterSize: getOuterSize,
+        getTotalSize: getOuterSize,
+        getInnerSize: getInnerSize,
         getElementSize: getElementSize,
         elemSize: getElementSize,
         offset: getOffsetSize,

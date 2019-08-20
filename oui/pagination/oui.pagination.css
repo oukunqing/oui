@@ -26,6 +26,7 @@
 }
 
 .oui-pagination .left, .oui-pagination .label {
+	width: auto;
     float: left;
 	color: #333;
 	border: none 0;
@@ -34,6 +35,7 @@
 }
 
 .oui-pagination .right {
+	width: auto;
     float: right;
 	border: none 0;
 	padding: 0;
@@ -70,7 +72,11 @@
     margin: 0; padding: 0;
 }
 
-.oui-pagination .list {}
+.oui-pagination .list {
+	width: auto;
+	margin: 0; padding: 0;
+	border: none 0;
+}
 
 .oui-pagination .stat {
     line-height: 22px;
