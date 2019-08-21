@@ -16,13 +16,19 @@
         defaultLongPressInterval: 40,  //长按滚动间隔，单位：毫秒
     },
     Util = {
+        isTrue: function(opt, keys) {
+            if(opt) {
+
+            }
+        },
         buildSwitch: function(t, opt, dir) {
             var div = $.createElement('div', '', function(elem) {
                 elem.className = 'tab-switch tab-switch-' + dir;
                 var style = '';
-                if(opt.height) {
-                    elem.style.height = opt.height + 'px';
-                    style = 'margin-top:' + (opt.height - 12) / 2 + 'px;';
+                if(opt.tabHeight) {
+                    var height = opt.tabHeight - 2;
+                    elem.style.height = height + 'px';
+                    style = 'margin-top:' + (height - 12) / 2 + 'px;';
                 }
                 elem.innerHTML = '<a class="arrow arrow-' + dir + '" style="' + style + '"></a>';
             }, t.tabContainer);
@@ -37,8 +43,8 @@
                 if(opt.style.box) {
                     elem.style.cssText = opt.style.box;
                 }
-                if(opt.height) {
-                    elem.style.height = opt.height + 'px';
+                if(opt.tabHeight) {
+                    elem.style.height = (opt.tabHeight - 2) + 'px';
                 }
             }, t.tabContainer);
             t.box = div;
@@ -57,6 +63,8 @@
             var elem = $.createElement('li', '', function(elem) {
                 elem.className = 'tab';
                 elem.id = cfg.id + '-' + opt.id;
+                elem.itemId = opt.id;
+
                 if(cfg.style.tab) {
                     elem.style.cssText = cfg.style.tab;
                 }
@@ -64,12 +72,13 @@
                 if(cfg.style.txt) {
                     txtStyle = cfg.style.txt;
                 }
-                if(cfg.height) {
-                    elem.style.height = cfg.height + 'px';
-                    closeStyle = 'margin-top:' + parseInt((cfg.height - 17) / 2, 10) + 'px;';
-                    txtStyle += ';line-height:' + (cfg.height) + 'px;';
+                if(cfg.tabHeight) {
+                    var height = cfg.tabHeight - 2;
+                    elem.style.height = height + 'px';
+                    closeStyle = 'margin-top:' + parseInt((height - 17) / 2, 10) + 'px;';
+                    txtStyle += ';line-height:' + (height) + 'px;';
                 }
-                var con = '<a class="tab-txt" href="#{id}" style="{1}">{name}</a>';
+                var con = '<a class="tab-txt" href="javascript:void(0);" style="{1}">{name}</a>';
                 if(opt.closeAble) {
                     con += '<a class="close" title="" style="{2}">×</a>';
                 }
@@ -120,11 +129,19 @@
                 t.show(opt.id);
             };
 
+            if(cfg.showContextMenu) {                    
+                elem['oncontextmenu'] = function(ev) {
+                    $.cancelBubble();
+                    Util.buildContextMenu(t, ev, this.itemId);
+                    return false;
+                };
+            }
+
             var div = $.createElement('div', opt.id, function(elem) {
                 elem.className = 'tab-panel';
                 var html = '<a class="pos-mark" name="' + opt.id + '"></a>';
                 if($.isString(opt.url, true)) {
-                    html += '<iframe class="tab-iframe" width="100%" height="400px" src="' + opt.url + '"' +
+                    html += '<iframe class="tab-iframe" width="100%" height="' + cfg.conHeight + 'px" src="' + opt.url + '"' +
                         ' frameborder="0" scrolling="auto"></iframe>';
                 } else {
                     html += opt.html || '';
@@ -137,27 +154,12 @@
             Factory.setCache(t.id, opt.id, elem, div);
             return this;
         },
-        delTab: function(t, id) {
-            var cache = Factory.getCache(t.id);
-            if($.isBoolean(id, false)) {
-                for(var k in cache.tabs) {
-                    $.removeElement(cache.tabs[k].con);
-                    $.removeElement(cache.tabs[k].tab);
-                }
-            } else {
-                if(cache.tabs[id]) {
-                    $.removeElement(cache.tabs[id].con);
-                    $.removeElement(cache.tabs[id].tab);
-                }
-            }
-            return this;
-        },
         setSize: function(t, func) {
             window.clearTimeout(this.sizeTimer);
             this.sizeTimer = window.setTimeout(function() {
                 var ts = $.getInnerSize(t.tabContainer),
                     s = $.elemSize(t.box), 
-                    tw = Util.getTabSize(t),
+                    tw = Util.getItemSize(t),
                     als = $.getOuterSize(t.left).width,
                     ars = $.getOuterSize(t.right).width,
                     w = ts.width- s.margin.width - s.padding.width - s.border.width,
@@ -165,7 +167,7 @@
 
                 $('.oui-tabs .tab-switch').each(function(){
                     $(this)[tw < bw ? 'hide' : 'show']();
-                })
+                });
 
                 var als2 = $.getOuterSize(t.left).width,
                     ars2 = $.getOuterSize(t.right).width,
@@ -187,7 +189,7 @@
             }, 20);
             return this;
         },
-        getTabSize: function(t) {
+        getItemSize: function(t) {
             var w = 0, 
                 s = $.elemSize(t.container),
                 childs = t.container.childNodes,
@@ -197,6 +199,7 @@
                 w += $.getElementSize(childs[i]).outerWidth;
             }
             w += s.padding.width;
+            //如果总宽度超出屏幕宽度，则加上滚动条的宽度
             if(w > $.getScreenSize().width) {
                 w += 17;
             }
@@ -253,16 +256,82 @@
         scrollOver: function(t) {
             return t.box.scrollLeft <= 0 || t.box.scrollLeft >= t.box.scrollWidth;
         },
-        setTabPosition: function(t, tab) {
+        setTabPosition: function(t, item) {
             var bs = $.getInnerSize(t.box),
-                ts = $.getOuterSize(tab),
+                ts = $.getOuterSize(item),
                 isCenter = t.getOptions().center,
                 centerOffset = isCenter ? ts.width / 2 - bs.width / 2 : 0;
 
-            if(tab.offsetLeft < t.box.scrollLeft) {
-                Util.scrollTo(t, 'left', tab.offsetLeft + centerOffset, true);
-            } else if((tab.offsetLeft + tab.offsetWidth - bs.width) > t.box.scrollLeft) {
-                Util.scrollTo(t, 'right', tab.offsetLeft + tab.offsetWidth - bs.width - t.box.scrollLeft - centerOffset);
+            if(item.offsetLeft < t.box.scrollLeft) {
+                Util.scrollTo(t, 'left', item.offsetLeft + centerOffset, true);
+            } else if((item.offsetLeft + item.offsetWidth - bs.width) > t.box.scrollLeft) {
+                Util.scrollTo(t, 'right', item.offsetLeft + item.offsetWidth - bs.width - t.box.scrollLeft - centerOffset);
+            }
+            return this;
+        },
+        buildMenuContent: function(t, itemId) {
+            var html = [
+                '<a class="item disabled"><i class="skey">Ctrl+X</i>关闭当前标签页</a>',
+                '<div class="sep"></div>',
+                '<a class="item">关闭全部标签页</a>',
+                '<a class="item">关闭其他标签页</a>',
+                '<a class="item">关闭左侧标签页</a>',
+                '<a class="item">关闭右侧标签页</a>',
+                '<div class="sep"></div>',
+                '<a class="item">重新加载</a>',
+                '<a class="item disabled">全部重新加载</a>',
+                '<div class="sep"></div>',
+                '<a class="item">重新打开关闭的标签页</a>',
+                '<a class="item">重新打开关闭的全部标签页</a>'
+            ];
+            var width = 256, height = 0;
+            for(var i = 0; i<html.length; i++) {
+                if(html[i].indexOf('<a') === 0) {
+                    height += 24;
+                } else {
+                    height += 9;
+                }
+            }
+            return { text: html.join(''), width: width, height: height + 6 + 2 };
+        },
+        buildContextMenu: function(t, ev, itemId) {
+            var pos = $.getEventPosition(ev), 
+                menuId = 'oui-tabs-' + t.id + '-menu',
+                obj = $I(menuId),
+                con = this.buildMenuContent(t, itemId);
+
+            if(obj) {
+                obj.innerHTML = con.text;
+                obj.style.left = pos.x + 'px';
+                obj.style.top = pos.y + 'px';
+            } else {
+                obj = $.createElement('div', menuId, function(elem) {
+                    elem.className = 'oui-tabs-context-menu';
+                    elem.style.cssText = 'z-index:99999999;left:{x}px;top:{y}px;width:{1}px;height:{2}px;'.format(pos, con.width, con.height);
+                    elem.innerHTML = con.text;
+                }, document.body);
+            }
+
+            var childs = obj.childNodes, len = childs.length;
+            for(var i = 0; i < len; i++) {
+                var item = childs[i];
+                if(item.tagName === 'A' && item.className.indexOf('disabled') < 0) {
+                    $.addListener(item, 'click', function() {
+
+                        console.log('menu: ', this.innerHTML);
+
+                        Util.hideContextMenu(ev, t, true);
+                    });
+                }
+            }
+
+            return this;
+        },
+        hideContextMenu: function(ev, t, hide) {
+            console.log('hideContextMenu:', ev, t);
+            var obj = $I('oui-tabs-' + t.id + '-menu');
+            if(obj && hide) {
+                $.removeElement(obj);
             }
             return this;
         }
@@ -273,24 +342,28 @@
         cur: null
     },
     Factory = {
-        initCache: function(id, options, obj) {
-            var key = 't_' + id;
+        initCache: function(objId, options, obj) {
+            var key = this.buildKey(objId);
             Cache.tabs[key] = {
-                id: id,
+                objId: objId,
                 obj: obj,
                 options: options,
-                tabs: {}
+                items: {}
             };
             Cache.count++;
+            return this;
         },
-        getCache: function(id) {
-            var key = 't_' + id;
+        buildKey: function(objId) {
+            return 't_' + objId;
+        },
+        getCache: function(objId) {
+            var key = this.buildKey(objId);
             return Cache.tabs[key] || null;
         },
         getCount: function(cache) {
             return cache ? cache.count : 0;
         },
-        getTab: function(cache, idx) {
+        getItem: function(cache, idx) {
             if(!cache) {
                 return null;
             }
@@ -298,12 +371,37 @@
                 idx = 0;
             }
             var i = 0;
-            for(var k in cache.tabs) {
+            for(var k in cache.items) {
                 if(i++ === idx) {
-                    return cache.tabs[k];
+                    return cache.items[k];
                 }
             }
             return null;
+        },
+        delItem: function(t, itemId) {
+            var cache = Factory.getCache(t.id);
+            if($.isBoolean(itemId, false)) {
+                for(var k in cache.items) {
+                    $.removeElement(cache.items[k].con);
+                    $.removeElement(cache.items[k].tab);
+                }
+            } else {
+                if(cache.items[itemId]) {
+                    $.removeElement(cache.items[itemId].con);
+                    $.removeElement(cache.items[itemId].tab);
+                }
+            }
+            return this;
+        },
+        getLast: function(objId) {
+            var cache = this.getCache(objId),
+                item = null;
+            if(cache) {
+                for(var k in cache.items) {
+                    item = cache.items[k];
+                }
+            }
+            return item;
         },
         getCur: function() {
             return Cache.cur;
@@ -312,38 +410,42 @@
             Cache.cur = cur;
             return this;
         },
-        getOptions: function(id) {
-            var key = 't_' + id;
+        getOptions: function(objId) {
+            var key = 't_' + objId;
             var cache = Cache.tabs[key];
             if(cache) {
                 return cache.options;
             }
             return null;
         },
-        setCache: function(id, tid, tab, con) {
-            var cache = this.getCache(id);
+        setCache: function(objId, itemId, tab, con) {
+            var cache = this.getCache(objId);
             if(null !== cache) {
-                cache.tabs[tid] = {
+                cache.items[itemId] = {
+                    objId: objId,
+                    itemId: itemId,
                     tab: tab,
                     con: con
                 };
             }
+            return this;
         },
-        delCache: function(id, tid) {
-            var cache = this.getCache(id);
+        delCache: function(objId, itemId) {
+            var cache = this.getCache(objId);
             if(null !== cache) {
-                if($.isBoolean(id, false)) {
-                    for(var k in cache.tabs) {
-                        delete cache.tabs[k];
+                if($.isBoolean(objId, false)) {
+                    for(var k in cache.items) {
+                        delete cache.items[k];
                     }
                     Cache.count = 0;
                 } else {
-                    if(cache.tabs[tid]) {
-                        delete cache.tabs[tid];
+                    if(cache.items[itemId]) {
+                        delete cache.items[itemId];
                         Cache.count--;
                     }
                 }
             }
+            return this;
         },
         loadCss: function (skin, func) {
             var path = Config.FilePath,
@@ -358,6 +460,7 @@
                     func();
                 }
             });
+            return this;
         },
         buildTab: function(tabContainer, conContainer, options) {
             var tab = $.toElement(tabContainer),
@@ -376,6 +479,34 @@
                 return new Tab(tab, con, opt);
             }
             return cache.obj;
+        },
+        getObjIds: function(objId, itemId) {
+            var opt = {};
+            if($.isObject(objId)) {
+                opt.objId = objId.objId || objId.tabId;
+                if($.isUndefined(itemId)) {
+                    opt.itemId = objId.itemId || objId.id;
+                }
+            } else {
+                opt.objId = objId;
+                opt.itemId = itemId;
+            }
+            return opt;
+        },
+        insert: function(options, insertIndex, show) {
+            var opt = this.getObjIds(options),
+                cache = this.getCache(opt.objId);
+            return cache ? cache.obj.insert(options, insertIndex, show) : null;
+        },
+        show: function(objId, itemId) {
+            var opt = this.getObjIds(objId, itemId),
+                cache = this.getCache(opt.objId);
+            return cache ? cache.obj.show(opt.itemId, func) : null;
+        },
+        remove: function(objId, itemId) {
+            var opt = this.getObjIds(objId, itemId),
+                cache = this.getCache(opt.objId);
+            return cache ? ($.isUndefined(itemId) ? cache.obj.closeAll() : cache.obj.close(itemId)) : null;
         }
     };
 
@@ -383,31 +514,60 @@
     Factory.loadCss('default');
 
     function Tab(tabContainer, conContainer, options) {
-        this.tabContainer = tabContainer;
-        this.conContainer = conContainer;
+        var that = this;
+        that.tabContainer = tabContainer;
+        that.conContainer = conContainer;
 
-        this.tabContainer.className = 'oui-tabs';
-        this.conContainer.className = 'oui-tab-contents';
+        that.tabContainer.className = 'oui-tabs';
+        that.conContainer.className = 'oui-tab-contents';
 
-        options = $.extend({
+        /*
+        var div = $.createElement('div', '', function(elem) {
+            elem.className = 'oui-tabs';
+        }, tabContainer);
+        that.tabContainer = div;
+        */
+        var opt = $.extend({
             id: 'oui-tabs-' + new Date().getMilliseconds(),
+            skin: 'default',    //样式: default, blue
             eventName: 'click',
             dblclickScroll: false,
+            showContextMenu: true,
             maxWidth: 240,
-            style: {
-                height: 28
+            tabHeight: 30,
+            conHeight: 400,
+            style: {                
+                //box: 'margin: 0 5px;',
+                //tab: 'margin: 0 5px 0 0;',
+                //txt: 'font-size:14px;'
             }
         }, options);
 
-        this.id = options.id || '';        
-        this.initial(options);
+        that.id = opt.id || '';
+
+        if (opt.skin !== 'default') {
+            /*
+            Factory.loadCss(opt.skin, function () {
+                that.initial(opt);
+            });
+            */
+            Factory.loadCss(opt.skin);
+        }
+        that.initial(opt);
     }
 
     Tab.prototype = {
         initial: function(options) {
-            Factory.initCache(this.id, options, this);
-            Util.initialTab(this, options);
-            return this;
+            var that = this;
+            Factory.initCache(that.id, options, that);
+            Util.initialTab(that, options);
+            $.addListener(window, 'resize', function() {
+                Util.setSize(that);
+            });
+            $.addListener(document, 'mousedown', function(ev) {
+                Util.hideContextMenu(ev, that);
+            });
+            return that;
         },
         getOptions: function() {
             return Factory.getOptions(this.id);
@@ -416,10 +576,11 @@
             return this.insert(options, null, show);
         },
         insert: function(options, insertIndex, show) {
-            var that = this;
-            var opt = $.extend({
-                closeAble: true
-            }, options);
+            var that = this,
+                cfg = that.getOptions(),
+                opt = $.extend({
+                    closeAble: true
+                }, options);
 
             Util.buildTab(that, opt, that.getOptions(), insertIndex)
                 .setSize(that, function() {
@@ -429,50 +590,76 @@
                 });
 
             if($.isFunction(opt.func)) {
-                opt.func(opt);
+                opt.func(opt, that);
+            } else if($.isFunction(cfg.callback)) {
+                cfg.callback(opt, that);
             }
 
             return that;
         },
-        show: function(id, func) {
-            var cache = Factory.getCache(this.id);
+        show: function(itemId, func) {
+            var that = this,
+                cfg = that.getOptions(),
+                cache = Factory.getCache(that.id);
             if(null === cache) {
-                return this;
+                return that;
             }
-            for(var k in cache.tabs) {
-                $.removeClass(cache.tabs[k].tab, 'cur');
-                $(cache.tabs[k].con).hide();
+            for(var k in cache.items) {
+                $.removeClass(cache.items[k].tab, 'cur');
+                $(cache.items[k].con).hide();
             }
-            var cur = cache.tabs[id] 
-                || (Factory.getCount(cache) === 1 ? Factory.getTab(cache) : null) 
+            var cur = cache.items[itemId] 
+                || (Factory.getCount(cache) === 1 ? Factory.getItem(cache) : null) 
                 || Factory.getCur();
 
             if(cur) {
                 $.addClass(cur.tab, 'cur');
                 $(cur.con).show();
                 Factory.setCur(cur);
-                Util.setTabPosition(this, cur.tab);
+                Util.setTabPosition(that, cur.tab);
             }
 
-            Util.setSize(this);
+            Util.setSize(that);
 
             if($.isFunction(func)) {
-                func();
+                func(itemId, that);
+            } else if($.isFunction(cfg.callback)) {
+                cfg.callback(itemId, that);
             }
 
-            return this;
+            return that;
         },
-        close: function(id) {
-            Util.delTab(this, id);
-            Factory.delCache(this.id, id);
-            Util.setSize(this);
-            return this;
+        close: function(itemId) {
+            var that = this,
+                cur = Factory.getCur(),
+                change = false,
+                newId = '';
+
+            Factory.delItem(that, itemId).delCache(that.id, itemId);
+
+            if(cur) {
+                //关闭当前页，需要重新设置一个新的当前页
+                if(itemId === cur.itemId) {
+                    change = true;
+                    var item = Factory.setCur(null).getLast(that.id);
+                    if(item) {
+                        newId = item.itemId;
+                    }
+                }
+            }
+
+            if(change) {
+                that.show(newId);
+            } else {
+                Util.setSize(that);
+            }
+            return that;
         },
         closeAll: function() {
-            Util.delTab(this, true);
-            Factory.delCache(this.id);
-            Util.setSize(this);
-            return this;
+            var that = this;
+            Factory.delItem(that, true).delCache(that.id).setCur(null);
+            Util.setSize(that);
+            return that;
         }
     };
 
@@ -491,17 +678,23 @@
     });
 
     $.extend($.tab, {
-        add: function() {
-
+        add: function(options, show) {
+            return Factory.insert(options, null, show);
         },
-        insert: function() {
-
+        insert: function(options, insertIndex, show) {
+            return Factory.insert(options, insertIndex, show);
         },
-        remove: function() {
-
+        show: function(objId, itemId, func) {
+            return Factory.show(objId, itemId, func);
         },
-        del: function() {
-
+        remove: function(objId, itemId) {
+            return Factory.remove(objId, itemId);
+        },
+        close: function(objId, itemId) {
+            return Factory.remove(objId, itemId);
+        },
+        closeAll: function(objId) {
+            return Factory.remove(objId);
         }
     });
 }(OUI);

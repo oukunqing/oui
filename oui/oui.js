@@ -2422,6 +2422,16 @@
         getEvent = function () {
             return window.event || arguments.callee.caller.arguments[0];
         },
+        getEventPosition = function(ev, elem) {
+            var e = ev || getEvent();
+            if (e.pageX || e.pageY) {
+                return { x: e.pageX, y: e.pageY };
+            }
+            return {
+                x: e.clientX + document.body.scrollLeft - document.body.clientLeft,
+                y: e.clientY + document.body.scrollTop - document.body.clientTop
+            };
+        },
         getScrollPosition = function () {
             var scrollPos = {};
             if (typeof window.pageYOffset !== 'undefined') {
@@ -2544,6 +2554,8 @@
         bindEventListener: bindEventListener,
         setFocus: setFocus,
         getEvent: getEvent,
+        getEventPosition: getEventPosition,
+        getEventPos: getEventPosition,
         getScrollPosition: getScrollPosition,
         getScrollPos: getScrollPosition,
         getKeyCode: getKeyCode,

@@ -6,7 +6,7 @@
     line-height: 28px;
     position: relative;
     box-sizing: border-box;
-    border-bottom: solid 1px #dee1e6;
+    border-bottom: solid 1px #292929;
 }
 
 .oui-tabs .tab-box {  
@@ -34,15 +34,15 @@
     cursor: pointer;
     font-family: Arial;
     font-size: 18px;
-    background: #dee1e6;
+    background: #292929;
     box-sizing: border-box;
 }
 
 .oui-tabs .tab-switch-left {
     left: 0;
-    border-right: solid 1px #dee1e6;
-    border-left: solid 1px #dee1e6;
-    border-top: solid 1px #dee1e6;
+    border-right: solid 1px #292929;
+    border-left: solid 1px #292929;
+    border-top: solid 1px #292929;
     border-top-right-radius: 4px;
     border-top-left-radius: 4px;
     bottom: -1px;
@@ -50,9 +50,9 @@
 
 .oui-tabs .tab-switch-right {
     right: 0;
-    border-left: solid 1px #dee1e6;
-    border-right: solid 1px #dee1e6;
-    border-top: solid 1px #dee1e6;
+    border-left: solid 1px #292929;
+    border-right: solid 1px #292929;
+    border-top: solid 1px #292929;
     border-top-right-radius: 4px;
     border-top-left-radius: 4px;
     bottom: -1px;
@@ -70,12 +70,12 @@
 }
 
 .oui-tabs .tab-switch .arrow-left {
-    border-right-color: #999;
+    border-right-color: #fff;
     left: -2px;
 }
 
 .oui-tabs .tab-switch .arrow-right {
-    border-left-color: #999;
+    border-left-color: #fff;
     left: 5px;
 }
 
@@ -99,12 +99,12 @@
 }
 
 .oui-tabs .tab {
-    background: #dee1e6;
-    border: solid 1px #dee1e6;
+    background: #292929;
+    border: solid 1px #292929;
     border-radius: 4px;
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
-	border-bottom: solid 1px #dee1e6;
+	border-bottom: solid 1px #292929;
     border-bottom: none 0;
     float: left;
     display: block;
@@ -123,13 +123,13 @@
 
 .oui-tabs .cur,.oui-tabs .tab:hover {
     background: #fff;
-    border: solid 1px #dee1e6;
+    border: solid 1px #292929;
     border-bottom: solid 1px #fff;
     /*margin-bottom: -1px;*/
 }
 
 .oui-tabs .cur {
-    /*font-weight: bold;*/
+    font-weight: bold;
     background: #fff;
     border-bottom: solid 1px #fff;
 }
@@ -146,7 +146,7 @@
     padding: 0 10px;
     margin: 0;
     border: none 0;
-    color: #555;
+    color: #999;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -166,6 +166,7 @@
     font-size: 16px;
     font-style: normal;
     font-family: 微软雅黑;
+	color: #fff;
     padding: 0;
     width: 17px;
     height: 17px;
@@ -181,7 +182,8 @@
 
 .oui-tabs .tab .close:hover {
     border-radius: 10px;
-    background: #dee1e6;
+    background: #292929;
+	color: #fff;
 }
 
 .oui-tab-contents {
