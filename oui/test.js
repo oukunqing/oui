@@ -304,4 +304,11 @@ function distillPlayIndex(con) {
 
 var n22 = 1565399308;
 
-console.log(n22.toDate().format())
+console.log(n22.toDate().format());
+
+var num100 = '';
+
+console.log(Math.ceil(num100.replace(/[^\d\.\-]+/,'')));
+
+
+console.log(Math.ceil(''));

@@ -11,9 +11,12 @@
 !function($) {
 
     var Config = {
-        FilePath: $.getScriptSelfPath(true),        
-        defaultLongPressTime: 512,    //长按最小时长，单位：毫秒
-        defaultLongPressInterval: 40,  //长按滚动间隔，单位：毫秒
+        FilePath: $.getScriptSelfPath(true),
+        LongPressTime: 512,      //长按最小时长，单位：毫秒
+        LongPressInterval: 40,   //长按滚动间隔，单位：毫秒
+        LongPressMinInterval: 10,   //长按滚动间隔，单位：毫秒
+        LongPressScrollDistance: 10,     //长按时一次滚动的距离，单位：px
+        LongPressScrollMaxDistance: 40     //长按时一次滚动的距离，单位：px
     },
     Util = {
         buildIframeId: function(objId, itemId) {
@@ -38,6 +41,14 @@
 
             var div = $.createElement('div', '', function(elem) {
                 elem.className = 'tab-box';
+                elem['oncontextmenu'] = function(ev) {
+                    //当有Tab项时，禁用Tab容器右键菜单
+                    if(elem.childNodes[0].childNodes.length > 0) {
+                        return false;
+                    }
+                    Util.buildContextMenu(t, ev, null);
+                    return false;
+                };
                 if(opt.style.box) {
                     elem.style.cssText = opt.style.box;
                 }
@@ -49,6 +60,10 @@
 
             var ul = $.createElement('ul', '', function(elem) {
                 elem.className = 'tab-container';
+                //限制一下高度，可以解决（在非chrome浏览器中）div换行的问题
+                if(opt.tabHeight) {
+                    elem.style.height = (opt.tabHeight - 2) + 'px';
+                }
             }, div);
             t.container = ul;
 
@@ -74,7 +89,7 @@
                     var height = cfg.tabHeight - 2;
                     elem.style.height = height + 'px';
                     closeStyle = 'margin-top:' + parseInt((height - 17) / 2, 10) + 'px;';
-                    txtStyle += ';line-height:' + (height) + 'px;';
+                    txtStyle += ';line-height:' + (height - ($.isFirefox ? 3 : 0)) + 'px;';
                 }
                 var con = '<a class="tab-txt" href="javascript:void(0);" style="{1}">{name}</a>';
                 if(opt.closeAble) {
@@ -92,7 +107,8 @@
                             ms = $.getMarginSize(txt),
                             es = $.getElementSize(elem);
                         elem.style.width = cfg.maxWidth + 'px';
-                        txt.style.width = (cfg.maxWidth - ps.width - ms.width - btnW - es.border.width - 2) + 'px';
+                        //txt.style.width = (cfg.maxWidth - ps.width - ms.width - btnW - es.border.width - 2) + 'px';
+                        txt.style.width = (cfg.maxWidth - 0 - ms.width - btnW - es.border.width) + 'px';
                         txt.title = $.getInnerText(txt);
                     }
                 }, 5);
@@ -114,12 +130,6 @@
                         t.close(opt.id);
                         $.cancelBubble();
                     };
-                } else {
-                    /*
-                    childs[i]['on' + cfg.eventName] = function() {
-                        t.show(opt.id);
-                    };
-                    */
                 }
             }
 
@@ -127,7 +137,7 @@
                 t.show(opt.id);
             };
 
-            if(cfg.showContextMenu) {                    
+            if(cfg.showContextMenu) {
                 elem['oncontextmenu'] = function(ev) {
                     $.cancelBubble();
                     Util.buildContextMenu(t, ev, this.itemId);
@@ -186,7 +196,7 @@
                 if($.isFunction(func)) {
                     func();
                 }
-            }, 20);
+            }, 10);
             return this;
         },
         getItemSize: function(t) {
@@ -196,14 +206,15 @@
                 len = childs.length;
 
             for(var i = len - 1; i >= 0; i--) {
-                w += $.getElementSize(childs[i]).outerWidth;
+                var iw = $.getElementSize(childs[i]).outerWidth;
+                w += iw;
             }
-            w += s.padding.width;
+            w += s.padding.width + s.margin.width + s.border.width;
             //如果总宽度超出屏幕宽度，则加上滚动条的宽度
             if(w > $.getScreenSize().width) {
                 w += 17;
             }
-            return w;
+            return w + ($.isFirefox ? 10 : 5);
         },
         scrollAction: function(t, btn, dir) {
             if(t.getOptions.dblclickScroll) {                
@@ -215,7 +226,7 @@
                 window.clearTimeout(t.timerLongPress);
                 t.timerLongPress = window.setTimeout(function () {
                     Util.longPressScroll(t, dir, false);
-                }, Config.defaultLongPressTime);
+                }, Config.LongPressTime);
 
                 Util.scrollTo(t, dir);
             });
@@ -232,18 +243,27 @@
             if(isStop) {
                 window.clearTimeout(t.timerLongPress);
                 window.clearInterval(t.timerLongPress2);
+                return this;
             }
+            var distance = Config.LongPressScrollDistance;
             t.timerLongPress2 = window.setInterval(function () {
                 if(isStop || Util.scrollOver(t)) {
                     window.clearInterval(t.timerLongPress2);
                     return false;
                 }
-                Util.scrollTo(t, dir);
-            }, Config.defaultLongPressInterval);
+                Util.scrollTo(t, dir, distance, null, isStop);
+                //滚动加速，每次加5px
+                if(distance < Config.LongPressScrollMaxDistance) {
+                    distance += 5;
+                }
+            }, Config.LongPressInterval);
             return this;
         },
-        scrollTo: function(t, dir, pos, goto) {
-            var distance = 10;
+        scrollTo: function(t, dir, pos, goto, isStop) {
+            if(isStop) {
+                return this;
+            }
+            var distance = Config.LongPressScrollDistance;
             if($.isNumber(pos)) {
                 distance = pos;
             }
@@ -251,15 +271,17 @@
                 t.box.scrollLeft = dir === 'left' ? distance : t.container.clientWidth - distance;
                 return this;
             }
-            return t.box.scrollLeft += (dir === 'left' ? -distance : distance), this;
+            t.box.scrollLeft += (dir === 'left' ? -distance : distance);
+
+            return this;
         },
         scrollOver: function(t) {
-            return t.box.scrollLeft <= 0 || t.box.scrollLeft >= t.box.scrollWidth;
+            return t.box.scrollLeft <= 0 || (t.box.scrollLeft + t.box.clientWidth) >= t.box.scrollWidth;
         },
-        setTabPosition: function(t, item) {
+        setTabPosition: function(t, item, isCenter) {
             var bs = $.getInnerSize(t.box),
                 ts = $.getOuterSize(item),
-                isCenter = t.getOptions().center,
+                isCenter = $.isBoolean(isCenter, t.getOptions().center),
                 centerOffset = isCenter ? ts.width / 2 - bs.width / 2 : 0;
 
             if(item.offsetLeft < t.box.scrollLeft) {
@@ -274,8 +296,8 @@
             if(!cache) {
                 return null;
             }
-
-            var curItem = Factory.getTabItem(t, itemId),
+            //如果不在Tab项上右键菜单，是没有当前项的，因此加个空对象
+            var curItem = Factory.getTabItem(t, itemId) || {},
                 iframeCount = 0,
                 closedCount = cache.closeIds.length;
             for(var k in cache.items) {
@@ -305,7 +327,7 @@
             var html = [
                 '<a class="item{0}" code="cur">关闭当前标签页</a>'.format(s.close ? '' : dis),
                 '<div class="sep"></div>',
-                '<a class="item" code="all">关闭全部标签页</a>',
+                '<a class="item{0}" code="all">关闭全部标签页</a>'.format(s.count > 0 ? '' : dis),
                 '<a class="item{0}" code="other">关闭其他标签页</a>'.format(s.other > 0 ? '' : dis),
                 '<a class="item{0}" code="left">关闭左侧标签页</a>'.format(s.left > 0 ? '' : dis),
                 '<a class="item{0}" code="right">关闭右侧标签页</a>'.format(s.right > 0 ? '' : dis),
@@ -423,6 +445,9 @@
             return this;
         },
         getSiblingCount: function(elem, dir) {
+            if(!elem) {
+                return 0;
+            }
             var sibling = elem[dir],
                 count = 0;
             while(sibling) {
@@ -438,6 +463,7 @@
                 sibling = sibling[dir];
                 Factory.delItem(t, itemId);
             }
+            Util.setSize(t);
             return this;
         },
         loadPage: function(iframe, url) {
@@ -698,7 +724,11 @@
             eventName: 'click',
             dblclickScroll: false,
             showContextMenu: true,
+            // Tab最大数量
+            maxCount: 30,
+            // Tab标签最大宽度
             maxWidth: 240,
+            // Tab高度
             tabHeight: 30,
             conHeight: 400,
             style: {                
@@ -737,18 +767,27 @@
         getOptions: function() {
             return Factory.getOptions(this.id);
         },
-        add: function(options, show) {
-            return this.insert(options, null, show);
+        add: function(options, show, reopen) {
+            return this.insert(options, null, show, reopen);
         },
-        insert: function(options, insertIndex, show) {
+        insert: function(options, insertIndex, show, reopen) {
             var that = this,
+                cache = Factory.getCache(that.id),
                 cfg = that.getOptions(),
                 opt = $.extend({
                     closeAble: true
                 }, options);
 
             opt.closeAble = $.keywordOverload(opt, ['closeAble', 'close']);
-
+            //判断数量是否超出限制
+            if(cache.ids.length >= cfg.maxCount) {
+                if(typeof $.alert !== 'undefined') {
+                    $.alert('标签页数量已超出限制', { id:'oui-tabs-count-limit-001' });
+                } else if(!reopen) {
+                    alert('标签页数量已超出限制。');
+                }
+                return that;
+            }
             Util.buildTab(that, opt, that.getOptions(), insertIndex)
                 .setSize(that, function() {
                     if($.isBoolean(show, false)) {
@@ -831,8 +870,10 @@
         closeAll: function(exceptItemId) {
             var that = this;
             Factory.delItem(that, true, exceptItemId).setCur(that, null);
-            Util.setSize(that);
-            return that.show();
+            Util.setSize(that, function() {
+                that.show();
+            });
+            return that;
         }
     };
 

@@ -1784,6 +1784,9 @@
             var style = elem.currentStyle || document.defaultView.getComputedStyle(elem, null);
             return $.isString(styleName) ? style[styleName] || defaultValue: style;
         },
+        getCssSizeVal = function(val) {
+            return Math.ceil(('' + val).replace(/[^\d\.\-]+/, ''));
+        },
         getElementStyleSize = function(elem, styleName) {
             var attr = ('' + styleName).toLowerCase(),
                 style = getElementStyle(elem),
@@ -1801,19 +1804,19 @@
             }
 
             if(['padding', 'margin', 'border', 'radius'].indexOf(attr) < 0) {
-                return parseInt('0' + style[attr], 10);
+                return getCssSizeVal(style[attr]);
             }
 
             data = attr == 'radius' ? {
-                topLeft: parseInt('0' + style['borderTopLeft' + postfix], 10),
-                topRight: parseInt('0' + style['borderTopRight' + postfix], 10),
-                bottomLeft: parseInt('0' + style['borderBottomLeft' + postfix], 10),
-                bottomRight: parseInt('0' + style['borderBottomRight' + postfix], 10),
+                topLeft: getCssSizeVal(style['borderTopLeft' + postfix]),
+                topRight: getCssSizeVal(style['borderTopRight' + postfix]),
+                bottomLeft: getCssSizeVal(style['borderBottomLeft' + postfix]),
+                bottomRight: getCssSizeVal(style['borderBottomRight' + postfix]),
             } : {
-                top: parseInt('0' + style[attr + 'Top' + postfix], 10),
-                right: parseInt('0' + style[attr + 'Right' + postfix], 10),
-                bottom: parseInt('0' + style[attr + 'Bottom' + postfix], 10),
-                left: parseInt('0' + style[attr + 'Left' + postfix], 10)
+                top: getCssSizeVal(style[attr + 'Top' + postfix]),
+                right: getCssSizeVal(style[attr + 'Right' + postfix]),
+                bottom: getCssSizeVal(style[attr + 'Bottom' + postfix]),
+                left: getCssSizeVal(style[attr + 'Left' + postfix])
             };
             if(attr !== 'radius') {
                 data.height = data.top + data.bottom;
@@ -1865,7 +1868,7 @@
             }
 
             if(['padding', 'margin', 'border', 'radius'].indexOf(p.attr) < 0) {
-                var v = isElem ? getElementStyleSize(val, p.attr) : parseInt('0' + val, 10);
+                var v = isElem ? getElementStyleSize(val, p.attr) : getCssSizeVal(val);
                 if(p.unit) {
                     v += p.unit;
                 }
@@ -1889,7 +1892,7 @@
                 };
             }
             for(var i in data) {
-                data[i] = Math.abs(parseInt('0' + data[i], 10));
+                data[i] = Math.abs(getCssSizeVal(data[i]));
                 if(p.isLimit) {
                     data[i] = data[i] > p.max || data[i] < p.min ? p.val : data[i];
                 }
@@ -1904,8 +1907,8 @@
                 return list;
             }
             if(p.attr !== 'radius') {
-                data[p.attr + 'Width'] = parseInt(data.left, 10) + parseInt(data.right, 10);
-                data[p.attr + 'Height'] = parseInt(data.top, 10) + parseInt(data.bottom, 10);
+                data[p.attr + 'Width'] = getCssSizeVal(data.left) + getCssSizeVal(data.right);
+                data[p.attr + 'Height'] = getCssSizeVal(data.top) + getCssSizeVal(data.bottom);
             }
 
             return p.isArray ? list : data;
@@ -2510,7 +2513,13 @@
             }
         };
 
+    var ua = function () { try { return navigator.userAgent } catch (e) { return '' } }();
     $.extendNative($, {
+        isChrome: ua.indexOf('Chrome') > -1,
+        isFirefox: ua.indexOf('Firefox') > -1,
+        isOpera: ua.indexOf('Opera') > -1,
+        isSafari: ua.indexOf('Safari') > -1,
+        isIE: ua.indexOf('compatible') > -1 && ua.indexOf('MSIE') > -1 && !isOpera,
         doc: doc, head: head, redirect: redirect,
         getLocationPath: getLocationPath,
         getScriptSelfPath: getScriptSelfPath,
@@ -2530,6 +2539,8 @@
         createCssStyle: createCssStyle,
         getElementStyle: getElementStyle,
         elemStyle: getElementStyle,
+        getCssSizeVal: getCssSizeVal,
+        getCssSizeValue: getCssSizeVal,
         getElementStyleSize: getElementStyleSize,
         getCssAttrSize: getCssAttrSize,
         getPaddingSize: getPaddingSize,

@@ -129,7 +129,6 @@
 }
 
 .oui-tabs .cur {
-    font-weight: bold;
     background: #fff;
     border-bottom: solid 1px #fff;
 }
@@ -180,7 +179,7 @@
     color: #555;
 }
 
-.oui-tabs .tab .close:hover {
+.oui-tabs .tab .close:hover{
     border-radius: 10px;
     background: #2ba1e1;
 	color: #fff;
