@@ -529,6 +529,18 @@
                 arr[i][key] < pivot[key] ? left.push(arr[i]) : right.push(arr[i]);
             }
             return this.quickSort(left, key).concat(pivot, this.quickSort(right, key));
+        },        
+        keywordOverload : function(opt, keys, val) {
+            if(!opt) {
+                return undefined;
+            }
+            for(var i in keys) {
+                var k = keys[i];
+                if(!$.isUndefined(opt[k]) && ($.isNullOrUndefined(val) ? true : opt[k] === val)) {
+                    return opt[k];
+                }
+            }
+            return undefined;
         },
         throwError: function (err) {
             try { console.trace(); console.log(err); } catch (e) { }
@@ -2077,10 +2089,8 @@
             return arr;
         },
         getAttribute = function(elem, attributes) {
-            if(!$.isElement(elem)) {
-                return undefined;
-            }
-            return elem.getAttribute(attributes);
+            elem = $.toElement(elem);
+            return $.isElement(elem) ? elem.getAttribute(attributes) : undefined;
         },
         setAttribute = function (elem, attributes, exempt, serialize) {
             if ($.isBoolean(exempt, false) || $.isElement(elem)) {
@@ -2398,6 +2408,21 @@
             }
             return this;
         },
+        disableEvent = function(elem, evName, func) {
+            elem = $.toElement(elem);
+            if($.isElement(elem)) {
+                if(evName.trim().indexOf('on') < 0) {
+                    evName = 'on' + evName;
+                }
+                elem[evName] = function(ev) {
+                    if($.isFunction(func)) {
+                        func();
+                    }
+                    return false;
+                };
+            }
+            return this;
+        },
         removeEventListener = function (elem, evName, func, useCapture) {
             var isRemove = true;            
             return addEventListener(elem, evName, func, useCapture, isRemove);
@@ -2550,6 +2575,7 @@
         addListener: addEventListener,
         removeEventListener: removeEventListener,
         removeListener: removeEventListener,
+        disableEvent: disableEvent,
         bind: bind,
         bindEventListener: bindEventListener,
         setFocus: setFocus,
