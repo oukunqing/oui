@@ -188,16 +188,16 @@
     background: #dee1e6;
 }
 
-.oui-tab-contents {
+.oui-tabs-contents {
 
 }
 
-.oui-tab-contents .tab-panel {
+.oui-tabs-contents .tab-panel {
     height: 100px;
     display: block;
 }
 
-.oui-tab-contents .pos-mark {
+.oui-tabs-contents .pos-mark {
     display: none;
 }
 

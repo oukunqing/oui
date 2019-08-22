@@ -1,4 +1,4 @@
-.oui-tabs {
+.oui-tabs-black {
     height: 30px;
     padding: 0;
     border: none 0;
@@ -9,7 +9,7 @@
     border-bottom: solid 1px #292929;
 }
 
-.oui-tabs .tab-box {  
+.oui-tabs-black .tab-box {  
     height: 28px;
     padding: 0;
     border: none 0;
@@ -20,7 +20,7 @@
     position: absolute;
 }
 
-.oui-tabs .tab-switch {
+.oui-tabs-black .tab-switch {
     width: 16px;
     height: 28px;
     display: block;
@@ -38,7 +38,7 @@
     box-sizing: border-box;
 }
 
-.oui-tabs .tab-switch-left {
+.oui-tabs-black .tab-switch-left {
     left: 0;
     border-right: solid 1px #292929;
     border-left: solid 1px #292929;
@@ -48,7 +48,7 @@
     bottom: -1px;
 }
 
-.oui-tabs .tab-switch-right {
+.oui-tabs-black .tab-switch-right {
     right: 0;
     border-left: solid 1px #292929;
     border-right: solid 1px #292929;
@@ -58,7 +58,7 @@
     bottom: -1px;
 }
 
-.oui-tabs .tab-switch .arrow {
+.oui-tabs-black .tab-switch .arrow {
     width: 0;
     height: 0;
     margin: 50% 0;
@@ -69,17 +69,17 @@
     content: '';
 }
 
-.oui-tabs .tab-switch .arrow-left {
+.oui-tabs-black .tab-switch .arrow-left {
     border-right-color: #fff;
     left: -2px;
 }
 
-.oui-tabs .tab-switch .arrow-right {
+.oui-tabs-black .tab-switch .arrow-right {
     border-left-color: #fff;
     left: 5px;
 }
 
-.oui-tabs .tab-container {
+.oui-tabs-black .tab-container {
     border: none 0;
     display: block;
     float: left;
@@ -92,13 +92,13 @@
     overflow: hidden;
 }
 
-.oui-tabs ul, .oui-tabs li {
+.oui-tabs-black ul, .oui-tabs-black li {
     list-style: none;
     margin: 0;
     padding: 0;
 }
 
-.oui-tabs .tab {
+.oui-tabs-black .tab {
     background: #292929;
     border: solid 1px #292929;
     border-radius: 4px;
@@ -121,24 +121,24 @@
     -ms-user-select: none; /*IE10*/
 }
 
-.oui-tabs .cur,.oui-tabs .tab:hover {
+.oui-tabs-black .cur,.oui-tabs-black .tab:hover {
     background: #fff;
     border: solid 1px #292929;
     border-bottom: solid 1px #fff;
     /*margin-bottom: -1px;*/
 }
 
-.oui-tabs .cur {
+.oui-tabs-black .cur {
     font-weight: bold;
     background: #fff;
     border-bottom: solid 1px #fff;
 }
 
-.oui-tabs .last {
+.oui-tabs-black .last {
     margin: 0;
 }
 
-.oui-tabs .tab .tab-txt {
+.oui-tabs-black .tab .tab-txt {
     cursor: pointer;
     text-decoration: none;
     display: block;
@@ -154,11 +154,11 @@
     -webkit-box-orient: vertical;
 }
 
-.oui-tabs .cur .tab-txt {
+.oui-tabs-black .cur .tab-txt {
     font-weight: bold;
 }
 
-.oui-tabs .tab .close {
+.oui-tabs-black .tab .close {
     float: right;
     margin: 5px 4px 0 0;
     display: block;
@@ -175,12 +175,12 @@
     line-height: 16px;
 }
 
-.oui-tabs .tab:hover .tab-txt,.oui-tabs .cur .tab-txt,
-.oui-tabs .cur .close,.oui-tabs .tab:hover .close {
+.oui-tabs-black .tab:hover .tab-txt,.oui-tabs-black .cur .tab-txt,
+.oui-tabs-black .cur .close,.oui-tabs-black .tab:hover .close {
     color: #555;
 }
 
-.oui-tabs .tab .close:hover {
+.oui-tabs-black .tab .close:hover {
     border-radius: 10px;
     background: #292929;
 	color: #fff;

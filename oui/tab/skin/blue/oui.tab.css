@@ -1,4 +1,4 @@
-.oui-tabs {
+.oui-tabs-blue {
     height: 30px;
     padding: 0;
     border: none 0;
@@ -9,7 +9,7 @@
     border-bottom: solid 1px #2ba1e1;
 }
 
-.oui-tabs .tab-box {  
+.oui-tabs-blue .tab-box {  
     height: 28px;
     padding: 0;
     border: none 0;
@@ -20,7 +20,7 @@
     position: absolute;
 }
 
-.oui-tabs .tab-switch {
+.oui-tabs-blue .tab-switch {
     width: 16px;
     height: 28px;
     display: block;
@@ -38,7 +38,7 @@
     box-sizing: border-box;
 }
 
-.oui-tabs .tab-switch-left {
+.oui-tabs-blue .tab-switch-left {
     left: 0;
     border-right: solid 1px #2ba1e1;
     border-left: solid 1px #2ba1e1;
@@ -48,7 +48,7 @@
     bottom: -1px;
 }
 
-.oui-tabs .tab-switch-right {
+.oui-tabs-blue .tab-switch-right {
     right: 0;
     border-left: solid 1px #2ba1e1;
     border-right: solid 1px #2ba1e1;
@@ -58,7 +58,7 @@
     bottom: -1px;
 }
 
-.oui-tabs .tab-switch .arrow {
+.oui-tabs-blue .tab-switch .arrow {
     width: 0;
     height: 0;
     margin: 50% 0;
@@ -69,17 +69,17 @@
     content: '';
 }
 
-.oui-tabs .tab-switch .arrow-left {
+.oui-tabs-blue .tab-switch .arrow-left {
     border-right-color: #fff;
     left: -2px;
 }
 
-.oui-tabs .tab-switch .arrow-right {
+.oui-tabs-blue .tab-switch .arrow-right {
     border-left-color: #fff;
     left: 5px;
 }
 
-.oui-tabs .tab-container {
+.oui-tabs-blue .tab-container {
     border: none 0;
     display: block;
     float: left;
@@ -92,13 +92,13 @@
     overflow: hidden;
 }
 
-.oui-tabs ul, .oui-tabs li {
+.oui-tabs-blue ul, .oui-tabs-blue li {
     list-style: none;
     margin: 0;
     padding: 0;
 }
 
-.oui-tabs .tab {
+.oui-tabs-blue .tab {
     background: #2ba1e1;
     border: solid 1px #2ba1e1;
     border-radius: 4px;
@@ -121,23 +121,23 @@
     -ms-user-select: none; /*IE10*/
 }
 
-.oui-tabs .cur,.oui-tabs .tab:hover {
+.oui-tabs-blue .cur,.oui-tabs-blue .tab:hover {
     background: #fff;
     border: solid 1px #2ba1e1;
     border-bottom: solid 1px #fff;
     /*margin-bottom: -1px;*/
 }
 
-.oui-tabs .cur {
+.oui-tabs-blue .cur {
     background: #fff;
     border-bottom: solid 1px #fff;
 }
 
-.oui-tabs .last {
+.oui-tabs-blue .last {
     margin: 0;
 }
 
-.oui-tabs .tab .tab-txt {
+.oui-tabs-blue .tab .tab-txt {
     cursor: pointer;
     text-decoration: none;
     display: block;
@@ -153,11 +153,11 @@
     -webkit-box-orient: vertical;
 }
 
-.oui-tabs .cur .tab-txt {
+.oui-tabs-blue .cur .tab-txt {
     font-weight: bold;
 }
 
-.oui-tabs .tab .close {
+.oui-tabs-blue .tab .close {
     float: right;
     margin: 5px 4px 0 0;
     display: block;
@@ -174,12 +174,12 @@
     line-height: 16px;
 }
 
-.oui-tabs .tab:hover .tab-txt,.oui-tabs .cur .tab-txt,
-.oui-tabs .cur .close,.oui-tabs .tab:hover .close {
+.oui-tabs-blue .tab:hover .tab-txt,.oui-tabs-blue .cur .tab-txt,
+.oui-tabs-blue .cur .close,.oui-tabs-blue .tab:hover .close {
     color: #555;
 }
 
-.oui-tabs .tab .close:hover{
+.oui-tabs-blue .tab .close:hover{
     border-radius: 10px;
     background: #2ba1e1;
 	color: #fff;

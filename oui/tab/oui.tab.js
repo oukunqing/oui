@@ -19,8 +19,11 @@
         LongPressScrollMaxDistance: 40     //长按时一次滚动的距离，单位：px
     },
     Util = {
+        buildId: function(objId, itemId, prefix) {
+            return prefix + '-' + objId + '-' + itemId;
+        },
         buildIframeId: function(objId, itemId) {
-            return 'oui-tabs-iframe-' + objId + '-' + itemId;
+            return this.buildId('oui-tabs-iframe', objId, itemId);
         },
         buildSwitch: function(t, opt, dir) {
             var div = $.createElement('div', '', function(elem) {
@@ -144,8 +147,8 @@
                     return false;
                 };
             }
-            var iframeId = '';
-            var div = $.createElement('div', opt.id, function(elem) {
+            var panelId = Util.buildId('oui-tabs-content', cfg.id, opt.id), iframeId = '';
+            var div = $.createElement('div', panelId, function(elem) {
                 elem.className = 'tab-panel';
                 var html = '<a class="pos-mark" name="' + opt.id + '"></a>';
                 if($.isString(opt.url, true)) {
@@ -165,8 +168,8 @@
             return this;
         },
         setSize: function(t, func) {
-            window.clearTimeout(this.sizeTimer);
-            this.sizeTimer = window.setTimeout(function() {
+            window.clearTimeout(t.sizeTimer);
+            t.sizeTimer = window.setTimeout(function() {
                 var ts = $.getInnerSize(t.tabContainer),
                     s = $.elemSize(t.box), 
                     tw = Util.getItemSize(t),
@@ -175,9 +178,13 @@
                     w = ts.width- s.margin.width - s.padding.width - s.border.width,
                     bw = w - als - ars;
 
-                $('.oui-tabs .tab-switch').each(function(){
-                    $(this)[tw < bw ? 'hide' : 'show']();
-                });
+                if(tw < bw) {
+                    t.left.style.display = 'none';
+                    t.right.style.display = 'none';
+                } else {
+                    t.left.style.display = '';
+                    t.right.style.display = '';
+                }
 
                 var als2 = $.getOuterSize(t.left).width,
                     ars2 = $.getOuterSize(t.right).width,
@@ -479,9 +486,7 @@
         }
     },
     Cache = {
-        count: 0,
-        tabs: {},
-        cur: null
+        tabs: {}
     },
     Factory = {
         initCache: function(objId, options, obj) {
@@ -493,9 +498,9 @@
                 items: {},
                 ids: [],
                 closeItems: {},
-                closeIds: []
+                closeIds: [],
+                cur: null
             };
-            Cache.count++;
             return this;
         },
         buildKey: function(objId) {
@@ -601,7 +606,6 @@
                         cache.ids.splice(i, 1);
                     }
                 }
-                Cache.count--;
             }
             return this;
         },
@@ -613,16 +617,17 @@
             }
             return null;
         },
-        getCur: function() {
-            return Cache.cur;
+        getCur: function(t, cache) {
+            cache = cache || this.getCache(t.id);
+            return cache.cur;
         },
         setCur: function(t, cur, force) {
             var cache = this.getCache(t.id),
-                oldCur = Factory.getCur();
+                oldCur = Factory.getCur(t, cache);
             if(!force && oldCur && Factory.getItem(cache, oldCur.itemId)) {
                 return this;
             }
-            Cache.cur = cur;
+            cache.cur = cur;
             return this;
         },
         getOptions: function(objId) {
@@ -705,13 +710,9 @@
     Factory.loadCss('default');
 
     function Tab(tabContainer, conContainer, options) {
-        var that = this;
+        var that = this, cssTab = '', cssCon = '';
         that.tabContainer = tabContainer;
         that.conContainer = conContainer;
-
-        that.tabContainer.className = 'oui-tabs';
-        that.conContainer.className = 'oui-tab-contents';
-
         /*
         var div = $.createElement('div', '', function(elem) {
             elem.className = 'oui-tabs';
@@ -741,13 +742,14 @@
         that.id = opt.id || '';
 
         if (opt.skin !== 'default') {
-            /*
-            Factory.loadCss(opt.skin, function () {
-                that.initial(opt);
-            });
-            */
+            cssTab = ' oui-tabs-' + opt.skin;
+            cssCon = ' oui-tabs-' + opt.skin + '-contents';
             Factory.loadCss(opt.skin);
         }
+
+        that.tabContainer.className = 'oui-tabs' + cssTab;
+        that.conContainer.className = 'oui-tabs-contents' + cssCon;
+
         that.initial(opt);
     }
 
@@ -814,9 +816,9 @@
                 $.removeClass(cache.items[k].tab, 'cur');
                 $(cache.items[k].con).hide();
             }
-            var cur = cache.items[itemId] 
-                || (Factory.getCount(cache) === 1 ? Factory.getItem(cache) : null) 
-                || Factory.getCur();
+            var cur = cache.items[itemId]  
+                || Factory.getCur(that, cache)
+                || Factory.getItem(cache);
 
             if(cur) {
                 $.addClass(cur.tab, 'cur');
@@ -831,6 +833,12 @@
                 func(itemId, that);
             } else if($.isFunction(cfg.callback)) {
                 cfg.callback(itemId, that);
+            }
+
+            if(itemId) {
+                window.setTimeout(function() {
+                    that.show();
+                }, 20);
             }
 
             return that;

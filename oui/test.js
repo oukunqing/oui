@@ -312,3 +312,18 @@ console.log(Math.ceil(num100.replace(/[^\d\.\-]+/,'')));
 
 
 console.log(Math.ceil(''));
+
+
+var unionCodeDict = ['qiyi','qq','sohu','youku','letv','pptv','mgtv'];
+var unionCode = 'youku';
+
+function toDict(arr, key) {
+    var data = {}, idx = 1;
+    data[arr.splice(arr.indexOf(key), 1)] = idx;
+    for(var i = 0; i < arr.length; i++) {
+        data[arr[i]] = ++idx;
+    }
+    return data;
+}
+
+console.log(toDict(unionCodeDict, unionCode));
