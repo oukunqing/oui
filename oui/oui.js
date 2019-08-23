@@ -3402,7 +3402,7 @@
 // oui.dialog
 !function ($) {
     function callParentFunc(funcName, param) {
-        if(window.location != top.window.location) {
+        if(window.location !== top.window.location) {
             try{
                 var func = parent.$.dialog[funcName],
                     id = $.getQueryString(location.href, 'dialog_id');
@@ -3416,11 +3416,23 @@
         return $;
     }
     $.extend($, {
+        //通过子窗口关闭父窗口对话框(oui.dialog)
         closeParentDialog: function(param) {
             return callParentFunc('closeParent', param);
         },
+        //根据子窗口内容重置父空口对话框(oui.dialog)大小
         resizeParentDialog: function(param) {
             return callParentFunc('resizeParent', param);
+        },
+        //关闭父窗口可能出现的Tab(oui.tab)标签的右键菜单
+        hideParentTabMenu: function() {
+            if(window.location !== top.window.location) {
+                var func = parent.$.tab['hideParentContextMenu'];
+                if($.isFunction(func)) {
+                    return func(), this;
+                }
+            }
+            return $;
         }
     });
 }(OUI);

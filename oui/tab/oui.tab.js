@@ -22,8 +22,14 @@
         buildId: function(objId, itemId, prefix) {
             return prefix + '-' + objId + '-' + itemId;
         },
+        buildPanelId: function(objId, itemId) {
+            return Util.buildId(objId, itemId, 'oui-tabs-panel');
+        },
         buildIframeId: function(objId, itemId) {
-            return this.buildId('oui-tabs-iframe', objId, itemId);
+            return Util.buildId(objId, itemId, 'oui-tabs-iframe');
+        },
+        buildLoadingId: function(objId, itemId) {
+            return Util.buildId(objId, itemId, 'oui-tabs-loading');
         },
         buildSwitch: function(t, opt, dir) {
             var div = $.createElement('div', '', function(elem) {
@@ -31,7 +37,7 @@
                 var style = '';
                 if(opt.tabHeight) {
                     var height = opt.tabHeight - 2;
-                    elem.style.height = height + 'px';
+                    elem.style.cssText = 'height:' + height + 'px;display:none;';
                     style = 'margin-top:' + (height - 12) / 2 + 'px;';
                 }
                 elem.innerHTML = '<a class="arrow arrow-' + dir + '" style="' + style + '"></a>';
@@ -76,10 +82,20 @@
             return this;
         },
         buildTab: function(t, opt, cfg, insertIndex) {
+            var cache = Factory.getCache(t.id),
+                objId = cfg.id,
+                itemId = opt.id || opt.itemId;
+            if(!cache) {
+                return this;
+            }
+            if(cache.items[itemId]) {
+                t.show(itemId);
+                return this;
+            }
             var elem = $.createElement('li', '', function(elem) {
-                elem.className = 'tab';
-                elem.id = cfg.id + '-' + opt.id;
-                elem.itemId = opt.id;
+                elem.className = 'tab-item';
+                elem.id = objId + '-' + itemId;
+                elem.itemId = itemId;
 
                 if(cfg.style.tab) {
                     elem.style.cssText = cfg.style.tab;
@@ -96,7 +112,7 @@
                 }
                 var con = '<a class="tab-txt" href="javascript:void(0);" style="{1}">{name}</a>';
                 if(opt.closeAble) {
-                    con += '<a class="close" title="" style="{2}">×</a>';
+                    con += '<i class="tab-close" title="" style="{2}">×</i>';
                 }
                 elem.innerHTML = con.format(opt, txtStyle, closeStyle);
                 window.setTimeout(function(){
@@ -120,7 +136,7 @@
             if($.isNumber(insertIndex)) {
                 t.container.insertBefore(elem, t.container.childNodes[insertIndex]);
             } else if($.isString(insertIndex, true)) {
-                var existingItem = document.getElementById(cfg.id + '-' + insertIndex);
+                var existingItem = document.getElementById(objId + '-' + insertIndex);
                 t.container.insertBefore(elem, existingItem);
             } else {
                 t.container.appendChild(elem);
@@ -130,14 +146,14 @@
             for(var i=0; i<childs.length; i++) {
                 if(childs[i].className === 'close') {
                     childs[i]['onclick'] = function() {
-                        t.close(opt.id);
+                        t.close(itemId);
                         $.cancelBubble();
                     };
                 }
             }
 
             elem['on' + cfg.eventName] = function() {
-                t.show(opt.id);
+                t.show(itemId);
             };
 
             if(cfg.showContextMenu) {
@@ -147,24 +163,55 @@
                     return false;
                 };
             }
-            var panelId = Util.buildId('oui-tabs-content', cfg.id, opt.id), iframeId = '';
+            var panelId = Util.buildPanelId(objId, itemId), iframeId = '', loadingId = '', iframe = null;
             var div = $.createElement('div', panelId, function(elem) {
                 elem.className = 'tab-panel';
-                var html = '<a class="pos-mark" name="' + opt.id + '"></a>';
+                var html = '<a class="pos-mark" name="' + itemId + '"></a>';
                 if($.isString(opt.url, true)) {
                     isIframe = true;
-                    iframeId = Util.buildIframeId(cfg.id, opt.id);
-                    html += '<iframe id="' + iframeId + '" class="tab-iframe" width="100%" height="' + cfg.conHeight + 'px" src="' + opt.url + '"' +
-                        ' frameborder="0" scrolling="auto"></iframe>';
+                    iframeId = Util.buildIframeId(objId, itemId);
+                    loadingId = Util.buildLoadingId(objId, itemId);
+                    html += '<div id="' + loadingId + '" class="tab-loading">正在努力加载，请稍候...</div>'
+                        + '<iframe id="' + iframeId + '" class="tab-iframe"'
+                        + ' style="width:100%;height:' + cfg.conHeight + 'px;"'
+                        + ' src="about:block;" frameborder="0" scrolling="auto"></iframe>';
                 } else {
                     html += opt.html || '';
                 }
                 elem.innerHTML = html;
                 elem.style.display = 'none';
+
+                if(isIframe) {
+                    window.setTimeout(function() {
+                        iframe = $I(iframeId);
+                        iframe.itemId = itemId;
+                        Util.loadPage(t, iframe, Util.buildPageUrl(opt.url, itemId));
+                    }, 2);
+                }
+
+                t.setContentSize(itemId);
             }, t.conContainer);
 
             Factory.setCache(t.id, opt, elem, div, iframeId);
 
+            return this;
+        },
+        buildPageUrl: function(url, itemId) {
+            return url.setUrlParam('tab_item_id', itemId).setUrlParam();
+        },
+        loadPage: function(t, iframe, url) {
+            try{
+                var loading = $I(Util.buildLoadingId(t.id, iframe.itemId));
+                loading.style.display = '';
+                iframe.src = $.setQueryString(url);
+                iframe.onload = iframe.onreadystatechange = function () {
+                    if (!this.readyState || this.readyState == "complete") {
+                        loading.style.display = 'none';
+                    }
+                };
+            } catch(e) {
+
+            }
             return this;
         },
         setSize: function(t, func) {
@@ -332,18 +379,18 @@
             }
             var dis = ' disabled';
             var html = [
-                '<a class="item{0}" code="cur">关闭当前标签页</a>'.format(s.close ? '' : dis),
+                '<a class="menu-item{0}" code="cur">关闭当前标签页</a>'.format(s.close ? '' : dis),
                 '<div class="sep"></div>',
-                '<a class="item{0}" code="all">关闭全部标签页</a>'.format(s.count > 0 ? '' : dis),
-                '<a class="item{0}" code="other">关闭其他标签页</a>'.format(s.other > 0 ? '' : dis),
-                '<a class="item{0}" code="left">关闭左侧标签页</a>'.format(s.left > 0 ? '' : dis),
-                '<a class="item{0}" code="right">关闭右侧标签页</a>'.format(s.right > 0 ? '' : dis),
+                '<a class="menu-item{0}" code="all">关闭全部标签页</a>'.format(s.count > 0 ? '' : dis),
+                '<a class="menu-item{0}" code="other">关闭其他标签页</a>'.format(s.other > 0 ? '' : dis),
+                '<a class="menu-item{0}" code="left">关闭左侧标签页</a>'.format(s.left > 0 ? '' : dis),
+                '<a class="menu-item{0}" code="right">关闭右侧标签页</a>'.format(s.right > 0 ? '' : dis),
                 '<div class="sep"></div>',
-                '<a class="item{0}" code="reload">重新加载</a>'.format(s.iframe ? '' : dis),
-                '<a class="item{0}" code="reloadAll">全部重新加载</a>'.format(s.iframeCount > 0 ? '' : dis),
+                '<a class="menu-item{0}" code="reload">重新加载</a>'.format(s.iframe ? '' : dis),
+                '<a class="menu-item{0}" code="reloadAll">全部重新加载</a>'.format(s.iframeCount > 0 ? '' : dis),
                 '<div class="sep"></div>',
-                '<a class="item{0}" code="reopen">重新打开关闭的标签页</a>'.format(s.closedCount > 0 ? '' : dis),
-                '<a class="item{0}" code="reopenAll">重新打开关闭的全部标签页</a>'.format(s.closedCount > 0 ? '' : dis)
+                '<a class="menu-item{0}" code="reopen">重新打开关闭的标签页</a>'.format(s.closedCount > 0 ? '' : dis),
+                '<a class="menu-item{0}" code="reopenAll">重新打开关闭的全部标签页</a>'.format(s.closedCount > 0 ? '' : dis)
             ];
             var width = 256, height = 0;
             for(var i = 0; i<html.length; i++) {
@@ -401,6 +448,14 @@
             }
             return this;
         },
+        hideParentContextMenu: function() {
+            if(Cache.count > 0) {
+                $('.oui-tabs-context-menu').each(function(i, obj){
+                    $.removeElement(obj);
+                });
+            }
+            return this;
+        },
         setMenuAction: function(t, action, itemId, elem) {
             var cache = Factory.getCache(t.id),
                 curItem = Factory.getTabItem(t, itemId),
@@ -426,14 +481,14 @@
                     break;
                 case 'reload':
                     if(curItem.iframe) {
-                        this.loadPage($I(curItem.iframe), curItem.opt.url);
+                        this.loadPage(t, $I(curItem.iframe), curItem.opt.url);
                     }
                     break;
                 case 'reloadAll':
                     for(var k in cache.items) {
                         var dr = cache.items[k];
                         if(dr.iframe) {
-                            this.loadPage($I(dr.iframe), dr.opt.url);
+                            this.loadPage(t, $I(dr.iframe), dr.opt.url);
                         }
                     }
                     break;
@@ -473,10 +528,6 @@
             Util.setSize(t);
             return this;
         },
-        loadPage: function(iframe, url) {
-            iframe.src = $.setQueryString(url)
-            return this;
-        },
         reopen: function(t, cache, itemId) {
             var opt = (cache.closeItems[itemId] || {}).opt;
             if(opt) {
@@ -486,7 +537,8 @@
         }
     },
     Cache = {
-        tabs: {}
+        tabs: {},
+        count: 0
     },
     Factory = {
         initCache: function(objId, options, obj) {
@@ -501,6 +553,7 @@
                 closeIds: [],
                 cur: null
             };
+            Cache.count += 1;
             return this;
         },
         buildKey: function(objId) {
@@ -703,6 +756,10 @@
             var opt = this.getObjIds(objId, itemId),
                 cache = this.getCache(opt.objId);
             return cache ? cache.obj.closeAll(exceptItemId) : null;
+        },
+        hideParentContextMenu: function() {
+            Util.hideParentContextMenu();
+            return this;
         }
     };
 
@@ -847,7 +904,7 @@
             var that = this,
                 cache = Factory.getCache(that.id),
                 item = Factory.getItem(cache, itemId),
-                cur = Factory.getCur(),
+                cur = Factory.getCur(that),
                 change = false,
                 newId = '';
 
@@ -855,7 +912,7 @@
                 return this;
             }
 
-            Factory.delItem(that, itemId)
+            Factory.delItem(that, itemId);
 
             if(cur) {
                 //关闭当前页，需要重新设置一个新的当前页
@@ -881,6 +938,40 @@
             Util.setSize(that, function() {
                 that.show();
             });
+            return that;
+        },
+        setContentSize: function(size, isContent) {
+            var that = this, tabHeight = 0, itemId = '';
+            if($.isObject(size)) {
+                that.conContainer.style.height = size.height + 'px';
+                tabHeight = isContent ? 0 : $.getOuterSize(that.tabContainer).height;
+            } else {
+                if($.isString(size)) {
+                    itemId = size;
+                }
+                size = { width: that.conContainer.clientWidth, height: that.conContainer.clientHeight };
+            }
+
+            if(itemId) {
+                var panel = $I(Util.buildPanelId(that.id, itemId)),
+                    iframe = $I(Util.buildIframeId(that.id, itemId));
+                    if(panel) {
+                        var es = $.elemSize(panel);
+                        obj.style.height = (size.height - tabHeight - es.padding.height - es.margin.height - es.border.height) + 'px';
+                    }
+                    if(iframe) {
+                        obj.style.height = (size.height - tabHeight) + 'px';
+                    }
+            } else {
+                $('#' + that.conContainer.id + ' .tab-panel').each(function(i, obj) {
+                    var es = $.elemSize(obj);
+                    obj.style.height = (size.height - tabHeight - es.padding.height - es.margin.height - es.border.height) + 'px';
+                });
+
+                $('#' + that.conContainer.id + ' .tab-iframe').each(function(i, obj) {
+                    obj.style.height = (size.height - tabHeight) + 'px';
+                });
+            }
             return that;
         }
     };
@@ -917,6 +1008,9 @@
         },
         closeAll: function(objId, exceptItemId) {
             return Factory.removeAll(objId, exceptItemId);
+        },
+        hideParentContextMenu: function() {
+            return Factory.hideParentContextMenu();
         }
     });
 }(OUI);

@@ -315,15 +315,48 @@ console.log(Math.ceil(''));
 
 
 var unionCodeDict = ['qiyi','qq','sohu','youku','letv','pptv','mgtv'];
-var unionCode = 'youku';
+var unionCode = 'youku2';
 
 function toDict(arr, key) {
-    var data = {}, idx = 1;
-    data[arr.splice(arr.indexOf(key), 1)] = idx;
+    var data = {}, idx = 1, pos = arr.indexOf(key);
+    if(pos >= 0) {
+        data[arr.splice(arr.indexOf(key), 1)] = idx++;
+    }
     for(var i = 0; i < arr.length; i++) {
-        data[arr[i]] = ++idx;
+        data[arr[i]] = idx++;
     }
     return data;
 }
 
 console.log(toDict(unionCodeDict, unionCode));
+
+function test() {
+    var num = 0;
+    while(1) {
+        num += 1;
+        if(num % 9 === 0
+            && num % 8 === 1
+            && num % 7 === 0
+            && num % 6 === 3
+            && num % 5 === 1
+            && num % 4 === 1
+            && num % 3 === 0
+            && num % 2 === 1) {
+            break;
+        }
+    }
+    return num;
+}
+console.log(test());
+
+function test2() {
+    var num = 0;
+    while(1) {
+        num += 1;
+        if(num % 9 === 0 && num % 7 === 0 && num % 5 === 1 && num % 4 === 1) {
+            break;
+        }
+    }
+    return num; 
+}
+console.log(test2());

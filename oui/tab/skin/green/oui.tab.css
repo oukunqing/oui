@@ -98,7 +98,7 @@
     padding: 0;
 }
 
-.oui-tabs-green .tab {
+.oui-tabs-green .tab-item {
     background: #6ebd4d;
     border: solid 1px #6ebd4d;
     border-radius: 4px;
@@ -121,7 +121,7 @@
     -ms-user-select: none; /*IE10*/
 }
 
-.oui-tabs-green .cur,.oui-tabs-green .tab:hover {
+.oui-tabs-green .cur,.oui-tabs-green .tab-item:hover {
     background: #fff;
     border: solid 1px #6ebd4d;
     border-bottom: solid 1px #fff;
@@ -137,7 +137,7 @@
     margin: 0;
 }
 
-.oui-tabs-green .tab .tab-txt {
+.oui-tabs-green .tab-item .tab-txt {
     cursor: pointer;
     text-decoration: none;
     display: block;
@@ -157,7 +157,7 @@
     font-weight: bold;
 }
 
-.oui-tabs-green .tab .close {
+.oui-tabs-green .tab-item .tab-close {
     float: right;
     margin: 5px 4px 0 0;
     display: block;
@@ -174,12 +174,12 @@
     line-height: 16px;
 }
 
-.oui-tabs-green .tab:hover .tab-txt,.oui-tabs-green .cur .tab-txt,
-.oui-tabs-green .cur .close,.oui-tabs-green .tab:hover .close {
+.oui-tabs-green .tab-item:hover .tab-txt,.oui-tabs-green .cur .tab-txt,
+.oui-tabs-green .cur .tab-close,.oui-tabs-green .tab-item:hover .tab-close {
     color: #555;
 }
 
-.oui-tabs-green .tab .close:hover{
+.oui-tabs-green .tab-item .tab-close:hover{
     border-radius: 10px;
     background: #6ebd4d;
 	color: #fff;
@@ -213,7 +213,7 @@
     box-shadow: 0 2px 3px 0 rgba(0,0,0,.32);
 }
 
-.oui-tabs-context-menu .item {
+.oui-tabs-context-menu .menu-item {
     height: 24px;
     line-height: 2em;
     display: block;
@@ -229,7 +229,7 @@
     box-sizing: border-box;
 }
 
-.oui-tabs-context-menu .item .skey {
+.oui-tabs-context-menu .menu-item .skey {
     float: right;
     font-style: normal;
     font-size: 12px;
@@ -238,7 +238,7 @@
     border: none 0;
 }
 
-.oui-tabs-context-menu .item:hover {
+.oui-tabs-context-menu .menu-item:hover {
     background: #e8eaed;
 }
 
