@@ -148,7 +148,7 @@
     border: none 0;
     box-sizing: border-box;
     color: #555;
-    font-family: 微软雅黑,宋体,Arial;
+    font-family: 宋体,微软雅黑,Arial;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -167,7 +167,7 @@
     text-align: center;
     font-size: 16px;
     font-style: normal;
-    font-family: 微软雅黑,宋体,Arial;
+    font-family: 宋体,微软雅黑,Arial;
     padding: 0;
     width: 17px;
     height: 17px;
