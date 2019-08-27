@@ -331,32 +331,59 @@ function toDict(arr, key) {
 console.log(toDict(unionCodeDict, unionCode));
 
 function test() {
-    var num = 0;
-    while(1) {
+    var num = 0, i = 0;
+    while(i < 100000) {
         num += 1;
-        if(num % 9 === 0
-            && num % 8 === 1
-            && num % 7 === 0
-            && num % 6 === 3
-            && num % 5 === 1
-            && num % 4 === 1
-            && num % 3 === 0
-            && num % 2 === 1) {
+        if(num % 9 === 0            //被9整除
+            && num % 8 === 1        //除8余1
+            && num % 7 === 0        //被7整除
+            && num % 6 === 3        //除6余3
+            && (num + 1) % 5 === 0  //加1被5整除
+            && num % 4 === 1        //除4余1
+            && num % 3 === 0        //被3整除
+            && num % 2 === 1) {     //除2余1
             break;
         }
     }
     return num;
 }
-console.log(test());
 
 function test2() {
-    var num = 0;
-    while(1) {
+    var num = 0, i = 0;
+    while(i < 100000) {
         num += 1;
-        if(num % 9 === 0 && num % 7 === 0 && num % 5 === 1 && num % 4 === 1) {
+        if(num % 9 === 0                //被9整除
+            && num % 8 === 1            //除8余1
+            && num % 7 === 0            //被7整除
+            && (num + 1) % 5 === 0) {   //加1被5整除
             break;
         }
     }
-    return num; 
+    return num;
 }
-console.log(test2());
+
+function validate(eggs) {
+    var logs = [];
+    for(var i = 1; i <= 9; i++) {
+        var m = eggs, j = 0;
+        while(m >= i) {
+            m -= i;
+            j++;
+        }
+        logs.push(i + '个' + i + '个拿，拿 ' + j + ' 次后，' 
+            + (m > 0 && i !== 5 ? '还剩' + m + '个' : (i === 5 ? '还差1个' : '正好拿完')) 
+            + '。');
+    }
+    return logs;
+}
+
+var result = test();
+console.log('鸡蛋最少是' + result + '个');
+var logs = validate(result);
+console.log(logs.join('\r\n'));
+
+
+var con = 'ct1_StartTime';
+console.log(con.replace(/^([a-z\d_]+)|(txt|ddl|lbl|chb)[_]?/g, ''));
+
+console.log($.crc.toCRC16('你好'))

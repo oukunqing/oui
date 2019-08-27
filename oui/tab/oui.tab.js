@@ -184,8 +184,10 @@
                 if(isIframe) {
                     window.setTimeout(function() {
                         iframe = $I(iframeId);
-                        iframe.itemId = itemId;
-                        Util.loadPage(t, iframe, Util.buildPageUrl(opt.url, itemId));
+                        if(iframe) {
+                            iframe.itemId = itemId;
+                            Util.loadPage(t, iframe, Util.buildPageUrl(opt.url, itemId));
+                        }
                     }, 2);
                 }
 
@@ -400,6 +402,7 @@
                     height += 9;
                 }
             }
+            //height + padding + border
             return { text: html.join(''), width: width, height: height + 6 + 2 };
         },
         buildContextMenu: function(t, ev, itemId) {
@@ -415,8 +418,9 @@
             } else {
                 obj = $.createElement('div', menuId, function(elem) {
                     elem.className = 'oui-tabs-context-menu';
-                    elem.style.cssText = 'z-index:99999999;left:{x}px;top:{y}px;width:{1}px;height:{2}px;'.format(pos, con.width, con.height);
+                    elem.style.cssText = 'left:{x}px;top:{y}px;width:{1}px;height:{2}px;'.format(pos, con.width, con.height);
                     elem.innerHTML = con.text;
+                    elem.tabId = t.id;
                     $.disableEvent(elem, 'contextmenu');
                 }, document.body);
             }
@@ -432,6 +436,8 @@
                     });
                 }
             }
+            $.addListener(document, 'keydown', Util.escContextMenu);
+
             return this;
         },
         hideContextMenu: function(ev, t, hide) {
@@ -444,15 +450,22 @@
                     || pos.x > (offset.left + offset.width)
                     || pos.y > (offset.top + offset.height)) {
                     $.removeElement(obj);
+                    $.removeListener(document, 'keydown', Util.escContextMenu);
                 }
             }
             return this;
         },
-        hideParentContextMenu: function() {
+        escContextMenu: function(e) {
+            var keyCode = $.getKeyCode(e);
+            Util.hideAllContextMenu();
+            return this;
+        },
+        hideAllContextMenu: function() {
             if(Cache.count > 0) {
                 $('.oui-tabs-context-menu').each(function(i, obj){
                     $.removeElement(obj);
                 });
+                $.removeListener(document, 'keydown', Util.escContextMenu);
             }
             return this;
         },
@@ -758,7 +771,7 @@
             return cache ? cache.obj.closeAll(exceptItemId) : null;
         },
         hideParentContextMenu: function() {
-            Util.hideParentContextMenu();
+            Util.hideAllContextMenu();
             return this;
         }
     };

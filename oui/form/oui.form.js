@@ -87,7 +87,7 @@
                 }, opt.configs),
                 messages: $.extend({}, messages, opt.messages),
                 trim: function (s) { return ('' + s).replace(/(^[\s]*)|([\s]*$)/g, ''); },
-                isMatch: function (key, pattern) { return (pattern || /^[a-z0-9]+[A-Z]/).test(key); },
+                isMatch: function (key, pattern) { return (pattern || /^[a-z0-9_]+[A-Z]/).test(key); },
                 checkElement: function (element) {
                     if ($.isString(element)) { element = document.getElementById(element); }
                     if (!$.isObject(element) || !element.getElementsByTagName) { throw new Error('element 参数输入错误'); }
@@ -125,7 +125,7 @@
                         configs = op.configs;
                     }
                     if (configs.removePrefix) {
-                        if (op.isMatch(key)) { return key.replace(/^([a-z]+)|(txt|ddl|lbl|chb)/g, ''); }
+                        if (op.isMatch(key)) { return key.replace(/^([a-z\d_]+)|(txt|ddl|lbl|chb)[_]?/g, ''); }
                         if ($.isString(configs.prefix) && configs.prefix !== '') {
                             var pos = key.indexOf(configs.prefix);
                             return pos >= 0 ? key.substr(pos + configs.prefix.length) : key;
@@ -667,12 +667,25 @@
         return list;
     },
     findElement = function (elements, tagName) {
+        var tags = [];
         if ($.isUndefined(tagName)) {
             return elements[0];
         }
+        if(tagName.indexOf('|') > -1) {
+            tags = tagName.split('|');
+        }
         for (var i = 0; i < elements.length; i++) {
-            if (elements[i].tagName === tagName) {
-                return elements[i];
+            var elem = elements[i];
+            for(var j = 0; j < tags.length; j++) {
+                var ts = tags[j].split(':');
+                if(elem.tagName === ts[0]) {
+                    if(!ts[1] || (ts[1] && elem.type === ts[1])) {
+                        return elem;
+                    }
+                }
+            }
+            if (elem.tagName === tagName) {
+                return elem;
             }
         }
         return null;
@@ -776,7 +789,7 @@
 
             var id = element.id || '',
                 table = $f.findElement($(this), 'TABLE'),
-                handler = $f.findElement($(this), 'BUTTON'),
+                handler = $f.findElement($(this), 'BUTTON|INPUT:submit|INPUT:button'),
                 callback = options.submitHandler || options.submit,
                 debounce = options.debounce || false,       //是否防抖节流，默认不启用
                 delay = options.delay || 320,               //延时时长，默认320毫秒

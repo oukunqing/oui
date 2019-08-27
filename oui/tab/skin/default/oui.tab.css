@@ -239,7 +239,8 @@
     font-family: Arial;
     margin: 0;
     padding: 3px 0;
-    box-shadow: 0 2px 3px 0 rgba(0,0,0,.32);
+    /*box-shadow: 5px 5px 2px 0 rgba(0,0,0,.32);*/
+    box-shadow: 4px 4px 4px -4px #666;
 }
 
 .oui-tabs-context-menu .menu-item {

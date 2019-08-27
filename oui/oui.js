@@ -628,7 +628,9 @@
 !function ($) {
     'use strict';
 
-    function Dictionary() {
+    var dicCache = {};
+
+    function Dictionary(id) {
         var get = function (data) {
             var obj = { keys: [], values: [] };
             for (var k in data) {
@@ -675,7 +677,17 @@
         window.Dictionary = Dictionary;
     }
 
-    $.extendNative($, { Dictionary: Dictionary, dict: new Dictionary() }, '$');
+    $.extendNative($, { 
+        Dictionary: Dictionary, 
+        dict: function(id) {
+            if(dicCache[id]) {
+                return dicCache[id];
+            }
+            var dic = new Dictionary(id);
+            dicCache[id] = dic;
+            return dic;
+        } 
+    }, '$');
 }(OUI);
 
 // 字符编码转换
@@ -2475,6 +2487,10 @@
             var e = e || window.event;
             return e.keyCode || e.which || e.charCode;
         },
+        getKeyChar = function(e) {
+            var keyCode = $.isNumber(e) ? e : getKeyCode(e);
+            return String.fromCharCode(keyCode).toUpperCase();
+        },
         filterHtmlCode = function (str) {
             str = str.replace(/<\/?[^>]*>/g, ''); //去除HTML tag
             str = str.replace(/[ | ]*\n/g, '\n'); //去除行尾空白
@@ -2596,6 +2612,7 @@
         getScrollPosition: getScrollPosition,
         getScrollPos: getScrollPosition,
         getKeyCode: getKeyCode,
+        getKeyChar: getKeyChar,
         filterHtmlCode: filterHtmlCode,
         getContentSize: getContentSize,
         getInnerText: getInnerText
