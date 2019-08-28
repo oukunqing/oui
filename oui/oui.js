@@ -1748,16 +1748,16 @@
             var name = (filePath || '').split('?')[0], pos = name.lastIndexOf('.');
             return pos >= 0 ? name.substr(pos + 1).toLowerCase() : '';
         },
-        createElement = function (nodeName, id, func, parent, exempt) {
+        createElement = function (nodeName, id, func, parent, exempt, param) {
             if ($.isFunction(id)) {
-                exempt = parent, parent = func, func = id, id = null;
+                param = exempt, exempt = parent, parent = func, func = id, id = null;
             }
             var elem = null, hasId = false;
             if ($.isString(id, true)) {
                 hasId = true;
                 elem = doc.getElementById(id);
                 if (elem !== null) {
-                    return $.isFunction(func) && func(elem), elem;
+                    return $.isFunction(func) && func(elem, param), elem;
                 }
             }
             elem = doc.createElement(nodeName);
@@ -1765,7 +1765,7 @@
             if (hasId) { elem.id = id; }
             if (!exempt && !isElement(parent) && !isDocument(parent)) { parent = undefined; }
 
-            return $.isFunction(func) && func(elem), parent &&  parent.appendChild(elem), elem;
+            return $.isFunction(func) && func(elem, param), parent &&  parent.appendChild(elem), elem;
         },
         createJsScript = function (data, id, func, parent) {
             if ($.isFunction(id)) {

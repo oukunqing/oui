@@ -24,7 +24,16 @@
             { key: 'dic1', name: '字典配置1', par: { id: 12, code: 'abc' } },
             { sep: 1 },
             { key:'dic', name: '字典配置' },
-            { key: 'sys', name: '系统配置' }
+            { key: 'sys', name: '系统配置', items: [
+                { name: '地图配置' },
+                { name: '私有地图配置' },
+                { name: '图片配置', items: [
+                    { name: 'Logo配置' },
+                    { name: '背景图片' }
+                ]},
+                { name: '百度地图配置' },
+                { name: '谷歌地图配置' }
+            ] }
         ]
     });
 
@@ -35,7 +44,7 @@
             console.log('目录： ', par);
         });
 
-    $.contextmenu({ id: 'menu2', obj: 'lbl1', width: 180, func: function(par) {
+    $.contextmenu({ id: 'menu2', obj: 'lbl1',  func: function(par) {
             console.log('par menu2: ', par);
         }
     })

@@ -76,7 +76,46 @@
         removeMenu: function(menuId) {
             return Factory.hideContextMenu(null, menuId, true);
         },
-        buildMenuItem: function(dr, menuId, callback, param) {
+        buildSubMenu: function(parent, pos, key, items, isSub) {
+            var offset = $.getOffset(parent);
+            console.log('buildSubMenu: ', parent, items, pos, offset, $.getCssAttrSize(parent, 'top'));
+            var opt = {
+                width: 240,
+                height: 240,
+                x: offset.width - 5,
+                y: -24 - 3
+            };
+
+            $.createElement('div', '', function(elem) {
+                elem.className = 'oui-context-menu';
+                elem.style.cssText = 'left:{x}px;width:{width}px;height:{height}px;margin-top:{y}px;'.format(opt);
+                $.disableEvent(elem, 'contextmenu');
+
+                var html = [];
+                for(var i = 0; i < items.length; i++) {
+                    var dr = items[i];
+                    var sub = $.createElement('div', '', function(elem2, param) {
+                        elem2.className = 'cmenu-item';
+                        elem2.innerHTML = dr.name;
+                        if(param) {
+                            $.addListener(elem2, 'click', function(ev) {
+                                $.cancelBubble();
+                        console.log('dr.items22:', param)
+                                Factory.buildSubMenu(this, $.getEventPosition(ev), dr.key, param, true);
+                            });
+                        } else {
+                            $.addListener(elem2, 'click', function(ev) {
+                                $.cancelBubble();
+                                Factory.hideContextMenu(ev, 0, true);
+                                //func(par, this);
+                            });
+                        }
+
+                    }, elem, false, dr.items);
+                }
+            }, parent);
+        },
+        buildMenuItem: function(dr, menuId, callback, par) {
             var elem = null;
             if(dr === 'sep' || dr.sep || dr.type === 'sep') {
                 elem = $.createElement('div', '', function(elem) {
@@ -86,19 +125,27 @@
             } else {
                 var func = dr.func || callback, 
                     txt = dr.name || dr.txt || dr.text,
-                    elem = $.createElement('div', '', function(elem) {
-                        elem.innerHTML = txt;
-                        elem.className = 'cmenu-item';
+                    hasChild = $.isArray(dr.items);
+
+                var elem = $.createElement('div', '', function(elem) {
+                    elem.className = 'cmenu-item';
+                    if(hasChild) {
+                        txt += '<i class="cmenu-arrow"></i>';
+                        $.addListener(elem, 'click', function(ev) {
+                            $.cancelBubble();
+                            Factory.buildSubMenu(elem, $.getEventPosition(ev), dr.key, dr.items);
+                        });
+                    } else {
                         if($.isFunction(func)) {
-                            elem.par = param;
-                            elem.func = func;
-                            elem.menuId = menuId;
                             $.addListener(elem, 'click', function(ev) {
-                                Factory.hideContextMenu(ev, this.menuId, true);
-                                this.func(elem.par, this);
+                                $.cancelBubble();
+                                Factory.hideContextMenu(ev, menuId, true);
+                                func(par, this);
                             });
                         }
-                    });
+                    }
+                    elem.innerHTML = txt;
+                });
                 return { type: 'menu', elem: elem, height: 24 };
             }
         },
@@ -151,14 +198,14 @@
             var cache = Factory.getCache(menu.id),
                 pos = $.getEventPosition(ev), 
                 opt = $.extend({
-                    width: 256,
+                    width: 240,
                     height: 'auto'
                 }, cache.options, pos),
                 id = 'oui-context-menu-' + menu.id,
                 obj = $I(id);
 
             if(obj) {
-                obj.innerHTML = con.text;
+                //obj.innerHTML = opt.name;
                 obj.style.left = pos.x + 'px';
                 obj.style.top = pos.y + 'px';
             } else {
@@ -264,7 +311,7 @@
 
             $.addListener(document, 'keydown', Factory.escContextMenu)
                 .addListener(document, 'mousedown', function(ev) {
-                    Factory.hideContextMenu(ev, that.id);
+                    //Factory.hideContextMenu(ev, that.id);
                 });
             return that.build(options);
         },
