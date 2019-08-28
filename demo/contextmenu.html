@@ -16,7 +16,7 @@
         id: 'menu1',
         obj: 'div1',
         par: { code: 'dx01', id: 32, name: '设备01'},
-        //width: 150,
+        width: 150,
         callback: function(par, obj) {
             console.log('par122: ', par, obj);
         },
@@ -31,7 +31,10 @@
                     { name: 'Logo配置' },
                     { name: '背景图片' }
                 ]},
-                { name: '百度地图配置' },
+                { name: '百度地图配置', items: [
+                    { name: 'WEB版' },
+                    { name: '安卓版' }
+                ] },
                 { name: '谷歌地图配置' }
             ] }
         ]
@@ -39,7 +42,10 @@
 
     menu.add({key: 'dic2', name: '字典配置2'})
         .sep('dic2')
-        .insert({ key: 'person', name: '人员配置'}, 1)
+        .insert({ key: 'person', name: '人员配置', items: [
+            { name: '使用者' },
+            { name: '经销商' }
+        ]}, 1)
         .add('设备目录', function(par) {
             console.log('目录： ', par);
         });

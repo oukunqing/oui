@@ -1765,7 +1765,7 @@
             if (hasId) { elem.id = id; }
             if (!exempt && !isElement(parent) && !isDocument(parent)) { parent = undefined; }
 
-            return $.isFunction(func) && func(elem, param), parent &&  parent.appendChild(elem), elem;
+            return $.isFunction(func) && func(elem, param), parent && parent.appendChild(elem), elem;
         },
         createJsScript = function (data, id, func, parent) {
             if ($.isFunction(id)) {
@@ -2527,6 +2527,38 @@
             } else {
                 return elem.textContent;
             }
+        },
+        isOnElem = function(elem, pos) {
+            var offset = getOffsetSize(elem);
+            if(pos.x >= offset.left && pos.y >= offset.top
+                && pos.x <= (offset.left + offset.width)
+                && pos.y <= (offset.top + offset.height)) {
+                return true;
+            }
+            return false;
+        },
+        isOnElement = function(elem, ev) {
+            elem = toElement(elem);
+            if(!isElement(elem)) {
+                return false;
+            }
+            var pos = ev.fromElement ? getEventPosition(ev) : ev,
+                isOn = isOnElem(elem, pos);
+
+            if(isOn) {
+                return true;
+            }
+            /*
+            var childs = elem.childNodes;
+            for(var i = 0; i < childs.length; i++) {
+                var sub = childs[i];                
+                if(sub.childNodes.length > 0) {
+                    return isOnElement(sub, pos);
+                } else if(isOnElem(sub, pos)) {
+                    return true;
+                }
+            }*/
+            return false;
         };
 
     var ua = function () { try { return navigator.userAgent } catch (e) { return '' } }();
@@ -2625,7 +2657,8 @@
         getKeyChar: getKeyChar,
         filterHtmlCode: filterHtmlCode,
         getContentSize: getContentSize,
-        getInnerText: getInnerText
+        getInnerText: getInnerText,
+        isOnElement: isOnElement
     }, '$');
 
 }(OUI);
