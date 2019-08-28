@@ -243,7 +243,7 @@
     box-shadow: 4px 4px 4px -4px #666;
 }
 
-.oui-tabs-context-menu .menu-item {
+.oui-tabs-context-menu .cmenu-item {
     height: 24px;
     line-height: 2em;
     display: block;
@@ -259,7 +259,7 @@
     box-sizing: border-box;
 }
 
-.oui-tabs-context-menu .menu-item .skey {
+.oui-tabs-context-menu .cmenu-item .skey {
     float: right;
     font-style: normal;
     font-size: 12px;
@@ -268,7 +268,7 @@
     border: none 0;
 }
 
-.oui-tabs-context-menu .menu-item:hover {
+.oui-tabs-context-menu .cmenu-item:hover {
     background: #e8eaed;
 }
 
@@ -277,7 +277,7 @@
     background: #fff;
 }
 
-.oui-tabs-context-menu .sep {
+.oui-tabs-context-menu .cmenu-sep {
     border: none 0;
     box-sizing: border-box;
     padding: 0;

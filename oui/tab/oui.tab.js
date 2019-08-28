@@ -41,6 +41,7 @@
                     style = 'margin-top:' + (height - 12) / 2 + 'px;';
                 }
                 elem.innerHTML = '<a class="arrow arrow-' + dir + '" style="' + style + '"></a>';
+                $.disableEvent(elem, 'contextmenu');
             }, t.tabContainer);
             return div;
         },
@@ -381,18 +382,18 @@
             }
             var dis = ' disabled';
             var html = [
-                '<a class="menu-item{0}" code="cur">关闭当前标签页</a>'.format(s.close ? '' : dis),
-                '<div class="sep"></div>',
-                '<a class="menu-item{0}" code="all">关闭全部标签页</a>'.format(s.count > 0 ? '' : dis),
-                '<a class="menu-item{0}" code="other">关闭其他标签页</a>'.format(s.other > 0 ? '' : dis),
-                '<a class="menu-item{0}" code="left">关闭左侧标签页</a>'.format(s.left > 0 ? '' : dis),
-                '<a class="menu-item{0}" code="right">关闭右侧标签页</a>'.format(s.right > 0 ? '' : dis),
-                '<div class="sep"></div>',
-                '<a class="menu-item{0}" code="reload">重新加载</a>'.format(s.iframe ? '' : dis),
-                '<a class="menu-item{0}" code="reloadAll">全部重新加载</a>'.format(s.iframeCount > 0 ? '' : dis),
-                '<div class="sep"></div>',
-                '<a class="menu-item{0}" code="reopen">重新打开关闭的标签页</a>'.format(s.closedCount > 0 ? '' : dis),
-                '<a class="menu-item{0}" code="reopenAll">重新打开关闭的全部标签页</a>'.format(s.closedCount > 0 ? '' : dis)
+                '<a class="cmenu-item{0}" code="cur">关闭当前标签页</a>'.format(s.close ? '' : dis),
+                '<div class="cmenu-sep"></div>',
+                '<a class="cmenu-item{0}" code="all">关闭全部标签页</a>'.format(s.count > 0 ? '' : dis),
+                '<a class="cmenu-item{0}" code="other">关闭其他标签页</a>'.format(s.other > 0 ? '' : dis),
+                '<a class="cmenu-item{0}" code="left">关闭左侧标签页</a>'.format(s.left > 0 ? '' : dis),
+                '<a class="cmenu-item{0}" code="right">关闭右侧标签页</a>'.format(s.right > 0 ? '' : dis),
+                '<div class="cmenu-sep"></div>',
+                '<a class="cmenu-item{0}" code="reload">重新加载</a>'.format(s.iframe ? '' : dis),
+                '<a class="cmenu-item{0}" code="reloadAll">全部重新加载</a>'.format(s.iframeCount > 0 ? '' : dis),
+                '<div class="cmenu-sep"></div>',
+                '<a class="cmenu-item{0}" code="reopen">重新打开关闭的标签页</a>'.format(s.closedCount > 0 ? '' : dis),
+                '<a class="cmenu-item{0}" code="reopenAll">重新打开关闭的全部标签页</a>'.format(s.closedCount > 0 ? '' : dis)
             ];
             var width = 256, height = 0;
             for(var i = 0; i<html.length; i++) {
@@ -405,11 +406,28 @@
             //height + padding + border
             return { text: html.join(''), width: width, height: height + 6 + 2 };
         },
+        setContextMenuPos: function(pos, size) {
+            var bs = $.getBodySize(),
+                ss = $.getScrollPos();
+
+            if(pos.x < 0 || size.width >= bs.width) {
+                pos.x = 0 + ss.left;
+            } else if((pos.x + size.width)> bs.width + ss.left) {
+                pos.x = bs.width - size.width;
+            }
+
+            if(pos.y < 0 || size.height >= bs.height) {
+                pos.y = 0 + ss.top;
+            } else if((pos.y + size.height)> bs.height + ss.top) {
+                pos.y = pos.y - size.height;
+            }
+            return pos;
+        },
         buildContextMenu: function(t, ev, itemId) {
-            var pos = $.getEventPosition(ev), 
-                menuId = 'oui-tabs-' + t.id + '-menu',
+            var menuId = 'oui-tabs-context-menu-' + t.id,
                 obj = $I(menuId),
-                con = this.buildMenuContent(t, itemId);
+                con = this.buildMenuContent(t, itemId),
+                pos = this.setContextMenuPos($.getEventPosition(ev), con);
 
             if(obj) {
                 obj.innerHTML = con.text;
@@ -428,7 +446,7 @@
             var childs = obj.childNodes, len = childs.length;
             for(var i = 0; i < len; i++) {
                 var elem = childs[i];
-                $.disableEvent(elem, 'contextmenu');
+                //$.disableEvent(elem, 'contextmenu');
                 if(elem.tagName === 'A' && elem.className.indexOf('disabled') < 0) {
                     $.addListener(elem, 'click', function() {
                         var action = $.getAttribute(this, 'code');
@@ -441,7 +459,7 @@
             return this;
         },
         hideContextMenu: function(ev, t, hide) {
-            var obj = $I('oui-tabs-' + t.id + '-menu'),
+            var obj = $I('oui-tabs-context-menu-' + t.id),
                 pos = $.getEventPosition(ev);
             if(obj) {
                 var offset = $.getOffsetSize(obj);
@@ -456,8 +474,9 @@
             return this;
         },
         escContextMenu: function(e) {
-            var keyCode = $.getKeyCode(e);
-            Util.hideAllContextMenu();
+            if($.getKeyCode(e) === $.keyCode.Esc) {
+                Util.hideAllContextMenu();
+            }
             return this;
         },
         hideAllContextMenu: function() {
@@ -770,7 +789,7 @@
                 cache = this.getCache(opt.objId);
             return cache ? cache.obj.closeAll(exceptItemId) : null;
         },
-        hideParentContextMenu: function() {
+        hideParentTabMenu: function() {
             Util.hideAllContextMenu();
             return this;
         }
@@ -1022,8 +1041,8 @@
         closeAll: function(objId, exceptItemId) {
             return Factory.removeAll(objId, exceptItemId);
         },
-        hideParentContextMenu: function() {
-            return Factory.hideParentContextMenu();
+        hideParentTabMenu: function() {
+            return Factory.hideParentTabMenu();
         }
     });
 }(OUI);

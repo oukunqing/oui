@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <script type="text/javascript" src="../oui/oui.js?"></script>
+    <script type="text/javascript" src="../oui/contextmenu/oui.contextmenu.js?12"></script>
+</head>
+<body>
+    <div id="div1" style="border: solid 1px #00f;padding:10px;margin-bottom:20px;">右键菜单</div>
+    <label id="lbl1">帮助信息</label>
+</body>
+</html>
+<script type="text/javascript">
+    var menu = $.contextmenu({
+        id: 'menu1',
+        obj: 'div1',
+        par: { code: 'dx01', id: 32, name: '设备01'},
+        //width: 150,
+        callback: function(par, obj) {
+            console.log('par122: ', par, obj);
+        },
+        items: [
+            { key: 'dic1', name: '字典配置1', par: { id: 12, code: 'abc' } },
+            { sep: 1 },
+            { key:'dic', name: '字典配置' },
+            { key: 'sys', name: '系统配置' }
+        ]
+    });
+
+    menu.add({key: 'dic2', name: '字典配置2'})
+        .sep('dic2')
+        .insert({ key: 'person', name: '人员配置'}, 1)
+        .add('设备目录', function(par) {
+            console.log('目录： ', par);
+        });
+
+    $.contextmenu({ id: 'menu2', obj: 'lbl1', width: 180, func: function(par) {
+            console.log('par menu2: ', par);
+        }
+    })
+    .add({ menuId: 'menu2', key: 'tts', name: '语音播报' })
+    .add({ menuId: 'menu2', key: 'track', name: '轨迹回放' });
+    
+</script>

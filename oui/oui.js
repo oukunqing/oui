@@ -2425,8 +2425,8 @@
         },
         disableEvent = function(elem, evName, func) {
             elem = $.toElement(elem);
-            if($.isElement(elem)) {
-                if(evName.trim().indexOf('on') < 0) {
+            if($.isElement(elem) && $.isString(evName, true)) {
+                if(!evName.startsWith('on')) {
                     evName = 'on' + evName;
                 }
                 elem[evName] = function(ev) {
@@ -2536,6 +2536,16 @@
         isOpera: ua.indexOf('Opera') > -1,
         isSafari: ua.indexOf('Safari') > -1,
         isIE: ua.indexOf('compatible') > -1 && ua.indexOf('MSIE') > -1 && !isOpera,
+        keyCode: {
+            Esc: 27,
+            Tab: 9,
+            Space: 32,
+            Enter: 13,
+            Left: 37,
+            Up: 38,
+            Right: 39,
+            Down: 40
+        },
         doc: doc, head: head, redirect: redirect,
         getLocationPath: getLocationPath,
         getScriptSelfPath: getScriptSelfPath,
@@ -3418,7 +3428,7 @@
 
 // oui.dialog
 !function ($) {
-    function callParentFunc(funcName, param) {
+    var callParentFunc = function(funcName, param) {
         if(window.location !== top.window.location) {
             try{
                 var func = parent.$.dialog[funcName],
@@ -3431,7 +3441,20 @@
             }
         }
         return $;
-    }
+    },
+    closeParentMenu = function(moduleName, funcName) {
+        if(window.location !== top.window.location) {
+            try{
+                var func = parent.$[moduleName][funcName];
+                if($.isFunction(func)) {
+                    return func(), this;
+                }
+            } catch(e) {
+                console.log(moduleName, funcName, e);
+            }
+        }
+        return $;
+    };
     $.extend($, {
         //通过子窗口关闭父窗口对话框(oui.dialog)
         closeParentDialog: function(param) {
@@ -3443,13 +3466,11 @@
         },
         //关闭父窗口可能出现的Tab(oui.tab)标签的右键菜单
         hideParentTabMenu: function() {
-            if(window.location !== top.window.location) {
-                var func = parent.$.tab['hideParentContextMenu'];
-                if($.isFunction(func)) {
-                    return func(), this;
-                }
-            }
-            return $;
+            return closeParentMenu('tab', 'hideParentTabMenu');
+        },
+        //关闭父窗口可能出现的右键菜单
+        hideParentMenu: function() {
+            return closeParentMenu('contextmenu', 'hideParentMenu');
         }
     });
 }(OUI);

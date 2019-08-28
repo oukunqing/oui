@@ -16,7 +16,7 @@
     <input type="button" value="关闭全部2" onclick="closeAll(true);" />
     <input type="button" value="关闭" onclick="close2();" />
     <input type="button" value="关闭2" onclick="close2(true);" />
-    <div style="margin:50px;">
+    <div style="margin:10px;">
         <div id="nav" style="width:700px;"></div>
         <div id="content" style="width:700px;"></div>
     </div>
@@ -24,7 +24,7 @@
         <div id="nav2" style="width:400px;"></div>
         <div id="content2" style="width:400px;"></div>
     </div>
-    <div style="float:left;clear:both;margin-top:100px;">
+    <div style="float:left;margin-top:100px;">
         <div id="nav3" style="width:400px;"></div>
         <div id="content3" style="width:400px;"></div>
     </div>
@@ -72,6 +72,7 @@
 
     tab2.add({ id: 'config', name: '系统配置', html: '系统配置'});
     tab2.add({ id: 'param', name: '参数配置', html: '参数配置'});
+    tab2.add({ id: 'dic', name: '字典配置', html: '字典配置'});
 
     tab2.show();
 
