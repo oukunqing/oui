@@ -17,6 +17,7 @@
                 menuId: menu.id,
                 menu: menu,
                 items: {},
+                boxs: [],
                 options: $.extend({
                     items: []
                 }, options),
@@ -69,25 +70,46 @@
         removeMenu: function(menuId) {
             return Factory.hideContextMenu(null, menuId, true);
         },
-        buildSubMenu: function(parent, pos, items, isSub, cfg) {
+        closeOpenedBox: function(cache, level) {
+            var boxs = cache.boxs || [], c = boxs.length;
+            boxs.sort(function(a, b) {
+                return b.level - a.level
+            });
+            for(var i = c - 1; i >= 0; i--) {
+                var b = boxs[i];
+                if(b.level > level) {
+                    $.removeElement(b.box);
+                    cache.boxs.splice(i, 1);
+                    $.removeClass(b.item, 'cur');
+                }
+            }
+            return this;
+        },
+        buildSubMenu: function(parent, pos, items, isSub, cfg, cache) {
             var offset = $.getOffset(parent);
             var opt = {
                 width: cfg.width,
                 height: cfg.height,
                 x: offset.width - 5,
                 y: -24 - 3
-            }, 
+            },
+            bs = $.getBodySize(),
+            ss = $.getScrollPosition(),
             id = parent.id + '-sub',
             obj = $I(id),
             level = parent.level + 1;
-
-
 
             if(obj) {
                 return this;
             }
 
-            $.createElement('div', id, function(box) {
+            Factory.closeOpenedBox(cache, parent.level);
+
+            if((offset.left + opt.x + opt.width - ss.left + 2) > (bs.width)) {
+                opt.x = 5 - offset.width;
+            }
+
+            var box = $.createElement('div', id, function(box) {
                 box.className = 'oui-context-menu menu-level-' + level;
                 box.menuId = parent.menuId;
                 box.itemId = Factory.buildItemId(parent.menuId);
@@ -102,31 +124,25 @@
                         txt = dr.name || dr.txt || dr.text,
                         hasChild = $.isArray(dr.items);
 
-                    $.createElement('div', id, function(elem, subItems) {
+                    $.createElement('div', id, function(elem, param) {
                         elem.className = 'cmenu-item';
                         elem.menuId = box.menuId;
                         elem.itemId = id;
                         elem.level = level;
 
-                        $.addListener(elem, 'mousedown', function(ev) {
+                        $.disableEvent(elem, 'mousedown', $.cancelBubble);
+                        $.addListener(elem, 'mouseover', function(ev) {
                             $.cancelBubble();
-                            return false;
+                            if(param.hasChild) {
+                                $.addClass(elem, 'cur');
+                                Factory.buildSubMenu(this, $.getEventPosition(ev), param.items, true, cfg, cache);
+                            } else {
+                                Factory.closeOpenedBox(cache, level);
+                            }
                         });
-                        if(hasChild) {
+
+                        if(param.hasChild) {
                             txt += '<i class="cmenu-arrow"></i>';
-                            $.addListener(elem, 'mouseover', function(ev) {
-                                $.cancelBubble();
-                                Factory.buildSubMenu(this, $.getEventPosition(ev), subItems, true, cfg);
-                            });
-                            
-                            $.addListener(elem, 'mouseout', function(ev) {
-                                $.cancelBubble();
-                                var sub = $I(elem.id + '-sub');
-                                if(!$.isOnElement(sub, ev)) {
-                                    $.removeElement(sub);
-                                }
-                            });
-                            
                         } else {
                             var func = Factory.buildMenuCallback(dr, cfg),
                                 par = Factory.buildMenuPar(dr, cfg);
@@ -138,14 +154,14 @@
                                 });
                             }
                         }
-
                         elem.innerHTML = txt;
-
-                    }, box, false, dr.items);
+                    }, box, false, { items: dr.items, hasChild: hasChild });
                 }                
             }, parent);
+
+            cache.boxs.push({box: box, level: level, item: parent});
         },
-        buildMenuItem: function(dr, menuId, cfg, level) {
+        buildMenuItem: function(dr, menuId, cfg, level, cache) {
             var elem = null;
             if(dr === 'sep' || dr.sep || dr.type === 'sep') {
                 elem = $.createElement('div', '', function(elem) {
@@ -165,26 +181,19 @@
                     elem.itemId = id;
                     elem.level = level;
 
-                    $.addListener(elem, 'mousedown', function(ev) {
+                    $.disableEvent(elem, 'mousedown', $.cancelBubble);
+                    $.addListener(elem, 'mouseover', function(ev) {
                         $.cancelBubble();
-                        return false;
+                        if(hasChild) {
+                            $.addClass(elem, 'cur');
+                            Factory.buildSubMenu(elem, $.getEventPosition(ev), dr.items, false, cfg, cache);
+                        } else {
+                            Factory.closeOpenedBox(cache, level);
+                        }
                     });
 
                     if(hasChild) {
                         txt += '<i class="cmenu-arrow"></i>';
-                        $.addListener(elem, 'mouseover', function(ev) {
-                            $.cancelBubble();
-                            Factory.buildSubMenu(elem, $.getEventPosition(ev), dr.items, false, cfg, ++level);
-                        });
-                        
-                        $.addListener(elem, 'mouseout', function(ev) {
-                            $.cancelBubble();
-                            var sub = $I(id + '-sub');
-                            if(!$.isOnElement(sub, ev)) {
-                                $.removeElement(sub);
-                            }
-                        });
-                        
                     } else {
                         if($.isFunction(func)) {
                             $.addListener(elem, 'click', function(ev) {
@@ -210,14 +219,13 @@
             }, dr.par, opt.param || opt.par);
             return par;
         },
-        buildMenuItems: function(opt) {
-            console.log('buildMenuItems opt: ', opt);
+        buildMenuItems: function(opt, cache) {
             var items = [];
 
             for(var i = 0; i < opt.items.length; i++) {
                 var dr = opt.items[i];
                 if(dr) {
-                    items.push(this.buildMenuItem(dr, opt.id, opt, 0));
+                    items.push(this.buildMenuItem(dr, opt.id, opt, 0, cache));
                 }                
             }
 
@@ -252,6 +260,7 @@
         buildContextMenu: function(ev, menu) {
             var cache = Factory.getCache(menu.id),
                 bs = $.getBodySize(),
+                ss = $.getScrollPosition(),
                 pos = $.getEventPosition(ev), 
                 opt = $.extend({
                     width: 240,
@@ -260,8 +269,8 @@
                 id = 'oui-context-menu-' + menu.id,
                 obj = $I(id);
 
-            if((opt.x + opt.width) > bs.width) {
-                opt.x -= (opt.x + opt.width) - bs.width;
+            if((opt.x + opt.width) > (bs.width + ss.left)) {
+                opt.x = bs.width + ss.left - opt.width;
             }
 
             if(obj) {
@@ -274,7 +283,7 @@
                     elem.style.cssText = 'left:{x}px;top:{y}px;width:{width}px;height:{height}px;'.format(opt);
                     $.disableEvent(elem, 'contextmenu');
 
-                    Factory.fillMenuItem(elem, Factory.buildMenuItems(opt), opt);
+                    Factory.fillMenuItem(elem, Factory.buildMenuItems(opt, cache), opt);
                 }, document.body);
             }
             return obj;

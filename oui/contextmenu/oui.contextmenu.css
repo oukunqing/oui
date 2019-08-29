@@ -39,7 +39,7 @@
     border: none 0;
 }
 
-.oui-context-menu .cmenu-item:hover {
+.oui-context-menu .cur, .oui-context-menu .cmenu-item:hover {
     background: #e8eaed;
 }
 

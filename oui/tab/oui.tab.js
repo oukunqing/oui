@@ -16,7 +16,7 @@
         LongPressInterval: 40,   //长按滚动间隔，单位：毫秒
         LongPressMinInterval: 10,   //长按滚动间隔，单位：毫秒
         LongPressScrollDistance: 10,     //长按时一次滚动的距离，单位：px
-        LongPressScrollMaxDistance: 40     //长按时一次滚动的距离，单位：px
+        LongPressScrollMaxDistance: 50     //长按时一次滚动的距离，单位：px
     },
     Util = {
         buildId: function(objId, itemId, prefix) {
@@ -116,22 +116,21 @@
                     con += '<i class="tab-close" title="" style="{2}">×</i>';
                 }
                 elem.innerHTML = con.format(opt, txtStyle, closeStyle);
-                window.setTimeout(function(){
-                    var txt = elem.childNodes[0],
-                        txtW = $.getOuterSize(txt).width,
-                        btn = opt.closeAble ? elem.childNodes[1] : null,
-                        btnW = $.getOuterSize(btn).width;
+                
+                var txt = elem.childNodes[0],
+                    txtW = $.getOuterSize(txt).width,
+                    btn = opt.closeAble ? elem.childNodes[1] : null,
+                    btnW = $.getOuterSize(btn).width;
 
-                    if($.isNumber(cfg.maxWidth) && cfg.maxWidth > 60 && (txtW + btnW) > cfg.maxWidth) {
-                        var ps = $.getPaddingSize(txt),
-                            ms = $.getMarginSize(txt),
-                            es = $.getElementSize(elem);
-                        elem.style.width = cfg.maxWidth + 'px';
-                        //txt.style.width = (cfg.maxWidth - ps.width - ms.width - btnW - es.border.width - 2) + 'px';
-                        txt.style.width = (cfg.maxWidth - 0 - ms.width - btnW - es.border.width) + 'px';
-                        txt.title = $.getInnerText(txt);
-                    }
-                }, 5);
+                if($.isNumber(cfg.maxWidth) && cfg.maxWidth > 60 && (txtW + btnW) > cfg.maxWidth) {
+                    var ps = $.getPaddingSize(txt),
+                        ms = $.getMarginSize(txt),
+                        es = $.getElementSize(elem);
+                    elem.style.width = cfg.maxWidth + 'px';
+                    //txt.style.width = (cfg.maxWidth - ps.width - ms.width - btnW - es.border.width - 2) + 'px';
+                    txt.style.width = (cfg.maxWidth - 0 - ms.width - btnW - es.border.width) + 'px';
+                    txt.title = $.getInnerText(txt);
+                }
             });
 
             if($.isNumber(insertIndex)) {
@@ -164,7 +163,7 @@
                     return false;
                 };
             }
-            var panelId = Util.buildPanelId(objId, itemId), iframeId = '', loadingId = '', iframe = null;
+            var panelId = Util.buildPanelId(objId, itemId), isIframe = false, iframeId = '', loadingId = '';
             var div = $.createElement('div', panelId, function(elem) {
                 elem.className = 'tab-panel';
                 var html = '<a class="pos-mark" name="' + itemId + '"></a>';
@@ -183,16 +182,14 @@
                 elem.style.display = 'none';
 
                 if(isIframe) {
-                    window.setTimeout(function() {
-                        iframe = $I(iframeId);
-                        if(iframe) {
-                            iframe.itemId = itemId;
-                            Util.loadPage(t, iframe, Util.buildPageUrl(opt.url, itemId));
-                        }
-                    }, 2);
+                    var iframe = $I(iframeId);
+                    if(iframe) {
+                        iframe.itemId = itemId;
+                        Util.loadPage(t, iframe, Util.buildPageUrl(opt.url, itemId));
+                    }
                 }
 
-                t.setContentSize(itemId);
+                t.setContentSize(itemId, false, opt);
             }, t.conContainer);
 
             Factory.setCache(t.id, opt, elem, div, iframeId);
@@ -253,7 +250,7 @@
                 if($.isFunction(func)) {
                     func();
                 }
-            }, 10);
+            }, 5);
             return this;
         },
         getItemSize: function(t) {
@@ -267,11 +264,7 @@
                 w += iw;
             }
             w += s.padding.width + s.margin.width + s.border.width;
-            //如果总宽度超出屏幕宽度，则加上滚动条的宽度
-            if(w > $.getScreenSize().width) {
-                w += 17;
-            }
-            return w + ($.isFirefox ? 10 : 5);
+            return w;
         },
         scrollAction: function(t, btn, dir) {
             if(t.getOptions.dblclickScroll) {                
@@ -867,7 +860,8 @@
                 cfg = that.getOptions(),
                 opt = $.extend({
                     closeAble: true
-                }, options);
+                }, options),
+                isShow = $.isBoolean(show, false);
 
             opt.closeAble = $.keywordOverload(opt, ['closeAble', 'close']);
             //判断数量是否超出限制
@@ -881,8 +875,9 @@
             }
             Util.buildTab(that, opt, that.getOptions(), insertIndex)
                 .setSize(that, function() {
-                    if($.isBoolean(show, false)) {
+                    if(isShow) {
                         that.show(opt.id);
+                        Util.setSize(that);
                     }
                 });
 
@@ -891,6 +886,11 @@
             } else if($.isFunction(cfg.callback)) {
                 cfg.callback(opt, that);
             }
+
+            //再设置一次尺寸大小，原因不确定
+            window.setTimeout(function(){
+                Util.setSize(that);
+            }, 25);
 
             return that;
         },
@@ -972,7 +972,8 @@
             });
             return that;
         },
-        setContentSize: function(size, isContent) {
+        setContentSize: function(size, isContent, opt) {
+            console.log('setContentSize: ', size);
             var that = this, tabHeight = 0, itemId = '';
             if($.isObject(size)) {
                 that.conContainer.style.height = size.height + 'px';
@@ -981,7 +982,7 @@
                 if($.isString(size)) {
                     itemId = size;
                 }
-                size = { width: that.conContainer.clientWidth, height: that.conContainer.clientHeight };
+                size = { width: that.conContainer.clientWidth, height: that.conContainer.clientHeight || opt.conHeight };
             }
 
             if(itemId) {
@@ -989,10 +990,11 @@
                     iframe = $I(Util.buildIframeId(that.id, itemId));
                     if(panel) {
                         var es = $.elemSize(panel);
-                        obj.style.height = (size.height - tabHeight - es.padding.height - es.margin.height - es.border.height) + 'px';
+                        panel.style.height = (size.height - tabHeight - es.padding.height - es.margin.height - es.border.height) + 'px';
                     }
                     if(iframe) {
-                        obj.style.height = (size.height - tabHeight) + 'px';
+                        console.log('iframe: ', size, tabHeight);
+                        iframe.style.height = (size.height - tabHeight) + 'px';
                     }
             } else {
                 $('#' + that.conContainer.id + ' .tab-panel').each(function(i, obj) {

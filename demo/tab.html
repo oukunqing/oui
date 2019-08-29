@@ -16,7 +16,7 @@
     <input type="button" value="关闭全部2" onclick="closeAll(true);" />
     <input type="button" value="关闭" onclick="close2();" />
     <input type="button" value="关闭2" onclick="close2(true);" />
-    <div style="margin:10px;">
+    <div style="margin:10px 0 150px;">
         <div id="nav" style="width:700px;"></div>
         <div id="content" style="width:700px;"></div>
     </div>
@@ -62,7 +62,7 @@
     tab.add({id: 'data6', name: '实时数据6', html: '实时数据6'});
     tab.add({id: 'data7', name: '实时数据7', html: '实时数据7'});
     
-    tab.show('omap');
+    tab.show('emap');
 
 
     var tab2 = $.tab($I('nav2'), $I('content2'), {
@@ -73,6 +73,8 @@
     tab2.add({ id: 'config', name: '系统配置', html: '系统配置'});
     tab2.add({ id: 'param', name: '参数配置', html: '参数配置'});
     tab2.add({ id: 'dic', name: '字典配置', html: '字典配置'});
+    tab2.add({ id: 'area', name: '区域管理', html: '区域管理'}); 
+    tab2.add({ id: 'area2', name: '区域管理2', html: '区域管理2'}); 
 
     tab2.show();
 
@@ -83,7 +85,7 @@
     });
 
     tab3.add({ id: 'config', name: '系统配置', html: '系统配置'});
-    tab3.add({ id: 'config', name: '系统配置2', html: '系统配置2'});
+    tab3.add({ id: 'config2', name: '系统配置2', html: '系统配置2'});
     tab3.add({ id: 'param', name: '参数配置', html: '参数配置'});  
     tab3.add({ id: 'device', name: '设备配置', html: '设备配置'}); 
     tab3.add({ id: 'person', name: '人员信息', html: '人员信息'}); 

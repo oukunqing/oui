@@ -1765,7 +1765,7 @@
             if (hasId) { elem.id = id; }
             if (!exempt && !isElement(parent) && !isDocument(parent)) { parent = undefined; }
 
-            return $.isFunction(func) && func(elem, param), parent && parent.appendChild(elem), elem;
+            return parent && parent.appendChild(elem), $.isFunction(func) && func(elem, param), elem;
         },
         createJsScript = function (data, id, func, parent) {
             if ($.isFunction(id)) {
