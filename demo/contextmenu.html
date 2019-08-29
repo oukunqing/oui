@@ -16,7 +16,8 @@
         id: 'menu1',
         obj: 'div1',
         par: { code: 'dx01', id: 32, name: '设备01'},
-        width: 150,
+        width: 'auto',
+        //height: 'auto',
         callback: function(par, obj) {
             console.log('par122: ', par, obj);
         },
@@ -45,7 +46,7 @@
             console.log('目录： ', par);
         });
 
-    $.contextmenu({ id: 'menu2', obj: 'lbl1',  func: function(par) {
+    $.cmenu({ id: 'menu2', obj: 'lbl1',  func: function(par) {
             console.log('par menu2: ', par);
         }
     })

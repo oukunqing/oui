@@ -11,7 +11,11 @@
 !function(){
 
     var Config = {
-        FilePath: $.getScriptSelfPath(true)
+        FilePath: $.getScriptSelfPath(true),
+        //菜单项边距边框尺寸
+        ItemMBPWidth: 12,
+        ItemMinWidth: 60,
+        ItemArrowWidth: 35
     },
     Cache = {
         menus: {},
@@ -94,7 +98,7 @@
             }
             return this;
         },
-        buildSubMenu: function(parent, pos, items, isSub, cfg, cache) {
+        buildSubMenu: function(parent, pos, items, isSub, cfg, cache, autoWidth) {
             var offset = $.getOffset(parent);
             var opt = {
                 width: cfg.width,
@@ -126,6 +130,11 @@
                 box.style.cssText = 'left:{x}px;width:{width}px;height:{height}px;margin-top:{y}px;'.format(opt);
                 $.disableEvent(box, 'contextmenu');
 
+                if(autoWidth) {
+                    var w = Factory.getMaxWidth(items);
+                    box.style.width = w + 'px';
+                }
+
                 var html = [];
                 for(var i = 0; i < items.length; i++) {
                     var dr = items[i],
@@ -144,7 +153,7 @@
                             $.cancelBubble();
                             if(param.hasChild) {
                                 $.addClass(elem, 'cur');
-                                Factory.buildSubMenu(this, $.getEventPosition(ev), param.items, true, cfg, cache);
+                                Factory.buildSubMenu(this, $.getEventPosition(ev), param.items, true, cfg, cache, autoWidth);
                             } else {
                                 Factory.closeOpenedBox(cache, level);
                             }
@@ -175,7 +184,7 @@
 
             cache.boxs.push({box: box, level: level, item: parent});
         },
-        buildMenuItem: function(dr, menuId, cfg, level, cache) {
+        buildMenuItem: function(dr, menuId, cfg, level, cache, autoWidth) {
             var elem = null;
             if(dr === 'sep' || dr.sep || dr.type === 'sep') {
                 elem = $.createElement('div', '', function(elem) {
@@ -187,7 +196,8 @@
                     hasChild = $.isArray(dr.items),
                     id = Factory.buildItemId(menuId),
                     func = Factory.buildMenuCallback(dr, cfg),                    
-                    par = Factory.buildMenuPar(dr, cfg);
+                    par = Factory.buildMenuPar(dr, cfg),
+                    w = autoWidth ? Factory.getContentWidth(dr) : 0;
 
                 elem = $.createElement('div', id, function(elem) {
                     elem.className = 'cmenu-item';
@@ -200,7 +210,7 @@
                         $.cancelBubble();
                         if(hasChild) {
                             $.addClass(elem, 'cur');
-                            Factory.buildSubMenu(elem, $.getEventPosition(ev), dr.items, false, cfg, cache);
+                            Factory.buildSubMenu(elem, $.getEventPosition(ev), dr.items, false, cfg, cache, autoWidth);
                         } else {
                             Factory.closeOpenedBox(cache, level);
                         }
@@ -219,7 +229,7 @@
                     }
                     elem.innerHTML = txt;
                 });
-                return { type: 'menu', elem: elem, height: 24 };
+                return { type: 'menu', elem: elem, height: 24, width: w };
             }
         },
         buildMenuCallback: function(dr, opt) {
@@ -233,13 +243,13 @@
             }, dr.par, opt.param || opt.par);
             return par;
         },
-        buildMenuItems: function(opt, cache) {
+        buildMenuItems: function(opt, cache, autoWidth) {
             var items = [];
 
             for(var i = 0; i < opt.items.length; i++) {
                 var dr = opt.items[i];
                 if(dr) {
-                    items.push(this.buildMenuItem(dr, opt.id, opt, 0, cache));
+                    items.push(this.buildMenuItem(dr, opt.id, opt, 0, cache, autoWidth));
                 }                
             }
 
@@ -309,6 +319,32 @@
             Factory.dealOption(items, opt, opt.pkey || opt.pid, insertIndex);
             return this;
         },
+        getContentWidth: function(dr) {
+            var txt = dr.name || dr.text || dr.txt;
+            var w = $.getContentSize(txt).width + Config.ItemMBPWidth;
+            if($.isArray(dr.items) && dr.items.length > 0) {
+                w += Config.ItemArrowWidth;
+            }
+            return w;
+        },
+        getMaxWidth: function(items, box) {
+            var width = 0;
+            for(var i = 0; i < items.length; i++) {
+                var dr = items[i], w = 0;
+                if($.isNumber(dr.width)) {
+                    w = dr.width;
+                } else {
+                    w = Factory.getContentWidth(dr);
+                }
+                if(w > width) {
+                    width = w;
+                }
+            }
+            if(width < Config.ItemMinWidth) {
+                width = Config.ItemMinWidth;
+            }
+            return width;
+        },
         buildContextMenu: function(ev, menu) {
             var cache = Factory.getCache(menu.id),
                 bs = $.getBodySize(),
@@ -334,8 +370,15 @@
                     elem.level = 0;
                     elem.style.cssText = 'left:{x}px;top:{y}px;width:{width}px;height:{height}px;'.format(opt);
                     $.disableEvent(elem, 'contextmenu');
+                    var autoWidth = ('' + opt.width).toLowerCase() === 'auto';
 
-                    Factory.fillMenuItem(elem, Factory.buildMenuItems(opt, cache), opt);
+                    var items = Factory.buildMenuItems(opt, cache, autoWidth);
+                    if(autoWidth) {
+                        var w = Factory.getMaxWidth(items);
+                        elem.style.width = w + 'px';
+                    }
+
+                    Factory.fillMenuItem(elem, items, opt);
                 }, document.body);
 
                 var boxSize = $.elemSize(box);
@@ -493,6 +536,10 @@
         hideParentMenu: function() {
             return Factory.hideAllContextMenu();
         }
+    });
+
+    $.extend({
+        cmenu: $.contextmenu
     });
 
 }(OUI);
