@@ -145,7 +145,7 @@
 
             var childs = elem.childNodes;
             for(var i=0; i<childs.length; i++) {
-                if(childs[i].className === 'close') {
+                if(childs[i].className.endsWith('close')) {
                     childs[i]['onclick'] = function() {
                         t.close(itemId);
                         $.cancelBubble();

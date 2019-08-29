@@ -81,6 +81,8 @@
             obj = $I(id),
             level = parent.level + 1;
 
+
+
             if(obj) {
                 return this;
             }
@@ -249,6 +251,7 @@
         },
         buildContextMenu: function(ev, menu) {
             var cache = Factory.getCache(menu.id),
+                bs = $.getBodySize(),
                 pos = $.getEventPosition(ev), 
                 opt = $.extend({
                     width: 240,
@@ -257,9 +260,13 @@
                 id = 'oui-context-menu-' + menu.id,
                 obj = $I(id);
 
+            if((opt.x + opt.width) > bs.width) {
+                opt.x -= (opt.x + opt.width) - bs.width;
+            }
+
             if(obj) {
-                obj.style.left = pos.x + 'px';
-                obj.style.top = pos.y + 'px';
+                obj.style.left = opt.x + 'px';
+                obj.style.top = opt.y + 'px';
             } else {
                 obj = $.createElement('div', id, function(elem) {
                     elem.className = 'oui-context-menu menu-level-0';

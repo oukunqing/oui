@@ -159,20 +159,7 @@
 }
 
 .oui-tabs-orange .tab-item .tab-close {
-    float: right;
-    margin: 5px 4px 0 0;
-    display: block;
-    text-align: center;
-    font-size: 16px;
-    font-style: normal;
-    font-family: 微软雅黑;
-	color: #fff;
-    padding: 0;
-    width: 17px;
-    height: 17px;
-    border: none 0;
-    overflow: hidden;
-    line-height: 16px;
+    color: #fff;
 }
 
 .oui-tabs-orange .tab-item:hover .tab-txt,.oui-tabs-orange .cur .tab-txt,
