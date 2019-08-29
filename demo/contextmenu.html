@@ -40,11 +40,15 @@
     menu.add({key: 'dic2', name: '字典配置2'}).sep('dic2')
         .insert({ key: 'person', pkey: 'map',  name: '人员配置', items: [
             { name: '使用者' },
-            { name: '经销商' }
+            { key: 'partner', name: '经销商' }
         ]}, 1)
         .add('设备目录', function(par) {
             console.log('目录： ', par);
-        });
+        })
+        .add([
+            {pkey: 'partner', name: '一级经销商'},
+            {pkey: 'partner', name: '二级经销商'}
+        ]);
 
     $.cmenu({ id: 'menu2', obj: 'lbl1',  func: function(par) {
             console.log('par menu2: ', par);

@@ -112,6 +112,10 @@
             obj = $I(id),
             level = parent.level + 1;
 
+            if(autoWidth) {
+                opt.width = Factory.getMaxWidth(items);
+            }
+
             if(obj) {
                 return this;
             }
@@ -119,7 +123,7 @@
             Factory.closeOpenedBox(cache, parent.level);
 
             if((offset.left + opt.x + opt.width - ss.left + 2) > (bs.width)) {
-                opt.x = 5 - offset.width;
+                opt.x = 5 - opt.width;
             }
 
             var box = $.createElement('div', id, function(box) {
@@ -129,11 +133,6 @@
                 box.level = level;
                 box.style.cssText = 'left:{x}px;width:{width}px;height:{height}px;margin-top:{y}px;'.format(opt);
                 $.disableEvent(box, 'contextmenu');
-
-                if(autoWidth) {
-                    var w = Factory.getMaxWidth(items);
-                    box.style.width = w + 'px';
-                }
 
                 var html = [];
                 for(var i = 0; i < items.length; i++) {
@@ -355,12 +354,12 @@
                     height: 'auto'
                 }, cache.options, pos),
                 id = 'oui-context-menu-' + menu.id,
-                box = $I(id);
+                box = $I(id),
+                autoWidth = ('' + opt.width).toLowerCase() === 'auto';
 
-            if((opt.x + opt.width) > (bs.width + ss.left)) {
+            if(!autoWidth && (opt.x + opt.width) > (bs.width + ss.left)) {
                 opt.x = bs.width + ss.left - opt.width;
             }
-
             if(box) {
                 box.style.left = opt.x + 'px';
                 box.style.top = opt.y + 'px';
@@ -370,12 +369,17 @@
                     elem.level = 0;
                     elem.style.cssText = 'left:{x}px;top:{y}px;width:{width}px;height:{height}px;'.format(opt);
                     $.disableEvent(elem, 'contextmenu');
-                    var autoWidth = ('' + opt.width).toLowerCase() === 'auto';
 
                     var items = Factory.buildMenuItems(opt, cache, autoWidth);
                     if(autoWidth) {
                         var w = Factory.getMaxWidth(items);
                         elem.style.width = w + 'px';
+                        opt.width = w;
+
+                        if((opt.x + opt.width) > (bs.width + ss.left)) {
+                            opt.x = bs.width + ss.left - opt.width;
+                            elem.style.left = (opt.x - 2) + 'px';
+                        }
                     }
 
                     Factory.fillMenuItem(elem, items, opt);
@@ -383,7 +387,7 @@
 
                 var boxSize = $.elemSize(box);
                 if(boxSize.top + boxSize.outerHeight > bs.height + ss.top) {
-                    box.style.top = (bs.height + ss.top - boxSize.outerHeight) + 'px';
+                    box.style.top = (bs.height + ss.top - boxSize.outerHeight - 2) + 'px';
                 }
             }
             return box;
