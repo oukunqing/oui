@@ -2,12 +2,12 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title></title>
+    <title>多级右键菜单 - $.contextmenu</title>
     <script type="text/javascript" src="../oui/oui.js?"></script>
     <script type="text/javascript" src="../oui/contextmenu/oui.contextmenu.js?12"></script>
 </head>
 <body>
-    <div id="div1" style="border: solid 1px #00f;padding:10px;margin:400px 20px;width:1400px;">右键菜单</div>
+    <div id="div1" style="border: solid 1px #00f;padding:10px;margin:50px 20px;">右键菜单</div>
     <label id="lbl1">帮助信息</label>
 </body>
 </html>
@@ -21,28 +21,23 @@
             console.log('par122: ', par, obj);
         },
         items: [
-            { key: 'dic1', name: '字典配置1', par: { id: 12, code: 'abc' } },
-            { sep: 1 },
+            { key: 'dic1', name: '字典配置1', par: { id: 12, code: 'abc' } }, { sep: 1 },
             { key:'dic', name: '字典配置' },
             { key: 'sys', name: '系统配置', items: [
-                { name: '地图配置' },
-                { name: '私有地图配置' },
-                { name: '图片配置', items: [
-                    { name: 'Logo配置' },
-                    { name: '背景图片' }
+                { key: 'map', name: '地图配置' },
+                { key: 'private-map', name: '私有地图配置' },
+                { key: 'pic', name: '图片配置', items: [
+                    { name: 'Logo配置' }, { key: 'bg', name: '背景图片' }
                 ]},
                 { name: '百度地图配置', items: [
-                    { name: 'WEB版' },
-                    { name: '安卓版' }
+                    { name: 'WEB版' }, { name: '安卓版' }
                 ] },
                 { name: '谷歌地图配置' }
             ] }
         ]
     });
-
-    menu.add({key: 'dic2', name: '字典配置2'})
-        .sep('dic2')
-        .insert({ key: 'person', name: '人员配置', items: [
+    menu.add({key: 'dic2', name: '字典配置2'}).sep('dic2')
+        .insert({ key: 'person', pkey: 'map',  name: '人员配置', items: [
             { name: '使用者' },
             { name: '经销商' }
         ]}, 1)

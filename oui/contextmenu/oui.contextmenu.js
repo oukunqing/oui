@@ -1,4 +1,13 @@
 
+/*
+    @Title: OUI
+    @Description：JS通用代码库
+    @Author: oukunqing
+    @License：MIT
+
+    $.contextmenu 右键菜单插件
+*/
+
 !function(){
 
     var Config = {
@@ -159,6 +168,11 @@
                 }                
             }, parent);
 
+            var boxSize = $.elemSize(box);
+            if(boxSize.top + boxSize.outerHeight > bs.height + ss.top) {
+                box.style.marginTop = (bs.height + ss.top) - (boxSize.top + boxSize.outerHeight) - 3 + 'px';
+            }
+
             cache.boxs.push({box: box, level: level, item: parent});
         },
         buildMenuItem: function(dr, menuId, cfg, level, cache) {
@@ -249,13 +263,51 @@
 
             return this;
         },
-        fillOptions: function(isInsert, items, opt, insertIndex) {
-            if(isInsert) {
-                items.splice(insertIndex, 0, opt);
+        pushOption: function(items, opt, insertIndex) {
+            var index = Factory.getInsertIndex(items, insertIndex);
+            if($.isNumber(index) && index >= 0) {
+                items.splice(index, 0, opt);
             } else {
                 items.push(opt);
             }
-            return items;
+            //items.push(opt);
+            return this;
+        },
+        getInsertIndex: function(items, insertIndex) {
+            var index = insertIndex;
+            if($.isString(insertIndex, true)) {
+                for(var i = 0; i < items.length; i++ ) {
+                    if(items[i].key === insertIndex) {
+                        index = i;
+                        break;
+                    }
+                }
+            }
+            return index;
+        },
+        dealOption: function(items, opt, pkey, insertIndex) {
+            if($.isString(pkey, true) || $.isNumber(pkey)) {                
+                for(var i = 0; i < items.length; i++) {
+                    if(items[i].key === pkey) {
+                        if(!$.isArray(items[i].items)) {
+                            items[i].items = [];
+                        }
+                        Factory.pushOption(items[i].items, opt, insertIndex);
+                        return this;
+                    } else if(items[i].items) {
+                        return Factory.dealOption(items[i].items, opt, pkey, insertIndex);
+                    }
+                }
+            }
+            Factory.pushOption(items, opt, insertIndex);
+            return this;
+        },
+        fillOptions: function(items, opt, insertIndex) {
+            if(!items || !opt) {
+                return this;
+            }
+            Factory.dealOption(items, opt, opt.pkey || opt.pid, insertIndex);
+            return this;
         },
         buildContextMenu: function(ev, menu) {
             var cache = Factory.getCache(menu.id),
@@ -267,17 +319,17 @@
                     height: 'auto'
                 }, cache.options, pos),
                 id = 'oui-context-menu-' + menu.id,
-                obj = $I(id);
+                box = $I(id);
 
             if((opt.x + opt.width) > (bs.width + ss.left)) {
                 opt.x = bs.width + ss.left - opt.width;
             }
 
-            if(obj) {
-                obj.style.left = opt.x + 'px';
-                obj.style.top = opt.y + 'px';
+            if(box) {
+                box.style.left = opt.x + 'px';
+                box.style.top = opt.y + 'px';
             } else {
-                obj = $.createElement('div', id, function(elem) {
+                box = $.createElement('div', id, function(elem) {
                     elem.className = 'oui-context-menu menu-level-0';
                     elem.level = 0;
                     elem.style.cssText = 'left:{x}px;top:{y}px;width:{width}px;height:{height}px;'.format(opt);
@@ -285,8 +337,13 @@
 
                     Factory.fillMenuItem(elem, Factory.buildMenuItems(opt, cache), opt);
                 }, document.body);
+
+                var boxSize = $.elemSize(box);
+                if(boxSize.top + boxSize.outerHeight > bs.height + ss.top) {
+                    box.style.top = (bs.height + ss.top - boxSize.outerHeight) + 'px';
+                }
             }
-            return obj;
+            return box;
         },
         hideContextMenu: function(ev, id, hide) {
             var obj = $I('oui-context-menu-' + id);
@@ -332,7 +389,7 @@
             return this;
         },
         checkOptions: function() {
-            var options = {}, i = 1;
+            var options = {}, i = 0;
             if(arguments.length > 1 && $.isString(arguments[0], true)) {
                 while(i++ < arguments.length) {
                     if($.isFunction(arguments[i])) {
@@ -376,37 +433,29 @@
                 .addListener(document, 'mousedown', function(ev) {
                     Factory.hideContextMenu(ev, that.id);
                 });
-            return that.build(options);
+            return that;
         },
-        build: function(options) {
-            return this;
-        },
-        insert: function(options, insertIndex, show) {
+        insert: function(options, insertIndex, show, isAdd) {
+            var cache = Factory.getCache(this.id),
+                opt = options,
+                items = [];
+
             options = Factory.checkOptions(options, insertIndex, show);
 
-            var cache = Factory.getCache(this.id),
-                isInsert = $.isNumber(insertIndex) && insertIndex >= 0;
-
-            if($.isString(insertIndex, true)) {
-                for(var i = 0; i < cache.options.items.length; i++ ) {
-                    if(cache.options.items[i].id === insertIndex) {
-                        insertIndex = i;
-                        isInsert = true;
-                        break;
-                    }
-                }
+            if(typeof insertIndex === 'undefined' || (!isAdd && opt !== options)) {
+                insertIndex = 0;
             }
             if($.isArray(options)) {
                 for(var i = 0; i < options.length; i++) {
-                    Factory.fillOptions(isInsert, cache.options.items, options[i], insertIndex);
+                    Factory.fillOptions(cache.options.items, options[i], insertIndex);
                 }
             } else {
-                Factory.fillOptions(isInsert, cache.options.items, options, insertIndex);
+                Factory.fillOptions(cache.options.items, options, insertIndex);
             }
             return this;
         },
         add: function(options, show) {
-            return this.insert(options, null, show);
+            return this.insert(options, null, show, true);
         },
         sep: function(insertIndex, show) {
             return this.insert({ sep: 1 }, insertIndex, show);

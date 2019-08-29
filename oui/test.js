@@ -394,6 +394,6 @@ console.log(Math.ceil(73/15))
 var array = ["one", "two", "four"];
 // splice(position, numberOfItemsToRemove, item)
 // 拼接函数(索引位置, 要删除元素的数量, 元素)
-array.splice(2, 0, "three");
+array.splice(undefined, 0, "three");
 
 console.log(array);
