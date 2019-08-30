@@ -39,8 +39,28 @@
     border: none 0;
 }
 
+.oui-context-menu .cmenu-disabled {
+    color: #999;
+}
+
+.oui-context-menu .cmenu-item .cmenu-link {
+    padding: 0;
+    margin: 0;
+    line-height: 24px;
+    font-size: 12px;
+    display: block;
+    border: none 0;
+    box-sizing: border-box;
+    text-decoration: none;
+    color: #00f;
+}
+
 .oui-context-menu .cur, .oui-context-menu .cmenu-item:hover {
     background: #e8eaed;
+}
+
+.oui-context-menu .cmenu-disabled:hover {
+    background: #fff;
 }
 
 .oui-context-menu .cmenu-item .cmenu-arrow {
@@ -55,6 +75,10 @@
     border-left-color: #000;
     width: 0;
     height: 0;
+}
+
+.oui-context-menu .cmenu-disabled .cmenu-arrow {
+    border-left-color: #999;
 }
 
 .oui-context-menu .disabled,.oui-context-menu .disabled:hover {

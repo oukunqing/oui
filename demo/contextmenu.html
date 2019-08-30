@@ -23,10 +23,10 @@
         },
         items: [
             { key: 'dic1', name: '字典配置1', par: { id: 12, code: 'abc' } }, { sep: 1 },
-            { key:'dic', name: '字典配置' },
+            { key:'dic', name: '字典配置', disabled: true },
             { key: 'sys', name: '系统配置', items: [
                 { key: 'map', name: '地图配置' },
-                { key: 'private-map', name: '私有地图配置' },
+                { key: 'private-map', name: '私有地图配置', url: 'dialog.html', target: '_blank'},
                 { key: 'pic', name: '图片配置', items: [
                     { name: 'Logo配置' }, { key: 'bg', name: '背景图片' }
                 ]},

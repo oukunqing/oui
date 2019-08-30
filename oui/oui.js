@@ -2548,7 +2548,7 @@
             if(isOn) {
                 return true;
             }
-            /*
+            
             var childs = elem.childNodes;
             for(var i = 0; i < childs.length; i++) {
                 var sub = childs[i];                
@@ -2557,8 +2557,23 @@
                 } else if(isOnElem(sub, pos)) {
                     return true;
                 }
-            }*/
+            }
             return false;
+        },
+        changeLink = function(aTag, url) {
+            aTag = toElement(aTag);
+            if($.isElement(aTag) && aTag.tagName === 'A' && $.isString(url)) {
+                aTag.setAttribute('href', url);
+            }
+            return this;
+        },
+        gotoLink = function(url, isTop) {
+            if(isTop) {
+                window.top.location.href = url;
+            } else {
+                window.location.href = url;
+            }
+            return this;
         };
 
     var ua = function () { try { return navigator.userAgent } catch (e) { return '' } }();
@@ -2658,7 +2673,10 @@
         filterHtmlCode: filterHtmlCode,
         getContentSize: getContentSize,
         getInnerText: getInnerText,
-        isOnElement: isOnElement
+        isOnElement: isOnElement,
+        changeLink: changeLink,
+        gotoLink: gotoLink,
+        gotoUrl: gotoLink
     }, '$');
 
 }(OUI);
