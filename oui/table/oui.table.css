@@ -48,6 +48,7 @@
 .oui-table .sortable{
     float: right; position: relative; overflow: auto; border: none 0; width:10px; height: 11px; display: block; cursor: pointer;
 }
+
 .oui-table .sortable .asc{
     position: absolute; top: 0;
     display: inline-block;
@@ -58,6 +59,7 @@
     content: "";
     margin-top: 0; padding: 0;
 }
+
 .oui-table .sortable .desc{
     position: absolute; bottom: 0;
     display: inline-block;
@@ -68,6 +70,7 @@
     content: "";
     margin-top: 0; padding: 0;
 }
+
 .oui-table .sortable .cur{
     border-top-color: #000;
     border-bottom-color: #000;

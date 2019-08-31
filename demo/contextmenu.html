@@ -40,7 +40,7 @@
     menu.add({key: 'dic2', name: '字典配置2'}).sep('dic2')
         .insert({ key: 'person', pkey: 'map',  name: '人员配置', items: [
             { name: '使用者' },
-            { key: 'partner', name: '经销商' }
+            { key: 'partner', name: '经销商', disabled: true }
         ]}, 1)
         .add('设备目录', function(par) {
             console.log('目录： ', par);

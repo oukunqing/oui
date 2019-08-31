@@ -9,6 +9,7 @@
 */
 
 !function($) {
+    'use strict';
 
     var Config = {
         FilePath: $.getScriptSelfPath(true),

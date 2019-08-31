@@ -114,7 +114,8 @@
         {
             rowData:{
                 style:{background:'#005eac'}
-            }, cellData: [
+            },
+			cellData: [
                 { content:'表头11', sortable: true, field:'Code', dragable: true, }, 
                 { content: '表头12', sortable: true, field:'Name' },
                  '表头13', '表头14', '表头15', '表头16',
@@ -124,31 +125,56 @@
         {
             rowData:{
                 style:{background:'#005eac'}
-            }, cellData: ['表头21', '表头22', '表头23', '表头24', '表头25', '表头26', '表头27']
-        }
-        , ['表头31', '表头33', '表头33', '表头34', '表头35', '表头36', '表头37']
+            }, cellData: [
+				'表头21', '表头22', '表头23', '表头24', '表头25', '表头26', '表头27'
+			]
+        },
+		['表头31', '表头33', '表头33', '表头34', '表头35', '表头36', '表头37']
     ];
         
     var bodyData = [
         {
-            rowData:{ attr:{ id: 1, class:'tr-1'}, event:{click:function(){alert(this.id);}}}, treeData:{id:1, pid:0}, cellData:[
-                {content:'单元格11', style:{color:'#f00'}}, {content:'单元格12'}, {content:'单元格13', rowSpan:0, colSpan:0}, {content:'单元格14'}, {content:'单元格15'}, {content:'单元格16'}, '1'
-            ]
+            rowData:{ 
+				attr:{ id: 1, class:'tr-1'}, 
+				event:{
+					click:function(){
+						alert(this.id);
+					}
+				}
+			}, 
+			treeData:{id:1, pid:0}, 
+			cellData:[
+				{content:'单元格11', style:{color:'#f00'}}, 
+				{content:'单元格12'}, 
+				{content:'单元格13', rowSpan:0, colSpan:0}, 
+				{content:'单元格14'}, 
+				{content:'单元格15'}, 
+				{content:'单元格16'}, 
+				'1'
+			]
         },
         {
-            rowData: {}, treeData:{id:2, pid:1}, cellData:[
-                {content:'单元格21', style:'color:#00f;'}, {content:'单元格22'}, {content:'单元格23'}, {content:'单元格24'}, {content:'单元格25'}, {content:'单元格26'}, '2'
+            rowData: {}, 
+			treeData:{id:2, pid:1}, 
+			cellData:[
+                {content:'单元格21', style:'color:#00f;'},
+				{content:'单元格22'}, 
+				{content:'单元格23'}, 
+				{content:'单元格24'}, 
+				{content:'单元格25'}, 
+				{content:'单元格26'}, 
+				'2'
             ]
         }
     ];
 
-    var tb1 = new $.Table();
+    var tb1 = $.table();
 
     console.log('tb1: ', tb1);
 
     tb1.createBody(bodyData);
     
-    var tb = new $.Table({
+    var tb = $.table({
         table: 'tblist',                //表格（对象 或 Id 或 null)，为null则自动创建表格对象（可以不设置）
         parent: document.body,          //表格父节点，默认为 document.body （可以不设置）
         showLineNumber: true,           //是否显示行号（若为true，则自动增加一列用于显示行号）

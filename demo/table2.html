@@ -278,7 +278,7 @@ function test(){
 		expandCallbackLimit: 1		//只回调1次
 	};
 
-	tb = new $.Table('tb1').toTree(treeCellIndex, treeOptions,
+	tb = $.table('tb1').toTree(treeCellIndex, treeOptions,
 		function(otb, tree) {
 			window.setTimeout(function(){
 				otb.append(appendData);

@@ -9,7 +9,8 @@
 */
 
 !function(){
-
+    'use strict';
+    
     var Config = {
         FilePath: $.getScriptSelfPath(true),
         //菜单项边距边框尺寸
@@ -23,6 +24,34 @@
         itemId: 1
     },
     Factory = {
+        loadCss: function (skin, func) {
+            var path = Config.FilePath,
+                name = $.getFileName(path, true),
+                dir = $.getFilePath(path);
+
+            if ($.isString(skin, true)) {
+                dir += 'skin/' + skin + '/';
+            }
+            $.loadLinkStyle(dir + name.replace('.min', '') + '.css', function () {
+                if ($.isFunction(func)) {
+                    func();
+                }
+            });
+            return this;
+        },
+        checkOptions: function() {
+            var options = {}, i = 0;
+            if(arguments.length > 1 && $.isString(arguments[0], true)) {
+                while(i++ < arguments.length) {
+                    if($.isFunction(arguments[i])) {
+                        options = { name: arguments[0], func: arguments[i] };
+                        break;
+                    }
+                }            
+                return options;
+            }
+            return arguments[0];
+        },
         initCache: function(menu, options) {
             var key = this.buildKey(menu.id);
             Cache.menus[key] = {
@@ -437,34 +466,6 @@
                 //$.removeListener(document, 'keydown', Factory.escContextMenu);
             }
             return this;
-        },
-        loadCss: function (skin, func) {
-            var path = Config.FilePath,
-                name = $.getFileName(path, true),
-                dir = $.getFilePath(path);
-
-            if ($.isString(skin, true)) {
-                dir += 'skin/' + skin + '/';
-            }
-            $.loadLinkStyle(dir + name.replace('.min', '') + '.css', function () {
-                if ($.isFunction(func)) {
-                    func();
-                }
-            });
-            return this;
-        },
-        checkOptions: function() {
-            var options = {}, i = 0;
-            if(arguments.length > 1 && $.isString(arguments[0], true)) {
-                while(i++ < arguments.length) {
-                    if($.isFunction(arguments[i])) {
-                        options = { name: arguments[0], func: arguments[i] };
-                        break;
-                    }
-                }            
-                return options;
-            }
-            return arguments[0];
         }
     };
 

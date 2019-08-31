@@ -1,0 +1,15 @@
+.oui-listbox {
+    display: block;
+    position: absolute;
+    overflow: auto;
+    margin: 0;
+    padding: 0;
+    border: solid 1px #ddd;
+    border-radius: 5px;
+    background: #fff;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    width: 200px;
+    height: 150px;
+    line-height: 1.8em;
+}

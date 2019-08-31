@@ -1333,5 +1333,9 @@
             return quickSort(left, key, key0).concat(pivot, quickSort(right, key, key0));
         };
 
-    $.extendNative($, { Table: Table }, '$');
+    $.extend({
+        table: function(options) {
+            return new Table(options);
+        }
+    });
 }(OUI);

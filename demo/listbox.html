@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>列表框 - $.listbox</title>
+    <script type="text/javascript" src="../oui/oui.js?"></script>
+    <script type="text/javascript" src="../oui/listbox/oui.listbox.js?12"></script>
+</head>
+<body>
+    <input type="button" onclick="hide();" value="关闭" />
+    <input type="button" onclick="show();" value="打开" />
+    <div style="margin: 80px 0 20px;">
+        <input type="text" id="txt1" style="padding: 2px 5px;margin: 8px;width:300px;height:30px;" />
+    </div>
+</body>
+</html>
+<script type="text/javascript">
+    var box = $.listbox('txt1', {
+        show: false
+    }).show();
+
+    function hide() {
+        box.hide();
+    }
+
+    function show() {
+        box.show();
+    }
+</script>

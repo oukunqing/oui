@@ -2397,10 +2397,17 @@
             }
             return xml;
         },
-        cancelBubble = function (ev) {
-            ev = ev || window.event || arguments.callee.caller.arguments[0];
-            if (ev.stopPropagation) { ev.stopPropagation(); } else { ev.cancelBubble = true; }
-            if (ev.preventDefault) { ev.preventDefault(); } else { ev.returnValue = false; }
+        cancelBubble = function (ev, func) {
+            if($.isFunction(ev)) {
+                func = ev;
+                ev = undefined;
+            }
+            var e = ev || window.event || arguments.callee.caller.arguments[0];
+            if (e.stopPropagation) { e.stopPropagation(); } else { e.cancelBubble = true; }
+            if (e.preventDefault) { e.preventDefault(); } else { e.returnValue = false; }
+            if($.isFunction(func)) {
+                func();
+            }
             return this;
         },
         addEventListener = function (elem, evName, func, useCapture, isRemove) {
@@ -2614,6 +2621,7 @@
         elemStyle: getElementStyle,
         getCssSizeVal: getCssSizeVal,
         getCssSizeValue: getCssSizeVal,
+        toCssSizeVal: getCssSizeVal,
         getElementStyleSize: getElementStyleSize,
         getCssAttrSize: getCssAttrSize,
         getPaddingSize: getPaddingSize,
