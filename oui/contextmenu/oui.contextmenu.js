@@ -39,7 +39,7 @@
             });
             return this;
         },
-        checkOptions: function() {
+        checkItemOptions: function() {
             var options = {}, i = 0;
             if(arguments.length > 1 && $.isString(arguments[0], true)) {
                 while(i++ < arguments.length) {
@@ -52,10 +52,25 @@
             }
             return arguments[0];
         },
-        initCache: function(menu, options) {
+        checkOptions: function(options) {
+            var items = [];
+            if($.isArray(options)) {
+                items = options;
+            } else if($.isArray(options.items)) {
+                items = options.items;
+            } else if($.isObject(options.items)) {
+                items = [options.items];
+            } else {
+                items = [options];
+            }
+            return $.extend(options, {items: items});
+        },
+        initCache: function(menu, options, obj, isUpdate) {
             var key = this.buildKey(menu.id);
+            options = Factory.checkOptions(options);
             Cache.menus[key] = {
                 id: menu.id,
+                obj: obj,
                 menuId: menu.id,
                 menu: menu,
                 items: {},
@@ -65,7 +80,17 @@
                 }, options),
                 itemId: 1
             };
-            Cache.count += 1;
+            if(!isUpdate) {
+                Cache.count += 1;
+            }
+            return this;
+        },
+        updateCache: function(menu, options) {
+            var key = this.buildKey(menu.id);
+            options = Factory.checkOptions(options);
+            Cache.menus[key].options = $.extend({
+                items: []
+            }, options);
             return this;
         },
         buildItemId: function(menuId) {
@@ -78,19 +103,29 @@
             var key = this.buildKey(menuId);
             return Cache.menus[key] || null;
         },
-        buildMenu: function(options) {
+        buildMenu: function(options, isUpdate) {
             var opt = $.extend({
-                id: '',
+                id: 'oui-menu',
                 obj: null
             }, options);
-            var cache = this.getCache(opt.menuId || opt.id);
-            if(!cache) {
-                return new ContextMenu(opt);
+
+            if(opt.id === 'oui-menu' && $.isElement(opt.obj)) {
+                opt.id = 'oui-menu-' + opt.obj.id;
             }
-            return cache.menu;
+
+            var cache = this.getCache(opt.menuId || opt.id), menu;
+            if(!cache) {
+                menu = new ContextMenu(opt);
+            } else {
+                menu = cache.menu;
+                if(isUpdate) {
+                    menu.update(options);
+                }
+            }
+            return menu;
         },
-        addItem: function(options, insertIndex, show, action) {
-            var opt = $.extend({ menuId: '' }, options);
+        addItem: function(items, insertIndex, show, action) {
+            var opt = $.extend({ menuId: '' }, items);
             if(!opt.menuId) {
                 return this;
             }
@@ -391,11 +426,23 @@
             }
             return width;
         },
-        buildContextMenu: function(ev, menu) {
+        getMenuPosition: function(ev, obj) {
+            var pos = {};
+            if(ev && ev.type === 'contextmenu') {
+                pos = $.getEventPosition(ev);
+            } else if($.isElement(obj)) {
+                var offset = $.getOffset(obj);
+                pos = { x: offset.left, y: offset.top };
+            } else {
+                return null;
+            }
+            return pos;
+        },
+        buildContextMenu: function(ev, menu, obj) {
             var cache = Factory.getCache(menu.id),
                 bs = $.getBodySize(),
                 ss = $.getScrollPosition(),
-                pos = $.getEventPosition(ev), 
+                pos = Factory.getMenuPosition(ev, obj), 
                 opt = $.extend({
                     width: 240,
                     height: 'auto'
@@ -403,6 +450,10 @@
                 id = 'oui-context-menu-' + menu.id,
                 box = $I(id),
                 autoWidth = ('' + opt.width).toLowerCase() === 'auto';
+
+            if(!pos) {
+                return this;
+            }
 
             if(!autoWidth && (opt.x + opt.width) > (bs.width + ss.left)) {
                 opt.x = bs.width + ss.left - opt.width;
@@ -489,23 +540,39 @@
             var that = this,
                 obj = $.toElement(options.obj);
 
-            Factory.initCache(that, options);
+            Factory.initCache(that, options, obj);
 
-            obj.oncontextmenu = function(ev) {
-                return Factory.buildContextMenu(ev, that), false;
-            };
+            if($.isElement(obj)) {
+                obj.oncontextmenu = function(ev) {
+                    return Factory.buildContextMenu(ev, that), false;
+                };
+            }
 
             $.addListener(document, 'keydown', Factory.escContextMenu)
                 .addListener(document, 'mousedown', function(ev) {
                     Factory.hideContextMenu(ev, that.id);
                 });
+
             return that;
+        },
+        update: function(options, isInitial) {
+            Factory.updateCache(this, options);
+            return this;
+        },
+        show: function(ev) {
+            ev = ev || $.getEvent();
+            var cache = Factory.getCache(this.id);
+            Factory.buildContextMenu(ev, this, cache.obj);
+            return this;
+        },
+        hide: function() {
+            return Factory.hideContextMenu(null, this.id, true), this;
         },
         insert: function(items, insertIndex, show, isAdd) {
             var cache = Factory.getCache(this.id),
                 opt = items;
 
-            items = Factory.checkOptions(items, insertIndex, show);
+            items = Factory.checkItemOptions(items, insertIndex, show);
 
             if(typeof insertIndex === 'undefined' || (!isAdd && opt !== items)) {
                 insertIndex = 0;
@@ -531,17 +598,17 @@
     };
 
     $.extend({
-        contextmenu: function(options) {
-            return Factory.buildMenu(options);
+        contextmenu: function(options, isUpdate) {
+            return Factory.buildMenu(options, isUpdate);
         }
     });
 
     $.extend($.contextmenu, {
-        add: function(options, show) {
-            return Factory.addItem(options, null, show, 'add');
+        add: function(items, show) {
+            return Factory.addItem(items, null, show, 'add');
         },
-        insert: function(options, insertIndex, show) {
-            return Factory.addItem(options, insertIndex, show, 'insert');
+        insert: function(items, insertIndex, show) {
+            return Factory.addItem(items, insertIndex, show, 'insert');
         },
         sep: function(insertIndex, show) {
             return Factory.addItem({ sep: 1 }, insertIndex, show, 'sep');
