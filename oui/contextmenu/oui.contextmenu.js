@@ -494,11 +494,12 @@
             var obj = $I('oui-context-menu-' + id);
             if(obj) {
                 if(null === ev && hide) {
-                    return $.removeElement(obj), Cache.count--, this;
+                    //return $.removeElement(obj), Cache.count--, this;
+                    return $.removeElement(obj), this;
                 };
                 if(hide || !$.isOnElement(obj, ev)) {
                     $.removeElement(obj);
-                    Cache.count--;
+                    //Cache.count--;
                 }
             }
             return this;
