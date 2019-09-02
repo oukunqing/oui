@@ -1145,6 +1145,8 @@
                         elem.style.cssText = css;
                     }
 
+                    $.disabledEvent(elem, 'contextmenu');
+                    
                     $.addListener(elem, 'dblclick', function () {
                         $.cancelBubble();
                         if (opt.maxAble) {

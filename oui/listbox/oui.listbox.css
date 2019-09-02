@@ -5,11 +5,43 @@
     margin: 0;
     padding: 0;
     border: solid 1px #ddd;
+    box-sizing: border-box;
     border-radius: 5px;
     background: #fff;
     border-top-left-radius: 0;
     border-top-right-radius: 0;
     width: 200px;
     height: 150px;
+    font-size: 14px;
+    font-family: 宋体;
     line-height: 1.8em;
+}
+
+.oui-listbox .list-item {
+    display: block;
+    overflow: hidden;
+    height: 30px;
+    line-height: 30px;
+    padding: 0 5px;
+    margin: 0;
+    cursor: pointer;
+    border: none 0;
+    box-sizing: border-box;
+}
+
+.oui-listbox .list-item a {
+    text-decoration: none;
+    color: #639;
+    color: #333;
+}
+
+.oui-listbox .cur-item,.oui-listbox .list-item:hover {
+    background: #e8eaed;
+}
+
+.oui-listbox .close {
+    float: right;
+    color: #639;
+    color: #333;
+
 }

@@ -501,27 +501,26 @@
                 });
             return that;
         },
-        insert: function(options, insertIndex, show, isAdd) {
+        insert: function(items, insertIndex, show, isAdd) {
             var cache = Factory.getCache(this.id),
-                opt = options,
-                items = [];
+                opt = items;
 
-            options = Factory.checkOptions(options, insertIndex, show);
+            items = Factory.checkOptions(items, insertIndex, show);
 
-            if(typeof insertIndex === 'undefined' || (!isAdd && opt !== options)) {
+            if(typeof insertIndex === 'undefined' || (!isAdd && opt !== items)) {
                 insertIndex = 0;
             }
-            if($.isArray(options)) {
-                for(var i = 0; i < options.length; i++) {
-                    Factory.fillOptions(cache.options.items, options[i], insertIndex);
+            if($.isArray(items)) {
+                for(var i = 0; i < items.length; i++) {
+                    Factory.fillOptions(cache.options.items, items[i], insertIndex);
                 }
             } else {
-                Factory.fillOptions(cache.options.items, options, insertIndex);
+                Factory.fillOptions(cache.options.items, items, insertIndex);
             }
             return this;
         },
-        add: function(options, show) {
-            return this.insert(options, null, show, true);
+        add: function(items, show) {
+            return this.insert(items, null, show, true);
         },
         sep: function(insertIndex, show) {
             return this.insert({ sep: 1 }, insertIndex, show);

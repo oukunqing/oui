@@ -2668,6 +2668,7 @@
         removeEventListener: removeEventListener,
         removeListener: removeEventListener,
         disableEvent: disableEvent,
+        disabledEvent: disableEvent,
         bind: bind,
         bindEventListener: bindEventListener,
         setFocus: setFocus,

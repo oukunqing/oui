@@ -305,3 +305,7 @@ function distillPlayIndex(con) {
 var n22 = 1567156032269;
 
 console.log(n22.toDate().format());
+
+var str = '\u0027';
+
+console.log($.unicodeToAscii(str))

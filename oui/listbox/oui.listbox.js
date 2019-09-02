@@ -86,8 +86,8 @@
         },
         setSizePos: function(opt, box) {
             var offset = $.getOffset(opt.target)
-                w = (opt.width === 'auto' ? offset.width : $.toCssSizeVal(opt.width)) - 2,
-                h = (opt.height === 'auto' ? 200 : $.toCssSizeVal(opt.height)) - 2;
+                w = opt.width === 'auto' ? offset.width : $.toCssSizeVal(opt.width),
+                h = opt.height === 'auto' ? 200 : $.toCssSizeVal(opt.height);
             box.style.cssText = 'left:{0}px;top:{1}px;width:{2}px;height:{3}px;display:none;'.format(
                 offset.left, 
                 offset.top + offset.height - 3,
@@ -96,8 +96,47 @@
             );
             return this;
         },
-        setListData: function(datas) {
+        setListData: function(m, datas, box, isAppend) {
+            if(!$.isArray(datas)) {
+                return this;
+            }
 
+            var html = [];
+            for(var i = 0; i < datas.length; i++) {
+                var dr = datas[i], txt = '', val = '';
+                if($.isString(dr)) {
+                    txt = val = dr;
+                } else {
+                    txt = dr.name || dr.text || dr.txt;
+                    val = dr.value || dr.val || dr.id;
+                }
+                html.push('<div class="list-item" data="' + val + '">' 
+                    + '<a href="javascript:void(0);">' + txt + '</a>'
+                    + '<a class="close">×</a>'
+                    + '</div>');
+            }
+            if(isAppend) {
+                var con = box.innerHTML;
+                box.innerHTML = con + html.join('');
+            } else {
+                box.innerHTML = html.join('');
+            }
+
+            var childs = box.childNodes;
+            for(var i = 0; i < childs.length; i++) {
+                childs[i].onclick = function() {
+                    m.target.value = $.getAttribute(this, 'data');
+                };
+
+                var arr = childs[i].childNodes;
+                if(arr.length > 1) {
+                    arr[1].onclick = function() {
+                        $.cancelBubble().removeElement(this.parentNode);
+                    };
+                }
+            }
+
+            return this;
         }
     };
 
@@ -119,10 +158,10 @@
 
     ListBox.prototype = {
         initial: function(options) {
-            var that = this,
-                target = $.toElement(options.target);
+            var that = this;
+            that.target = $.toElement(options.target);
 
-            $.addListener(target, 'click', function(par) {
+            $.addListener(that.target, 'click', function(par) {
                 $.cancelBubble(function() {
                     that.show();
                 });
@@ -141,6 +180,7 @@
             return that;
         },
         show: function(datas) {
+            Factory.setListData(this, datas, this.box);
             this.box.style.display = '';
             return this;
         },
@@ -148,21 +188,16 @@
             this.box.style.display = 'none';
             return this;
         },
-        update: function() {
-            
-        },
-        insert: function(options, insertIndex, show, isAdd) {
-            var cache = Factory.getCache(this.id),
-                opt = options,
-                items = [];
-
+        update: function(datas) {
+            Factory.setListData(this, datas, this.box);
             return this;
         },
-        add: function(options, show) {
-            return this.insert(options, null, show, true);
+        insert: function(datas, insertIndex, show) {
+            Factory.setListData(this, datas, this.box, true);
+            return this;
         },
-        sep: function(insertIndex, show) {
-            return this.insert({ sep: 1 }, insertIndex, show);
+        add: function(datas, show) {
+            return this.insert(datas, null, show);
         },
         remove: function() {
             return Factory.hideContextMenu(null, this.id, true), this;

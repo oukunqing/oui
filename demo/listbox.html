@@ -17,7 +17,9 @@
 <script type="text/javascript">
     var box = $.listbox('txt1', {
         show: false
-    }).show();
+    })
+    .show(['dx01', 'dx02', 'dx03','dx1001'])
+    .add(['helmet01', 'helmet02']);
 
     function hide() {
         box.hide();
