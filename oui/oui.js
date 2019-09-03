@@ -1748,24 +1748,36 @@
             var name = (filePath || '').split('?')[0], pos = name.lastIndexOf('.');
             return pos >= 0 ? name.substr(pos + 1).toLowerCase() : '';
         },
-        createElement = function (nodeName, id, func, parent, exempt, param) {
+        createElement = function (nodeName, id, func, parent, options) {
             if ($.isFunction(id)) {
-                param = exempt, exempt = parent, parent = func, func = id, id = null;
+                options = parent, parent = func, func = id, id = null;
             }
-            var elem = null, hasId = false;
+            var elem = null, hasId = false,
+                op = options || {},
+                opt = {
+                    exempt: op.exempt || false,
+                    param: op.param || op,
+                    cssText: op.cssText || ''
+                };
+
+            id = id || opt.id;
+
             if ($.isString(id, true)) {
                 hasId = true;
                 elem = doc.getElementById(id);
                 if (elem !== null) {
-                    return $.isFunction(func) && func(elem, param), elem;
+                    return $.isFunction(func) && func(elem, opt.param), elem;
                 }
             }
             elem = doc.createElement(nodeName);
 
             if (hasId) { elem.id = id; }
-            if (!exempt && !isElement(parent) && !isDocument(parent)) { parent = undefined; }
+            if (!opt.exempt && !isElement(parent) && !isDocument(parent)) { parent = undefined; }
 
-            return parent && parent.appendChild(elem), $.isFunction(func) && func(elem, param), elem;
+            if(opt.cssText && opt.cssText.indexOf(':') > 0) {
+                elem.style.cssText = opt.cssText;
+            }
+            return parent && parent.appendChild(elem), $.isFunction(func) && func(elem, opt.param), elem;
         },
         createJsScript = function (data, id, func, parent) {
             if ($.isFunction(id)) {
@@ -1878,8 +1890,14 @@
             if(!p.attr) {
                 return null;
             }
-
-            if(['padding', 'margin', 'border', 'radius'].indexOf(p.attr) < 0) {
+            if(p.attr === 'style') {
+                return {
+                    width: getCssSizeVal(getElementStyle(val, 'width')),
+                    height: getCssSizeVal(getElementStyle(val, 'height')),
+                    left: getCssSizeVal(getElementStyle(val, 'left')),
+                    top: getCssSizeVal(getElementStyle(val, 'top'))
+                };
+            } else if(['padding', 'margin', 'border', 'radius'].indexOf(p.attr) < 0) {
                 var v = isElem ? getElementStyleSize(val, p.attr) : getCssSizeVal(val);
                 if(p.unit) {
                     v += p.unit;
@@ -1924,6 +1942,9 @@
             }
 
             return p.isArray ? list : data;
+        },
+        getStyleSize = function(elem, options) {
+            return getCssAttrSize(elem, $.extend({}, options, {attr:'style'}));
         },
         getPaddingSize = function(elem, options) {
             return getCssAttrSize(elem, $.extend({}, options, {attr:'padding'}));
@@ -2017,7 +2038,7 @@
                     offsetWidth: 0, offsetHeight: 0, clientWidth: 0, clientHeight: 0,
                     innerWidth: 0, innerHeight: 0, outerWidth: 0, outerHeight: 0,                    
                     inner: ns, outer: ns, client: ns, offset: ns,
-                    border: ns, padding: ns, margin: ns
+                    border: ns, padding: ns, margin: ns, style: $.extend(ns, { left: 0, top: 0 })
                 };
             }
             var ps = getPaddingSize(elem),
@@ -2027,6 +2048,7 @@
                 cs = getClientSize(elem),
                 is = getInnerSize(elem),
                 us = getOuterSize(elem),
+                ss = getStyleSize(elem),
                 par = {
                     offsetWidth: os.width, offsetHeight: os.height,
                     clientWidth: cs.width, clientHeight: cs.height,
@@ -2034,7 +2056,7 @@
                     outerWidth: us.width, outerHeight: us.height,
                     totalWidth: us.width, totalHeight: us.height,
                     inner: is, outer: us, client: cs, offset: os,
-                    border: bs, padding: ps, margin: ms
+                    border: bs, padding: ps, margin: ms, style: ss
                 };
 
             return $.extend(par, os);

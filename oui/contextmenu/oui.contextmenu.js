@@ -240,7 +240,7 @@
                             }
                             elem.innerHTML = Factory.buildMenuText(txt, dr, disabled);
                         }
-                    }, box, false, { items: dr.items, hasChild: hasChild });
+                    }, box, { items: dr.items, hasChild: hasChild });
                 }                
             }, parent);
 
@@ -426,15 +426,15 @@
             }
             return width;
         },
-        getMenuPosition: function(ev, obj) {
+        getMenuPosition: function(ev, obj, bs, ss) {
             var pos = {};
             if(ev && ev.type === 'contextmenu') {
                 pos = $.getEventPosition(ev);
             } else if($.isElement(obj)) {
                 var offset = $.getOffset(obj);
-                pos = { x: offset.left, y: offset.top };
+                pos = { x: offset.left, y: offset.top + offset.height - 2 };
             } else {
-                return null;
+                return { x: bs.width / 2 + ss.left, y: bs.height / 2 + ss.top, center: true };
             }
             return pos;
         },
@@ -442,7 +442,7 @@
             var cache = Factory.getCache(menu.id),
                 bs = $.getBodySize(),
                 ss = $.getScrollPosition(),
-                pos = Factory.getMenuPosition(ev, obj), 
+                pos = Factory.getMenuPosition(ev, obj, bs, ss), 
                 opt = $.extend({
                     width: 240,
                     height: 'auto'
@@ -465,7 +465,7 @@
                 box = $.createElement('div', id, function(elem) {
                     elem.className = 'oui-context-menu menu-level-0';
                     elem.level = 0;
-                    elem.style.cssText = 'left:{x}px;top:{y}px;width:{width}px;height:{height}px;'.format(opt);
+                    elem.style.cssText += 'left:{x}px;top:{y}px;width:{width}px;height:{height}px;'.format(opt);
                     $.disableEvent(elem, 'contextmenu');
 
                     var items = Factory.buildMenuItems(opt, cache, autoWidth);
@@ -479,13 +479,18 @@
                             elem.style.left = (opt.x - 2) + 'px';
                         }
                     }
-
                     Factory.fillMenuItem(elem, items, opt);
                 }, document.body);
 
-                var boxSize = $.elemSize(box);
-                if(boxSize.top + boxSize.outerHeight > bs.height + ss.top) {
-                    box.style.top = (bs.height + ss.top - boxSize.outerHeight - 2) + 'px';
+                var xs = $.elemSize(box);
+
+                if(pos.center) {
+                    box.style.left = (xs.style.left - xs.width / 2) + 'px';
+                    box.style.top = (xs.style.top - xs.height / 2) + 'px';
+                }
+
+                if(xs.top + xs.outerHeight > bs.height + ss.top) {
+                    box.style.top = (bs.height + ss.top - xs.outerHeight - 2) + 'px';
                 }
             }
             return box;
@@ -561,7 +566,6 @@
             return this;
         },
         show: function(ev) {
-            ev = ev || $.getEvent();
             var cache = Factory.getCache(this.id);
             Factory.buildContextMenu(ev, this, cache.obj);
             return this;
