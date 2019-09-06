@@ -309,3 +309,11 @@ console.log(n22.toDate().format());
 var str = '\u0027';
 
 console.log($.unicodeToAscii(str))
+
+
+var nn = 1, sn = '1';
+console.log(nn === sn);
+
+var dt = new Date('ab');
+
+console.log('dt:', dt, typeof dt, dt === Invalid Date);

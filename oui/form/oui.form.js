@@ -14,8 +14,8 @@
         return element !== null && typeof element === 'object' && typeof element.nodeType === 'number';
     },
     initFormConfig = function (formElement, options, elements) {
-        if ($.isString(formElement)) { formElement = document.getElementById(formElement); }
-        if (!$.isObject(formElement) || !formElement.getElementsByTagName) {
+        if ($.isString(formElement)) { formElement = document.getElementById(formElement.replace(/[#]+/gi, '')); }
+        if (!$.isElement(formElement) || !formElement.getElementsByTagName) {
             throw new Error('element 参数错误');
         }
         var id = formElement.id || '',

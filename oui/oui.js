@@ -1069,10 +1069,25 @@
             }
             var dt = new Date(ts);
             if (isNaN(dt.getFullYear())) {
-                console.error('Date time format error: ', this);
-                console.trace();
+                if($.isUndefined(format)) {
+                    console.error('Date time format error: ', this);
+                    console.trace();
+                }
             }
             return $.isString(format) ? dt.format(format) : dt;
+        },
+        toDateString: function(format) {
+            if(this.trim() === '') {
+                return '';
+            }
+            var dt = this.toDate(true);
+            return isNaN(dt.getFullYear()) ? '' : dt.format(format || '');
+        },
+        toDateFormat: function(format) {
+            return this.toDateString(format);
+        },
+        toDateStr: function(format) {
+            return this.toDateString(format);
         },
         toArray: function (delimiter, type, keepZero, distinct) {
             if ($.isBoolean(type)) {
