@@ -3444,6 +3444,14 @@
                 return self.each(function (i, obj) { obj.setAttribute(name, value); }), self;
             }
         },
+        clear: function(attrName) {
+            if(!$.isString(attrName, true)) {
+                attrName = 'value';
+            }
+            return this.each(function (i, obj) {
+                obj[attrName] = '';
+            });
+        },
         offset: function() {
             var self = this, elem = self[0] || {};
             return $.offset(elem);
