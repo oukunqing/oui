@@ -1799,8 +1799,8 @@
                     return $.extend(boundary, {
                         x: offset.left,
                         y: offset.top,
-                        width: offset.left + parent.offsetWidth,
-                        height: offset.top + parent.offsetHeight
+                        width: offset.left + offset.width,
+                        height: offset.top + offset.height
                     });
                 }
                 return $.extend(boundary, $.getBodySize());
@@ -2097,6 +2097,7 @@
                 }
 
                 //par.position = par.position === 'custom' ? 10 : parseInt(par.position, 10);
+                //转换Position关键字为数字
                 util.convertPositionNumber(_, par);
                 par.x = Math.abs(par.x);
                 par.y = Math.abs(par.y);
@@ -2110,8 +2111,8 @@
                     h = obj.offsetHeight,
                     //锁定界面相当于固定位置
                     fixed = opt.lock || opt.fixed,
-                    cpTop = fixed ? bs.x : cp.top,
-                    cpLeft = fixed ? bs.y : cp.left,
+                    cpTop = fixed ? bs.y : cp.top,
+                    cpLeft = fixed ? bs.x : cp.left,
                     isCenter = util.checkPosition(_, Config.Position.Center, par.position),
                     isMiddle = util.checkPosition(_, Config.Position.Middle, par.position),
                     isBottom = false,
@@ -2135,6 +2136,9 @@
 
                 //TODO: margin setting
 
+                if(opt.animate) {
+                    return util.moveToPosition(_, { left: posX, top: posY });
+                }
                 return $.setStyle(obj, { left: posX, top: posY }, 'px'), util;
             },
             movePosition: function (_, options, isMoveTo) {
@@ -2185,6 +2189,118 @@
                     }
                 }
                 $.setStyle(obj, { width: w, height: h, left: posX, top: posY }, 'px');
+
+                return util;
+            },
+            getMoveDirection: function(pos) {
+                var dir = '';
+                switch(pos) {
+                    case 1: case 2: case 3:
+                    case 7: case 8: case 9:
+                        dir = 'vertical';
+                        break;
+                    case 4:
+                    case 6:
+                        dir = 'horizontal';
+                        break;
+                    case 5:
+                        dir = 'animate';
+                        break;
+                }
+                return dir;
+            },
+            isAnimetePosOver: function(add, v, pos, key) {
+                if((add && v >= pos[key]) || (!add && v <= pos[key])) {
+                    return true;
+                }
+                return false;
+            },
+            setAnimetePos: function(add, v, pos, key, obj) {
+                var util = this;
+                if((add && v >= pos[key]) || (!add && v <= pos[key])) {
+                    v = pos[key];
+                    window.clearInterval(util.timerMoveTo);
+                }
+                obj.style[key] = v + 'px';
+                return this;
+            },
+            moveToPosition: function(_, pos) {
+                var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls, obj = ctls.dialog;
+                if (p.none || !obj) { return this; }
+
+                var x = pos.left, 
+                    y = pos.top,
+                    ani = opt.animate,
+                    dir = ani.direction || ani.dir || util.getMoveDirection(opt.position), 
+                    distance = ani.distance || 10,
+                    interval = ani.interval || 5,
+                    start = ani.start || 7,
+                    add = false,
+                    addX = false,
+                    addY = false,
+                    os = $.elemSize(obj),
+                    bs = util.getBoundary(opt.parent),
+                    rate = (pos.left - bs.x) / (pos.top - bs.y);
+
+                //转换Position关键字为数字
+                util.convertPositionNumber(_, opt);
+
+                if(dir === 'animate') {
+                    //如果不是居中显示的，起始位置从本位置开始
+                    if(opt.position % 5 !== 0) {
+                        start = opt.position;
+                    }
+                    if(start === 2 || start === 8) {
+                        dir = 'vertical';
+                    } else if(start === 4 || start === 6) {
+                        dir = 'horizontal';
+                    } else {
+                        if(start === 5) {
+                            start = 7;
+                        }
+                        addX = start % 3 !== 0;
+                        addY = start < 7;
+                        x = addX ? bs.x - os.outer.width : bs.width;
+                        y = addY ? bs.y - os.outer.height : bs.height;
+                    }
+                }
+                if(dir === 'vertical') {
+                    add = opt.position < 4;
+                    y = add ? bs.y - os.outer.height : bs.height;
+                } else if(dir === 'horizontal') {
+                    add = opt.position % 3 !== 0;
+                    x = add ? bs.x - os.outer.width : bs.width;
+                }
+                $.setStyle(obj, { left: x, top: y }, 'px');
+
+                window.clearInterval(util.timerMoveTo);
+                util.timerMoveTo = window.setInterval(function() {
+                    if(dir === 'vertical') {
+                        y += distance * (add ? 1 : -1);
+                        util.setAnimetePos(add, y, pos, 'top', obj);
+                    } else if(dir === 'horizontal') {
+                        x += distance * (add ? 1 : -1);
+                        util.setAnimetePos(add, x, pos, 'left', obj);
+                    } else if(dir === 'animate') {
+                        x += distance * rate * (addX ? 1 : -1);
+                        y += distance * (addY ? 1 : -1);
+
+                        if(util.isAnimetePosOver(addX, x, pos, 'left')
+                            && util.isAnimetePosOver(addY, y, pos, 'top')) {
+                            x = pos.left;
+                            y = pos.top;
+                            window.clearInterval(util.timerMoveTo);
+                        } else {                            
+                            if(util.isAnimetePosOver(addX, x, pos, 'left')) {
+                                x = pos.left;
+                            }
+                            if(util.isAnimetePosOver(addY, y, pos, 'top')) {
+                                y = pos.top;
+                            }
+                        }
+                        $.setStyle(obj, { left: x, top: y }, 'px');
+                    }
+                }, interval);
 
                 return util;
             },
@@ -2277,6 +2393,7 @@
                 }
                 par.position = (par.position || par.pos);
 
+                //转换Position关键字（处理大小写）
                 util.convertPositionKey(par);
 
                 var pos = par.position,
@@ -3357,6 +3474,16 @@
                 showFoot: true,         //是否显示底部按钮栏
                 cancelBubble: false,    //是否阻止背景层事件冒泡
                 iframeScroll: true,     //是否允许iframe滚动条
+                animate: false,         //是否启用动画
+                /*
+                //动画详细参数
+                animate: {
+                    direction: 'vertical',  // animate, vertical, horizontal
+                    start: 7,               // 1, 3, 7, 9。 针对 animate 有效
+                    distance: 10,           // 动画移动的像素距离
+                    interval: 5             // 动画移动的频率，单位：毫秒
+                }
+                */
                 //自定义样式
                 styles: Config.CustomStyles,
                 //样式也可以采用单独设置，会自动合并到styles中

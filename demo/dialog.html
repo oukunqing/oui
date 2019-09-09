@@ -15,7 +15,7 @@
     <script type="text/javascript" src="../oui/dialog/oui.dialog.js?12"></script>
 </head>
 <body>
-    <div id="p1"></div>
+    <div id="p1" style="margin:100px 0 0 0;"></div>
     <div id="p2" style="height:300px;width:600px;border-radius: 5px 10px 3px 6px;margin:0 0 5px 0;
             border: solid 1px #f00;
             display:block;left:5px; top: 10px;">
@@ -432,13 +432,26 @@ function win(){
 function form2() {
     var html = '<div class="form">登录窗口<br />帐号<input type="text" /><br />密码<input type="text" /></div>';
     var win = $.dialog.form(html, '登录窗口 <span style="color:#f00;">标题栏文字比较多</span> 隐藏文字显示', {
+        id: 'form22',
         //lang: 'Chinese',
         //lang: 'English',
         //status: 'max',
         position: 9,
+        //position: 'bottomRight',
         parent: 'p2',
         x: 5,
         y: 5,
+        //animate: true,
+        
+        animate: {
+            //direction: 'horizontal',
+            direction: 'animate',
+            //若 position !== 5，则 start 随 position
+            start: 1,
+            distance: 10,
+            interval: 10
+        },
+        
         lock: false,
         fixed: true,
         moveAble: true,
@@ -471,6 +484,7 @@ function form2() {
             }
         }
     });
+    return false;
     //$.dialog.closeAll('tooltip');
 
     $.tooltip.closeAll();
