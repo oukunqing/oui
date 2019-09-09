@@ -60,7 +60,7 @@
                 items = options.items;
             } else if($.isObject(options.items)) {
                 items = [options.items];
-            } else {
+            } else if(options.name) {
                 items = [options];
             }
             return $.extend(options, {items: items});
@@ -266,7 +266,10 @@
                     par = Factory.buildMenuPar(dr, cfg),
                     w = autoWidth ? Factory.getContentWidth(dr) : 0,
                     disabled = $.isBoolean(dr.disabled || dr.disable, false);
-
+                    
+                if(!txt) {
+                    return null;
+                }
                 elem = $.createElement('div', id, function(elem) {
                     elem.className = 'cmenu-item' + (disabled ? ' cmenu-disabled' : '');
                     elem.menuId = menuId;
@@ -330,7 +333,10 @@
             for(var i = 0; i < opt.items.length; i++) {
                 var dr = opt.items[i];
                 if(dr) {
-                    items.push(this.buildMenuItem(dr, opt.id, opt, 0, cache, autoWidth));
+                    var item = this.buildMenuItem(dr, opt.id, opt, 0, cache, autoWidth);
+                    if(item) {
+                        items.push(item);
+                    }
                 }                
             }
 
