@@ -15,7 +15,9 @@
         //菜单项边距边框尺寸
         ItemMBPWidth: 12,
         ItemMinWidth: 60,
-        ItemArrowWidth: 35
+        ItemArrowWidth: 35,
+        DefaultHeight: 240,
+        MaxHeight: 300
     },
     Cache = {
         index: 1,
@@ -49,8 +51,9 @@
             var opt = $.extend({
                 id: 'oui-listbox-' + (Cache.index++),
                 target: obj,
+                show: false,
                 width: 'auto',
-                height: 200
+                height: Config.DefaultHeight
             }, options);
 
             return opt;
@@ -84,17 +87,32 @@
 
             return box;
         },
+        getBoxHeight: function(opt, box) {
+            var childs = box.childNodes, len = childs.length, th = 0;
+            if(len > 0) {
+                var es = $.elemSize(childs[0]),
+                    h = es.outer.height || es.style.height,
+                    bs = $.elemSize(box),
+                    maxHeight = opt.maxHeight || Config.MaxHeight;
+                th = len * h;
+                if(maxHeight && th > maxHeight) {
+                    th = maxHeight;
+                }
+                th += bs.margin.height + bs.border.height + bs.padding.height;
+            }
+            return th;
+        },
         setSizePos: function(opt, box) {
-            var offset = $.getOffset(opt.target)
+            var offset = $.getOffset(opt.target),
                 w = opt.width === 'auto' ? offset.width : $.toCssSizeVal(opt.width),
-                h = opt.height === 'auto' ? 200 : $.toCssSizeVal(opt.height);
-            box.style.cssText = 'left:{0}px;top:{1}px;width:{2}px;height:{3}px;display:none;'.format(
-                offset.left, 
-                offset.top + offset.height - 3,
-                w,
-                h
-            );
-            return this;
+                h = opt.height === 'auto' ? Factory.getBoxHeight(opt, box) : $.toCssSizeVal(opt.height);
+                cssText = 'left:{0}px;top:{1}px;width:{2}px;height:{3}px;'.format(
+                    offset.left, 
+                    offset.top + offset.height - 3,
+                    w,
+                    h
+                );
+            return box.style.cssText = cssText, this;
         },
         setListData: function(m, datas, box, isAppend) {
             if(!$.isArray(datas)) {
@@ -126,6 +144,11 @@
             for(var i = 0; i < childs.length; i++) {
                 childs[i].onclick = function() {
                     m.target.value = $.getAttribute(this, 'data');
+
+                    for(var j = 0; j < childs.length; j++) {
+                        childs[j].className = 'list-item';
+                    }
+                    $.addClass(this, 'cur-item');
                 };
 
                 var arr = childs[i].childNodes;
@@ -136,6 +159,18 @@
                 }
             }
 
+            Factory.setSizePos(m.options, box);
+
+            return this;
+        },
+        clearListData: function(m, box) {
+            box.innerHTML = '';
+            return this;
+        },
+        show: function(m, show) {
+            if(show) {
+                m.show();
+            }
             return this;
         }
     };
@@ -145,21 +180,39 @@
     Factory.loadCss();
 
     function ListBox(options) {
-
         var opt = $.extend({
             id: 'oui-listbox',
-            target: null
+            target: null,
+            set: {
+                event: '',
+                callback: null
+            }
         }, options);
 
         this.id = opt.id;
+        this.options = options;
 
         this.initial(options);
     }
 
     ListBox.prototype = {
-        initial: function(options) {
-            var that = this;
-            that.target = $.toElement(options.target);
+        initial: function(opt) {
+            var that = this,
+                set = opt.set || opt.initial || {},
+                func = set.callback || set.func;
+
+            that.target = $.toElement(opt.target);
+
+            if(set && $.isFunction(func)) {
+                var events = set.event.split(/[\|,]/g);
+                for(var i = 0; i < events.length; i++) {
+                    if(events[i]) {
+                        $.addListener(that.target, events[i], function() {
+                            func(this, that);
+                        });
+                    }
+                }
+            }
 
             $.addListener(that.target, 'click', function(par) {
                 $.cancelBubble(function() {
@@ -173,15 +226,25 @@
                 });
             });
 
-            //Factory.initCache(that, options);
+            //Factory.initCache(that, opt);
 
-            that.box = Factory.buildBox(options);
+            that.box = Factory.buildBox(opt);
+
+            if(opt.items) {
+                that.add(opt.items);
+            }
+
+            if(!opt.show) {
+                that.hide();
+            }
 
             return that;
         },
         show: function(datas) {
             Factory.setListData(this, datas, this.box);
-            this.box.style.display = '';
+            if(this.box.childNodes.length > 0) {
+                this.box.style.display = '';
+            }
             return this;
         },
         hide: function() {
@@ -189,11 +252,11 @@
             return this;
         },
         update: function(datas) {
-            Factory.setListData(this, datas, this.box);
+            Factory.setListData(this, datas, this.box).show(show);
             return this;
         },
         insert: function(datas, insertIndex, show) {
-            Factory.setListData(this, datas, this.box, true);
+            Factory.setListData(this, datas, this.box, true).show(show);
             return this;
         },
         add: function(datas, show) {
@@ -201,6 +264,13 @@
         },
         remove: function() {
             return Factory.hideContextMenu(null, this.id, true), this;
+        },
+        clear: function() {
+            Factory.clearListData(this, this.box);
+            return this.hide();
+        },
+        html: function(html, show) {
+            return this.box.innerHTML = html, Factory.show(show), this;
         }
     };
 

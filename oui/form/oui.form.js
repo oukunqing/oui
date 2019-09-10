@@ -136,7 +136,7 @@
                 getValue: function (element, noDefault) {
                     //console.log('getValue: ', element.id, ', field: ', element.field, ', value: ', element.value);
                     if (element.field) {
-                        var attr = element.field.attribute;
+                        var attr = element.field.attribute || element.field.attr;
                         // 获取 value 或 指定的属性值 或 默认值
                         return op.trim((!op.isLegalName(attr) ? element.value : element.getAttribute(attr)) || (!noDefault ? element.field.defaultValue : ''));
                     }
@@ -396,10 +396,11 @@
                     element.isSetEvent = 1;
                 },
                 setValue: function (element, value, fieldConfig, isArray) {
-                    if (!op.isLegalName(fieldConfig.field.attribute)) {
+                    var attr = fieldConfig.field.attribute || fieldConfig.field.attr;
+                    if (!op.isLegalName(attr)) {
                         element.value = isArray ? value.join(',') : value;
                     } else {
-                        element.setAttribute(fieldConfig.field.attribute, isArray ? value.join(',') : value);
+                        element.setAttribute(attr, isArray ? value.join(',') : value);
                     }
                 },
                 setSelectOption: function (element, value, fieldConfig, isArray) {

@@ -2620,13 +2620,15 @@
             return this;
         };
 
-    var ua = function () { try { return navigator.userAgent } catch (e) { return '' } }();
+    var ua = function () { try { return navigator.userAgent } catch (e) { return '' } }(),
+        ie = ua.indexOf('compatible') > -1 && ua.indexOf('MSIE') > -1 && !isOpera;
     $.extendNative($, {
         isChrome: ua.indexOf('Chrome') > -1,
         isFirefox: ua.indexOf('Firefox') > -1,
         isOpera: ua.indexOf('Opera') > -1,
         isSafari: ua.indexOf('Safari') > -1,
-        isIE: ua.indexOf('compatible') > -1 && ua.indexOf('MSIE') > -1 && !isOpera,
+        isIE: ie,
+        isMSIE: ie,
         keyCode: {
             Esc: 27,
             Tab: 9,
@@ -2660,6 +2662,7 @@
         getCssSizeValue: getCssSizeVal,
         toCssSizeVal: getCssSizeVal,
         getElementStyleSize: getElementStyleSize,
+        elemStyleSize: getElementStyleSize,
         getCssAttrSize: getCssAttrSize,
         getPaddingSize: getPaddingSize,
         getMarginSize: getMarginSize,

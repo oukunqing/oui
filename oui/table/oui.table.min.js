@@ -1,6 +1,6 @@
 
 /*
- @Title: OUI.Table.js
+ @Title: oui.table.js
  @Description：表格/树形表格插件
  @Author: oukunqing
  @License：MIT
