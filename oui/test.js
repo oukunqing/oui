@@ -316,3 +316,8 @@ console.log(nn === sn);
 
 
 console.log('##id'.replace(/^[#]+/, ''));
+
+
+var isLegalName = function (name) { return /^[_A-Za-z]/.test(name); };
+
+console.log(isLegalName('data-val'))

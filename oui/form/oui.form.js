@@ -14,7 +14,7 @@
         return element !== null && typeof element === 'object' && typeof element.nodeType === 'number';
     },
     initFormConfig = function (formElement, options, elements) {
-        if ($.isString(formElement)) { formElement = document.getElementById(formElement.replace(/[#]+/gi, '')); }
+        if ($.isString(formElement)) { formElement = document.getElementById(formElement.replace(/^[#]+/, '')); }
         if (!$.isElement(formElement) || !formElement.getElementsByTagName) {
             throw new Error('element 参数错误');
         }
@@ -96,7 +96,7 @@
                 isCheckBox: function (element, type) { return /^checkbox|radio$/.test(type); },
                 isChecked: function (element, type) { return /^checkbox|radio$/.test(type) ? element.checked : true; },
                 isSelect: function (element, tag) { return /^SELECT$/.test(tag); },
-                isLegalName: function (name) { return /^[_A-Za-z]/.test(name); },
+                isLegalName: function (name) { return name && /^[_A-Za-z]/.test(name); },
                 swap: function (o) {
                     var tmp;
                     if (o.minValue && o.maxValue && o.minValue > o.maxValue) {
