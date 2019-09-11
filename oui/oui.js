@@ -1692,7 +1692,7 @@
         },
         toElement = function(elemId) {
             if($.isString(elemId, true)) {
-                return document.getElementById(elemId.replace('#', ''));
+                return document.getElementById(elemId.replace(/^[#]+/, ''));
             }
             return elemId;
         },
@@ -2609,7 +2609,7 @@
             if($.isElement(aTag) && aTag.tagName === 'A' && $.isString(url)) {
                 aTag.setAttribute('href', url);
             }
-            return this;
+            return $;
         },
         gotoLink = function(url, isTop) {
             if(isTop) {
@@ -2617,7 +2617,45 @@
             } else {
                 window.location.href = url;
             }
-            return this;
+            return $;
+        },
+        size = function(elem, key, val) {
+            if($.isUndefined(elem)) {
+                return $.isUndefined(val) ? 0 : $;
+            }
+            var elems = $.isArray(elem) ? elem : [elem];
+
+            if($.isObject(key)) {
+                for(var i = 0; i < elems.length; i++) {
+                    var el = toElement(elems[i]);
+                    if($.isElement(el)) {
+                        for(var k in key) {
+                            var unit = $.isNumeric(key[k]) ? 'px' : '';
+                            el.style[k] = key[k] + unit;
+                        }
+                    }
+                }
+                return $;
+            } else if($.isUndefined(val)) {
+                var el = toElement(elems[0]),
+                    es = getElementSize(el);
+                return es.outer[key];
+            } else {
+                var unit = $.isNumeric(val) ? 'px' : '';
+                for(var i = 0; i < elems.length; i++) {
+                    var el = toElement(elems[i]);
+                    if($.isElement(el)) {
+                        el.style[key] = val + unit;
+                    }
+                }
+                return $;
+            }
+        },
+        width = function(elem, val) {
+            return size(elem, 'width', val);
+        },
+        height = function(elem, val) {
+            return size(elem, 'height', val);
         };
 
     var ua = function () { try { return navigator.userAgent } catch (e) { return '' } }(),
@@ -2627,8 +2665,7 @@
         isFirefox: ua.indexOf('Firefox') > -1,
         isOpera: ua.indexOf('Opera') > -1,
         isSafari: ua.indexOf('Safari') > -1,
-        isIE: ie,
-        isMSIE: ie,
+        isIE: ie, isMSIE: ie,
         keyCode: {
             Esc: 27,
             Tab: 9,
@@ -2725,7 +2762,12 @@
         isOnElement: isOnElement,
         changeLink: changeLink,
         gotoLink: gotoLink,
-        gotoUrl: gotoLink
+        gotoUrl: gotoLink,
+        size: size,
+        width: width,
+        w: width,
+        height: height,
+        h: height
     }, '$');
 
 }(OUI);
@@ -3405,6 +3447,18 @@
         }
     }, '$');
 
+    var $size = function($fn, key, val) {
+        if($.isUndefined(val)) {
+            var self = $fn, elem = self[0] || null;
+            return $.getElementSize(elem)[key];
+        } else {                
+            var _val = $.isNumeric(val) ? val + 'px' : val;
+            return $fn.each(function (i, obj) {
+                obj.style[key] = _val;
+            });
+        }
+    };
+
     $.extendNative($.fn, {
         each: function (callback, args) {
             return $.each(this, callback, args), this;
@@ -3478,17 +3532,20 @@
                 $.removeClass(obj, value);
             });
         },
+        size: function(key, val) {
+            return $size(this, key, val);
+        },
         width: function(w) {
-            var _w = $.isNumeric(w) ? w + 'px' : w;
-            return this.each(function (i, obj) {
-                obj.style.width = _w;
-            });
+            return $size(this, 'width', w);
+        },
+        w: function(w) {
+            return $size(this, 'width', w);
         },
         height: function(h) {
-            var _h = $.isNumeric(h) ? h + 'px' : h;
-            return this.each(function (i, obj) {
-                obj.style.height = _h;
-            });
+            return $size(this, 'height', h);
+        },
+        h: function(h) {
+            return $size(this, 'height', h);
         }
     }, '$.fn');
 

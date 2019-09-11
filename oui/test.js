@@ -313,3 +313,6 @@ console.log($.unicodeToAscii(str))
 
 var nn = 1, sn = '1';
 console.log(nn === sn);
+
+
+console.log('##id'.replace(/^[#]+/, ''));
