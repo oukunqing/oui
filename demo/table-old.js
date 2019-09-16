@@ -23,16 +23,15 @@
             ROW: 'oui_table_tr_',
             KEY: 'k_'
         },
-        buildId = function(id, prefix, table) {
-            var tableId = (table || {id: ''}).id;
+        buildId = function(id, prefix){
             if(prefix){
-                return tableId + ID_PREFIX[prefix] + id;
+                return ID_PREFIX[prefix] + id;
             } else {
-                return tableId + ID_PREFIX.ROW + id;
+                return ID_PREFIX.ROW + id;
             }
         },
-        buildKey = function (id, table) {
-            return buildId(id, 'KEY', table);
+        buildKey = function (id) {
+            return buildId(id, 'KEY');
         },            
         isCellSpan = function (span) {
             return $.isNumber(span) && span > 0;
@@ -248,7 +247,7 @@
         },
         setTreeRow = function(that, attrName, row, data, id){
             //设置tr的id属性
-            row.setAttribute('id', buildId(id, 'ROW', that));
+            row.setAttribute('id', buildId(id, 'ROW'));
             //设置 tree 属性
             setTreeAttr(attrName, row, data);
             //设置tr创建记录，通过id找tr位置时要用到
@@ -263,19 +262,19 @@
             }
             cell.innerHTML = content;
 
-            setSwitchAction(that, $I(buildId(data.id, 'SWITCH', that)), 'toggle');
+            setSwitchAction(that, $I(buildId(data.id, 'SWITCH')), 'toggle');
 
             $.addClass(cell, 'tree-cell');
         },
         isNodeHide = function(that, id) {
-            var row = $I(buildId(id, 'ROW', that));
+            var row = $I(buildId(id, 'ROW'));
             if(row !== null){
                 return row.style.display === 'none';
             }
             return false
         },
         isNodeExpand = function(that, id) {
-            var btnSwitch = $I(buildId(id, 'SWITCH', that));
+            var btnSwitch = $I(buildId(id, 'SWITCH'));
             if(btnSwitch !== null) {
                 return btnSwitch.getAttribute('expand') === '1';
             }
@@ -395,13 +394,13 @@
         },
         findRowIndex = function (that, container, pid) {
             var childs = getChildIds(that.tree, pid), len = childs.length;
-            var tr = $I(buildId(pid, 'ROW', that)), rowCount = 0, idx = -1;
+            var tr = $I(buildId(pid)), rowCount = 0, idx = -1;
             var headRows = container.tagName === 'TBODY' ? getTHeadRows(that.table) : 0;
             if (len > 0 && tr != null) {
                 var id = 0, realPid = 0;
                 //找到父节点下的最后一个有效的直系子节点所在的行
                 for (var i = len - 1; i >= 0; i--) {
-                    id = childs[i], idx = getRowIndex($I(buildId(id, 'ROW', that))) - headRows;
+                    id = childs[i], idx = getRowIndex($I(buildId(id, 'ROW'))) - headRows;
                     if (idx >= 0) {
                         realPid = id;
                         break;
@@ -409,7 +408,7 @@
                 }
                 //如果没找到，就把父节点当成最后一个子节点所在行
                 if (idx < 0) {
-                    idx = getRowIndex($I(buildId(pid, 'ROW', that))) - headRows, realPid = idx >= 0 ? pid : 0;
+                    idx = getRowIndex($I(buildId(pid))) - headRows, realPid = idx >= 0 ? pid : 0;
                 }
 
                 if (realPid > 0) {
@@ -833,14 +832,14 @@
             if ($.isArray(ids)) {
                 var list = [];
                 for (var i in ids) {
-                    var tr = $I(buildId(ids[i], 'ROW', this));
+                    var tr = $I(buildId(ids[i]));
                     if (tr != null) {
                         list.push(tr);
                     }
                 }
                 return list;
             } else {
-                return $I(buildId(ids, 'ROW', this));
+                return $I(buildId(ids));
             }
         },
         getCheckedRow: function () {
@@ -1001,7 +1000,7 @@
             if (data && data.treeData) {
                 var pid = data.treeData.pid || 0, pkey = buildKey(pid), pdata = this.options.treeDatas[pkey];
                 if (pdata) {
-                    var btnSwitch = $I(buildId(pid, 'SWITCH', this.Table));
+                    var btnSwitch = $I(buildId(pid, 'SWITCH'));
                     if (btnSwitch !== null && btnSwitch.getAttribute('expand') === '0') {
                         this.expand(pid);
                     }
@@ -1011,9 +1010,7 @@
             return callback(func, this), this;
         },
         toggle: function (id, collapse, func) {
-            var that = this, tableId = that.Table.id,
-                op = that.options, 
-                btnSwitch = $I(buildId(id, 'SWITCH', this.Table));
+            var that = this, op = that.options, btnSwitch = $I(buildId(id, 'SWITCH'));
             if (btnSwitch !== null) {
                 //判断收缩还是展开
                 collapse = $.isBoolean(collapse, btnSwitch.getAttribute('expand') === '1');
@@ -1032,7 +1029,7 @@
                 setCollapse(that, id, ids, collapse);
 
                 for (var i = ids.length - 1; i >= 0; i--) {
-                    var obj = $I(buildId(ids[i], 'ROW', this.Table));
+                    var obj = $I(buildId(ids[i]));
                     if (obj !== null) {
                         obj.style.display = collapse ? 'none' : '';
                     }
@@ -1053,7 +1050,7 @@
 
                 for (var i in this.options.treeDatas) {
                     var dr = this.options.treeDatas[i].treeData || {}, id = dr.id;
-                    var obj = $I(buildId(id, 'ROW', this.Table)), btnSwitch = $I(buildId(id, 'SWITCH', this.Table));
+                    var obj = $I(buildId(id, 'ROW')), btnSwitch = $I(buildId(id, 'SWITCH'));
                     if (obj !== null) {
                         obj.style.display = dr.level <= level ? '' : 'none';
                     }
@@ -1078,7 +1075,7 @@
         toggleAll: function (collapse, func) {
             for (var i in this.options.treeDatas) {
                 var dr = this.options.treeDatas[i].treeData || {}, id = dr.id;
-                var obj = $I(buildId(id, 'ROW', this.Table)), btnSwitch = $I(buildId(id, 'SWITCH', this.Table));
+                var obj = $I(buildId(id, 'ROW')), btnSwitch = $I(buildId(id, 'SWITCH'));
                 if (obj !== null) {
                     obj.style.display = collapse && dr.level > 0 ? 'none' : '';
                 }
@@ -1100,14 +1097,14 @@
             if ($.isFunction(keepSelf)) {
                 func = keepSelf, keepSelf = false;
             }
-            var that = this, obj = $I(buildId(id, 'ROW', that.Table));
+            var that = this, obj = $I(buildId(id, 'ROW'));
             if (obj === null) {
                 return callback(func, that, false), that;
             }
             //获取当前节点下的所有子节点
             var childs = getChildIds(that, id), ids = getRowIds(that, childs, true, []), len = ids.length;
             for (var i = len - 1; i >= 0; i--) {
-                var tr = $I(buildId(ids[i], 'ROW', that.Table));
+                var tr = $I(buildId(ids[i]));
                 deleteTableRow(tr);
                 removeData(that, id);
             }
@@ -1125,7 +1122,7 @@
             return this.remove(id, true, func), this;
         },
         select: function (id, func) {
-            var that = this, op = that.options, fa = $I(buildId(id, 'FOCUS', that.Table)), find = fa !== null;
+            var that = this, op = that.options, fa = $I(buildId(id, 'FOCUS')), find = fa !== null;
             if (find) {
                 var tr = findRow(fa);
                 if (tr !== null) {
@@ -1161,7 +1158,7 @@
             }
         },
         getChildIds: function (id, recursion) {
-            if(!$I(buildId(id, 'SWITCH', this.Table))){
+            if(!$I(buildId(id, 'SWITCH'))){
                 return [];
             }
             var childIds = getChildIds(this, id);
@@ -1252,7 +1249,7 @@
                 if (!hasTreeFlag(that, id)) {
                     break;
                 }
-                rows.push(!getRow ? id : $I(buildId(id, 'ROW', that.Table)));
+                rows.push(!getRow ? id : $I(buildId(id)));
 
                 //展开时需要屏蔽之前被收缩的子节点
                 if (!isCollapse(that, id) || collapse) {
@@ -1273,9 +1270,9 @@
         },
         buildSwitch = function (that, id, level) {
             var op = that.options, isExpand = (level <= op.openLevel) || op.openLevel < -1;
-            var f = '<a id="' + buildId(id, 'FOCUS', that.Table) + '" class="table-tree-focuser" href="#" /></a>';
+            var f = '<a id="' + buildId(id, 'FOCUS') + '" class="table-tree-focuser" href="#" /></a>';
             var a = '<a id="{0}" tid="{1}" expand="{2}" class="{3}" style="cursor:pointer;margin-left:{4}px !important;"></a>'.format(
-                buildId(id, 'SWITCH', that.Table), id, isExpand ? 1 : 0, isExpand ? op.className.expand : op.className.collapse, buildSpace(level, op.spaceWidth)
+                buildId(id, 'SWITCH'), id, isExpand ? 1 : 0, isExpand ? op.className.expand : op.className.collapse, buildSpace(level, op.spaceWidth)
             );
             return f + a;
         },
@@ -1287,14 +1284,14 @@
             obj.className = that.options.className[collapse ? 'collapse' : 'expand'];
         },
         showChildCount = function(that, id) {
-            var btnSwitch = $I(buildId(id, 'SWITCH', that.Table));
+            var btnSwitch = $I(buildId(id, 'SWITCH'));
             if(!btnSwitch){
                 return false;
             }
-            var childs = getChildIds(that, id), objCount = $I(buildId(id, 'COUNT', that.Table));
+            var childs = getChildIds(that, id), objCount = $I(buildId(id, 'COUNT'));
             if(!objCount){
                 var cell = findRow(btnSwitch, 'TD');
-                objCount = $.createElement('span', buildId(id, 'COUNT', that.Table), function(elem){
+                objCount = $.createElement('span', buildId(id, 'COUNT'), function(elem){
                     elem.className = 'child-count';
                 }, cell);
             }

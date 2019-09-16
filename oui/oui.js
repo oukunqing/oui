@@ -522,6 +522,19 @@
         param: buildParam, buildParam: buildParam, setUrlParam: setUrlParam, buildAjaxData: buildAjaxData,
         setQueryString: setQueryString, getQueryString: getQueryString, getUrlHost: getUrlHost,
         isDebug: isDebug,
+        toGpsString: function(gps, decimalLen) {
+            var con = [], len = decimalLen || 8;
+            if($.isString(gps)) {
+                var arr = gps.split(',');
+                for(var i = 0; i < arr.length; i++) {
+                    con.push(arr[i].round(len));
+                }
+            } else if($.isObject(gps)) {
+                con.push(gps.lat.round(len));
+                con.push(gps.lng.round(len));
+            }
+            return con.join(',');
+        },
         quickSort: function (arr, key) {
             if (0 === arr.length) { return []; }
             var left = [], right = [], pivot = arr[0], c = arr.length;
@@ -1033,6 +1046,7 @@
         toInteger: function (defaultValue) { return $.toInteger(this, defaultValue); },
         toFloat: function (defaultValue, decimalLen) { return $.toDecimal(this, defaultValue, decimalLen); },
         toDecimal: function (defaultValue, decimalLen) { return $.toDecimal(this, defaultValue, decimalLen); },
+        round: function(decimalLen) { return $.toNumber(this).round(decimalLen); },
         expandNumberList: function () { return $.expandNumberList(this); },
         toChineseNumber: function (isMoney) { return $.numberToChinese(this, isMoney); },
         chineseToNumber: function (isMoney) { return $.chineseToNumber(this, isMoney); },

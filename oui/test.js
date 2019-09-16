@@ -321,3 +321,25 @@ console.log('##id'.replace(/^[#]+/, ''));
 var isLegalName = function (name) { return /^[_A-Za-z]/.test(name); };
 
 console.log(isLegalName('data-val'))
+
+var toGpsString = function(gps, decimalLen) {
+    var lat = parseFloat(gps.lat, 10),
+        lng = parseFloat(gps.lng, 10),
+        len = decimalLen || 8,
+        pow = Math.pow(10, len);
+
+    return Math.round(lat*pow)/pow + ',' + Math.round(lng*pow)/pow;
+};
+
+console.log(toGpsString({lat: 29.86153584157376, lng: 121.63875961808736}));
+
+console.log($.toGpsString({lat: '29.8615', lng: '121.63875961808736'}))
+
+function toJsonStr(str) {
+    var pattern = /('|false|true|\d)[\s]{0,}(;)/gi;
+    return str.replace(pattern, '$1,').replace(/,[\s]{0,}(})$/, '$1');
+}
+
+var str22 = "{ activeTab: ''; curPlaysrc: 'qe;q'  ; title: '怒海潜沙&amp;秦岭神树';  id: '75ijb6qovzrhtp7';  dataType: '2'; videoType: '2';  hasAlbum: false; telelistCol: 13; }";
+console.log(toJsonStr(str22));
+

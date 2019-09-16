@@ -168,7 +168,10 @@
         }
     ];
 
-    var tb1 = $.table();
+    var tb1 = $.table({
+        table: 'tblist1',
+		showTree: true
+	});
 
     console.log('tb1: ', tb1);
 
@@ -245,7 +248,7 @@
                 ]
             },
             {
-                rowData: {}, treeData:{id:6, pid:4}, cellData:[
+                rowData: {}, treeData:{id:'p6', pid:4}, cellData:[
                     {content:'单元格61'}, {content:'单元格62'}, {content:'单元格63'}, {content:'单元格64'}, {content:'单元格65'}, {content:'单元格66'}, '6'
                 ]
             },
@@ -293,7 +296,7 @@
     window.setTimeout(function(){
         var appendData = [
             {
-                rowData: {}, treeData:{id:28, pid:6}, cellData:[
+                rowData: {}, treeData:{id:28, pid:'p6'}, cellData:[
                     {content:'单元格281'}, {content:'单元格282'}, {content:'单元格283'}, {content:'单元格284'}, {content:'单元格285'}, {content:'单元格286'}, '13'
                 ]
             },
