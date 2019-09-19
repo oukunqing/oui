@@ -134,8 +134,8 @@
             return 0;
         },
         getOptionValue = function (dr) {
-            if ($.isString(dr)) {
-                return dr;
+            if ($.isString(dr) || $.isNumber(dr)) {
+                return '' + dr;
             }
             var keys = ['content', 'html', 'text'];
             for (var i in keys) {
@@ -255,7 +255,7 @@
             setTreeFlag(that.tree, id, false);
         },
         setTreeCell = function (that, cell, data, content) {
-            content = buildSwitch(that.tree, data.id, data.level) + content;
+            content = buildSwitch(that.tree, data) + content;
 
             if ($.isDebug()) {
                 //临时测试用
@@ -1271,8 +1271,14 @@
             }
             return w;
         },
-        buildSwitch = function (that, id, level) {
-            var op = that.options, isExpand = (level <= op.openLevel) || op.openLevel < -1;
+        buildSwitch = function (that, data) {
+            var op = that.options, 
+                id = data.id,
+                level = data.level,
+                isExpand = (level <= op.openLevel) || op.openLevel < -1;
+            if(data.leaf) {
+                return '<a class="space"></a>';
+            }
             var f = '<a id="' + buildId(id, 'FOCUS', that.Table) + '" class="table-tree-focuser" href="#" /></a>';
             var a = '<a id="{0}" tid="{1}" expand="{2}" class="{3}" style="cursor:pointer;margin-left:{4}px !important;"></a>'.format(
                 buildId(id, 'SWITCH', that.Table), id, isExpand ? 1 : 0, isExpand ? op.className.expand : op.className.collapse, buildSpace(level, op.spaceWidth)

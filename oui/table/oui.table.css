@@ -91,29 +91,36 @@
 }
 
 .oui-table-tree .expand{
-    display:inline-block;
-    width:0;
-    height:0;
-    padding:0;
-    margin:0;
-    border-left:5px solid transparent;
+    display: inline-block;
+    width: 0;
+    height: 0;
+    padding: 0;
+    margin: 0;
+    border-left: 5px solid transparent;
     border-right: 5px solid transparent;
     border-top: 6px solid #000;
-    margin-right:2px;
+    margin-right: 2px;
 }
 
 .oui-table-tree .collapse{
-    display:inline-block;
-    width:0;
-    height:0;
-    padding:0;
-    margin:0;
+    display: inline-block;
+    width: 0;
+    height: 0;
+    padding: 0;
+    margin: 0;
     border-top: 5px solid transparent;
     border-left: 6px solid #000;
     border-bottom: 5px solid transparent; 
-    margin-right:6px;
+    margin-right: 6px;
 }
 
 .oui-table-tree .focuser{
     margin:0; padding:0; border:none 0;
+}
+
+.oui-table-tree .space {
+	width: 25px;
+	margin: 0;
+	padding: 0;
+	display: inline-block;
 }

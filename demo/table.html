@@ -170,7 +170,11 @@
 
     var tb1 = $.table({
         table: 'tblist1',
-		showTree: true
+		showTree: true,
+		trigger: {                      //树形收缩/展开触发器，若cell和row同时设置了不同的事件，可能会有事件冒泡
+            cell: ['click', 'toggle'],  //点击列触发事件，数组或字符串，第1个元素为事件：(click, dblclick)，第2个元素为动作： (toggle, expand, collapse)
+            //row: 'click'              //点击行触发事件，数组或字符串，第1个元素为事件：(click, dblclick)，第2个元素为动作： (toggle, expand, collapse)
+        }
 	});
 
     console.log('tb1: ', tb1);
