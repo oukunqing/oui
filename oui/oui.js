@@ -3165,24 +3165,25 @@
             return this;
         },
         getElementValue: function (elements, defaultValue, attributeName, func) {
-            elements = $.toElement(elements);
-            if ($.isElement(elements)) {
-                var val = (isAttribute ? elements.getAttribute(attributeName) : elements.value) || defaultValue;
-                if ($.isFunction(func)) {
-                    return func(val);
-                }
-                return val;
+            if($.isUndefined(defaultValue)) {
+                defaultValue = '';
             }
-
-            var isAttribute = $.isString(attributeName);
-            if ($.isArray(elements) || $.isArrayLike(elements) || elements.length > 1) {
-                var arr = [], len = elements.length;
-                for (var i = 0; i < len; i++) {
-                    arr.push(elements[i].value);
+            var elems = ($.isArray(elements) || $.isArrayLike(elements)) ? elements : [elements],
+                isAttr = $.isString(attributeName),
+                arr = [], 
+                len = elems.length, 
+                val = defaultValue;
+            for (var i = 0; i < len; i++) {
+                var elem = $.toElement(elems[i]);
+                if($.isElement(elem)) {
+                    val = (isAttr ? elem.getAttribute(attributeName) : elem.value) || defaultValue;
+                    arr.push(val);
                 }
-                return arr;
             }
-            return '';
+            if ($.isFunction(func)) {
+                return func(len > 1 ? arr : val);
+            }
+            return len > 1 ? arr : val;
         },
         setElementAttribute: function (elem, value, attributeName) {
             if (attributeName === 'value') {
@@ -3198,24 +3199,18 @@
                 attributeName = 'value';
             }
 
-            elements = $.toElement(elements);
-            if ($.isElement(elements)) {
-                var val = $.isArray(values) ? values[0] : $.isUndefined(values) ? '' : values;
-                $.setElementAttribute(elements, val, attributeName);
-                return this;
+            var elems = ($.isArray(elements) || $.isArrayLike(elements)) ? elements : [elements],
+                isAttr = $.isString(attributeName),
+                len = elems.length, 
+                vals = !$.isArray(values) ? [values] : values;
+            for (var i = 0; i < len; i++) {
+                var elem = $.toElement(elems[i]);
+                if($.isElement(elem)) {
+                    var val = $.isUndefined(vals[i]) ? (sameValue ? vals[0] : '') : vals[i];
+                    $.setElementAttribute(elem, val, attributeName);
+                }
             }
 
-            if ($.isArray(elements) || $.isArrayLike(elements) || elements.length > 1) {
-                var len = elements.length;
-                if (!$.isArray(values)) {
-                    values = [values];
-                }
-                for (var i = 0; i < len; i++) {
-                    var val = $.isUndefined(values[i]) ? (sameValue ? values[0] : '') : values[i];
-                    $.setElementAttribute(elements[i], val, attributeName);
-                }
-                return this;
-            }
             return this;
         },
         appendOption: function(obj, val, txt) {

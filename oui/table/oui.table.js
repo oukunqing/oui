@@ -775,12 +775,21 @@
             }
             return setRowStyle.call(this), setLineNumber.call(this), callback(func, this), this;
         },
+        delete: function(rowIndex, func) {
+            return this.deleteRow(rowIndex, func);
+        },
+        remove: function(rowIndex, func) {
+
+        },
         clearRow: function (keepRows, func) {
             keepRows = keepRows || 0;
             for (var i = this.table.rows.length - 1; i >= keepRows; i--) {
                 this.table.deleteRow(i);
             }
             return callback(func, this), this;
+        },
+        clear: function(keepRows, func) {
+            return this.clearRow(keepRows, func);
         },
         alternate: function (className) {
             return setRowStyle.call(this, true, className), this;

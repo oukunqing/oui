@@ -3954,6 +3954,9 @@
         },
         toolwindow: function(content, title, options) {
             return Factory.show(content, title, options, Config.DialogType.toolwindow);
+        },
+        window: function(content, title, options) {
+            return Factory.show(content, title, options, Config.DialogType.window);
         }
     });
 
