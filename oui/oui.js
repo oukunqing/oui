@@ -370,6 +370,42 @@
         toJsonString = function (o) { return JSON.stringify(o); },
         toJson = function (s) { return JSON.parse(s); },
         toEncode = function (s) { return encodeURIComponent(s); },
+        toFunction = function(funcName) {
+            if ($.isFunction(funcName)) {
+                return funcName;
+            }
+            if ($.isString(funcName, true)) {
+                var func = null, arr = funcName.split('.'), first = true;
+                for (var i = 0; i < arr.length; i++) {
+                    var str = arr[i].trim();
+                    if($.isString(str, true)) {
+                        if (first) {
+                            func = eval('(' + str + ')');
+                            first = false;
+                        } else if (!first && func) {
+                            func = func[str];
+                        }
+                    }
+                }
+                return func;
+            }
+            return null;
+        },
+        getArguments = function(args, start, end) {
+            var par = {}, len = 0, s = start || 0, e = end || args.length;
+            for(var i = s; i < e; i++) {
+                par[len++] = args[i];
+            }
+            return par.length = len, par;
+        },
+        callFunction = function(funcName) {
+            var func = toFunction(funcName);
+            if(isFunction(func)) {
+                var args = getArguments(arguments, 1);
+                func.apply(this, args);
+            }
+            return this;
+        },
         buildParam = function (a, v, strict) {
             strict = isBoolean(strict, true);
             var isObj = isObject(a);
@@ -518,7 +554,9 @@
         toBoolean: toBoolean, toBool: toBoolean,
         containsKey: containsKey, containsValue: containsValue, contains: contains, distinctList: distinctList,
         collapseNumberList: collapseNumberList, expandNumberList: expandNumberList,
-        toJsonString: toJsonString, toJson: toJson, toEncode: toEncode,
+        toJsonString: toJsonString, toJson: toJson, toEncode: toEncode, 
+        getArguments: getArguments, getArgs: getArguments,
+        toFunction: toFunction, toFunc: toFunction, callFunction: callFunction, callFunc: callFunction,
         param: buildParam, buildParam: buildParam, setUrlParam: setUrlParam, buildAjaxData: buildAjaxData,
         setQueryString: setQueryString, getQueryString: getQueryString, getUrlHost: getUrlHost,
         isDebug: isDebug,
@@ -3215,6 +3253,21 @@
         },
         appendOption: function(obj, val, txt) {
             return obj.options.add(new Option(txt, val)), this;
+        },
+        callbackParent: function(funcName) {
+            if (top.location.href !== location.href) {
+                if($.isString(funcName, true) && funcName.indexOf('parent.') < 0) {
+                    funcName = 'parent.' + funcName;
+                }
+                var func = $.toFunction(funcName);
+                if (!$.isFunction(func)) {
+                    return this;
+                }
+                var args = $.getArguments(arguments, 1);
+                func.apply(this, args);
+                
+            }
+            return this;
         }
     }, '$');
 
