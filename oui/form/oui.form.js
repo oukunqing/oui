@@ -391,6 +391,10 @@
                         } else {
                             $(element).keyup(function () { op.showTooltip(op.checkValue(this), this); });
                         }
+
+                        element.validate = function() {
+                            op.showTooltip(op.checkValue(this), this);
+                        };
                     }
                     //记录是否被创建事件，防止重复创建
                     element.isSetEvent = 1;
@@ -701,7 +705,16 @@
             getTableData: getTableData,
             setTableData: setTableData,
             filterData: filterData,
-            findElement: findElement
+            findElement: findElement,
+            validate: function(element) {
+                var elems = $.isArray(element) ? element : [element];
+                for(var i = 0; i < elems.length; i++) {
+                    var elem = $.toElement(element);
+                    if($.isElement(elem) && $.isFunction(elem.validate)) {
+                        elem.validate();
+                    }
+                }
+            }
         },
         md5: md5
     });
