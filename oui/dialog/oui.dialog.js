@@ -15,6 +15,7 @@
         IdIndex: 1,
         Identifier: 'oui-dialog-identifier-',
         TargetAttributeName: 'dialog-id',
+        TooltipAttributeName: 'tooltip-id',
         TitleHeight: 30,        //标题栏高度，单位：px
         BottomHeight: 40,       //底部栏高度，单位：px
         Padding: 4,             //拖动边框宽度，单位：px
@@ -815,7 +816,8 @@
 
                 var p = this.getOptions($.extend(opt, options).id);
                 if (!p && (opt.target || opt.type === Config.DialogType.tooltip)) {
-                    var tid = $.getAttribute(opt.target, Config.TargetAttributeName);
+                    var attrName = opt.type === Config.DialogType.tooltip ? Config.TooltipAttributeName : Config.TargetAttributeName;
+                    var tid = $.getAttribute(opt.target, attrName);
                     if (tid) {
                         p = this.getOptions(tid);
                     }
@@ -3250,7 +3252,7 @@
                 }
                 var tipId = undefined, d = undefined;
                 try {
-                    tipId = opt.target.getAttribute(Config.TargetAttributeName);
+                    tipId = opt.target.getAttribute(Config.TooltipAttributeName);
                 } catch (e) {
                     tipId = undefined;
                 }
@@ -3270,7 +3272,7 @@
 
                     ctls.body = util.buildBody(_, ctls.dialog);
 
-                    $.setAttribute(opt.target, Config.TargetAttributeName, opt.id);
+                    $.setAttribute(opt.target, Config.TooltipAttributeName, opt.id);
                     p.parent.appendChild(ctls.dialog);
                 }
                 Factory.setWindowResize();
@@ -4012,7 +4014,7 @@
     $.extend($.tooltip, {
         close: function (id) {
             if ($.isElement(id)) {
-                id = id.getAttribute(Config.TargetAttributeName);
+                id = id.getAttribute(Config.TooltipAttributeName);
             }
             return Factory.close(id), $;
         },

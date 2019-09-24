@@ -403,6 +403,8 @@
             if(isFunction(func)) {
                 var args = getArguments(arguments, 1);
                 func.apply(this, args);
+            } else if($.isDebug()) {
+                console.log('callFunction: ', ('' + funcName) + ' is not a function.');
             }
             return this;
         },
@@ -561,7 +563,8 @@
         setQueryString: setQueryString, getQueryString: getQueryString, getUrlHost: getUrlHost,
         isDebug: isDebug,
         toGpsString: function(gps, decimalLen) {
-            var con = [], len = decimalLen || 8;
+            var con = [], 
+                len = $.checkNumber(decimalLen, 3, 14) ? decimalLen : 8;
             if($.isString(gps)) {
                 var arr = gps.split(',');
                 for(var i = 0; i < arr.length; i++) {
