@@ -343,3 +343,8 @@ function toJsonStr(str) {
 var str22 = "{ activeTab: ''; curPlaysrc: 'qe;q'  ; title: '怒海潜沙&amp;秦岭神树';  id: '75ijb6qovzrhtp7';  dataType: '2'; videoType: '2';  hasAlbum: false; telelistCol: 13; }";
 console.log(toJsonStr(str22));
 
+
+
+var name = 'abc';
+
+console.log((acc=name))

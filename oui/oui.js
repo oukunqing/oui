@@ -2199,6 +2199,13 @@
             elem = $.toElement(elem);
             return $.isElement(elem) ? elem.getAttribute(attributes) : undefined;
         },
+        setAttribute2 = function(elem, key, val) {
+            if(key.toLowerCase() === 'class') {
+                $.addClass(elem, val);
+            } else {
+                elem.setAttribute(key, val);
+            }
+        },
         setAttribute = function (elem, attributes, exempt, serialize) {
             if ($.isBoolean(exempt, false) || $.isElement(elem)) {
                 if ($.isObject(attributes)) {
@@ -2211,11 +2218,11 @@
                                 elem.setAttribute(key, $.toJsonString(val));
                             }
                         } else {
-                            elem.setAttribute(key, val);
+                            setAttribute2(elem, key, val);
                         }
                     }
                 } else if ($.isString(attributes) && isAttributeValue(exempt)) {
-                    elem.setAttribute(attributes, exempt);
+                    setAttribute2(elem, attributes, exempt);
                 }
             }
             return this;

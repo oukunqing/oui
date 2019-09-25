@@ -370,6 +370,11 @@
             }
             var attr = dr.attribute || dr.attr || dr.property || dr.prop;
             $.setAttribute(elem, attr, true);
+
+            var className = dr.className || dr.class || dr.css;
+            if(className) {
+                $.addClass(elem, className);
+            }
         },
         checkChild = function (key, trees) {
             if (trees !== null) {
@@ -769,6 +774,9 @@
             }
             return this;
         },
+        update: function(bodyData, func) {
+            return this.clearRow(getTHeadRows(this.table)).appendBody(bodyData, func);
+        },
         deleteRow: function (rowIndex, func) {
             if (this.table.rows.length > rowIndex) {
                 this.table.deleteRow(rowIndex);
@@ -779,7 +787,7 @@
             return this.deleteRow(rowIndex, func);
         },
         remove: function(rowIndex, func) {
-
+            return this.deleteRow(rowIndex, func);
         },
         clearRow: function (keepRows, func) {
             keepRows = keepRows || 0;

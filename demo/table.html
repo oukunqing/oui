@@ -144,7 +144,7 @@
 			}, 
 			treeData:{id:1, pid:0}, 
 			cellData:[
-				{content:'单元格11', style:{color:'#f00'}}, 
+				{content:'单元格11', style:{color:'#f00'}, attr: {class:'td22'}}, 
 				{content:'单元格12'}, 
 				{content:'单元格13', rowSpan:0, colSpan:0}, 
 				{content:'单元格14'}, 
@@ -227,8 +227,11 @@
     window.setTimeout(function(){
         var bodyData = [
             {
-                rowData:{ attribute:{ id:1, class:'tr-1'}, event:{click:function(){alert(this.id);}}}, treeData:{id:1, pid:0}, cellData:[
-                    {content:'单元格11', style:{color:'#f00'}}, {content:'单元格12'}, {content:'单元格13'}, {content:'单元格14'}, {content:'单元格15'}, {content:'单元格16'}, '1'
+                rowData:{ attribute:{ id:1, class:'tr-1'}, 
+				event:{click:function(){alert(this.id);}}}, 
+				treeData:{id:1, pid:0}, 
+				cellData:[
+                    {content:'单元格11', style:{color:'#f00'}, attr: {class:'td22'}}, {content:'单元格12'}, {content:'单元格13'}, {content:'单元格14'}, {content:'单元格15'}, {content:'单元格16'}, '1'
                 ]
             },
             {
