@@ -2611,8 +2611,8 @@
                 }, options),
                     isMin = p.status.min;
 
-                par.x = parseInt(par.x || par.width, 10);
-                par.y = parseInt(par.y || par.height, 10);
+                par.x = parseInt(par.x || par.width || 0, 10);
+                par.y = parseInt(par.y || par.height || 0, 10);
 
                 if (par.dir === '' || isNaN(par.x) || isNaN(par.y)) {
                     return util;
@@ -2642,11 +2642,13 @@
                     footHeight = (ctls.foot ? ctls.foot.offsetHeight : 0),
                     w, h;
 
-                if (par.resizeTo && !isDrag) {
+                if (par.resizeTo && !isDrag) {                    
                     w = par.x;
                     h = par.y;
-
+                    var ds = util.getSize(_, opt, ctls, obj);
                     if (par.isBody) {
+                        if(w <= 0){ w = ds.width; }
+                        if(h <= 0) { h = ds.height; }
                         var padding = Common.getCssAttrSize(opt.padding, { attr: 'padding', isLimit: true }),
                             ph = padding.top + padding.bottom,
                             pw = padding.left + padding.right,
@@ -2656,6 +2658,9 @@
 
                         w += pw + cpw;
                         h += headHeight + footHeight + padding.top + ph + cph;
+                    } else {
+                        if(w <= 0){ w = ds.dialog.width; }
+                        if(h <= 0) { h = ds.dialog.height; }
                     }
                 } else {
                     w = dp.width + par.x;
@@ -3188,17 +3193,34 @@
                 }
                 return true;
             },
+            getSize: function(_, opt, ctls, obj) {
+                var util = this, p = util.getParam(_);
+                if (p.none || !ctls.dialog) { return {}; }
+                if(!opt) {
+                    opt = p.options;
+                    ctls = p.controls;
+                    obj = ctls.body;
+                }
+                if(!$.isElement(obj)) {
+                    return {};
+                }                
+                var box = ctls.dialog,
+                    ds = $.getElementSize(box),
+                    ps = $.getElementStyleSize(obj, 'padding'),
+                    psCon = $.getElementStyleSize(ctls.content, 'padding'),
+                    size = { 
+                        width: obj.clientWidth - ps.width - psCon.width, 
+                        height: obj.clientHeight - ps.height - psCon.height,
+                        dialog: ds
+                    };
+                return size;
+            },
             resize: function (_) {
                 var util = this, p = util.getParam(_), opt = p.options, ctls = p.controls;
                 if (p.none || !ctls.dialog) { return util; }
                 var obj = ctls.body;
                 if ($.isFunction(opt.resize) && $.isElement(obj)) {
-                    var ps = $.getElementStyleSize(obj, 'padding'),
-                        psCon = $.getElementStyleSize(ctls.content, 'padding'),
-                        size = { 
-                            width: obj.clientWidth - ps.width - psCon.width, 
-                            height: obj.clientHeight - ps.height - psCon.height
-                        };
+                    var size = util.getSize(_, opt, ctls, obj);
                     //判断尺寸是否改变，防止重复回调相同的尺寸
                     if(!util.compare(p.lastResize, size)) {
                         p.lastResize = size;
@@ -3866,6 +3888,9 @@
         },
         normal: function () {
             return Util.setSize(this, { type: Config.DialogStatus.normal }), this;
+        },
+        size: function(options) {
+            return $.isObject(options) ? this.resize(options) : Util.getSize(this);
         },
         resize: function (options) {
             $.extend(options, { resizeTo: false });
