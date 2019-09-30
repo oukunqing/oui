@@ -408,6 +408,9 @@ function win(){
             //body: {border: 'solid 1px #00f;'},
             title: {color: '#f00'},
             content: {color: '#00f'}
+        },
+        complete: function (d) {
+            console.log('complete:', d, d.size());
         }
     }).resizeTo({width:500});
     $.tooltip.close($I('txtTips'));

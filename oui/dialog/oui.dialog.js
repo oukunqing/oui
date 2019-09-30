@@ -3195,15 +3195,12 @@
             },
             getSize: function(_, opt, ctls, obj) {
                 var util = this, p = util.getParam(_);
-                if (p.none || !ctls.dialog) { return {}; }
                 if(!opt) {
                     opt = p.options;
                     ctls = p.controls;
                     obj = ctls.body;
                 }
-                if(!$.isElement(obj)) {
-                    return {};
-                }                
+                if (p.none || !ctls || !ctls.dialog || !$.isElement(obj)) { return {}; }     
                 var box = ctls.dialog,
                     ds = $.getElementSize(box),
                     ps = $.getElementStyleSize(obj, 'padding'),
@@ -3573,7 +3570,9 @@
             }
 
             if($.isFunction(opt.complete)) {
-                opt.complete(_);
+                window.setTimeout(function() {
+                    opt.complete(_);
+                }, 50);
             }
 
             return _;
