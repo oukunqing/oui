@@ -357,6 +357,8 @@
                 opt.title = title || opt.title;
                 opt.target = target || opt.target;
                 opt.callback = func || opt.callback;
+                opt.complete = opt.complete || opt.onload || opt.ready;
+                opt.coverOCX = opt.coverOCX || opt.coverOcx || opt.cover;
 
                 //对话框关闭后，要获取停止的HTML控件
                 opt.focusTo = opt.focusTo || opt.focus;
@@ -3454,6 +3456,7 @@
                 minAble: true,          //是否允许最小化
                 delayClose: false,      //是否延时关闭，启用延时关闭，则点击“确定按钮”关闭时不会关闭，在callback回调中处理关闭
                 callback: null,         //回调函数，默认情况下，只有点击按钮关闭时才会回调
+                complete: null,         //对话框加载完成后的回调函数
                 codeCallback: false,    //始终回调（当使用代码关闭窗口时也会回调）
                 debounce: true,         //是否防抖
                 debounceDelay: 320,     //防抖间隔，单位：毫秒
@@ -3545,6 +3548,10 @@
                 });
             } else {
                 Util.build(_, opt);
+            }
+
+            if($.isFunction(opt.complete)) {
+                opt.complete(_);
             }
 
             return _;
@@ -3841,7 +3848,7 @@
             } else if (p.status.min) {
                 type = Config.DialogStatus.normal;
             }
-            return Util.setSize(_, { type: type });
+            return Util.setSize(_, { type: type }), _;
         },
         max: function () {
             var _ = this, p = Util.getParam(_);
@@ -3852,13 +3859,13 @@
             if (p.status.max || (p.status.min && lastStatus === Config.DialogStatus.normal)) {
                 type = Config.DialogStatus.normal;
             }
-            return Util.setSize(_, { type: type });
+            return Util.setSize(_, { type: type }), _;
         },
         restore: function () {
-            return Util.setSize(this, { type: Config.DialogStatus.normal });
+            return Util.setSize(this, { type: Config.DialogStatus.normal }), this;
         },
         normal: function () {
-            return Util.setSize(this, { type: Config.DialogStatus.normal });
+            return Util.setSize(this, { type: Config.DialogStatus.normal }), this;
         },
         resize: function (options) {
             $.extend(options, { resizeTo: false });
@@ -3902,7 +3909,7 @@
             return _;
         },
         showHead: function (isShow, type, rebuild) {
-            return Util.showHeadFoot(this, isShow, type, rebuild, 'head');
+            return Util.showHeadFoot(this, isShow, type, rebuild, 'head'), this;
         },
         showFoot: function (isShow, type, rebuild) {
             Util.showHeadFoot(this, isShow, type, rebuild, 'foot');
