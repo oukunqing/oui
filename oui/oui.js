@@ -2099,16 +2099,25 @@
                 ps = getPaddingSize(elem);
             return { width: cs.width - ps.width, height: cs.height - ps.height };
         },
+        getScrollSize = function(elem) {
+            elem = $.toElement(elem);
+            if(isElement(elem)) {
+                return {
+                    left: elem.scrollLeft, width: elem.scrollWidth, top: elem.scrollTop, height: elem.scrollHeight,
+                };
+            }
+            return { left: 0, top: 0, width: 0, height: 0};
+        },
         getElementSize = function(elem, basic) {
             elem = $.toElement(elem);
-            var ns = { width: 0, height: 0 };
+            var ns = { left: 0, top: 0, width: 0, height: 0 };
             if(!$.isElement(elem)) {
                 return {
                     width: 0, height: 0, totalWidth: 0, totalHeight: 0,
                     offsetWidth: 0, offsetHeight: 0, clientWidth: 0, clientHeight: 0,
-                    innerWidth: 0, innerHeight: 0, outerWidth: 0, outerHeight: 0,                    
+                    innerWidth: 0, innerHeight: 0, outerWidth: 0, outerHeight: 0,
                     inner: ns, outer: ns, client: ns, offset: ns,
-                    border: ns, padding: ns, margin: ns, style: $.extend(ns, { left: 0, top: 0 })
+                    border: ns, padding: ns, margin: ns, scroll: ns, style: ns
                 };
             }
             var ps = getPaddingSize(elem),
@@ -2119,6 +2128,7 @@
                 is = getInnerSize(elem),
                 us = getOuterSize(elem),
                 ss = getStyleSize(elem),
+                rs = getScrollSize(elem),
                 par = {
                     offsetWidth: os.width, offsetHeight: os.height,
                     clientWidth: cs.width, clientHeight: cs.height,
@@ -2126,7 +2136,7 @@
                     outerWidth: us.width, outerHeight: us.height,
                     totalWidth: us.width, totalHeight: us.height,
                     inner: is, outer: us, client: cs, offset: os,
-                    border: bs, padding: ps, margin: ms, style: ss
+                    border: bs, padding: ps, margin: ms, scroll: rs, style: ss                    
                 };
 
             return $.extend(par, os);
@@ -2775,6 +2785,7 @@
         getOuterSize: getOuterSize,
         getTotalSize: getOuterSize,
         getInnerSize: getInnerSize,
+        getScrollSize: getScrollSize,
         getElementSize: getElementSize,
         elemSize: getElementSize,
         offset: getOffsetSize,

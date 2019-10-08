@@ -213,7 +213,7 @@ console.log($.buildData('', null, {type:3}));
 console.log($.buildData(null, null, 'type=1&id=4'));
 */
 
-console.log((1562229347).toDate().format());
+console.log((1569683545).toDate().format());
 
 var str = 'http://123';
 
@@ -322,3 +322,6 @@ console.log('##id'.replace(/^[#]+/, ''));
 var pattern = /^[\d\.]+$/g;
 
 console.log(pattern.test('122.227.179.90'))
+
+
+console.log((1569683545).toDate().format());
