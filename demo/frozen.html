@@ -227,14 +227,16 @@
 
 window.onload = function() {
 	$.frozen('tb1', {
-
+		rows: 3,
+		cols: 2,
+		right: 1
 	});
 };
 
 window.onresize = function() {
 	var bs = $.getBodySize();
 	console.log('bs:',bs);
-	if(bs.width < 1000) {
+	if(bs.width < 800) {
 		return false;
 	}
 	var box = $I('divBox');

@@ -9,7 +9,25 @@
 !function ($) {
     'use strict';
 
-    var Factory = {
+    var Config = {
+        FilePath: $.getScriptSelfPath(true)
+    },
+    Factory = {
+        loadCss: function (skin, func) {
+            var path = Config.FilePath,
+                name = $.getFileName(path, true),
+                dir = $.getFilePath(path);
+
+            if ($.isString(skin, true)) {
+                dir += 'skin/' + skin + '/';
+            }
+            $.loadLinkStyle(dir + name.replace('.min', '') + '.css', function () {
+                if ($.isFunction(func)) {
+                    func();
+                }
+            });
+            return this;
+        },
         caches: {},
         buildKey: function(id) {
             return 'frozen-' + id;
@@ -51,11 +69,11 @@
             }
             if(dir === 'clear') {
                 for(var k in cache.controls) {
-                    $.removeElement(cache.controls[k]);
+                    $.removeElement(cache.controls[k].box);
                 }
                 cache.controls = {};
             } else {
-                $.removeElement(cache.controls[dir]);
+                $.removeElement(cache.controls[dir].box);
                 delete cache.controls[dir];
             }
             return this;
@@ -85,14 +103,134 @@
         isTHeadRow: function (row) {
             return row.parentNode && row.parentNode.tagName === 'THEAD';
         },
-        copyAttribute: function (row, rowOld, arrKey) {
+        isTHeadRow: function (row) {
+            return row.parentNode !== null && row.parentNode.tagName === 'THEAD';
+        },
+        createTBody: function (table, row) {
+            if (!Factory.isTHeadRow(row) && !table.created) {
+                var tbody = table.createTBody();
+                table.created = true;
+                return tbody;
+            }
+            return false;
+        },
+        getHead: function(table) {
+            var head = table.tHead;
+            console.log('head:', head);
+            return head;
+        },
+        copyAttribute: function (elem, elemOld, arrKey) {
             for (var k in arrKey) {
                 var key = arrKey[k];
-                if (rowOld[key] != null && rowOld[key] != undefined) {
-                    row[key] = rowOld[key];
+                if (elemOld[key] !== null && elemOld[key] !== undefined) {
+                    elem[key] = elemOld[key];
                 }
             }
             return this;
+        },
+        cloneElement: function(type, elem, elemObj) {
+            elem.className = elemObj.className;
+            elem.style.cssText = elemObj.style.cssText;
+            var arrKey = [];
+
+            if(type === 'row') {
+                arrKey = ['ondblclick', 'onclick', 'onmouseover', 'onmouseout'];
+            } else { // cell
+                arrKey = ['ondblclick', 'onclick', 'onmouseover', 'onmouseout'];
+                var ss = $.getStyleSize(elemObj);
+                elem.style.width = ss.width + 'px';
+            }
+
+            Factory.copyAttribute(elem, elemObj, []);
+
+            return elem;
+        },
+        buildRows: function(tbTarget, tbSource, dir, options) {
+            var offset = 0, 
+                rows = options.rows,
+                cols = options.cols,
+                container = tbSource.tHead !== null ? tbTarget.createTHead() : tbTarget,
+                size = {};
+
+            switch(dir) {
+                case 'head':
+                    var head = Factory.getHead(tbSource), isOver = false;
+                    if(options.fixHead && head) {
+                        tbTarget.appendChild(head.cloneNode(true));
+                        var headRows = head.rows.length;
+                        if(cols > 0 && rows < headRows) {
+                            rows = headRows;
+                        }
+                        offset = headRows;
+                        isOver = rows <= headRows;
+                    }
+                    if(!isOver) {
+                        for(var i = offset; i < rows; i++) {
+                            var rowOld = tbSource.rows[i];
+                            container = Factory.createTBody(tbTarget, rowOld) || container;
+                            var row = container.insertRow(container.rows.length);
+
+                            Factory.cloneElement('row', row, rowOld);
+
+                            for(var j = 0; j < rowOld.cells.length; j++) {
+                                var cellOld = rowOld.cells[j];
+                                var cell = cellOld.cloneNode(true);
+
+                                Factory.cloneElement('cell', cell, cellOld);
+
+                                row.appendChild(cell);
+                            }
+                        }
+                    }
+                    break;
+                case 'left':
+                case 'head-left':
+                    if(dir === 'left') {
+                        rows = tbSource.rows.length;
+                    }
+                    for(var i = offset; i < rows; i++) {
+                        var rowOld = tbSource.rows[i];
+                        container = Factory.createTBody(tbTarget, rowOld) || container;
+                        var row = container.insertRow(container.rows.length);
+
+                        Factory.cloneElement('row', row, rowOld);
+
+                        for(var j = 0; j < cols; j++) {
+                            var cellOld = rowOld.cells[j];
+                            var cell = cellOld.cloneNode(true);
+
+                            Factory.cloneElement('cell', cell, cellOld);
+
+                            row.appendChild(cell);
+                        }
+                    }
+                    break;
+                case 'right':
+                case 'head-right':
+                    cols = options.right;
+                    if(dir === 'right') {
+                        rows = tbSource.rows.length;
+                    }
+                    for(var i = offset; i < rows; i++) {
+                        var rowOld = tbSource.rows[i], c = rowOld.cells.length;
+                        container = Factory.createTBody(tbTarget, rowOld) || container;
+                        var row = container.insertRow(container.rows.length);
+
+                        Factory.cloneElement('row', row, rowOld);
+
+                        for(var j = cols - 1; j >= 0; j--) {
+                            var cellOld = rowOld.cells[c - 1 - j];
+                            var cell = cellOld.cloneNode(true);
+
+                            Factory.cloneElement('cell', cell, cellOld);
+
+                            row.appendChild(cell);
+                        }
+                    }
+                    break;
+            }
+
+            return size;
         },
         getBoxSize: function(table) {
             var parent = table.parentNode,
@@ -100,13 +238,10 @@
 
             return ps;
         },
-        getHead: function(table) {
-            var head = table.tHead;
-            console.log('head:', head);
-            return head;
-        },
-        buildTable: function(f, dir) {
-            var isCol = dir.indexOf('left') >= 0 || dir.indexOf('right') >= 0,
+        buildTable: function(f, dir, options) {
+            var isHead = dir === 'head',
+                isCol = dir === 'left' || dir === 'right',
+                isHeadCol = dir === 'head-left' || dir === 'head-right',
                 isRight = dir.indexOf('right') >= 0,
                 ts = $.elemSize(f.table),
                 bs = $.elemSize(f.box),
@@ -115,19 +250,24 @@
 
                 console.log('isRight:',isRight);
 
+            if(isHead && ts.height < bs.inner.height) {
+                return undefined;
+            } else if(isCol && ts.width < bs.inner.width) {
+                return undefined;
+            }
+
             var bw = dir === 'head' ? bs.inner.width : 200,
                 bh = bs.inner.height,
                 tw = dir === 'head' ? ts.width : 100,
                 th = ts.height;
 
             var div = $.createElement('div', divId, function(elem) {
-                var cssText = 'position:absolute;overflow:hidden;display:block;width:' + bw + 'px;z-index:999999;';
-                if(isCol) {
-                    cssText += 'height:' + bh + 'px;border:solid 1px #f00;';
-                }
-                if(isRight) {
-                    cssText += 'left:' + (bs.inner.width + bs.offset.left - bw + bs.padding.width) + 'px;';
-                    console.log('bs:', bs)
+                elem.className = 'oui-frozen-box';
+                var cssText = '';
+                if(isHead) {
+                    cssText = 'width:' + bw + 'px;';
+                } else if(isCol) {
+                    cssText += 'height:' + bh + 'px;';
                 }
                 elem.style.cssText = cssText;
                 if($.isFirefox) {
@@ -144,39 +284,30 @@
                 }
             });
             var tb = $.createElement('table', tbId, function(elem) {
-                var cssText = 'width:' + tw + 'px;';
-                if(isCol) {
+                var cssText = '';
+                if(isHead) {
+                    cssText = 'width:' + tw + 'px;';
+                } else if(isCol) {
                     cssText += 'height:' + th + 'px;';
                 }
                 elem.style.cssText = cssText;
-                elem.className = f.table.className;
-                
+                elem.className = f.table.className;                
             }, div);
 
-            switch(dir) {
-                case 'head':
-                    var head = Factory.getHead(f.table);
-                    if(head) {
-                        tb.appendChild(head.cloneNode(true));
-                    }
-                    f.divHead = div;
-                    f.tbHead = tb;
-                    break;
-                case 'left':
-                    for(var i = 0; i<f.table.rows.length; i++) {
-                        var row = tb.insertRow(i);
-                        row.appendChild(f.table.rows[i].cells[0].cloneNode(true));
-                    }
-                    f.divLeft = div;
-                    f.tbLeft = tb;
-                    break;
-                case 'right':
-                    f.divRight = div;
-                    f.tbRight = tb;
-                    break;
-            }
+            var size = Factory.buildRows(tb, f.table, dir, options);
+
+            Factory.setControl(f.id, dir, { box: div, table: tb });
 
             f.box.insertBefore(div, f.table);
+
+            if(isRight){
+                var left = (bs.inner.width + bs.offset.left + bs.border.width + bs.padding.width - $.elemSize(div).width);
+                div.style.left = left + 'px';
+                console.log('div:', $.elemSize(div), $.elemSize(tb));
+            }
+            for(var k in size) {
+                div.style[k] = size[k] + 'px';
+            }
 
             return div;
         },
@@ -186,13 +317,31 @@
 
     };
 
+    //先加载样式文件
+    Factory.loadCss();
+
     function Frozen(options) {
 
+        var opt = $.extend({
+            fixHead: true,
+            rows: 0,
+            cols: 0,
+            right: 0,
+            colStartRowIndex: 0,
+            background: '#fff',
+            zindex: 99999,
+            showSplitLine: true,
+            splitLineColor: '#99bbe8',
+            borderWidth: 1,
+            isFixedSize: false,
+            isBootstrap: false
+        }, options);
+
         this.id = options.id;
-        this.table = options.table;
+        this.table = opt.table;
         this.box = this.table.parentNode;
 
-        return this.initial(options);
+        return this.initial(opt);
     }
 
     Frozen.prototype = {
@@ -208,27 +357,42 @@
                 that.rebuild();
             });
 
-            return that.build();
+            return that.build(opt);
         },
-        build: function() {
+        build: function(opt) {
             var that = this;
+            if(!$.isObject(opt)) {
+                var cache = Factory.getCache(that.id);
+                opt = cache.options;
+            }
             Factory.setParam(that.id, 'size', $.getOffset(that.box));
 
-            var head = Factory.buildTable(that, 'head');
-            Factory.setControl(that.id, 'head', head);
-            var left = Factory.buildTable(that, 'left');
-            Factory.setControl(that.id, 'left', left);
-            var right = Factory.buildTable(that, 'right');
-            Factory.setControl(that.id, 'right', right);
+            var head = Factory.buildTable(that, 'head', opt), left, right;
 
+            if(opt.cols > 0) {
+                left = Factory.buildTable(that, 'left', opt);
+            }
+            if(opt.right > 0) {
+                right = Factory.buildTable(that, 'right', opt);
+            }
+            if(head && left) {
+                var headLeft = Factory.buildTable(that, 'head-left', opt);
+            }
+            if(head && right) {
+                var headRightt = Factory.buildTable(that, 'head-right', opt);
+            }
 
             that.box.onscroll = function () {
-                if (that.divHead != null) {
-                    console.log('divHead',this.scrollLeft,that.divHead.scrollLeft)
-                    that.divHead.scrollLeft = this.scrollLeft;
+                var cache = Factory.getCache(that.id),
+                    ctls = cache.controls;
+                if (ctls.head) {
+                    ctls.head.box.scrollLeft = this.scrollLeft;
                 }
-                if (that.divLeft != null) {
-                    that.divLeft.scrollTop = this.scrollTop;
+                if (ctls.left != null) {
+                    ctls.left.box.scrollTop = this.scrollTop;
+                }
+                if (ctls.right != null) {
+                    ctls.right.box.scrollTop = this.scrollTop;
                 }
             };
 
@@ -263,7 +427,7 @@
         clear: function() {
             var cache = Factory.getCache(this.id);
             for(var i in cache.controls) {
-                $.removeElement(cache.controls[i]);
+                $.removeElement(cache.controls[i].box);
             }
             return this;
         },

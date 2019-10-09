@@ -2773,6 +2773,7 @@
         getElementStyleSize: getElementStyleSize,
         elemStyleSize: getElementStyleSize,
         getCssAttrSize: getCssAttrSize,
+        getStyleSize: getStyleSize,
         getPaddingSize: getPaddingSize,
         getMarginSize: getMarginSize,
         getBorderSize: getBorderSize,

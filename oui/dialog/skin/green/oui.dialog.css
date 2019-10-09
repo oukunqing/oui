@@ -1,0 +1,105 @@
+.oui-dialog-green {
+    padding: 5px; 
+    margin: 0px;
+    /*width: auto; */
+    position: absolute;
+    border: solid 1px #ddd;
+    background: #008000;
+    border-radius: 4px;
+    box-sizing: border-box;
+    box-shadow: 0 2px 3px 0 rgba(0,0,0,.32);
+    box-shadow: 0 2px 3px 0 rgba(153,187,232,.32);
+    font-size: 14px;
+    /*
+    font-family: 微软雅黑, 宋体, Arial;
+    */
+    line-height: 1.25em;
+    cursor: default;
+
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+.oui-dialog-green .dialog-main {
+    background: #008000;
+}
+
+.oui-dialog-max {
+    width: 100%; height: 100%; 
+    border-radius: 0px;
+    box-sizing: border-box;
+    top: 0; left: 0;
+    /*border: none 0;*/
+}
+
+.oui-dialog-green .dialog-head{
+    padding:0; margin:0;
+    border: none 0;
+    background: #008000;
+    width: 100%;
+    height: 30px;
+    max-height: 50px;
+    /*border-bottom: solid 1px #ddd;*/
+    box-sizing: border-box;
+    clear: both; 
+    overflow: hidden;
+    /*cursor: move;*/
+    
+    -moz-user-select:none;
+    -khtml-user-select:none;
+    user-select:none;
+    -ms-user-select: none;
+}
+
+.oui-dialog-green .dialog-head .dialog-title {
+    margin: 0; 
+    padding: 0;
+    width: auto;
+    height: 30px;
+    /*font-weight: bold;*/
+    float: left;
+    color: #333;
+    box-sizing: border-box;
+    font-size: 14px;
+    text-align: left;
+    text-indent: 6px;
+    line-height: 28px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.oui-dialog-green .dialog-head .btn-panel {
+    margin: 2px 2px 0 0;
+    float: right;
+}
+
+.oui-dialog-green .dialog-head .dialog-btn {
+    border: solid 1px #008000;
+    border-radius: 3px;
+    background-color: transparent;
+
+    cursor: pointer;
+    width: 20px; height: 20px;
+    display: inline-block;
+    margin: 0 0 0 5px; padding: 0;
+    box-sizing: content-box;
+}
+
+.oui-dialog-green .dialog-body .dialog-icon {
+    border: none 0;
+    width: 32px;
+    height: 32px;
+    position: absolute;
+    left: 3px; top: 3px;
+    display: block;
+}
+
+.oui-dialog-green .dialog-foot .button-panel {
+    border: none 0;
+    box-sizing: border-box;
+    /*border-top: solid 1px #ddd;*/
+    text-align: right;
+    margin: 6px 6px 5px;
+    padding: 0;
+}

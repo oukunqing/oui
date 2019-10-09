@@ -1,0 +1,31 @@
+.oui-frozen-box {
+    position: absolute;
+    display: block;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    z-index: 999999;
+    
+    border: none 0;
+    border-bottom: solid 1px #f00;
+    background: #fff;
+}
+
+.oui-frozen-table {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.oui-frozen-table-head {    
+    border-bottom: solid 1px #f00;
+}
+
+.oui-frozen-table-left {    
+    border-right: solid 1px #f00;
+}
+
+.oui-frozen-table-right {    
+    border-right: solid 1px #f00;
+}
