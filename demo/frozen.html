@@ -21,7 +21,7 @@
 <input type="button" value="隐藏" onclick="hide();" />
 <input type="button" value="显示" onclick="show();" />
 <div id="divBox" style="width:700px; height:300px; overflow:auto;border:solid 4px #f00;padding:0px;margin:0;">
-<table cellpadding="0" cellspacing="0" border="0" class="tb" id="tb1"  style="width:1000px;">
+<table cellpadding="0" cellspacing="0" border="0" class="tb"  style="width:1000px;">
 	<thead>
 	<tr>
 		<td>11</td>
@@ -236,9 +236,17 @@ window.onresize = function() {
 };
 
 function frozen() {
-	//var table = $I('divBox').childNodes[1];
+	var table = $I('divBox').childNodes[1];
 	//console.log('table:', table);
-	var table = 'tb1';
+	//var table = 'tb1';
+	$.frozen(table, {
+		rows: 3,
+		cols: 2,
+		right: 2,
+		complete: function(f) {
+			console.log('f:', f);
+		}
+	});
 	$.frozen(table, {
 		rows: 3,
 		cols: 2,

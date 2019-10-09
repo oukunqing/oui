@@ -90,9 +90,10 @@
         buildFrozen: function(table, options) {
             var id = '';
             if($.isElement(table)) {
-                id = table.id;
+                id = table.id || table.frozenId;
                 if(!id) {
                     id = 'oui-frozen-' + (Config.Index++);
+                    table.frozenId = id;
                 }
             } else if($.isString(table, true)) {
                 id = table;
