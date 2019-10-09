@@ -42,7 +42,9 @@
                 id: id,
                 frozen: f,
                 options: options,
-                controls: {}
+                controls: {},
+                show: true,
+                size: {}
             };
             return this;
         },
@@ -86,11 +88,22 @@
                 id = table;
                 table = $.toElement(table);
             }
+
             var opt = $.extend({
                 id: id,
                 table: table,
+                fixHead: true,
                 rows: 1,
-                cols: 0
+                cols: 0,
+                right: 0,
+                colStartRowIndex: 0,
+                background: '#fff',
+                zindex: 99999,
+                showSplitLine: true,
+                splitLineColor: '#99bbe8',
+                borderWidth: 1,
+                isFixedSize: false,
+                isBootstrap: false
             }, options);
 
             var cache = Factory.getCache(opt.id);
@@ -100,11 +113,15 @@
                 return new Frozen(opt);
             }
         },
-        isTHeadRow: function (row) {
-            return row.parentNode && row.parentNode.tagName === 'THEAD';
+        getFrozen: function(id) {
+            var cache = Factory.getCache(id);
+            if(cache) {
+                return cache.frozen;
+            }
+            return {};
         },
         isTHeadRow: function (row) {
-            return row.parentNode !== null && row.parentNode.tagName === 'THEAD';
+            return row.parentNode && row.parentNode.tagName === 'THEAD';
         },
         createTBody: function (table, row) {
             if (!Factory.isTHeadRow(row) && !table.created) {
@@ -116,7 +133,6 @@
         },
         getHead: function(table) {
             var head = table.tHead;
-            console.log('head:', head);
             return head;
         },
         copyAttribute: function (elem, elemOld, arrKey) {
@@ -128,7 +144,7 @@
             }
             return this;
         },
-        cloneElement: function(type, elem, elemObj) {
+        cloneElement: function(type, elem, elemObj, rowIndex, options) {
             elem.className = elemObj.className;
             elem.style.cssText = elemObj.style.cssText;
             var arrKey = [];
@@ -137,20 +153,49 @@
                 arrKey = ['ondblclick', 'onclick', 'onmouseover', 'onmouseout'];
             } else { // cell
                 arrKey = ['ondblclick', 'onclick', 'onmouseover', 'onmouseout'];
-                var ss = $.getStyleSize(elemObj);
-                elem.style.width = ss.width + 'px';
+                //从指定的行开始计算（并采用）列宽
+                if(rowIndex >= options.colStartRowIndex) {
+                    var ss = $.getStyleSize(elemObj), w = ss.width;
+                    if(!w) {
+                        w = elemObj.clientWidth;
+                    }
+                    elem.style.width = w + 'px';
+                }
             }
 
             Factory.copyAttribute(elem, elemObj, []);
 
             return elem;
         },
+        setSpanCount: function (arr, idx, span) {
+            if (arr[idx] === undefined) {
+                arr[idx] = 0;
+            }
+            arr[idx] += span;
+            return this;
+        },
+        setCut: function(cut, cell, i, j, cols, arrCellCut) {
+            if(j < cols) {
+                if(cell.rowSpan > 1) {
+                    for (var k = 1; k < cell.rowSpan; k++) {
+                        Factory.setSpanCount(arrCellCut, i + k, cell.colSpan);
+                    }
+                } else if(cell.colSpan > 1) {
+                    Factory.setSpanCount(arrCellCut, i, cell.colSpan - 1);
+                    cut = cell.colSpan - 1;
+                }
+            }
+            return cut;
+        },
         buildRows: function(tbTarget, tbSource, dir, options) {
             var offset = 0, 
                 rows = options.rows,
                 cols = options.cols,
                 container = tbSource.tHead !== null ? tbTarget.createTHead() : tbTarget,
-                size = {};
+                arrRowCut = [],
+                arrCellCut = [],
+                size = {},
+                isRight = dir.indexOf('right') >= 0;
 
             switch(dir) {
                 case 'head':
@@ -158,10 +203,8 @@
                     if(options.fixHead && head) {
                         tbTarget.appendChild(head.cloneNode(true));
                         var headRows = head.rows.length;
-                        if(cols > 0 && rows < headRows) {
-                            rows = headRows;
-                        }
                         offset = headRows;
+                        rows = cols > 0 && rows < headRows ? headRows : rows;
                         isOver = rows <= headRows;
                     }
                     if(!isOver) {
@@ -169,15 +212,12 @@
                             var rowOld = tbSource.rows[i];
                             container = Factory.createTBody(tbTarget, rowOld) || container;
                             var row = container.insertRow(container.rows.length);
-
                             Factory.cloneElement('row', row, rowOld);
 
                             for(var j = 0; j < rowOld.cells.length; j++) {
                                 var cellOld = rowOld.cells[j];
                                 var cell = cellOld.cloneNode(true);
-
-                                Factory.cloneElement('cell', cell, cellOld);
-
+                                Factory.cloneElement('cell', cell, cellOld, i, options);
                                 row.appendChild(cell);
                             }
                         }
@@ -185,46 +225,32 @@
                     break;
                 case 'left':
                 case 'head-left':
-                    if(dir === 'left') {
-                        rows = tbSource.rows.length;
-                    }
-                    for(var i = offset; i < rows; i++) {
-                        var rowOld = tbSource.rows[i];
-                        container = Factory.createTBody(tbTarget, rowOld) || container;
-                        var row = container.insertRow(container.rows.length);
-
-                        Factory.cloneElement('row', row, rowOld);
-
-                        for(var j = 0; j < cols; j++) {
-                            var cellOld = rowOld.cells[j];
-                            var cell = cellOld.cloneNode(true);
-
-                            Factory.cloneElement('cell', cell, cellOld);
-
-                            row.appendChild(cell);
-                        }
-                    }
-                    break;
                 case 'right':
                 case 'head-right':
-                    cols = options.right;
-                    if(dir === 'right') {
+                    if(dir === 'left' || dir === 'right') {
                         rows = tbSource.rows.length;
                     }
+                    if(isRight) {
+                        cols = options.right;
+                    }
                     for(var i = offset; i < rows; i++) {
-                        var rowOld = tbSource.rows[i], c = rowOld.cells.length;
+                        var rowOld = tbSource.rows[i], c = rowOld.cells.length, cut = arrCellCut[i] || 0;
                         container = Factory.createTBody(tbTarget, rowOld) || container;
                         var row = container.insertRow(container.rows.length);
-
                         Factory.cloneElement('row', row, rowOld);
 
-                        for(var j = cols - 1; j >= 0; j--) {
-                            var cellOld = rowOld.cells[c - 1 - j];
-                            var cell = cellOld.cloneNode(true);
-
-                            Factory.cloneElement('cell', cell, cellOld);
-
-                            row.appendChild(cell);
+                        for(var j = 0; j < cols - cut; j++) {
+                            var cellOld = isRight ? rowOld.cells[c - j - 1] : rowOld.cells[j];
+                            if(cellOld) {
+                                var cell = cellOld.cloneNode(true);
+                                Factory.cloneElement('cell', cell, cellOld, i, options);
+                                cut = Factory.setCut(cut, cell, i, j, cols, arrCellCut);
+                                if(isRight) {
+                                    row.insertBefore(cell, row.childNodes[0]);
+                                } else {
+                                    row.appendChild(cell);
+                                }
+                            }
                         }
                     }
                     break;
@@ -301,7 +327,7 @@
             f.box.insertBefore(div, f.table);
 
             if(isRight){
-                var left = (bs.inner.width + bs.offset.left + bs.border.width + bs.padding.width - $.elemSize(div).width);
+                var left = (bs.inner.width + bs.offset.left + bs.border.right + bs.padding.width - $.elemSize(div).width);
                 div.style.left = left + 'px';
                 console.log('div:', $.elemSize(div), $.elemSize(tb));
             }
@@ -311,8 +337,24 @@
 
             return div;
         },
-        setPosition: function() {
+        isResize: function(cache, f) {
+            var size = cache.size, 
+                curSize = $.getOffset(f.box),
+                changed = size.width !== curSize.width || size.height !== curSize.height;
 
+            return changed;
+        },
+        setScrollPosition: function(ctls, box) {
+            if (ctls.head) {
+                ctls.head.box.scrollLeft = box.scrollLeft;
+            }
+            if (ctls.left !== null) {
+                ctls.left.box.scrollTop = box.scrollTop;
+            }
+            if (ctls.right !== null) {
+                ctls.right.box.scrollTop = box.scrollTop;
+            }
+            return this;
         }
 
     };
@@ -321,27 +363,13 @@
     Factory.loadCss();
 
     function Frozen(options) {
-
-        var opt = $.extend({
-            fixHead: true,
-            rows: 0,
-            cols: 0,
-            right: 0,
-            colStartRowIndex: 0,
-            background: '#fff',
-            zindex: 99999,
-            showSplitLine: true,
-            splitLineColor: '#99bbe8',
-            borderWidth: 1,
-            isFixedSize: false,
-            isBootstrap: false
-        }, options);
-
         this.id = options.id;
-        this.table = opt.table;
+        this.table = options.table;
         this.box = this.table.parentNode;
 
-        return this.initial(opt);
+        $.addClass(this.box, 'oui-frozen').addClass(this.table, 'oui-frozen');
+
+        return this.initial(options);
     }
 
     Frozen.prototype = {
@@ -360,13 +388,10 @@
             return that.build(opt);
         },
         build: function(opt) {
-            var that = this;
+            var that = this, cache = Factory.getCache(that.id);
             if(!$.isObject(opt)) {
-                var cache = Factory.getCache(that.id);
                 opt = cache.options;
             }
-            Factory.setParam(that.id, 'size', $.getOffset(that.box));
-
             var head = Factory.buildTable(that, 'head', opt), left, right;
 
             if(opt.cols > 0) {
@@ -381,19 +406,14 @@
             if(head && right) {
                 var headRightt = Factory.buildTable(that, 'head-right', opt);
             }
+            Factory.setParam(that.id, 'size', $.getOffset(that.box))
+                .setParam(that.id, 'show', true)
+                .setScrollPosition(cache.controls, that.box);
 
             that.box.onscroll = function () {
                 var cache = Factory.getCache(that.id),
                     ctls = cache.controls;
-                if (ctls.head) {
-                    ctls.head.box.scrollLeft = this.scrollLeft;
-                }
-                if (ctls.left != null) {
-                    ctls.left.box.scrollTop = this.scrollTop;
-                }
-                if (ctls.right != null) {
-                    ctls.right.box.scrollTop = this.scrollTop;
-                }
+                Factory.setScrollPosition(ctls, this);
             };
 
             return that;
@@ -401,28 +421,37 @@
         rebuild: function() {
             var that = this,
                 cache = Factory.getCache(that.id);
-
             if(!cache) {
                 return that.build();
+            } else if(!cache.show) {
+                return that;
             }
-
-            var size = cache.size, 
-                curSize = $.getOffset(that.box),
-                changed = size.width !== curSize.width || size.height !== curSize.height;
-
+            var changed = Factory.isResize(cache, that);
             if(!changed) {
                 return that;
             }
 
             return that.clear().build();
         },
-        show: function() {
+        show: function(isShow) {
+            var show = $.isBoolean(isShow, true),
+                cache = Factory.getCache(this.id),
+                changed = Factory.isResize(cache, this);
 
+            Factory.setParam(this.id, 'show', show);
+
+            if(changed) {
+                return this.clear().build();
+            }
+
+            for(var i in cache.controls) {
+                var box = cache.controls[i].box;
+                box.style.display = show ? '' : 'none';
+            }
             return this;
         },
         hide: function() {
-
-            return this;
+            return this.show(false);
         },
         clear: function() {
             var cache = Factory.getCache(this.id);
@@ -442,6 +471,25 @@
     $.extend({
         frozen: function(obj, options) {
             return Factory.buildFrozen(obj, options);
+        }
+    });
+
+    $.extend($.frozen, {
+        show: function (id, isShow) {
+            var frozen = Factory.getFrozen(id);
+            if(frozen && $.isFunction(frozen.show)) {
+                frozen.show(isShow);
+            }
+            return this;
+        },
+        hide: function (id) {
+            return this.show(id, false);
+        },
+        clear: function (id) {
+            var frozen = Factory.getFrozen(id);
+            if(frozen && $.isFunction(frozen.clear)) {
+                frozen.clear();
+            }
         }
     });
 

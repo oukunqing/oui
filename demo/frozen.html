@@ -13,14 +13,14 @@
 .tb tbody td{text-align:center;font-size:14px;}
 </style>
     <script type="text/javascript" src="../oui/oui.js?12"></script>
-    <script type="text/javascript" src="../oui/frozen/oui.frozen.js?12"></script>
+    <script type="text/javascript" src="../oui/frozen/oui.frozen.js?123"></script>
 </head>
 
 <body>
-<input type="button" value="锁定" onclick="fix();" />
+<input type="button" value="锁定" onclick="frozen();" />
 <input type="button" value="隐藏" onclick="hide();" />
 <input type="button" value="显示" onclick="show();" />
-<div id="divBox" style="width:700px; height:300px; overflow:auto;border:solid 1px #00f;padding:0px;margin:0;">
+<div id="divBox" style="width:700px; height:300px; overflow:auto;border:solid 4px #f00;padding:0px;margin:0;">
 <table cellpadding="0" cellspacing="0" border="0" class="tb" id="tb1" style="width:1000px;">
 	<thead>
 	<tr>
@@ -70,8 +70,7 @@
 		<td>54</td>
 		<td>55</td>
 		<td>56</td>
-		<td>57</td>
-		<td>58</td>
+		<td colspan="2">57</td>
 	</tr>
 	<tr>
 		<td rowspan="2">61</td>
@@ -225,16 +224,8 @@
 </html>
 <script type="text/javascript">
 
-window.onload = function() {
-	$.frozen('tb1', {
-		rows: 3,
-		cols: 2,
-		right: 1
-	});
-};
-
 window.onresize = function() {
-	var bs = $.getBodySize();
+	var bs = $.getBodySize(); 
 	console.log('bs:',bs);
 	if(bs.width < 800) {
 		return false;
@@ -243,5 +234,21 @@ window.onresize = function() {
 	box.style.width = bs.width * 0.9 + 'px';
 	box.style.height = bs.height * 0.8 + 'px';
 };
+
+function frozen() {
+	$.frozen('tb1', {
+		rows: 3,
+		cols: 2,
+		right: 2
+	});
+}
+
+function show() {
+	$.frozen.show('tb1');
+}
+
+function hide() {
+	$.frozen.hide('tb1');
+}
 
 </script>
