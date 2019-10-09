@@ -10,7 +10,8 @@
     'use strict';
 
     var Config = {
-        FilePath: $.getScriptSelfPath(true)
+        FilePath: $.getScriptSelfPath(true),
+        Index: 1
     },
     Factory = {
         loadCss: function (skin, func) {
@@ -80,10 +81,19 @@
             }
             return this;
         },
+        checkOptions: function(options) {
+            var opt = $.extend({}, options);
+            opt.complete = opt.complete || opt.callback;
+
+            return opt;
+        },
         buildFrozen: function(table, options) {
             var id = '';
             if($.isElement(table)) {
                 id = table.id;
+                if(!id) {
+                    id = 'oui-frozen-' + (Config.Index++);
+                }
             } else if($.isString(table, true)) {
                 id = table;
                 table = $.toElement(table);
@@ -103,8 +113,9 @@
                 splitLineColor: '#99bbe8',
                 borderWidth: 1,
                 isFixedSize: false,
-                isBootstrap: false
-            }, options);
+                isBootstrap: false,
+                complete: null
+            }, Factory.checkOptions(options));
 
             var cache = Factory.getCache(opt.id);
             if(cache) {
@@ -389,6 +400,10 @@
                     ctls = cache.controls;
                 Factory.setScrollPosition(ctls, this);
             };
+
+            if($.isFunction(opt.complete)) {
+                opt.complete(that);
+            }
 
             return that;
         },
