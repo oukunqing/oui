@@ -1,7 +1,7 @@
 
 /*
  @Title: oui.frozen.js
- @Description：表头锁定插件
+ @Description：冻结空格（表头锁定）插件
  @Author: oukunqing
  @License：MIT
 */
@@ -322,10 +322,10 @@
             if (ctls.head) {
                 ctls.head.box.scrollLeft = box.scrollLeft;
             }
-            if (ctls.left !== null) {
+            if (ctls.left && ctls.left.box) {
                 ctls.left.box.scrollTop = box.scrollTop;
             }
-            if (ctls.right !== null) {
+            if (ctls.right && ctls.right.box) {
                 ctls.right.box.scrollTop = box.scrollTop;
             }
             return this;
