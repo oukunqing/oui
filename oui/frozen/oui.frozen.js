@@ -194,7 +194,6 @@
                 container = tbSource.tHead !== null ? tbTarget.createTHead() : tbTarget,
                 arrRowCut = [],
                 arrCellCut = [],
-                size = {},
                 isRight = dir.indexOf('right') >= 0;
 
             switch(dir) {
@@ -255,8 +254,7 @@
                     }
                     break;
             }
-
-            return size;
+            return this;
         },
         getBoxSize: function(table) {
             var parent = table.parentNode,
@@ -274,35 +272,21 @@
                 divId = f.id + '-' + dir + '-box',
                 tbId = f.id + '-' + dir + '-table';
 
-                console.log('isRight:',isRight);
-
-            if(isHead && ts.height < bs.inner.height) {
-                return undefined;
-            } else if(isCol && ts.width < bs.inner.width) {
+            if((isHead && ts.height < bs.inner.height) || (isCol && ts.width < bs.inner.width)) {
                 return undefined;
             }
-
-            var bw = dir === 'head' ? bs.inner.width : 200,
-                bh = bs.inner.height,
-                tw = dir === 'head' ? ts.width : 100,
-                th = ts.height;
-
             var div = $.createElement('div', divId, function(elem) {
                 elem.className = 'oui-frozen-box';
-                var cssText = '';
-                if(isHead) {
-                    cssText = 'width:' + bw + 'px;';
-                } else if(isCol) {
-                    cssText += 'height:' + bh + 'px;';
-                }
+                var cssText = isHead ? ('width:' + bs.inner.width + 'px;') : isCol ? ('height:' + bs.inner.height + 'px;') : '';
                 elem.style.cssText = cssText;
+
+                // 同步鼠标滚轮事件
                 if($.isFirefox) {
                     $.addListener(elem, 'DOMMouseScroll', function(e) {
                         // 这里用 +=，因为火狐浏览器下，向下滚动是负值
                         f.box.scrollTop += e.wheelDelta || e.detail;
                     });
                 } else {
-                    // 同步鼠标滚轮事件
                     elem.onmousewheel = function(e) {
                         // 这里用 -=，因为向下滚动是负值
                         f.box.scrollTop -= e.wheelDelta || e.detail;
@@ -310,29 +294,19 @@
                 }
             });
             var tb = $.createElement('table', tbId, function(elem) {
-                var cssText = '';
-                if(isHead) {
-                    cssText = 'width:' + tw + 'px;';
-                } else if(isCol) {
-                    cssText += 'height:' + th + 'px;';
-                }
+                var cssText = isHead ? ('width:' + ts.width + 'px;') : isCol ? ('height:' + ts.height + 'px;') : '';
                 elem.style.cssText = cssText;
                 elem.className = f.table.className;                
             }, div);
 
-            var size = Factory.buildRows(tb, f.table, dir, options);
-
-            Factory.setControl(f.id, dir, { box: div, table: tb });
+            Factory.buildRows(tb, f.table, dir, options).setControl(f.id, dir, { box: div, table: tb });
 
             f.box.insertBefore(div, f.table);
 
-            if(isRight){
+            if(isRight) {
+                //设置右边固定列的box起始位置：inner width + 左偏移 + 右边框 + padding - div宽度
                 var left = (bs.inner.width + bs.offset.left + bs.border.right + bs.padding.width - $.elemSize(div).width);
                 div.style.left = left + 'px';
-                console.log('div:', $.elemSize(div), $.elemSize(tb));
-            }
-            for(var k in size) {
-                div.style[k] = size[k] + 'px';
             }
 
             return div;
