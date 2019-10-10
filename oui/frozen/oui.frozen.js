@@ -106,14 +106,16 @@
         buildFrozen: function(table, options) {
             var id = '';
             if($.isElement(table)) {
-                id = table.id || table.frozenId;
+                id = table.id || $.getAttribute(table, 'frozenid');
                 if(!id) {
                     id = 'oui-frozen-' + (Config.Index++);
-                    table.frozenId = id;
                 }
             } else if($.isString(table, true)) {
                 id = table;
                 table = $.toElement(table);
+            }
+            if(!$.isElement(table)) {
+                return null;
             }
 
             var opt = $.extend({
@@ -139,8 +141,8 @@
                 }
             }, Factory.checkOptions(options));
 
-            var cache = Factory.getCache(opt.id);
-            if(cache) {
+            var cache = Factory.getCache(opt.id), isFrozen = $.getAttribute(table, 'frozenid');
+            if(cache && isFrozen) {
                 return cache.frozen;
             } else {
                 return new Frozen(opt);
@@ -177,7 +179,7 @@
             }
             return this;
         },
-        cloneElement: function(type, elem, elemObj, rowIndex, options) {
+        cloneElement: function(f, type, elem, elemObj, rowIndex, options, dir) {
             elem.className = elemObj.className;
             elem.style.cssText = elemObj.style.cssText;
             var arrKey = [];
@@ -188,11 +190,12 @@
                 arrKey = ['ondblclick', 'onclick', 'onmouseover', 'onmouseout'];
                 //从指定的行开始计算（并采用）列宽
                 if(rowIndex >= options.colStartRowIndex) {
-                    var ss = $.getStyleSize(elemObj), w = ss.width;
-                    if(!w) {
-                        w = elemObj.clientWidth;
-                    }
+                    var ws = $.getStyleSize(elemObj), w = ws.width || elemObj.clientWidth;
                     elem.style.width = w + 'px';
+                }
+                if(elemObj.rowSpan > 1 || dir) {
+                    var hs = $.getStyleSize(elemObj), h = hs.height || elemObj.clientHeight;
+                    elem.style.height = h + 'px';
                 }
             }
 
@@ -251,12 +254,12 @@
                             var rowOld = tbSource.rows[i];
                             container = Factory.createTBody(tbTarget, rowOld) || container;
                             var row = container.insertRow(container.rows.length);
-                            Factory.cloneElement('row', row, rowOld);
+                            Factory.cloneElement(f, 'row', row, rowOld);
 
                             for(var j = 0; j < rowOld.cells.length; j++) {
                                 var cellOld = rowOld.cells[j];
                                 var cell = cellOld.cloneNode(true);
-                                Factory.cloneElement('cell', cell, cellOld, i, options);
+                                Factory.cloneElement(f, 'cell', cell, cellOld, i, options);
                                 row.appendChild(cell);
                             }
                         }
@@ -283,7 +286,7 @@
 
                         container = Factory.createTBody(tbTarget, rowOld) || container;
                         var row = container.insertRow(isFoot ? 0 : container.rows.length);
-                        Factory.cloneElement('row', row, rowOld);
+                        Factory.cloneElement(f, 'row', row, rowOld);
 
                         for(var j = 0; j < cols - cut; j++) {
                             var cellOld = isRight ? rowOld.cells[c - j - 1] : rowOld.cells[j];
@@ -298,7 +301,7 @@
                                     cell.colSpan = cols - j;
                                 }
 
-                                Factory.cloneElement('cell', cell, cellOld, i, options);
+                                Factory.cloneElement(f, 'cell', cell, cellOld, i, options, dir);
                                 cut = Factory.setCut(cut, cell, i, j, cols, arrCellCut);
                                 if(isRight) {
                                     row.insertBefore(cell, row.childNodes[0]);
@@ -316,12 +319,12 @@
                         container = Factory.createTBody(tbTarget, rowOld) || container;
                         //这里要倒着插入行
                         var row = container.insertRow(0);
-                        Factory.cloneElement('row', row, rowOld);
+                        Factory.cloneElement(f, 'row', row, rowOld);
 
                         for(var j = 0; j < rowOld.cells.length; j++) {
                             var cellOld = rowOld.cells[j];
                             var cell = cellOld.cloneNode(true);
-                            Factory.cloneElement('cell', cell, cellOld, i, options);
+                            Factory.cloneElement(f, 'cell', cell, cellOld, i, options);
                             row.appendChild(cell);
                         }
                     }
@@ -388,8 +391,6 @@
             f.box.insertBefore(div, f.table);
 
             if(isRight) {
-                var boxSize = $.elemSize(div), tbSize = $.elemSize(tb);
-                console.log('boxSize:', boxSize, ', tbSize:', tbSize);
                 //设置右边固定列的box起始位置：inner width + 左偏移 + 右边框 + padding - div宽度
                 var left = (bs.inner.width + bs.offset.left + bs.border.right + bs.padding.width - $.elemSize(div).width);
                 div.style.left = left + 'px';
@@ -472,6 +473,7 @@
         this.id = options.id;
         this.table = options.table;
         this.box = this.table.parentNode;
+        this.rowHeights = [];
 
         //$.addClass(this.box, 'oui-frozen').addClass(this.table, 'oui-frozen');
 
@@ -533,6 +535,8 @@
                     ctls = cache.controls;
                 Factory.setScrollPosition(ctls, this);
             };
+
+            $.setAttribute(that.table, 'frozenid', that.id);
 
             if($.isFunction(opt.complete)) {
                 opt.complete(that);

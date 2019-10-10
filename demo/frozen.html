@@ -237,8 +237,9 @@ window.onresize = function() {
 
 var ii = 0;
 
+var table = $I('divBox').childNodes[1];
+
 function frozen() {
-	var table = $I('divBox').childNodes[1];
 	//console.log('table:', table);
 	//var table = 'tb1';
 	$.frozen(table, {
