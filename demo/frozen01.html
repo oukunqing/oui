@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>冻结窗格插件示例</title>
+<title>冻结窗格插件示例 - 第1列无合并</title>
 <style type="text/css">
 .tb{border-collapse:collapse; }
 .tb td{border:solid 1px #008000; text-indent:5px; height:24px; padding:0;}
@@ -21,7 +21,7 @@
 <input type="button" value="隐藏" onclick="hide();" />
 <input type="button" value="显示" onclick="show();" />
 <div id="divBox" style="width:700px; height:300px; overflow:auto;border:solid 4px #f00;padding:0px;margin:0; position: relative;">
-<table cellpadding="0" cellspacing="0" border="0" class="tb"  style="width:1000px;">
+<table cellpadding="0" cellspacing="0" border="0" class="tb" id="tb1" style="width:1000px;">
 	<thead>
 	<tr>
 		<td>11</td>
@@ -45,7 +45,8 @@
 	</thead>
 	<tbody>
 	<tr>
-		<td colspan="2">31</td>
+		<td>31</td>
+		<td>32</td>
 		<td>33</td>
 		<td>34</td>
 		<td>35</td>
@@ -238,16 +239,18 @@ window.onresize = function() {
 var ii = 0;
 
 function frozen() {
-	var table = $I('divBox').childNodes[1];
-	//console.log('table:', table);
-	//var table = 'tb1';
+	var table = 'tb1';
 	$.frozen(table, {
 		//fixHead: false,
-		//rows: 2,
-		cols: 2,
+		rows: 2,
+		cols: 1,
 		right: 1,
+		/*
+		right: 2,
 		foot: 1,
+		*/
 		//debounce: false,
+		border: 'solid 1px #f00',
 		complete: function(f) {
 			console.log('f:', ii++, f);
 		}

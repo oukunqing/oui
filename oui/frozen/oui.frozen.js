@@ -29,6 +29,7 @@
             });
             return this;
         },
+        timers: {},
         caches: {},
         buildKey: function(id) {
             return 'frozen-' + id;
@@ -55,6 +56,14 @@
                 return this;
             }
             cache.controls[dir] = obj;
+            return this;
+        },
+        setOptions: function(id, key, val) {
+            var cache = Factory.getCache(id);
+            if(!cache) {
+                return this;
+            }
+            cache.options[key] = val;
             return this;
         },
         setParam: function(id, key, val) {
@@ -84,6 +93,13 @@
         checkOptions: function(options) {
             var opt = $.extend({}, options);
             opt.complete = opt.complete || opt.callback;
+            opt.rows = parseInt('0' + (opt.rows || opt.head || opt.top), 10);
+            opt.cols = parseInt('0' + (opt.cols || opt.columns || opt.left), 10);
+            opt.right = parseInt('0' + (opt.right), 10);
+            opt.foot = parseInt('0' + (opt.foot || opt.bottom), 10);
+            opt.border = opt.border || opt.borderStyle || '';
+            opt.splitLineColor = opt.splitLineColor || opt.borderColor || '#99bbe8';
+            opt.showSplitLine = opt.showSplitLine || opt.showBorder;
 
             return opt;
         },
@@ -104,18 +120,23 @@
                 id: id,
                 table: table,
                 fixHead: true,
-                rows: 1,
-                cols: 0,
+                rows: 1,    //head,top
+                cols: 0,    //left
                 right: 0,
+                foot: 0,    //bottom
+                debounce: true,
                 colStartRowIndex: 0,
                 background: '#fff',
                 zindex: 99999,
                 showSplitLine: true,
-                splitLineColor: '#99bbe8',
+                border: '',
+                splitLineColor: '#99bbe8',  //borderColor
                 borderWidth: 1,
                 isFixedSize: false,
                 isBootstrap: false,
-                complete: null
+                complete: function(f) {
+
+                }
             }, Factory.checkOptions(options));
 
             var cache = Factory.getCache(opt.id);
@@ -199,14 +220,17 @@
             }
             return cut;
         },
-        buildRows: function(tbTarget, tbSource, dir, options) {
+        buildRows: function(f, tbTarget, tbSource, dir, options) {
             var offset = 0, 
+                rowsLen = tbSource.rows.length,
                 rows = options.rows,
                 cols = options.cols,
                 container = tbSource.tHead !== null ? tbTarget.createTHead() : tbTarget,
                 arrRowCut = [],
                 arrCellCut = [],
-                isRight = dir.indexOf('right') >= 0;
+                isRight = dir.indexOf('right') >= 0,
+                isFoot = dir.indexOf('foot') >= 0,
+                isCorner = dir.indexOf('-') > 0;
 
             switch(dir) {
                 case 'head':
@@ -215,7 +239,11 @@
                         tbTarget.appendChild(head.cloneNode(true));
                         var headRows = head.rows.length;
                         offset = headRows;
-                        rows = cols > 0 && rows < headRows ? headRows : rows;
+                        if(cols > 0 && rows < headRows) {
+                            rows = headRows;
+                            Factory.setOptions(f.id, 'rows', rows);
+                        }
+
                         isOver = rows <= headRows;
                     }
                     if(!isOver) {
@@ -235,25 +263,41 @@
                     }
                     break;
                 case 'left':
-                case 'head-left':
                 case 'right':
+                case 'head-left':
                 case 'head-right':
+                case 'foot-left':
+                case 'foot-right':
                     if(dir === 'left' || dir === 'right') {
-                        rows = tbSource.rows.length;
+                        rows = rowsLen;
+                    } else if(isFoot) {
+                        rows = options.foot;
                     }
                     if(isRight) {
                         cols = options.right;
                     }
                     for(var i = offset; i < rows; i++) {
-                        var rowOld = tbSource.rows[i], c = rowOld.cells.length, cut = arrCellCut[i] || 0;
+                        var rowOld = isFoot ? tbSource.rows[rowsLen - i - 1] : tbSource.rows[i],
+                            c = rowOld.cells.length,
+                            cut = arrCellCut[i] || 0;
+
                         container = Factory.createTBody(tbTarget, rowOld) || container;
-                        var row = container.insertRow(container.rows.length);
+                        var row = container.insertRow(isFoot ? 0 : container.rows.length);
                         Factory.cloneElement('row', row, rowOld);
 
                         for(var j = 0; j < cols - cut; j++) {
                             var cellOld = isRight ? rowOld.cells[c - j - 1] : rowOld.cells[j];
                             if(cellOld) {
-                                var cell = cellOld.cloneNode(true);
+                                var cell = cellOld.cloneNode(true), colSpan = cell.colSpan;
+                                //判断行中的行是否全合并，若全合并则清除该列内容
+                                if(colSpan >= c) {
+                                    cell.innerHTML = '';
+                                }
+                                //判断合并列数是否超出冻结列数
+                                if(colSpan > cols - j) {
+                                    cell.colSpan = cols - j;
+                                }
+
                                 Factory.cloneElement('cell', cell, cellOld, i, options);
                                 cut = Factory.setCut(cut, cell, i, j, cols, arrCellCut);
                                 if(isRight) {
@@ -265,6 +309,24 @@
                         }
                     }
                     break;
+                case 'foot':
+                    rows = options.foot;
+                    for(var i = offset; i < rows; i++) {
+                        var rowOld = tbSource.rows[rowsLen - i - 1];
+                        container = Factory.createTBody(tbTarget, rowOld) || container;
+                        //这里要倒着插入行
+                        var row = container.insertRow(0);
+                        Factory.cloneElement('row', row, rowOld);
+
+                        for(var j = 0; j < rowOld.cells.length; j++) {
+                            var cellOld = rowOld.cells[j];
+                            var cell = cellOld.cloneNode(true);
+                            Factory.cloneElement('cell', cell, cellOld, i, options);
+                            row.appendChild(cell);
+                        }
+                    }
+                    break;
+
             }
             return this;
         },
@@ -276,9 +338,11 @@
         },
         buildTable: function(f, dir, options) {
             var isHead = dir === 'head',
+                isFoot = dir === 'foot',
                 isCol = dir === 'left' || dir === 'right',
                 isHeadCol = dir === 'head-left' || dir === 'head-right',
                 isRight = dir.indexOf('right') >= 0,
+                isBottom = dir.indexOf('foot') >= 0,
                 ts = $.elemSize(f.table),
                 bs = $.elemSize(f.box),
                 divId = f.id + '-' + dir + '-box',
@@ -289,8 +353,14 @@
             }
             var div = $.createElement('div', divId, function(elem) {
                 elem.className = 'oui-frozen-box';
-                var cssText = isHead ? ('width:' + bs.inner.width + 'px;') : isCol ? ('height:' + bs.inner.height + 'px;') : '';
-                elem.style.cssText = cssText;
+                var cssText = isHead || isFoot ? ('width:' + bs.inner.width + 'px;') : isCol ? ('height:' + bs.inner.height + 'px;') : '';
+                if(options.zindex > 0) {
+                    cssText += 'z-index:' + options.zindex + ';';
+                }
+                if(cssText) {
+                    elem.style.cssText = cssText;
+                }
+                Factory.setBorder(elem, dir, options);
 
                 // 同步鼠标滚轮事件
                 if($.isFirefox) {
@@ -306,19 +376,27 @@
                 }
             });
             var tb = $.createElement('table', tbId, function(elem) {
-                var cssText = isHead ? ('width:' + ts.width + 'px;') : isCol ? ('height:' + ts.height + 'px;') : '';
-                elem.style.cssText = cssText;
-                elem.className = f.table.className;                
+                var cssText = isHead || isFoot ? ('width:' + ts.width + 'px;') : isCol ? ('height:' + ts.height + 'px;') : '';
+                if(cssText) {
+                    elem.style.cssText = cssText;
+                }
+                elem.className = f.table.className + ' oui-frozen-table';
             }, div);
 
-            Factory.buildRows(tb, f.table, dir, options).setControl(f.id, dir, { box: div, table: tb });
+            Factory.buildRows(f, tb, f.table, dir, options).setControl(f.id, dir, { box: div, table: tb });
 
             f.box.insertBefore(div, f.table);
 
             if(isRight) {
+                var boxSize = $.elemSize(div), tbSize = $.elemSize(tb);
+                console.log('boxSize:', boxSize, ', tbSize:', tbSize);
                 //设置右边固定列的box起始位置：inner width + 左偏移 + 右边框 + padding - div宽度
                 var left = (bs.inner.width + bs.offset.left + bs.border.right + bs.padding.width - $.elemSize(div).width);
                 div.style.left = left + 'px';
+            }
+            if(isBottom) {
+                var top = (bs.inner.height + bs.offset.top + bs.border.bottom + bs.padding.height - $.elemSize(div).height);
+                div.style.top = top + 'px';
             }
 
             return div;
@@ -331,8 +409,11 @@
             return changed;
         },
         setScrollPosition: function(ctls, box) {
-            if (ctls.head) {
+            if (ctls.head && ctls.head.box) {
                 ctls.head.box.scrollLeft = box.scrollLeft;
+            }
+            if (ctls.foot && ctls.foot.box) {
+                ctls.foot.box.scrollLeft = box.scrollLeft;
             }
             if (ctls.left && ctls.left.box) {
                 ctls.left.box.scrollTop = box.scrollTop;
@@ -340,6 +421,45 @@
             if (ctls.right && ctls.right.box) {
                 ctls.right.box.scrollTop = box.scrollTop;
             }
+            return this;
+        },
+        setBorder: function(obj, dir, opt) {
+            if(!opt.showSplitLine) {
+                return this;
+            }
+            var style = opt.border || ('solid ' + (opt.borderWidth || 1) + 'px' + (opt.splitLineColor || '#99bbe8'));
+
+            if(dir === 'head' || dir === 'head-left' || dir === 'head-right') {
+                obj.style.borderBottom = style;
+            } else if(dir === 'foot' || dir === 'foot-left' || dir === 'foot-right') {
+                obj.style.borderTop = style;
+            }
+            if(dir === 'left' || dir === 'head-left' || dir === 'foot-left') {
+                obj.style.borderRight = style;
+            } else if(dir === 'right' || dir === 'head-right' || dir === 'foot-right') {
+                obj.style.borderLeft = style;
+            }
+            return this;
+        },
+        setDebounce: function(f) {
+            f.clear();
+                            
+            var ft = Factory.timers[f.id], ts = new Date().getTime();
+            if(!ft) {
+                ft = Factory.timers[f.id] = { timer: null, last: ts };
+                return f.build();
+            }
+            window.clearTimeout(ft.timer);
+
+            if(ts - ft.last > 5000) {   
+                ft.last = ts;
+                return f.build();
+            }
+            ft.timer = window.setTimeout(function() {
+                ft.last = new Date().getTime();
+                f.build();
+            }, 100);
+
             return this;
         }
 
@@ -353,7 +473,7 @@
         this.table = options.table;
         this.box = this.table.parentNode;
 
-        $.addClass(this.box, 'oui-frozen').addClass(this.table, 'oui-frozen');
+        //$.addClass(this.box, 'oui-frozen').addClass(this.table, 'oui-frozen');
 
         return this.initial(options);
     }
@@ -362,13 +482,15 @@
         initial: function(opt) {
             var that = this;
 
-            //that.box.style.position = 'relative';
+            var position = $.getElementStyle(that.box, 'position');
+            if(position === 'relative') {
+                that.box.style.position = 'inherit';
+            }
 
             Factory.setCache(that.id, opt, that);
 
             $.addListener(window, 'resize', function() {
-                //that.resize();
-                that.rebuild();
+                return that.rebuild();
             });
 
             return that.build(opt);
@@ -378,7 +500,7 @@
             if(!$.isObject(opt)) {
                 opt = cache.options;
             }
-            var head = Factory.buildTable(that, 'head', opt), left, right;
+            var head = Factory.buildTable(that, 'head', opt), left, right, foot;
 
             if(opt.cols > 0) {
                 left = Factory.buildTable(that, 'left', opt);
@@ -392,6 +514,16 @@
             if(head && right) {
                 var headRightt = Factory.buildTable(that, 'head-right', opt);
             }
+            if(opt.foot > 0) {
+                foot = Factory.buildTable(that, 'foot', opt)
+            }
+            if(foot && left) {
+                var footLeft = Factory.buildTable(that, 'foot-left', opt);
+            }
+            if(foot && right) {
+                var footRightt = Factory.buildTable(that, 'foot-right', opt);
+            }
+
             Factory.setParam(that.id, 'size', $.getOffset(that.box))
                 .setParam(that.id, 'show', true)
                 .setScrollPosition(cache.controls, that.box);
@@ -416,12 +548,17 @@
             } else if(!cache.show) {
                 return that;
             }
-            var changed = Factory.isResize(cache, that);
-            if(!changed) {
+            if(!Factory.isResize(cache, that)) {
                 return that;
             }
+            //return that.clear().build();
 
-            return that.clear().build();
+            var opt = cache.options;
+            if(!opt.debounce) {
+                return that.clear().build();
+            }
+
+            return Factory.setDebounce(that), that;
         },
         show: function(isShow) {
             var show = $.isBoolean(isShow, true),
@@ -448,6 +585,7 @@
             for(var i in cache.controls) {
                 $.removeElement(cache.controls[i].box);
             }
+            cache.controls = {};
             return this;
         },
         update: function() {
