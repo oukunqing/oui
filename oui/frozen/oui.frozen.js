@@ -232,8 +232,7 @@
                 arrRowCut = [],
                 arrCellCut = [],
                 isRight = dir.indexOf('right') >= 0,
-                isFoot = dir.indexOf('foot') >= 0,
-                isCorner = dir.indexOf('-') > 0;
+                isFoot = dir.indexOf('foot') >= 0;
 
             switch(dir) {
                 case 'head':
@@ -339,7 +338,7 @@
 
             return ps;
         },
-        buildTable: function(f, dir, options) {
+        buildTable: function(f, dir, opt) {
             var isHead = dir === 'head',
                 isFoot = dir === 'foot',
                 isCol = dir === 'left' || dir === 'right',
@@ -357,13 +356,16 @@
             var div = $.createElement('div', divId, function(elem) {
                 elem.className = 'oui-frozen-box';
                 var cssText = isHead || isFoot ? ('width:' + bs.inner.width + 'px;') : isCol ? ('height:' + bs.inner.height + 'px;') : '';
-                if(options.zindex > 0) {
-                    cssText += 'z-index:' + options.zindex + ';';
+                if(opt.zindex > 0) {
+                    cssText += 'z-index:' + opt.zindex + ';';
+                }
+                if(opt.background && opt.background !== '#fff') {
+                    cssText += 'background:' + opt.background + ';';
                 }
                 if(cssText) {
                     elem.style.cssText = cssText;
                 }
-                Factory.setBorder(elem, dir, options);
+                Factory.setBorder(elem, dir, opt);
 
                 // 同步鼠标滚轮事件
                 if($.isFirefox) {
@@ -386,7 +388,7 @@
                 elem.className = f.table.className + ' oui-frozen-table';
             }, div);
 
-            Factory.buildRows(f, tb, f.table, dir, options).setControl(f.id, dir, { box: div, table: tb });
+            Factory.buildRows(f, tb, f.table, dir, opt).setControl(f.id, dir, { box: div, table: tb });
 
             f.box.insertBefore(div, f.table);
 
