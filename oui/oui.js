@@ -2731,13 +2731,20 @@
         };
 
     var ua = function () { try { return navigator.userAgent } catch (e) { return '' } }(),
-        ie = ua.indexOf('compatible') > -1 && ua.indexOf('MSIE') > -1 && !isOpera;
+        mc = ua.match(/([A-Z]+)\//ig) || [], ut = mc.join('_').replace(/\//g,''),
+        isFirefox = ut.indexOf('Firefox') > -1,
+        isEdge = ut.indexOf('Edge') > -1,
+        isOpera = ut.indexOf('Opera') > -1 || ut.indexOf('OPR') > -1,
+        isSafari = ut.indexOf('Version_Safari') > -1,
+        isChrome = !isOpera && !isEdge && ut.indexOf('Chrome_Safari') > -1,
+        isIE = ut.indexOf('Trident') > -1 || (ua.indexOf('MSIE') > -1 && ua.indexOf('compatible') > -1);
     $.extendNative($, {
-        isChrome: ua.indexOf('Chrome') > -1,
-        isFirefox: ua.indexOf('Firefox') > -1,
-        isOpera: ua.indexOf('Opera') > -1,
-        isSafari: ua.indexOf('Safari') > -1,
-        isIE: ie, isMSIE: ie,
+        isChrome: isChrome,
+        isFirefox: isFirefox,
+        isOpera: isOpera,
+        isSafari: isSafari,
+        isIE: isIE, isMSIE: isIE,
+        isEdge: isEdge,
         keyCode: {
             Esc: 27,
             Tab: 9,

@@ -130,7 +130,7 @@
                 colStartRowIndex: 0,
                 background: '#fff',
                 zindex: 99999,
-                showSplitLine: true,
+                showSplitLine: false,
                 border: '',
                 splitLineColor: '#99bbe8',  //borderColor
                 borderWidth: 1,
@@ -232,22 +232,22 @@
                 arrRowCut = [],
                 arrCellCut = [],
                 isRight = dir.indexOf('right') >= 0,
-                isFoot = dir.indexOf('foot') >= 0;
+                isFoot = dir.indexOf('foot') >= 0,
+                head = Factory.getHead(tbSource),
+                headRows = head ? head.rows.length : 0;
 
             switch(dir) {
                 case 'head':
-                    var head = Factory.getHead(tbSource), isOver = false;
-                    if(options.fixHead && head) {
+                    var isOver = false;
+                    if(options.fixHead && head && !$.isIE) {
                         tbTarget.appendChild(head.cloneNode(true));
-                        var headRows = head.rows.length;
                         offset = headRows;
-                        if(cols > 0 && rows < headRows) {
-                            rows = headRows;
-                            Factory.setOptions(f.id, 'rows', rows);
-                        }
-
-                        isOver = rows <= headRows;
                     }
+                    if(rows < headRows) {
+                        rows = headRows;
+                        Factory.setOptions(f.id, 'rows', rows);
+                    }
+                    isOver = rows <= headRows;
                     if(!isOver) {
                         for(var i = offset; i < rows; i++) {
                             var rowOld = tbSource.rows[i];
@@ -270,11 +270,7 @@
                 case 'head-right':
                 case 'foot-left':
                 case 'foot-right':
-                    if(dir === 'left' || dir === 'right') {
-                        rows = rowsLen;
-                    } else if(isFoot) {
-                        rows = options.foot;
-                    }
+                    rows = (dir === 'left' || dir === 'right') ? rowsLen : isFoot ? options.foot : rows;
                     if(isRight) {
                         cols = options.right;
                     }
@@ -328,7 +324,6 @@
                         }
                     }
                     break;
-
             }
             return this;
         },
@@ -401,7 +396,6 @@
                 var top = (bs.inner.height + bs.offset.top + bs.border.bottom + bs.padding.height - $.elemSize(div).height);
                 div.style.top = top + 'px';
             }
-
             return div;
         },
         isResize: function(cache, f) {
