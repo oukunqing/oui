@@ -2731,13 +2731,14 @@
         };
 
     var ua = function () { try { return navigator.userAgent } catch (e) { return '' } }(),
-        mc = ua.match(/([A-Z]+)\//ig) || [], ut = mc.join('_').replace(/\//g,''),
-        isFirefox = ut.indexOf('Firefox') > -1,
-        isEdge = ut.indexOf('Edge') > -1,
-        isOpera = ut.indexOf('Opera') > -1 || ut.indexOf('OPR') > -1,
-        isSafari = ut.indexOf('Version_Safari') > -1,
-        isChrome = !isOpera && !isEdge && ut.indexOf('Chrome_Safari') > -1,
-        isIE = ut.indexOf('Trident') > -1 || (ua.indexOf('MSIE') > -1 && ua.indexOf('compatible') > -1);
+        //mc = ua.match(/([A-Z]+)\/([\d\.]+)/ig) || [], ut = mc.join('_').replace(/\//g,''),
+        isFirefox = ua.indexOf('Firefox') > -1,
+        isEdge = ua.indexOf('Edge') > -1,
+        isOpera = ua.indexOf('Opera') > -1 || ua.indexOf('OPR') > -1,
+        isSafari = ua.indexOf('Safari') > -1 && ua.indexOf('Chrome') < 0,
+        isChrome = !isOpera && !isEdge && !isSafari && ua.indexOf('Chrome') > -1,
+        isIE = ua.indexOf('Trident') > -1 || (ua.indexOf('MSIE') > -1 && ua.indexOf('compatible') > -1),
+        ieVersion = isIE ? parseFloat('0' + (ua.match(/(MSIE\s|rv:)([\d\.]+)[;]?/) || [])[2], 10) : 0;
     $.extendNative($, {
         isChrome: isChrome,
         isFirefox: isFirefox,
@@ -2745,6 +2746,7 @@
         isSafari: isSafari,
         isIE: isIE, isMSIE: isIE,
         isEdge: isEdge,
+        ieVersion: ieVersion,
         keyCode: {
             Esc: 27,
             Tab: 9,
