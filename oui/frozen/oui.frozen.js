@@ -100,6 +100,7 @@
             opt.border = opt.border || opt.borderStyle || '';
             opt.splitLineColor = opt.splitLineColor || opt.borderColor || '#99bbe8';
             opt.showSplitLine = opt.showSplitLine || opt.showBorder;
+            opt.setBackground = opt.setBackground || opt.showBackground;
 
             return opt;
         },
@@ -128,9 +129,10 @@
                 foot: 0,    //bottom
                 debounce: true,
                 colStartRowIndex: 0,
-                background: '#fff',
+                background: '#f8f8f8',
                 zindex: 99999,
                 showSplitLine: false,
+                setBackground: true,
                 border: '',
                 splitLineColor: '#99bbe8',  //borderColor
                 borderWidth: 1,
@@ -354,7 +356,7 @@
                 if(opt.zindex > 0) {
                     cssText += 'z-index:' + opt.zindex + ';';
                 }
-                if(opt.background && opt.background !== '#fff') {
+                if(opt.setBackground && opt.background && opt.background !== '#fff') {
                     cssText += 'background:' + opt.background + ';';
                 }
                 if(cssText) {
