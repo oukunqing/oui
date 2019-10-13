@@ -368,7 +368,7 @@
                 divId = f.id + '-' + dir + '-box',
                 tbId = f.id + '-' + dir + '-table';
 
-            if((isHead && ts.height < bs.inner.height) || (isCol && ts.width < bs.inner.width)) {
+            if(((isHead || isFoot) && ts.height < bs.inner.height) || (isCol && ts.width < bs.inner.width)) {
                 return undefined;
             }
             var div = $.createElement('div', divId, function(elem) {
