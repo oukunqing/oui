@@ -239,7 +239,7 @@ window.onresize = function() {
 
 var ii = 0;
 
-var table = $I('divBox').childNodes[1];
+var table = $I('divBox').childNodes[1], fid = '';
 
 function frozen() {
 	//console.log('table:', table);
@@ -256,16 +256,17 @@ function frozen() {
 		//debounce: false,
 		complete: function(f) {
 			console.log('f:', ii++, f);
+			fid = f.id;
 		}
 	});
 }
 
 function show() {
-	$.frozen.show('tb1');
+	$.frozen.show(fid);
 }
 
 function hide() {
-	$.frozen.hide('tb1');
+	$.frozen.hide(fid);
 }
 
 </script>

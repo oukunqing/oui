@@ -228,6 +228,9 @@
         buildHeadRows: function(f, offset, rows, tbTarget, tbSource, container, options, isBody) {
             for(var i = offset; i < rows; i++) {
                 var rowOld = tbSource.rows[i];
+                if(!rowOld) {
+                    break;
+                }
                 if(isBody) {
                     container = Factory.createTBody(tbTarget, rowOld) || container;
                 }
@@ -258,7 +261,6 @@
 
             switch(dir) {
                 case 'head':
-                    var isOver = false;
                     if(options.fixHead && head) {
                         if(!$.isIE) {
                             tbTarget.appendChild(head.cloneNode(true));
@@ -267,13 +269,11 @@
                         }
                         offset = headRows;
                     }
-                    if(rows < headRows) {
+                    if(rows > headRows) {
+                        Factory.buildHeadRows(f, offset, rows, tbTarget, tbSource, container, options, true);
+                    } else if(rows < headRows) {
                         rows = headRows;
                         Factory.setOptions(f.id, 'rows', rows);
-                    }
-                    isOver = rows <= headRows;
-                    if(!isOver) {
-                        Factory.buildHeadRows(f, offset, headRows, tbTarget, tbSource, container, options, true);
                     }
                     break;
                 case 'left':
@@ -287,12 +287,17 @@
                         cols = options.right;
                     }
                     for(var i = offset; i < rows; i++) {
-                        var rowOld = isFoot ? tbSource.rows[rowsLen - i - 1] : tbSource.rows[i],
+                        var rowOld = isFoot ? tbSource.rows[rowsLen - i - 1] : tbSource.rows[i];
+                        if(!rowOld) {
+                            break;
+                        }
+
+                        container = Factory.createTBody(tbTarget, rowOld) || container;
+
+                        var row = container.insertRow(isFoot ? 0 : container.rows.length),
                             c = rowOld.cells.length,
                             cut = arrCellCut[i] || 0;
 
-                        container = Factory.createTBody(tbTarget, rowOld) || container;
-                        var row = container.insertRow(isFoot ? 0 : container.rows.length);
                         Factory.cloneElement(f, 'row', row, rowOld);
 
                         for(var j = 0; j < cols - cut; j++) {
@@ -323,6 +328,9 @@
                     rows = options.foot;
                     for(var i = offset; i < rows; i++) {
                         var rowOld = tbSource.rows[rowsLen - i - 1];
+                        if(!rowOld) {
+                            break;
+                        }
                         container = Factory.createTBody(tbTarget, rowOld) || container;
                         //这里要倒着插入行
                         var row = container.insertRow(0);
@@ -330,9 +338,11 @@
 
                         for(var j = 0; j < rowOld.cells.length; j++) {
                             var cellOld = rowOld.cells[j];
-                            var cell = cellOld.cloneNode(true);
-                            Factory.cloneElement(f, 'cell', cell, cellOld, i, options);
-                            row.appendChild(cell);
+                            if(cellOld) {
+                                var cell = cellOld.cloneNode(true);
+                                Factory.cloneElement(f, 'cell', cell, cellOld, i, options);
+                                row.appendChild(cell);
+                            }
                         }
                     }
                     break;
@@ -483,8 +493,6 @@
         this.box = this.table.parentNode;
         this.rowHeights = [];
 
-        //$.addClass(this.box, 'oui-frozen').addClass(this.table, 'oui-frozen');
-
         return this.initial(options);
     }
 
@@ -493,6 +501,8 @@
             var that = this;
 
             var position = $.getElementStyle(that.box, 'position');
+            // 若表格容器DIV的position为relative，则空格冻结效果会错乱
+            // 故移除表格容器DIV的relative样式属性
             if(position === 'relative') {
                 that.box.style.position = 'inherit';
             }
@@ -544,6 +554,7 @@
                 Factory.setScrollPosition(ctls, this);
             };
 
+            // 设置 frozenid 属性，以此来判断table是否已经生成窗格冻结，防止重复生成
             $.setAttribute(that.table, 'frozenid', that.id);
 
             if($.isFunction(opt.complete)) {
@@ -552,7 +563,7 @@
 
             return that;
         },
-        rebuild: function() {
+        rebuild: function(force) {
             var that = this,
                 cache = Factory.getCache(that.id);
             if(!cache) {
@@ -560,7 +571,8 @@
             } else if(!cache.show) {
                 return that;
             }
-            if(!Factory.isResize(cache, that)) {
+
+            if(!force && !Factory.isResize(cache, that)) {
                 return that;
             }
             //return that.clear().build();
@@ -575,11 +587,11 @@
         show: function(isShow) {
             var show = $.isBoolean(isShow, true),
                 cache = Factory.getCache(this.id),
-                changed = Factory.isResize(cache, this);
+                sizeChanged = Factory.isResize(cache, this);
 
             Factory.setParam(this.id, 'show', show);
 
-            if(changed) {
+            if(sizeChanged) {
                 return this.clear().build();
             }
 
@@ -601,7 +613,8 @@
             return this;
         },
         update: function() {
-            return this.rebuild();
+            // 强制重新生成
+            return this.rebuild(true);
         },
         resize: function() {
             return this.rebuild();
