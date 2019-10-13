@@ -225,24 +225,46 @@
             }
             return cut;
         },
+        buildHeadRows: function(f, offset, rows, tbTarget, tbSource, container, options, isBody) {
+            for(var i = offset; i < rows; i++) {
+                var rowOld = tbSource.rows[i];
+                if(isBody) {
+                    container = Factory.createTBody(tbTarget, rowOld) || container;
+                }
+                var row = container.insertRow(container.rows.length);
+                Factory.cloneElement(f, 'row', row, rowOld);
+
+                for(var j = 0; j < rowOld.cells.length; j++) {
+                    var cellOld = rowOld.cells[j];
+                    var cell = cellOld.cloneNode(true);
+                    Factory.cloneElement(f, 'cell', cell, cellOld, i, options);
+                    row.appendChild(cell);
+                }
+            }
+            return this;
+        },
         buildRows: function(f, tbTarget, tbSource, dir, options) {
             var offset = 0, 
                 rowsLen = tbSource.rows.length,
                 rows = options.rows,
                 cols = options.cols,
-                container = tbSource.tHead !== null ? tbTarget.createTHead() : tbTarget,
                 arrRowCut = [],
                 arrCellCut = [],
                 isRight = dir.indexOf('right') >= 0,
                 isFoot = dir.indexOf('foot') >= 0,
                 head = Factory.getHead(tbSource),
-                headRows = head ? head.rows.length : 0;
+                headRows = head ? head.rows.length : 0,
+                container = !isFoot && tbSource.tHead !== null ? tbTarget.createTHead() : tbTarget;
 
             switch(dir) {
                 case 'head':
                     var isOver = false;
-                    if(options.fixHead && head && !$.isIE) {
-                        tbTarget.appendChild(head.cloneNode(true));
+                    if(options.fixHead && head) {
+                        if(!$.isIE) {
+                            tbTarget.appendChild(head.cloneNode(true));
+                        } else {
+                            Factory.buildHeadRows(f, offset, headRows, tbTarget, tbSource, container, options, false);
+                        }
                         offset = headRows;
                     }
                     if(rows < headRows) {
@@ -251,19 +273,7 @@
                     }
                     isOver = rows <= headRows;
                     if(!isOver) {
-                        for(var i = offset; i < rows; i++) {
-                            var rowOld = tbSource.rows[i];
-                            container = Factory.createTBody(tbTarget, rowOld) || container;
-                            var row = container.insertRow(container.rows.length);
-                            Factory.cloneElement(f, 'row', row, rowOld);
-
-                            for(var j = 0; j < rowOld.cells.length; j++) {
-                                var cellOld = rowOld.cells[j];
-                                var cell = cellOld.cloneNode(true);
-                                Factory.cloneElement(f, 'cell', cell, cellOld, i, options);
-                                row.appendChild(cell);
-                            }
-                        }
+                        Factory.buildHeadRows(f, offset, headRows, tbTarget, tbSource, container, options, true);
                     }
                     break;
                 case 'left':
