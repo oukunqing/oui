@@ -325,3 +325,7 @@ console.log(pattern.test('122.227.179.90'))
 
 
 console.log((1569683545).toDate().format());
+
+var rows = 0, headRows = 2;
+rows = headRows || 1;
+console.log('rows:', rows);

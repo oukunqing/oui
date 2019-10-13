@@ -123,7 +123,7 @@
                 id: id,
                 table: table,
                 fixHead: true,
-                rows: 1,    //head,top
+                rows: 0,    //head,top
                 cols: 0,    //left
                 right: 0,
                 foot: 0,    //bottom
@@ -269,11 +269,12 @@
                         }
                         offset = headRows;
                     }
+                    if(rows < headRows || (!head && rows <= 0)) {
+                        rows = headRows || 1;
+                        Factory.setOptions(f.id, 'rows', rows);
+                    }
                     if(rows > headRows) {
                         Factory.buildHeadRows(f, offset, rows, tbTarget, tbSource, container, options, true);
-                    } else if(rows < headRows) {
-                        rows = headRows;
-                        Factory.setOptions(f.id, 'rows', rows);
                     }
                     break;
                 case 'left':
