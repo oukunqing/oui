@@ -413,8 +413,8 @@
                 bs = $.elemSize(f.box),
                 divId = f.id + '-' + dir + '-box',
                 tbId = f.id + '-' + dir + '-table';
-
-            if(((isHead || isFoot) && ts.height < bs.inner.height) || (isCol && ts.width < bs.inner.width)) {
+           
+            if(((isHead || isFoot) && ts.height <= bs.inner.height) || (isCol && ts.width <= bs.inner.width)) {
                 return undefined;
             }
             var div = $.createElement('div', divId, function(elem) {
@@ -424,6 +424,7 @@
                     cssText += 'z-index:' + opt.zindex + ';';
                 }
                 /*
+                // DIV 不再设置背景色，改成设置 Table
                 if(opt.setBackground && opt.background && opt.background !== '#fff') {
                     cssText += 'background:' + opt.background + ';';
                 }
