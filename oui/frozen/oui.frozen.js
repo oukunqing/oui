@@ -419,7 +419,7 @@
                 var top = (bs.inner.height + bs.offset.top + bs.border.bottom + bs.padding.height - $.elemSize(div).height);
                 div.style.top = top + 'px';
             }
-            return div;
+            return { div: div, table: tb };
         },
         isResize: function(cache, f) {
             var size = cache.size, 
@@ -521,28 +521,31 @@
             if(!$.isObject(opt)) {
                 opt = cache.options;
             }
-            var head = Factory.buildTable(that, 'head', opt), left, right, foot;
+            var head = Factory.buildTable(that, 'head', opt), left, right, foot, 
+                tbRows = that.table.rows.length;
 
-            if(opt.cols > 0) {
-                left = Factory.buildTable(that, 'left', opt);
-            }
-            if(opt.right > 0) {
-                right = Factory.buildTable(that, 'right', opt);
-            }
-            if(head && left) {
-                var headLeft = Factory.buildTable(that, 'head-left', opt);
-            }
-            if(head && right) {
-                var headRightt = Factory.buildTable(that, 'head-right', opt);
-            }
-            if(opt.foot > 0) {
-                foot = Factory.buildTable(that, 'foot', opt)
-            }
-            if(foot && left) {
-                var footLeft = Factory.buildTable(that, 'foot-left', opt);
-            }
-            if(foot && right) {
-                var footRightt = Factory.buildTable(that, 'foot-right', opt);
+            if(tbRows > opt.rows) {
+                if(opt.cols > 0) {
+                    left = Factory.buildTable(that, 'left', opt);
+                }
+                if(opt.right > 0) {
+                    right = Factory.buildTable(that, 'right', opt);
+                }
+                if(head && left) {
+                    var headLeft = Factory.buildTable(that, 'head-left', opt);
+                }
+                if(head && right) {
+                    var headRightt = Factory.buildTable(that, 'head-right', opt);
+                }
+                if(opt.foot > 0) {
+                    foot = Factory.buildTable(that, 'foot', opt)
+                }
+                if(foot && left) {
+                    var footLeft = Factory.buildTable(that, 'foot-left', opt);
+                }
+                if(foot && right) {
+                    var footRightt = Factory.buildTable(that, 'foot-right', opt);
+                }
             }
 
             Factory.setParam(that.id, 'size', $.getOffset(that.box))
