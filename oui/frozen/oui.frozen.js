@@ -195,7 +195,7 @@
                     var ws = $.getStyleSize(elemObj), w = ws.width || elemObj.clientWidth;
                     elem.style.width = w + 'px';
                 }
-                if(elemObj.rowSpan > 1 || dir) {
+                if(elemObj.rowSpan > 1 || (dir && dir !== 'head')) {
                     var hs = $.getStyleSize(elemObj), h = hs.height || elemObj.clientHeight;
                     elem.style.height = h + 'px';
                 }
@@ -240,7 +240,7 @@
                 for(var j = 0; j < rowOld.cells.length; j++) {
                     var cellOld = rowOld.cells[j];
                     var cell = cellOld.cloneNode(true);
-                    Factory.cloneElement(f, 'cell', cell, cellOld, i, options);
+                    Factory.cloneElement(f, 'cell', cell, cellOld, i, options, 'head');
                     row.appendChild(cell);
                 }
             }
@@ -455,7 +455,12 @@
                 if(cssText) {
                     elem.style.cssText = cssText;
                 }
-                elem.className = f.table.className + ' oui-frozen-table';
+                //elem.className = f.table.className + ' oui-frozen-table';
+                $.addClass(elem, f.table.className + ' oui-frozen-table');
+
+                if(($.isFirefox || $.isIE) && (isHead || isFoot)) {
+                    elem.style.width = ts.clientWidth + 'px';
+                }
 
                 Factory.setMargin(elem, dir, ts);
             }, div);
@@ -561,6 +566,8 @@
             if(position === 'relative') {
                 that.box.style.position = 'inherit';
             }
+
+            $.addClass(that.table, 'oui-frozen-table');
 
             Factory.setCache(that.id, opt, that);
 
