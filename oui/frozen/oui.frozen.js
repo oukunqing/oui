@@ -356,6 +356,52 @@
 
             return ps;
         },
+        setMargin: function(table, dir, ts) {
+            var arr = [], arr2 = [];
+            switch(dir) {
+                case 'head':
+                    arr = ['Top','Left','Right'];
+                    arr2 = ['Bottom'];
+                    break;
+                case 'head-left':
+                    arr = ['Top','Left'];
+                    arr2 = ['Bottom', 'Right'];
+                    break;
+                case 'head-right':
+                    arr = ['Top','Right'];
+                    arr2 = ['Bottom', 'Left'];
+                    break;
+                case 'left':
+                    arr = ['Top','Left','Bottom'];
+                    arr2 = ['Right'];
+                    break;
+                case 'right':
+                    arr = ['Top','Right','Bottom'];
+                    arr2 = ['Left'];
+                    break;
+                case 'foot':
+                    arr = ['Bottom','Left','Right'];
+                    arr2 = ['Top'];
+                    break;
+                case 'foot-left':
+                    arr = ['Bottom','Left'];
+                    arr2 = ['Top', 'Right'];
+                    break;
+                case 'foot-right':
+                    arr = ['Bottom','Right'];
+                    arr2 = ['Top', 'Left'];
+                    break;
+            }
+            for(var i = 0; i < arr.length; i++) {
+                var mr = ts.margin[arr[i].toLowerCase()];
+                if(mr) {
+                    table.style['margin' + arr[i]] = mr + 'px';
+                }
+            }
+            for(var i = 0; i < arr2.length; i++) {
+                table.style['margin' + arr2[i]] = '0px';
+            }
+        },
         buildTable: function(f, dir, opt) {
             var isHead = dir === 'head',
                 isFoot = dir === 'foot',
@@ -402,7 +448,7 @@
             });
             var tb = $.createElement('table', tbId, function(elem) {
                 var cssText = isHead || isFoot ? ('width:' + ts.width + 'px;') : isCol ? ('height:' + ts.height + 'px;') : '';
-                
+
                 if(opt.setBackground && opt.background && opt.background !== '#fff') {
                     cssText += 'background:' + opt.background + ';';
                 }
@@ -410,6 +456,8 @@
                     elem.style.cssText = cssText;
                 }
                 elem.className = f.table.className + ' oui-frozen-table';
+
+                Factory.setMargin(elem, dir, ts);
             }, div);
 
             Factory.buildRows(f, tb, f.table, dir, opt).setControl(f.id, dir, { box: div, table: tb });
