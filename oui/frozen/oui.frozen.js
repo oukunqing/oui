@@ -377,9 +377,11 @@
                 if(opt.zindex > 0) {
                     cssText += 'z-index:' + opt.zindex + ';';
                 }
+                /*
                 if(opt.setBackground && opt.background && opt.background !== '#fff') {
                     cssText += 'background:' + opt.background + ';';
                 }
+                */
                 if(cssText) {
                     elem.style.cssText = cssText;
                 }
@@ -400,6 +402,10 @@
             });
             var tb = $.createElement('table', tbId, function(elem) {
                 var cssText = isHead || isFoot ? ('width:' + ts.width + 'px;') : isCol ? ('height:' + ts.height + 'px;') : '';
+                
+                if(opt.setBackground && opt.background && opt.background !== '#fff') {
+                    cssText += 'background:' + opt.background + ';';
+                }
                 if(cssText) {
                     elem.style.cssText = cssText;
                 }
