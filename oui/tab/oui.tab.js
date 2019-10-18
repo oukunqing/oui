@@ -17,9 +17,31 @@
         LongPressInterval: 40,   //长按滚动间隔，单位：毫秒
         LongPressMinInterval: 10,   //长按滚动间隔，单位：毫秒
         LongPressScrollDistance: 10,     //长按时一次滚动的距离，单位：px
-        LongPressScrollMaxDistance: 50     //长按时一次滚动的距离，单位：px
+        LongPressScrollMaxDistance: 50,     //长按时一次滚动的距离，单位：px
+        LangText: {
+            loading: {chinese: '正在努力加载，请稍候...', english: 'Loading, please wait a moment!'},
+            overrun: {chinese: '标签页数量已超出限制', english: 'Tab page count exceeded limit.'},
+
+            close: {chinese: '关闭当前标签页', english: 'Close tab'},
+            closeall: {chinese: '关闭全部标签页', english: 'Close all tabs'},
+            closeother: {chinese: '关闭其他标签页', english: 'Close other tabs'},
+            closeleft: {chinese: '关闭左侧标签页', english: 'Close tab to the left'},
+            closeright: {chinese: '关闭右侧标签页', english: 'Close tab to the right'},
+            reload: {chinese: '重新加载', english: 'Reload'},
+            reloadall: {chinese: '全部重新加载', english: 'Reload all'},
+            reopen: {chinese: '重新打开关闭的标签页', english: 'Reopen closed tab'},
+            reopenall: {chinese: '重新打开关闭的全部标签页', english: 'Reopen all closed tab'}
+        }
     },
     Util = {
+        getLangText: function(key, lang) {
+            lang = (lang || '').toLowerCase();
+            if(['chinese', 'english'].indexOf(lang) < 0) {
+                lang = 'chinese';
+            }
+            var txt = Config.LangText[key];
+            return txt ? txt[lang] : '';
+        },
         buildId: function(objId, itemId, prefix) {
             return prefix + '-' + objId + '-' + itemId;
         },
@@ -94,7 +116,7 @@
                 t.show(itemId);
                 return this;
             }
-            var elem = $.createElement('li', '', function(elem) {
+            var tab = $.createElement('li', '', function(elem) {
                 elem.className = 'tab-item';
                 elem.id = objId + '-' + itemId;
                 elem.itemId = itemId;
@@ -135,15 +157,15 @@
             });
 
             if($.isNumber(insertIndex)) {
-                t.container.insertBefore(elem, t.container.childNodes[insertIndex]);
+                t.container.insertBefore(tab, t.container.childNodes[insertIndex]);
             } else if($.isString(insertIndex, true)) {
                 var existingItem = document.getElementById(objId + '-' + insertIndex);
-                t.container.insertBefore(elem, existingItem);
+                t.container.insertBefore(tab, existingItem);
             } else {
-                t.container.appendChild(elem);
+                t.container.appendChild(tab);
             }
 
-            var childs = elem.childNodes;
+            var childs = tab.childNodes;
             for(var i=0; i<childs.length; i++) {
                 if(childs[i].className.endsWith('close')) {
                     childs[i]['onclick'] = function() {
@@ -153,12 +175,12 @@
                 }
             }
 
-            elem['on' + cfg.eventName] = function() {
+            tab['on' + cfg.eventName] = function() {
                 t.show(itemId);
             };
 
             if(cfg.showContextMenu) {
-                elem['oncontextmenu'] = function(ev) {
+                tab['oncontextmenu'] = function(ev) {
                     $.cancelBubble();
                     Util.buildContextMenu(t, ev, this.itemId);
                     return false;
@@ -172,7 +194,8 @@
                     isIframe = true;
                     iframeId = Util.buildIframeId(objId, itemId);
                     loadingId = Util.buildLoadingId(objId, itemId);
-                    html += '<div id="' + loadingId + '" class="tab-loading">正在努力加载，请稍候...</div>'
+                    html += '<div id="' + loadingId + '" class="tab-loading" style="display:none;">' 
+                        + Util.getLangText('loading', opt.lang) + '</div>'
                         + '<iframe id="' + iframeId + '" class="tab-iframe"'
                         + ' style="width:100%;height:' + cfg.conHeight + 'px;"'
                         + ' src="about:block;" frameborder="0" scrolling="auto"></iframe>';
@@ -182,26 +205,31 @@
                 elem.innerHTML = html;
                 elem.style.display = 'none';
 
-                if(isIframe) {
-                    var iframe = $I(iframeId);
-                    if(iframe) {
-                        iframe.itemId = itemId;
+                var iframe = isIframe ? $I(iframeId) : undefined;
+                if(iframe) {
+                    iframe.itemId = itemId;
+                    if(opt.load) {
                         Util.loadPage(t, iframe, Util.buildPageUrl(opt.url, itemId));
                     }
                 }
 
                 t.setContentSize(itemId, false, opt);
+
+                Factory.setCache(t.id, opt, tab, elem, iframe);
             }, t.conContainer);
 
-            Factory.setCache(t.id, opt, elem, div, iframeId);
+            //Factory.setCache(t.id, opt, tab, div, iframe);
 
             return this;
         },
         buildPageUrl: function(url, itemId) {
             return url.setUrlParam('tab_item_id', itemId).setUrlParam();
         },
-        loadPage: function(t, iframe, url) {
+        loadPage: function(t, iframe, url, forceLoad) {
             try{
+                if(!iframe || !url || (iframe.loaded && !forceLoad)) {
+                    return this;
+                }
                 var loading = $I(Util.buildLoadingId(t.id, iframe.itemId));
                 loading.style.display = '';
                 iframe.src = $.setQueryString(url);
@@ -210,12 +238,14 @@
                         loading.style.display = 'none';
                     }
                 };
+                //设置加载标记，表示iframe已经加载过
+                iframe.loaded = true;
             } catch(e) {
 
             }
             return this;
         },
-        setSize: function(t, func) {
+        setSize: function(t, func, par) {
             window.clearTimeout(t.sizeTimer);
             t.sizeTimer = window.setTimeout(function() {
                 var ts = $.getInnerSize(t.tabContainer),
@@ -249,7 +279,7 @@
                 t.container.style.width = tw + 'px';
 
                 if($.isFunction(func)) {
-                    func();
+                    func(par);
                 }
             }, 5);
             return this;
@@ -374,20 +404,20 @@
             if(!s) {
                 return this;
             }
-            var dis = ' disabled';
+            var cache = Factory.getCache(t.id), opt = cache.options, dis = ' disabled';
             var html = [
-                '<a class="cmenu-item{0}" code="cur">关闭当前标签页</a>'.format(s.close ? '' : dis),
+                '<a class="cmenu-item{0}" code="cur">{1}</a>'.format(s.close ? '' : dis, Util.getLangText('close', opt.lang)),
                 '<div class="cmenu-sep"></div>',
-                '<a class="cmenu-item{0}" code="all">关闭全部标签页</a>'.format(s.count > 0 ? '' : dis),
-                '<a class="cmenu-item{0}" code="other">关闭其他标签页</a>'.format(s.other > 0 ? '' : dis),
-                '<a class="cmenu-item{0}" code="left">关闭左侧标签页</a>'.format(s.left > 0 ? '' : dis),
-                '<a class="cmenu-item{0}" code="right">关闭右侧标签页</a>'.format(s.right > 0 ? '' : dis),
+                '<a class="cmenu-item{0}" code="all">{1}</a>'.format(s.count > 0 ? '' : dis, Util.getLangText('closeall', opt.lang)),
+                '<a class="cmenu-item{0}" code="other">{1}</a>'.format(s.other > 0 ? '' : dis, Util.getLangText('closeother', opt.lang)),
+                '<a class="cmenu-item{0}" code="left">{1}</a>'.format(s.left > 0 ? '' : dis, Util.getLangText('closeleft', opt.lang)),
+                '<a class="cmenu-item{0}" code="right">{1}</a>'.format(s.right > 0 ? '' : dis, Util.getLangText('closeright', opt.lang)),
                 '<div class="cmenu-sep"></div>',
-                '<a class="cmenu-item{0}" code="reload">重新加载</a>'.format(s.iframe ? '' : dis),
-                '<a class="cmenu-item{0}" code="reloadAll">全部重新加载</a>'.format(s.iframeCount > 0 ? '' : dis),
+                '<a class="cmenu-item{0}" code="reload">{1}</a>'.format(s.iframe ? '' : dis, Util.getLangText('reload', opt.lang)),
+                '<a class="cmenu-item{0}" code="reloadAll">{1}</a>'.format(s.iframeCount > 0 ? '' : dis, Util.getLangText('reloadall', opt.lang)),
                 '<div class="cmenu-sep"></div>',
-                '<a class="cmenu-item{0}" code="reopen">重新打开关闭的标签页</a>'.format(s.closedCount > 0 ? '' : dis),
-                '<a class="cmenu-item{0}" code="reopenAll">重新打开关闭的全部标签页</a>'.format(s.closedCount > 0 ? '' : dis)
+                '<a class="cmenu-item{0}" code="reopen">{1}</a>'.format(s.closedCount > 0 ? '' : dis, Util.getLangText('reopen', opt.lang)),
+                '<a class="cmenu-item{0}" code="reopenAll">{1}</a>'.format(s.closedCount > 0 ? '' : dis, Util.getLangText('reopenall', opt.lang))
             ];
             var width = 256, height = 0;
             for(var i = 0; i<html.length; i++) {
@@ -507,14 +537,14 @@
                     break;
                 case 'reload':
                     if(curItem.iframe) {
-                        this.loadPage(t, $I(curItem.iframe), curItem.opt.url);
+                        this.loadPage(t, curItem.iframe, curItem.opt.url, true);
                     }
                     break;
                 case 'reloadAll':
                     for(var k in cache.items) {
                         var dr = cache.items[k];
                         if(dr.iframe) {
-                            this.loadPage(t, $I(dr.iframe), dr.opt.url);
+                            this.loadPage(t, dr.iframe, dr.opt.url, true);
                         }
                     }
                     break;
@@ -805,6 +835,7 @@
         var opt = $.extend({
             id: 'oui-tabs-' + new Date().getMilliseconds(),
             skin: 'default',    //样式: default, blue
+            lang: 'chinese',    //chinese, english
             eventName: 'click',
             dblclickScroll: false,
             showContextMenu: true,
@@ -819,7 +850,8 @@
                 //box: 'margin: 0 5px;',
                 //tab: 'margin: 0 5px 0 0;',
                 //txt: 'font-size:14px;'
-            }
+            },
+            items: []
         }, options);
 
         that.id = opt.id || '';
@@ -847,6 +879,22 @@
             $.addListener(document, 'mousedown', function(ev) {
                 Util.hideContextMenu(ev, that);
             });
+
+            if($.isArray(options.items) && options.items.length > 0) {
+                var showId = '';
+                for(var i = 0; i < options.items.length; i++) {
+                    var dr = options.items[i];
+                    if(dr) {
+                        if(dr.show && !showId) {
+                            showId = dr.id;
+                        }
+                        that.add(dr);
+                    }
+                }
+                if(showId) {
+                    that.show(showId);
+                }
+            }
             return that;
         },
         getOptions: function() {
@@ -860,7 +908,11 @@
                 cache = Factory.getCache(that.id),
                 cfg = that.getOptions(),
                 opt = $.extend({
-                    closeAble: true
+                    closeAble: true,
+                    //是否加载iframe内容
+                    load: true,
+                    //默认显示
+                    show: false
                 }, options),
                 isShow = $.isBoolean(show, false);
 
@@ -868,9 +920,9 @@
             //判断数量是否超出限制
             if(cache.ids.length >= cfg.maxCount) {
                 if(typeof $.alert !== 'undefined') {
-                    $.alert('标签页数量已超出限制', { id:'oui-tabs-count-limit-001' });
+                    $.alert(Util.getLangText('overrun', opt.lang), { id:'oui-tabs-count-limit-001' });
                 } else if(!reopen) {
-                    alert('标签页数量已超出限制。');
+                    alert(Util.getLangText('overrun'), opt.lang);
                 }
                 return that;
             }
@@ -910,9 +962,14 @@
                 || Factory.getCur(that, cache)
                 || Factory.getItem(cache);
 
+
             if(cur) {
                 $.addClass(cur.tab, 'cur');
                 $(cur.con).show();
+
+                if(cur.iframe && !cur.iframe.loaded) {
+                    Util.loadPage(that, cur.iframe, cur.opt.url);
+                }
                 Factory.setCur(that, cur, true);
                 Util.setTabPosition(that, cur.tab);
             }
@@ -974,7 +1031,7 @@
             return that;
         },
         setContentSize: function(size, isContent, opt) {
-            console.log('setContentSize: ', size);
+            //console.log('setContentSize: ', size);
             var that = this, tabHeight = 0, itemId = '';
             if($.isObject(size)) {
                 that.conContainer.style.height = size.height + 'px';
@@ -994,7 +1051,7 @@
                         panel.style.height = (size.height - tabHeight - es.padding.height - es.margin.height - es.border.height) + 'px';
                     }
                     if(iframe) {
-                        console.log('iframe: ', size, tabHeight);
+                        //console.log('iframe: ', size, tabHeight);
                         iframe.style.height = (size.height - tabHeight) + 'px';
                     }
             } else {

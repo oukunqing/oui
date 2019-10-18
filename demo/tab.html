@@ -4,6 +4,9 @@
     <meta charset="utf-8">
     <title>Tab标签 - $.tab</title>
     <script type="text/javascript" src="../oui/oui.js?"></script>
+	<script>
+    var WEB_LANG = 'English';
+	</script>
     <script type="text/javascript" src="../oui/tab/oui.tab.js?12"></script>
 </head>
 <body>
@@ -31,11 +34,11 @@
 </body>
 </html>
 <script type="text/javascript">
-    
     var tabId = 'tab1';
     var tab = $.tab($I('nav'), $I('content'), {
         id: tabId,
         skin: 'blue',
+		lang: 'english',
         eventName: 'click',
         //dblclickScroll: false,
         //center: false,
@@ -45,15 +48,20 @@
             //box: 'margin: 0 5px;',
             //tab: 'margin: 0 5px 0 0;',
             //txt: 'font-size:14px;'
-        }
+        },
+		items: [			
+			{id: 'emap', name: '电子地图百度地图私有地图谷歌地图22233', url: 'dialog.html', closeAble: true, show: false, load: false},
+			{tabId: 'tab1', id: 'omap', name: '私有地图', html: '私有地图', closeAble: true, show: true},
+			{id: 'data1', name: '实时数据1', html: '实时数据1', closeAble: true }			
+		]
     });
 
 
-    tab.add({id: 'emap', name: '电子地图百度地图私有地图谷歌地图22233', url: 'dialog.html', closeAble: true});
-    $.tab.add({tabId: 'tab1', id: 'omap', name: '私有地图', html: '私有地图', closeAble: true});
+    //tab.add({id: 'emap', name: '电子地图百度地图私有地图谷歌地图22233', url: 'dialog.html', closeAble: true});
+    //$.tab.add({tabId: 'tab1', id: 'omap', name: '私有地图', html: '私有地图', closeAble: true});
         
     
-    tab.add({id: 'data1', name: '实时数据1', html: '实时数据1', closeAble: true });
+    //tab.add({id: 'data1', name: '实时数据1', html: '实时数据1', closeAble: true });
     tab.add({id: 'data2', name: '实时数据2', html: '实时数据2'});
     
     tab.insert({id: 'data3', name: '实时数据3', html: '实时数据3'}, 'data', true);
@@ -62,7 +70,7 @@
     tab.add({id: 'data6', name: '实时数据6', html: '实时数据6'});
     tab.add({id: 'data7', name: '实时数据7', html: '实时数据7'});
     
-    tab.show('emap');
+    //tab.show('omap');
 
 
     var tab2 = $.tab($I('nav2'), $I('content2'), {
@@ -89,11 +97,11 @@
     tab3.add({ id: 'param', name: '参数配置', html: '参数配置'});  
     tab3.add({ id: 'device', name: '设备配置', html: '设备配置'}); 
     tab3.add({ id: 'person', name: '人员信息', html: '人员信息'}); 
-/*
+
     window.setTimeout(function() {
-    tab3.show('person');
+    //tab3.show('person');
     }, 50);
-    */
+    
     tab3.show('param');
 
     tab3.setContentSize({width:400, height: 220});
