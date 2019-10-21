@@ -325,7 +325,7 @@
                 }
                 return this;
             },
-            checkOptions: function (content, title, opt, isUpdate) {
+            checkOptions: function (content, title, opt, isUpdate, dialogType) {
                 var target = null,  //目标控件，用于位置停靠
                     elem = null,    //内容控件，用于加载内容
                     func = null;    //回调函数
@@ -347,7 +347,7 @@
                     title = '';
                 }
                 if ($.isFunction(opt)) {
-                    opt = { callback: opt };
+                    opt = dialogType === Config.DialogType.confirm ? { ok: opt } : { callback: opt };
                 }
                 if (!$.isObject(opt)) {
                     opt = {};
@@ -754,7 +754,7 @@
                 return this;
             },
             show: function (content, title, options, type, target) {
-                options = Common.checkOptions(content, title, options);
+                options = Common.checkOptions(content, title, options, false, type);
                 var opt = {
                     id: Common.buildId(options.id),
                     type: Common.checkType(type || options.type, true)
