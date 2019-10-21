@@ -331,38 +331,50 @@
                         keyField = fields[key],
                         isAppointId = fields[op.getKey(id)] || false,
                         isSingle = isAppointId || document.getElementsByName(name || '').length <= 1,
-                        field = checkField(op.swap($.extend({
-                            title: '',                  //字段名称（用于提示信息）
-                            type: '',                   //字段类型（email,url等），用于格式验证
-                            dataType: $.isString(keyField) ? keyField : 'string', //值类型（string,int,float)
-                            defaultValue: '',           //默认值 (val, value, defaultValue)
-                            value: '',                  //获取到的字段内容
-                            attribute: '',              //获取指定的属性值作为value
-                            minValue: '', maxValue: '',   //最小值、最大值（用于验证输入的数字大小）
-                            required: false,            //是否必填项
-                            empty: false,               //是否允许空值
-                            strict: false,              //是否严格模式（检测输入内容的类型）
-                            md5: false,                 //是否MD5加密
-                            minLength: '', maxLength: '', //字符长度
-                            pattern: '',                //正则表达式（内部验证）
-                            //提示信息回调 function(status, message, element){}
-                            //status 验证状态：true-表示通过，false-表示失败
-                            tooltip: null,
-                            //提示信息显示时长（毫秒），0-表示一直显示，若大于0表示会定时关闭
-                            tooltipTime: null,
-                            //给SELECT赋值时，当下拉选项值不存在时，是否追加（特殊情况使用）
-                            appendOption: false,
-                            //外部验证回调函数 function(value, element){} 返回值为 boolean （true|false）
-                            //返回 true - 表示验证通过，false-表示验证失败
-                            validate: null,
-                            messages: {},               //验证失败时显示的提示信息（为空则显示默认的信息）
-                            //tooltip position
-                            position: '',
-                            same: {id: '', msg: ''},
-                            distinct: {id: '', msg: ''},
-                            //检测字段内容是否已存在
-                            exists: null
-                        }, $.isString(keyField) ? {} : keyField)));
+                        dataType = 'string';
+
+                        if($.isString(keyField, true)) {
+                            dataType = keyField;
+                            keyField = {};
+                        } else if($.isObject(keyField)) {
+                            if(!$.isBoolean(keyField.required)) {
+                                keyField.required = keyField.require || false;
+                            }
+                            keyField.pattern = keyField.regex || keyField.pattern || '';
+                        }
+
+                    var field = checkField(op.swap($.extend({
+                        title: '',                  //字段名称（用于提示信息）
+                        type: '',                   //字段类型（email,url等），用于格式验证
+                        dataType: dataType, //值类型（string,int,float)
+                        defaultValue: '',           //默认值 (val, value, defaultValue)
+                        value: '',                  //获取到的字段内容
+                        attribute: '',              //获取指定的属性值作为value
+                        minValue: '', maxValue: '',   //最小值、最大值（用于验证输入的数字大小）
+                        required: false,            //是否必填项
+                        empty: false,               //是否允许空值
+                        strict: false,              //是否严格模式（检测输入内容的类型）
+                        md5: false,                 //是否MD5加密
+                        minLength: '', maxLength: '', //字符长度
+                        pattern: '',                //正则表达式（内部验证）
+                        //提示信息回调 function(status, message, element){}
+                        //status 验证状态：true-表示通过，false-表示失败
+                        tooltip: null,
+                        //提示信息显示时长（毫秒），0-表示一直显示，若大于0表示会定时关闭
+                        tooltipTime: null,
+                        //给SELECT赋值时，当下拉选项值不存在时，是否追加（特殊情况使用）
+                        appendOption: false,
+                        //外部验证回调函数 function(value, element){} 返回值为 boolean （true|false）
+                        //返回 true - 表示验证通过，false-表示验证失败
+                        validate: null,
+                        messages: {},               //验证失败时显示的提示信息（为空则显示默认的信息）
+                        //tooltip position
+                        position: '',
+                        same: {id: '', msg: ''},
+                        distinct: {id: '', msg: ''},
+                        //检测字段内容是否已存在
+                        exists: null
+                    }, keyField)));
 
                     if (!$.isObject(field.messages)) {
                         field.messages = { required: field.messages };
@@ -375,7 +387,9 @@
                     //标记元素是Id模式，还是Name数组模式
                     element.isSingle = isSingle;
 
-                    return { id: id, name: name, key: key, nameKey: nameKey, value: op.getValue(element), isSingle: isSingle, field: field };
+                    return { 
+                        id: id, name: name, key: key, nameKey: nameKey, value: op.getValue(element), isSingle: isSingle, field: field
+                    };
                 },
                 setControlEvent: function (element, configs, fieldConfig) {
                     if (!element.isSetEvent) {

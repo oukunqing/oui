@@ -72,6 +72,10 @@
             t.left = Util.buildSwitch(t, opt, 'left');
             Util.scrollAction(t, t.left, 'left');
 
+            if(t.box) {
+                return this;
+            }
+
             var div = $.createElement('div', '', function(elem) {
                 elem.className = 'tab-box';
                 elem['oncontextmenu'] = function(ev) {
@@ -234,7 +238,7 @@
                 loading.style.display = '';
                 iframe.src = $.setQueryString(url);
                 iframe.onload = iframe.onreadystatechange = function () {
-                    if (!this.readyState || this.readyState == "complete") {
+                    if (!this.readyState || this.readyState === 'complete') {
                         loading.style.display = 'none';
                     }
                 };
@@ -826,12 +830,7 @@
         var that = this, cssTab = '', cssCon = '';
         that.tabContainer = tabContainer;
         that.conContainer = conContainer;
-        /*
-        var div = $.createElement('div', '', function(elem) {
-            elem.className = 'oui-tabs';
-        }, tabContainer);
-        that.tabContainer = div;
-        */
+
         var opt = $.extend({
             id: 'oui-tabs-' + new Date().getMilliseconds(),
             skin: 'default',    //样式: default, blue
@@ -871,8 +870,13 @@
     Tab.prototype = {
         initial: function(options) {
             var that = this;
+            if(that.box) {
+                return this;
+            }
             Factory.initCache(that.id, options, that);
+
             Util.initialTab(that, options);
+            
             $.addListener(window, 'resize', function() {
                 Util.setSize(that);
             });

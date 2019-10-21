@@ -1842,12 +1842,49 @@
             elem = doc.createElement(nodeName);
 
             if (hasId) { elem.id = id; }
-            if (!opt.exempt && !isElement(parent) && !isDocument(parent)) { parent = undefined; }
+
+            if(!opt.exempt) {
+                if($.isString(parent, true)) {
+                    parent = toElement(parent);
+                }
+                if (!isElement(parent) && !isDocument(parent)) { 
+                    parent = undefined; 
+                }
+            }
 
             if(opt.cssText && opt.cssText.indexOf(':') > 0) {
                 elem.style.cssText = opt.cssText;
             }
             return parent && parent.appendChild(elem), $.isFunction(func) && func(elem, opt.param), elem;
+        },
+        createIframe = function(id, func, parent, options) {
+            var opt = $.extend({}, options);
+            var elem = createElement('IFRAME', id, func, parent, opt);
+            elem.width = '100%';
+            elem.height = '100%';
+            elem.frameBorder = '0';
+            elem.scrolling = 'auto';
+            return elem;
+        },
+        loadIframe = function(iframe, url, complete, forceLoad) {
+            if($.isBoolean(complete)) {
+                forceLoad = complete;
+                complete = null;
+            }
+            if(!iframe || !url || (iframe.loaded && !forceLoad)) {
+                return this;
+            }
+            iframe.src = $.setQueryString(url);
+            iframe.onload = iframe.onreadystatechange = function () {
+                if (!this.readyState || this.readyState === 'complete') {
+                    if($.isFunction(complete)) {
+                        complete();
+                    }
+                }
+            };
+            //设置加载标记，表示iframe已经加载过
+            iframe.loaded = true;
+            return this;
         },
         createJsScript = function (data, id, func, parent) {
             if ($.isFunction(id)) {
@@ -2772,6 +2809,8 @@
         isStyleUnit: isStyleUnit,
         isNumberSize: isNumberSize,
         createElement: createElement,
+        createIframe: createIframe,
+        loadIframe: loadIframe,
         createJsScript: createJsScript,
         createCssStyle: createCssStyle,
         getElementStyle: getElementStyle,
