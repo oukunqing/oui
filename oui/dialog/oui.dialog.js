@@ -3995,7 +3995,10 @@
 
     $.extend($.dialog, {
         msg: function (content, options) {
-            return Factory.show(content, undefined, options, Config.DialogType.msg);
+            var opt = $.extend({
+                autoClose: true, timing: 2560
+            }, options);
+            return Factory.show(content, undefined, opt, Config.DialogType.msg);
         },
         win: function (content, title, options) {
             return Factory.show(content, title, options, Config.DialogType.win);
