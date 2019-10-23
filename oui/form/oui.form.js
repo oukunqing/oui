@@ -346,7 +346,7 @@
                     var field = checkField(op.swap($.extend({
                         title: '',                  //字段名称（用于提示信息）
                         type: '',                   //字段类型（email,url等），用于格式验证
-                        dataType: dataType, //值类型（string,int,float)
+                        dataType: dataType,         //值类型（string,int,float)
                         defaultValue: '',           //默认值 (val, value, defaultValue)
                         value: '',                  //获取到的字段内容
                         attribute: '',              //获取指定的属性值作为value
@@ -817,9 +817,10 @@
 
             var id = element.id || '',
                 table = $f.findElement($(this), 'TABLE'),
-                handler = $f.findElement($(this), 'BUTTON|INPUT:submit|INPUT:button'),
+                handler = $f.findElement($(this), 'INPUT:submit|BUTTON:submit|INPUT:button|BUTTON'),
                 callback = options.submitHandler || options.submit,
-                debounce = options.debounce || false,       //是否防抖节流，默认不启用
+                //debounce = options.debounce || false,       //是否防抖节流，默认不启用
+                debounce = $.isBoolean(options.debounce, true),       //是否防抖节流，默认启用
                 delay = options.delay || 320,               //延时时长，默认320毫秒
                 timeLimit = options.timeLimit || 5000,      //防抖时限，默认5000毫秒
                 isForm = element.tagName === 'FORM',

@@ -328,4 +328,7 @@ console.log((1569683545).toDate().format());
 
 var rows = 0, headRows = 2;
 rows = headRows || 1;
-console.log('rows:', rows);
+console.log('rows:', rows)
+
+    console.log('2019-11-11'.replace(/[-\/]/g,''))
+    console.log('2019/11/11'.replace(/[-\/]/g,''))
