@@ -1,7 +1,7 @@
 
 /*
  @Title: oui.frozen.js
- @Description：冻结空格（表头锁定）插件
+ @Description：冻结窗格（表头锁定）插件
  @Author: oukunqing
  @License：MIT
 */
@@ -365,10 +365,8 @@
             return this;
         },
         getBoxSize: function(table) {
-            var parent = table.parentNode,
-                ps = $.elemSize(parent);
-
-            return ps;
+            var parent = table.parentNode;
+            return $.elemSize(parent);
         },
         setMargin: function(table, dir, ts) {
             var arr = [], arr2 = [];
@@ -595,7 +593,6 @@
 
             return this;
         }
-
     };
 
     //先加载样式文件
@@ -697,7 +694,6 @@
             if(!force && !Factory.isResize(cache, that)) {
                 return that;
             }
-            //return that.clear().build();
 
             var opt = cache.options;
             if(!opt.debounce) {
