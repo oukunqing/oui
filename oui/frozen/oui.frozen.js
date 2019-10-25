@@ -437,17 +437,9 @@
                 if(opt.zindex > 0) {
                     cssText += 'z-index:' + opt.zindex + ';';
                 }
-                /*
-                // DIV 不再设置背景色，改成设置 Table
-                if(opt.setBackground && opt.background && opt.background !== '#fff') {
-                    cssText += 'background:' + opt.background + ';';
-                }
-                */
                 if(cssText) {
                     elem.style.cssText = cssText;
                 }
-                //Factory.setBorder(elem, dir, opt);
-
                 // 同步鼠标滚轮事件
                 if($.isFirefox) {
                     $.addListener(elem, 'DOMMouseScroll', function(e) {
@@ -519,18 +511,30 @@
             }
             return this;
         },
-        buildBorder: function(tb, len, type, first, attrName, style) {
+        buildBorder: function(tb, rowLen, type, first, attrName, style) {
             if(type === 'row') {
-                var row = first ? tb.rows[0] : tb.rows[len - 1];
-                //row.style[attrName] = style;
-                for(var i = 0; i < row.cells.length; i++) {
-                    row.cells[i].style[attrName] = style;
+                if(!first) {
+                    //顶部表格底边框线 处理单元格行合并的问题
+                    for(var i = 0; i < rowLen; i++) {
+                        var row = tb.rows[i], c = row.cells.length;
+                        for(var j = 0; j < c; j++) {
+                            var cell = row.cells[j];
+                            if(i === rowLen - 1 || cell.rowSpan + i === rowLen) {
+                                cell.style[attrName] = style;
+                            }
+                        }
+                    }
+                } else {
+                    var row = tb.rows[0];
+                    for(var i = 0; i < row.cells.length; i++) {
+                        row.cells[i].style[attrName] = style;
+                    }
                 }
             } else {
-                for(var i = 0; i < len; i++) {
-                    var cc = tb.rows[i].cells.length;
-                    if(cc > 0) {
-                        tb.rows[i].cells[first ? 0 : cc - 1].style[attrName] = style;
+                for(var i = 0; i < rowLen; i++) {
+                    var c = tb.rows[i].cells.length;
+                    if(c > 0) {
+                        tb.rows[i].cells[first ? 0 : c - 1].style[attrName] = style;
                     }
                 }
             }
