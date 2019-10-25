@@ -104,7 +104,7 @@
 
             return opt;
         },
-        buildFrozen: function(table, options) {
+        buildFrozen: function(table, options, force) {
             var id = '';
             if($.isElement(table)) {
                 id = table.id || $.getAttribute(table, 'frozenid');
@@ -118,6 +118,8 @@
             if(!$.isElement(table)) {
                 return null;
             }
+
+            force = $.isBoolean(force, false);
 
             var opt = $.extend({
                 id: id,
@@ -143,8 +145,14 @@
                 }
             }, Factory.checkOptions(options));
 
-            var cache = Factory.getCache(opt.id), isFrozen = $.getAttribute(table, 'frozenid');
-            if(cache && isFrozen) {
+            var cache = Factory.getCache(opt.id),
+                isFrozen = $.getAttribute(table, 'frozenid');
+
+            if(cache && isFrozen && !force) {
+                if(force) {
+                    console.log('cache.frozen:', cache, cache.frozen)
+                    cache.frozen.rebuild();
+                }
                 return cache.frozen;
             } else {
                 return new Frozen(opt);
@@ -570,6 +578,9 @@
 
             $.addClass(that.table, 'oui-frozen-table');
 
+            //先执行清除，防止强制冻结时的重复生成
+            that.clear();
+
             Factory.setCache(that.id, opt, that);
 
             $.addListener(window, 'resize', function() {
@@ -672,6 +683,9 @@
         },
         clear: function() {
             var cache = Factory.getCache(this.id);
+            if(!cache || !cache.controls) {
+                return this;
+            }
             for(var i in cache.controls) {
                 $.removeElement(cache.controls[i].box);
             }
@@ -688,8 +702,8 @@
     };
 
     $.extend({
-        frozen: function(obj, options) {
-            return Factory.buildFrozen(obj, options);
+        frozen: function(obj, options, force) {
+            return Factory.buildFrozen(obj, options, force);
         }
     });
 
