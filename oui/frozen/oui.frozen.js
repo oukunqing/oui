@@ -521,6 +521,7 @@
         buildBorder: function(tb, len, type, first, attrName, style) {
             if(type === 'row') {
                 var row = first ? tb.rows[0] : tb.rows[len - 1];
+                //row.style[attrName] = style;
                 for(var i = 0; i < row.cells.length; i++) {
                     row.cells[i].style[attrName] = style;
                 }
@@ -535,12 +536,12 @@
             return this;
         },
         setBorder: function(obj, dir, opt) {
-            if(!opt.showSplitLine) {
+            if(!opt.showSplitLine || !opt.splitLineColor) {
                 return this;
             }
-            var style = opt.border || ('solid ' + (opt.borderWidth || 1) + 'px' + (opt.splitLineColor));
+            var style = opt.border || ('solid ' + (opt.borderWidth || 1) + 'px ' + (opt.splitLineColor));
             if(obj.tagName === 'TABLE') {
-                var c = obj.rows.length, row;
+                var c = obj.rows.length;
                 if(c <= 0) {
                     return this;
                 }
