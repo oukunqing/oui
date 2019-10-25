@@ -98,10 +98,18 @@
             opt.right = parseInt('0' + (opt.right), 10);
             opt.foot = parseInt('0' + (opt.foot || opt.bottom), 10);
             opt.border = opt.border || opt.borderStyle || '';
-            opt.splitLineColor = opt.splitLineColor || opt.borderColor || '#99bbe8';
-            opt.showSplitLine = opt.showSplitLine || opt.showBorder;
-            opt.setBackground = opt.setBackground || opt.showBackground;
+            opt.splitLineColor = opt.splitLineColor || opt.borderColor || opt.lineColor;
 
+            if(!$.isBoolean(opt.showSplitLine)) {
+                if($.isBoolean(opt.showBorder)) {
+                    opt.showSplitLine = opt.showBorder;
+                } else if($.isBoolean(opt.showLine)) {
+                    opt.showSplitLine = opt.showLine;
+                }
+            }
+            if(!$.isBoolean(opt.setBackground) && $.isBoolean(opt.showBackground)) {
+                opt.setBackground = opt.showBackground;
+            }
             return opt;
         },
         buildFrozen: function(table, options, force) {
@@ -133,10 +141,11 @@
                 colStartRowIndex: 0,
                 background: '#f8f8f8',
                 zindex: 99999,
-                showSplitLine: false,
-                setBackground: true,
+                showSplitLine: true,
+                setBackground: false,
                 border: '',
-                splitLineColor: '#99bbe8',  //borderColor
+                //splitLineColor: '#99bbe8',  //borderColor, lineColor
+                splitLineColor: '#646464',  //borderColor, lineColor
                 borderWidth: 1,
                 isFixedSize: false,
                 isBootstrap: false,
@@ -149,10 +158,6 @@
                 isFrozen = $.getAttribute(table, 'frozenid');
 
             if(cache && isFrozen && !force) {
-                if(force) {
-                    console.log('cache.frozen:', cache, cache.frozen)
-                    cache.frozen.rebuild();
-                }
                 return cache.frozen;
             } else {
                 return new Frozen(opt);
@@ -440,7 +445,7 @@
                 if(cssText) {
                     elem.style.cssText = cssText;
                 }
-                Factory.setBorder(elem, dir, opt);
+                //Factory.setBorder(elem, dir, opt);
 
                 // 同步鼠标滚轮事件
                 if($.isFirefox) {
@@ -474,7 +479,9 @@
                 Factory.setMargin(elem, dir, ts);
             }, div);
 
-            Factory.buildRows(f, tb, f.table, dir, opt).setControl(f.id, dir, { box: div, table: tb });
+            Factory.buildRows(f, tb, f.table, dir, opt)
+                .setControl(f.id, dir, { box: div, table: tb })
+                .setBorder(tb, dir, opt);
 
             f.box.insertBefore(div, f.table);
 
@@ -511,21 +518,53 @@
             }
             return this;
         },
+        buildBorder: function(tb, len, type, first, attrName, style) {
+            if(type === 'row') {
+                var row = first ? tb.rows[0] : tb.rows[len - 1];
+                for(var i = 0; i < row.cells.length; i++) {
+                    row.cells[i].style[attrName] = style;
+                }
+            } else {
+                for(var i = 0; i < len; i++) {
+                    var cc = tb.rows[i].cells.length;
+                    if(cc > 0) {
+                        tb.rows[i].cells[first ? 0 : cc - 1].style[attrName] = style;
+                    }
+                }
+            }
+            return this;
+        },
         setBorder: function(obj, dir, opt) {
             if(!opt.showSplitLine) {
                 return this;
             }
-            var style = opt.border || ('solid ' + (opt.borderWidth || 1) + 'px' + (opt.splitLineColor || '#99bbe8'));
-
-            if(dir === 'head' || dir === 'head-left' || dir === 'head-right') {
-                obj.style.borderBottom = style;
-            } else if(dir === 'foot' || dir === 'foot-left' || dir === 'foot-right') {
-                obj.style.borderTop = style;
-            }
-            if(dir === 'left' || dir === 'head-left' || dir === 'foot-left') {
-                obj.style.borderRight = style;
-            } else if(dir === 'right' || dir === 'head-right' || dir === 'foot-right') {
-                obj.style.borderLeft = style;
+            var style = opt.border || ('solid ' + (opt.borderWidth || 1) + 'px' + (opt.splitLineColor));
+            if(obj.tagName === 'TABLE') {
+                var c = obj.rows.length, row;
+                if(c <= 0) {
+                    return this;
+                }
+                if(dir === 'head' || dir === 'head-left' || dir === 'head-right') {
+                    Factory.buildBorder(obj, c, 'row', false, 'borderBottom', style);
+                } else if(dir === 'foot' || dir === 'foot-left' || dir === 'foot-right') {
+                    Factory.buildBorder(obj, c, 'row', true, 'borderTop', style);
+                }
+                if(dir === 'left' || dir === 'head-left' || dir === 'foot-left') {
+                    Factory.buildBorder(obj, c, 'col', false, 'borderRight', style);
+                } else if(dir === 'right' || dir === 'head-right' || dir === 'foot-right') {
+                    Factory.buildBorder(obj, c, 'col', true, 'borderLeft', style);
+                }
+            } else {
+                if(dir === 'head' || dir === 'head-left' || dir === 'head-right') {
+                    obj.style.borderBottom = style;
+                } else if(dir === 'foot' || dir === 'foot-left' || dir === 'foot-right') {
+                    obj.style.borderTop = style;
+                }
+                if(dir === 'left' || dir === 'head-left' || dir === 'foot-left') {
+                    obj.style.borderRight = style;
+                } else if(dir === 'right' || dir === 'head-right' || dir === 'foot-right') {
+                    obj.style.borderLeft = style;
+                }
             }
             return this;
         },
