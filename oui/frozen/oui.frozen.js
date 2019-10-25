@@ -99,6 +99,7 @@
             opt.foot = parseInt('0' + (opt.foot || opt.bottom), 10);
             opt.border = opt.border || opt.borderStyle || '';
             opt.splitLineColor = opt.splitLineColor || opt.borderColor || opt.lineColor;
+            opt.borderWidth = opt.borderWidth || opt.lineWidth;
 
             if(!$.isBoolean(opt.showSplitLine)) {
                 if($.isBoolean(opt.showBorder)) {
