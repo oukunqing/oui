@@ -599,6 +599,15 @@
         throwError: function (err) {
             try { console.trace(); console.log(err); } catch (e) { }
             throw new Error(err);
+        },
+        checkValue: function() {
+            var args = arguments;
+            for(var i = 0; i < args.length; i++) {
+                if(typeof args[i] !== 'undefined') {
+                    return args[i];
+                }
+            }
+            return undefined;
         }
     }, '$');
 }(OUI);
@@ -1913,7 +1922,7 @@
                 return null;
             }
             var style = elem.currentStyle || document.defaultView.getComputedStyle(elem, null);
-            return $.isString(styleName) ? style[styleName] || defaultValue: style;
+            return $.isString(styleName, true) ? $.checkValue(style[styleName], defaultValue) : style;
         },
         getCssSizeVal = function(val) {
             return Math.ceil(('' + val).replace(/[^\d\.\-]+/, ''));
