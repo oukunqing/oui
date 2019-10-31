@@ -9,167 +9,6 @@
 !function ($) {
     'use strict';
 
-    function Pagination(options, dataCount) {
-        var that = this;
-        that.options = setOptions({
-            element: null,              //分页显示HTML控件（或ID）
-            pageStart: 0,               //起始页，0 或 1，与 pageIndex 起始值对应
-            pageIndex: 0,               //起始页码，默认与 pageStart 相同
-            pageSize: 10,               //每页显示条数，默认为10
-            dataCount: 0,               //总数据条数
-            markCount: 10,              //分页数字按钮显示个数，默认为10个
-            markType: defaultType,      //标记类型：图标|中文|英文（symbol|chinese|english）
-            markText: null,             //标记文字（上一页 下一页）
-            showList: true,             //是否显示数字列表，若不显示数字列表，则默认显示输入框
-            showInvalid: true,          //是否显示无效的按钮
-            showEllipsis: true,         //是否显示省略号(快进)按钮
-            alwaysEllipsis: false,      //是否始终显示省略号按钮
-            showFirstLast: true,        //是否显示首页/尾页按钮
-            showPageInput: false,       //是否显示页码输入框
-            showPageJump: true,         //是否显示页码跳转输入框
-            showDataCount: false,       //是否显示数据条数
-            showPageCount: true,        //是否显示总页数
-            showDataStat: false,        //是否显示数据统计
-            showSizeSelect: true,       //是否显示PageSize下拉框
-            pageSizeItems: [],          //PageSize下拉框默认选项
-            callback: function (pageIndex, pageSize, that, param) {      //回调函数模式
-                console.log('pageIndex: ', pageIndex, 'pageSize: ', pageSize, ', param: ', param);
-            },
-            callbackParam: null,                    //回调参数
-            url: '',                                //URL模式，必须包含关键字 {0} 或 {pageIndex}，若url可用，则url优先于callback
-            useKeyEvent: true,                      //是否启用快捷键（回车键，方向键 [上下左右或HJKL] ）
-            useLongPress: true,                     //是否启用长按功能（长按 上一页 下一页）
-            longPressTime: defaultLongPressTime,    //长按生效时长（长按多少毫秒启动长按功能），单位：毫秒
-            longPressInterval: defaultLongPressInterval,    //长按分页切换频率，单位：毫秒
-            showReload: false,                      //是否显示刷新按钮
-            position: defaultPositon,               //left|right
-            className: defaultClassName,            //默认样式名称，可以修改为外置样式
-            skin: defaultSkin,                      //样式，若skin=null则不启用内置样式
-            inputWidth: defaultInputWidth,          //输入框宽度，默认为50px
-            debounce: true,                         //是否启用防抖功能（或者值为number，且大于50即为启用）
-            debounceTime: defaultDebounceTime,      //抖动时长，单位：毫秒
-            focus: false                            //是否锁定焦点
-        }, options, dataCount);
-
-        that.paging();
-    }
-
-    Pagination.prototype = {
-        paging: function (options, dataCount) {
-            if ($.isObject(options) || $.isNumber(options)) {
-                this.options = setOptions(this.options, options, dataCount);
-            }
-            var that = this, op = $.extend(that.options, {
-                pageCount: Math.ceil(that.options.dataCount / that.options.pageSize),
-                minuend: Math.abs(that.options.pageStart - 1)
-            });
-
-            //检测pageIndex是否在pageCount范围内
-            checkPageIndex(that);
-
-            var mi = parseInt(op.markCount / 2, 10),
-                mc = Math.ceil(op.markCount / 2),
-                minMax = getMinMax(that),
-                min = minMax[0],
-                max = minMax[1] + op.pageStart,
-                quickNum = 0,
-                pmSub = op.pageIndex - op.markCount,
-                pcSub = op.pageCount - op.minuend,
-                pmSum = op.pageIndex + op.markCount,
-                className = op.markType === defaultType ? 'text symbol' : 'text',
-                html = [
-                    '<div class="' + getClassName(that) + '">',
-                    '<div class="' + op.skin + ' ' + getPosition(that, true) + '">',
-                    '<ul class="list">'
-                ];
-
-            var cssData = '.' + op.className + ' li{float: left;}', cssId = op.className + '-css-' + $.crc.toCRC16(op.className).toLowerCase();
-            //创建CssStyle，防止闪烁
-            $.createCssStyle(cssData, cssId);
-
-            buildDataCount(op.showDataCount, that, html, op.markText['dataCount'], op.dataCount);
-
-            buildPageSize(op.showSizeSelect, that, html, op.minuend);
-
-            if (op.pageIndex != min && op.pageCount > 0) {
-                buildLinkText(op.showFirstLast, that, html, op.pageStart, 'first', false, className);
-                //显示省略号快退按钮
-                if (op.showEllipsis && pmSub >= op.pageStart) {
-                    quickNum = pmSub > op.pageStart ? pmSub : op.pageStart;
-                    buildLinkText(true, that, html, quickNum, 'ellipsis', false, 'ellipsis');
-                } else if (op.alwaysEllipsis) {
-                    buildLinkText(true, that, html, 'PQ', 'ellipsis', true, 'ellipsis');
-                }
-                buildLinkText(true, that, html, op.pageIndex - 1, 'previous', false, className);
-            } else if (op.showInvalid) {
-                buildLinkText(op.showFirstLast, that, html, 0, 'first', true, className);
-                if (op.alwaysEllipsis) {
-                    buildLinkText(true, that, html, 'PQ', 'ellipsis', true, 'ellipsis');
-                }
-                buildLinkText(true, that, html, 0, 'previous', true, className);
-            }
-
-            if (op.showList) {
-                var c = 0;
-                for (var i = min; i < max; i++) {
-                    var num = i + op.minuend;
-                    if (i > op.pageCount || c > op.markCount) {
-                        break;
-                    }
-                    if (c === mi) {
-                        buildPageInput(op.showPageInput, that, html, false, 'i');
-                    }
-                    if (i === op.pageIndex) {
-                        html.push('<li><a class="link cur">' + num + '</a></li>');
-                    } else {
-                        html.push('<li><a class="link num" value="' + i + '">' + num + '</a></li>');
-                    }
-                    c++;
-                }
-            } else {
-                buildPageInput(op.showPageInput, that, html, false, 'i');
-            }
-
-            //上一页<、下一页>、第一页<<、最后一页标记>>
-            if (op.pageIndex != op.pageCount - op.minuend && op.pageCount > 0) {
-                buildLinkText(true, that, html, op.pageIndex + 1, 'next', false, className);
-
-                //显示省略号快进按钮
-                if (op.showEllipsis && pmSum < op.pageCount) {
-                    quickNum = pmSum < pcSub ? pmSum : pcSub;
-                    buildLinkText(true, that, html, quickNum, 'ellipsis', false, 'ellipsis');
-                } else if (op.alwaysEllipsis) {
-                    buildLinkText(true, that, html, 'NQ', 'ellipsis', true, 'ellipsis');
-                }
-                buildLinkText(op.showFirstLast, that, html, pcSub, 'last', false, className);
-            } else if (op.showInvalid) {
-                buildLinkText(true, that, html, 0, 'next', true, className);
-                if (op.alwaysEllipsis) {
-                    buildLinkText(true, that, html, 'NQ', 'ellipsis', true, 'ellipsis');
-                }
-                buildLinkText(op.showFirstLast, that, html, 0, 'last', true, false, className);
-            }
-
-            buildPageInput(op.showPageJump, that, html, true, 'j');
-
-            buildLinkText(op.showReload, that, html, op.pageIndex, 'reload', false, 'text');
-
-            buildDataCount(op.showPageCount, that, html, op.markText['pageCount'], op.pageCount);
-
-            html.push('</ul></div>');
-
-            buildDataStat(op.showDataStat, that, html, op.markText['dataStat']);
-
-            html.push('</div>');
-
-            op.element.innerHTML = html.join('');
-
-            createEvent(that, op.minuend);
-
-            return this;
-        }
-    };
-
     var thisFilePath = $.getScriptSelfPath(true);
     //先加载样式文件
     $.loadLinkStyle($.getFilePath(thisFilePath) + $.getFileName(thisFilePath, true).replace('.min', '') + '.css');
@@ -279,11 +118,15 @@
                     op.showPageInput = true;
                 }
 
+                //列表显示，则默认显示跳转输入框
+                if(op.showList && !$.isBoolean(options.showPageJump)) {
+                    op.showPageJump = true;
+                }
+
                 if (!$.isString(op.className, true)) {
                     op.className = defaultClassName;
                 }
             }
-
             return op;
         },
         checkPageIndex = function (that, value) {
@@ -589,8 +432,10 @@
     var Factory = {
         caches: {},
         buildKey: function(elem) {
-            var key = elem.id || elem.className || elem.tagName;
-            return key;
+            if($.isElement(elem)) {
+                return elem.id || elem.className || elem.tagName;
+            }
+            return elem;
         },
         setCache: function(elem, obj) {
             var key = this.buildKey(elem);
@@ -601,24 +446,203 @@
             var key = this.buildKey(elem);
             return this.caches[key];
         },
+        buildOptions: function(args, options) {
+            if(args.length >= 4) {
+                options = {
+                    element: args[0],
+                    dataCount: args[1],
+                    pageIndex: args[2],
+                    pageSize: args[3],
+                    callback: args[4],
+                    skin: args[5]
+                };
+            }
+            return options;
+        },
         show: function(options, dataCount) {
-            var elem = options.element || options.parent || options.container || options.obj,
-                p = this.getCache(elem);
-            options.element = elem;
+            var opt = $.extend({}, options);
+            if(!opt.element) {
+                opt.element = opt.parent || opt.container || opt.obj;
+            }
+            console.log('show:', opt);
+            var p = this.getCache(opt.element);
             if(!p) {
-                p = new Pagination(options, dataCount);
-                this.setCache(elem, p);
+                p = new Pagination(opt, dataCount);
+                this.setCache(opt.element, p);
                 return p;
             }
-            return p.paging(options, dataCount), p;
+            return p.paging(opt, dataCount), p;
+        }
+    };
+
+    function Pagination(options, dataCount) {
+        var that = this;
+        that.options = setOptions({
+            element: null,              //分页显示HTML控件（或ID）
+            pageSize: 10,               //每页显示条数，默认为10
+            pageStart: 0,               //起始页，0 或 1，与 pageIndex 起始值对应
+            pageIndex: 0,               //起始页码，默认与 pageStart 相同
+            dataCount: 0,               //总数据条数
+            markCount: 10,              //分页数字按钮显示个数，默认为10个
+            markType: defaultType,      //标记类型：图标|中文|英文（symbol|chinese|english）
+            markText: null,             //标记文字（上一页 下一页）
+            showList: false,             //是否显示数字列表，若不显示数字列表，则默认显示输入框
+            showInvalid: true,          //是否显示无效的按钮
+            showEllipsis: true,         //是否显示省略号(快进)按钮
+            alwaysEllipsis: false,      //是否始终显示省略号按钮
+            showFirstLast: true,        //是否显示首页/尾页按钮
+            showPageInput: false,       //是否显示页码输入框
+            showPageJump: false,         //是否显示页码跳转输入框
+            showDataCount: true,       //是否显示数据条数
+            showPageCount: true,        //是否显示总页数
+            showDataStat: false,        //是否显示数据统计
+            showSizeSelect: true,       //是否显示PageSize下拉框
+            pageSizeItems: [],          //PageSize下拉框默认选项
+            callback: function (pageIndex, pageSize, that, param) {      //回调函数模式
+                console.log('pageIndex: ', pageIndex, 'pageSize: ', pageSize, ', param: ', param);
+            },
+            callbackParam: null,                    //回调参数
+            url: '',                                //URL模式，必须包含关键字 {0} 或 {pageIndex}，若url可用，则url优先于callback
+            useKeyEvent: true,                      //是否启用快捷键（回车键，方向键 [上下左右或HJKL] ）
+            useLongPress: true,                     //是否启用长按功能（长按 上一页 下一页）
+            longPressTime: defaultLongPressTime,    //长按生效时长（长按多少毫秒启动长按功能），单位：毫秒
+            longPressInterval: defaultLongPressInterval,    //长按分页切换频率，单位：毫秒
+            showReload: false,                      //是否显示刷新按钮
+            position: defaultPositon,               //left|right
+            className: defaultClassName,            //默认样式名称，可以修改为外置样式
+            skin: defaultSkin,                      //样式，若skin=null则不启用内置样式
+            inputWidth: defaultInputWidth,          //输入框宽度，默认为50px
+            debounce: true,                         //是否启用防抖功能（或者值为number，且大于50即为启用）
+            debounceTime: defaultDebounceTime,      //抖动时长，单位：毫秒
+            focus: false                            //是否锁定焦点
+        }, options, dataCount);
+
+        that.paging();
+    }
+
+    Pagination.prototype = {
+        paging: function (options, dataCount) {
+            if ($.isObject(options) || $.isNumber(options)) {
+                this.options = setOptions(this.options, options, dataCount);
+            }
+            var that = this, op = $.extend(that.options, {
+                pageCount: Math.ceil(that.options.dataCount / that.options.pageSize),
+                minuend: Math.abs(that.options.pageStart - 1)
+            });
+
+            //检测pageIndex是否在pageCount范围内
+            checkPageIndex(that);
+
+            var mi = parseInt(op.markCount / 2, 10),
+                mc = Math.ceil(op.markCount / 2),
+                minMax = getMinMax(that),
+                min = minMax[0],
+                max = minMax[1] + op.pageStart,
+                quickNum = 0,
+                pmSub = op.pageIndex - op.markCount,
+                pcSub = op.pageCount - op.minuend,
+                pmSum = op.pageIndex + op.markCount,
+                className = op.markType === defaultType ? 'text symbol' : 'text',
+                html = [
+                    '<div class="' + getClassName(that) + '">',
+                    '<div class="' + op.skin + ' ' + getPosition(that, true) + '">',
+                    '<ul class="list">'
+                ];
+
+            var cssData = '.' + op.className + ' li{float: left;}', cssId = op.className + '-css-' + $.crc.toCRC16(op.className).toLowerCase();
+            //创建CssStyle，防止闪烁
+            $.createCssStyle(cssData, cssId);
+
+            buildDataCount(op.showDataCount, that, html, op.markText['dataCount'], op.dataCount);
+
+            buildPageSize(op.showSizeSelect, that, html, op.minuend);
+
+            if (op.pageIndex != min && op.pageCount > 0) {
+                buildLinkText(op.showFirstLast, that, html, op.pageStart, 'first', false, className);
+                //显示省略号快退按钮
+                if (op.showEllipsis && pmSub >= op.pageStart) {
+                    quickNum = pmSub > op.pageStart ? pmSub : op.pageStart;
+                    buildLinkText(true, that, html, quickNum, 'ellipsis', false, 'ellipsis');
+                } else if (op.alwaysEllipsis) {
+                    buildLinkText(true, that, html, 'PQ', 'ellipsis', true, 'ellipsis');
+                }
+                buildLinkText(true, that, html, op.pageIndex - 1, 'previous', false, className);
+            } else if (op.showInvalid) {
+                buildLinkText(op.showFirstLast, that, html, 0, 'first', true, className);
+                if (op.alwaysEllipsis) {
+                    buildLinkText(true, that, html, 'PQ', 'ellipsis', true, 'ellipsis');
+                }
+                buildLinkText(true, that, html, 0, 'previous', true, className);
+            }
+
+            if (op.showList) {
+                var c = 0;
+                for (var i = min; i < max; i++) {
+                    var num = i + op.minuend;
+                    if (i > op.pageCount || c > op.markCount) {
+                        break;
+                    }
+                    if (c === mi) {
+                        buildPageInput(op.showPageInput, that, html, false, 'i');
+                    }
+                    if (i === op.pageIndex) {
+                        html.push('<li><a class="link cur">' + num + '</a></li>');
+                    } else {
+                        html.push('<li><a class="link num" value="' + i + '">' + num + '</a></li>');
+                    }
+                    c++;
+                }
+            } else {
+                buildPageInput(op.showPageInput, that, html, false, 'i');
+            }
+
+            //上一页<、下一页>、第一页<<、最后一页标记>>
+            if (op.pageIndex != op.pageCount - op.minuend && op.pageCount > 0) {
+                buildLinkText(true, that, html, op.pageIndex + 1, 'next', false, className);
+
+                //显示省略号快进按钮
+                if (op.showEllipsis && pmSum < op.pageCount) {
+                    quickNum = pmSum < pcSub ? pmSum : pcSub;
+                    buildLinkText(true, that, html, quickNum, 'ellipsis', false, 'ellipsis');
+                } else if (op.alwaysEllipsis) {
+                    buildLinkText(true, that, html, 'NQ', 'ellipsis', true, 'ellipsis');
+                }
+                buildLinkText(op.showFirstLast, that, html, pcSub, 'last', false, className);
+            } else if (op.showInvalid) {
+                buildLinkText(true, that, html, 0, 'next', true, className);
+                if (op.alwaysEllipsis) {
+                    buildLinkText(true, that, html, 'NQ', 'ellipsis', true, 'ellipsis');
+                }
+                buildLinkText(op.showFirstLast, that, html, 0, 'last', true, false, className);
+            }
+
+            buildPageInput(op.showPageJump, that, html, true, 'j');
+
+            buildLinkText(op.showReload, that, html, op.pageIndex, 'reload', false, 'text');
+
+            buildDataCount(op.showPageCount, that, html, op.markText['pageCount'], op.pageCount);
+
+            html.push('</ul></div>');
+
+            buildDataStat(op.showDataStat, that, html, op.markText['dataStat']);
+
+            html.push('</div>');
+
+            op.element.innerHTML = html.join('');
+
+            createEvent(that, op.minuend);
+
+            return this;
         }
     };
 
     $.extend($, {
         pagination: function(options, dataCount) {
+            options = Factory.buildOptions(arguments, options);
             return Factory.show(options, dataCount);
         },
         paging: function(options, dataCount) {
+            options = Factory.buildOptions(arguments, options);
             return Factory.show(options, dataCount);
         }
     });

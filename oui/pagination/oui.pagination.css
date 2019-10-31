@@ -48,7 +48,7 @@
 
 .oui-pagination a,.oui-pagination input,.oui-pagination button,.oui-pagination select{
     margin: 0; padding: 0; float: left; height: 22px; font-size: 14px; font-weight: normal; text-align: center; 
-    border-radius: 4px; box-sizing: border-box; background-image: none; background-color: transparent;    
+    border-radius: 5px; box-sizing: border-box; background-image: none; background-color: transparent;    
     border: 1px solid #ccc; color: #333; background: #fff; white-space: nowrap; vertical-align: middle; display: inline-block;
 }
 
@@ -168,9 +168,9 @@
 /*以下为定制样式 blue,red,green,black等，调用时指定参数中的 skin 为相应的样式名称*/
 
 .oui-pagination .blue { }
-.oui-pagination .blue a.link { border: solid 1px #005eac; }
-.oui-pagination .blue a.link:hover { background: #005eac; }
-.oui-pagination .blue a.cur {background: #005eac; }
+.oui-pagination .blue a.link { border: solid 1px #2e6da4; }
+.oui-pagination .blue a.link:hover { background: #2e6da4; }
+.oui-pagination .blue a.cur {background: #2e6da4; }
 .oui-pagination .blue button.btn { background: #337ab7; border-color: #2e6da4; }
 
 .oui-pagination .red { }
