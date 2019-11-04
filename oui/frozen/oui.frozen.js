@@ -205,7 +205,8 @@
             } else { // cell
                 arrKey = ['ondblclick', 'onclick', 'onmouseover', 'onmouseout'];
                 //从指定的行开始计算（并采用）列宽
-                if(rowIndex >= options.colStartRowIndex) {
+                //当单元格有合并列时，则不采用列宽，防止表格错位
+                if(rowIndex >= options.colStartRowIndex && elemObj.colSpan <= 1) {
                     var ws = $.getStyleSize(elemObj), w = ws.width || elemObj.clientWidth;
                     elem.style.width = w + 'px';
                 }
@@ -275,19 +276,21 @@
 
             switch(dir) {
                 case 'head':
-                    if(options.fixHead && head) {
-                        if(!$.isIE) {
-                            tbTarget.appendChild(head.cloneNode(true));
-                        } else {
-                            Factory.buildHeadRows(f, offset, headRows, tbTarget, tbSource, container, options, false);
+                    if(options.fixHead) {
+                        if(head) {
+                            if(!$.isIE) {
+                                tbTarget.appendChild(head.cloneNode(true));
+                            } else {
+                                Factory.buildHeadRows(f, offset, headRows, tbTarget, tbSource, container, options, false);
+                            }
+                            offset = headRows;
                         }
-                        offset = headRows;
+                        if(rows < headRows || (!head && rows <= 0)) {
+                            rows = headRows || 1;
+                            Factory.setOptions(f.id, 'rows', rows);
+                        }
                     }
-                    if(rows < headRows || (!head && rows <= 0)) {
-                        rows = headRows || 1;
-                        Factory.setOptions(f.id, 'rows', rows);
-                    }
-                    if(rows > headRows) {
+                    if(rows > offset) {
                         Factory.buildHeadRows(f, offset, rows, tbTarget, tbSource, container, options, true);
                     }
                     break;

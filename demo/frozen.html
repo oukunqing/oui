@@ -20,6 +20,8 @@ select {margin-right:10px;}
 
 <body>
 <div style="padding:0 0 10px 0;">
+<div>说明：当启用强制固定表头时，且表格包含tHead时，则强制固定表头</div>
+<label><input type="checkbox" id="chbHead" /><span>强制固定表头</span></label>
 上:
 <select id="ddlHead"></select>
 左:
@@ -271,7 +273,8 @@ var ii = 0;
 var table = $I('divBox').childNodes[1], fid = '';
 
 function frozen() {
-	var head = parseInt('0' + document.getElementById('ddlHead').value, 10),
+	var fixHead = document.getElementById('chbHead').checked, 
+		head = parseInt('0' + document.getElementById('ddlHead').value, 10),
 		left = parseInt('0' + document.getElementById('ddlLeft').value, 10),
 		foot = parseInt('0' + document.getElementById('ddlFoot').value, 10),
 		right = parseInt('0' + document.getElementById('ddlRight').value, 10);
@@ -281,6 +284,7 @@ function frozen() {
 	$.frozen(table, {
 		//fixHead: false,
 		rows: head,			//rows, head
+		fixHead: fixHead,
 		cols: left,			//cols, left
 		foot: foot,
 		right: right,

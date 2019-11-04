@@ -18,12 +18,13 @@
 <div id="p5"></div>
 <br />
 <div id="p6"></div>
+<br />
+<div id="p7"></div>
 
 
 </body>
 </html>
 <script type="text/javascript">
-    
     var pageIndex = $.getQueryString()['pageIndex'] || 1;
     var timer = null;
     var p1 = $.pagination({
@@ -132,8 +133,9 @@
     });
    
    var p6 = $.pagination({
-        element: document.getElementById('p6'),
-        dataCount: 89,
+        //element: document.getElementById('p6'),
+        element: 'p6',
+        dataCount: 689,
         pageIndex: 0,
         pageStart: 0,
         showList: true,
@@ -146,4 +148,10 @@
             p6.paging(pageIndex);
         }
     });
+
+	var p7 = $.pagination('p7', 389, 0, 10, function(pageIndex, pageSize) {		
+		console.log('p7-callback: ', pageIndex);
+
+		p7.paging(pageIndex);
+	});
 </script>
