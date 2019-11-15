@@ -171,6 +171,12 @@
             }
             return {};
         },
+        callFrozen: function(frozen, funcName, param) {
+            if(frozen && $.isFunction(frozen[funcName])) {
+                frozen[funcName](param);
+            }
+            return this;
+        },
         isTHeadRow: function (row) {
             return row.parentNode && row.parentNode.tagName === 'THEAD';
         },
@@ -755,20 +761,19 @@
 
     $.extend($.frozen, {
         show: function (id, isShow) {
-            var frozen = Factory.getFrozen(id);
-            if(frozen && $.isFunction(frozen.show)) {
-                frozen.show(isShow);
-            }
-            return this;
+            return Factory.callFrozen(Factory.getFrozen(id), 'show', isShow), this;
         },
         hide: function (id) {
             return this.show(id, false);
         },
+        update: function(id) {
+            return Factory.callFrozen(Factory.getFrozen(id), 'update'), this;
+        },
+        resize: function(id) {
+            return Factory.callFrozen(Factory.getFrozen(id), 'resize'), this;
+        },
         clear: function (id) {
-            var frozen = Factory.getFrozen(id);
-            if(frozen && $.isFunction(frozen.clear)) {
-                frozen.clear();
-            }
+            return Factory.callFrozen(Factory.getFrozen(id), 'clear'), this;
         }
     });
 

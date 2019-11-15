@@ -20,8 +20,11 @@ select {margin-right:10px;}
 
 <body>
 <div style="padding:0 0 10px 0;">
-<div>说明：当启用强制固定表头时，且表格包含tHead时，则强制固定表头</div>
+<div style="line-height:24px;margin-bottom:10px;"><span style="color:#f00;">请注意：不兼容IE9以下版本的IE浏览器</span>
+<br />说明：当启用强制固定表头时，且表格包含tHead时，则强制固定表头。<br />当表格宽度高度小于DIV容器的宽度高度（没出现滚动条）时，则不启用冻结</div>
 <label><input type="checkbox" id="chbHead" /><span>强制固定表头</span></label>
+<label><input type="checkbox" id="chbLine" checked="checked" /><span>显示分割线</span></label>
+&nbsp;&nbsp;&nbsp;&nbsp;
 上:
 <select id="ddlHead"></select>
 左:
@@ -34,7 +37,7 @@ select {margin-right:10px;}
 <input type="button" value="隐藏" onclick="hide();" />
 <input type="button" value="显示" onclick="show();" />
 </div>
-<div id="divBox" style="width:700px; height:300px; overflow:auto;border:solid 4px #f00;padding:0px;margin:0; position: relative;">
+<div id="divBox" style="width:700px; height:300px; overflow:auto;border:solid 1px #f00;padding:0px;margin:0; position: relative;">
 <table cellpadding="0" cellspacing="0" border="0" class="tb"  style="width:1000px;">
 	<thead>
 	<tr>
@@ -240,10 +243,10 @@ select {margin-right:10px;}
 </html>
 <script type="text/javascript">
 window.onload = function() {
-	var head = document.getElementById('ddlHead'),
-		left = document.getElementById('ddlLeft'),
-		foot = document.getElementById('ddlFoot'),
-		right = document.getElementById('ddlRight');
+	var head = $I('ddlHead'),
+		left = $I('ddlLeft'),
+		foot = $I('ddlFoot'),
+		right = $I('ddlRight');
 	
 	for(var i = 0; i <= 10; i++) {
 		head.options.add(new Option(i, i));
@@ -265,7 +268,7 @@ window.onresize = function() {
 	}
 	var box = $I('divBox');
 	box.style.width = bs.width * 0.9 + 'px';
-	box.style.height = bs.height * 0.8 + 'px';
+	box.style.height = bs.height * 0.6 + 'px';
 };
 
 var ii = 0;
@@ -273,32 +276,58 @@ var ii = 0;
 var table = $I('divBox').childNodes[1], fid = '';
 
 function frozen() {
-	var fixHead = document.getElementById('chbHead').checked, 
-		head = parseInt('0' + document.getElementById('ddlHead').value, 10),
-		left = parseInt('0' + document.getElementById('ddlLeft').value, 10),
-		foot = parseInt('0' + document.getElementById('ddlFoot').value, 10),
-		right = parseInt('0' + document.getElementById('ddlRight').value, 10);
+	var fixHead = $I('chbHead').checked, 
+		head = parseInt('0' + $I('ddlHead').value, 10),
+		left = parseInt('0' + $I('ddlLeft').value, 10),
+		foot = parseInt('0' + $I('ddlFoot').value, 10),
+		right = parseInt('0' + $I('ddlRight').value, 10);
+
+	//是否强制冻结（表格已经冻结后，可以直接重新冻结）
+	//如果表格table一直存在，而只是行tr改变，就需要设置为 true,
+	//如果表格table每次也是重新创建（或重新.innerHTML | .html(...) ) 可以设置为 false
+	//因为有防止重复冻结功能，调用.frozen后，表格table会被设置forzen-id属性以示标记
+	var force = true;
+
+	var showLine = $I('chbLine').checked;
 
 	//console.log('table:', table);
 	//var table = 'tb1';
-	$.frozen(table, {
-		//fixHead: false,
+	var fo = $.frozen(table, {
+		//上部行数
 		rows: head,			//rows, head
+		//固定tHead
 		fixHead: fixHead,
+		//左边列数
 		cols: left,			//cols, left
+		//底部行数
 		foot: foot,
+		//右边列数
 		right: right,
-		border: '',
-		showBorder:true,  // showSplitLine, showLine
+		//是否显示分割线
+		showBorder: showLine,  // showSplitLine, showLine
+		////线条颜色可以自定义，默认为 #646464（即excel中的窗口冻结分割线颜色）
 		//lineColor: '#ccc',
+
+		//分割线样式，border 参数优先于 lineColor
+		border: '',         //'solid 2px #f00'
 		//setBackground: true,	// showBackground
+		////冻结部分的单元格背景色，可以自定义，默认按原来的单元格背景色不变
 		//background: '#f1f1f1',
 		//debounce: false,
+		//冻结完成后回调函数
 		complete: function(f) {
 			console.log('f:', ii++, f);
 			fid = f.id;
 		}
-	}, true);
+	}, force);
+
+/*
+	fo.hide();
+
+	fo.show();
+
+	fo.resize();
+*/
 }
 
 function show() {
@@ -307,6 +336,10 @@ function show() {
 
 function hide() {
 	$.frozen.hide(fid);
+}
+
+function resize() {
+	$.frozen.resize(fid);
 }
 
 </script>

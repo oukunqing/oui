@@ -47,7 +47,9 @@
                 },
                 formElement: formElement,
                 submitHandler: opt.submitHandler || opt.submit,
-                fields: $.extend({}, opt.fields, opt.rules),
+                // 如果 opt参数中没有包含 fields 或者 rules 字段，则取整个opt参数作为字段规则
+                // 这个情况会出现在直接调用 getFormData 的时候
+                fields: opt.fields || opt.rules ? $.extend({}, opt.fields, opt.rules) : $.extend({}, opt),
                 configs: $.extend({
                     defaultValue: '',
                     minValue: '',
