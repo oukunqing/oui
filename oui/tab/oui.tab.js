@@ -1036,7 +1036,8 @@
         },
         setContentSize: function(size, isContent, opt) {
             //console.log('setContentSize: ', size);
-            var that = this, tabHeight = 0, itemId = '';
+            var that = this, tabHeight = 0, itemId = '',
+                cfg = $.extend(that.getOptions(), opt);
             if($.isObject(size)) {
                 that.conContainer.style.height = size.height + 'px';
                 tabHeight = isContent ? 0 : $.getOuterSize(that.tabContainer).height;
@@ -1045,6 +1046,10 @@
                     itemId = size;
                 }
                 size = { width: that.conContainer.clientWidth, height: that.conContainer.clientHeight || opt.conHeight };
+            }
+
+            if(tabHeight <= 0) {
+                tabHeight = cfg.tabHeight;
             }
 
             if(itemId) {
