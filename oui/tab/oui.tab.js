@@ -302,7 +302,7 @@
             return w;
         },
         scrollAction: function(t, btn, dir) {
-            if(t.getOptions.dblclickScroll) {                
+            if(t.getOptions().dblclickScroll) {                
                 $.addEventListener(btn, 'dblclick', function () {
                     Util.scrollTo(t, dir, 0, true);
                 });
@@ -833,9 +833,9 @@
 
         var opt = $.extend({
             id: 'oui-tabs-' + new Date().getMilliseconds(),
-            skin: 'default',    //样式: default, blue
-            lang: 'chinese',    //chinese, english
-            eventName: 'click',
+            skin: 'default',        //样式: default, blue
+            lang: 'chinese',        //chinese, english
+            eventName: 'click',     //click, mouseover
             dblclickScroll: false,
             showContextMenu: true,
             // Tab最大数量
@@ -1037,7 +1037,7 @@
         setContentSize: function(size, isContent, opt) {
             //console.log('setContentSize: ', size);
             var that = this, tabHeight = 0, itemId = '',
-                cfg = $.extend(that.getOptions(), opt);
+                cfg = that.getOptions();
             if($.isObject(size)) {
                 that.conContainer.style.height = size.height + 'px';
                 tabHeight = isContent ? 0 : $.getOuterSize(that.tabContainer).height;
@@ -1049,7 +1049,7 @@
             }
 
             if(tabHeight <= 0) {
-                tabHeight = cfg.tabHeight;
+                tabHeight = opt.tabHeight || cfg.tabHeight;
             }
 
             if(itemId) {
@@ -1077,17 +1077,38 @@
         }
     };
 
-    function TabPage() {
+    function Tabs(tabContainer, conContainer, options) {
+        var that = this, cssTab = '', cssCon = '';
+        that.tabContainer = $.toElement(tabContainer);
+        that.conContainer = $.toElement(conContainer);
 
+        var opt = $.extend({
+            eventName: 'click',     //click, mouseover
+
+        }, options);
+
+        that.initial(opt);
     }
 
-    TabPage.prototype = {
-        
+    Tabs.prototype = {
+        initial: function(options) {
+            var that = this;
+            var tabs = that.tabContainer.childNodes, cons = that.conContainer.childNodes;
+
+            console.log('tabs:', tabs, ', cons: ', cons);
+
+            console.log(that.tabContainer.querySelectorAll('a'));
+        }
+
     };
+
 
     $.extend({
         tab: function(tabContainer, conContainer, options) {
             return Factory.buildTab(tabContainer, conContainer, options);
+        },
+        tabs: function(tabContainer, conContainer, options) {
+            return new Tabs(tabContainer, conContainer, options);
         }
     });
 

@@ -1881,7 +1881,8 @@
                     btns.min.title = Common.getStatusText(minKey, opt.lang);
                 }
 
-                var bs = util.getBoundary(opt.parent),
+                var cp = $.getScrollPosition(),
+                    bs = util.getBoundary(opt.parent),
                     isSetBodySize = false,
                     isSetPosition = false,
                     isFullScreen = false;
@@ -1891,11 +1892,15 @@
                         return this;
                     }
                     var hasParent = $.isElement(opt.parent);
-                    var scrollTop = opt.lock || hasParent ? bs.x : document.documentElement.scrollTop;
                     if (hasParent) {
-                        par = { width: opt.parent.offsetWidth + 'px', height: opt.parent.offsetHeight + 'px', top: scrollTop, left: bs.x };
+                        par = { 
+                            width: opt.parent.offsetWidth + 'px', 
+                            height: opt.parent.offsetHeight + 'px', 
+                            top: opt.parent.offsetTop - cp.top,
+                            left: opt.parent.offsetLeft - cp.left
+                        };
                     } else {
-                        par = { width: '100%', height: '100%', top: scrollTop, left: bs.x };
+                        par = { width: '100%', height: '100%', top: bs.y, left: bs.x };
                     }
                     isSetBodySize = isFullScreen = true;
 
@@ -2059,7 +2064,7 @@
                 }
                 return this;
             },
-            setPosition: function (_, options) {
+            setPosition: function (_, options, isDragTo) {
                 var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls, obj = ctls.dialog;
                 if (p.none || !obj) { return this; }
 
@@ -2140,7 +2145,7 @@
 
                 //TODO: margin setting
 
-                if(opt.animate) {
+                if(opt.animate && !isDragTo) {
                     return util.moveToPosition(_, { left: posX, top: posY });
                 }
                 return $.setStyle(obj, { left: posX, top: posY }, 'px'), util;
@@ -2163,7 +2168,8 @@
                     return util.setTargetPosition(par, obj), util;
                 }
 
-                var moveTo = $.isBoolean(isMoveTo, false),
+                var cp = $.getScrollPosition(),
+                    moveTo = $.isBoolean(isMoveTo, false),
                     bs = util.getBoundary(opt.parent),
                     left = obj.offsetLeft,
                     top = obj.offsetTop,
@@ -2191,6 +2197,10 @@
                     if ((posY + h) > bs.height) {
                         posY = bs.height - h;
                     }
+                }
+                if($.isElement(opt.parent)) {
+                    posX -= cp.left;
+                    posY -= cp.top;
                 }
                 $.setStyle(obj, { width: w, height: h, left: posX, top: posY }, 'px');
 
@@ -2232,7 +2242,8 @@
                 var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls, obj = ctls.dialog;
                 if (p.none || !obj) { return this; }
 
-                var x = pos.left, 
+                var cp = $.getScrollPosition(),
+                    x = pos.left, 
                     y = pos.top,
                     ani = opt.animate,
                     dir = ani.direction || ani.dir || util.getMoveDirection(opt.position), 
@@ -2275,7 +2286,7 @@
                     add = opt.position % 3 !== 0;
                     x = add ? bs.x - os.outer.width : bs.width;
                 }
-                $.setStyle(obj, { left: x, top: y }, 'px');
+                $.setStyle(obj, { left: x - cp.left, top: y - cp.top }, 'px');
 
                 window.clearInterval(util.timerMoveTo);
                 util.timerMoveTo = window.setInterval(function() {
@@ -2302,7 +2313,8 @@
                                 y = pos.top;
                             }
                         }
-                        $.setStyle(obj, { left: x, top: y }, 'px');
+
+                        $.setStyle(obj, { left: x - cp.left, top: y - cp.top }, 'px');
                     }
                 }, interval);
 
@@ -2993,7 +3005,7 @@
                     offsetX = evt.clientX - moveX;
                 }
                 //移动对话框到当前鼠标位置
-                util.setPosition(_, { position: 'custom', event: 'drag', x: offsetX, y: offsetY });
+                util.setPosition(_, { position: 'custom', event: 'drag', x: offsetX, y: offsetY }, true);
 
                 return this;
             },
