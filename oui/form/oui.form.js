@@ -348,6 +348,7 @@
                     var field = checkField(op.swap($.extend({
                         title: '',                  //字段名称（用于提示信息）
                         type: '',                   //字段类型（email,url等），用于格式验证
+                        dataKey: '',                //指定值关键字（默认不用指定）
                         dataType: dataType,         //值类型（string,int,float)
                         defaultValue: '',           //默认值 (val, value, defaultValue)
                         value: '',                  //获取到的字段内容
@@ -390,7 +391,8 @@
                     element.isSingle = isSingle;
 
                     return { 
-                        id: id, name: name, key: key, nameKey: nameKey, value: op.getValue(element), isSingle: isSingle, field: field
+                        id: id, name: name, key: key, nameKey: nameKey, value: op.getValue(element), 
+                        dataKey: field.dataKey, isSingle: isSingle, field: field
                     };
                 },
                 setControlEvent: function (element, configs, fieldConfig) {
@@ -532,13 +534,13 @@
                 } else if (obj.isSingle) {
                     if(fc.key) {
                         if(fc.field.md5 && $.isString(result.value, true)) {
-                            data[fc.key] = $.md5(result.value);
+                            data[fc.dataKey || fc.key] = $.md5(result.value);
                         } else {
-                            data[fc.key] = result.value;
+                            data[fc.dataKey || fc.key] = result.value;
                         }
                     }
                 } else {
-                    if((key = fc.nameKey || fc.key)) {
+                    if((key = fc.dataKey || fc.nameKey || fc.key)) {
                         if ($.isUndefined(data[key])) {
                             data[key] = [];
                         }

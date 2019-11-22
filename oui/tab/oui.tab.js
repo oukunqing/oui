@@ -1083,6 +1083,7 @@
         that.conContainer = $.toElement(conContainer);
 
         var opt = $.extend({
+            type: 'switch',         //switch, scroll
             eventName: 'click',     //click, mouseover
 
         }, options);
@@ -1093,13 +1094,38 @@
     Tabs.prototype = {
         initial: function(options) {
             var that = this;
-            var tabs = that.tabContainer.childNodes, cons = that.conContainer.childNodes;
+            //var tabs = that.tabContainer.childNodes, cons = that.conContainer.childNodes;
+            var tabs = that.tabContainer.querySelectorAll('a'),
+                cons = that.conContainer.querySelectorAll('div');
 
+            that.tabs = tabs;
+            that.cons = cons;
+
+            if(options.type === 'switch') {
+                for(var i = 0; i < cons.length; i++) {
+                    cons[i].style.display = 'none';
+                }
+            }
             console.log('tabs:', tabs, ', cons: ', cons);
+        },
+        show: function(key) {
+            var that = this;
+            for(var i = 0; i < that.tabs.length; i++) {
+                if(key === $.getAttribute(that.tabs[i], 'rel')) {
+                    
+                    break;
+                }
+            }
+            for(var i = 0; i < that.cons.length; i++) {
+                if(key === $.getAttribute(that.cons[i], 'key')) {
+                    that.cons[i].style.display = '';
+                    break;
+                }
+            }
+        },
+        scroll: function(key) {
 
-            console.log(that.tabContainer.querySelectorAll('a'));
         }
-
     };
 
 

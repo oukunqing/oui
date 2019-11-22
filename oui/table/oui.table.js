@@ -255,7 +255,7 @@
             setTreeFlag(that.tree, id, false);
         },
         setTreeCell = function (that, cell, data, content) {
-            content = buildSwitch(that.tree, data) + content;
+            content = buildSwitch(that.tree, data, cell) + content;
 
             if ($.isDebug()) {
                 //临时测试用
@@ -1288,7 +1288,7 @@
             }
             return w;
         },
-        buildSwitch = function (that, data) {
+        buildSwitch = function (that, data, cell) {
             var op = that.options, 
                 id = data.id,
                 level = data.level,
@@ -1296,9 +1296,17 @@
             if(data.leaf) {
                 return '<a class="space"></a>';
             }
+            var cs = $.getElementSize(cell), ch = cs.style.height || cs.offset.height;
+            //var mt = ch > 24 ? 'margin-top:' + (ch / 2 - 12 / 2) + 'px;' : '';
+            var mt = cs.padding.top > 0 ? 'margin-top:' + (cs.padding.top / 2 + 1) + 'px;' : '';
             var f = '<a id="' + buildId(id, 'FOCUS', that.Table) + '" class="table-tree-focuser" href="#" /></a>';
-            var a = '<a id="{0}" tid="{1}" expand="{2}" class="{3}" style="cursor:pointer;margin-left:{4}px !important;"></a>'.format(
-                buildId(id, 'SWITCH', that.Table), id, isExpand ? 1 : 0, isExpand ? op.className.expand : op.className.collapse, buildSpace(level, op.spaceWidth)
+            var a = '<a id="{0}" tid="{1}" expand="{2}" class="{3}" style="cursor:pointer;margin-left:{4}px !important;{5}"></a>'.format(
+                buildId(id, 'SWITCH', that.Table), 
+                id, 
+                isExpand ? 1 : 0, 
+                isExpand ? op.className.expand : op.className.collapse, 
+                buildSpace(level, op.spaceWidth),
+                mt
             );
             return f + a;
         },

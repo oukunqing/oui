@@ -201,7 +201,7 @@
             }
             return this;
         },
-        cloneElement: function(f, type, elem, elemObj, rowIndex, options, dir) {
+        cloneElement: function(f, type, elem, elemObj, rowIndex, options, dir, cellIndex, sizeRow) {
             elem.className = elemObj.className;
             elem.style.cssText = elemObj.style.cssText;
             var arrKey = [];
@@ -210,11 +210,16 @@
                 arrKey = ['ondblclick', 'onclick', 'onmouseover', 'onmouseout'];
             } else { // cell
                 arrKey = ['ondblclick', 'onclick', 'onmouseover', 'onmouseout'];
-                //从指定的行开始计算（并采用）列宽
-                //当单元格有合并列时，则不采用列宽，防止表格错位
-                if(rowIndex >= options.colStartRowIndex && elemObj.colSpan <= 1) {
-                    var ws = $.getStyleSize(elemObj), w = ws.width || elemObj.clientWidth;
+                if(sizeRow) {
+                    var ws = $.getStyleSize(sizeRow.cells[cellIndex]), w = ws.width || elemObj.clientWidth;
                     elem.style.width = w + 'px';
+                } else {
+                    //从指定的行开始计算（并采用）列宽
+                    //当单元格有合并列时，则不采用列宽，防止表格错位
+                    if(rowIndex >= options.colStartRowIndex && elemObj.colSpan <= 1) {
+                        var ws = $.getStyleSize(elemObj), w = ws.width || elemObj.clientWidth;
+                        elem.style.width = w + 'px';
+                    }
                 }
                 if(elemObj.rowSpan > 1 || (dir && dir !== 'head')) {
                     var hs = $.getStyleSize(elemObj), h = hs.height || elemObj.clientHeight;
@@ -246,7 +251,7 @@
             }
             return cut;
         },
-        buildHeadRows: function(f, offset, rows, tbTarget, tbSource, container, options, isBody) {
+        buildHeadRows: function(f, offset, rows, tbTarget, tbSource, container, options, isBody, sizeRow) {
             for(var i = offset; i < rows; i++) {
                 var rowOld = tbSource.rows[i];
                 if(!rowOld) {
@@ -261,7 +266,7 @@
                 for(var j = 0; j < rowOld.cells.length; j++) {
                     var cellOld = rowOld.cells[j];
                     var cell = cellOld.cloneNode(true);
-                    Factory.cloneElement(f, 'cell', cell, cellOld, i, options, 'head');
+                    Factory.cloneElement(f, 'cell', cell, cellOld, i, options, 'head', j, sizeRow);
                     row.appendChild(cell);
                 }
             }
@@ -283,11 +288,19 @@
             switch(dir) {
                 case 'head':
                     if(options.fixHead) {
+                        var sizeRow = null;
+                        console.log('options:', options.colStartRowIndex, options.rows);
+                        if(options.colStartRowIndex >= options.rows) {
+                            if(options.colStartRowIndex >= tbSource.rows.length) {
+                                options.colStartRowIndex = tbSource.rows.length;
+                            }
+                            sizeRow = tbSource.rows[options.colStartRowIndex];
+                        }
                         if(head) {
-                            if(!$.isIE) {
+                            if(!$.isIE && !sizeRow) {
                                 tbTarget.appendChild(head.cloneNode(true));
                             } else {
-                                Factory.buildHeadRows(f, offset, headRows, tbTarget, tbSource, container, options, false);
+                                Factory.buildHeadRows(f, offset, headRows, tbTarget, tbSource, container, options, false, sizeRow);
                             }
                             offset = headRows;
                         }

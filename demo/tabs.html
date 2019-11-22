@@ -21,13 +21,13 @@
     <input type="button" value="关闭2" onclick="close2(true);" />
     <div style="margin:10px 0 150px;">
         <div id="nav" style="width:700px;">
-			<a>标签页1</a>
-			<a>标签页2标签页2</a>
+			<a rel="one">标签页1</a>
+			<a rel="two">标签页2标签页2</a>
 			<a>标签页3</a>
         </div>
         <div id="content" style="width:700px;">
-			<div>内容1</div>
-			<div>内容2</div>
+			<div key="one">内容1</div>
+			<div key="two">内容2</div>
 			<div>内容3</div>
         </div>
     </div>
@@ -41,5 +41,5 @@
         //center: false,
         tabHeight: 30,
         conHeight: 240
-    });
+    }).show('two');
 </script>
