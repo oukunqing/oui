@@ -180,9 +180,11 @@
             }
             return that;
         },
-        buildDataCount = function (enabled, that, arr, text, datas) {
+        buildDataCount = function (enabled, that, arr, text, count) {
             if (enabled) {
-                arr.push('<span class="label">' + (text || '{0}').format(datas) + '</span>');
+                var str = text || '';
+                str = str.indexOf('{0}') < 0 ? '{0}' + str : str;
+                arr.push('<span class="label">' + str.format(count) + '</span>');
             }
             return that;
         },
