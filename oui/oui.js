@@ -1781,6 +1781,23 @@
                 form.nodeName === 'FORM' &&
                 form.tagName === 'FORM';
         },
+        isDisplay = function(elem, recursion) {
+            elem = toElement(elem);
+            if(!isElement(elem)) {
+                return false;
+            }
+            if(!$.isBoolean(recursion, true)) {
+                return elem.style.display !== 'none';
+            }
+            var show = true;
+            while(isElement(elem)) {
+                if(elem.style.display === 'none') {
+                    return false;
+                }
+                elem = elem.parentNode;
+            }
+            return show;
+        },
         isStyleUnit = function(val, units) {
             if($.isNumber(val) || isNaN(parseFloat(val, 10))) {
                 return false;
@@ -2815,6 +2832,7 @@
         toElement: toElement,
         isChildNode: isChildNode,
         isForm: isForm,
+        isDisplay: isDisplay,
         isStyleUnit: isStyleUnit,
         isNumberSize: isNumberSize,
         createElement: createElement,
