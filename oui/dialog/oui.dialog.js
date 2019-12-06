@@ -343,7 +343,11 @@
                     target = title;
                     title = '';
                 } else if ($.isFunction(title)) {
-                    func = title;
+                    if(dialogType === Config.DialogType.confirm) {
+                        opt = { ok: title };
+                    } else {
+                        func = title;
+                    }
                     title = '';
                 }
                 if ($.isFunction(opt)) {
@@ -753,7 +757,7 @@
                 });
                 return this;
             },
-            show: function (content, title, options, type, target) {
+            show: function (content, title, options, type, target, okButton) {
                 options = Common.checkOptions(content, title, options, false, type);
                 var opt = {
                     id: Common.buildId(options.id),
@@ -773,6 +777,11 @@
                         opt.showMin = opt.showMax = opt.maxAble = false;
                         opt.keyClose = opt.escClose = opt.clickBgClose = false;
                         opt.buttonPosition = 'right';
+                        if($.isBoolean(okButton, false)) {
+                            opt.defaultButton = 'OK';
+                        } else if($.isString(okButton, true) || $.isNumber(okButton)) {
+                            opt.defaultButton = okButton;
+                        }
                         break;
                     case Config.DialogType.dialog:
                         opt.height = 'auto';
@@ -3858,7 +3867,7 @@
                 return _;
             }
 
-            var dbKey = p.defaultButton;
+            var dbKey = p.options.defaultButton;
             if (dbKey && buttons[dbKey]) {
                 buttons[dbKey].focus();
                 return _;
@@ -3982,8 +3991,13 @@
         alert: function (content, title, options) {
             return Factory.show(content, title, options, Config.DialogType.alert);
         },
-        confirm: function (content, title, options) {
-            return Factory.show(content, title, options, Config.DialogType.confirm);
+        confirm: function (content, title, options, okButton) {
+            if(arguments.length <= 3 && ($.isFunction(title) || $.isObject(title))) {
+                okButton = options;
+                options = title;
+                title = undefined;
+            }
+            return Factory.show(content, title, options, Config.DialogType.confirm, null, okButton);
         },
         message: function (content, options) {
             return Factory.show(content, undefined, options, Config.DialogType.message);

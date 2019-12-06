@@ -458,6 +458,9 @@
                     callback: args[4],
                     skin: args[5]
                 };
+                if($.isString(args[6], true)) {
+                    options.markText = { dataCount: args[6] };
+                }
             }
             return options;
         },
