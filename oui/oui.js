@@ -1047,6 +1047,9 @@
             var reg = new RegExp('(.{' + itemLen + '}(?!$))', 'g');
             return this.replace(reg, '$1' + delimiter);
         },
+        join: function() {
+            return this.toString();
+        },
         isEmpty: function () { return this.trim() === ''; },
         isNumeric: function () { return $.isnumeric(this); },
         isDecimal: function () { return $.isDecimal(this); },
@@ -1322,6 +1325,9 @@
                 return num.toNumberUnit(num, kb, 'KB', decimalLen, true, space);
             }
             return '';
+        },
+        join: function() {
+            return this.toString();
         }
     }, 'Number.prototype');
 

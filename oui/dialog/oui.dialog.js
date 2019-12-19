@@ -359,7 +359,7 @@
                 opt.element = elem || opt.element;
                 opt.content = content || opt.content;
                 opt.title = title || opt.title;
-                opt.target = target || opt.target;
+                opt.target = target || opt.anchor || opt.target;
                 opt.callback = func || opt.callback;
                 opt.complete = opt.complete || opt.onload || opt.ready;
                 opt.coverOCX = opt.coverOCX || opt.coverOcx || opt.cover;
@@ -3472,7 +3472,7 @@
                 position: 5,            //对话框初始位置, 0,1,2,3,4,5,6,7,8,9，共10种位置设置
                 x: 0,                   //x轴(left)偏移量，单位：px
                 y: 0,                   //y轴(top)偏移量，单位：px
-                target: null,           //Element 要跟随位置的html控件
+                target: null,           //Element 要跟随位置的html控件 target || anchor
                 direction: 'auto',      //跟随位置的方向 auto | fixed
                 focusTo: null,          //要获取焦点的html控件(对话框关闭后获取焦点)
                 fixed: false,           //是否固定位置

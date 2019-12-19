@@ -334,5 +334,21 @@ console.log('2019-11-06 16:23:00'.toDate().format('ts'));
 
 console.log(480*3+240);
 
+var x = 1, y = 2;
+x = x ^ y;
+y = x ^ y;
+x = x ^ y;
+
+console.log(x,y);
 
 
+var num = 'a';
+
+console.log(parseInt(num) || parseInt('0x' + num));
+
+
+var str = ' ';
+console.log(str.toUnicode());
+var str = '\u0020';
+
+console.log($.unicodeToAscii(str))

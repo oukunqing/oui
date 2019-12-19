@@ -8,6 +8,9 @@
 </head>
 <body>
     <div id="div1" style="border: solid 1px #00f;padding:10px;margin:50px 20px;">右键菜单</div>
+    <input type="text" id="txt1" />
+    <br />
+    <br />
     <label id="lbl1">帮助信息</label>
 </body>
 </html>
@@ -15,17 +18,23 @@
     var menu = $.contextmenu({
         id: 'menu1',
         obj: 'div1',
+        //anchor:'txt1',
+        //position: 9,
+        //event: 'click',
+        //y: 0,
+        //x: 0,
         par: { code: 'dx01', id: 32, name: '设备01'},
         width: 'auto',
         //height: 'auto',
         callback: function(par, obj) {
             console.log('par122: ', par, obj);
         },
+        //radius: 5,
         items: [
             { key: 'dic1', name: '字典配置1', par: { id: 12, code: 'abc' } }, { sep: 1 },
             { key:'dic', name: '字典配置', disabled: true },
             { key: 'sys', name: '系统配置', items: [
-                { key: 'map', name: '地图配置' },
+                { key: 'map', name: '地图配置', node: true },
                 { key: 'private-map', name: '私有地图配置', url: 'dialog.html', target: '_blank'},
                 { key: 'pic', name: '图片配置', items: [
                     { name: 'Logo配置' }, { key: 'bg', name: '背景图片' }
@@ -41,7 +50,7 @@
     menu.add({key: 'dic2', name: '字典配置2'}).sep('dic2')
         .insert({ key: 'person', pkey: 'map',  name: '人员配置', items: [
             { name: '使用者' },
-            { key: 'partner', name: '经销商', disabled: true }
+            { key: 'partner', name: '经销商', disabled: false }
         ]}, 1)
         .add('设备目录', function(par) {
             console.log('目录： ', par);
@@ -55,7 +64,9 @@
 
     $.cmenu({ id: 'menu2', obj: 'lbl1',  func: function(par) {
             console.log('par menu2: ', par);
-        }
+        },
+        width: 'auto',
+        target: 'txt1'
     })
     .add({ menuId: 'menu2', key: 'tts', name: '语音播报' })
     .add({ menuId: 'menu2', key: 'track', name: '轨迹回放' });
