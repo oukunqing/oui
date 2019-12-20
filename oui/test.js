@@ -352,3 +352,18 @@ console.log(str.toUnicode());
 var str = '\u0020';
 
 console.log($.unicodeToAscii(str))
+
+//[\s\S\u4e00-\u9fa5]
+
+var ps = '^[\\w\\u4e00-\\u9fa5\\!\\-，。！]*?$';
+
+var reg = new RegExp(ps);
+
+console.log(reg.test('abc你好!a-b123'));
+
+console.log(/^[\w]+$/g.test('a'));
+
+console.log(/(^[a-z0-9]+_)[A-Za-z\d]/.test('device_01'))
+console.log(/^[a-z0-9_]+[A-Z]/.test('txt_Name'))
+
+console.log('nameabc'.replace(/(^[a-z\d]+_)|(^txt|ddl|lbl|chb)[_]?/g, ''));

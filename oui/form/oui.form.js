@@ -89,7 +89,9 @@
                 }, opt.configs),
                 messages: $.extend({}, messages, opt.messages),
                 trim: function (s) { return ('' + s).replace(/(^[\s]*)|([\s]*$)/g, ''); },
-                isMatch: function (key, pattern) { return (pattern || /^[a-z0-9_]+[A-Z]/).test(key); },
+                isMatch: function (key, pattern) {
+                    return (pattern || /^[a-z0-9_]+[A-Z]/).test(key) || (pattern || /(^[a-z0-9]+_)[A-Za-z\d]/).test(key);
+                },
                 checkElement: function (element) {
                     if ($.isString(element)) { element = document.getElementById(element); }
                     if (!$.isObject(element) || !element.getElementsByTagName) { throw new Error('element 参数输入错误'); }
@@ -127,10 +129,13 @@
                         configs = op.configs;
                     }
                     if (configs.removePrefix) {
-                        if (op.isMatch(key)) { return key.replace(/^([a-z\d_]+)|(txt|ddl|lbl|chb)[_]?/g, ''); }
-                        if ($.isString(configs.prefix) && configs.prefix !== '') {
+                        if (op.isMatch(key)) { 
+                            key = key.replace(/(^[a-z\d]+_)|(^txt|ddl|lbl|chb)[_]?/g, '');
+                        } else if ($.isString(configs.prefix) && configs.prefix !== '') {
                             var pos = key.indexOf(configs.prefix);
-                            return pos >= 0 ? key.substr(pos + configs.prefix.length) : key;
+                            if(pos >= 0) {
+                                key = key.substr(pos + configs.prefix.length);
+                            }
                         }
                     }
                     return key;
