@@ -31,6 +31,7 @@
         },
         timers: {},
         caches: {},
+        resizes: {},
         buildKey: function(id) {
             return 'frozen-' + id;
         },
@@ -192,7 +193,7 @@
             var head = table.tHead;
             return head;
         },
-        copyAttribute: function (elem, elemOld, arrKey) {
+        copyEvent: function (elem, elemOld, arrKey) {
             for (var k in arrKey) {
                 var key = arrKey[k];
                 if (elemOld[key] !== null && elemOld[key] !== undefined) {
@@ -204,12 +205,10 @@
         cloneElement: function(f, type, elem, elemObj, rowIndex, options, dir, cellIndex, sizeRow) {
             elem.className = elemObj.className;
             elem.style.cssText = elemObj.style.cssText;
-            var arrKey = [];
-
+            var arrKey = ['ondblclick', 'onclick', 'onmouseover', 'onmouseout', 'oncontextmenu'];
             if(type === 'row') {
-                arrKey = ['ondblclick', 'onclick', 'onmouseover', 'onmouseout'];
+                //nothing to do
             } else { // cell
-                arrKey = ['ondblclick', 'onclick', 'onmouseover', 'onmouseout'];
                 if(sizeRow) {
                     var ws = $.getStyleSize(sizeRow.cells[cellIndex]), w = ws.width || elemObj.clientWidth;
                     elem.style.width = w + 'px';
@@ -227,7 +226,7 @@
                 }
             }
 
-            Factory.copyAttribute(elem, elemObj, []);
+            Factory.copyEvent(elem, elemObj, arrKey);
 
             return elem;
         },
@@ -289,7 +288,6 @@
                 case 'head':
                     if(options.fixHead) {
                         var sizeRow = null;
-                        console.log('options:', options.colStartRowIndex, options.rows);
                         if(options.colStartRowIndex >= options.rows) {
                             if(options.colStartRowIndex >= tbSource.rows.length) {
                                 options.colStartRowIndex = tbSource.rows.length;
@@ -511,8 +509,8 @@
         },
         isResize: function(cache, f) {
             var size = cache.size, 
-                curSize = $.getOffset(f.box),
-                changed = size.width !== curSize.width || size.height !== curSize.height;
+                curSize = $.getOffset(f.box);
+            var changed = size.width !== curSize.width || size.height !== curSize.height;
 
             return changed;
         },
@@ -648,7 +646,7 @@
             Factory.setCache(that.id, opt, that);
 
             $.addListener(window, 'resize', function() {
-                return that.rebuild();
+                return that.rebuild(false, 'resize');
             });
 
             return that.build(opt);
@@ -702,11 +700,12 @@
                 opt.complete(that);
             }
 
-            console.log('frozen:', that.id, opt.rows, opt.cols, opt.foot, opt.right, new Date().format());
+            console.log('frozen:', that.id, opt.rows, opt.cols, opt.foot, opt.right, new Date().format('tms'));
 
             return that;
         },
-        rebuild: function(force) {
+        rebuild: function(force, action) {
+            //console.log('rebuild:', action, new Date().getTime());
             var that = this,
                 cache = Factory.getCache(that.id);
             if(!cache) {
@@ -715,7 +714,7 @@
                 return that;
             }
 
-            if(!force && !Factory.isResize(cache, that)) {
+            if(!force && (!Factory.isResize(cache, that) && action !== 'resize')) {
                 return that;
             }
 

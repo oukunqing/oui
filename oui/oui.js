@@ -1342,6 +1342,8 @@
             }
             if (['timestamp', 'time', 'tick', 'ts'].indexOf(formatString) >= 0) {
                 return $.isNumber(len) ? t.getTime().toString().substr(0, len) : t.getTime().toString();
+            } else if(['tl','tms'].indexOf(formatString) >= 0) {
+                formatString = 'yyyy-MM-dd HH:mm:ss.fff';
             }
             var p = /([y]+|[M]+|[d]+|[H]+|[s]+|[f]+)/gi,
                 y = year + (year < 1900 ? 1900 : 0), M = t.getMonth() + 1, d = t.getDate(),
@@ -3143,9 +3145,14 @@
                 var checked = false, 
                     dic = {cancel: 0, checked: 1, all: 1, reverse: 2};
                 switch (parseInt(dic[('' + action).toLowerCase()] || action, 10)) {
+                    //Cancel
                     case 0: checked = false; break;
+                    //All
                     case 1: checked = true; break;
+                    //Reverse
                     case 2: checked = !obj.checked; break;
+                    //Default
+                    default: checked = true; break;
                 }
                 return checked;
             }

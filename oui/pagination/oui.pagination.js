@@ -469,7 +469,6 @@
             if(!opt.element) {
                 opt.element = opt.parent || opt.container || opt.obj;
             }
-            console.log('show:', opt);
             var p = this.getCache(opt.element);
             if(!p) {
                 p = new Pagination(opt, dataCount);

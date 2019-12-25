@@ -302,9 +302,6 @@ function distillPlayIndex(con) {
     return idx.replace(/(^[\s]*)|([\s]*$)/g, '');;
 }
 
-var n22 = 1567156032269;
-
-console.log(n22.toDate().format());
 
 var str = '\u0027';
 
@@ -367,3 +364,11 @@ console.log(/(^[a-z0-9]+_)[A-Za-z\d]/.test('device_01'))
 console.log(/^[a-z0-9_]+[A-Z]/.test('txt_Name'))
 
 console.log('nameabc'.replace(/(^[a-z\d]+_)|(^txt|ddl|lbl|chb)[_]?/g, ''));
+
+
+var n22 = 1577261779165;
+
+console.log(n22.toDate().format('tms'));
+var n22 = 1577261779271;
+
+console.log(n22.toDate().format('tms'));
