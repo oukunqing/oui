@@ -84,10 +84,11 @@
             toolwin: 'toolwin'
         },
         DialogStatus: {
-            close: 'close',
+            normal: 'normal',
             max: 'max',
             min: 'min',
-            normal: 'normal',
+            close: 'close',
+            hide: 'hide',
             tooltip: 'tooltip'
         },
         DialogStatusText: {
@@ -1040,8 +1041,11 @@
                 }
 
                 //初始最小化或最大化对话框
-                if ([Config.DialogStatus.min, Config.DialogStatus.max].indexOf(status) >= 0) {
+                if ([Config.DialogStatus.min, Config.DialogStatus.max].indexOf(status) > -1) {
                     _[status]();
+                } else if([Config.DialogStatus.hide, Config.DialogStatus.close].indexOf(status) > -1) {
+                    //初始化即隐藏
+                    _.hide('initial-hide');
                 }
 
                 util.buildCloseTiming(_), _.focus();
