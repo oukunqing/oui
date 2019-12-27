@@ -1044,7 +1044,12 @@
                     _[status]();
                 }
 
-                return util.buildCloseTiming(_), _.focus(), util;
+                util.buildCloseTiming(_), _.focus();
+
+                if(opt.hide) {
+                    _.hide('initial-hide');
+                }
+                return util;
             },
             setClickBgClose: function (_) {
                 var p = this.getParam(_), opt = p.options, ctls = p.controls;
@@ -3463,6 +3468,7 @@
                 opacity: null,          //背景层透明度，默认为 0.2
                 shadow: true,           //是否显示CSS阴影
                 lock: true,             //是否锁屏
+                hide: false,            //是否默认隐藏（创建立即隐藏）
                 title: null,            //标题
                 content: null,          //文字内容
                 url: null,              //加载的URL
@@ -3707,10 +3713,17 @@
             if (_.isClosed() || _.isHide() || !p || !opt.closeAble) {
                 return _;
             }
+            if(action === 'initial-hide') {
+                console.log(action + ': ' + _.id);
+            }
             var ctls = p.controls,
                 timers = p.timers,
                 url = opt.redirect || opt.targetUrl,
                 actions = Util.getAction(_);
+
+            if(!ctls.dialog) {
+                return _;
+            }
 
             //记录隐藏之前的对话框尺寸大小，以便再次显示时，还原尺寸大小
             Util.setOptions(_, 'hideSize', { width: ctls.dialog.offsetWidth, height: ctls.dialog.offsetHeight });
