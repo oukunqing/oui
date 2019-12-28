@@ -1856,6 +1856,13 @@
             if ($.isFunction(id)) {
                 options = parent, parent = func, func = id, id = null;
             }
+            if($.isUndefined(options) && (($.isObject(parent) && !$.isElement(parent)) || $.isArray(parent))) {
+                options = parent;
+                parent = undefined;
+            }
+            if($.isUndefined(parent) && options) {
+                parent = options.parent || undefined;
+            }
             var elem = null, hasId = false,
                 op = options || {},
                 opt = {
