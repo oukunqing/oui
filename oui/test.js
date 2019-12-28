@@ -372,3 +372,16 @@ console.log(n22.toDate().format('tms'));
 var n22 = 1577261779271;
 
 console.log(n22.toDate().format('tms'));
+
+
+var pp = /\<(img[\w\d\s\=\"\-\:\/\.]+)/i;
+
+var str = '<div id="main" class="main" v-data="accd" lang="2" custom-attr="hello" a-b-c="123"> <div class="left tree t1">左边栏</div>'
++ '<img src="http://www.baidu.com/logo.png" /> </div>';
+console.log(pp.test(str));
+console.log(str.match(pp));
+
+var mc = str.match(pp);
+for(var i=0; i<mc.length; i++) {
+    console.log(mc[i]);
+}

@@ -217,6 +217,7 @@
                         elem.menuId = box.menuId;
                         elem.itemId = id;
                         elem.level = level;
+                        elem.data = param.data;
 
                         if(!disabled) {
                             $.disableEvent(elem, 'mousedown', $.cancelBubble);
@@ -235,20 +236,27 @@
                             txt += '<i class="cmenu-arrow"></i>';
                             if(!dr.node && !dr.leaf) {
                                 elem.innerHTML = txt;
+                                $.addListener(elem, 'mouseup', function(ev){
+                                    $.cancelBubble(ev);
+                                });
                                 return false;
                             }
                         }
                         var func = Factory.buildMenuCallback(dr, cfg);
                         if(!disabled && $.isFunction(func)) {
-                            var par = Factory.buildMenuPar(dr, cfg);
                             $.addListener(elem, 'mouseup', function(ev) {
-                                $.cancelBubble();
+                                $.cancelBubble(ev);
                                 Factory.hideContextMenu(ev, box.menuId, true);
+                                var par = Factory.buildMenuPar(elem.data, cfg);
                                 func(par, this);
+                            });
+                        } else {                            
+                            $.addListener(elem, 'mouseup', function(ev){
+                                $.cancelBubble(ev);
                             });
                         }
                         elem.innerHTML = Factory.buildMenuText(txt, dr, disabled);
-                    }, box, { items: dr.items, hasChild: hasChild });
+                    }, box, { items: dr.items, hasChild: hasChild, data: dr });
                 }                
             }, parent);
 
@@ -301,14 +309,21 @@
                         txt += '<i class="cmenu-arrow"></i>';
                         if(!dr.node && !dr.leaf) {
                             elem.innerHTML = txt;
+                            $.addListener(elem, 'mouseup', function(ev){
+                                $.cancelBubble(ev);
+                            });
                             return false;
                         }
                     }                    
                     if(!disabled && $.isFunction(func)) {
                         $.addListener(elem, 'mouseup', function(ev) {
-                            $.cancelBubble();
+                            $.cancelBubble(ev);
                             Factory.hideContextMenu(ev, menuId, true);
                             func(par, this);
+                        });
+                    } else {
+                        $.addListener(elem, 'mouseup', function(ev){
+                            $.cancelBubble(ev);
                         });
                     }
                     elem.innerHTML = Factory.buildMenuText(txt, dr, disabled);

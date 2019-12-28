@@ -42,13 +42,15 @@
                 { name: '百度地图配置', items: [
                     { name: 'WEB版' }, { name: '安卓版' }
                 ] },
-                { name: '谷歌地图配置' }
+                { name: '谷歌地图配置' },
+                { name: '高德地图配置' },
+                { name: '腾讯地图配置' }
             ] }
         ]
     });
     
     menu.add({key: 'dic2', name: '字典配置2'}).sep('dic2')
-        .insert({ key: 'person', pkey: 'map',  name: '人员配置', items: [
+        .insert({ key: 'person', pkey: 'map',  name: '人员配置', node: true, items: [
             { name: '使用者' },
             { key: 'partner', name: '经销商', disabled: false }
         ]}, 1)
@@ -58,6 +60,10 @@
         .add([
             {pkey: 'partner', name: '一级经销商'},
             {pkey: 'partner', name: '二级经销商'}
+        ])
+        .add([
+            {pkey: 'map', name: '腾讯地图配置2', disabled: true},
+            {pkey: 'map', name: '高德地图配置2'}
         ])
         //.show()
         ;
