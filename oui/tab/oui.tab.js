@@ -45,6 +45,9 @@
         buildId: function(objId, itemId, prefix) {
             return prefix + '-' + objId + '-' + itemId;
         },
+        buildItemId: function(objId, itemId) {
+            return objId + '-' + itemId;
+        },
         buildPanelId: function(objId, itemId) {
             return Util.buildId(objId, itemId, 'oui-tabs-panel');
         },
@@ -122,7 +125,7 @@
             }
             var tab = $.createElement('li', '', function(elem) {
                 elem.className = 'tab-item';
-                elem.id = objId + '-' + itemId;
+                elem.id = Util.buildItemId(objId, itemId);
                 elem.itemId = itemId;
 
                 if(cfg.style.tab) {
@@ -534,10 +537,10 @@
                     t.closeAll(itemId);
                     break;
                 case 'left':
-                    this.removeSibling(t, curItem.tab, 'previousSibling');
+                    this.removeSibling(t, curItem, 'previousSibling');
                     break;
                 case 'right':
-                    this.removeSibling(t, curItem.tab, 'nextSibling');
+                    this.removeSibling(t, curItem, 'nextSibling');
                     break;
                 case 'reload':
                     if(curItem.iframe) {
@@ -579,13 +582,19 @@
             return count;
         },
         removeSibling: function(t, elem, dir) {
-            var sibling = elem[dir];
+            var sibling = elem.tab[dir];
             while(sibling) {
                 var itemId = sibling.itemId;
                 sibling = sibling[dir];
                 Factory.delItem(t, itemId);
             }
-            Util.setSize(t);
+            var cur = Factory.getCur(t);
+            if(!cur || $I(Util.buildItemId(cur.objId, cur.itemId)) === null) {
+                Factory.setCur(t, elem, true);
+                t.show(elem.itemId);
+            } else {
+                Util.setSize(t);
+            }
             return this;
         },
         reopen: function(t, cache, itemId) {
@@ -965,7 +974,6 @@
             var cur = cache.items[itemId]  
                 || Factory.getCur(that, cache)
                 || Factory.getItem(cache);
-
 
             if(cur) {
                 $.addClass(cur.tab, 'cur');

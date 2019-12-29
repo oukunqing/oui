@@ -247,8 +247,7 @@
                             $.addListener(elem, 'mouseup', function(ev) {
                                 $.cancelBubble(ev);
                                 Factory.hideContextMenu(ev, box.menuId, true);
-                                var par = Factory.buildMenuPar(elem.data, cfg);
-                                func(par, this);
+                                func(Factory.buildMenuPar(elem.data, cfg), this);
                             });
                         } else {                            
                             $.addListener(elem, 'mouseup', function(ev){
