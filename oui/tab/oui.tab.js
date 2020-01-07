@@ -152,6 +152,8 @@
                     btn = opt.closeAble ? elem.childNodes[1] : null,
                     btnW = $.getOuterSize(btn).width;
 
+                    console.log('txt::',txt,$.getOuterSize(elem),$.getOuterSize(btn),cfg.maxWidth,$.isNumber(cfg.maxWidth),cfg.maxWidth > 60,(txtW + btnW));
+
                 if($.isNumber(cfg.maxWidth) && cfg.maxWidth > 60 && (txtW + btnW) > cfg.maxWidth) {
                     var ps = $.getPaddingSize(txt),
                         ms = $.getMarginSize(txt),
@@ -160,6 +162,8 @@
                     //txt.style.width = (cfg.maxWidth - ps.width - ms.width - btnW - es.border.width - 2) + 'px';
                     txt.style.width = (cfg.maxWidth - 0 - ms.width - btnW - es.border.width) + 'px';
                     txt.title = $.getInnerText(txt);
+
+                    console.log(cfg.maxWidth);
                 }
             });
 

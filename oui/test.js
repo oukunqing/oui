@@ -385,3 +385,9 @@ var mc = str.match(pp);
 for(var i=0; i<mc.length; i++) {
     console.log(mc[i]);
 }
+
+
+console.log(new Date());
+console.log(new Date().format('ts'));
+
+1578122628

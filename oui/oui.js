@@ -1129,7 +1129,7 @@
             var num = parseFloat(this, 10);
             return num.toFileSize();
         },
-        toDate: function (format) {
+        toDate: function (format) {            
             var ts = Date.parse(this.replace(/-/g, '/'));
             if (isNaN(ts) && /^[\d]{10,13}$/.test(this)) {
                 ts = Number(this.padRight(13));
@@ -1144,8 +1144,8 @@
             return $.isString(format) ? dt.format(format) : dt;
         },
         toDateString: function(format) {
-            if(this.trim() === '') {
-                return '';
+            if(this.trim() === '' || this === '-') {
+                return this;
             }
             var dt = this.toDate(true);
             return isNaN(dt.getFullYear()) ? '' : dt.format(format || '');
