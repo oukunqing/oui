@@ -39,6 +39,7 @@
                 return new OUI(selector, context);
             }
             var self = this, nodes = [];
+
             if (selector === undefined) {
                 return self.length = 0, self;
             }
@@ -120,6 +121,7 @@
 
         if (isWindow()) {
             window.OUI = window.$ = OUI;
+            window.$.extend(window.$, { OUI: true });
         } else {
             global.OUI = global.$ = OUI;
         }

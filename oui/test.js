@@ -390,4 +390,77 @@ for(var i=0; i<mc.length; i++) {
 console.log(new Date());
 console.log(new Date().format('ts'));
 
-1578122628
+
+function buildDeviceCodeList(devCode) {
+    //var devCodeList = cms.util.getCheckBoxCheckedValue('chbDevCode', ',');
+    var devCodeList = 'add,asd,acc'
+    if (devCodeList) {
+        devCodeList = (',' + devCodeList + ',').replace(',' + devCode + ',', ',');
+        devCodeList = devCode + devCodeList;
+    } else {
+        devCodeList = devCode;
+    }
+    if(devCodeList.endsWith(',')) {
+        devCodeList = devCodeList.substr(0, devCodeList.length - 1);
+    }
+    return devCodeList;
+};
+
+console.log(buildDeviceCodeList('abc'));
+
+var url ="http://122.227.179.90:40000/device?action=getdeviceinfo&html=1&log=1" +
+                "&status=-1&version=1&data=1&page=a&size=20";
+var pattern = /(&page=[\d\w]{0,}|&pageIndex=[\d\w]{0,})/i;
+var url2 = url.replace(pattern, '');
+console.log(url2);
+
+
+function del(s) {
+    return s.endsWith('/') ? s.substr(0, s.length - 1) : s;
+}
+
+var s = 'http://122.227.7.1/dev/';
+
+console.log(del(s));
+
+
+function escape2Html(str) {
+    var arrEntities = {'lt':'<','gt':'>','nbsp':' ','amp':'&','quot':'"'};
+    return str.replace(/&(lt|gt|nbsp|amp|quot);/ig,function(all,t){return arrEntities[t];});
+}
+
+function escape2Html(str) {
+    return str.replace(/&(amp);/ig, '&');
+}
+
+console.log(escape2Html('http://&amp;'))
+
+function getDomain(s) {
+    var pattern = /[a-z\d\.\-\_](^[a-z\d\-\_]+\.[a-z]{2,4}$)/i;
+
+    var m = s.match(pattern);
+
+    console.log(m);
+}
+
+
+function getDomain(s) {
+    //var arr = s.split('.'), len = arr.length;
+    //return len > 2 ? arr[len - 2] + '.' + arr[len - 1] : s;
+
+    return s.split('.').slice(-2).join('.');
+}
+
+
+console.log(getDomain('iqiyi.com'));
+
+var ids = [1,2,3];
+
+console.log(ids.indexOf(2))
+
+if(ids.indexOf(2)>0) {
+    ids.splice(ids.indexOf(2),1);
+}
+
+
+console.log('ids:',ids);

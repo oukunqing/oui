@@ -176,6 +176,7 @@
                     value = value || op.getValue(element);
                     field = field || element.field;
                     configs = configs || element.configs;
+
                     var len = value.length,
                         messages = $.extend({}, op.messages, field.messages),
                         getTitle = function (field, title) {
@@ -402,17 +403,40 @@
                 },
                 setControlEvent: function (element, configs, fieldConfig) {
                     if (!element.isSetEvent) {
-                        if (!configs.focusInvalid) {
-                            $(element).focus(function () { op.showTooltip(op.checkValue(this), this); });
-                        }
-                        $(element).blur(function () { op.showTooltip(op.checkValue(this), this); });
+                        var events = {
+                            focus: function() { op.showTooltip(op.checkValue(this), this); },
+                            blur: function() { op.showTooltip(op.checkValue(this), this); },
+                            change: function() { op.showTooltip(op.checkValue(this), this); },
+                            click: function() { op.showTooltip(op.getCheckValue(this), this); },
+                            keyup: function() { op.showTooltip(op.checkValue(this), this); }
+                        };
 
-                        if (fieldConfig.field.tag === 'SELECT') {
-                            $(element).change(function () { op.showTooltip(op.checkValue(this), this); });
-                        } else if (op.isCheckBox(element, element.type)) {
-                            $(element).click(function () { op.showTooltip(op.getCheckValue(this), this); });
+                        if(typeof $.OUI === 'boolean') {
+                            if (!configs.focusInvalid) {
+                                element.onfocus = events['focus'];
+                            }
+                            element.onblur = events['blur'];
+
+                            if (fieldConfig.field.tag === 'SELECT') {
+                                element.onchange = events['change'];
+                            } else if (op.isCheckBox(element, element.type)) {
+                                element.onclick = events['click'];
+                            } else {
+                                element.onkeyup = events['keyup'];
+                            }
                         } else {
-                            $(element).keyup(function () { op.showTooltip(op.checkValue(this), this); });
+                            if (!configs.focusInvalid) {
+                                $(element).focus(events['focus']);
+                            }
+                            $(element).blur(events['blur']);
+
+                            if (fieldConfig.field.tag === 'SELECT') {
+                                $(element).change(events['change']);
+                            } else if (op.isCheckBox(element, element.type)) {
+                                $(element).click(events['click']);
+                            } else {
+                                $(element).keyup(events['keyup']);
+                            }
                         }
 
                         element.validate = function() {
@@ -652,7 +676,6 @@
             var warns = [], op = initFormConfig(tableElement, options), configs = op.configs;
             var tr = tableElement.rows[i], arr = tr.getElementsByTagName(configs.tagName || "*");
             var data = getElementsData(warns, arr, op);
-            //console.log('warns: ', warns);
             if (data) {
                 list.push(data);
             }
@@ -697,13 +720,14 @@
     findElement = function (elements, tagName) {
         var tags = [];
         if ($.isUndefined(tagName)) {
-            return elements[0];
+            return $.toElement(elements[0]);
         }
         if(tagName.indexOf('|') > -1) {
             tags = tagName.split('|');
         }
+
         for (var i = 0; i < elements.length; i++) {
-            var elem = elements[i];
+            var elem = $.toElement(elements[i]);
             for(var j = 0; j < tags.length; j++) {
                 var ts = tags[j].split(':');
                 if(elem.tagName === ts[0]) {
@@ -814,10 +838,9 @@
     });
 
 
-    // formValidate
-    $.extend($.fn, {
-        formValidate: function (options) {
-            var $f = $.form, element = $f.findElement($(this)), len = $(this).length;
+    $.extend($, {
+        formValidate: function(controls, options) {
+            var $f = $.form, element = $f.findElement(controls), len = $(this).length;
 
             if (!$.isObject(options) || !$f.isElement(element)) {
                 $.alert('表单验证参数错误');
@@ -825,8 +848,8 @@
             }
 
             var id = element.id || '',
-                table = $f.findElement($(this), 'TABLE'),
-                handler = $f.findElement($(this), 'INPUT:submit|BUTTON:submit|INPUT:button|BUTTON'),
+                table = $f.findElement(controls, 'TABLE'),
+                handler = $f.findElement(controls, 'INPUT:submit|BUTTON:submit|INPUT:button|BUTTON'),
                 callback = options.submitHandler || options.submit,
                 //debounce = options.debounce || false,       //是否防抖节流，默认不启用
                 debounce = $.isBoolean(options.debounce, true),       //是否防抖节流，默认启用
@@ -874,10 +897,17 @@
             //3.创建取值事件
             if ($.isFunction(callback)) {
                 if (isForm) {
-                    $(this).submit(function () {
-                        var formData = $f.getFormData(element, options, elements);
-                        return debounce ? delayCallback(callback, formData) : callback(formData), false;
-                    });
+                    if(typeof $.OUI === 'boolean') {
+                        element.onsubmit = function() {
+                            var formData = $f.getFormData(element, options, elements);
+                            return debounce ? delayCallback(callback, formData) : callback(formData), false;
+                        };
+                    } else {
+                        $(this).submit(function () {
+                            var formData = $f.getFormData(element, options, elements);
+                            return debounce ? delayCallback(callback, formData) : callback(formData), false;
+                        });
+                    }
                 } else if (handler) {
                     $(handler).click(function () {
                         var formData = $f.getFormData(element, options, elements);
@@ -895,7 +925,14 @@
             if ($.isFunction(complete)) {
                 complete(elements, tableElements);
             }
+            return $;
+        }
+    });
 
+    // formValidate
+    $.extend($.fn, {
+        formValidate: function (options) {
+            $.formValidate($(this), options);
             return $(this);
         }
     });
