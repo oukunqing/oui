@@ -37,7 +37,7 @@
                 cssText: 'border:solid 1px #f00;'
             },
             op = {
-                tagPattern: /INPUT|SELECT|TEXTAREA/,
+                tagPattern: new RegExp('INPUT|SELECT|TEXTAREA' + (opt.tagPattern ? '|' + opt.tagPattern : '')),
                 typePattern: /text|hidden|password|select-one|checkbox|radio|email|url|number|range|date|search/,
                 valuePattern: {
                     email: /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/,
@@ -449,10 +449,15 @@
                 setValue: function (element, value, fieldConfig, isArray) {
                     var attr = fieldConfig.field.attribute || fieldConfig.field.attr;
                     if (!op.isLegalName(attr)) {
-                        element.value = isArray ? value.join(',') : value;
+                        if(typeof element.value === 'undefined') {
+                            element.innerHTML = isArray ? value.join(',') : value;
+                        } else {
+                            element.value = isArray ? value.join(',') : value;
+                        }
                     } else {
                         element.setAttribute(attr, isArray ? value.join(',') : value);
                     }
+                    return true;
                 },
                 setSelectOption: function (element, value, fieldConfig, isArray) {
                     var text = value, val = value, isEmptyArray = false;
@@ -629,7 +634,7 @@
                 continue;
             }
             var obj = arr[i], tag = obj.tagName, type = obj.type;
-            if (!op.tagPattern.test(tag) || !op.typePattern.test(type)) {
+            if (!op.tagPattern.test(tag) || (typeof type !== 'undefined' && !op.typePattern.test(type))) {
                 continue; 
             }
 

@@ -5,17 +5,17 @@
 </head>
 <body>
     <form id="form1" method="post" action="">
-        <table>
+        <table cellpadding="5" cellspacing="0">
             <tr>
-                <td>ID:</td>
+                <td><label for="txtId">ID</label></td>
                 <td><input type="text" id="txtId" /></td>
             </tr>
             <tr>
-                <td>Name:</td>
+                <td><label for="txtName">Name</label></td>
                 <td><input type="text" id="txtName" /></td>
             </tr>
             <tr>
-                <td>Age:</td>
+                <td><label for="ddlAge">Age</label></td>
                 <td>
                     <select id="ddlAge">
                         <option value="">请选择Age</option>
@@ -38,8 +38,8 @@
 <script type="text/javascript" src="../oui/dialog/oui.dialog.min.js?12"></script>
 <script type="text/javascript" src="../oui/form/oui.form.min.js?12"></script>
 <script type="text/javascript">
-    window.onload = function() {
-        
+    //没有引用jquery.js
+    window.onload = function() {        
         $.formValidate(['form1','btnOK'], {
             rules: {
                 Id: { dataType: 'int' },
@@ -53,8 +53,11 @@
                 return false;
             }
         });
-        
-        /*
+    };
+
+    /*
+    //引用jquery.js
+    $(document).ready(function(){
         $('#form1,#btnOK').formValidate({
             rules: {
                 Id: { dataType: 'int' },
@@ -68,6 +71,7 @@
                 return false;
             }
         });
-        */
-    };
+    });
+    */
+
 </script>

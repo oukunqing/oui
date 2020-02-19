@@ -463,4 +463,21 @@ if(ids.indexOf(2)>0) {
 }
 
 
-console.log('ids:',ids);
+
+
+var f = '{ww60}*1+{AC_}-[51]+[51]';
+
+var r = /\{([\w\d]+)\}/g;
+
+console.log(f.match(r))
+
+console.log($.isArray(f.match(r)))
+
+var mc = f.match(r);
+for(var m in mc){
+    console.log('m:',mc[m]);
+}
+
+console.log(eval('('+'1<2?3:4'+')'));
+
+console.log(f.replaceAll('\\[51\\]', '<ac>'))
