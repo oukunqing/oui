@@ -758,6 +758,35 @@
                 });
                 return this;
             },
+            //表单容器缓存，防止重复设置
+            FormCache: {},
+            //设置表单滚动事件
+            setFormScroll: function(obj) {
+                var parent = obj.parentNode;
+                while(parent.tagName === 'DIV') {
+                    var id = parent.id;                    
+                    if(id && !Factory.FormCache[id]) {
+                        var style = $.getElementStyle(parent, 'overflow');
+                        if(style && style.toLowerCase() === 'auto') {
+                            //表单输入框父级DIV容器滚动时，重新定位提示框
+                            $.addListener(parent, 'scroll', function(e) {
+                                for (var i = 0; i < Cache.ids.length; i++) {
+                                    var d = Factory.getDialog(Cache.ids[i].id);
+                                    if (d && !d.isClosed()) {
+                                        var p = Util.getParam(d), opt = p.options;
+                                        if (opt.type === Config.DialogType.tooltip) {
+                                            Util.setTooltipPosition(d);
+                                        }
+                                    }
+                                }
+                            });
+                        }
+                        Factory.FormCache[id] = id;
+                    }
+                    parent = parent.parentNode;
+                }
+                return this;
+            },
             show: function (content, title, options, type, target, okButton) {
                 options = Common.checkOptions(content, title, options, false, type);
                 var opt = {
@@ -2518,11 +2547,14 @@
                     case 'left':
                     case 'right':
                         res.top = fs.y - (h - fs.h) / 2;
+                        //注释以下代码，当DIV容器滚动时，以便让提示框跟随目标输入框移动位置
+                        /* 
                         if (res.top < ps.top || (res.top + h) > (bs.height + ps.top)) {
                             newTop = res.top < ps.top ? ps.top + 2 : bs.height + ps.top - h - 2;
                             res.moveY = res.top - newTop;
                             res.top = newTop;
                         }
+                        */
                         if (fs.h < h) {
                             res.css = 'top: ' + (h / 2 + res.moveY) + 'px;';
                         }
@@ -3323,8 +3355,13 @@
 
                     ctls.body = util.buildBody(_, ctls.dialog);
 
+                    $.setAttribute(ctls.dialog, 'target', opt.target.id || '');
                     $.setAttribute(opt.target, Config.TooltipAttributeName, opt.id);
                     p.parent.appendChild(ctls.dialog);
+
+                    if($.isElement(opt.target)) {
+                        Factory.setFormScroll(opt.target);
+                    }
                 }
                 Factory.setWindowResize();
 

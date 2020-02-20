@@ -560,7 +560,8 @@
                     warns.push({ element: obj, message: result.message });
                     op.setControlEvent(obj, configs, fc);
                     if (configs.singleStep) {
-                        if (configs.focusInvalid) {
+                        //if (configs.focusInvalid) {
+                        if (!configs.focusInvalid) {
                             op.setFocus(element);
                         }
                         return false;
@@ -586,7 +587,8 @@
             }
         }
         if (warns.length > 0) {
-            if (configs.focusInvalid) {
+            //if (configs.focusInvalid) {
+            if (!configs.focusInvalid) {
                 op.setFocus(warns[0].element);
             }
             return false;

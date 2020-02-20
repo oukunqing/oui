@@ -1131,7 +1131,7 @@
             var num = parseFloat(this, 10);
             return num.toFileSize();
         },
-        toDate: function (format) {            
+        toDate: function (format) {
             var ts = Date.parse(this.replace(/-/g, '/'));
             if (isNaN(ts) && /^[\d]{10,13}$/.test(this)) {
                 ts = Number(this.padRight(13));
@@ -1380,6 +1380,26 @@
                 list.push(this.addDays(i).format('yyyy-MM-dd'));
             }
             return list;
+        },
+        isDate: function() {
+            if (isNaN(this.getFullYear())) {
+                return false;
+            }
+            return true;
+        },
+        getAge: function(dtNow) {
+            if(!dtNow || typeof dtNow.isDate === 'undefined' || !dtNow.isDate()) {
+                dtNow = new Date();
+            }
+            var age = dtNow.getFullYear() - this.getFullYear();
+            var m1 = dtNow.getMonth(), m2 = this.getMonth(), 
+                d1 = dtNow.getDate(), d2 = this.getDate();
+
+            //周岁算法：每过一个生日就长一岁
+            if(m1 <= m2 && d1 <= d2) {
+                age -= 1;
+            }
+            return age;
         }
     }, 'Date.prototype');
 

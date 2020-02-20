@@ -481,3 +481,16 @@ for(var m in mc){
 console.log(eval('('+'1<2?3:4'+')'));
 
 console.log(f.replaceAll('\\[51\\]', '<ac>'))
+
+console.log('19810309'.separate('-'))
+
+console.log('{0:-422}'.format('19810309'))
+
+console.log('abc'.toDate().isDate())
+
+console.log(new Date().isDate())
+
+
+console.log(new Date().timeSpan('1981-03-09'.toDate()));
+
+console.log('1981-03-09'.toDate().getAge('2008-06-01'.toDate()))
