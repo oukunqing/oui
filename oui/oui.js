@@ -1268,6 +1268,13 @@
         },
         filterRareWord: function() {
             return this.replace(/[^\uff01-\uff0e|\u0000-\u9fa5]*/g, '');
+        },
+        getAge: function() {
+            var dt = this.toDate();
+            if(dt.isDate()) {
+                return dt.getAge();
+            }
+            return '-';
         }
     }, 'String.prototype');
 
