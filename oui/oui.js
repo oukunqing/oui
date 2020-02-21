@@ -1212,6 +1212,9 @@
             }
             return u;
         },
+        toJson: function() {
+            return $.toJson(this);
+        },
         timeSpan: function (dt2) {
             return this.toDate().timeSpan(dt2.toDate());
         },
