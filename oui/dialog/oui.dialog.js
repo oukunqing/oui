@@ -3363,6 +3363,14 @@
                         Factory.setFormScroll(opt.target);
                     }
                 }
+
+                //指定焦点目标，或默认焦点目标
+                var focusObj = $.isBoolean(opt.focusTo, false) ? opt.target : opt.focusTo;
+
+                if ($.isElement(focusObj) && $.isDisplay(focusObj, true)) {
+                    $.setFocus(focusObj);
+                }
+
                 Factory.setWindowResize();
 
                 return util.setTooltipPosition(_);

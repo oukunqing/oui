@@ -440,7 +440,7 @@
                         }
 
                         element.validate = function() {
-                            op.showTooltip(op.checkValue(this), this);
+                            op.showTooltip(op.checkValue(element), element);
                         };
                     }
                     //记录是否被创建事件，防止重复创建
