@@ -494,3 +494,10 @@ console.log(new Date().isDate())
 console.log(new Date().timeSpan('1981-03-09'.toDate()));
 
 console.log('1981-03-09'.toDate().getAge('2008-06-01'.toDate()))
+
+
+var code = '330681198103193291';
+
+console.log(code.isIdentity())
+
+console.log($.PATTERN.Date.test('2008-16-01'))

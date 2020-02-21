@@ -131,6 +131,20 @@
 !function ($) {
     'use strict';
 
+    $.extend($, {
+        PATTERN: {
+            Email: /^[A-Z0-9\u4e00-\u9fa5]+@[A-Z0-9_-]+(\.[A-Z0-9_-]+)+$/gi,
+            //手机号码
+            Mobile: /^1([38][0-9]|4[579]|5[0-3,5-9]|6[6]|7[0135678]|9[89])\d{8}$/,
+            //身份证规则
+            //前2位为省份区划编码 11 - 82
+            //7-8位为出生年份开头2个数字  19或20
+            Identity: /^[1-8][1-9][\d]{4}(19|20)[\d]{2}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[0-1])[\d]{3}[\dX]$/i,
+            //日期格式
+            Date: /^(19|20)[\d]{2}[\-\/](0[1-9]|1[0-2])[\-\/](0[1-9]|[12][0-9]|3[0-1])$/
+        }
+    });
+
     var version = '1.0.0',
         trim = function (s) { return s.replace(/(^[\s]*)|([\s]*$)/g, ''); },
         isUndefined = function (o) { return typeof o === 'undefined'; },
@@ -493,10 +507,16 @@
             }
         },
         isMobile = function (num) {
-            return /^1([38][0-9]|4[579]|5[0-3,5-9]|6[6]|7[0135678]|9[89])\d{8}$/.test(num);
+            //return /^1([38][0-9]|4[579]|5[0-3,5-9]|6[6]|7[0135678]|9[89])\d{8}$/.test(num);
+            return $.PATTERN.Mobile.test(num);
+        },
+        isIdentity = function(num) {
+            //return /^[1-8][1-9][\d]{4}(19|20)[\d]{2}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[0-1])[\d]{3}[\dX]$/i.test(num);
+            return $.PATTERN.Identity.test(num);
         },
         isEmail = function (email) {
-            return /^[A-Z0-9\u4e00-\u9fa5]+@[A-Z0-9_-]+(\.[A-Z0-9_-]+)+$/gi.test(email);
+            //return /^[A-Z0-9\u4e00-\u9fa5]+@[A-Z0-9_-]+(\.[A-Z0-9_-]+)+$/gi.test(email);
+            return $.PATTERN.Email.test(num);
         },
         padLeft = function(s, totalWidth, paddingChar, isRight) {
             var char = paddingChar || '0', c = totalWidth - s.length;
@@ -538,7 +558,7 @@
         isObject: isObject, isArray: isArray, isBoolean: isBoolean, isNull: isNull,
         isProperty: isProperty, isPercent: isPercent, isPercentSize: isPercent, version: version,
         isNumeric: isNumeric, isDecimal: isDecimal, isInteger: isInteger, isFloat: isDecimal, isInt: isInteger,
-        isHexNumeric: isHexNumeric, isHexNumber: isHexNumber, isMobile: isMobile, isEmail: isEmail,
+        isHexNumeric: isHexNumeric, isHexNumber: isHexNumber, isMobile: isMobile, isIdentity: isIdentity, isEmail: isEmail,
         isRegexp: isRegexp, isNullOrUndefined: isNullOrUndefined,
         isEmpty: function (o) {
             if (isUndefined(o) || null === o) { return true; }
@@ -1061,6 +1081,7 @@
         isHexNumeric: function () { return $.isHexNumeric(this); },
         isPercent: function() { return $.isPercent(this); },
         isMobile: function () { return $.isMobile(this); },
+        isIdentity: function() { return $.isIdentity(this); },
         isEmail: function () { return $.isEmail(this); },
         isNaN: function() { return isNaN(parseFloat(this, 10)); },
         /*
