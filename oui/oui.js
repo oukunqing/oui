@@ -1274,7 +1274,7 @@
             if(dt.isDate()) {
                 return dt.getAge();
             }
-            return '-';
+            return 0;
         }
     }, 'String.prototype');
 
