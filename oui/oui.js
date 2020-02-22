@@ -140,6 +140,8 @@
             //前2位为省份区划编码 11 - 82
             //7-8位为出生年份开头2个数字  19或20
             Identity: /^[1-8][1-9][\d]{4}(19|20)[\d]{2}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[0-1])[\d]{3}[\dX]$/i,
+            //固定电话号码
+            Telephone: /^(\(\d{3,4}\)|\d{3,4}-|\s)?\d{7,8}$/,
             //日期格式
             Date: /^(19|20)[\d]{2}[\-\/](0[1-9]|1[0-2])[\-\/](0[1-9]|[12][0-9]|3[0-1])$/
         }
@@ -506,6 +508,9 @@
                 return false;
             }
         },
+        isTelephone = function(num) {
+            return $.PATTERN.Telephone.test(num);
+        },
         isMobile = function (num) {
             //return /^1([38][0-9]|4[579]|5[0-3,5-9]|6[6]|7[0135678]|9[89])\d{8}$/.test(num);
             return $.PATTERN.Mobile.test(num);
@@ -558,7 +563,8 @@
         isObject: isObject, isArray: isArray, isBoolean: isBoolean, isNull: isNull,
         isProperty: isProperty, isPercent: isPercent, isPercentSize: isPercent, version: version,
         isNumeric: isNumeric, isDecimal: isDecimal, isInteger: isInteger, isFloat: isDecimal, isInt: isInteger,
-        isHexNumeric: isHexNumeric, isHexNumber: isHexNumber, isMobile: isMobile, isIdentity: isIdentity, isEmail: isEmail,
+        isHexNumeric: isHexNumeric, isHexNumber: isHexNumber, 
+        isMobile: isMobile, isTelephone: isTelephone, isIdentity: isIdentity, isEmail: isEmail,
         isRegexp: isRegexp, isNullOrUndefined: isNullOrUndefined,
         isEmpty: function (o) {
             if (isUndefined(o) || null === o) { return true; }
@@ -1080,6 +1086,7 @@
         isInt: function () { return $.isInteger(this); },
         isHexNumeric: function () { return $.isHexNumeric(this); },
         isPercent: function() { return $.isPercent(this); },
+        isTelephone: function () { return $.isTelephone(this); },
         isMobile: function () { return $.isMobile(this); },
         isIdentity: function() { return $.isIdentity(this); },
         isEmail: function () { return $.isEmail(this); },

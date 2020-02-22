@@ -501,3 +501,6 @@ var code = '330681198103193291';
 console.log(code.isIdentity())
 
 console.log($.PATTERN.Date.test('2008-16-01'))
+
+
+console.log($.PATTERN.Telephone.test('0574-88011324'))
