@@ -504,3 +504,17 @@ console.log($.PATTERN.Date.test('2008-16-01'))
 
 
 console.log($.PATTERN.Telephone.test('0574-88011324'))
+
+console.log('1582365590'.toDate().format())
+
+
+var arr = [];
+
+arr = arr.concat([1,2]);
+
+console.log(arr);
+
+var t2 = '2020-02-07 08:58:54.753';
+var dt = t2.toDate();
+
+console.log(dt);

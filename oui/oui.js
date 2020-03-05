@@ -2343,9 +2343,24 @@
             }
             return arr;
         },
-        getAttribute = function(elem, attributes) {
+        getAttribute = function(elem, attributes, defaultValue) {
             elem = $.toElement(elem);
-            return $.isElement(elem) ? elem.getAttribute(attributes) : undefined;
+            if($.isElement(elem)) {
+                var val = '', keys = [];
+                if($.isArray(attributes)) {
+                    keys = attributes;
+                } else {
+                    keys = attributes.split(/[,|]/);
+                }
+                for(var i = 0; i < keys.length; i++) {
+                    val = elem.getAttribute(keys[i]);
+                    if(typeof val === 'string') {
+                        return val;
+                    }
+                }
+                return defaultValue;
+            }
+            return undefined;
         },
         setAttribute2 = function(elem, key, val) {
             if(key.toLowerCase() === 'class') {

@@ -209,10 +209,16 @@
                         } else if (pattern && !pattern.test(value)) {   // 正则表达式验证
                             return result(false, (messages.pattern || configs.messages.pattern).format(title));
                         }
-
                     } else {
                         // 验证数字输入，大小值范围限定，其中 type="hidden" 默认值至少为0
                         var val = value, numType = '数字', strict = field.strict || configs.strict;
+                        //不是必填项的数字，如果没有填写，则取默认值或0
+                        if(value === '' && !field.required) {
+                            value = field.value || 0;
+                            if(typeof element.value !== 'undefined') {
+                                element.value = value;
+                            }
+                        }
                         switch (field.dataType) {
                             case 'int':
                                 value = parseInt(value, 10);
@@ -325,9 +331,12 @@
                 },
                 getFieldConfig: function (element, fields) {
                     var isValue = function (s) { return !$.isUndefined(s) && !$.isObject(s); },
-                        checkField = function (field) {
+                        checkField = function (field, elem) {
                             var arr = ['string', 'int', 'float', 'decimal'];
-                            if (!$.isString(field.dataType) || arr.indexOf(field.dataType) < 0) { field.dataType = arr[0]; }
+                            if (!$.isString(field.dataType) || arr.indexOf(field.dataType) < 0) {
+                                var elemDataType = $.getAttribute(elem, 'data-type,datatype,value-type,valuetype', '');
+                                field.dataType = elemDataType || arr[0];
+                            }
                             //默认值字段设置
                             if (field.value === '') {
                                 field.value = isValue(field.val) ? field.val : isValue(field.defaultValue) ? field.defaultValue : field.value;
@@ -339,7 +348,7 @@
                         keyField = fields[key],
                         isAppointId = fields[op.getKey(id)] || false,
                         isSingle = isAppointId || document.getElementsByName(name || '').length <= 1,
-                        dataType = 'string';
+                        dataType = '';
 
                         if($.isString(keyField, true)) {
                             dataType = keyField;
@@ -383,7 +392,7 @@
                         distinct: {id: '', msg: ''},
                         //检测字段内容是否已存在
                         exists: null
-                    }, keyField)));
+                    }, keyField)), element);
 
                     if (!$.isObject(field.messages)) {
                         field.messages = { required: field.messages };
