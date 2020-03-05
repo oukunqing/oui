@@ -254,9 +254,12 @@
             //设置tr创建记录，通过id找tr位置时要用到
             setTreeFlag(that.tree, id, false);
         },
-        setTreeCell = function (that, cell, data, content) {
+        setTreeCell = function (that, cell, data, content, postfix) {
             content = buildSwitch(that.tree, data, cell) + content;
 
+            if(!$.isUndefined(postfix)) {
+                content += '<span>' + postfix + '</span>';
+            }
             if ($.isDebug()) {
                 //临时测试用
                 content += ' [ id: ' + data.id + ', pid: ' + data.pid + ', level: ' + data.level + ' ]';
@@ -332,13 +335,13 @@
                     insertCellProperty(row, rowData);
                 }
 
-                var content = getOptionValue(dr);
+                var content = getOptionValue(dr), postfix = dr.postfix || '';
                 //如果用了树形结构，排序会引起顺序错乱，所以不允许排序
                 if (isTree && cellIndex === treeCellIndex) {
                     //设置树形行数据、事件
                     setTreeRow(that, attrName, row, treeData, id);
                     //设置树形列数据、事件
-                    setTreeCell(that, cell, treeData, content);
+                    setTreeCell(that, cell, treeData, content, postfix);
 
                     trigger.cell && setTreeAction(that, cell, id, trigger.cell || []);
                     trigger.row && setTreeAction(that, row, id, trigger.row || []);
@@ -826,7 +829,7 @@
         },
         toTree: function (cellIndex, treeOptions, func) {
             var id = this.table.id || this.id;
-            if(this.options.showTree || TO_TREE_LOG[id]){
+            if(this.options.showTree || TO_TREE_LOG[id]) {
                 return callback(func, this), this;
             }
             //记录toTree行为，防止重复操作

@@ -173,6 +173,7 @@
                     return { pass: true, value: value, message: '' };
                 },
                 checkValue: function (element, value, field, configs) {
+                    var isEvent = typeof configs === 'undefined';
                     value = value || op.getValue(element);
                     field = field || element.field;
                     configs = configs || element.configs;
@@ -215,7 +216,9 @@
                         //不是必填项的数字，如果没有填写，则取默认值或0
                         if(value === '' && !field.required) {
                             value = field.value || 0;
-                            if(typeof element.value !== 'undefined') {
+                            var dataShow = $.getAttribute(element, 'data-show,data-auto', '1').toInt();
+                            console.log('dataShow:',dataShow, element.id,!isEvent && dataShow === 1 && typeof element.value !== 'undefined');
+                            if(!isEvent && dataShow === 1 && typeof element.value !== 'undefined') {
                                 element.value = value;
                             }
                         }
