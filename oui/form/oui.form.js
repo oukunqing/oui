@@ -217,7 +217,6 @@
                         if(value === '' && !field.required) {
                             value = field.value || 0;
                             var dataShow = $.getAttribute(element, 'data-show,data-auto', '1').toInt();
-                            console.log('dataShow:',dataShow, element.id,!isEvent && dataShow === 1 && typeof element.value !== 'undefined');
                             if(!isEvent && dataShow === 1 && typeof element.value !== 'undefined') {
                                 element.value = value;
                             }

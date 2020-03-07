@@ -152,7 +152,7 @@
                     btn = opt.closeAble ? elem.childNodes[1] : null,
                     btnW = $.getOuterSize(btn).width;
 
-                    console.log('txt::',txt,$.getOuterSize(elem),$.getOuterSize(btn),cfg.maxWidth,$.isNumber(cfg.maxWidth),cfg.maxWidth > 60,(txtW + btnW));
+                    //console.log('txt::',txt,$.getOuterSize(elem),$.getOuterSize(btn),cfg.maxWidth,$.isNumber(cfg.maxWidth),cfg.maxWidth > 60,(txtW + btnW));
 
                 if($.isNumber(cfg.maxWidth) && cfg.maxWidth > 60 && (txtW + btnW) > cfg.maxWidth) {
                     var ps = $.getPaddingSize(txt),
@@ -163,7 +163,7 @@
                     txt.style.width = (cfg.maxWidth - 0 - ms.width - btnW - es.border.width) + 'px';
                     txt.title = $.getInnerText(txt);
 
-                    console.log(cfg.maxWidth);
+                    //console.log(cfg.maxWidth);
                 }
             });
 
@@ -200,6 +200,9 @@
             var panelId = Util.buildPanelId(objId, itemId), isIframe = false, iframeId = '', loadingId = '';
             var div = $.createElement('div', panelId, function(elem) {
                 elem.className = 'tab-panel';
+                if(cfg.style.panel) {
+                    elem.style.cssText = cfg.style.panel;
+                }
                 var html = '<a class="pos-mark" name="' + itemId + '"></a>';
                 if($.isString(opt.url, true)) {
                     isIframe = true;
@@ -861,7 +864,8 @@
             style: {                
                 //box: 'margin: 0 5px;',
                 //tab: 'margin: 0 5px 0 0;',
-                //txt: 'font-size:14px;'
+                //txt: 'font-size:14px;',
+                //panel: 'overflow: hidden;'
             },
             items: []
         }, options);
