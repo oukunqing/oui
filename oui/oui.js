@@ -2692,6 +2692,36 @@
             }
             return this;
         },
+        //添加键盘按键事件  keyCode 可以设置为 keyCode (数字) 如：70, 也可以设置 key（字符）, 如 F
+        //可以作为快捷键
+        addKeyListener = function(elem, evName, keyCode, func, isShiftKey) {
+            if(typeof keyCode === 'function') {
+                isShiftKey = func;
+                func = keyCode;
+                keyCode = undefined;
+            }
+            isShiftKey = $.isBoolean(isShiftKey, true);
+            //设置一个变量以记录按键次数
+            elem.keyEventTimes = 0;
+
+            var name = 'addEventListener',
+                other = 'attachEvent',
+                normal = typeof doc.addEventListener !== 'undefined',
+                callback = function(ev) {
+                    var e = ev || event;
+                    if (isShiftKey && !e.shiftKey) {
+                        return false;
+                    }
+                    if(typeof keyCode === 'undefined') {
+                        func(e, ++elem.keyEventTimes);
+                    } else if(typeof keyCode === 'number' && e.keyCode === keyCode) {
+                        func(e, ++elem.keyEventTimes);
+                    } else if(typeof keyCode === 'string' && e.key.toUpperCase() === keyCode.toUpperCase()) {
+                        func(e, ++elem.keyEventTimes);
+                    }
+                };            
+            return normal ? elem[name](evName, callback) : elem[other]('on' + evName, callback), this;
+        },
         disableEvent = function(elem, evName, func) {
             elem = $.toElement(elem);
             if($.isElement(elem) && $.isString(evName, true)) {
@@ -2981,6 +3011,7 @@
         cancelBubble: cancelBubble,
         addEventListener: addEventListener,
         addListener: addEventListener,
+        addKeyListener: addKeyListener,
         removeEventListener: removeEventListener,
         removeListener: removeEventListener,
         disableEvent: disableEvent,

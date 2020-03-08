@@ -59,6 +59,10 @@
                 return false;
             }
         });
+
+		$.addKeyListener(document, 'keyup',  function(e, n) {
+			console.log('e:', e, n);
+		}, false);
     };
 
     /*
