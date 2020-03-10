@@ -2736,7 +2736,7 @@
             return $.addEventListener(elem, evName, callback), this;
         },
         //键盘或鼠标连击事件监听
-        addHitListener = function(elem, evName, keyCode, func, timout, times) {
+        addHitListener = function(elem, evName, keyCode, func, timout, times, isShiftKey) {
             if(!$.isDocument(elem)) {
                 elem = $.toElement(elem);
                 if(!$.isElement(elem)) {
@@ -2744,11 +2744,14 @@
                 }
             }
             if(typeof keyCode === 'function') {
+                isShiftKey = times;
                 times = timout;
                 timout = func;
                 func = keyCode;
                 keyCode = undefined;
             }
+            isShiftKey = $.isBoolean(isShiftKey, false);
+
             timout = timout || 3000;
             times = times || 5;
 
@@ -2760,7 +2763,7 @@
 
             var callback = function(ev) {
                 var e = ev || event, type = e.type, pass = false;
-                if(!$.isFunction(func)) {
+                if ((isShiftKey && !e.shiftKey) || !$.isFunction(func)) {
                     return false;
                 }
                 $.cancelBubble(ev);

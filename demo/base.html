@@ -278,6 +278,25 @@
         });
 
         console.log(obj);
+
+
+
+
+		 //Shift + F
+        $.addKeyListener(document, 'keyup', 'F', function (e, n) {
+            console.log('left', n);
+        }, true);
+
+        //空白处 连击L键
+        $.addHitListener(document, 'keyup', 'L', function (e, n) {
+            console.log('left');
+        }, 3000, 6, false);
+
+        //空白处 连击R键
+        $.addHitListener(document, 'keyup', 'R', function (e, n) {
+            console.log('R:', n);
+        }, 2000, 3);
+
     </script>
 </head>
 <body>
