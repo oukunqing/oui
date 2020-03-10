@@ -1797,6 +1797,12 @@
             return b && $.isString(tagName) ? elem.tagName === tagName : b;
         },
         */
+        isBody = function(body) {
+            return body && 
+                body.nodeType === 1 &&
+                body.nodeName === 'BODY' &&
+                body.tagName === 'BODY';
+        },
         isDocument = function(doc) {
             return doc &&
                 //typeof doc === 'object' &&
@@ -2692,9 +2698,15 @@
             }
             return this;
         },
-        //添加键盘按键事件  keyCode 可以设置为 keyCode (数字) 如：70, 也可以设置 key（字符）, 如 F
+        //键盘按键事件监听  keyCode 可以设置为 keyCode (数字) 如：70, 也可以设置 key（字符）, 如 F
         //可以作为快捷键
         addKeyListener = function(elem, evName, keyCode, func, isShiftKey) {
+            if(!$.isDocument(elem)) {
+                elem = $.toElement(elem);
+                if(!$.isElement(elem)) {
+                    return false;
+                }
+            }
             if(typeof keyCode === 'function') {
                 isShiftKey = func;
                 func = keyCode;
@@ -2704,23 +2716,89 @@
             //设置一个变量以记录按键次数
             elem.keyEventTimes = 0;
 
-            var name = 'addEventListener',
-                other = 'attachEvent',
-                normal = typeof doc.addEventListener !== 'undefined',
-                callback = function(ev) {
-                    var e = ev || event;
-                    if (isShiftKey && !e.shiftKey) {
-                        return false;
+            var callback = function(ev) {
+                var e = ev || event, elem = this;
+                if ((isShiftKey && !e.shiftKey) || !$.isFunction(func)) {
+                    return false;
+                }
+                $.cancelBubble(ev);
+
+                if(typeof keyCode === 'undefined') {
+                    func(e, ++elem.keyEventTimes);
+                } else if(typeof keyCode === 'number' && e.keyCode === keyCode) {
+                    console.log('KeyListener: ', e.keyCode);
+                    func(e, ++elem.keyEventTimes);
+                } else if(typeof keyCode === 'string' && e.key.toUpperCase() === keyCode.toUpperCase()) {
+                    console.log('KeyListener: ', e.keyCode, e.key, keyCode);
+                    func(e, ++elem.keyEventTimes);
+                }
+            };
+            return $.addEventListener(elem, evName, callback), this;
+        },
+        //键盘或鼠标连击事件监听
+        addHitListener = function(elem, evName, keyCode, func, timout, times) {
+            if(!$.isDocument(elem)) {
+                elem = $.toElement(elem);
+                if(!$.isElement(elem)) {
+                    return false;
+                }
+            }
+            if(typeof keyCode === 'function') {
+                times = timout;
+                timout = func;
+                func = keyCode;
+                keyCode = undefined;
+            }
+            timout = timout || 3000;
+            times = times || 5;
+
+            //设置一个变量以记录按键次数
+            var keyCount = evName + (keyCode || '') + 'HitCount', 
+                keyTimes = evName + (keyCode || '') + 'HitTimes';
+            elem[keyCount] = 1;
+            elem[keyTimes] = 0;
+
+            var callback = function(ev) {
+                var e = ev || event, type = e.type, pass = false;
+                if(!$.isFunction(func)) {
+                    return false;
+                }
+                $.cancelBubble(ev);
+                if(type.startsWith('key')) {
+                    //如果是监听document,则必须在body空白处输入才有效
+                    if($.isDocument(elem)) {
+                        if(!$.isBody(e.target)) {
+                            return false;
+                        }
                     }
-                    if(typeof keyCode === 'undefined') {
-                        func(e, ++elem.keyEventTimes);
-                    } else if(typeof keyCode === 'number' && e.keyCode === keyCode) {
-                        func(e, ++elem.keyEventTimes);
+                    if(typeof keyCode === 'number' && e.keyCode === keyCode) {
+                        pass = true;
                     } else if(typeof keyCode === 'string' && e.key.toUpperCase() === keyCode.toUpperCase()) {
-                        func(e, ++elem.keyEventTimes);
+                        pass = true;
                     }
-                };            
-            return normal ? elem[name](evName, callback) : elem[other]('on' + evName, callback), this;
+                } else if(type.startsWith('mouse')) {
+                    pass = true;
+                }
+                if(!pass) {
+                    return false;
+                }
+                var ts = new Date().getTime(), tc = ts - elem[keyTimes];
+                if (elem[keyCount] == 1 || (elem[keyCount]  > 1 && tc > timout)) {
+                    elem[keyCount]  = 1;
+                    elem[keyTimes] = ts;
+                    tc = ts - elem[keyTimes];
+                }
+                console.log('HitListener: ', evName + (keyCode ? ':' + keyCode : ''), e.keyCode || '', elem[keyCount]);
+                if (elem[keyCount]  >= times) {
+                    try{ func(e, elem[keyCount]); } catch(e){}
+                    elem[keyCount] = 1;
+                    elem[keyTimes] = 0;
+                    return false;
+                }
+                elem[keyCount]  = tc < timout ? elem[keyCount]  + 1 : 1;
+            };
+
+            return $.addEventListener(elem, evName, callback), this;
         },
         disableEvent = function(elem, evName, func) {
             elem = $.toElement(elem);
@@ -2946,6 +3024,7 @@
         getFilePath: getFilePath,
         getFileName: getFileName,
         getExtension: getExtension,
+        isBody: isBody,
         isDocument: isDocument,
         isWindow: isWindow,
         isElement: isElement,
@@ -3012,6 +3091,7 @@
         addEventListener: addEventListener,
         addListener: addEventListener,
         addKeyListener: addKeyListener,
+        addHitListener: addHitListener,
         removeEventListener: removeEventListener,
         removeListener: removeEventListener,
         disableEvent: disableEvent,
