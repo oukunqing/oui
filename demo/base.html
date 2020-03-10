@@ -3,6 +3,10 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>OUI公共库测试</title>
+	<style type="text/css">
+	div {clear:both;}
+		.left { width: 300px;}
+	</style>
     <script type="text/javascript" src="../oui/oui.js?12"></script>
     <script type="text/javascript">
         console.log(new Date().getTime());
@@ -329,6 +333,18 @@ base.js demo
 <div id="div2">
     <br />
     <input type="text" name="txt" value="txt223" />
+</div>
+
+<input type="button" value="收放左边栏" onclick="$.toggleDisplay('left');"/>
+<div id="left" class="left" style="border:solid 1px #f00;height:100px;">
+	这是左边栏
+</div>
+
+<input type="button" value="收放右边栏" onclick="$.toggleDisplay('right', 350);"/>
+<input type="button" value="显示右边栏" onclick="$.toggleDisplay('right', true);"/>
+<input type="button" value="隐藏右边栏" onclick="$.toggleDisplay('right', false);"/>
+<div id="right" style="border:solid 1px #f00;height:100px;display:none;width:600px;">
+	这是右边栏
 </div>
 </body>
 </html>

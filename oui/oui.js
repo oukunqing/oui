@@ -2992,6 +2992,52 @@
         },
         height = function(elem, val) {
             return size(elem, 'height', val);
+        },
+        toggleDisplay = function(elem, options) {
+            elem = $.toElement(elem);
+            if(!$.isElement(elem)){
+                return false;
+            }
+            if($.isBoolean(options)) {
+                options = { show: options };
+            } else if($.isNumber(options)) {
+                options = { width: options, size: true };
+            }
+            var opt = $.extend({
+                show: undefined,
+                size: false,
+                width: 0,
+                height: 0
+            }, options);
+
+            if(!$.isBoolean(opt.show)) {
+                opt.show = elem.style.display === 'none';
+            }
+            var w = parseInt('0' + $.getElementStyle(elem, 'width')),
+                h = parseInt('0' + $.getElementStyle(elem, 'height'));
+
+            if(opt.size) {
+
+                if(w > 0) {
+                    elem.widthCache = w;
+                }
+                if(h > 0) {
+                    elem.heightCache = h;
+                }
+                w = opt.show ? (parseInt('0' + opt.width, 10) || elem.widthCache): 0;
+                h = opt.show ? (parseInt('0' + opt.height, 10) || elem.heightCache): 0;
+
+                elem.style.width = w + 'px';
+                elem.style.height = h + 'px';
+            }          
+            elem.style.display = opt.show ? '' : 'none';
+
+            if(opt.show && w <= 0 && elem.widthCache) {
+                elem.style.width = elem.widthCache + 'px';
+                elem.style.height = elem.heightCache + 'px';
+            }
+
+            return { show: opt.show, width: w, height: h };
         };
 
     var ua = function () { try { return navigator.userAgent } catch (e) { return '' } }(),
@@ -3120,7 +3166,8 @@
         width: width,
         w: width,
         height: height,
-        h: height
+        h: height,
+        toggleDisplay: toggleDisplay
     }, '$');
 
 }(OUI);
