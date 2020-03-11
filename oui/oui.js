@@ -3017,7 +3017,6 @@
                 h = parseInt('0' + $.getElementStyle(elem, 'height'));
 
             if(opt.size) {
-
                 if(w > 0) {
                     elem.widthCache = w;
                 }

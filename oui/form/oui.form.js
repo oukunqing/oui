@@ -788,10 +788,19 @@
     var showAjaxError = function (jqXHR, textStatus, errorThrown) {
         if (0 === jqXHR.status) { return false; }
         //jquery ajax 中出现的12031错误状态码的原因没有查到，如果有出现，暂时先屏蔽
-        if (12031 === jqXHR.status || jqXHR.status > 12000) { return false; }
+        if (12031 === jqXHR.status || jqXHR.status > 12000) {
+            console.log(jqXHR.status, textStatus, errorThrown);
+            return false; 
+        }
 
-        var html = ['应用程序异常，详细信息如下：', 'status:' + jqXHR.status, 'errorThrown:' + errorThrown, 'textStatus:' + textStatus];
-        $.alert(html.join('<br />'), '错误信息', { icon: 'error', copyAble: true });
+        var html = [
+            '应用程序服务端异常，详细信息如下：', 
+            'status: ' + jqXHR.status, 
+            'textStatus: ' + textStatus, 
+            'errorThrown: ' + errorThrown
+        ];
+        //指定对话框ID appServerError，防止重复出现多个对话框
+        $.alert(html.join('<br />'), '服务异常', { id: 'appServerError', icon: 'error', copyAble: true });
     },
     showAjaxFail = function (data, textStatus, jqXHR) {
         var html = [data.msg];
