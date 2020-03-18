@@ -1460,10 +1460,39 @@
             return tick;
         },
         timeTick: function (tick) {
+            var add = function (v, type) {
+                //先除以10000，将ticks换算回毫秒
+                return Date.timeTick(Date.addTick(this.ticks / 10000, v, type));
+            },
+            show = function (formatString, hideMilliseconds) {
+                var s = this, fs = formatString, hide = hideMilliseconds;
+                if (typeof hide === 'undefined' && typeof fs === 'boolean') {
+                    hide = fs, fs = '';
+                }
+                if (typeof fs !== 'string' || ['en', 'cn', 'time'].indexOf(fs) >= 0) {
+                    //\u5929 天, \u5c0f\u65f6 小时, \u5206\u949f 分钟, \u79d2 秒, \u6beb\u79d2 毫秒
+                    var a = ['{days}\u5929', '{hours}\u5c0f\u65f6', '{minutes}\u5206\u949f', '{seconds}\u79d2', '{milliseconds}\u6beb\u79d2'],
+                        p = s.days ? 0 : (s.hours ? 1 : (s.minutes ? 2 : s.seconds ? 3 : 4)), len = a.length - (hide ? 1 : 0);
+                    if (fs === 'en') {
+                        a = ['{days}days ', '{hours}h ', '{minutes}m ', '{seconds}s ', '{milliseconds}ms'];
+                    } else if (fs === 'time') {
+                        a = ['{days}days ', '{hours}:', '{minutes}:', '{seconds}.', '{milliseconds}'];
+                    }
+                    fs = '';
+                    for (var i = p; i < len; i++) {
+                        fs += a[i];
+                    }
+                    return fs.format(s);
+                }
+                var p = /[{]?(days|hours|minutes|seconds|milliseconds)[}]?/gi;
+                return fs.replace(p, '{$1}').format(s);
+            };
+
             if (tick === 0) {
                 return {
                     totalDays: 0, totalHours: 0, totalMinutes: 0, totalSeconds: 0, totalMilliseconds: 0,
-                    ticks: 0, days: 0, hours: 0, minutes: 0, seconds: 0, milliseconds: 0
+                    ticks: 0, days: 0, hours: 0, minutes: 0, seconds: 0, milliseconds: 0,
+                    add: add, show: show
                 };
             }
             var ms = tick / 1000, ds = {
@@ -1474,7 +1503,9 @@
                 totalMinutes: (ms / ds.m).round(15),
                 totalSeconds: ms.round(15),
                 totalMilliseconds: tick,
-                ticks: tick * 10000     //时间最小刻度单位为秒的一千万分之一(即毫秒的万分之一)
+                ticks: tick * 10000,     //时间最小刻度单位为秒的一千万分之一(即毫秒的万分之一),
+                add: add,
+                show: show
             };
             ts.days = parseInt(ts.totalDays, 10);
             ts.hours = parseInt((ms -= ts.days * ds.d) / ds.h, 10);
@@ -1482,33 +1513,6 @@
             ts.seconds = parseInt((ms -= ts.minutes * ds.m), 10);
             ts.milliseconds = ((ms -= ts.seconds) * ds.s).round();
 
-            ts.add = function (v, type) {
-                //先除以10000，将ticks换算回毫秒
-                return Date.timeTick(Date.addTick(this.ticks / 10000, v, type));
-            },
-                ts.show = function (formatString, hideMilliseconds) {
-                    var s = this, fs = formatString, hide = hideMilliseconds;
-                    if (typeof hide === 'undefined' && typeof fs === 'boolean') {
-                        hide = fs, fs = '';
-                    }
-                    if (typeof fs !== 'string' || ['en', 'cn', 'time'].indexOf(fs) >= 0) {
-                        //\u5929 天, \u5c0f\u65f6 小时, \u5206\u949f 分钟, \u79d2 秒, \u6beb\u79d2 毫秒
-                        var a = ['{days}\u5929', '{hours}\u5c0f\u65f6', '{minutes}\u5206\u949f', '{seconds}\u79d2', '{milliseconds}\u6beb\u79d2'],
-                            p = s.days ? 0 : (s.hours ? 1 : (s.minutes ? 2 : s.seconds ? 3 : 4)), len = a.length - (hide ? 1 : 0);
-                        if (fs === 'en') {
-                            a = ['{days}days ', '{hours}h ', '{minutes}m ', '{seconds}s ', '{milliseconds}ms'];
-                        } else if (fs === 'time') {
-                            a = ['{days}days ', '{hours}:', '{minutes}:', '{seconds}.', '{milliseconds}'];
-                        }
-                        fs = '';
-                        for (var i = p; i < len; i++) {
-                            fs += a[i];
-                        }
-                        return fs.format(s);
-                    }
-                    var p = /[{]?(days|hours|minutes|seconds|milliseconds)[}]?/gi;
-                    return fs.replace(p, '{$1}').format(s);
-                };
             return ts;
         },
         timeSpan: function (dt1, dt2) {
@@ -3037,6 +3041,45 @@
             }
 
             return { show: opt.show, width: w, height: h };
+        },
+        trigger = function (elem, evName) {
+            if(!$.isString(evName, true)) {
+                return this;
+            }
+            if ($.isString(elem)) {
+                elem = $.toElement(elem);
+            }
+            var isEvent = document.createEvent ? true : false, ev;
+            if (document.createEvent) {
+                if (evName.toLowerCase().startsWith('on')) {
+                    evName = evName.substr(2);
+                }
+                ev = document.createEvent("HTMLEvents");
+                ev.initEvent(evName, true, true);
+            } else if (document.createEventObject) {
+                if (!evName.toLowerCase().startsWith('on')) {
+                    evName = 'on' + evName;
+                }
+            }
+            if ($.isWindow(elem) || $.isDocument(elem) || $.isElement(elem)) {
+                if(elem.tagName === 'A' && (evName === 'href' || evName.indexOf('click') > -1)) {
+                    elem.click();
+                } else {
+                    isEvent ? elem['dispatchEvent'](ev) : elem['fireEvent'](evName);
+                }
+            } else if ($.isArray(elem)) {
+                for (var i = 0; i < elem.length; i++) {
+                    var e = $.toElement(elem[i]);
+                    if ($.isElement(e)) {
+                        if(e.tagName === 'A' && (evName === 'href' || evName.indexOf('click') > -1)) {
+                            e.click();
+                        } else {
+                            isEvent ? e['dispatchEvent'](ev) : e['fireEvent'](evName);
+                        }
+                    }
+                }
+            }
+            return this;
         };
 
     var ua = function () { try { return navigator.userAgent } catch (e) { return '' } }(),
@@ -3166,7 +3209,8 @@
         w: width,
         height: height,
         h: height,
-        toggleDisplay: toggleDisplay
+        toggleDisplay: toggleDisplay,
+        trigger: trigger
     }, '$');
 
 }(OUI);
@@ -3960,6 +4004,11 @@
         },
         h: function(h) {
             return $size(this, 'height', h);
+        },
+        trigger: function(evName) {
+            return this.each(function(i, obj) {
+                $.trigger(obj, evName);
+            });
         }
     }, '$.fn');
 
