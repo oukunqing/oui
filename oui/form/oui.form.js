@@ -803,10 +803,12 @@
         $.alert(html.join('<br />'), '服务异常', { id: 'appServerError', icon: 'error', copyAble: true });
     },
     showAjaxFail = function (data, textStatus, jqXHR) {
-        var html = [data.msg];
-        if (data.error) {
+        var msg = data.msg || data.Msg || data.message || data.Message,
+            error = data.error || data.Error;
+        var html = [msg];
+        if (error) {
             html.push('可能的原因：');
-            html.push(data.error);
+            html.push(error);
         }
         var dialogId = data.dialogId || data.dialog || '';
         var callback = null;
@@ -843,7 +845,7 @@
                         //callback(data, options.param);
                         if (options.getJSON || options.getJson) {
                             callback(data, textStatus, jqXHR);
-                        } else if (1 === data.result) {
+                        } else if (1 === data.result || 1 === data.Result) {
                             callback(data, options.param);
                         } else {
                             showAjaxFail(data, textStatus, jqXHR);

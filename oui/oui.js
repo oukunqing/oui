@@ -3080,6 +3080,28 @@
                 }
             }
             return this;
+        },
+        findParentElement = function(obj, tagName) {
+            var tag = tagName;
+            if(!$.isString(tag, true)) {
+                return null;
+            }
+            if ($.isElement(obj)) {
+                if(obj.tagName === tag) {
+                    return obj;
+                }
+                var parent = obj.parentNode;
+                if (parent !== null) {
+                    return parent.tagName === tagName ? parent : findParentElement(parent);
+                }
+            }
+            return null;
+        },
+        findRow = function (obj, tagName) {
+            return findParentElement(obj, 'TR');
+        },
+        findCell = function(obj, tagName) {
+            return findParentElement(obj, 'TD');
         };
 
     var ua = function () { try { return navigator.userAgent } catch (e) { return '' } }(),
@@ -3210,7 +3232,10 @@
         height: height,
         h: height,
         toggleDisplay: toggleDisplay,
-        trigger: trigger
+        trigger: trigger,
+        findParentElement: findParentElement,
+        findRow: findRow,
+        findCell: findCell
     }, '$');
 
 }(OUI);
