@@ -7,7 +7,7 @@
 	<script>
     var WEB_LANG = 'English';
 	</script>
-    <script type="text/javascript" src="../oui/tab/oui.tab.js?12"></script>
+    <script type="text/javascript" src="../oui/tab/oui.tab.js?12&skin=orange"></script>
 </head>
 <body>
 	<input type="button" value="添加" onclick="addTab();" />
@@ -75,7 +75,7 @@
 
     var tab2 = $.tab($I('nav2'), $I('content2'), {
         id: 'tab2',
-        skin: 'orange',
+        //skin: 'orange',
     });
 
     tab2.add({ id: 'config', name: '系统配置', html: '系统配置'});
@@ -89,7 +89,7 @@
 
     var tab3 = $.tab($I('nav3'), $I('content3'), {
         id: 'tab3',
-        //skin: 'green',
+        skin: 'green',
     });
 
     tab3.add({ id: 'config', name: '系统配置', html: '系统配置'});

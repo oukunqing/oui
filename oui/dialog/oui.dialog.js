@@ -11,6 +11,17 @@
 
     var Config = {
         FilePath: $.getScriptSelfPath(true),
+        DefaultSkin: 'default',
+        IsDefaultSkin: function(skin) {
+            return (!$.isUndefined(skin) ? skin : Config.GetSkin()) === Config.DefaultSkin;
+        },
+        Skin: '',
+        GetSkin: function() {
+            if(!Config.Skin) {
+                Config.Skin = Config.FilePath.getQueryString('skin') || Config.DefaultSkin;
+            }
+            return Config.Skin;
+        },
         Index: 1,
         IdIndex: 1,
         Identifier: 'oui-dialog-identifier-',
@@ -411,7 +422,9 @@
                 if ($.isString(opt.skin, true)) {
                     opt.skin = opt.skin.toLowerCase();
                 } else {
-                    opt.skin = 'default';
+                    //opt.skin = Config.DefaultSkin;
+                    //指定默认样式
+                    opt.skin = Config.GetSkin();
                 }
 
                 if($.isBoolean(opt.copyAble, false) || $.isBoolean(opt.selectAble || opt.selectable, false)) {
@@ -1144,7 +1157,7 @@
                 var p = this.getParam(_), opt = p.options, ctls = p.controls;
                 if (p.none) { return this; }
                 var css, shadow = opt.shadow, className = 'oui-dialog';
-                if (opt.skin !== 'default') {
+                if (opt.skin !== Config.DefaultSkin) {
                     className += ' oui-dialog-' + opt.skin;
                 }
                 ctls.dialog = $.createElement('div');
@@ -3493,13 +3506,17 @@
         };
 
     //先加载(默认)样式文件
-    Factory.loadCss('default');
+    Factory.loadCss(Config.DefaultSkin);
+    //加载指定的(默认)样式文件
+    if(!Config.IsDefaultSkin()) {
+        Factory.loadCss(Config.GetSkin());
+    }
 
     function Dialog(content, title, options) {
         var ds = Common.getDefaultSize(),
             opt = $.extend({
                 id: null,                       //id
-                skin: 'default',                //样式: default, blue
+                skin: Config.DefaultSkin,       //样式: default, blue
                 lang: Config.Lang.Chinese,      //语言 Chinese,English
                 type: Config.DialogType.alert,  //alert,confirm,message,tooltip,window,iframe
                 status: Config.DialogStatus.normal,     //初始状态  normal, min, max 三种状态
@@ -3637,7 +3654,7 @@
 
             Util.setOptions(_, 'options', opt);
 
-            if (opt.skin !== 'default') {
+            if (!Config.IsDefaultSkin(opt.skin)) {
                 Factory.loadCss(opt.skin, function () {
                     Util.build(_, opt);
                 });

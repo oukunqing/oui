@@ -12,7 +12,7 @@
         }
     </style>
     <script type="text/javascript" src="../oui/oui.js?12"></script>
-    <script type="text/javascript" src="../oui/dialog/oui.dialog.js?12"></script>
+    <script type="text/javascript" src="../oui/dialog/oui.dialog.js?12&skin=green"></script>
 </head>
 <body>
     <div id="p1" style="margin:100px 0 0 0;"></div>
@@ -613,9 +613,11 @@ function load2(id){
     var win = $.dialog.load(elem, {maxWidth:800, maxHeight:500});
 }
 
+var msgWin, msgTimer = null;
 function msg(isFixWidth){
-    var win = $.dialog.msg('msg: Message提示信息演示' + (isFixWidth ? '(固定宽度)' : ''), {
-        id: 'msg', autoClose: false, closeTiming: 15000, fixed: false,
+	var id = isFixWidth ? 1 : 0;
+    msgWin= $.dialog.msg('msg: Message提示信息演示' + (isFixWidth ? '(固定宽度)' : ''), {
+        id: 'msg' + id, autoClose: false, closeTiming: 15000, fixed: false,
         //position: 'bottomleft', 
         position: 5, 
         //shadow: false,
@@ -638,13 +640,16 @@ function msg(isFixWidth){
             console.log('msg close');
         }
     });
+	if(msgTimer !== null) {
+		window.clearTimeout(msgTimer);
+	}
     //win.update('更新了', {clickBgClose: true});
     //console.log(win.getOptions());
-    window.setTimeout(function() {
+    msgTimer = window.setTimeout(function() {
         //win.show();
         //win.update('请注意：提示信息改变了。请注意：提示信息改变了', {width:'auto'});
         //win.update('请注意：提示信息改变了。请注意：提示信息改变了', '', 'autosize');
-        win.update('Message提示信息演示：可以固定宽度高度，也可以自适应宽度高度。', '', isFixWidth ? 'autoheight' : 'autosize');
+        msgWin.update('Message提示信息演示：可以固定宽度高度，也可以自适应宽度高度。', '', isFixWidth ? 'autoheight' : 'autosize');
     }, 5000);
 }
 

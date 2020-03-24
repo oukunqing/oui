@@ -3,7 +3,7 @@
     margin: 0px;
     /*width: auto; */
     position: absolute;
-    border: solid 1px #ddd;
+    border: solid 1px #99bbe8;
     background: #99bbe8;
     border-radius: 4px;
     box-sizing: border-box;
@@ -22,7 +22,7 @@
 }
 
 .oui-dialog-blue .dialog-main {
-    background: #99bbe8;
+    /*background: #99bbe8;*/
 }
 
 .oui-dialog-max {
@@ -37,6 +37,12 @@
     padding:0; margin:0;
     border: none 0;
     background: #99bbe8;
+    /*左右圆角与总的背景互斥*/
+    /*
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    */
+
     width: 100%;
     height: 30px;
     max-height: 50px;

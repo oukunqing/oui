@@ -35,6 +35,25 @@
                 op[key] = isNaN(num) || num < 0 ? 0 : num;
             }
         },
+        skin = '',
+        getSkin = function() {
+            if(!skin) {
+                skin = thisFilePath.getQueryString('skin') || defaultSkin;
+            }
+            return skin;
+        },
+        checkOptions = function(opt) {
+            if (!$.isObject(opt)) {
+                opt = {};
+            }
+            if ($.isString(opt.skin, true)) {
+                opt.skin = opt.skin.toLowerCase();
+            } else {
+                //指定默认样式
+                opt.skin = getSkin();
+            }
+            return opt;
+        },
         setOptions = function (op, options, dataCount) {
             var texts = {
                 symbol: {
@@ -127,6 +146,7 @@
                     op.className = defaultClassName;
                 }
             }
+
             return op;
         },
         checkPageIndex = function (that, value) {
@@ -519,7 +539,7 @@
             debounce: true,                         //是否启用防抖功能（或者值为number，且大于50即为启用）
             debounceTime: defaultDebounceTime,      //抖动时长，单位：毫秒
             focus: false                            //是否锁定焦点
-        }, options, dataCount);
+        }, checkOptions(options), dataCount);
 
         that.paging();
     }

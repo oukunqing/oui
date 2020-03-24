@@ -13,6 +13,17 @@
 
     var Config = {
         FilePath: $.getScriptSelfPath(true),
+        DefaultSkin: 'default',
+        IsDefaultSkin: function(skin) {
+            return (!$.isUndefined(skin) ? skin : Config.GetSkin()) === Config.DefaultSkin;
+        },
+        Skin: '',
+        GetSkin: function() {
+            if(!Config.Skin) {
+                Config.Skin = Config.FilePath.getQueryString('skin') || Config.DefaultSkin;
+            }
+            return Config.Skin;
+        },
         LongPressTime: 512,      //长按最小时长，单位：毫秒
         LongPressInterval: 40,   //长按滚动间隔，单位：毫秒
         LongPressMinInterval: 10,   //长按滚动间隔，单位：毫秒
@@ -70,6 +81,18 @@
                 $.disableEvent(elem, 'contextmenu');
             }, t.tabContainer);
             return div;
+        },
+        checkOptions: function(opt) {
+            if (!$.isObject(opt)) {
+                opt = {};
+            }
+            if ($.isString(opt.skin, true)) {
+                opt.skin = opt.skin.toLowerCase();
+            } else {
+                //指定默认样式
+                opt.skin = Config.GetSkin();
+            }
+            return opt;
         },
         initialTab: function(t, opt) {
             t.left = Util.buildSwitch(t, opt, 'left');
@@ -840,7 +863,11 @@
     };
 
     //先加载(默认)样式文件
-    Factory.loadCss('default');
+    Factory.loadCss(Config.DefaultSkin);
+    //加载指定的(默认)样式文件
+    if(!Config.IsDefaultSkin()) {
+        Factory.loadCss(Config.GetSkin());
+    }
 
     function Tab(tabContainer, conContainer, options) {
         var that = this, cssTab = '', cssCon = '';
@@ -849,7 +876,7 @@
 
         var opt = $.extend({
             id: 'oui-tabs-' + new Date().getMilliseconds(),
-            skin: 'default',        //样式: default, blue
+            skin: Config.DefaultSkin,        //样式: default, blue
             lang: 'chinese',        //chinese, english
             eventName: 'click',     //click, mouseover
             dblclickScroll: false,
@@ -868,11 +895,11 @@
                 //panel: 'overflow: hidden;'
             },
             items: []
-        }, options);
+        }, Util.checkOptions(options));
 
         that.id = opt.id || '';
 
-        if (opt.skin !== 'default') {
+        if (opt.skin !== Config.DefaultSkin) {
             cssTab = ' oui-tabs-' + opt.skin;
             cssCon = ' oui-tabs-' + opt.skin + '-contents';
             Factory.loadCss(opt.skin);
