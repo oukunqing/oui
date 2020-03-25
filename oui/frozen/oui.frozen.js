@@ -94,13 +94,14 @@
         checkOptions: function(options) {
             var opt = $.extend({}, options);
             opt.complete = opt.complete || opt.callback;
-            opt.rows = parseInt('0' + (opt.rows || opt.head || opt.top), 10);
-            opt.cols = parseInt('0' + (opt.cols || opt.columns || opt.left), 10);
+            opt.rows = $.keyOverload(opt, ['rows', 'head', 'top'], 0, 'int');
+            opt.cols = $.keyOverload(opt, ['cols', 'columns', 'left'], 0, 'int');
             opt.right = parseInt('0' + (opt.right), 10);
-            opt.foot = parseInt('0' + (opt.foot || opt.bottom), 10);
-            opt.border = opt.border || opt.borderStyle || '';
-            opt.splitLineColor = opt.splitLineColor || opt.borderColor || opt.lineColor;
-            opt.borderWidth = opt.borderWidth || opt.lineWidth;
+            opt.foot = $.keyOverload(opt, ['foot', 'bottom'], 0, 'int');
+            opt.border = $.keyOverload(opt, ['border', 'borderStyle'], '');
+            opt.splitLineColor = $.keyOverload(opt, ['splitLineColor', 'borderColor', 'lineColor']);
+            opt.borderWidth = $.keyOverload(opt, ['borderWidth', 'lineWidth']);
+            opt.colStartRowIndex = $.keyOverload(opt, ['colStartRowIndex', 'rowIndex', 'rowStart'], 0);
 
             if(!$.isBoolean(opt.showSplitLine)) {
                 if($.isBoolean(opt.showBorder)) {
@@ -125,7 +126,7 @@
                 id = table;
                 table = $.toElement(table);
             }
-            if(!$.isElement(table)) {
+            if(!$.isElement(table) && table.tagName !== 'TABLE') {
                 return null;
             }
 
@@ -155,6 +156,10 @@
 
                 }
             }, Factory.checkOptions(options));
+
+            if(opt.colStartRowIndex >= opt.table.rows.length) {
+                opt.colStartRowIndex = opt.table.rows.length - 1;
+            }
 
             var cache = Factory.getCache(opt.id),
                 isFrozen = $.getAttribute(table, 'frozenid');
@@ -202,27 +207,33 @@
             }
             return this;
         },
-        cloneElement: function(f, type, elem, elemObj, rowIndex, options, dir, cellIndex, sizeRow) {
+        getMaxValue: function(minVal, maxVal) {
+            if(!$.isNumber(minVal)) {
+                minVal = 0;
+            }
+            return minVal < maxVal ? maxVal : minVal;
+        },
+        cloneElement: function(f, type, elem, elemObj, rowIndex, opt, dir, cellIndex, sizeRow) {
             elem.className = elemObj.className;
             elem.style.cssText = elemObj.style.cssText;
             var arrKey = ['ondblclick', 'onclick', 'onmouseover', 'onmouseout', 'oncontextmenu'];
             if(type === 'row') {
                 //nothing to do
             } else { // cell
-                if(sizeRow) {
-                    var ws = $.getStyleSize(sizeRow.cells[cellIndex]), w = ws.width || elemObj.clientWidth;
-                    elem.style.width = w + 'px';
-                } else {
-                    //从指定的行开始计算（并采用）列宽
-                    //当单元格有合并列时，则不采用列宽，防止表格错位
-                    if(rowIndex >= options.colStartRowIndex && elemObj.colSpan <= 1) {
-                        var ws = $.getStyleSize(elemObj), w = ws.width || elemObj.clientWidth;
-                        elem.style.width = w + 'px';
+                if(elemObj.colSpan <= 1) {
+                    if(sizeRow) {
+                        var ws = $.getStyleSize(sizeRow.cells[cellIndex]);
+                        elem.style.width = Factory.getMaxValue(ws.width, elemObj.clientWidth) + 'px';
+                    } else if(rowIndex >= opt.colStartRowIndex) {                        
+                        //从指定的行开始计算（并采用）列宽
+                        //当单元格有合并列时，则不采用列宽，防止表格错位
+                        var ws = $.getStyleSize(elemObj);
+                        elem.style.width = Factory.getMaxValue(ws.width, elemObj.clientWidth) + 'px';
                     }
-                }
+                }   
                 if(elemObj.rowSpan > 1 || (dir && dir !== 'head')) {
-                    var hs = $.getStyleSize(elemObj), h = hs.height || elemObj.clientHeight;
-                    elem.style.height = h + 'px';
+                    var hs = $.getStyleSize(elemObj);
+                    elem.style.height = Factory.getMaxValue(hs.height, elemObj.clientHeight) + 'px';
                 }
             }
 
@@ -250,7 +261,7 @@
             }
             return cut;
         },
-        buildHeadRows: function(f, offset, rows, tbTarget, tbSource, container, options, isBody, sizeRow) {
+        buildHeadRows: function(f, offset, rows, tbTarget, tbSource, container, opt, isBody, sizeRow) {
             for(var i = offset; i < rows; i++) {
                 var rowOld = tbSource.rows[i];
                 if(!rowOld) {
@@ -265,40 +276,40 @@
                 for(var j = 0; j < rowOld.cells.length; j++) {
                     var cellOld = rowOld.cells[j];
                     var cell = cellOld.cloneNode(true);
-                    Factory.cloneElement(f, 'cell', cell, cellOld, i, options, 'head', j, sizeRow);
+                    Factory.cloneElement(f, 'cell', cell, cellOld, i, opt, 'head', j, sizeRow);
                     row.appendChild(cell);
                 }
             }
             return this;
         },
-        buildRows: function(f, tbTarget, tbSource, dir, options) {
+        buildRows: function(f, tbTarget, tbSource, dir, opt) {
             var offset = 0, 
                 rowsLen = tbSource.rows.length,
-                rows = options.rows,
-                cols = options.cols,
+                rows = opt.rows,
+                cols = opt.cols,
                 arrRowCut = [],
                 arrCellCut = [],
                 isRight = dir.indexOf('right') >= 0,
                 isFoot = dir.indexOf('foot') >= 0,
                 head = Factory.getHead(tbSource),
                 headRows = head ? head.rows.length : 0,
-                container = !isFoot && tbSource.tHead !== null ? tbTarget.createTHead() : tbTarget;
+                container = !isFoot && tbSource.tHead !== null ? tbTarget.createTHead() : tbTarget,
+                sizeRow = null;
 
             switch(dir) {
                 case 'head':
-                    if(options.fixHead) {
-                        var sizeRow = null;
-                        if(options.colStartRowIndex >= options.rows) {
-                            if(options.colStartRowIndex >= tbSource.rows.length) {
-                                options.colStartRowIndex = tbSource.rows.length;
+                    if(opt.fixHead) {
+                        if(opt.colStartRowIndex >= opt.rows) {
+                            if(opt.colStartRowIndex >= tbSource.rows.length) {
+                                opt.colStartRowIndex = tbSource.rows.length;
                             }
-                            sizeRow = tbSource.rows[options.colStartRowIndex];
+                            sizeRow = tbSource.rows[opt.colStartRowIndex];
                         }
                         if(head) {
                             if(!$.isIE && !sizeRow) {
                                 tbTarget.appendChild(head.cloneNode(true));
                             } else {
-                                Factory.buildHeadRows(f, offset, headRows, tbTarget, tbSource, container, options, false, sizeRow);
+                                Factory.buildHeadRows(f, offset, headRows, tbTarget, tbSource, container, opt, false, sizeRow);
                             }
                             offset = headRows;
                         }
@@ -308,7 +319,7 @@
                         }
                     }
                     if(rows > offset) {
-                        Factory.buildHeadRows(f, offset, rows, tbTarget, tbSource, container, options, true);
+                        Factory.buildHeadRows(f, offset, rows, tbTarget, tbSource, container, opt, true);
                     }
                     break;
                 case 'left':
@@ -317,9 +328,12 @@
                 case 'head-right':
                 case 'foot-left':
                 case 'foot-right':
-                    rows = (dir === 'left' || dir === 'right') ? rowsLen : isFoot ? options.foot : rows;
+                    rows = (dir === 'left' || dir === 'right') ? rowsLen : isFoot ? opt.foot : rows;
                     if(isRight) {
-                        cols = options.right;
+                        cols = opt.right;
+                    }
+                    if(opt.colStartRowIndex > 0 && (dir.startsWith('head-') || dir.startsWith('foot-'))) {
+                        sizeRow = tbSource.rows[opt.colStartRowIndex];
                     }
                     for(var i = offset; i < rows; i++) {
                         var rowOld = isFoot ? tbSource.rows[rowsLen - i - 1] : tbSource.rows[i];
@@ -348,7 +362,7 @@
                                     cell.colSpan = cols - j;
                                 }
 
-                                Factory.cloneElement(f, 'cell', cell, cellOld, i, options, dir);
+                                Factory.cloneElement(f, 'cell', cell, cellOld, i, opt, dir, j, sizeRow);
                                 cut = Factory.setCut(cut, cell, i, j, cols, arrCellCut);
                                 if(isRight) {
                                     row.insertBefore(cell, row.childNodes[0]);
@@ -360,7 +374,8 @@
                     }
                     break;
                 case 'foot':
-                    rows = options.foot;
+                    rows = opt.foot;
+
                     for(var i = offset; i < rows; i++) {
                         var rowOld = tbSource.rows[rowsLen - i - 1];
                         if(!rowOld) {
@@ -375,7 +390,7 @@
                             var cellOld = rowOld.cells[j];
                             if(cellOld) {
                                 var cell = cellOld.cloneNode(true);
-                                Factory.cloneElement(f, 'cell', cell, cellOld, i, options);
+                                Factory.cloneElement(f, 'cell', cell, cellOld, i, opt);
                                 row.appendChild(cell);
                             }
                         }

@@ -529,6 +529,65 @@
                 s = isRight ? s + char : char + s;
             }
             return s;
+        },
+        filterValue = function(vals, dval, valType) {
+            if(!$.isArray(vals)) {
+                vals = [vals];
+            }
+            var noval = $.isNullOrUndefined(dval),
+                numval = $.isNumber(dval),
+                isInt = $.isBoolean(valType, false) || valType === 'int';
+
+            for(var i = 0; i < vals.length; i++) {
+                var v = vals[i], undef = $.isUndefined(v);
+                if(!undef && noval) {
+                    return v;
+                }
+                if(!undef && !noval) {
+                    if(numval) {
+                        v = isInt ? parseInt(v, 10) : parseFloat(v, 10);
+                        if(!isNaN(v) && v >= dval) {
+                            return v;
+                        }
+                    } else if(v !== '') {
+                        return v;
+                    }
+                }
+            }
+            return !noval ? dval : undefined;
+        },
+        keywordOverload = function(opt, keys, val, valType) {
+            if(!opt) {
+                return undefined;
+            }
+            var vals = [];
+            for(var i in keys) {
+                var k = keys[i];
+                vals.push(opt[k]);
+            }
+            return filterValue(vals, val, valType);
+        },
+        setValue = function(obj, key, val, par) {
+            par = $.extend({
+                cover: false,
+                add: true,
+                set: true
+            }, par);
+
+            if(!$.isObject(obj)) {
+                obj = {};
+            }
+            if(!par.set) {
+                return obj;
+            }
+            if(!$.isUndefined(obj[key])) {
+                if(par.cover) {
+                    obj[key] = val;
+                }
+            } else if(par.add) {
+                obj[key] = val;
+            }
+            return obj;
         };
 
     var counter = 1, debug = isBoolean(isDebug(), true);
@@ -590,6 +649,8 @@
         param: buildParam, buildParam: buildParam, setUrlParam: setUrlParam, buildAjaxData: buildAjaxData,
         setQueryString: setQueryString, getQueryString: getQueryString, getUrlHost: getUrlHost,
         isDebug: isDebug,
+        filterValue: filterValue, keywordOverload : keywordOverload, keyOverload: keywordOverload,
+        setValue: setValue,
         toGpsString: function(gps, decimalLen) {
             var con = [], 
                 len = $.checkNumber(decimalLen, 3, 14) ? decimalLen : 8;
@@ -611,18 +672,6 @@
                 arr[i][key] < pivot[key] ? left.push(arr[i]) : right.push(arr[i]);
             }
             return this.quickSort(left, key).concat(pivot, this.quickSort(right, key));
-        },        
-        keywordOverload : function(opt, keys, val) {
-            if(!opt) {
-                return undefined;
-            }
-            for(var i in keys) {
-                var k = keys[i];
-                if(!$.isUndefined(opt[k]) && ($.isNullOrUndefined(val) ? true : opt[k] === val)) {
-                    return opt[k];
-                }
-            }
-            return undefined;
         },
         throwError: function (err) {
             try { console.trace(); console.log(err); } catch (e) { }
