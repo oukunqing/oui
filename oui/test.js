@@ -509,3 +509,8 @@ console.log('1584363889614'.toDate().format())
 
 
 console.log(/[\d]/.test('abcasdfas'))
+
+
+var n = 1, v = parseFloat('1.0', 10);
+
+console.log(n===v);

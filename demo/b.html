@@ -175,6 +175,7 @@ body {
     .table .thead {
         font-weight: bold;
         color: #666;
+		height: 35px;
     }
 
     .table tr.alternate {
@@ -1209,29 +1210,29 @@ body {
 </body>
 </html><script type="text/javascript">
 
-function frozen() {
-	var table = 'tbList';
-	$.frozen(table, {
-		//fixHead: false,
-		rows: 1,
-		cols: 2,
-		right: 0,
-		colStartRowIndex: 1,
-		foot: 1,
-		/*
-		right: 2,
-		foot: 1,
-		*/
-		//debounce: false,
-		border: 'solid 1px #f00',
-		complete: function(f) {
-			console.log('f:', f);
-		}
-	});
-}
+	function frozen() {
+		var table = 'tbList';
+		$.frozen(table, {
+			//fixHead: false,
+			rows: 1,
+			cols: 2,
+			right: 0,
+			colStartRowIndex: 1,
+			foot: 1,
+			/*
+			right: 2,
+			foot: 1,
+			*/
+			//debounce: false,
+			border: 'solid 1px #f00',
+			complete: function(f) {
+				console.log('f:', f);
+			}
+		});
+	}
 
-window.onload = function() {
-	frozen();
-};
+	window.onload = function() {
+		frozen();
+	};
 
 </script>
