@@ -230,7 +230,7 @@
                 } else {
                     //从指定的行开始计算（并采用）列宽
                     //当单元格有合并列时，则不采用列宽，防止表格错位
-                    if(rowIndex >= options.colStartRowIndex && elemObj.colSpan <= 1) {
+                    if(rowIndex >= opt.colStartRowIndex && elemObj.colSpan <= 1) {
                         var ws = $.getStyleSize(elemObj), w = ws.width || elemObj.clientWidth;
                         elem.style.width = w + 'px';
                     }
@@ -379,9 +379,9 @@
                     }
                     break;
                 case 'foot':
-                    rows = options.foot;
-                    if(options.colStartRowIndex > 0) {
-                        sizeRow = tbSource.rows[options.colStartRowIndex];
+                    rows = opt.foot;
+                    if(opt.colStartRowIndex > 0) {
+                        sizeRow = tbSource.rows[opt.colStartRowIndex];
                     }
                     rows = opt.foot;
 
@@ -399,7 +399,7 @@
                             var cellOld = rowOld.cells[j];
                             if(cellOld) {
                                 var cell = cellOld.cloneNode(true);
-                                Factory.cloneElement(f, 'cell', cell, cellOld, i, options, dir, j, sizeRow);
+                                Factory.cloneElement(f, 'cell', cell, cellOld, i, opt, dir, j, sizeRow);
                                 row.appendChild(cell);
                             }
                         }
