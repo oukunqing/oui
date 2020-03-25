@@ -210,8 +210,12 @@
                 //nothing to do
             } else { // cell
                 if(sizeRow) {
-                    var ws = $.getStyleSize(sizeRow.cells[cellIndex]), w = ws.width || elemObj.clientWidth;
-                    elem.style.width = w + 'px';
+                    if(elemObj.colSpan <= 1) {                        
+                        var sizeCell = sizeRow.cells[cellIndex],
+                            ws = $.getStyleSize(sizeCell), 
+                            w = ws.width || sizeCell.clientWidth;
+                        elem.style.width = w + 'px';
+                    }
                 } else {
                     //从指定的行开始计算（并采用）列宽
                     //当单元格有合并列时，则不采用列宽，防止表格错位
@@ -282,12 +286,12 @@
                 isFoot = dir.indexOf('foot') >= 0,
                 head = Factory.getHead(tbSource),
                 headRows = head ? head.rows.length : 0,
-                container = !isFoot && tbSource.tHead !== null ? tbTarget.createTHead() : tbTarget;
+                container = !isFoot && tbSource.tHead !== null ? tbTarget.createTHead() : tbTarget,
+                sizeRow = null;
 
             switch(dir) {
                 case 'head':
                     if(options.fixHead) {
-                        var sizeRow = null;
                         if(options.colStartRowIndex >= options.rows) {
                             if(options.colStartRowIndex >= tbSource.rows.length) {
                                 options.colStartRowIndex = tbSource.rows.length;
@@ -321,6 +325,10 @@
                     if(isRight) {
                         cols = options.right;
                     }
+                    if(options.colStartRowIndex > 0 && (dir.startsWith('head-') || dir.startsWith('foot-'))) {
+                        sizeRow = tbSource.rows[options.colStartRowIndex];
+                    }
+
                     for(var i = offset; i < rows; i++) {
                         var rowOld = isFoot ? tbSource.rows[rowsLen - i - 1] : tbSource.rows[i];
                         if(!rowOld) {
@@ -348,7 +356,7 @@
                                     cell.colSpan = cols - j;
                                 }
 
-                                Factory.cloneElement(f, 'cell', cell, cellOld, i, options, dir);
+                                Factory.cloneElement(f, 'cell', cell, cellOld, i, options, dir, isRight ? c - j - 1 : j, sizeRow);
                                 cut = Factory.setCut(cut, cell, i, j, cols, arrCellCut);
                                 if(isRight) {
                                     row.insertBefore(cell, row.childNodes[0]);
@@ -361,6 +369,9 @@
                     break;
                 case 'foot':
                     rows = options.foot;
+                    if(options.colStartRowIndex > 0) {
+                        sizeRow = tbSource.rows[options.colStartRowIndex];
+                    }
                     for(var i = offset; i < rows; i++) {
                         var rowOld = tbSource.rows[rowsLen - i - 1];
                         if(!rowOld) {
@@ -375,7 +386,7 @@
                             var cellOld = rowOld.cells[j];
                             if(cellOld) {
                                 var cell = cellOld.cloneNode(true);
-                                Factory.cloneElement(f, 'cell', cell, cellOld, i, options);
+                                Factory.cloneElement(f, 'cell', cell, cellOld, i, options, dir, j, sizeRow);
                                 row.appendChild(cell);
                             }
                         }

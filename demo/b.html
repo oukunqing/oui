@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"><title>设备信息列表 - ZyrhDeviceService</title><style type="text/css">
+body {
+    font-family: 微软雅黑,宋体,Arial;
+    font-size: 12px;
+}
+
+.form {
+    clear: both;
+    display: block;
+    overflow: hidden;
+}
+
+    .form select {
+        float: left;
+        margin: 0 5px 5px 0;
+        border: solid 1px #ddd;
+        border-radius: 3px;
+        height: 28px;
+        line-height: 28px;
+        box-sizing: border-box;
+    }
+
+    .form .txt {
+        float: left;
+        margin: 0 5px 5px 0;
+        border: solid 1px #ddd;
+        border-radius: 3px;
+        height: 28px;
+        padding: 0 5px;
+        line-height: 28px;
+        box-sizing: border-box;
+    }
+
+    .form .btn {
+        float: left;
+        margin: 0 5px 5px 0;
+        border-radius: 3px;
+        height: 28px;
+        padding: 0 15px;
+        line-height: 28px;
+        box-sizing: border-box;
+        color: #fff;
+        background: #337ab7;
+        border: solid 1px #2e6da4;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: middle;
+        cursor: pointer;
+    }
+
+    .form .btn-primary {
+        color: #fff;
+        background: #337ab7;
+        border: solid 1px #2e6da4;
+    }
+
+    .form .btn-default {
+        color: #333;
+        background: #fff;
+        border: solid 1px #ccc;
+    }
+
+    .form label {
+        float: left;
+    }
+
+    .form .chb-label {
+        border: solid 1px #ddd;
+        border-radius: 5px;
+        float: left;
+        font-size: 12px;
+        line-height: 26px;
+        padding: 0 7px;
+        margin: 0 5px 5px 0;
+        height: 28px;
+        box-sizing: border-box;
+    }
+
+        .form .chb-label .chb {
+            float: left;
+            border: solid 1px #ddd;
+            width: 13px;
+            height: 13px;
+            margin: 7px 0 0;
+        }
+
+        .form .chb-label span {
+            float: left;
+            padding: 0 0 0 5px;
+        }
+
+    .form .home {
+        margin: 0 5px 0 0;
+        border-radius: 3px;
+        height: 28px;
+        padding: 0 10px;
+        line-height: 28px;
+        box-sizing: border-box;
+        color: #fff;
+        background-color: #5cb85c;
+        border: solid 1px #4cae4c;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: middle;
+    }
+
+.search-box {
+    margin: 5px 0 0;
+    clear: both;
+}
+
+    .search-box input, .search-box select {
+        float: left;
+        margin-right: 5px;
+    }
+
+.data-list {
+    clear: both;
+    overflow: auto;
+    margin: 0;
+    padding: 0;
+    height: 300px;
+}
+
+.stat {
+    padding: 0;
+    margin: 0;
+    line-height: 24px;
+    clear: both;
+    display: block;
+    overflow: hidden;
+}
+
+.paging {
+    margin: 5px 0;
+    clear: both;
+    display: block;
+    overflow: hidden;
+}
+
+    .paging label {
+        float: left;
+        line-height: 24px;
+        margin-right: 5px;
+    }
+
+    .paging a {
+        padding: 0 5px;
+        display: block;
+        float: left;
+        line-height: 24px;
+        border: solid 1px #ddd;
+        box-sizing: border-box;
+        color: #005eac;
+        text-decoration: none;
+        margin: 0 5px 5px 0;
+        border-radius: 5px;
+    }
+
+        .paging a.cur {
+            color: #f00;
+        }
+
+
+.table {
+    border-collapse: collapse;
+    font-size: 12px;
+    margin: 0;
+    padding: 0;
+}
+
+    .table .thead {
+        font-weight: bold;
+        color: #666;
+    }
+
+    .table tr.alternate {
+        background: #eef6f9;
+        background: #fafafa;
+    }
+
+    .table td {
+        border: solid 1px #ddd;
+        padding: 0 10px;
+		min-width: 100px;
+        text-align: center;
+    }
+
+        .table td .con {
+            padding: 0 5px;
+            text-align: left;
+            word-break: break-all;
+            line-height: 18px;
+        }
+
+            .table td .con i {
+                font-style: normal;
+                color: #999;
+                margin-right: 5px;
+            }
+
+            .table td .con em {
+                font-style: normal;
+            }
+</style>
+    <script type="text/javascript" src="../oui/oui.js?12"></script>
+    <script type="text/javascript" src="../oui/frozen/oui.frozen.js?2"></script>
+	</head>
+	<body>
+	<div id="divList" class="data-list" >
+		<table cellpadding="0" cellspacing="0" id="tbList" class="table">
+			<thead>
+				<tr class="thead">
+					<td>
+						No.
+					</td>
+					<td>
+						Type
+					</td>
+					<td>
+						Port
+					</td>
+					<td>
+						Code
+					</td>
+					<td>
+						Point
+					</td>
+					<td>
+						Status
+					</td>
+					<td>
+						Action
+					</td>
+					<td>
+						RegisterTime
+					</td>
+					<td>
+						Report
+					</td>
+					<td>
+						Heartbeat
+					</td>
+					<td>
+						KeepAlive
+					</td>
+					<td>
+						OnlineTimes
+					</td>
+				</tr>
+			</thead>
+			<tbody>
+				<tr class="" style="color:#000">
+					<td style="width:60px;">
+						1
+					</td>
+					<td>
+						Device920
+					</td>
+					<td>
+						40008
+					</td>
+					<td>
+						861929047602121
+					</td>
+					<td>
+						39.144.18.121:3154
+					</td>
+					<td>
+						On
+					</td>
+					<td>
+						0
+					</td>
+					<td>
+						2020-03-25 16:32:29.024
+					</td>
+					<td>
+						1
+					</td>
+					<td>
+						2020-03-25 16:32:31.968
+					</td>
+					<td>
+						2020-03-25 16:32:49.375
+					</td>
+					<td>
+						1 / 0
+					</td>
+				</tr>
+				<tr class="alternate" style="color:#000">
+					<td>
+						2
+					</td>
+					<td>
+						Device816
+					</td>
+					<td>
+						23509
+					</td>
+					<td>
+						925254
+					</td>
+					<td>
+						36.23.85.240:37772
+					</td>
+					<td>
+						On
+					</td>
+					<td>
+						0
+					</td>
+					<td>
+						2020-03-25 16:32:38.837
+					</td>
+					<td>
+						1
+					</td>
+					<td>
+						2020-03-25 16:32:38.837
+					</td>
+					<td>
+						2020-03-25 16:32:49.502
+					</td>
+					<td>
+						1 / 0
+					</td>
+				</tr>
+				<tr class="" style="color:#000">
+					<td>
+						3
+					</td>
+					<td>
+						Device816
+					</td>
+					<td>
+						23509
+					</td>
+					<td>
+						602540
+					</td>
+					<td>
+						36.19.98.151:40858
+					</td>
+					<td>
+						On
+					</td>
+					<td>
+						0
+					</td>
+					<td>
+						2020-03-25 16:32:38.837
+					</td>
+					<td>
+						1
+					</td>
+					<td>
+						2020-03-25 16:32:38.837
+					</td>
+					<td>
+						2020-03-25 16:32:49.502
+					</td>
+					<td>
+						1 / 0
+					</td>
+				</tr>
+				<tr class="alternate" style="color:#000">
+					<td>
+						4
+					</td>
+					<td>
+						Device816
+					</td>
+					<td>
+						23509
+					</td>
+					<td>
+						600594
+					</td>
+					<td>
+						103.221.142.245:2153
+					</td>
+					<td>
+						On
+					</td>
+					<td>
+						0
+					</td>
+					<td>
+						2020-03-25 16:32:39.926
+					</td>
+					<td>
+						1
+					</td>
+					<td>
+						2020-03-25 16:32:39.926
+					</td>
+					<td>
+						2020-03-25 16:32:39.926
+					</td>
+					<td>
+						1 / 0
+					</td>
+				</tr>
+				<tr class="" style="color:#000">
+					<td>
+						5
+					</td>
+					<td>
+						Device816
+					</td>
+					<td>
+						23509
+					</td>
+					<td>
+						126253
+					</td>
+					<td>
+						106.61.104.167:56849
+					</td>
+					<td>
+						On
+					</td>
+					<td>
+						0
+					</td>
+					<td>
+						2020-03-25 16:32:40.345
+					</td>
+					<td>
+						1
+					</td>
+					<td>
+						2020-03-25 16:32:40.345
+					</td>
+					<td>
+						2020-03-25 16:32:40.345
+					</td>
+					<td>
+						1 / 0
+					</td>
+				</tr>
+				<tr class="alternate" style="color:#000">
+					<td>
+						6
+					</td>
+					<td>
+						Device816
+					</td>
+					<td>
+						23509
+					</td>
+					<td>
+						623773
+					</td>
+					<td>
+						36.98.122.51:61827
+					</td>
+					<td>
+						On
+					</td>
+					<td>
+						0
+					</td>
+					<td>
+						2020-03-25 16:32:40.345
+					</td>
+					<td>
+						1
+					</td>
+					<td>
+						2020-03-25 16:32:40.345
+					</td>
+					<td>
+						2020-03-25 16:32:40.345
+					</td>
+					<td>
+						1 / 0
+					</td>
+				</tr>
+				<tr class="" style="color:#000">
+					<td>
+						7
+					</td>
+					<td>
+						Device816
+					</td>
+					<td>
+						23509
+					</td>
+					<td>
+						982165
+					</td>
+					<td>
+						117.132.195.161:55591
+					</td>
+					<td>
+						On
+					</td>
+					<td>
+						0
+					</td>
+					<td>
+						2020-03-25 16:32:41.328
+					</td>
+					<td>
+						1
+					</td>
+					<td>
+						2020-03-25 16:32:41.328
+					</td>
+					<td>
+						2020-03-25 16:32:41.328
+					</td>
+					<td>
+						1 / 0
+					</td>
+				</tr>
+				<tr class="alternate" style="color:#000">
+					<td>
+						8
+					</td>
+					<td>
+						Device816
+					</td>
+					<td>
+						23509
+					</td>
+					<td>
+						388339
+					</td>
+					<td>
+						103.221.142.250:2330
+					</td>
+					<td>
+						On
+					</td>
+					<td>
+						0
+					</td>
+					<td>
+						2020-03-25 16:32:41.427
+					</td>
+					<td>
+						1
+					</td>
+					<td>
+						2020-03-25 16:32:41.427
+					</td>
+					<td>
+						2020-03-25 16:32:41.427
+					</td>
+					<td>
+						1 / 0
+					</td>
+				</tr>
+				<tr class="" style="color:#000">
+					<td>
+						9
+					</td>
+					<td>
+						Device816
+					</td>
+					<td>
+						23509
+					</td>
+					<td>
+						097629
+					</td>
+					<td>
+						106.57.110.71:26587
+					</td>
+					<td>
+						On
+					</td>
+					<td>
+						0
+					</td>
+					<td>
+						2020-03-25 16:32:41.846
+					</td>
+					<td>
+						1
+					</td>
+					<td>
+						2020-03-25 16:32:41.846
+					</td>
+					<td>
+						2020-03-25 16:32:41.846
+					</td>
+					<td>
+						1 / 0
+					</td>
+				</tr>
+				<tr class="alternate" style="color:#000">
+					<td>
+						10
+					</td>
+					<td>
+						Device816
+					</td>
+					<td>
+						23509
+					</td>
+					<td>
+						388337
+					</td>
+					<td>
+						103.221.142.251:2240
+					</td>
+					<td>
+						On
+					</td>
+					<td>
+						0
+					</td>
+					<td>
+						2020-03-25 16:32:41.846
+					</td>
+					<td>
+						1
+					</td>
+					<td>
+						2020-03-25 16:32:41.846
+					</td>
+					<td>
+						2020-03-25 16:32:41.846
+					</td>
+					<td>
+						1 / 0
+					</td>
+				</tr>
+				<tr class="" style="color:#000">
+					<td>
+						11
+					</td>
+					<td>
+						Device816
+					</td>
+					<td>
+						23509
+					</td>
+					<td>
+						535022
+					</td>
+					<td>
+						39.144.17.6:34983
+					</td>
+					<td>
+						On
+					</td>
+					<td>
+						0
+					</td>
+					<td>
+						2020-03-25 16:32:42.827
+					</td>
+					<td>
+						1
+					</td>
+					<td>
+						2020-03-25 16:32:42.827
+					</td>
+					<td>
+						2020-03-25 16:32:42.827
+					</td>
+					<td>
+						1 / 0
+					</td>
+				</tr>
+				<tr class="alternate" style="color:#000">
+					<td>
+						12
+					</td>
+					<td>
+						Device816
+					</td>
+					<td>
+						23509
+					</td>
+					<td>
+						864966
+					</td>
+					<td>
+						36.19.98.236:18403
+					</td>
+					<td>
+						On
+					</td>
+					<td>
+						0
+					</td>
+					<td>
+						2020-03-25 16:32:42.830
+					</td>
+					<td>
+						1
+					</td>
+					<td>
+						2020-03-25 16:32:42.830
+					</td>
+					<td>
+						2020-03-25 16:32:42.830
+					</td>
+					<td>
+						1 / 0
+					</td>
+				</tr>
+				<tr class="" style="color:#000">
+					<td>
+						13
+					</td>
+					<td>
+						Device816
+					</td>
+					<td>
+						23509
+					</td>
+					<td>
+						097454
+					</td>
+					<td>
+						106.57.99.143:29776
+					</td>
+					<td>
+						On
+					</td>
+					<td>
+						0
+					</td>
+					<td>
+						2020-03-25 16:32:42.929
+					</td>
+					<td>
+						1
+					</td>
+					<td>
+						2020-03-25 16:32:42.929
+					</td>
+					<td>
+						2020-03-25 16:32:42.929
+					</td>
+					<td>
+						1 / 0
+					</td>
+				</tr>
+				<tr class="alternate" style="color:#000">
+					<td>
+						14
+					</td>
+					<td>
+						Device816
+					</td>
+					<td>
+						23509
+					</td>
+					<td>
+						609764
+					</td>
+					<td>
+						36.18.46.246:48665
+					</td>
+					<td>
+						On
+					</td>
+					<td>
+						0
+					</td>
+					<td>
+						2020-03-25 16:32:43.347
+					</td>
+					<td>
+						1
+					</td>
+					<td>
+						2020-03-25 16:32:43.347
+					</td>
+					<td>
+						2020-03-25 16:32:43.347
+					</td>
+					<td>
+						1 / 0
+					</td>
+				</tr>
+				<tr class="" style="color:#000">
+					<td>
+						15
+					</td>
+					<td>
+						Device816
+					</td>
+					<td>
+						23509
+					</td>
+					<td>
+						568846
+					</td>
+					<td>
+						36.23.124.246:32983
+					</td>
+					<td>
+						On
+					</td>
+					<td>
+						0
+					</td>
+					<td>
+						2020-03-25 16:32:43.349
+					</td>
+					<td>
+						1
+					</td>
+					<td>
+						2020-03-25 16:32:43.349
+					</td>
+					<td>
+						2020-03-25 16:32:43.349
+					</td>
+					<td>
+						1 / 0
+					</td>
+				</tr>
+				<tr class="alternate" style="color:#000">
+					<td>
+						16
+					</td>
+					<td>
+						Device816
+					</td>
+					<td>
+						23509
+					</td>
+					<td>
+						621595
+					</td>
+					<td>
+						117.132.195.65:2616
+					</td>
+					<td>
+						On
+					</td>
+					<td>
+						0
+					</td>
+					<td>
+						2020-03-25 16:32:44.328
+					</td>
+					<td>
+						1
+					</td>
+					<td>
+						2020-03-25 16:32:44.328
+					</td>
+					<td>
+						2020-03-25 16:32:44.328
+					</td>
+					<td>
+						1 / 0
+					</td>
+				</tr>
+				<tr class="" style="color:#000">
+					<td>
+						17
+					</td>
+					<td>
+						Device816
+					</td>
+					<td>
+						23509
+					</td>
+					<td>
+						624243
+					</td>
+					<td>
+						103.221.142.252:2215
+					</td>
+					<td>
+						On
+					</td>
+					<td>
+						0
+					</td>
+					<td>
+						2020-03-25 16:32:44.329
+					</td>
+					<td>
+						1
+					</td>
+					<td>
+						2020-03-25 16:32:44.329
+					</td>
+					<td>
+						2020-03-25 16:32:44.329
+					</td>
+					<td>
+						1 / 0
+					</td>
+				</tr>
+				<tr class="alternate" style="color:#000">
+					<td>
+						18
+					</td>
+					<td>
+						Device816
+					</td>
+					<td>
+						23509
+					</td>
+					<td>
+						126147
+					</td>
+					<td>
+						106.61.136.94:24711
+					</td>
+					<td>
+						On
+					</td>
+					<td>
+						0
+					</td>
+					<td>
+						2020-03-25 16:32:44.331
+					</td>
+					<td>
+						1
+					</td>
+					<td>
+						2020-03-25 16:32:44.331
+					</td>
+					<td>
+						2020-03-25 16:32:44.331
+					</td>
+					<td>
+						1 / 0
+					</td>
+				</tr>
+				<tr class="" style="color:#000">
+					<td>
+						19
+					</td>
+					<td>
+						Device816
+					</td>
+					<td>
+						23509
+					</td>
+					<td>
+						608105
+					</td>
+					<td>
+						39.144.17.203:54009
+					</td>
+					<td>
+						On
+					</td>
+					<td>
+						0
+					</td>
+					<td>
+						2020-03-25 16:32:44.430
+					</td>
+					<td>
+						1
+					</td>
+					<td>
+						2020-03-25 16:32:44.430
+					</td>
+					<td>
+						2020-03-25 16:32:44.430
+					</td>
+					<td>
+						1 / 0
+					</td>
+				</tr>
+				<tr class="alternate" style="color:#000">
+					<td>
+						20
+					</td>
+					<td>
+						Device816
+					</td>
+					<td>
+						23509
+					</td>
+					<td>
+						613816
+					</td>
+					<td>
+						223.104.254.64:51622
+					</td>
+					<td>
+						On
+					</td>
+					<td>
+						0
+					</td>
+					<td>
+						2020-03-25 16:32:44.860
+					</td>
+					<td>
+						1
+					</td>
+					<td>
+						2020-03-25 16:32:44.860
+					</td>
+					<td>
+						2020-03-25 16:32:44.860
+					</td>
+					<td>
+						1 / 0
+					</td>
+				</tr>
+				<tr class="" style="color:#000">
+					<td>
+						21
+					</td>
+					<td>
+						Device816
+					</td>
+					<td>
+						23509
+					</td>
+					<td>
+						126261
+					</td>
+					<td>
+						106.57.101.80:55716
+					</td>
+					<td>
+						On
+					</td>
+					<td>
+						0
+					</td>
+					<td>
+						2020-03-25 16:32:44.976
+					</td>
+					<td>
+						1
+					</td>
+					<td>
+						2020-03-25 16:32:44.976
+					</td>
+					<td>
+						2020-03-25 16:32:44.976
+					</td>
+					<td>
+						1 / 0
+					</td>
+				</tr>
+				<tr class="alternate" style="color:#000">
+					<td>
+						22
+					</td>
+					<td>
+						Device816
+					</td>
+					<td>
+						23509
+					</td>
+					<td>
+						126238
+					</td>
+					<td>
+						106.57.108.50:58724
+					</td>
+					<td>
+						On
+					</td>
+					<td>
+						0
+					</td>
+					<td>
+						2020-03-25 16:32:45.828
+					</td>
+					<td>
+						1
+					</td>
+					<td>
+						2020-03-25 16:32:45.828
+					</td>
+					<td>
+						2020-03-25 16:32:45.828
+					</td>
+					<td>
+						1 / 0
+					</td>
+				</tr>
+				<tr class="" style="color:#000">
+					<td>
+						23
+					</td>
+					<td>
+						Device816
+					</td>
+					<td>
+						23509
+					</td>
+					<td>
+						108889
+					</td>
+					<td>
+						106.57.121.251:24236
+					</td>
+					<td>
+						On
+					</td>
+					<td>
+						0
+					</td>
+					<td>
+						2020-03-25 16:32:45.829
+					</td>
+					<td>
+						1
+					</td>
+					<td>
+						2020-03-25 16:32:45.829
+					</td>
+					<td>
+						2020-03-25 16:32:45.829
+					</td>
+					<td>
+						1 / 0
+					</td>
+				</tr>
+				<tr class="alternate" style="color:#000">
+					<td>
+						24
+					</td>
+					<td>
+						Device816
+					</td>
+					<td>
+						23509
+					</td>
+					<td>
+						126113
+					</td>
+					<td>
+						106.61.94.99:10660
+					</td>
+					<td>
+						On
+					</td>
+					<td>
+						0
+					</td>
+					<td>
+						2020-03-25 16:32:45.830
+					</td>
+					<td>
+						1
+					</td>
+					<td>
+						2020-03-25 16:32:45.830
+					</td>
+					<td>
+						2020-03-25 16:32:45.830
+					</td>
+					<td>
+						1 / 0
+					</td>
+				</tr>
+				<tr class="" style="color:#000">
+					<td>
+						25
+					</td>
+					<td>
+						Device816
+					</td>
+					<td>
+						23509
+					</td>
+					<td>
+						108160
+					</td>
+					<td>
+						106.57.120.156:37379
+					</td>
+					<td>
+						On
+					</td>
+					<td>
+						0
+					</td>
+					<td>
+						2020-03-25 16:32:45.832
+					</td>
+					<td>
+						1
+					</td>
+					<td>
+						2020-03-25 16:32:45.832
+					</td>
+					<td>
+						2020-03-25 16:32:45.832
+					</td>
+					<td>
+						1 / 0
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</body>
+</html><script type="text/javascript">
+
+function frozen() {
+	var table = 'tbList';
+	$.frozen(table, {
+		//fixHead: false,
+		rows: 1,
+		cols: 2,
+		right: 0,
+		colStartRowIndex: 1,
+		foot: 1,
+		/*
+		right: 2,
+		foot: 1,
+		*/
+		//debounce: false,
+		border: 'solid 1px #f00',
+		complete: function(f) {
+			console.log('f:', f);
+		}
+	});
+}
+
+window.onload = function() {
+	frozen();
+};
+
+</script>
