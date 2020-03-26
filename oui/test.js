@@ -514,3 +514,20 @@ console.log(/[\d]/.test('abcasdfas'))
 var n = 1, v = parseFloat('1.0', 10);
 
 console.log(n===v);
+
+function build(url, key, val, append) {
+    if ($.isString(key, true) && key.indexOf(',') > -1) {
+        key = key.split(',');
+    }
+    var add = $.isBoolean(append, true), keys = $.isArray(key) ? key : [key], pattern = [];
+    for (var i in keys) {
+        pattern.push('&' + keys[i] + '=[\\d\\w\\-]{0,}');
+    }
+    var reg = new RegExp('(' + pattern.join('|') + ')', 'i'), con = '&' + keys[0] + '=' + val;
+    return reg.test(url) ? url.replace(reg, add ? con : '') : (!add ? url : url + con);
+}
+
+var url = 'http://122.227.179.90:40000/device?action=getdeviceinfo&html=1&page=1';
+console.log('url: ', url);
+url = build(url, 'page,pageIndex', 2);
+console.log('url: ', url);

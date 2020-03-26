@@ -193,6 +193,7 @@
     .table .thead {
         font-weight: bold;
         color: #666;
+		line-height: 35px;
     }
 
     .table tr.alternate {
@@ -203,15 +204,15 @@
     .table td {
         border: solid 1px #ddd;
         padding: 5px;
-        min-width: 60px;
+        min-width: 50px;
         text-align: center;
+		line-height: 20px;
     }
 
         .table td .con {
             padding: 0 5px;
             text-align: left;
             word-break: break-all;
-            line-height: 18px;
         }
 
             .table td .con i {
@@ -233,6 +234,7 @@ function setValue(id, val) {
         obj.value = val;
     }
 }
+
 function getValue(id, toNum) {
     var obj = document.getElementById(id);
     if (obj != null) {
@@ -244,10 +246,12 @@ function getValue(id, toNum) {
     }
     return '';
 }
+
 function getChecked(id) {
     var obj = document.getElementById(id);
     return obj.checked ? 1 : 0;
 }
+
 function getCheckedValue(name) {
     var vals = [];
     var arr = document.getElementsByName(name);
@@ -258,6 +262,7 @@ function getCheckedValue(name) {
     }
     return vals;
 }
+
 function append(url, pattern, con, append) {
     if (typeof append === 'undefined') {
         append = true;
@@ -270,81 +275,93 @@ function append(url, pattern, con, append) {
     }
     return url + con;
 }
+
+function build(url, key, val, append) {
+	console.log('build: ', key, val, append);
+    if ($.isString(key, true) && key.indexOf(',') > -1) {
+        key = key.split(',');
+    }
+    var add = $.isBoolean(append, true), keys = $.isArray(key) ? key : [key], pattern = [];
+    for (var i in keys) {
+        pattern.push('&' + keys[i] + '=[\\d\\w\\-]{0,}');
+    }
+    var reg = new RegExp('(' + pattern.join('|') + ')', 'i'), con = '&' + keys[0] + '=' + val;
+    return reg.test(url) ? url.replace(reg, add ? con : '') : (!add ? url : url + con);
+}
+
 function getInfo(page) {
     var url = location.href;
     if (url.indexOf('?') < 0) {
         url += '?';
     }
-
-    var size = getValue('ddlPageSize', true);
-    url = append(url, /(&size=[\d\w\-]{0,})/i, '&size=' + size, size > 0);
-    url = append(url, /(&page=[\d\w\-]{0,}|&pageIndex=[\d\w\-]{0,})/i, '&page=' + page, size > 0);
-
-    var orderby = getValue('ddlOrderby', false);
-    url = append(url, /(&orderby=[\d\w\-]{0,})/i, '&orderby=' + orderby, orderby !== '');
-    var asc = getValue('ddlAsc', false);
-    url = append(url, /(&asc=[\d\w\-]{0,})/i, '&asc=' + asc, orderby !== '' && asc !== '');
-
-    var arr = getCheckedValue('chbStatus'),
-        status = arr.length <= 0 ? -1 : arr.length >= 2 ? 2 : parseInt(arr[0], 10);
-    url = append(url, /(&status=[\d\w\-]{0,})/i, '&status=' + status, status >= 0);
-
-    var arr1 = getCheckedValue('chbReport'),
-        report = arr1.length <= 0 ? -1 : arr1.length >= 2 ? 2 : parseInt(arr1[0], 10);
-    url = append(url, /(&report=[\d\w\-]{0,})/i, '&report=' + report, report >= 0);
-
-    var arr2 = getCheckedValue('chbGps'),
-        gps = arr2.length <= 0 ? -1 : arr2.length >= 2 ? 2 : parseInt(arr2[0], 10);
-    url = append(url, /(&gps=[\d\w\-]{0,})/i, '&gps=' + gps, gps >= 0);
-
-    var log = getChecked('chbLog');
-    url = append(url, /(&log=[\d\w\-]{0,})/i, '&log=' + log, log > 0);
-
-    var point = getChecked('chbPoint');
-    url = append(url, /(&point=[\d\w\-]{0,})/i, '&point=' + point, point > 0);
-
-    var time = getChecked('chbStatusTime');
-    url = append(url, /(&time=[\d\w\-]{0,})/i, '&time=' + time, time < 1);
-
-    var heartbeat = getChecked('chbHeartbeat');
-    url = append(url, /(&heartbeat=[\d\w\-]{0,})/i, '&heartbeat=' + heartbeat, heartbeat < 1);
-
-    var keepalive = getChecked('chbKeepalive');
-    url = append(url, /(&keepalive=[\d\w\-]{0,})/i, '&keepalive=' + keepalive, keepalive < 1);
-
-    var version = getChecked('chbVersion');
-    url = append(url, /(&version=[\d\w\-]{0,})/i, '&version=' + version, version > 0);
-
-    var serial = getChecked('chbSerial');
-    url = append(url, /(&serial=[\d\w\-]{0,})/i, '&serial=' + serial, serial > 0);
-
-    var data = getChecked('chbData');
-    url = append(url, /(&data=[\d\w\-]{0,})/i, '&data=' + data, data > 0);
-
-    var attr = getChecked('chbAttr');
-    url = append(url, /(&attr=[\d\w\-]{0,})/i, '&attr=' + attr, attr > 0);
-
-    var keywords = getValue('txtKeywords', false);
-    url = append(url, /(&keywords=[\d\w\-]{0,})/i, '&keywords=' + keywords, keywords !== '');
-    var field = getValue('ddlField', false);
-    url = append(url, /(&field=[\d\w\-]{0,})/i, '&field=' + field, keywords !== '' && field !== '');
+    
+    var size = getValue('ddlPageSize', true),
+        orderby = getValue('ddlOrderby', false),
+        asc = getValue('ddlAsc', false),
+        arr = getCheckedValue('chbStatus'),
+        status = arr.length <= 0 ? -1 : arr.length >= 2 ? 2 : parseInt(arr[0], 10),
+        arr1 = getCheckedValue('chbReport'),
+        report = arr1.length <= 0 ? -1 : arr1.length >= 2 ? 2 : parseInt(arr1[0], 10),
+        arr2 = getCheckedValue('chbGps'),
+        gps = arr2.length <= 0 ? -1 : arr2.length >= 2 ? 2 : parseInt(arr2[0], 10),
+        log = getChecked('chbLog'),
+        point = getChecked('chbPoint'),
+        time = getChecked('chbStatusTime'),
+        heartbeat = getChecked('chbHeartbeat'),
+        keepalive = getChecked('chbKeepalive'),
+        version = getChecked('chbVersion'),
+        serial = getChecked('chbSerial'),
+        data = getChecked('chbData'),
+        attr = getChecked('chbAttr'),
+        keywords = getValue('txtKeywords', false),
+        field = getValue('ddlField', false);
 
     var type = [];
-    var arr = document.getElementsByName('chbType');
-    for (var i = 0; i < arr.length; i++) {
-        if (arr[i].checked) {
-            type.push(arr[i].value);
+    var elems = document.getElementsByName('chbType');
+    for (var i = 0; i < elems.length; i++) {
+        if (elems[i].checked) {
+            type.push(elems[i].value);
         }
     }
     type = type.join(',');
-    url = append(url, /(&type=[\d\w\-\,]{0,})/i, '&type=' + type, type !== '');
 
-    location.href = url;
+    var params = [
+        ['size', size, size > 0],
+        ['page,pageInex', page, size > 0],
+        ['orderby', orderby, orderby !== ''],
+        ['asc', asc, asc !== ''],
+        ['status', status, status >= 0],
+        ['report', report, report >= 0],
+        ['gps', gps, gps >= 0],
+        ['log', log, log > 0],
+        ['point', point, point > 0],
+        ['time', time, time < 1],
+        ['heartbeat', heartbeat, heartbeat < 1],
+        ['keepalive', keepalive, keepalive < 1],
+        ['version', version, version > 0],
+        ['serial', serial, serial > 0],
+        ['data', data, data > 0],
+        ['attr', attr, attr > 0],
+        ['keywords', keywords, keywords !== ''],
+        ['field', field, keywords !== '' && field !== ''],
+        ['type', type, type !== '']
+    ];
+
+    for (var i = 0; i < params.length; i++) {
+        var dr = params[i];
+        url = build(url, dr[0], dr[1], dr[2]);
+    }
+
+    console.log('url: ', url);
+
+    //location.href = url;
 }
+
 function noSearch() {
     setValue('txtKeywords', '');
     getInfo(0);
 }
+
 function goHome() {
     var url = location.href.split('?')[0];
     location.href = url + '?action=getdeviceinfo&html=1';
@@ -357,20 +374,20 @@ function setSize() {
     $('#divList').height(h);
 }
 
-window.onload = function() {
-
+window.onload = function () {
     setSize();
 
     $.frozen('tbList', {
         rows: 1,
-       cols: 4,
+        cols: 4,
         right: 0,
         rowIndex: 1
     });
+
+    getInfo(2);
 };
 
-window.onresize = function() {
-
+window.onresize = function () {
     setSize();
-	};
+};
 </script>

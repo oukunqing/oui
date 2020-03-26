@@ -236,8 +236,8 @@
                     }
                 }
                 if(elemObj.rowSpan > 1 || (dir && dir !== 'head')) {
-                    var hs = $.getStyleSize(elemObj);
-                    elem.style.height = Factory.getMaxValue(hs.height, elemObj.clientHeight) + 'px';
+                    var hs = $.getStyleSize(elemObj), h = hs.height || elemObj.clientHeight;
+                    elem.style.height = h + 'px';
                 }
             }
 
@@ -339,7 +339,6 @@
                     if(opt.colStartRowIndex > 0 && (dir.startsWith('head-') || dir.startsWith('foot-'))) {
                         sizeRow = tbSource.rows[opt.colStartRowIndex];
                     }
-
                     for(var i = offset; i < rows; i++) {
                         var rowOld = isFoot ? tbSource.rows[rowsLen - i - 1] : tbSource.rows[i];
                         if(!rowOld) {
