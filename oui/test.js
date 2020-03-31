@@ -533,5 +533,6 @@ url = build(url, 'page,pageIndex', 2);
 console.log('url: ', url);
 
 
-var txt = 'hello';
-console.log(txt, global.txt);
+var obj = {txt: 'hello'};
+global.txt = 'world';
+console.log('{txt}'.format(global));

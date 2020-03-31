@@ -1717,7 +1717,7 @@
                     o = o[ks[i]], v = o;
                 }
                 if ($.isUndefined(o)) {
-                    v = !$.isUndefined(dv) ? dv : throwError(err, s, vals);
+                    v = !$.isUndefined(dv) ? dv : throwError(err, str, vals);
                 }
             }
         } else {
@@ -1767,7 +1767,12 @@
             if (null === matchs) {
                 return s.toString() || s;
             }
-            var len = vals.length, mc = matchs.length, isObject = $.isObject(vals[0]), obj = isObject ? vals[0] : {};
+            //var len = vals.length, mc = matchs.length, isObject = $.isObject(vals[0]), obj = isObject ? vals[0] : {};
+            var len = vals.length,
+                mc = matchs.length,
+                //若没有传递参数，则取window对象作为参数(对象)
+                obj = len === 0 ? window : $.isObject(vals[0]) ? vals[0] : {},
+                isObject = $.isObject(obj);
 
             for (var i = 0; i < mc; i++) {
                 var m = matchs[i], mv = m.replace(pattern, ''), p = s.indexOf(m), idx = parseInt(mv, 10);
