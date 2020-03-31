@@ -531,3 +531,7 @@ var url = 'http://122.227.179.90:40000/device?action=getdeviceinfo&html=1&page=1
 console.log('url: ', url);
 url = build(url, 'page,pageIndex', 2);
 console.log('url: ', url);
+
+
+var txt = 'hello';
+console.log(txt, global.txt);
