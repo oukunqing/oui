@@ -100,13 +100,15 @@
             min: 'min',
             close: 'close',
             hide: 'hide',
-            tooltip: 'tooltip'
+            tooltip: 'tooltip',
+            reload: 'reload'
         },
         DialogStatusText: {
             min: { english: 'Minimize', chinese: '\u6700\u5c0f\u5316' },                  //最小化
             max: { english: 'Maximize', chinese: '\u6700\u5927\u5316' },                  //最大化
             close: { english: 'Close', chinese: '\u5173\u95ed' },                         //关闭
-            restore: { english: 'Restore', chinese: '\u8fd8\u539f' }                      //还原
+            restore: { english: 'Restore', chinese: '\u8fd8\u539f' },                     //还原
+            reload: { english: 'Reload', chinese: '\u91cd\u65b0\u52a0\u8f7d' }            //重新加载
         },
         CloseType: {
             close: 'Close',
@@ -1277,10 +1279,16 @@
                 return this;
             },
             buildClose: function (_, pNode, isTop) {
-                var p = this.getParam(_), opt = p.options, ctls = p.controls, html = [];
+                var util = this, p = util.getParam(_), opt = p.options, ctls = p.controls, html = [];
                 if (!ctls.dialog) {
-                    return this;
+                    return util;
                 }
+
+                if (util.isIframe(opt)) {
+                    var reload = Common.getStatusText('reload', opt.lang);
+                    html.push('<a class="dialog-btn btn-reload" code="reload" key="reload" title="' + reload + '"></a>');
+                }
+
                 if (isTop) {
                     var isMin = opt.minAble && opt.showMin,
                         isMax = opt.maxAble && opt.showMax,
@@ -1437,6 +1445,14 @@
                     url.setUrlParam('dialog_id', _.id).setUrlParam('dialog_param', param),
                     opt.iframeScroll || opt.iframeScrolling ? 'auto' : 'no',
                     opt.loading || Common.getDialogText('Loading', opt.lang));
+            },
+            reload: function(_) {
+                var util = this, p = util.getParam(_), opt = p.options,
+                    iframe = $I(_.getDialogId() + '-iframe');
+                if (util.isIframe(opt) && iframe !== null && iframe.src) {
+                    iframe.src = iframe.src.setUrlParam();
+                }
+                return util;
             },
             showIframeShade: function (ctls, isShow) {
                 if (ctls.iframeShade) {
@@ -1675,8 +1691,8 @@
                         continue;
                     }
                     $.addListener(obj, evName || 'click', function () {
-                        util.setAction(_, this);
                         $.cancelBubble();
+                        util.setAction(_, this);
                     });
 
                     $.addListener(obj, 'mousedown', function () {
@@ -1789,7 +1805,9 @@
                     key = (obj.getAttribute('key') || '').toLowerCase();
                     code = (obj.getAttribute('code') || '').toLowerCase();
                 }
-                if (key === Config.DialogStatus.min) {
+                if(key === Config.DialogStatus.reload) {
+                    _.reload();
+                } else if (key === Config.DialogStatus.min) {
                     _.min();
                 } else if (key === Config.DialogStatus.max) {
                     _.max();
@@ -3981,6 +3999,13 @@
                 type = Config.DialogStatus.normal;
             }
             return Util.setSize(_, { type: type }), _;
+        },
+        reload: function() {
+            var _ = this, p = Util.getParam(_);
+            if (p.none || _.isClosed() || _.isHide() || _.isMin()) {
+                return _;
+            }
+            return Util.reload(_), _;
         },
         restore: function () {
             return Util.setSize(this, { type: Config.DialogStatus.normal }), this;

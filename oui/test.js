@@ -536,3 +536,7 @@ console.log('url: ', url);
 var obj = {txt: 'hello'};
 global.txt = 'world';
 console.log('{txt}'.format(global));
+
+
+
+console.log('重新加载'.toUnicode());

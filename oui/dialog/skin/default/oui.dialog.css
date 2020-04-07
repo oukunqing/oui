@@ -204,6 +204,10 @@
     background:transparent url('imgs/icon.png') no-repeat -80px 0;
 }
 
+.oui-dialog .dialog-head .btn-reload {
+    background:transparent url('imgs/icon.png') no-repeat -320px 0;
+}
+
 .oui-dialog .dialog-body .btn-panel {
     margin: 2px 2px 0 0;
 }
@@ -221,6 +225,7 @@
 
     background:transparent url('imgs/icon.png') no-repeat -80px 0;
 }
+
 
 .oui-dialog .dialog-body .close0 {
     border: none 0;

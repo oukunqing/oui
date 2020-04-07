@@ -474,13 +474,6 @@
         getTime = function() {
             return ('' + new Date().getTime()).substr(-9);
         },
-        setQueryString = function (url, data, value) {
-            if (!isString(url)) {
-                return url;
-            }
-            var param = buildParam(data, value, true) || buildParam('up_ts_0', getTime());
-            return url + (url.indexOf('?') > -1 ? '&' : '?') + param;
-        },
         getQueryString = function (url, name) {
             var str = isString(url) ? url : location.href, params = str.substr(str.indexOf('?')), obj = {};
             if (params.indexOf('?') >= 0) {
@@ -492,7 +485,29 @@
                     }
                 }
             }
-            return !isNullOrUndefined(name) ? obj[name] : obj;
+            if(!isNullOrUndefined(name)) {
+                if($.isArray(name)) {
+                    for(var i = 0; i < name.length; i++) {
+                        var v = obj[name[i]];
+                        if(!$.isUndefined(v)) {
+                            return v;
+                        }
+                    }
+                }
+                return obj[name] || '';
+            }
+            return obj;
+        },
+        setQueryString = function (url, data, value) {
+            if (!isString(url)) {
+                return url;
+            }
+            var pkey = 'up_ts_0', pv = getQueryString(url, pkey);
+            if(pv) {
+                url = url.replace(pkey + '=' + pv, '');
+            }
+            var param = buildParam(data, value, true) || buildParam(pkey, getTime(), false);
+            return url + (url.indexOf('?') > -1 ? '&' : '?') + param;
         },
         getUrlHost = function (url) {
             var pos = url.indexOf('//'),
@@ -4139,7 +4154,7 @@
         if(window.location !== top.window.location) {
             try{
                 var func = parent.$.dialog[funcName],
-                    id = $.getQueryString(location.href, 'dialog_id');
+                    id = $.getQueryString(location.href, ['dialog_id', 'dialogid']);
                 if($.isFunction(func) && !$.isUndefined(id)) {
                     return func(id, param), this;
                 }
