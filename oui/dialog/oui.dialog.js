@@ -1300,7 +1300,7 @@
                             elem.className = 'dialog-btn btn-reload left-reload';
                             elem.style.margin = '2px 0 0 2px';
                             $.setAttribute(elem, { title: reload, code: 'reload', key: 'reload'});
-                            pNode.insertBefore(elem, ctls.title);
+                            pNode.insertBefore((ctls.reload = elem), ctls.title);
                             util.setButtonEvent(_, [elem], 'click', true);
                         });
                     }
@@ -2107,9 +2107,10 @@
                 }
                 var topWidth = width || ctls.head.clientWidth,
                     logoWidth = ctls.logo ? ctls.logo.offsetWidth : 0,
+                    reloadWidth = ctls.reload ? ctls.reload.offsetWidth : 0,
                     btnWidth = ctls.btnPanel ? ctls.btnPanel.offsetWidth : 0,
                     timerWidth = ctls.timer ? ctls.timer.offsetWidth : 0,
-                    titleWidth = topWidth - logoWidth - timerWidth - btnWidth - 10;
+                    titleWidth = topWidth - logoWidth - reloadWidth - timerWidth - btnWidth - 10;
 
                 if (ctls.title) {
                     ctls.title.style.maxWidth = (titleWidth) + 'px';
