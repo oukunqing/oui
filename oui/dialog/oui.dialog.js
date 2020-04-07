@@ -22,6 +22,14 @@
             }
             return Config.Skin;
         },
+        //是否显示logo小图标
+        ShowLogo: function() {
+            return Config.FilePath.getQueryString('logo') !== '0';
+        },
+        //重载图标的位置 left 或 right
+        ReloadPosition: function() {
+            return Config.FilePath.getQueryString(['reloadPosition','reloadPos']) || 'right';
+        },
         Index: 1,
         IdIndex: 1,
         Identifier: 'oui-dialog-identifier-',
@@ -1226,7 +1234,7 @@
                     });
                 }
 
-                if (opt.showLogo) {
+                if (opt.showLogo && Config.ShowLogo()) {
                     var logo = $.createElement('div');
                     logo.className = 'dialog-logo';
                     elem.appendChild((ctls.logo = logo));
@@ -1283,10 +1291,19 @@
                 if (!ctls.dialog) {
                     return util;
                 }
-
-                if (util.isIframe(opt)) {
+                if (opt.reloadable && util.isIframe(opt)) {
                     var reload = Common.getStatusText('reload', opt.lang);
-                    html.push('<a class="dialog-btn btn-reload" code="reload" key="reload" title="' + reload + '"></a>');
+                    if(opt.reloadPosition === 'right') {
+                        html.push('<a class="dialog-btn btn-reload" code="reload" key="reload" title="' + reload + '"></a>');
+                    } else {
+                        $.createElement('a', function (elem) {
+                            elem.className = 'dialog-btn btn-reload left-reload';
+                            elem.style.margin = '2px 0 0 2px';
+                            $.setAttribute(elem, { title: reload, code: 'reload', key: 'reload'});
+                            pNode.insertBefore(elem, ctls.title);
+                            util.setButtonEvent(_, [elem], 'click', true);
+                        });
+                    }
                 }
 
                 if (isTop) {
@@ -1449,7 +1466,7 @@
             reload: function(_) {
                 var util = this, p = util.getParam(_), opt = p.options,
                     iframe = $I(_.getDialogId() + '-iframe');
-                if (util.isIframe(opt) && iframe !== null && iframe.src) {
+                if (opt.reloadable && util.isIframe(opt) && iframe !== null && iframe.src) {
                     iframe.src = iframe.src.setUrlParam();
                 }
                 return util;
@@ -1690,18 +1707,23 @@
                     if (obj.tagName !== 'A') {
                         continue;
                     }
-                    $.addListener(obj, evName || 'click', function () {
-                        $.cancelBubble();
+                    $.addListener(obj, evName || 'click', function (e) {
+                        $.cancelBubble(e);
                         util.setAction(_, this);
                     });
 
-                    $.addListener(obj, 'mousedown', function () {
-                        $.cancelBubble();
+                    //设置dblclick并阻止冒泡，防止点击按钮时触发标题栏双击事件
+                    $.addListener(obj, 'dblclick', function (e) {
+                        $.cancelBubble(e);
+                    });
+
+                    $.addListener(obj, 'mousedown', function (e) {
+                        $.cancelBubble(e);
                         events.btnMouseDown = true;
                     });
 
-                    $.addListener(obj, 'mouseup', function () {
-                        $.cancelBubble();
+                    $.addListener(obj, 'mouseup', function (e) {
+                        $.cancelBubble(e);
                         events.btnMouseDown = false;
                     });
 
@@ -1793,7 +1815,7 @@
                 return false;
             },
             setAction: function (_, obj, param) {
-                var util = this, p = util.getParam(_), code = '', key = '', click = false;
+                var util = this, p = util.getParam(_), opt = p.options, code = '', key = '', click = false;
                 if (typeof obj === 'string') {
                     key = obj.toLowerCase();
                     obj = null;
@@ -1806,7 +1828,19 @@
                     code = (obj.getAttribute('code') || '').toLowerCase();
                 }
                 if(key === Config.DialogStatus.reload) {
-                    _.reload();
+                    var curTime = new Date().getTime(), lastTime = _.lastReloadTime || 0;
+                    //限制连击间隔，防止连击狂刷新
+                    if(!lastTime || curTime - lastTime > opt.reloadInterval) {
+                        _.lastReloadTime = curTime;
+                        _.reload();
+                    } else {
+                        //防抖
+                        _.lastReloadTime = curTime;
+                        window.clearTimeout(_.lastReloadTimer);
+                        _.lastReloadTimer = window.setTimeout(function() {
+                            _.reload();
+                        }, 320);
+                    }
                 } else if (key === Config.DialogStatus.min) {
                     _.min();
                 } else if (key === Config.DialogStatus.max) {
@@ -1816,8 +1850,8 @@
                         obj: obj, code: code, key: key, param: param
                     };
                     //如果采用了延迟关闭，并且启用防抖功能，则延迟调用关闭
-                    if (click && p.options.delayClose && p.options.debounce && p.options.debounceDelay > 0) {
-                        util.delayClose(_, p, (code || key), p.options.debounceDelay, cfg);
+                    if (click && p.options.delayClose && opt.debounce && opt.debounceDelay > 0) {
+                        util.delayClose(_, p, (code || key), opt.debounceDelay, cfg);
                     } else {
                         util.setActionParam(p, cfg);
                         _.close();
@@ -3556,6 +3590,9 @@
                 title: null,            //标题
                 content: null,          //文字内容
                 url: null,              //加载的URL
+                reloadable: true,       //是否可以重新加载
+                reloadInterval: 3500,   //重新加载的时间间隔，单位：毫秒
+                reloadPosition: Config.ReloadPosition(),//重新按钮位置 left,right, 默认：right
                 element: null,          //Element 要加载内容的html控件
                 icon: '',               //Icon图标  info, warning, question, error, success, loading
                 loading: '',            //loading提示文字
