@@ -423,10 +423,15 @@
                     iframeCount++;
                 }
             }
+            var count = 0;
+            for(var k in cache.items) {
+                count++;
+            }
+
             var data = {
-                count: cache.ids.length,
+                count: count,
                 close: curItem.closeAble,
-                other: cache.ids.length - 1,
+                other: count - 1,
                 left: this.getSiblingCount(curItem.tab, 'previousSibling'),
                 right: this.getSiblingCount(curItem.tab, 'nextSibling'),
                 iframe: curItem.iframe,
@@ -735,7 +740,7 @@
             }
             if($.isBoolean(itemId, false)) {
                 for(var k in cache.items) {
-                    if($.isUndefined(exceptItemId) || exceptItemId !== k) {
+                    if($.isUndefined(exceptItemId) || exceptItemId !== parseInt(k, 10)) {
                         this.setClosedItem(cache, k, cache.items[k].opt);
                         this.delCache(cache, k);
                     }
