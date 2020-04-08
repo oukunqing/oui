@@ -126,7 +126,7 @@
                 id = table;
                 table = $.toElement(table);
             }
-            if(!$.isElement(table) && table.tagName !== 'TABLE') {
+            if(!$.isElement(table) || table.tagName !== 'TABLE') {
                 return null;
             }
 
