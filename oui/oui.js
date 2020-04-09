@@ -1011,8 +1011,8 @@
             var arr = $.isArray(str) ? str : str.split(''), len = arr.length, res = [];
             for (var i = 0; i < len; i++) {
                 var code = arr[i].charCodeAt();
-                var code16 = code.toString(16).padStart(4, '0');
-                res.push((noPrefix ? '' : '\\u') + code16);
+                var hex = code.toString(16).padStart(4, '0');
+                res.push((noPrefix ? '' : '\\u') + hex);
             }
             return returnArray ? res : res.join('');
         },
@@ -1275,13 +1275,19 @@
             }
             return list;
         },
-        toUnicode: function () {
+        toUnicode: function (returnArray, noPrefix) {
+            /*
             var s = this, c = s.length, u = '';
             for (var i = 0; i < c; i++) {
                 var hex = s.charCodeAt(i).toString(16);
                 u += '\\u' + hex.padStart(4);
             }
             return u;
+            */
+            return $.chineseToUnicode(this, returnArray, noPrefix);
+        },
+        parseUnicode: function(returnArray) {
+            return $.unicodeToChinese(this, returnArray);
         },
         toJson: function() {
             return $.toJson(this);

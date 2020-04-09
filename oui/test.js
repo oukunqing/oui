@@ -540,3 +540,8 @@ console.log('{txt}'.format(global));
 
 
 console.log('重新加载'.toUnicode());
+console.log('重新加载'.chineseToUnicode());
+
+
+
+console.log('\\u91cd\\u65b0\\u52a0\\u8f7d'.parseUnicode())
