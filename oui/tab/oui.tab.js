@@ -24,6 +24,9 @@
             }
             return Config.Skin;
         },
+        GetLang: function() {
+            return Config.FilePath.getQueryString(['lang']) || 'chinese';
+        },
         LongPressTime: 512,      //长按最小时长，单位：毫秒
         LongPressInterval: 40,   //长按滚动间隔，单位：毫秒
         LongPressMinInterval: 10,   //长按滚动间隔，单位：毫秒
@@ -740,7 +743,7 @@
             }
             if($.isBoolean(itemId, false)) {
                 for(var k in cache.items) {
-                    if($.isUndefined(exceptItemId) || exceptItemId !== parseInt(k, 10)) {
+                    if($.isUndefined(exceptItemId) || exceptItemId.toString() !== k.toString()) {
                         this.setClosedItem(cache, k, cache.items[k].opt);
                         this.delCache(cache, k);
                     }
@@ -882,7 +885,8 @@
         var opt = $.extend({
             id: 'oui-tabs-' + new Date().getMilliseconds(),
             skin: Config.DefaultSkin,        //样式: default, blue
-            lang: 'chinese',        //chinese, english
+            //lang: 'chinese',        //chinese, english
+            lang: Config.GetLang(),         //语言 Chinese,English
             eventName: 'click',     //click, mouseover
             dblclickScroll: false,
             showContextMenu: true,

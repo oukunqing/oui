@@ -230,7 +230,6 @@
 /* 右键菜单 */
 .oui-tabs-context-menu {
     position:absolute;
-    border: solid 1px #bababa;
     box-sizing: border-box;
     overflow: hidden;
     display: block;
@@ -240,7 +239,9 @@
     margin: 0;
     padding: 3px 0;
     /*box-shadow: 5px 5px 2px 0 rgba(0,0,0,.32);*/
-    box-shadow: 4px 4px 4px -4px #666;
+    box-shadow: 4px 4px 4px -4px #ccc;
+    border: solid 1px #dadce0;
+	border-radius: 4px;
 }
 
 .oui-tabs-context-menu .cmenu-item {

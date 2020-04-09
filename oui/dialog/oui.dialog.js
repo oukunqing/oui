@@ -30,6 +30,9 @@
         ReloadPosition: function() {
             return Config.FilePath.getQueryString(['reloadPosition','reloadPos']) || 'right';
         },
+        GetLang: function() {
+            return Config.FilePath.getQueryString(['lang']) || 'chinese';
+        },
         Index: 1,
         IdIndex: 1,
         Identifier: 'oui-dialog-identifier-',
@@ -3570,7 +3573,8 @@
             opt = $.extend({
                 id: null,                       //id
                 skin: Config.DefaultSkin,       //样式: default, blue
-                lang: Config.Lang.Chinese,      //语言 Chinese,English
+                //lang: Config.Lang.Chinese,      //语言 Chinese,English
+                lang: Config.GetLang(),         //语言 Chinese,English
                 type: Config.DialogType.alert,  //alert,confirm,message,tooltip,window,iframe
                 status: Config.DialogStatus.normal,     //初始状态  normal, min, max 三种状态
                 zindex: Common.buildZindex(),   //css z-index值，控制显示层级
