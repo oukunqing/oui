@@ -3184,7 +3184,7 @@
                 }
                 var parent = obj.parentNode;
                 if (parent !== null) {
-                    return parent.tagName === tagName ? parent : findParentElement(parent);
+                    return parent.tagName === tagName ? parent : findParentElement(parent, tagName);
                 }
             }
             return null;
