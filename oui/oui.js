@@ -426,39 +426,58 @@
             }
             return this;
         },
-        buildParam = function (a, v, strict) {
-            strict = isBoolean(strict, true);
-            var isObj = isObject(a);
-            if(isNullOrUndefined(a) || (!isObj && strict && isNullOrUndefined(v))) {
+        getUrlVal = function(url, key) {
+            return !url ? '' : getQueryString(url, key);
+        },
+        getUrlSymbol = function(url) {
+            if(!url) {
                 return '';
             }
-            var s = [];
+            var end = url.endsWith('?') || url.endsWith('&'),
+                symbol = end ? '' : url.indexOf('?') > -1 ? '&' : '?';
+            return symbol;
+        },
+        _buildParam = function(url, s, key, val, oldVal) {
+            if(!isNullOrUndefined(val)) {
+                var ps = key + '=' + toEncode(isObject(val) ? toJsonString(val) : val);
+                if(oldVal !== '') {
+                    url = url.replace(key + '=' + oldVal, ps);
+                } else {
+                    s.push(ps);
+                }
+            }
+            return url;
+        },
+        buildParam = function (a, v, strict, url) {
+            var isUrl = $.isString(url, true),
+                isObj = isObject(a),
+                isStrict = isBoolean(strict, true);
+
+            if(isNullOrUndefined(a) || (!isObj && isStrict && isNullOrUndefined(v))) {
+                return isUrl ? url : '';
+            }
             if (isString(a)) {
                 if (!isNullOrUndefined(v)) {
                     a = [{ key: a, value: v }];
                 } else {
-                    return a;
+                    return isUrl ? url + getUrlSymbol(url) + a : a;
                 }
             }
+            var s = [];
             if (isArray(a)) {
                 for (var i = 0, c = a.length; i < c; i++) {
-                    var key = a[i].key || a[i].name, val = a[i].value || a[i].data;
-                    if (isObject(val)) {
-                        val = toJsonString(val);
-                    }
-                    s.push(key + '=' + toEncode(val));
+                    var key = a[i].key || a[i].name, val = a[i].value || a[i].data || a[i].val;
+                    url = _buildParam(url, s, key, val, getUrlVal(url, key));
                 }
             } else if (isObj) {
                 for (var key in a) {
-                    if(!isNullOrUndefined(a[key])) {
-                        var val = isObject(a[key]) ? toJsonString(a[key]) : a[key];
-                        s.push(key + '=' + toEncode(val));
-                    }
+                    url = _buildParam(url, s, key, a[key], getUrlVal(url, key));
                 }
             } else {
                 s.push(a);
             }
-            return s.join('&');
+            var ps = s.join('&');
+            return isUrl ? url + (ps ? getUrlSymbol(url) : '') + ps : ps;
         },
         buildAjaxData = function(action, formData, param) {
             var data = { action: action, data: formData };
@@ -472,7 +491,7 @@
             return buildParam(a, v, strict);
         },
         getTime = function() {
-            return ('' + new Date().getTime()).substr(-9);
+            return ('' + new Date().getTime());//.substr(0, 10);
         },
         getQueryString = function (url, name) {
             var str = isString(url) ? url : location.href, params = str.substr(str.indexOf('?')), obj = {};
@@ -502,12 +521,10 @@
             if (!isString(url)) {
                 return url;
             }
-            var pkey = 'up_ts_0', pv = getQueryString(url, pkey);
-            if(pv) {
-                url = url.replace(pkey + '=' + pv, '');
-            }
-            var param = buildParam(data, value, true) || buildParam(pkey, getTime(), false);
-            return url + (url.indexOf('?') > -1 ? '&' : '?') + param;
+            var pkey = 'hupts001';
+            url = buildParam(data, value, true, url);
+            url = buildParam(pkey, getTime(), false, url);
+            return url;
         },
         getUrlHost = function (url) {
             var pos = url.indexOf('//'),
@@ -3764,6 +3781,17 @@
                 
             }
             return this;
+        },
+        resetForm: function(formId) {
+            var form = $I(formId || 'form1');
+            if(null === form || form.tagName !== 'FORM') {
+                return this;
+            }
+            return form.reset(), this;
+        },
+        reload: function(key, val) {
+            var url = location.href;
+            return location.href = url.setQueryString(key, val), this;
         }
     }, '$');
 
@@ -3773,7 +3801,8 @@
         setElemValue: $.setElementValue,
         setElemVal: $.setElementValue,
         setElemAttribute: $.setElementAttribute,
-        setElemAttr: $.setElementAttribute
+        setElemAttr: $.setElementAttribute,
+        callParentFunc: $.callbackParent
     }, '$');
 }(OUI);
 

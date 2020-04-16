@@ -545,3 +545,12 @@ console.log('重新加载'.chineseToUnicode());
 
 
 console.log('\\u91cd\\u65b0\\u52a0\\u8f7d'.parseUnicode())
+
+function test(s, v) {
+    s.push(v);
+}
+
+var arr = ['',''];
+//test(arr, 'abc');
+
+console.log('arr;', arr.join('&'))

@@ -14,9 +14,17 @@
 		var status = true;
 		console.log('{name}-{obj.txt}:{val}-{status}'.format());
 
+		var url = location.href;
+		function test() {
+			//url = url.setQueryString({continueAdd: new Date().getTime()});
+			url = url.setQueryString('acc', 123);
+			console.log(url);
+			//$.reload({continueAdd: new Date().getTime()});
+		}
+
 	</script>
 </head>
 <body>
-
+	<input type="button" onclick="test();" />
 </body>
 </html>
