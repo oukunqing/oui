@@ -521,9 +521,9 @@
             if (!isString(url)) {
                 return url;
             }
-            var pkey = 'hupts001';
+            var pkey = 'hupts001', time = getTime();
             url = buildParam(data, value, true, url);
-            url = buildParam(pkey, getTime(), false, url);
+            url = buildParam(pkey, time, false, url);
             return url;
         },
         getUrlHost = function (url) {

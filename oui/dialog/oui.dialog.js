@@ -833,7 +833,7 @@
                         opt.showMin = opt.showMax = opt.maxAble = false;
                         opt.keyClose = opt.escClose = opt.clickBgClose = false;
                         opt.buttonPosition = 'right';
-                        if($.isBoolean(okButton, false)) {
+                        if($.isBoolean(okButton, false) || $.isUndefined(okButton)) {
                             opt.defaultButton = 'OK';
                         } else if($.isString(okButton, true) || $.isNumber(okButton)) {
                             opt.defaultButton = okButton;
