@@ -3417,7 +3417,7 @@
 
         $.extendNative(window, {
             $I: function (id, parent) {
-                if (id.indexOf('#') === 0) {
+                if (typeof id === 'string' && id.startsWith('#')) {
                     id = id.substr(1);
                 }
                 return (parent || doc).getElementById(id);
