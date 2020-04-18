@@ -849,6 +849,7 @@
                     case Config.DialogType.form:
                         opt.height = 'auto';
                         opt.delayClose = true;
+                        opt.form = true;
                         break;
                     case Config.DialogType.url:
                     case Config.DialogType.load:
@@ -1066,7 +1067,7 @@
                 }
                 Factory.setWindowResize();
 
-                if (!opt.showHead || ctls.iframe || Common.isPlainText(ctls.content)) {
+                if (!opt.form && (!opt.showHead || ctls.iframe || Common.isPlainText(ctls.content))) {
                     $.addListener([ctls.body, ctls.dialog], 'mousedown', function () {
                         _.topMost();
                     });
@@ -3595,6 +3596,7 @@
                 title: null,            //标题
                 content: null,          //文字内容
                 url: null,              //加载的URL
+                form: false,            //是否为Form表单，Form表单则默认允许复制和选择内容
                 reloadable: true,       //是否可以重新加载
                 reloadInterval: 3500,   //重新加载的时间间隔，单位：毫秒
                 reloadPosition: Config.ReloadPosition(),//重新按钮位置 left,right, 默认：right
