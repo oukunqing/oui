@@ -2636,6 +2636,12 @@
             return appendChild(parent, elem, isRemove);
         },
         removeElement = function(elem) {
+            if($.isString(elem, true)) {
+                elem = $.toElement(elem);
+            }            
+            if(!$.isElement(elem)) {
+                return this;
+            }
             var parent = elem.parentNode;
             return removeChild(parent, elem);
         },
