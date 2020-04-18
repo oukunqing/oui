@@ -554,3 +554,9 @@ var arr = ['',''];
 //test(arr, 'abc');
 
 console.log('arr;', arr.join('&'))
+
+var id=0;
+
+console.log('abc{0}'.format(id))
+
+console.log(typeof (new Date().getTime() - 1))

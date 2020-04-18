@@ -1341,6 +1341,12 @@
         getUrlHost: function () {
             return $.getUrlHost(this);
         },
+        getFileName: function(withoutExtension) {
+            return $.getFileName(this, withoutExtension);
+        },
+        getExtension: function() {
+            return $.getExtension(this);
+        },
         formatSimple: function (args) {
             var s = this, sep = '%s', vals = [], rst = [];
             if (arguments.length > 1) {
@@ -2462,7 +2468,7 @@
                 }
                 return defaultValue;
             }
-            return undefined;
+            return null;
         },
         setAttribute2 = function(elem, key, val) {
             if(key.toLowerCase() === 'class') {
@@ -3417,8 +3423,12 @@
 
         $.extendNative(window, {
             $I: function (id, parent) {
-                if (typeof id === 'string' && id.startsWith('#')) {
-                    id = id.substr(1);
+                if (typeof id === 'string') {
+                    if(id.startsWith('#')) {
+                        id = id.substr(1);
+                    }
+                } else if($.isElement(id)) {
+                    return id;
                 }
                 return (parent || doc).getElementById(id);
             },
