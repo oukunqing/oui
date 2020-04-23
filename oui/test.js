@@ -560,3 +560,26 @@ var id=0;
 console.log('abc{0}'.format(id))
 
 console.log(typeof (new Date().getTime() - 1))
+
+
+console.log(new Date().format('ts'))
+
+
+function distill(str) {
+    var arr = str.split('|'), list = [], tmp = [];
+    for(var i = 0; i < arr.length; i++) {
+        if(arr[i] && (tmp = arr[i].split(',')).length > 1) {
+            list.push(tmp[0]);
+        }
+    }
+    return list;
+}
+
+
+
+
+console.log(distill('|文字3,1276427|配置,2836677|区域,1273154|'));
+
+var pattern = /[\|]([^\,]+)/g;
+
+console.log(('|文字3,1276427|配置,2836677|区域,1273154|'.match(/[\|]([^\,]+)/g) || []).join(',').replace(/[\|]/g,'').split(','))

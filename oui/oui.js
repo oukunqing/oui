@@ -4161,7 +4161,9 @@
         event: function (action, func) {
             return this.each(function (i, obj) {
                 $.addEventListener(obj, action, function (e) {
-                    func(e, i, this);
+                    if($.isFunction(func)) {
+                        func(e, i, this);
+                    }
                 });
             });
         },
