@@ -505,7 +505,6 @@ console.log($.PATTERN.Date.test('2008-16-01'))
 
 console.log($.PATTERN.Telephone.test('0574-88011324'))
 
-console.log('1584363889614'.toDate().format())
 
 
 console.log(/[\d]/.test('abcasdfas'))
@@ -546,40 +545,18 @@ console.log('重新加载'.chineseToUnicode());
 
 console.log('\\u91cd\\u65b0\\u52a0\\u8f7d'.parseUnicode())
 
-function test(s, v) {
-    s.push(v);
-}
 
-var arr = ['',''];
-//test(arr, 'abc');
-
-console.log('arr;', arr.join('&'))
-
-var id=0;
-
-console.log('abc{0}'.format(id))
-
-console.log(typeof (new Date().getTime() - 1))
+console.log('1587916832189'.toDate().format())
 
 
-console.log(new Date().format('ts'))
+var pattern = /^[1-8][1-9][\d]{4}(19|20)[\d]{2}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[0-1])[\d]{3}[\dX]$/i;
 
+console.log(pattern.test('452402198906571258'))
 
-function distill(str) {
-    var arr = str.split('|'), list = [], tmp = [];
-    for(var i = 0; i < arr.length; i++) {
-        if(arr[i] && (tmp = arr[i].split(',')).length > 1) {
-            list.push(tmp[0]);
-        }
-    }
-    return list;
-}
+console.log($.base64)
+var code = $.base64.encode('12345');
+console.log(code)
+console.log($.base64.decode(code+'ab'))
+console.log(code.base64decode())
 
-
-
-
-console.log(distill('|文字3,1276427|配置,2836677|区域,1273154|'));
-
-var pattern = /[\|]([^\,]+)/g;
-
-console.log(('|文字3,1276427|配置,2836677|区域,1273154|'.match(/[\|]([^\,]+)/g) || []).join(',').replace(/[\|]/g,'').split(','))
+console.log('-a-b cd+a-h '.trim().replace(/[\-\s]/g, '+'));
