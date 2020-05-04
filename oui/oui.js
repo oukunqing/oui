@@ -904,7 +904,7 @@
                 return out;
             },
             decode: function(s) {
-                if(s.indexOf('-') > -1) {
+                if(/[\-\s]/.test(s)) {
                     s = s.trim().replace(/[\-\s]/g, '+');
                 }
                 var c1, c2, c3, c4;

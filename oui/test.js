@@ -559,4 +559,6 @@ console.log(code)
 console.log($.base64.decode(code+'ab'))
 console.log(code.base64decode())
 
-console.log('-a-b cd+a-h '.trim().replace(/[\-\s]/g, '+'));
+console.log('ab cd+ah '.trim().replace(/[\-\s]/g, '+'));
+
+console.log(/[\-\s]/g.test('ab'))
