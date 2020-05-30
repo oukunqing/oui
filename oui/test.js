@@ -546,7 +546,6 @@ console.log('重新加载'.chineseToUnicode());
 console.log('\\u91cd\\u65b0\\u52a0\\u8f7d'.parseUnicode())
 
 
-console.log('1587916832189'.toDate().format())
 
 
 var pattern = /^[1-8][1-9][\d]{4}(19|20)[\d]{2}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[0-1])[\d]{3}[\dX]$/i;
@@ -562,3 +561,20 @@ console.log(code.base64decode())
 console.log('ab cd+ah '.trim().replace(/[\-\s]/g, '+'));
 
 console.log(/[\-\s]/g.test('ab'))
+
+
+console.log('1589687486'.toDate().format())
+
+
+console.log('a,bc,d'.replace(/[,]/g,''))
+
+console.log('{0:E}'.format(1234567890123));
+
+
+var obj = {"deviceid":"002104","curtime":"2020-01-16 08:31:03","gpsinfo":{"latitude":"","longitude":"","gpsdir":"","speed":"","ns":"","height":""},"netinfo":{"signal":"25","netstatus":"FDD LTE"},"other":{"voltage":"116","electricity":"540"}};
+
+console.log(typeof obj)
+
+var val = $.getValue(obj, 'other.voltage.voltage', 5);
+
+console.log(val)

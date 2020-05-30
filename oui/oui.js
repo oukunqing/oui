@@ -7,7 +7,7 @@
 */
 
 // OUI
-!function () {
+;!function () {
     'use strict';
 
     var isWindow = function () {
@@ -620,6 +620,33 @@
                 obj[key] = val;
             }
             return obj;
+        },
+        getValue = function(obj, key, dval) {
+            if(!$.isObject(obj)) {
+                return dval;
+            }
+            var keys = [];
+            if($.isArray(key)) {
+                keys = key;
+            } else if($.isString(key, true)) {
+                keys = key.split('.');
+            }
+            var len = keys.length;
+            for(var i = 0; i < keys.length; i++) {
+                var k = keys[i];
+                if(k) {                    
+                    obj = obj[k];
+                }
+                //若键值为null，则返回默认值
+                if(obj === null || typeof obj === 'undefined') {
+                    return typeof dval !== 'undefined' ? dval : '';
+                }
+                //若键值不为对象，则直接返回键值
+                if(i < len - 1 && !$.isObject(obj)) {
+                    return obj;
+                }
+            }
+            return obj;
         };
 
     var counter = 1, debug = isBoolean(isDebug(), true);
@@ -682,7 +709,7 @@
         setQueryString: setQueryString, getQueryString: getQueryString, getUrlHost: getUrlHost,
         isDebug: isDebug,
         filterValue: filterValue, keywordOverload : keywordOverload, keyOverload: keywordOverload,
-        setValue: setValue,
+        setValue: setValue, getValue: getValue,
         toGpsString: function(gps, decimalLen) {
             var con = [], 
                 len = $.checkNumber(decimalLen, 3, 14) ? decimalLen : 8;
