@@ -418,6 +418,15 @@
                     op.pageSizeItems = defaultPageSizeItems;
                 }
 
+                if ($.isArray(op.sizeOptions)) {
+                    for (var i = 0; i < op.sizeOptions.length; i++) {
+                        var n = op.sizeOptions[i];
+                        if (op.pageSizeItems.indexOf(n) < 0) {
+                            op.pageSizeItems.push(n);
+                        }
+                    }
+                }
+
                 if (op.pageSizeItems.indexOf(op.pageSize) < 0) {
                     if ($.isArray(op.pageSizeItems[0])) {
                         var text = (op.pageSizeItems[0][1] || '').replace(/[\d]+/, op.pageSize);
@@ -522,6 +531,7 @@
             showDataStat: false,        //是否显示数据统计
             showSizeSelect: true,       //是否显示PageSize下拉框
             pageSizeItems: [],          //PageSize下拉框默认选项
+            sizeOptions: [],            //要追加的PageSize下拉框选项
             callback: function (pageIndex, pageSize, that, param) {      //回调函数模式
                 console.log('pageIndex: ', pageIndex, 'pageSize: ', pageSize, ', param: ', param);
             },
