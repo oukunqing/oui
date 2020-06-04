@@ -392,13 +392,17 @@
                     keyChar = String.fromCharCode(keyCode).toUpperCase();
 
                 if(keyChar === 'P') {
-                    $.setFocus(focusInput);
+                    //$.setFocus(focusInput);
+                    //设置输入框光标位置到输入框内容的最后
+                    $.setTextCursorPosition(focusInput);
                 }
             });
 
             if(op.focus || that.isKeyPressPaging) {
                 //设置输入框获取焦点
-                $.setFocus(focusInput);
+                //$.setFocus(focusInput);
+                //设置输入框光标位置到输入框内容的最后
+                $.setTextCursorPosition(focusInput);
             }
         },
         getValue = function (obj) {
@@ -519,14 +523,14 @@
             markCount: 10,              //分页数字按钮显示个数，默认为10个
             markType: defaultType,      //标记类型：图标|中文|英文（symbol|chinese|english）
             markText: null,             //标记文字（上一页 下一页）
-            showList: false,             //是否显示数字列表，若不显示数字列表，则默认显示输入框
+            showList: false,            //是否显示数字列表，若不显示数字列表，则默认显示输入框
             showInvalid: true,          //是否显示无效的按钮
             showEllipsis: true,         //是否显示省略号(快进)按钮
             alwaysEllipsis: false,      //是否始终显示省略号按钮
             showFirstLast: true,        //是否显示首页/尾页按钮
             showPageInput: false,       //是否显示页码输入框
-            showPageJump: false,         //是否显示页码跳转输入框
-            showDataCount: true,       //是否显示数据条数
+            showPageJump: false,        //是否显示页码跳转输入框
+            showDataCount: true,        //是否显示数据条数
             showPageCount: true,        //是否显示总页数
             showDataStat: false,        //是否显示数据统计
             showSizeSelect: true,       //是否显示PageSize下拉框
