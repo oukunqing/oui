@@ -76,11 +76,11 @@
             opt.interval = 60;
         }
 
-        this.options = opt;
         this.cache = {
             timer: null,
             number: opt.interval,
-            enable: false
+            enable: false,
+            options: opt
         };
 
         this.id = opt.id;
@@ -89,7 +89,12 @@
 
     Timer.prototype = {
         initial: function(opt) {
-            $.extend(this.options, opt);
+            //频率参数有变化时
+            if(opt.interval !== this.cache.options.interval) {
+                $.extend(this.cache.options, opt);
+                //计时器计数重新开始
+                this.cache.number = opt.interval;
+            }
             Factory.initCache(this, opt);
             return this;
         },
@@ -104,7 +109,7 @@
                 if(!_.cache.enable) {
                     return false;
                 }
-                _.cache.number = Factory.checkNumber(_.cache.number, _.options.interval);
+                _.cache.number = Factory.checkNumber(_.cache.number, _.cache.options.interval);
                 _.cache.number -= 1;
                 if($.isFunction(func)) {
                     func(_.cache.number);
@@ -112,7 +117,7 @@
             }, 1000);
 
             if($.isFunction(func)) {
-                _.cache.number = Factory.checkNumber(_.cache.number, _.options.interval);
+                _.cache.number = Factory.checkNumber(_.cache.number, _.cache.options.interval);
                 func(_.cache.number);
             }
             return _;
@@ -141,7 +146,7 @@
             if($.isNumber(opt.interval) && opt.interval > 0) {
                 _.options.interval = opt.interval;
             }
-            _.cache.number = _.options.interval;
+            _.cache.number = _.cache.options.interval;
 
             _.start(func, options);
 
