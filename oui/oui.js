@@ -3275,6 +3275,7 @@
 
             return { show: opt.show, width: w, height: h };
         },
+        //触发事件，比如触发 window.resize 事件
         trigger = function (elem, evName) {
             if(!$.isString(evName, true)) {
                 return this;
@@ -3335,6 +3336,29 @@
         },
         findCell = function(obj, tagName) {
             return findParentElement(obj, 'TD');
+        },
+        setCookie = function (name, value, expireMinutes) {
+            if (!$.isNumber(expireMinutes) || expireMinutes <= 0) {
+                document.cookie = name + '=' + escape(value) + ';';
+            } else {
+                var dt = new Date();
+                dt.setTime(dt.getTime() + (8 * 60 * 60 * 1000) + expireMinutes * 60 * 1000);
+                document.cookie = name + "=" + escape(value) + ";expires=" + dt.toGMTString();
+            }
+            return this;
+        },
+        getCookie = function (name) {
+            var arr = document.cookie.match(new RegExp("(^| )" + name + "=([^;]*)(;|$$)"));
+            return arr != null ? unescape(arr[2]) : '';
+        },
+        delCookie = function (name) {
+            var dt = new Date();
+            dt.setTime(dt.getTime() - 1);
+            var val = getCookie(name);
+            if (val !== null) {
+                document.cookie = name + "=" + val + ";expires=" + dt.toGMTString();
+            }
+            return this;
         };
 
     var ua = function () { try { return navigator.userAgent } catch (e) { return '' } }(),
@@ -3468,7 +3492,10 @@
         trigger: trigger,
         findParentElement: findParentElement,
         findRow: findRow,
-        findCell: findCell
+        findCell: findCell,
+        setCookie: setCookie,
+        getCookie: getCookie,
+        delCookie: delCookie
     }, '$');
 
 }(OUI);

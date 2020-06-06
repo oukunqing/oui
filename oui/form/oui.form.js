@@ -631,6 +631,32 @@
         }
         return data;
     },
+    getFormParam = function(formElement, options, elements) {
+        var opt = $.extend({tagName: ''}, options);
+        var param = {}, appointTag = opt.tagName.trim() !== '';
+        if($.isArray(elements)) {
+            for(var i=0; i<elements.length;i++){
+                var obj = elements[i], id = obj.id;
+                if(id){
+                    param[obj.id] = obj.value.trim();
+                }
+            }
+        } else {
+            var form = $.toElement(formElement);
+            elements = form.getElementsByTagName(opt.tagName || "*");
+            for(var i=0; i<elements.length;i++){
+                var obj = elements[i], id = obj.id, tag = obj.tagName.toUpperCase(), type = obj.type;
+                if(id) {
+                    if((appointTag && tag === opt.tagName) || 
+                        (!appointTag && ['INPUT', 'SELECT', 'TEXTAREA'].indexOf(tag) > -1 && 
+                            ['button','submit','hidden','password'].indexOf(type) < 0)) {
+                        param[obj.id] = obj.value.trim();
+                    }
+                }
+            }
+        }
+        return param;
+    },
     filterData = function (options, formData) {
         if (!$.isObject(formData)) {
             formData = options.formData || options.datas || options.data;
@@ -766,6 +792,7 @@
             isElement: isElement,
             setFormVerify: setFormVerify,
             getFormData: getFormData,
+            getFormParam: getFormParam,
             setFormData: setFormData,
             getTableData: getTableData,
             setTableData: setTableData,

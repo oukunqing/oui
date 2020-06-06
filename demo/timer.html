@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>定时器 - $.timer</title>
+    <script type="text/javascript" src="../oui/oui.js?"></script>
+    <script type="text/javascript" src="../oui/timer/oui.timer.js?12"></script>
+    
+</head>
+<body>
+	<label>
+		<input type="checkbox" onclick="test(this);" />
+		<span id="ts01">定时刷新</span>
+	</label>
+
+	<button onclick="run();">启动</button>
+	<button onclick="run(true);">停止</button>
+	<button onclick="run(false, true);">重置</button>
+</body>
+</html>
+<script type="text/javascript">
+	function run(isStop, isReset) {
+		if(isStop) {
+			$.timer.stop('timer1');
+			$('#ts01').html('定时刷新.');
+			return false;
+		}
+		var action = isReset ? 'reset' : 'start';
+		var timer = $.timer({
+			id: 'timer1',
+			interval: 30
+		})[action](function(num) {
+			console.log('start:', num);
+			$('#ts01').html(num + '秒后刷新');
+		});
+	}
+
+	function test(chb) {
+		console.log('chb: ', chb.checked);
+		if(chb.checked) {
+			run();
+		} else {
+			run(true);
+		}
+	}
+</script>
