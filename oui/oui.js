@@ -309,7 +309,9 @@
             if (!isBoolean(distinct)) {
                 distinct = false;
             }
-
+            if(!$.isArray(numbers)) {
+                numbers = ('' + numbers).split(/[\,\|]/g);
+            }
             numbers.sort(function (a, b) {
                 return a - b;
             });
@@ -3359,6 +3361,38 @@
                 document.cookie = name + "=" + val + ";expires=" + dt.toGMTString();
             }
             return this;
+        },
+        getImgRealSize = function (img, callback) {
+            var w = 0, h = 0;
+            img = $.toElement(img);
+            if(!$.isElement(img)) {
+                return {width: w, height: h};
+            }
+            //HTML5
+            if (img.naturalWidth) {
+                w = img.naturalWidth;
+                h = img.naturalHeight;
+                callback({width: w, height: h});
+            } else { // IE6/7/8
+                var imgae = new Image();
+                image.src = img.src;
+                image.onload = function() {
+                    callback({width: image.width, height: image.height});
+                };
+            }
+            return {width: w, height: h};
+        },
+        setImgCenter = function(img) {
+            img = $.toElement(img);
+            if(!$.isElement(img)) {
+                return false;
+            }
+            var parent = img.parentNode;
+            var ps = $.getElementSize(parent);
+            //TODO:
+            //TODO:
+            
+
         };
 
     var ua = function () { try { return navigator.userAgent } catch (e) { return '' } }(),
@@ -3495,7 +3529,8 @@
         findCell: findCell,
         setCookie: setCookie,
         getCookie: getCookie,
-        delCookie: delCookie
+        delCookie: delCookie,
+        getImgRealSize: getImgRealSize
     }, '$');
 
 }(OUI);
