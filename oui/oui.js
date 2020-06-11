@@ -316,12 +316,15 @@
                 return a - b;
             });
 
-            var con = '', start = 0, last = 0;
+            var con = '', start = 0, last = 0, n = 0;
 
             for (var i = 0, c = numbers.length; i < c; i++) {
                 var num = numbers[i];
+                if(!$.isNumeric(num)) {
+                    continue;
+                }
 
-                if (0 === i) {
+                if (0 === n++) {
                     con += num;
                     start = num;
                 } else {
@@ -704,6 +707,7 @@
         toBoolean: toBoolean, toBool: toBoolean,
         containsKey: containsKey, containsValue: containsValue, contains: contains, distinctList: distinctList,
         collapseNumberList: collapseNumberList, expandNumberList: expandNumberList,
+        collapseNumbers: collapseNumberList, expandNumbers: expandNumberList,
         toJsonString: toJsonString, toJson: toJson, toEncode: toEncode, 
         getArguments: getArguments, getArgs: getArguments,
         toFunction: toFunction, toFunc: toFunction, callFunction: callFunction, callFunc: callFunction,

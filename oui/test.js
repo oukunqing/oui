@@ -579,20 +579,20 @@ var val = $.getValue(obj, 'other.voltage.voltage', 5);
 
 console.log(val);
 
-var numbers = '1,5,6-9,12-56,99';
+var numbers = '1,3,6-9,,12-16,99';
 
-console.log($.expandNumberList(numbers));
+console.log($.expandNumbers(numbers));
 
 var numbers = [1,2,3,5,6,9,21,22,23,99];
 
-console.log($.collapseNumberList(numbers));
+console.log($.collapseNumbers(numbers));
 
 
 var numbers = '1,2,3,5,6,9,21,22,23,99';
 
-console.log($.collapseNumberList(numbers));
+console.log($.collapseNumbers(numbers));
 
 
-var numbers = {id:12};
+var numbers = ',1,,2,4,5,6,,7,8,9';
 
-console.log($.collapseNumberList(numbers));
+console.log($.collapseNumbers(numbers));
