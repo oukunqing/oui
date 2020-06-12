@@ -1260,6 +1260,30 @@
             }
             return v + s;
         },
+        insertItem: function(s, index, separator) {
+            var _s = this.trim();
+            var arr = _s.split(/[\,\|]/g), c = arr.length, list = [], n = 0;
+            if(_s === '' || c <= 0) {
+                return s;
+            }
+            if(!$.isNumber(index)) {
+                index = 0;
+            }
+            if(index <= 0) {
+                list.push(s);
+            }
+            for(var i = 0; i < c; i++) {
+                var v = arr[i];
+                if(v !== '' && v !== s) {
+                    list.push(v);
+                    n++;
+                }
+                if(index === n && n > 0) {
+                    list.push(s);
+                }
+            }
+            return list.join(separator || ',');
+        },
         space: function (prefix, postfix) {
             var s = this,
                 s1 = $.isNumber(prefix) ? ''.append(' ', prefix) : (prefix || ' '),

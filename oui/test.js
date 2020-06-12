@@ -596,3 +596,8 @@ console.log($.collapseNumbers(numbers));
 var numbers = ',1,,2,4,5,6,,7,8,9';
 
 console.log($.collapseNumbers(numbers));
+
+
+var str = '56';
+
+console.log(str.insertItem('56'))
