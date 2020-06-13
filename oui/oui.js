@@ -1260,6 +1260,7 @@
             }
             return v + s;
         },
+        //插入字符串组元素，
         insertItem: function(s, index, separator) {
             var _s = this.trim();
             var arr = _s.split(/[\,\|]/g), c = arr.length, list = [], n = 0;
@@ -1537,6 +1538,13 @@
         },
         base64encode: function() {
             return $.base64.encode(this);
+        },
+        collapseNumbers: function() {
+            var arr = this.split(/[\,\|]/g);
+            return $.collapseNumberList(arr);
+        },
+        expandNumbers: function() {
+            return $.expandNumberList(this);
         }
     }, 'String.prototype');
 
@@ -3260,7 +3268,7 @@
         height = function(elem, val) {
             return size(elem, 'height', val);
         },
-        toggleDisplay = function(elem, options) {
+        toggleDisplay = function(elem, options, func) {
             elem = $.toElement(elem);
             if(!$.isElement(elem)){
                 return false;
@@ -3269,12 +3277,16 @@
                 options = { show: options };
             } else if($.isNumber(options)) {
                 options = { width: options, size: true };
+            } else if($.isFunction(options)) {
+                func = options;
+                options = {};
             }
             var opt = $.extend({
                 show: undefined,
                 size: false,
                 width: 0,
-                height: 0
+                height: 0,
+                callback: func
             }, options);
 
             if(!$.isBoolean(opt.show)) {
@@ -3303,7 +3315,13 @@
                 elem.style.height = elem.heightCache + 'px';
             }
 
-            return { show: opt.show, width: w, height: h };
+            var result = { show: opt.show, width: w, height: h };
+
+            if($.isFunction(opt.callback)) {
+                opt.callback(result);
+            }
+
+            return result;
         },
         //触发事件，比如触发 window.resize 事件
         trigger = function (elem, evName) {
