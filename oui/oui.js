@@ -1592,6 +1592,7 @@
         toThousand: function (delimiter, len) { return this.toString().toThousand(delimiter, len); },
         toChineseNumber: function (isMoney) { return $.numberToChinese(this, isMoney); },
         toDate: function (format) { return this.toString().toDate(format); },
+        toDateFormat: function(format) { return this.toString().toDateFormat(format); },
         toNumberUnit: function (num, kn, unit, decimalLen, force, space) {
             if (typeof decimalLen === 'boolean') {
                 space = force;
