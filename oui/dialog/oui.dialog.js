@@ -554,8 +554,13 @@
                 };
                 return size;
             },
-            getRealSize: function (txt) {
-                return $.getContentSize(txt, {className: 'oui-dialog-title-size', id: 'div-oui-dialog-text-size-01'});
+            getRealSize: function (txt, opt) {
+                if($.isString(txt, true)) {
+                    return $.getContentSize(txt, {className: 'oui-dialog-title-size', id: 'div-oui-dialog-text-size-01'});
+                }
+                if(opt) {
+                    return {width: opt.width, height: opt.height};
+                }
             }
         },
         Cache = {
@@ -2118,7 +2123,7 @@
 
                 if (ctls.title) {
                     ctls.title.style.maxWidth = (titleWidth) + 'px';
-                    var realSize = Common.getRealSize(ctls.title.innerHTML, '');
+                    var realSize = Common.getRealSize(ctls.title.innerHTML);
 
                     if (realSize.width > titleWidth) {
                         ctls.title.title = $.filterHtmlCode(opt.title);
@@ -2197,6 +2202,8 @@
                     direction: opt.direction,
                     parent: opt.parent,
                     position: opt.position,
+                    width: opt.width,
+                    height: opt.height,
                     x: opt.x,
                     y: opt.y
                 }, options), posX, posY,
@@ -2585,8 +2592,9 @@
                     res.dir = 'top';
                     res.top = ys.top;
                     if (res.top < bs.y) {
-                        h += res.top - distance - bs.y;
-                        w = Common.getRealSize(par.content).width;
+                        ////这里不用重新计算高度了
+                        //h += res.top - distance - bs.y;
+                        w = Common.getRealSize(par.content, par).width;
                         res.top = bs.y;
                         $.setStyle(obj, { height: h, width: w }, 'px');
                     }
@@ -2595,7 +2603,7 @@
                     res.top = ys.bottom;
                     if (res.top + h > bs.height) {
                         h += bs.height - (res.top + h) - distance;
-                        w = Common.getRealSize(par.content).width;
+                        w = Common.getRealSize(par.content, par).width;
                         res.top = bs.height - h - distance;
                         $.setStyle(obj, { height: h, width: w }, 'px');
                     }
@@ -2650,7 +2658,6 @@
                         res.css = 'top: ' + (h - distance) + 'px;';
                         break;
                 }
-
                 if (isFixedSize) {
                     $.setStyle(obj, { width: w, height: h }, 'px');
                 }

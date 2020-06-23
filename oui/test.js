@@ -601,3 +601,8 @@ console.log($.collapseNumbers(numbers));
 var str = '56';
 
 console.log(str.insertItem('56'))
+
+
+//https://kdocs.cn/l/spobuy32j
+
+console.log(Math.random().toFixed(4))
