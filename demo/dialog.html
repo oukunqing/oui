@@ -54,6 +54,7 @@
     <button onclick="tips();">Tips</button>
     <button onclick="update();">更新对话框</button>
     <button onclick="percent();">百分比尺寸</button>
+	<a onmouseover="showTooltip(this);" onmouseout="hideTooltip(this);">Tooltip</a>
 
     <div id="divArticle" style="display: none;">
         这是来自 DIV #divArticle 的内容
@@ -944,4 +945,11 @@ function showTable(){
     console.log('node: ', node.id, node.src, node.getAttribute('src'), node);
 }
 
+function showTooltip(obj) {
+	var win = $.tips('Tooltip提示信息示例', obj, {position: 1, id: 'tooltip001'});
+}
+
+function hideTooltip() {
+	$.tooltip.close('tooltip001');
+}
 </script>

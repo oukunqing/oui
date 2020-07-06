@@ -314,8 +314,12 @@
                 return $.isNumberSize(num);
             },
             getTs: function (start, len) {
-                var tick = new Date().getTime();
-                return parseInt(('' + tick).substr(start || 4, len || 8), 10);
+                var tick = new Date().getTime(),
+                    num = ('' + tick).substr(start || 4, len || 8);
+                if(num.indexOf('0') === 0) {
+                    num = '1' + num;
+                }
+                return parseInt(num, 10);
             },
             buildId: function (id, prefix) {
                 if (!$.isString(id, true) && !$.isNumber(id)) {

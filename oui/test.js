@@ -563,7 +563,6 @@ console.log('ab cd+ah '.trim().replace(/[\-\s]/g, '+'));
 console.log(/[\-\s]/g.test('ab'))
 
 
-console.log('1589687486'.toDate().format())
 
 
 console.log('a,bc,d'.replace(/[,]/g,''))
@@ -598,11 +597,13 @@ var numbers = ',1,,2,4,5,6,,7,8,9';
 console.log($.collapseNumbers(numbers));
 
 
-var str = '56';
+var str = ',342,260,342,343,344,345,346,347';
 
-console.log(str.insertItem('56'))
+console.log(str.insertItem('342'))
+console.log(str.insertItem('342').collapseNumbers())
 
 
 //https://kdocs.cn/l/spobuy32j
 
-console.log(Math.random().toFixed(4))
+
+console.log('1534406015'.toDate().format())

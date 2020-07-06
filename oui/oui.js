@@ -1262,6 +1262,7 @@
         },
         //插入字符串组元素，
         insertItem: function(s, index, separator) {
+            
             var _s = this.trim();
             var arr = _s.split(/[\,\|]/g), c = arr.length, list = [], n = 0;
             if(_s === '' || c <= 0) {
