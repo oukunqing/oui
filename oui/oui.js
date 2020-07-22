@@ -1416,6 +1416,18 @@
         toDateStr: function(format) {
             return this.toDateString(format);
         },
+        toTimeStr: function() {
+            return parseInt('0' + this, 10).toTimeStr();
+        },
+        toSeconds: function() {
+            var arr = this.split(':');
+            var s = parseInt('0' + arr[0], 10) * 3600;
+            if(arr.length > 2) {                
+                s += parseInt('0' + arr[1], 10) * 60;
+                s += parseInt('0' + arr[2], 10);
+            }
+            return s;
+        },
         toArray: function (delimiter, type, keepZero, distinct) {
             if ($.isBoolean(type)) {
                 distinct = keepZero, keepZero = type, type = null;
@@ -1546,6 +1558,14 @@
         },
         expandNumbers: function() {
             return $.expandNumberList(this);
+        },
+        addNamePostfix: function(postfix) {
+            var s = this, pos = s.lastIndexOf('.');
+            if(pos >= 0) {
+                return s.substr(0, pos) + postfix + s.substr(pos);
+            } else {
+                return s + postfix;
+            }
         }
     }, 'String.prototype');
 
@@ -1630,6 +1650,13 @@
         },
         join: function() {
             return this.toString();
+        },
+        toTimeStr: function() {
+            var seconds = this,
+                h = parseInt(seconds / 3600, 10),
+                m = parseInt((seconds - h * 3600) / 60, 10),
+                s = seconds % 60;
+            return h.padLeft(2) + ':' + m.padLeft(2) + ':' + s.padLeft(2);
         }
     }, 'Number.prototype');
 
@@ -1858,11 +1885,14 @@
             case '%':   //百分比
                 v = v.mul(100).round(n) + '%';
                 break;
-            case 'R':
+            case 'R':   //TODO:            
                 break;
+            case 'B':   //二进制
+            case 'O':   //八进制
             case 'X':   //十六进制显示
                 //无符号右移运算，移动位数为0，可以将32位有符号整数转换为32位无符号整数。
-                v = (parseInt(v, 10) >>> 0).toString(16).toUpperCase().padLeft(n);
+                var radix = fu === 'O' ? 8 : fu === 'B' ? 2 : 16;
+                v = (parseInt(v, 10) >>> 0).toString(radix).toUpperCase().padLeft(n);
                 break;
             case 'S': //空格分隔符
             case '-':
@@ -1903,7 +1933,7 @@
             }
         } else if (isNum) {
             //C-货币，D-数字，E-科学计数，F-小数，G-标准数字，N-千位分隔，-十六进制
-            var p1 = /([CDEFGNRXSP%\-\.\:])/gi, p2 = /([A-Z])/gi, p3 = /^([CDEFGNRXSP%\-\.\:][\d]+)$/gi, p4 = /^([A-Z]{1}[\d]+)$/gi;
+            var p1 = /([BCDEFGNOPRSX%\-\.\:])/gi, p2 = /([A-Z])/gi, p3 = /^([BCDEFGNOPRSX%\-\.\:][\d]+)$/gi, p4 = /^([A-Z]{1}[\d]+)$/gi;
             if ((ss.length === 1 && p1.test(ss)) || (ss.length >= 2 && p3.test(ss))) {
                 var nv = parseInt(ss.substr(1), 10), dn = v.toString().split('.'), n = isNaN(nv) ? (f.toUpperCase() === 'D' ? 0 : 2) : nv;
                 v = formatNumberSwitch(v, f, n, dn, err, str, args);

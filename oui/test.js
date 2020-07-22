@@ -607,3 +607,21 @@ console.log(str.insertItem('342').collapseNumbers())
 
 
 console.log('1534406015'.toDate().format())
+
+console.log('{0:X}'.format(123));
+console.log('{0:O}'.format(123));
+console.log('{0:B}'.format(123).padLeft(8));
+
+
+console.log('2020-07-15 16:38:56'.toDate().format('ts'))
+
+var channelid = 4;
+
+console.log({"length":20,"start":0,"ClientType":5,"searchtext":"","TypeID": "\"" + channelid + "\""})
+
+var name = 'pic/1.jpg';
+
+console.log(name.addNamePostfix('_thumb'));
+
+console.log((3750).toTimeStr());
+console.log(('01:02:30').toSeconds());
