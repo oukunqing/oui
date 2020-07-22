@@ -21,7 +21,7 @@
     display: block;
     text-align: left;
     margin: 0;
-    padding: 0 10px;
+    padding: 0 20px;
     font-size: 12px;
     background: #fff;
     color: #555;
@@ -98,5 +98,16 @@
 }
 
 .oui-context-menu .cmenu-sub {
+
+}
+
+.oui-context-menu .cm-chb-label {
+    
+}
+
+.oui-context-menu .cm-chb {
+    float: left; border: none 0;
+    padding: 0;
+    margin: 6px 0px 0 -16px;
 
 }

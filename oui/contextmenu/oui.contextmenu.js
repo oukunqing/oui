@@ -14,12 +14,13 @@
     var Config = {
         FilePath: $.getScriptSelfPath(true),
         //菜单项边距边框尺寸
-        ItemMBPWidth: 12,
-        ItemMinWidth: 60,
+        ItemMBPWidth: 22,
+        ItemMinWidth: 80,
         ItemArrowWidth: 35
     },
     Cache = {
         menus: {},
+        checks: {},
         count: 0,
         itemId: 1
     },
@@ -93,11 +94,39 @@
             }, options);
             return this;
         },
+        updateChecked: function(menuId, chbId, checked) {
+            var key = this.buildKey(menuId),
+                cache = Cache.checks[key];
+            if(!cache) {
+                Cache.checks[key] = {};
+            }
+            Cache.checks[key][chbId] = { checked: checked };
+            return this;
+        },
+        getChecked: function(menuId, chbId) {
+            var key = this.buildKey(menuId);
+            var cache = Cache.checks[key];
+            if(cache && cache[chbId]) {
+                return cache[chbId].checked;
+            }
+            return null;
+        },
+        clearChecked: function(menuId) {
+            var key = this.buildKey(menuId),
+                cache = Cache.checks[key];
+            if(!cache) {
+                Cache.checks[key] = null;
+            }
+            return this;
+        },
         buildItemId: function(menuId) {
             return 'cmenu-' + menuId + '-' + (Cache.itemId++);
         },
         buildKey: function(id) {
             return 'm_' + id;
+        },
+        buildChbId: function(menuId, id) {
+            return 'cmenu-chb-' + menuId + '-' + id;
         },
         getCache: function(menuId) {
             var key = this.buildKey(menuId);
@@ -246,15 +275,16 @@
                         if(!disabled && $.isFunction(func)) {
                             $.addListener(elem, 'mouseup', function(ev) {
                                 $.cancelBubble(ev);
-                                Factory.hideContextMenu(ev, box.menuId, true);
-                                func(Factory.buildMenuPar(elem.data, cfg), this);
+                                var par = Factory.buildMenuPar(elem.data, cfg);
+                                Factory.setChecked(box.menuId, par).hideContextMenu(ev, box.menuId, true);
+                                func(par, this);
                             });
                         } else {                            
                             $.addListener(elem, 'mouseup', function(ev){
                                 $.cancelBubble(ev);
                             });
                         }
-                        elem.innerHTML = Factory.buildMenuText(txt, dr, disabled);
+                        elem.innerHTML = Factory.buildMenuText(txt, dr, disabled, box.menuId);
                     }, box, { items: dr.items, hasChild: hasChild, data: dr });
                 }                
             }, parent);
@@ -317,7 +347,7 @@
                     if(!disabled && $.isFunction(func)) {
                         $.addListener(elem, 'mouseup', function(ev) {
                             $.cancelBubble(ev);
-                            Factory.hideContextMenu(ev, menuId, true);
+                            Factory.setChecked(menuId, par).hideContextMenu(ev, menuId, true);
                             func(par, this);
                         });
                     } else {
@@ -325,16 +355,43 @@
                             $.cancelBubble(ev);
                         });
                     }
-                    elem.innerHTML = Factory.buildMenuText(txt, dr, disabled);
+                    elem.innerHTML = Factory.buildMenuText(txt, dr, disabled, menuId);
                 });
                 return { type: 'menu', elem: elem, height: 24, width: w };
             }
         },
-        buildMenuText: function(txt, dr, disabled) {
+        setChecked: function(menuId, par) {
+            var chbId = Factory.buildChbId(menuId, par.key), chb = $I(chbId);
+            if(chb !== null) {
+                par.checked = !chb.checked;
+                Factory.updateChecked(menuId, chbId, par.checked);
+            }
+            return this;
+        },
+        buildMenuText: function(txt, dr, disabled, menuId) {
             if(!disabled && dr && dr.url) {
                 var target = dr.target ? 'target="' + dr.target + '"' : '';
                 return '<a class="cmenu-link" href="{url}" {1} onmouseup="$.cancelBubble();">{2}</a>'.format(dr, target, txt);
             }
+            if(!$.isUndefined(dr.checkbox)) {
+                var chbId = Factory.buildChbId(menuId, dr.key),
+                    cacheChecked = Factory.getChecked(menuId, chbId), 
+                    checked = '';
+
+                if(cacheChecked !== null) {
+                    checked = cacheChecked ? ' checked="checked"' : '';
+                } else {
+                    checked = $.isBoolean(dr.checkbox, false) || dr.checkbox.checked ? ' checked="checked" ' : '';
+                }
+                return [
+                    '<label class="cm-chb-label">',
+                    '<input type="checkbox" class="cm-chb" ' + checked + ' id="' + chbId + '" />',
+                    '<span>',
+                    txt,
+                    '</span>',
+                    '</label>'
+                ].join('');
+            }            
             return txt;
         },
         buildMenuCallback: function(dr, opt) {
@@ -346,6 +403,14 @@
                 action: dr.action || dr.key || '',
                 name: dr.name || dr.text || dr.txt
             }, dr.par);
+
+            /*
+            if($.isBoolean(dr.checkbox) || $.isObject(dr.checkbox)) {
+                par.checkbox = $.extend({
+                    checked: false
+                }, dr.checkbox);
+            }
+            */
 
             return $.extend({}, opt.par, par);
         },
@@ -389,7 +454,6 @@
             } else {
                 items.push(opt);
             }
-            //items.push(opt);
             return this;
         },
         getInsertIndex: function(items, insertIndex) {
@@ -434,10 +498,10 @@
             if($.isArray(dr.items) && dr.items.length > 0) {
                 w += Config.ItemArrowWidth;
             }
-            if(/[a-z]/ig.test(txt)) {
+            if(/[a-z0-9]/ig.test(txt)) {
                 w += 5;
             }
-            return w;
+            return w + 10;
         },
         getMaxWidth: function(items, box) {
             var width = 0;
