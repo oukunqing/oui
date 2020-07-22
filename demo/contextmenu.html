@@ -32,7 +32,8 @@
         },
         //radius: 5,
         items: [
-            { key: 'dic1', name: '字典配置1', par: { id: 12, code: 'abc' } }, { sep: 1 },
+            { key: 'dic1', name: '字典配置1', checkbox: {checked:false, id:'chb12'}, par: { id: 12, code: 'abc' } },
+			{ sep: 1 }, 
             { key:'dic', name: '字典配置', disabled: true },
             { key: 'sys', name: '系统配置', items: [
                 { key: 'map', name: '地图配置', node: true },
@@ -63,7 +64,7 @@
             {pkey: 'partner', name: '二级经销商'}
         ])
         .add([
-            {pkey: 'map', name: '腾讯地图配置2', disabled: true},
+            {pkey: 'map', name: '腾讯地图配置123456', disabled: true},
             {pkey: 'map', name: '高德地图配置2'}
         ])
         //.show()

@@ -332,11 +332,8 @@
         },
         buildMenuText: function(txt, dr, disabled) {
             if(!disabled && dr && dr.url) {
-                if(dr.target) {
-                    return '<a class="cmenu-link" href="{0}" target="{1}" onmouseup="$.cancelBubble();">{2}</a>'.format(dr.url, dr.target, txt);
-                } else {
-                    return '<a class="cmenu-link" href="{0}" onmouseup="$.cancelBubble();">{1}</a>'.format(dr.url, txt);
-                }
+                var target = dr.target ? 'target="' + dr.target + '"' : '';
+                return '<a class="cmenu-link" href="{url}" {1} onmouseup="$.cancelBubble();">{2}</a>'.format(dr, target, txt);
             }
             return txt;
         },
@@ -436,6 +433,9 @@
             var w = $.getContentSize(txt).width + Config.ItemMBPWidth;
             if($.isArray(dr.items) && dr.items.length > 0) {
                 w += Config.ItemArrowWidth;
+            }
+            if(/[a-z]/ig.test(txt)) {
+                w += 5;
             }
             return w;
         },
