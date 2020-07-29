@@ -31,24 +31,37 @@ console.log(toTime(3750));
 console.log(toSecond('01:05:12'));
 */
 
+//idx: 目标索引
+//num: 列表数量
 function getNavList(datas, idx, num) {
-    var len = datas.length, pre = [], next = [], nc = 0;
+    var len = datas.length, 
+        //前列表
+        pre = [], 
+        //后列表
+        next = [], 
+        nc = 0;
+
     if(idx > len) {
         idx = len;
     }
+    //先循环一遍，找到 目标索引idx 之后的数据条数，只要超过列表数量num 即可
     for(var i = idx + 1; i < len; i++) {
         nc++;
         if(nc >= num) {
             break;
         }
     }
-    var pac = nc < num ? num - nc : 0, pos = idx - (num + pac);
+    //计算前列表需要补足的数据条数（根据后列表的数量决定，比如后列表如果小于目标数量2条的话，那前列表就要补2条）
+    var pac = nc < num ? num - nc : 0, 
+        //计算前列表起始位置，这里主要是为了考虑程序性能
+        pos = idx - (num + pac);
     if(pos < 0) {
         pos = 0;
     }
     for(var i = pos; i < idx; i++) {
         pre.push(datas[i]);
     }
+    //获取前列表的数据量，计算后列表截止的位置
     var pc = pre.length, end = idx + num * 2 - pc + 1;
     if(end > len) {
         end = len;

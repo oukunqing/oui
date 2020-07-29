@@ -1,0 +1,4041 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<style type="text/css">
+		table {border-collapse:collapse;}
+		table td{border:solid 1px #ddd; font-weight:normal; text-align:center;padding:0 5px;}
+		table td input {width:50px;}
+	</style>
+	<script type="text/javascript"></script>
+    <script type="text/javascript" src="../oui/oui.js?12"></script>
+    <script type="text/javascript" src="../oui/frozen/oui.frozen.js?1234"></script>
+</head>
+<body>
+
+<div class="tableContainer" style="width: 1300px;height: 600px; overflow:auto;">
+<style>input{width:80%;}</style>
+	<table cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin:0 auto;table-layout:fixed;"
+	id="MainTable">
+		<thead>
+			<tr class="firstRow">
+				<td  valign="middle" style="word-break: break-all; border-width: 1px; border-style: solid;"
+				rowspan="4" colspan="1" align="center">
+					
+						序号
+					
+				</td>
+				<td valign="middle" rowspan="4" colspan="1" align="center"
+				style="word-break: break-all; border-width: 1px; border-style: solid;">
+					
+						项目
+					
+				</td>
+				<td  valign="middle" rowspan="3" colspan="1" style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center" class="selectTdClass">
+					
+						编号
+					
+				</td>
+				<td  valign="middle" style="word-break: break-all; border-width: 1px; border-style: solid;"
+				rowspan="2" colspan="1" align="center" class="selectTdClass">
+					
+						一般程序立案总数
+					
+				</td>
+				<td  valign="middle" style="word-break: break-all; border-width: 1px; border-style: solid;"
+				rowspan="2" colspan="1" align="center" class="selectTdClass">
+					
+						一般程序结案总数
+					
+				</td>
+				<td  valign="middle" style="word-break: break-all; border-width: 1px; border-style: solid;"
+				rowspan="2" colspan="1" align="center" class="selectTdClass">
+					
+						简易程序案件
+					
+				</td>
+				<td valign="middle" colspan="1" rowspan="2"  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center" class="selectTdClass">
+					
+						涉案金额
+					
+				</td>
+				<td valign="middle" colspan="1" rowspan="2"  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center" class="selectTdClass">
+					
+						没收违法财物折合市价金额
+					
+				</td>
+				<td valign="middle" colspan="1" rowspan="2"  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center" class="selectTdClass">
+					
+						没收违法所得金额
+					
+				</td>
+				<td valign="middle" colspan="1" rowspan="2"  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center" class="selectTdClass">
+					
+						罚款金额
+					
+				</td>
+				<td valign="middle" colspan="1" rowspan="2"  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center" class="selectTdClass">
+					
+						挽回经济损失金额
+					
+				</td>
+				<td valign="middle" colspan="1" rowspan="2"  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center" class="selectTdClass">
+					
+						出动执法人员
+					
+				</td>
+				<td valign="middle" colspan="4" rowspan="1" style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center" class="selectTdClass">
+					
+						大要案
+					
+				</td>
+				<td valign="middle" colspan="1" rowspan="2"  align="center"
+				style="border-width: 1px; border-style: solid;" class="selectTdClass">
+					
+						符合公开条件案件数
+					
+				</td>
+				<td  valign="middle" style="word-break: break-all; border-width: 1px; border-style: solid;"
+				rowspan="2" colspan="1" align="center" class="selectTdClass">
+					
+						案件信息公开数
+					
+				</td>
+			</tr>
+			<tr>
+				<td valign="middle"  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center"  class="selectTdClass">
+					
+						罚没入库10万元以上案件
+					
+				</td>
+				<td valign="middle"  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center"  class="selectTdClass">
+					
+						移送司法机关案件数
+					
+				</td>
+				<td valign="middle"  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center"  class="selectTdClass">
+					
+						追究刑事责任人数
+					
+				</td>
+				<td valign="middle"  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center"  class="selectTdClass">
+					
+						合计
+					
+				</td>
+			</tr>
+			<tr>
+				<td  valign="middle" style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center" class="selectTdClass">
+					
+						（件）
+					
+				</td>
+				<td  valign="middle" style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center" class="selectTdClass">
+					
+						（件）
+					
+				</td>
+				<td  valign="middle" style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center" class="selectTdClass">
+					
+						（件）
+					
+				</td>
+				<td valign="middle"   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center" class="selectTdClass">
+					
+						（万元）
+					
+				</td>
+				<td valign="middle"   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center" class="selectTdClass">
+					
+						（万元）
+					
+				</td>
+				<td valign="middle"   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center" class="selectTdClass">
+					
+						（万元）
+					
+				</td>
+				<td valign="middle"   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center" class="selectTdClass">
+					
+						（万元）
+					
+				</td>
+				<td valign="middle"   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center" class="selectTdClass">
+					
+						（万元）
+					
+				</td>
+				<td valign="middle"   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center" class="selectTdClass">
+					
+						（人次）
+					
+				</td>
+				<td valign="middle"   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center" class="selectTdClass">
+					
+						（件）
+					
+				</td>
+				<td valign="middle"   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center" class="selectTdClass">
+					
+						（件）
+					
+				</td>
+				<td valign="middle"   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center" class="selectTdClass">
+					
+						（人次）
+					
+				</td>
+				<td valign="middle"   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center" class="selectTdClass">
+					
+						（件）
+					
+				</td>
+				<td valign="middle"   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center" class="selectTdClass">
+					
+						（件）
+					
+				</td>
+				<td  valign="middle" style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center" class="selectTdClass">
+					
+						（件）
+					
+				</td>
+			</tr>
+			<tr>
+				<td  valign="middle" style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center" class="selectTdClass">
+					
+						甲
+					
+				</td>
+				<td  valign="middle" style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center" class="selectTdClass">
+					
+						1
+					
+				</td>
+				<td  valign="middle" style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center" class="selectTdClass">
+					
+						2
+					
+				</td>
+				<td  valign="middle" style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center" class="selectTdClass">
+					
+						3
+					
+				</td>
+				<td valign="middle"   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center" class="selectTdClass">
+					
+						4
+					
+				</td>
+				<td valign="middle"   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center" class="selectTdClass">
+					
+						5
+					
+				</td>
+				<td valign="middle"   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center" class="selectTdClass">
+					
+						6
+					
+				</td>
+				<td valign="middle"   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center" class="selectTdClass">
+					
+						7
+					
+				</td>
+				<td valign="middle"   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center" class="selectTdClass">
+					
+						8
+					
+				</td>
+				<td valign="middle"   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center" class="selectTdClass">
+					
+						9
+					
+				</td>
+				<td valign="middle"   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center" class="selectTdClass">
+					
+						10
+					
+				</td>
+				<td valign="middle"   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center" class="selectTdClass">
+					
+						11
+					
+				</td>
+				<td valign="middle"   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center" class="selectTdClass">
+					
+						12
+					
+				</td>
+				<td valign="middle"   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center" class="selectTdClass">
+					
+						13
+					
+				</td>
+				<td valign="middle"   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center" class="selectTdClass">
+					
+						14
+					
+				</td>
+				<td  valign="middle" style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center" class="selectTdClass">
+					
+						15
+					
+				</td>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td  valign="middle" style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center">
+					1
+				</td>
+				<td style="word-break: break-all; border-width: 1px; border-style: solid;">
+					标准化违法案件
+				</td>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					1
+				</td>
+				<td  style="border-width: 1px; border-style: solid;" class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td  style="border-width: 1px; border-style: solid;" class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td  style="border-width: 1px; border-style: solid;" class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+			</tr>
+			<tr>
+				<td  valign="middle" style="word-break: break-all; border-width: 1px; border-style: solid;"
+				rowspan="3" colspan="1" align="center">
+					2
+				</td>
+				<td style="word-break: break-all; border-width: 1px; border-style: solid;">
+					认证认可违法案件
+				</td>
+				<td  style="border-width: 1px; border-style: solid; word-break: break-all;"
+				class="selectTdClass">
+					2
+				</td>
+				<td  style="border-width: 1px; border-style: solid;" class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td  style="border-width: 1px; border-style: solid;" class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td  style="border-width: 1px; border-style: solid;" class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+			</tr>
+			<tr>
+				<td style="word-break: break-all; border-width: 1px; border-style: solid;">
+					其中：交通顽瘴痼疾类案件
+				</td>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					3
+				</td>
+				<td  style="border-width: 1px; border-style: solid;" class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td  style="border-width: 1px; border-style: solid;" class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td  style="border-width: 1px; border-style: solid;" class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td  style="border-width: 1px; border-style: solid;" class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+			</tr>
+			<tr>
+				<td style="word-break: break-all; border-width: 1px; border-style: solid;">
+					无证生产销售强制性产品认证目录内产品类案件
+				</td>
+				<td  style="border-width: 1px; border-style: solid; word-break: break-all;"
+				class="selectTdClass">
+					4
+				</td>
+				<td  style="border-width: 1px; border-style: solid;" class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td  style="border-width: 1px; border-style: solid;" class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td  style="border-width: 1px; border-style: solid;" class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td  style="border-width: 1px; border-style: solid;" class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+			</tr>
+			<tr>
+				<td  valign="middle" style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center">
+					3
+				</td>
+				<td style="word-break: break-all; border-width: 1px; border-style: solid;">
+					计量违法案件
+				</td>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					5
+				</td>
+				<td  style="border-width: 1px; border-style: solid;" class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td  style="border-width: 1px; border-style: solid;" class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td  style="border-width: 1px; border-style: solid;" class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td  style="border-width: 1px; border-style: solid;" class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+			</tr>
+			<tr>
+				<td  valign="middle" style="word-break: break-all; border-width: 1px; border-style: solid;"
+				rowspan="10" colspan="1" align="center">
+					4
+				</td>
+				<td style="word-break: break-all; border-width: 1px; border-style: solid;">
+					质量违法案件
+				</td>
+				<td  style="border-width: 1px; border-style: solid; word-break: break-all;"
+				class="selectTdClass">
+					6
+				</td>
+				<td  style="border-width: 1px; border-style: solid;" class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td  style="border-width: 1px; border-style: solid;" class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td  style="border-width: 1px; border-style: solid;" class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td  style="border-width: 1px; border-style: solid;" class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+			</tr>
+			<tr>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				width="350">
+					其中：口罩及防护用品类案件
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					7
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+			</tr>
+			<tr>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				width="350">
+					&nbsp; &nbsp;农资类案件
+				</td>
+				<td   style="border-width: 1px; border-style: solid; word-break: break-all;"
+				class="selectTdClass">
+					8
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+			</tr>
+			<tr>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				width="350">
+					&nbsp; &nbsp;建材类案件
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					9
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+			</tr>
+			<tr>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				width="350">
+					&nbsp;汽车配件类案件
+				</td>
+				<td   style="border-width: 1px; border-style: solid; word-break: break-all;"
+				class="selectTdClass">
+					10
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+			</tr>
+			<tr>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				width="350">
+					&nbsp;消防产品类案件
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					11
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+			</tr>
+			<tr>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				width="350">
+					&nbsp;儿童用品类案件
+				</td>
+				<td   style="border-width: 1px; border-style: solid; word-break: break-all;"
+				class="selectTdClass">
+					12
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+			</tr>
+			<tr>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				width="350">
+					&nbsp;纤维制品类案件
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					13
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+			</tr>
+			<tr>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				width="350">
+					&nbsp; &nbsp;成品油类案件
+				</td>
+				<td   style="border-width: 1px; border-style: solid; word-break: break-all;"
+				class="selectTdClass">
+					14
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+			</tr>
+			<tr>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				width="350">
+					其他生产销售假冒伪劣类
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					15
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+			</tr>
+			<tr>
+				<td valign="middle"  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				 align="center">
+					5
+				</td>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				width="350">
+					消费者权益保护案件
+				</td>
+				<td   style="border-width: 1px; border-style: solid; word-break: break-all;"
+				class="selectTdClass">
+					16
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+			</tr>
+			<tr>
+				<td valign="middle"  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				 align="center">
+					6
+				</td>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				width="350">
+					合同违法案件
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					17
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+			</tr>
+			<tr>
+				<td valign="middle"  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				 align="center">
+					7
+				</td>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				width="350">
+					拍卖违法案件
+				</td>
+				<td   style="border-width: 1px; border-style: solid; word-break: break-all;"
+				class="selectTdClass">
+					18
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+			</tr>
+			<tr>
+				<td valign="middle" colspan="1" rowspan="4" style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center" >
+					8
+				</td>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				width="350">
+					知识产权案件
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					19
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+			</tr>
+			<tr>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				width="350">
+					其中：商标类案件
+				</td>
+				<td   style="border-width: 1px; border-style: solid; word-break: break-all;"
+				class="selectTdClass">
+					20
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+			</tr>
+			<tr>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				width="350">
+					&nbsp; &nbsp; &nbsp;专利类案件
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					21
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+			</tr>
+			<tr>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				width="350">
+					&nbsp;地理标志类案件
+				</td>
+				<td   style="border-width: 1px; border-style: solid; word-break: break-all;"
+				class="selectTdClass">
+					22
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+			</tr>
+			<tr>
+				<td valign="middle" colspan="1" rowspan="6" style="word-break: break-all; border-width: 1px; border-style: solid;"
+				 align="center">
+					9
+				</td>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				width="350">
+					食品安全违法案件
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					23
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+			</tr>
+			<tr>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				width="350">
+					其中: 烟草类案件
+				</td>
+				<td   style="border-width: 1px; border-style: solid; word-break: break-all;"
+				class="selectTdClass">
+					24
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+			</tr>
+			<tr>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				width="350">
+					&nbsp; &nbsp; &nbsp; 酒类案件
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					25
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+			</tr>
+			<tr>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				width="350">
+					&nbsp;野生动物违规交易类案件
+				</td>
+				<td   style="border-width: 1px; border-style: solid; word-break: break-all;"
+				class="selectTdClass">
+					26
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+			</tr>
+			<tr>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				width="350">
+					&nbsp;保健食品类案件
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					27
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+			</tr>
+			<tr>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				width="350">
+					吊销许可证类案件
+				</td>
+				<td   style="border-width: 1px; border-style: solid; word-break: break-all;"
+				class="selectTdClass">
+					28
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+			</tr>
+			<tr>
+				<td valign="middle"  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				 align="center">
+					10
+				</td>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				width="350">
+					注册登记等其他违法案件
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					29
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+			</tr>
+			<tr>
+				<td valign="middle" colspan="1" rowspan="3"  align="center"
+				style="word-break: break-all; border-width: 1px; border-style: solid;">
+					11
+				</td>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;">
+					无合法来源证明进口商品案件
+				</td>
+				<td   style="border-width: 1px; border-style: solid; word-break: break-all;"
+				class="selectTdClass">
+					30
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+			</tr>
+			<tr>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;">
+					其中：食品类案件
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					31
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+			</tr>
+			<tr>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;">
+					&nbsp; &nbsp;成品油类案件
+				</td>
+				<td   style="border-width: 1px; border-style: solid; word-break: break-all;"
+				class="selectTdClass">
+					32
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+			</tr>
+			<tr>
+				<td valign="middle" colspan="1" rowspan="4" style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center" >
+					12
+				</td>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				width="350">
+					非法出版物案件
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					33
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+			</tr>
+			<tr>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				width="350">
+					其中：政治性非法出版物案件
+				</td>
+				<td   style="border-width: 1px; border-style: solid; word-break: break-all;"
+				class="selectTdClass">
+					34
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+			</tr>
+			<tr>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				width="350">
+					&nbsp;涉黄出版物案件
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					35
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+			</tr>
+			<tr>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				width="350">
+					政治性敏感商品案件
+				</td>
+				<td   style="border-width: 1px; border-style: solid; word-break: break-all;"
+				class="selectTdClass">
+					36
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+			</tr>
+			<tr>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				>
+					13
+				</td>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				width="350">
+					非法卫星电视地面接收设施及“网络共享”设备产品案件
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					37
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+			</tr>
+			<tr>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				>
+					14
+				</td>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				width="350">
+					广告违法案件
+				</td>
+				<td   style="border-width: 1px; border-style: solid; word-break: break-all;"
+				class="selectTdClass">
+					38
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+			</tr>
+			<tr>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				>
+					15
+				</td>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				width="350">
+					特种设备违法案件
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					39
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+			</tr>
+			<tr>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				>
+					16
+				</td>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				width="350">
+					不正当竞争违法案件
+				</td>
+				<td   style="border-width: 1px; border-style: solid; word-break: break-all;"
+				class="selectTdClass">
+					40
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+			</tr>
+			<tr>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				>
+					17
+				</td>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				width="350">
+					价格违法案件
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					41
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+			</tr>
+			<tr>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				>
+					18
+				</td>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				width="350">
+					商务违法案件
+				</td>
+				<td   style="border-width: 1px; border-style: solid; word-break: break-all;"
+				class="selectTdClass">
+					42
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+			</tr>
+			<tr>
+				<td valign="middle" colspan="1" rowspan="3" style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center" >
+					19
+				</td>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				width="350">
+					药品安全违法案件
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					43
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+			</tr>
+			<tr>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				width="350">
+					其中：假药案件
+				</td>
+				<td   style="border-width: 1px; border-style: solid; word-break: break-all;"
+				class="selectTdClass">
+					44
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+			</tr>
+			<tr>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				width="350">
+					劣药
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					45
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+			</tr>
+			<tr>
+				<td valign="middle" colspan="1" rowspan="2" style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center" >
+					20
+				</td>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				width="350">
+					医疗器械违法案件
+				</td>
+				<td   style="border-width: 1px; border-style: solid; word-break: break-all;"
+				class="selectTdClass">
+					46
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+			</tr>
+			<tr>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				width="350">
+					其中：不符合标准的医疗器械案件
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					47
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+			</tr>
+			<tr>
+				<td valign="middle" colspan="1" rowspan="2" style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center" >
+					21
+				</td>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				width="350">
+					化妆品违法案件
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					48
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+			</tr>
+			<tr>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				width="350">
+					其中：假冒化妆品
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					49
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+			</tr>
+			<tr>
+				<td valign="middle"  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center" >
+					22
+				</td>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				width="350">
+					其他
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					50
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+			</tr>
+			<tr>
+				<td  valign="middle" style="word-break: break-all; border-width: 1px; border-style: solid;"
+				align="center">
+				</td>
+				<td style="word-break: break-all; border-width: 1px; border-style: solid;">
+					总计
+				</td>
+				<td  style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					51
+				</td>
+				<td  style="border-width: 1px; border-style: solid;" class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td  style="border-width: 1px; border-style: solid;" class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td  style="border-width: 1px; border-style: solid;" class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="word-break: break-all; border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td   style="border-width: 1px; border-style: solid;"
+				class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+				<td  style="border-width: 1px; border-style: solid;" class="selectTdClass">
+					<input type="text" id="R5C1" placeholder="" value="" />
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</div>
+    <style>
+   .MainTable { 
+            border-collapse: collapse;
+            white-space: nowrap;
+            margin: 0
+        }
+
+            .MainTable td {
+                border: 1px solid #e6e6e6;
+                font-size: 13px !important;
+                padding: 0;
+            }
+
+            .MainTable tr:nth-child(2n+4) td:first-child {
+                background: #ffffff;
+            }
+
+            .MainTable tr:nth-child(2) {
+                background: #F3F3F3;
+            }
+
+            .MainTable tr:nth-child(2n+4) {
+                background: #f3f3f3;
+            }
+
+                .MainTable tr:nth-child(2n+4) input {
+                    background: #f3f3f3;
+                }
+
+
+        .textbox {
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+            border: 0;
+            text-align: center;
+		 
+        }
+		input{ readonly:readonly}
+    </style>
+</body>
+</html>
+<script type="text/javascript">
+function fixed(){
+	
+		var fo = $.frozen('MainTable', {
+			//colStartRowIndex: rowIndex,
+			//colStartRowIndex: 5,
+			//rowIndex: 4,
+			//上部行数
+			rows: 4,			//rows, head
+			//固定tHead
+			fixHead: false,
+			//左边列数
+			cols: 2,			//cols, left
+			//底部行数
+			foot: 0,
+			//右边列数
+			right: 0,
+			//是否显示分割线
+			showBorder: false,  // showSplitLine, showLine
+			////线条颜色可以自定义，默认为 #646464（即excel中的窗口冻结分割线颜色）
+			//lineColor: '#ccc',
+
+			//分割线样式，border 参数优先于 lineColor
+			border: '',         //'solid 2px #f00'
+			//setBackground: true,	// showBackground
+			////冻结部分的单元格背景色，可以自定义，默认按原来的单元格背景色不变
+			//background: '#f1f1f1',
+			//debounce: false,
+			//冻结完成后回调函数
+			complete: function(f) {
+
+			}
+		}, true);
+
+	}
+
+window.onload = function(){
+	fixed();
+};
+</script>

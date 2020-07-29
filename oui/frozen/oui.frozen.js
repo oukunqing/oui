@@ -219,7 +219,7 @@
             var arrKey = ['ondblclick', 'onclick', 'onmouseover', 'onmouseout', 'oncontextmenu'];
             if(type === 'row') {
                 //nothing to do
-            } else { // cell
+            } else { // cell                
                 if(sizeRow) {
                     if(elemObj.colSpan <= 1) {                        
                         var sizeCell = sizeRow.cells[cellIndex],
@@ -235,6 +235,14 @@
                         elem.style.width = w + 'px';
                     }
                 }
+                //如果没有指定了列行索引的，每个单元格计算宽度
+                //如果表格首行（或前几行是整行合并的，必须指定列行索引为整行合并之后的行索引，否则列宽计算会不对）
+                //因为会有各种不同的（样式）表格
+                if(opt.colStartRowIndex <= 0) {
+                    var ws = $.getStyleSize(elemObj), w = ws.width || elemObj.clientWidth;
+                    elem.style.width = w + 'px';  
+                }              
+
                 if(elemObj.rowSpan > 1 || (dir && dir !== 'head')) {
                     var hs = $.getStyleSize(elemObj), h = hs.height || elemObj.clientHeight;
                     elem.style.height = h + 'px';
