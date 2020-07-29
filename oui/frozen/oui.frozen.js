@@ -135,6 +135,7 @@
             var opt = $.extend({
                 id: id,
                 table: table,
+                box: null,
                 fixHead: true,
                 rows: 0,    //head,top
                 cols: 0,    //left
@@ -525,7 +526,8 @@
                 .setControl(f.id, dir, { box: div, table: tb })
                 .setBorder(tb, dir, opt);
 
-            f.box.insertBefore(div, f.table);
+            //f.box.insertBefore(div, f.table);
+            f.table.parentNode.insertBefore(div, f.table);
 
             if(isRight) {
                 //设置右边固定列的box起始位置：inner width + 左偏移 + 右边框 + padding - div宽度
@@ -652,7 +654,8 @@
     function Frozen(options) {
         this.id = options.id;
         this.table = options.table;
-        this.box = this.table.parentNode;
+        var box = $.toElement(options.box);
+        this.box = $.isElement(box) ? box : this.table.parentNode;
         this.rowHeights = [];
 
         return this.initial(options);

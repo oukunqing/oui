@@ -14,7 +14,8 @@
 </head>
 <body>
 
-<div class="tableContainer" style="width: 1300px;height: 600px; overflow:auto;">
+<div class="tableContainer" id="divBox" style="width: 1300px;height: 600px; overflow:auto;">
+<div>
 <style>input{width:80%;}</style>
 	<table cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin:0 auto;table-layout:fixed;"
 	id="MainTable">
@@ -3956,6 +3957,7 @@
 			</tr>
 		</tbody>
 	</table>
+	</div>
 </div>
     <style>
    .MainTable { 
@@ -4003,6 +4005,7 @@
 function fixed(){
 	
 		var fo = $.frozen('MainTable', {
+			box: 'divBox',
 			//colStartRowIndex: rowIndex,
 			//colStartRowIndex: 5,
 			//rowIndex: 4,
