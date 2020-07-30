@@ -527,6 +527,7 @@
                 .setBorder(tb, dir, opt);
 
             //f.box.insertBefore(div, f.table);
+            //这里一定要用 insertBefore，而不能用 appendChild
             f.table.parentNode.insertBefore(div, f.table);
 
             if(isRight) {
