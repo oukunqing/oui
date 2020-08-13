@@ -3831,8 +3831,14 @@
                 return action;
             } else {
                 var checked = false, 
-                    dic = {cancel: 0, checked: 1, all: 1, reverse: 2};
-                switch (parseInt(dic[('' + action).toLowerCase()] || action, 10)) {
+                    dic = {cancel: 0, checked: 1, all: 1, reverse: 2},
+                    oper = dic['' + action.toLowerCase()];
+                if($.isNumber(oper)) {
+                    action = oper;
+                } else {
+                    action = parseInt(action, 10);
+                }
+                switch (action) {
                     //Cancel
                     case 0: checked = false; break;
                     //All
