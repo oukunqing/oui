@@ -31,17 +31,17 @@
     <div id="div1" style="border: solid 1px #00f;padding:10px;margin:50px 20px; ">右键菜单</div>
     <input type="text" id="txt1" />
     <br />
-	<a style="margin-left:200px;" id="btn1">配置</a>
+	<a style="margin-left:200px;" id="btn1">下-右菜单栏</a>
     <br />
     <br />
-	<a style="margin-left:260px;" id="btn2">配置2</a>
+	<a style="margin-left:260px;" id="btn2">下-左菜单栏</a>
     <br />
     <br />
-	<a style="margin-left:300px;" id="btn3">图片</a>
+	<a style="margin-left:300px;" id="btn3">图片居中</a>
     <br />
-	<a id="btn4">图片2</a>
+	<a id="btn4">下-左图片横向列表</a>
     <br />
-	<a style="margin-left:400px;" id="btn5">图片3</a>
+	<a style="margin-left:400px;" id="btn5">图片二级导航</a>
     <br />
     <label id="lbl1">帮助信息</label>
 
@@ -80,6 +80,7 @@
 	}
 	*/
 
+	//获取HTML元素（仅显示，不生成菜单项）
 	$.qmenu.init('btn1', 'p1', {
 		position: 'bottom-right',
 		position: 'bottom-right'
@@ -88,7 +89,7 @@
 
 	$.qmenu({
 		obj: 'btn2',
-		position: 9,
+		position: 7,
 
 		callback: function(par, i) {
 			console.log('par: ', par, i);

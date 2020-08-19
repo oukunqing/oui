@@ -8,7 +8,8 @@
         //菜单项边距边框尺寸
         ItemMBPWidth: 22,
         ItemMinWidth: 80,
-        ItemArrowWidth: 35
+        ItemArrowWidth: 35,
+        Index: 1
     },
     Cache = {
         menus: {},
@@ -34,16 +35,17 @@
         },
         buildMenu: function(options, isUpdate) {
             var opt = $.extend({
-                id: 'oui-qmenu',
                 obj: null
             }, options);
-
-            console.log('opt: ', opt);
 
             return new QuickMenu(opt);
         },
         buildQuickMenu: function(opt) {
-            var id = null;
+            var id = 'oui-qmenu-' + opt.id;
+            var obj = $I(id);
+            if(obj !== null) {
+                $.removeElement(obj);
+            }
             var box = $.createElement('div', id, function(box) {
                 box.className = 'oui-qmenu';
                 if($.isString(opt.className, true)) {
@@ -117,78 +119,79 @@
         addItem: function() {
 
         },
-        showMenu: function(ev, btn, obj, show, force, position) {
-            if(show) {
-                obj.style.display = '';
-                var left = btn.offsetLeft,
-                    leftL = btn.offsetLeft - obj.offsetWidth,
-                    leftR = btn.offsetLeft + btn.offsetWidth,
-                    top = btn.offsetTop,
-                    topB = btn.offsetTop + btn.offsetHeight,
-                    topT = btn.offsetTop - btn.offsetHeight;
+        showMenu: function(ev, btn, obj, position) {
+            obj.style.display = '';
+            var left = btn.offsetLeft,
+                leftL = btn.offsetLeft - obj.offsetWidth,
+                leftR = btn.offsetLeft + btn.offsetWidth,
+                top = btn.offsetTop,
+                topB = btn.offsetTop + btn.offsetHeight,
+                topT = btn.offsetTop - btn.offsetHeight;
 
-                var dic = { '1': 'topleft', '2': 'top', '3': 'topright', '4': 'left', '5': 'center', '6': 'right', 
-                            '7': 'bottomleft', '8': 'bottom', '9': 'bottomright' };
-                var pos = dic['' + position] || position;
+            var dic = { '1': 'topleft', '2': 'top', '3': 'topright', '4': 'left', '5': 'center', '6': 'right', 
+                        '7': 'bottomleft', '8': 'bottom', '9': 'bottomright' };
+            var pos = dic['' + position] || position;
 
-                switch(pos.toLowerCase().replace('-', '')) {
-                    case 'topleft':
-                        top = topT;
-                        break;
-                    case 'topcenter':
-                    case 'top':
-                        top = topT;
-                        left = btn.offsetLeft + btn.offsetWidth / 2 - obj.offsetWidth / 2;
-                        break;
-                    case 'topright':
-                        top = topT;
-                        left = btn.offsetLeft + btn.offsetWidth - obj.offsetWidth;
-                        break;
-                    case 'left':
-                        left = leftL;
-                        top = btn.offsetTop + btn.offsetHeight / 2 - obj.offsetHeight / 2;
-                        break;
-                    case 'lefttop':
-                        left = leftL;
-                        break;
-                    case 'leftbottom':
-                        left = leftL;
-                        top = btn.offsetTop + btn.offsetHeight - obj.offsetHeight;
-                        break;
-                    case 'center':
-                        left = btn.offsetLeft + btn.offsetWidth / 2 - obj.offsetWidth / 2;
-                        top = btn.offsetTop + btn.offsetHeight / 2 - obj.offsetHeight / 2;
-                        break;
-                    case 'right':
-                        left = leftR;
-                        top = btn.offsetTop + btn.offsetHeight / 2 - obj.offsetHeight / 2;
-                        break;
-                    case 'righttop':
-                        left = leftR;
-                        break;
-                    case 'rightbottom':
-                        left = leftR;
-                        top = btn.offsetTop + btn.offsetHeight - obj.offsetHeight;
-                        break;
-                    case 'bottomleft':
-                        top = topB;
-                        break;
-                    case 'bottomcenter':
-                    case 'bottom':
-                        top = topB;
-                        left = btn.offsetLeft + btn.offsetWidth / 2 - obj.offsetWidth / 2;
-                        break;
-                    case 'bottomright':
-                        top = topB;
-                        left = btn.offsetLeft + btn.offsetWidth - obj.offsetWidth;
-                        break;
-                }
-                obj.style.left = left + 'px';
-                obj.style.top = top + 'px';
-            } else {
-                if(force || !$.isOnElement(obj, ev)) {
-                    obj.style.display = 'none';
-                }
+            switch(pos.toLowerCase().replace('-', '')) {
+                case 'topleft':
+                    top = topT;
+                    break;
+                case 'topcenter':
+                case 'top':
+                    top = topT;
+                    left = btn.offsetLeft + btn.offsetWidth / 2 - obj.offsetWidth / 2;
+                    break;
+                case 'topright':
+                    top = topT;
+                    left = btn.offsetLeft + btn.offsetWidth - obj.offsetWidth;
+                    break;
+                case 'left':
+                    left = leftL;
+                    top = btn.offsetTop + btn.offsetHeight / 2 - obj.offsetHeight / 2;
+                    break;
+                case 'lefttop':
+                    left = leftL;
+                    break;
+                case 'leftbottom':
+                    left = leftL;
+                    top = btn.offsetTop + btn.offsetHeight - obj.offsetHeight;
+                    break;
+                case 'center':
+                    left = btn.offsetLeft + btn.offsetWidth / 2 - obj.offsetWidth / 2;
+                    top = btn.offsetTop + btn.offsetHeight / 2 - obj.offsetHeight / 2;
+                    break;
+                case 'right':
+                    left = leftR;
+                    top = btn.offsetTop + btn.offsetHeight / 2 - obj.offsetHeight / 2;
+                    break;
+                case 'righttop':
+                    left = leftR;
+                    break;
+                case 'rightbottom':
+                    left = leftR;
+                    top = btn.offsetTop + btn.offsetHeight - obj.offsetHeight;
+                    break;
+                case 'bottomleft':
+                    top = topB;
+                    break;
+                case 'bottomcenter':
+                case 'bottom':
+                    top = topB;
+                    left = btn.offsetLeft + btn.offsetWidth / 2 - obj.offsetWidth / 2;
+                    break;
+                case 'bottomright':
+                    top = topB;
+                    left = btn.offsetLeft + btn.offsetWidth - obj.offsetWidth;
+                    break;
+            }
+            obj.style.left = left + 'px';
+            obj.style.top = top + 'px';
+
+            return this;
+        },
+        hideMenu: function(ev, obj, force) {
+            if(force || !$.isOnElement(obj, ev)) {
+                obj.style.display = 'none';
             }
             return this;
         }
@@ -199,7 +202,7 @@
 
     function QuickMenu(options) {
         var opt = $.extend({
-            id: 'oui-qmenu',
+            id: Config.Index++,
             obj: null,
             radius: 5,
             position: 7,
@@ -227,10 +230,16 @@
             $.qmenu.init(this.obj, this.box, { position: opt.position });
         },
         show: function() {
-
+            if($.isElement(this.box)) {
+                this.box.style.display = '';
+            }
+            return this;
         },
         hide: function() {
-
+            if($.isElement(this.box)) {
+                this.box.style.display = 'none';
+            }
+            return this;
         },
         build: function() {
 
@@ -262,15 +271,15 @@
             var pos = opt.position || opt.pos;
 
             $.addListener(btn, 'mouseover', function (event, btn) {
-                Factory.showMenu(event, this, box, true, false, pos);
+                Factory.showMenu(event, this, box, pos);
             });
 
             $.addListener(btn, 'mouseout', function (event, btn) {
-                Factory.showMenu(event, this, box, false, false, pos);
+                Factory.hideMenu(event, box, false);
             });
 
             $.addListener(box, ['mouseover','mouseout'], function (event, btn) {
-                Factory.showMenu(event, null, box, false, false, pos);
+                Factory.hideMenu(event, box, false);
             });
             return this;
         },
