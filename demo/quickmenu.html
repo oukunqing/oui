@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>快捷菜单（快速选项屏） - $.quickmenu</title>
+    <script type="text/javascript" src="../oui/oui.js?"></script>
+    <script type="text/javascript" src="../oui/contextmenu/oui.contextmenu.js?12"></script>
+    <script type="text/javascript" src="../oui/quickmenu/oui.quickmenu.js?12"></script>
+
+	<style type="text/css">
+		body {margin:0;padding:0; font-size:14px;}
+		.panel {
+			overflow: hidden;
+			display: block;
+			border: solid 1px #ddd;
+			border-radius: 5px;
+			padding: 5px;
+			min-width: 150px;
+			line-height: 30px;
+			background: #fff;
+		}
+		.panel ul, .panel li {margin:0; padding:0; list-style:none; cursor:default;}
+
+		.sub-menu {overflow:hidden;}
+		.sub-menu a {text-align:center;float:left;margin:0 5px;}
+		.sub-menu a img {display:inline-block;}
+		.sub-menu a span {display:block;}
+	</style>    
+</head>
+<body>
+    <div id="div1" style="border: solid 1px #00f;padding:10px;margin:50px 20px; ">右键菜单</div>
+    <input type="text" id="txt1" />
+    <br />
+	<a style="margin-left:200px;" id="btn1">配置</a>
+    <br />
+    <br />
+	<a style="margin-left:260px;" id="btn2">配置2</a>
+    <br />
+    <br />
+	<a style="margin-left:300px;" id="btn3">图片</a>
+    <br />
+	<a id="btn4">图片2</a>
+    <br />
+	<a style="margin-left:400px;" id="btn5">图片3</a>
+    <br />
+    <label id="lbl1">帮助信息</label>
+
+	<div id="p1" class="panel" style="display:none;">
+		<div>
+			<ul>
+				<li><a onclick="console.log(1);">菜单项1</a></li>
+				<li><a onclick="console.log(2);">菜单项2</a></li>
+				<li><a onclick="console.log(3);">菜单项3</a></li>
+				<li><a onclick="console.log(4);">菜单项4</a></li>
+				<li><a onclick="console.log(5);">菜单项5</a></li>
+			</ul>
+		</div>
+		<div style="border:solid 1px #f00;">
+			<a onclick="console.log('bottom');">bottom</a>
+		</div>
+	</div>
+
+</body>
+</html>
+<script type="text/javascript">
+	/*
+	function showConfig(ev, btn, show) {
+		var obj = $I('p1');
+
+		if(show) {
+			obj.style.display = '';
+			obj.style.left = btn.offsetLeft + 'px';
+			obj.style.top = btn.offsetTop + btn.offsetHeight + 'px';
+		} else {
+			if(!$.isOnElement(obj, ev)) {
+				obj.style.display = 'none';
+			}
+
+		}
+	}
+	*/
+
+	$.qmenu.init('btn1', 'p1', {
+		position: 'bottom-right',
+		position: 'bottom-right'
+	});
+
+
+	$.qmenu({
+		obj: 'btn2',
+		position: 9,
+
+		callback: function(par, i) {
+			console.log('par: ', par, i);
+		},
+		items: [
+			{ key: 'area', name: '显示区域', par: { id: 123, code: 'area' } },
+			{ key: 'track', name: '查看历史轨迹', url: 'https://cn.bing.com/', target: '_blank' },
+			{ key: 'emap', name: '电子地图', par: { code: 'emap' } },
+			{ key: 'preview', name: '视频预览' },
+			'sep',
+			{ key: 'tts', name: '发送语音文字' },
+			'自定义菜单项'
+		]
+	});
+	
+	$.qmenu({
+		obj: 'btn3',
+		position: 'center',
+
+		callback: function(par, i) {
+			console.log('par: ', par, i);
+		},
+		html: '<a href="http://122.227.179.90:81" target="_blank"><img src="http://122.227.179.90:81/skin/default/images/home/welcome.jpg" /></a>',
+		style: 'padding: 10px 10px 8px;'
+	});
+	
+	$.qmenu({
+		obj: 'btn4',
+		position: 'bottomleft',
+		callback: function(par, i) {
+			console.log('par: ', par, i);
+		},
+		html: [
+			'<a href="http://122.227.179.90:81" target="_blank"><img src="http://122.227.179.90:81/upfiles/menu/20160822155030694.png" /></a>',
+			'<a href="http://122.227.179.90:81" target="_blank"><img src="http://122.227.179.90:81/upfiles/menu/20160613163725093.png" /></a>',
+			'<a href="http://122.227.179.90:81" target="_blank"><img src="http://122.227.179.90:81/upfiles/menu/20160822155127344.png" /></a>',
+			'<a href="http://122.227.179.90:81" target="_blank"><img src="http://122.227.179.90:81/upfiles/menu/20190708213342918.png" /></a>'
+		].join(''),
+		style: 'padding: 10px 10px 8px;'
+	});
+	
+	$.qmenu({
+		obj: 'btn5',
+		position: 'bottom',
+		callback: function(par, i) {
+			console.log('par: ', par, i);
+		},
+		html: [
+			'<a href="http://122.227.179.90:81" target="_blank"><img src="http://122.227.179.90:81/upfiles/menu/20160822155030694.png" /><span>视频预览</span></a>',
+			'<a href="http://122.227.179.90:81" target="_blank"><img src="http://122.227.179.90:81/upfiles/menu/20160613163725093.png" /><span>录像回放</span></a>',
+			'<a href="http://122.227.179.90:81" target="_blank"><img src="http://122.227.179.90:81/upfiles/menu/20160822155127344.png" /><span>电子地图</span></a>',
+			'<a href="http://122.227.179.90:81" target="_blank"><img src="http://122.227.179.90:81/upfiles/menu/20190708213342918.png" /><span>FLASH视频</span></a>'
+		].join(''),
+		style: 'padding: 10px 10px 8px;',
+		//指定自定义的外联样式
+		className: 'sub-menu'
+	});
+
+    var menu = $.contextmenu({
+        id: 'menu1',
+        obj: 'div1',
+        //anchor:'txt1',
+        //position: 9,
+        //event: 'click',
+        //y: 0,
+        //x: 0,
+        par: { code: 'dx01', id: 32, name: '设备01'},
+        width: 'auto',
+        //height: 'auto',
+        callback: function(par, obj) {
+            console.log('par122: ', par, obj);
+        },
+        //radius: 5,
+        items: [
+            { key: 'dic1', name: '字典配置1', checkbox: {checked: false}, par: { id: 12, code: 'abc' } },
+			{ sep: 1 }, 
+            { key:'dic', name: '字典配置', disabled: true },
+            { key: 'sys', name: '系统配置', items: [
+                { key: 'map', name: '地图配置', node: true },
+                { key: 'private-map', name: '私有地图配置', url: 'dialog.html', target: '_blank'},
+                { key: 'pic', name: '图片配置', items: [
+                    { name: 'Logo配置' }, { key: 'bg', name: '背景图片' }
+                ]},
+                { name: '百度地图配置', items: [
+                    { name: 'WEB版' }, { name: '安卓版' }
+                ] },
+                { name: '谷歌地图配置', key: 'abb2', checkbox: {checked: true} },
+                { name: '高德地图配置' },
+                { name: '腾讯地图配置' }
+            ] }
+        ]
+    });
+    
+    menu.add({key: 'dic2', name: '字典配置2'}).sep('dic2')
+        .insert({ key: 'person', pkey: 'map',  name: '人员配置', node: true, items: [
+            { name: '使用者' },
+            { key: 'partner', name: '经销商', disabled: false }
+        ]}, 1)
+        .add('设备目录', function(par) {
+            console.log('目录： ', par);
+        })
+        .add([
+            {pkey: 'partner', name: '一级经销商'},
+            {pkey: 'partner', name: '二级经销商'}
+        ])
+        .add([
+            {pkey: 'map', name: '腾讯地图配置123456', disabled: true},
+            {pkey: 'map', name: '高德地图配置2'}
+        ])
+        //.show()
+        ;
+
+    $.cmenu({ id: 'menu2', obj: 'lbl1',  func: function(par) {
+            console.log('par menu2: ', par);
+        },
+        width: 'auto',
+        target: 'txt1'
+    })
+    .add({ menuId: 'menu2', key: 'tts', name: '语音播报' })
+    .add({ menuId: 'menu2', key: 'track', name: '轨迹回放' });
+    
+</script>

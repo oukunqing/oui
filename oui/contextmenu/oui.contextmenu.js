@@ -8,7 +8,7 @@
     $.contextmenu 右键菜单插件
 */
 
-!function(){
+;!function () {
     'use strict';
     
     var Config = {
@@ -343,7 +343,7 @@
                             });
                             return false;
                         }
-                    }                    
+                    }
                     if(!disabled && $.isFunction(func)) {
                         $.addListener(elem, 'mouseup', function(ev) {
                             $.cancelBubble(ev);
