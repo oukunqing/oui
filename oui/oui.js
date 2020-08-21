@@ -3832,7 +3832,7 @@
             } else {
                 var checked = false, 
                     dic = {cancel: 0, checked: 1, all: 1, reverse: 2},
-                    oper = dic['' + action.toLowerCase()];
+                    oper = dic[('' + action).toLowerCase()];
                     
                 switch ($.isNumber(oper) ? oper : parseInt(action, 10)) {
                     //Cancel

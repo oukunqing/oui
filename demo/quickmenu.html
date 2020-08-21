@@ -83,7 +83,8 @@
 	//获取HTML元素（仅显示，不生成菜单项）
 	$.qmenu.init('btn1', 'p1', {
 		position: 'bottom-right',
-		position: 'bottom-right'
+		position: 'bottom-right',
+		event: 'click'
 	});
 
 
@@ -145,7 +146,8 @@
 		].join(''),
 		style: 'padding: 10px 10px 8px;',
 		//指定自定义的外联样式
-		className: 'sub-menu'
+		className: 'sub-menu',
+		//event: 'click'
 	});
 
     var menu = $.contextmenu({

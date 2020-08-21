@@ -116,7 +116,7 @@
             });
             return elem;
         },
-        addItem: function() {
+        addItem: function(items) {
 
         },
         showMenu: function(ev, btn, obj, position) {
@@ -227,7 +227,7 @@
             this.obj = $.toElement(opt.obj);
             this.box = Factory.buildQuickMenu(opt);
 
-            $.qmenu.init(this.obj, this.box, { position: opt.position });
+            $.qmenu.init(this.obj, this.box, opt);
         },
         show: function() {
             if($.isElement(this.box)) {
@@ -241,11 +241,13 @@
             }
             return this;
         },
-        build: function() {
+        build: function(options) {
 
+            return this;
         },
-        update: function() {
+        update: function(options) {
 
+            return this;
         }
     };
 
@@ -267,10 +269,12 @@
             box.style.position = 'absolute';
             box.style.margin = '0 0 0 0';
 
-            var opt = $.extend({}, options);
+            var opt = $.extend({
+                event: 'mouseover'
+            }, options);
             var pos = opt.position || opt.pos;
 
-            $.addListener(btn, 'mouseover', function (event, btn) {
+            $.addListener(btn, opt.event, function (event, btn) {
                 Factory.showMenu(event, this, box, pos);
             });
 
@@ -278,7 +282,7 @@
                 Factory.hideMenu(event, box, false);
             });
 
-            $.addListener(box, ['mouseover','mouseout'], function (event, btn) {
+            $.addListener(box, ['mouseover', 'mouseout'], function (event, btn) {
                 Factory.hideMenu(event, box, false);
             });
             return this;
