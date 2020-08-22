@@ -652,6 +652,14 @@
                 }
             }
             return obj;
+        },
+        //判断是否为空值，如果设置了默认值，则返回值或默认值；如果没有设置默认值，则返回布尔值
+        isValue = function(val, dval) {
+            var isBoolean = typeof dval === 'undefined';
+            if(null === val || typeof val === 'undefined') {
+                return isBoolean ? false : dval;
+            }
+            return isBoolean ? true : val;
         };
 
     var counter = 1, debug = isBoolean(isDebug(), true);
@@ -715,7 +723,7 @@
         setQueryString: setQueryString, getQueryString: getQueryString, getUrlHost: getUrlHost,
         isDebug: isDebug,
         filterValue: filterValue, keywordOverload : keywordOverload, keyOverload: keywordOverload,
-        setValue: setValue, getValue: getValue,
+        setValue: setValue, getValue: getValue, isValue: isValue,
         toGpsString: function(gps, decimalLen) {
             var con = [], 
                 len = $.checkNumber(decimalLen, 3, 14) ? decimalLen : 8;
@@ -3460,6 +3468,32 @@
             }
             return {width: w, height: h};
         },
+        fillOption = function (elem, value, text) {
+            elem = $.toElement(elem);
+            if (!elem.tagName === 'SELECT') {
+                return this;
+            }
+            elem.options.add(new Option($.isValue(text, value), value));
+            return this;
+        },
+        fillOptions = function (elem, list) {
+            elem = $.toElement(elem);
+            if (!elem.tagName === 'SELECT') {
+                return this;
+            }
+            for (var i = 0; i < list.length; i++) {
+                var dr = list[i];
+                if ($.isArray(dr)) {
+                    //new Option(text, value);
+                    elem.options.add(new Option($.isValue(dr[1], dr[0]), dr[0]));
+                } else if ($.isObject(dr)) {
+                    elem.options.add(new Option(dr.text, dr.value || dr.val));
+                } else {
+                    elem.options.add(new Option(dr, dr));
+                }
+            }
+            return this;
+        },
         setImgCenter = function(img) {
             img = $.toElement(img);
             if(!$.isElement(img)) {
@@ -3608,7 +3642,9 @@
         setCookie: setCookie,
         getCookie: getCookie,
         delCookie: delCookie,
-        getImgRealSize: getImgRealSize
+        getImgRealSize: getImgRealSize,
+        fillOption: fillOption,
+        fillOptions: fillOptions
     }, '$');
 
 }(OUI);
