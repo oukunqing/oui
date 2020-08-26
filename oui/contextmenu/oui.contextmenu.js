@@ -501,7 +501,7 @@
             if(/[a-z0-9]/ig.test(txt)) {
                 w += 5;
             }
-            return w + 10;
+            return w + 10 + 2;
         },
         getMaxWidth: function(items, box) {
             var width = 0;
