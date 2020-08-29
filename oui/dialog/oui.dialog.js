@@ -1128,8 +1128,11 @@
                     return this;
                 }
                 if (opt.lock && ctls.container) {
-                    $.addListener(ctls.container, opt.clickBgClose, function () {
-                        _.close();
+                    $.addListener(ctls.container, opt.clickBgClose, function (ev) {
+                        //判断鼠标点击位置是否在对话框范围，如果在范围内则不关闭
+                        if(!$.isOnElement(ctls.dialog, ev)) {
+                            _.close();
+                        }
                     });
                 } else {
                     window.setTimeout(function () {
