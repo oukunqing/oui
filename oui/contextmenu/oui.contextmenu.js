@@ -498,9 +498,12 @@
             if($.isArray(dr.items) && dr.items.length > 0) {
                 w += Config.ItemArrowWidth;
             }
+            //数字的宽度相对窄一些，需要加上5像素
             if(/[a-z0-9]/ig.test(txt)) {
                 w += 5;
             }
+            //宽度加上10像素
+            //额外增加2像素
             return w + 10 + 2;
         },
         getMaxWidth: function(items, box) {

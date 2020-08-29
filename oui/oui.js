@@ -690,13 +690,14 @@
     };
 
     $.extendNative($, {
-        trim: trim, isUndefined: isUndefined, isString: isString, isNumber: isNumber, isFunction: isFunction,
-        isObject: isObject, isArray: isArray, isBoolean: isBoolean, isNull: isNull,
+        trim: trim, isUndefined: isUndefined, isUndef: isUndefined, isString: isString, isNumber: isNumber, 
+        isFunction: isFunction, isFunc: isFunction,
+        isObject: isObject, isArray: isArray, isBoolean: isBoolean, isBool: isBoolean, isNull: isNull,
         isProperty: isProperty, isPercent: isPercent, isPercentSize: isPercent, version: version,
         isNumeric: isNumeric, isDecimal: isDecimal, isInteger: isInteger, isFloat: isDecimal, isInt: isInteger,
         isHexNumeric: isHexNumeric, isHexNumber: isHexNumber, 
         isMobile: isMobile, isTelephone: isTelephone, isIdentity: isIdentity, isEmail: isEmail,
-        isRegexp: isRegexp, isNullOrUndefined: isNullOrUndefined,
+        isRegexp: isRegexp, isNullOrUndefined: isNullOrUndefined, isNullOrUndef: isNullOrUndefined
         isEmpty: function (o) {
             if (isUndefined(o) || null === o) { return true; }
             else if (isString(o)) { return '' === trim(o); }
