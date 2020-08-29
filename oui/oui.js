@@ -697,7 +697,7 @@
         isNumeric: isNumeric, isDecimal: isDecimal, isInteger: isInteger, isFloat: isDecimal, isInt: isInteger,
         isHexNumeric: isHexNumeric, isHexNumber: isHexNumber, 
         isMobile: isMobile, isTelephone: isTelephone, isIdentity: isIdentity, isEmail: isEmail,
-        isRegexp: isRegexp, isNullOrUndefined: isNullOrUndefined, isNullOrUndef: isNullOrUndefined
+        isRegexp: isRegexp, isNullOrUndefined: isNullOrUndefined, isNullOrUndef: isNullOrUndefined,
         isEmpty: function (o) {
             if (isUndefined(o) || null === o) { return true; }
             else if (isString(o)) { return '' === trim(o); }
@@ -4116,6 +4116,34 @@
         reload: function(key, val) {
             var url = location.href;
             return location.href = url.setQueryString(key, val), this;
+        },
+        //还原输入框原始值，原始值保存在输入框 自定义属性 old-value 中
+        restoreValue: function(elements) {
+            var elems = $.isArray(elements) ? elements : [elements];
+            for(var i = 0; i < elems.length; i++) {
+                var elem = $.toElement(elems[i]);
+                if($.isElement(elem)) {
+                    elem.value = $.isValue(elem.getAttribute('old-value'), '');
+                }
+            }
+            return this;
+        },
+        //把数组中的数据分别赋值给（ID)输入框和（Name）输入框
+        //数组格式：[{"Id":1,"Name":"名称1"},{"Id":2,"Name":"名称2"}]
+        setIdAndName: function(datas, idElem, nameElem) {
+            idElem = $.toElement(idElem);
+            nameElem = $.toElement(nameElem);
+            var ids = [], names = [];
+            for(var i = 0; i < datas.length; i++) {
+                var dr = datas[i];
+                ids.push($.getValue(dr, ['Id', 'id']));
+                names.push($.getValue(dr, ['Name', 'name']));
+            }
+            idElem.value = ids.join(',');
+            nameElem.value = names.join(',');
+            $.setAttribute(idElem, 'old-value', idElem.value);
+            $.setAttribute(nameElem, 'old-value', nameElem.value);
+            return this;
         }
     }, '$');
 

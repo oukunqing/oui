@@ -2091,6 +2091,10 @@
                                 $.setStyle(obj, p.lastSize, 'px');
                             }
                         } else {
+                            //宽度跟随目标控件的宽度
+                            if(opt.target && (sp.width === 'follow' || sp.width === 'inherit')) {
+                                sp.width = opt.target.offsetWidth;
+                            }
                             par = { width: sp.width, height: sp.height };
                         }
                     }
@@ -3594,7 +3598,13 @@
                 minHeight: '125px',         //最小高度
                 maxWidth: '100%',           //最大宽度
                 maxHeight: '100%',          //最大高度
-                width: ds.width + 'px',     //初始宽度      px, auto, %
+                position: 5,            //对话框初始位置, 0,1,2,3,4,5,6,7,8,9，共10种位置设置
+                x: 0,                   //x轴(left)偏移量，单位：px
+                y: 0,                   //y轴(top)偏移量，单位：px
+                target: null,           //Element 要跟随位置的html控件 target || anchor
+                direction: 'auto',      //跟随位置的方向 auto | fixed
+                width: ds.width + 'px',     //初始宽度      px, auto, %, follow|inherit
+                //width: follow|inherit 并且设置了target，则width跟随target控件的宽度
                 height: ds.height + 'px',   //初始高度      px, auto, %
                 margin: 0,              //当宽度或高度设置为 % 百分比时，启用 margin，margin格式参考css [上右下左] 设置，单位为px
                 padding: 4,             //内边距（拖动边框）宽度，格式参考css设置,单位为px
@@ -3614,11 +3624,6 @@
                 element: null,          //Element 要加载内容的html控件
                 icon: '',               //Icon图标  info, warning, question, error, success, loading
                 loading: '',            //loading提示文字
-                position: 5,            //对话框初始位置, 0,1,2,3,4,5,6,7,8,9，共10种位置设置
-                x: 0,                   //x轴(left)偏移量，单位：px
-                y: 0,                   //y轴(top)偏移量，单位：px
-                target: null,           //Element 要跟随位置的html控件 target || anchor
-                direction: 'auto',      //跟随位置的方向 auto | fixed
                 focusTo: null,          //要获取焦点的html控件(对话框关闭后获取焦点)
                 fixed: false,           //是否固定位置
                 topMost: false,         //是否允许置顶显示
