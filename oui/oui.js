@@ -626,20 +626,24 @@
             }
             return obj;
         },
-        getValue = function(obj, key, dval) {
-            if(!$.isObject(obj)) {
-                return dval;
-            }
+        toList = function(key, delimiter) {
             var keys = [];
             if($.isArray(key)) {
                 keys = key;
             } else if($.isString(key, true)) {
-                keys = key.split('.');
+                keys = key.split(delimiter);
             }
-            var len = keys.length;
+            return keys;
+        },
+        //获取Object对象（嵌套）的值
+        getValue = function(obj, key, dval) {
+            if(!$.isObject(obj)) {
+                return dval;
+            }
+            var keys = toList(key, '.'), len = keys.length;
             for(var i = 0; i < keys.length; i++) {
                 var k = keys[i];
-                if(k) {                    
+                if(k) {
                     obj = obj[k];
                 }
                 //若键值为null，则返回默认值
@@ -660,6 +664,23 @@
                 return isBoolean ? false : dval;
             }
             return isBoolean ? true : val;
+        },
+        //获取参数值（参数名重载）
+        getParam = function(opt, key, dval) {
+            if(!$.isObject(opt)) {
+                return dval;
+            }
+            var keys = toList(key, /[\|\,]/g), len = keys.length;
+            for(var i = 0; i < keys.length; i++) {
+                var k = keys[i], val;
+                if(k) {
+                    val = opt[k];
+                }
+                if(!$.isNullOrUndefined(val)) {
+                    return val;
+                }
+            }
+            return dval;
         };
 
     var counter = 1, debug = isBoolean(isDebug(), true);
@@ -724,7 +745,7 @@
         setQueryString: setQueryString, getQueryString: getQueryString, getUrlHost: getUrlHost,
         isDebug: isDebug,
         filterValue: filterValue, keywordOverload : keywordOverload, keyOverload: keywordOverload,
-        setValue: setValue, getValue: getValue, isValue: isValue,
+        setValue: setValue, getValue: getValue, isValue: isValue, getParam: getParam,
         toGpsString: function(gps, decimalLen) {
             var con = [], 
                 len = $.checkNumber(decimalLen, 3, 14) ? decimalLen : 8;
@@ -3502,9 +3523,9 @@
             }
             var parent = img.parentNode;
             var ps = $.getElementSize(parent);
+
             //TODO:
-            //TODO:
-            
+            //TODO:            
 
         };
 

@@ -625,3 +625,13 @@ console.log(name.addNamePostfix('_thumb'));
 
 console.log((3750).toTimeStr());
 console.log(('01:02:30').toSeconds());
+
+
+//var abc = eval('\x27' + encodeURI(_0x170a80)['replace'](/%/gm, '\x5cx') + '\x27');
+var abc = eval('\x27' + 'abc%123acc'['replace'](/%/gm, '\x5cx') + '\x27');
+console.log('\x27' + 'abc%123acc'['replace'](/%/gm, '\x5cx') + '\x27');
+
+console.log(abc);
+var abc = eval('\x27' + 'abc%aaabc'['replace'](/%/gm, '\x5cx') + '\x27');
+
+console.log(abc);

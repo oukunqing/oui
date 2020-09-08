@@ -19,18 +19,20 @@
     <input type="button" value="关闭全部2" onclick="closeAll(true);" />
     <input type="button" value="关闭" onclick="close2();" />
     <input type="button" value="关闭2" onclick="close2(true);" />
-    <div style="margin:10px 0 150px;">
-        <div id="nav" style="width:700px;">
-			<a rel="one">标签页1</a>
-			<a rel="two">标签页2标签页2</a>
-			<a>标签页3</a>
-        </div>
-        <div id="content" style="width:700px;">
-			<div key="one">内容1</div>
-			<div key="two">内容2</div>
-			<div>内容3</div>
+    <div id="nav" style="width:700px;" class="oui-tabs">
+        <div class="tab-box" style="width:700px;">
+			<ul class="tab-container">
+				<li class="tab-item"><a class="tab-txt" rel="one">标签页1</a></li>
+				<li class="tab-item"><a class="tab-txt" rel="two">标签页2标签页2</a></li>
+				<li class="tab-item"><a class="tab-txt" rel="03">标签页3</a></li>
+			</ul>
         </div>
     </div>
+	<div id="content" style="width:700px;" class="oui-tabs-contents">
+		<div key="one">内容1</div>
+		<div key="two">内容2</div>
+		<div key="03">内容3</div>
+	</div>
 </body>
 </html>
 <script type="text/javascript">
@@ -38,6 +40,7 @@
     var tab = $.tabs($I('nav'), $I('content'), {
         id: tabId,
         eventName: 'click',		//click, mouseover
+        eventName: 'mouseover',		//click, mouseover
         //center: false,
         tabHeight: 30,
         conHeight: 240

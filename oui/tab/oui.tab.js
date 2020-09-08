@@ -95,6 +95,9 @@
                 //指定默认样式
                 opt.skin = Config.GetSkin();
             }
+            //eventName参数名重载
+            opt.eventName = $.getParam(opt, ['eventName','event','evtName']);
+
             return opt;
         },
         initialTab: function(t, opt) {
@@ -173,12 +176,19 @@
                 }
                 elem.innerHTML = con.format(opt, txtStyle, closeStyle);
                 
+                if($.isNumber(insertIndex)) {
+                    t.container.insertBefore(elem, t.container.childNodes[insertIndex]);
+                } else if($.isString(insertIndex, true)) {
+                    var existingItem = document.getElementById(objId + '-' + insertIndex);
+                    t.container.insertBefore(elem, existingItem);
+                } else {
+                    t.container.appendChild(elem);
+                }
+
                 var txt = elem.childNodes[0],
                     txtW = $.getOuterSize(txt).width,
                     btn = opt.closeAble ? elem.childNodes[1] : null,
                     btnW = $.getOuterSize(btn).width;
-
-                    //console.log('txt::',txt,$.getOuterSize(elem),$.getOuterSize(btn),cfg.maxWidth,$.isNumber(cfg.maxWidth),cfg.maxWidth > 60,(txtW + btnW));
 
                 if($.isNumber(cfg.maxWidth) && cfg.maxWidth > 60 && (txtW + btnW) > cfg.maxWidth) {
                     var ps = $.getPaddingSize(txt),
@@ -186,13 +196,14 @@
                         es = $.getElementSize(elem);
                     elem.style.width = cfg.maxWidth + 'px';
                     //txt.style.width = (cfg.maxWidth - ps.width - ms.width - btnW - es.border.width - 2) + 'px';
-                    txt.style.width = (cfg.maxWidth - 0 - ms.width - btnW - es.border.width) + 'px';
+                    //减去12是因为文字缩略显示之后多出省略号
+                    txt.style.width = (cfg.maxWidth - ms.width - btnW - es.border.width - 12) + 'px';
                     txt.title = $.getInnerText(txt);
-
-                    //console.log(cfg.maxWidth);
                 }
             });
 
+            /*
+            //这段代码已经移到上面了
             if($.isNumber(insertIndex)) {
                 t.container.insertBefore(tab, t.container.childNodes[insertIndex]);
             } else if($.isString(insertIndex, true)) {
@@ -201,6 +212,7 @@
             } else {
                 t.container.appendChild(tab);
             }
+            */
 
             var childs = tab.childNodes;
             for(var i=0; i<childs.length; i++) {
@@ -762,7 +774,7 @@
                 delete cache.items[itemId];
                 var c = cache.ids.length;
                 for(var i = c - 1; i >= 0; i--) {
-                    if(cache.ids[i] === itemId) {
+                    if(cache.ids[i].toString() === itemId.toString()) {
                         cache.ids.splice(i, 1);
                     }
                 }
@@ -974,6 +986,7 @@
                 isShow = $.isBoolean(show, false);
 
             opt.closeAble = $.keywordOverload(opt, ['closeAble', 'close']);
+
             //判断数量是否超出限制
             if(cache.ids.length >= cfg.maxCount) {
                 if(typeof $.alert !== 'undefined') {
@@ -1148,10 +1161,18 @@
             var that = this;
             //var tabs = that.tabContainer.childNodes, cons = that.conContainer.childNodes;
             var tabs = that.tabContainer.querySelectorAll('a'),
-                cons = that.conContainer.querySelectorAll('div');
+                cons = that.conContainer.querySelectorAll('div'),
+                eventName = options.eventName;
 
             that.tabs = tabs;
             that.cons = cons;
+
+            for(var i = 0; i < tabs.length; i++) {
+                $.addListener(tabs[i], eventName, function() {
+                    var key = this.getAttribute('rel');
+                    that.show(key);
+                });
+            }
 
             if(options.type === 'switch') {
                 for(var i = 0; i < cons.length; i++) {
@@ -1162,9 +1183,13 @@
         },
         show: function(key) {
             var that = this;
+            for(var i = 0; i < that.cons.length; i++) {
+                $.removeClass(that.tabs[i], 'cur');
+                that.cons[i].style.display = 'none';
+            }
             for(var i = 0; i < that.tabs.length; i++) {
                 if(key === $.getAttribute(that.tabs[i], 'rel')) {
-                    
+                    $.addClass(that.tabs[i], 'cur');
                     break;
                 }
             }
