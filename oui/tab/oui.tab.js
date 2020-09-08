@@ -1177,7 +1177,7 @@
 
             for(var i = 0; i < tabs.length; i++) {
                 $.addListener(tabs[i], opt.eventName, function() {
-                    var key = this.getAttribute('rel');
+                    var key = $.getAttribute(this, 'tab|key|rel');
                     that.show(key);
                 });
             }
@@ -1203,14 +1203,16 @@
                     that.cons[0].style.display = '';
                 }
             } else {
+                //设置当前TAB项样式
                 for(var i = 0; i < that.tabs.length; i++) {
-                    if(key === $.getAttribute(that.tabs[i], 'rel')) {
+                    if(key === $.getAttribute(that.tabs[i], 'tab|key|rel')) {
                         $.addClass(that.tabs[i].parentNode, 'cur');
                         break;
                     }
                 }
+                //显示当前TAB项内容
                 for(var i = 0; i < that.cons.length; i++) {
-                    if(key === $.getAttribute(that.cons[i], 'key')) {
+                    if(key === $.getAttribute(that.cons[i], 'tab|key|rel')) {
                         that.cons[i].style.display = '';
                         break;
                     }
