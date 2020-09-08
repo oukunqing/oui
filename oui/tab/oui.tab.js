@@ -1147,34 +1147,42 @@
         that.tabContainer = $.toElement(tabContainer);
         that.conContainer = $.toElement(conContainer);
 
+        options.eventName = $.getParam(options, ['eventName','event','evtName']);
+
         var opt = $.extend({
             type: 'switch',         //switch, scroll
             eventName: 'click',     //click, mouseover
-
+            skin: 'default'
         }, options);
 
         that.initial(opt);
     }
 
     Tabs.prototype = {
-        initial: function(options) {
+        initial: function(opt) {
             var that = this;
+            if(opt.skin !== 'default') {
+                Factory.loadCss(opt.skin);
+
+                var cssTab = 'oui-tabs-' + opt.skin,
+                    cssCon = 'oui-tabs-' + opt.skin + '-contents';
+                $.addClass(that.tabContainer, cssTab).addClass(that.conContainer, cssCon);
+            }
             //var tabs = that.tabContainer.childNodes, cons = that.conContainer.childNodes;
             var tabs = that.tabContainer.querySelectorAll('a'),
-                cons = that.conContainer.querySelectorAll('div'),
-                eventName = options.eventName;
+                cons = that.conContainer.querySelectorAll('div');
 
             that.tabs = tabs;
             that.cons = cons;
 
             for(var i = 0; i < tabs.length; i++) {
-                $.addListener(tabs[i], eventName, function() {
+                $.addListener(tabs[i], opt.eventName, function() {
                     var key = this.getAttribute('rel');
                     that.show(key);
                 });
             }
 
-            if(options.type === 'switch') {
+            if(opt.type === 'switch') {
                 for(var i = 0; i < cons.length; i++) {
                     cons[i].style.display = 'none';
                 }
@@ -1184,19 +1192,28 @@
         show: function(key) {
             var that = this;
             for(var i = 0; i < that.cons.length; i++) {
-                $.removeClass(that.tabs[i], 'cur');
+                $.removeClass(that.tabs[i].parentNode, 'cur');
                 that.cons[i].style.display = 'none';
             }
-            for(var i = 0; i < that.tabs.length; i++) {
-                if(key === $.getAttribute(that.tabs[i], 'rel')) {
-                    $.addClass(that.tabs[i], 'cur');
-                    break;
+            if($.isUndefined(key)) {
+                if(that.tabs.length > 0) {
+                    $.addClass(that.tabs[0].parentNode, 'cur');
                 }
-            }
-            for(var i = 0; i < that.cons.length; i++) {
-                if(key === $.getAttribute(that.cons[i], 'key')) {
-                    that.cons[i].style.display = '';
-                    break;
+                if(that.cons.length > 0) {
+                    that.cons[0].style.display = '';
+                }
+            } else {
+                for(var i = 0; i < that.tabs.length; i++) {
+                    if(key === $.getAttribute(that.tabs[i], 'rel')) {
+                        $.addClass(that.tabs[i].parentNode, 'cur');
+                        break;
+                    }
+                }
+                for(var i = 0; i < that.cons.length; i++) {
+                    if(key === $.getAttribute(that.cons[i], 'key')) {
+                        that.cons[i].style.display = '';
+                        break;
+                    }
                 }
             }
         },
