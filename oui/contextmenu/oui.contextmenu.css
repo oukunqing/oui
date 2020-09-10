@@ -119,3 +119,15 @@
     border: none 0;
     background: transparent;
 }
+
+.oui-context-menu .menu-icon {
+    float: left;
+    display: block;
+    border: none;
+    border-radius: 3px;
+    box-sizing: border-box;
+    margin: 2px 5px 0 0;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+}

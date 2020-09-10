@@ -11,12 +11,15 @@
 ;!function () {
     'use strict';
     
+    var SelfPath = $.getScriptSelfPath(true);
     var Config = {
-        FilePath: $.getScriptSelfPath(true),
+        FilePath: SelfPath,
+        FileDir: $.getFilePath(SelfPath),
         //菜单项边距边框尺寸
         ItemMBPWidth: 22,
         ItemMinWidth: 80,
-        ItemArrowWidth: 35
+        ItemArrowWidth: 35,
+        IconWidth: 25
     },
     Cache = {
         menus: {},
@@ -133,6 +136,9 @@
             return Cache.menus[key] || null;
         },
         buildMenu: function(options, isUpdate) {
+
+            options.showIcon = $.getParam(options, ['showIcon', 'icon']);
+
             var opt = $.extend({
                 id: 'oui-menu',
                 obj: null
@@ -210,7 +216,7 @@
             level = parent.level + 1;
 
             if(autoWidth) {
-                opt.width = Factory.getMaxWidth(items);
+                opt.width = Factory.getMaxWidth(items) + (cfg.showIcon ? Config.IconWidth : 0);
             }
 
             if(obj) {
@@ -233,7 +239,6 @@
                 box.style.cssText = cssText;
                 $.disableEvent(box, 'contextmenu');
 
-                var html = [];
                 for(var i = 0; i < items.length; i++) {
                     var dr = items[i],
                         id = Factory.buildItemId(box.menuId),
@@ -261,6 +266,8 @@
                             });
                         }
 
+                        txt += Factory.buildMenuIcon(cfg, dr);
+
                         if(param.hasChild) {
                             txt += '<i class="cmenu-arrow"></i>';
                             if(!dr.node && !dr.leaf) {
@@ -279,7 +286,7 @@
                                 Factory.setChecked(box.menuId, par).hideContextMenu(ev, box.menuId, true);
                                 func(par, this);
                             });
-                        } else {                            
+                        } else {
                             $.addListener(elem, 'mouseup', function(ev){
                                 $.cancelBubble(ev);
                             });
@@ -334,6 +341,8 @@
                         });
                     }
 
+                    txt += Factory.buildMenuIcon(cfg, dr);
+
                     if(hasChild) {
                         txt += '<i class="cmenu-arrow"></i>';
                         if(!dr.node && !dr.leaf) {
@@ -367,6 +376,19 @@
                 Factory.updateChecked(menuId, chbId, par.checked);
             }
             return this;
+        },
+        buildMenuIcon: function(opt, dr) {
+            if(opt.showIcon) {
+                var icon = dr.icon || '', img = dr.img || '', cssText = dr.iconCss || dr.iconStyle;
+                if(img) {
+                    return '<img src="' + img + '" class="menu-icon" style="' + cssText + '" />';
+                } else if(icon) {
+                    return '<div class="menu-icon" style="background:url(\'' + icon + '\') no-repeat center;' + cssText + '"></div>';
+                } else {
+                    return '<div class="menu-icon" style="' + cssText + '"></div>';
+                }
+            }
+            return '';
         },
         buildMenuText: function(txt, dr, disabled, menuId) {
             if(!disabled && dr && dr.url) {
@@ -538,7 +560,8 @@
                         pos = { x: x, y: y, self: true };
                         break;
                 }
-            } else if(ev && ev.type === 'contextmenu') {
+            } else if(ev && (ev.type === 'contextmenu' || ['follow', 'mousedown'].indexOf(opt.position) > -1)) {
+                //鼠标事件，右键菜单或position位置跟随鼠标
                 pos = $.getEventPosition(ev);
             } else if($.isElement(obj)) {
                 var offset = $.getOffset(obj);
@@ -589,7 +612,7 @@
 
                     var items = Factory.buildMenuItems(opt, cache, autoWidth);
                     if(autoWidth && !followSize) {
-                        var w = Factory.getMaxWidth(items);
+                        var w = Factory.getMaxWidth(items) + (opt.showIcon ? Config.IconWidth : 0);
                         elem.style.width = w + 'px';
                         opt.width = w;
 
@@ -655,13 +678,15 @@
             id: 'oui-menu',
             obj: null,
             radius: 5,
-            //触发事件，默认为contextmenu（即右键菜单），也可以是 click
+            //触发事件，默认为contextmenu（即右键菜单），也可以是 click, mouseover
             event: 'contextmenu', 
             //以下参数作为目标停靠时用
             target: null,   //anchor
             position: 7,
             x: 0,
-            y: -1
+            y: -1,
+            //是否显示图标
+            showIcon: false
         }, options);
 
         this.id = opt.menuId || opt.id;
@@ -677,9 +702,15 @@
             Factory.initCache(that, opt, obj);
 
             if($.isElement(obj)) {
-                obj['on' + opt.event] = function(ev) {
-                    return Factory.buildContextMenu(ev, that, obj), false;
-                };
+                if(opt.event.toLowerCase() === 'contextmenu') {
+                    obj['on' + opt.event] = function(ev) {
+                        return Factory.buildContextMenu(ev, that, obj), false;
+                    };
+                } else {
+                    $.addListener(obj, opt.event, function(ev) {
+                        return Factory.buildContextMenu(ev, that, obj), false;
+                    });
+                }
             }
 
             $.addListener(document, 'keydown', Factory.escContextMenu)

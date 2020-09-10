@@ -80,7 +80,7 @@
 }
 
 .oui-tabs .tab-container {
-    border: none 0; border:solid 1px #f00;
+    border: none 0;
     display: block;
     float: left;
     box-sizing: border-box;

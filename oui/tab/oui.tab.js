@@ -95,8 +95,8 @@
                 //指定默认样式
                 opt.skin = Config.GetSkin();
             }
-            //eventName参数名重载
-            opt.eventName = $.getParam(opt, ['eventName','event','evtName']);
+            //event参数名重载
+            opt.event = $.getParam(opt, ['event','eventName','evtName']);
 
             return opt;
         },
@@ -224,7 +224,7 @@
                 }
             }
 
-            tab['on' + cfg.eventName] = function() {
+            tab['on' + cfg.event] = function() {
                 t.show(itemId);
             };
 
@@ -899,7 +899,7 @@
             skin: Config.DefaultSkin,        //样式: default, blue
             //lang: 'chinese',        //chinese, english
             lang: Config.GetLang(),         //语言 Chinese,English
-            eventName: 'click',     //click, mouseover
+            event: 'click',     //click, mouseover
             dblclickScroll: false,
             showContextMenu: true,
             // Tab最大数量
@@ -1147,11 +1147,11 @@
         that.tabContainer = $.toElement(tabContainer);
         that.conContainer = $.toElement(conContainer);
 
-        options.eventName = $.getParam(options, ['eventName','event','evtName']);
+        options.event = $.getParam(options, ['event','eventName','evtName']);
 
         var opt = $.extend({
             type: 'switch',         //switch, scroll
-            eventName: 'click',     //click, mouseover
+            event: 'click',     //click, mouseover
             skin: 'default'
         }, options);
 
@@ -1176,7 +1176,7 @@
             that.cons = cons;
 
             for(var i = 0; i < tabs.length; i++) {
-                $.addListener(tabs[i], opt.eventName, function() {
+                $.addListener(tabs[i], opt.event, function() {
                     var key = $.getAttribute(this, 'tab|key|rel');
                     that.show(key);
                 });

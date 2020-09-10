@@ -19,9 +19,13 @@
     var menu = $.contextmenu({
         id: 'menu1',
         obj: 'div1',
-        //anchor:'txt1',
         //position: 9,
         //event: 'click',
+		//位置跟随鼠标
+		//position: 'follow',
+		//菜单位置锚接HTML控件元素
+        //anchor:'txt1',
+		//target: 'txt1',
         //y: 0,
         //x: 0,
         par: { code: 'dx01', id: 32, name: '设备01'},
@@ -74,9 +78,14 @@
             console.log('par menu2: ', par);
         },
         width: 'auto',
-        target: 'txt1'
+        target: 'txt1',
+		showIcon: true		//图标大小为20px*20px
     })
-    .add({ menuId: 'menu2', key: 'tts', name: '语音播报' })
-    .add({ menuId: 'menu2', key: 'track', name: '轨迹回放' });
+	//img 表示以 img src 显示图标，图片可能会被拉伸
+    .add({ menuId: 'menu2', key: 'tts', name: '语音播报', img: 'helmet-on.png' })
+	//icon 表示以 div background 显示图标
+    .add({ menuId: 'menu2', key: 'tts', name: '语音播报2', icon: 'helmet-on.png' })
+	//无img和icon，表示直接以cssText显示图片
+    .add({ menuId: 'menu2', key: 'track', name: '轨迹回放', iconStyle: 'background:url(\'helmet-off.png\') no-repeat center;' });
     
 </script>
