@@ -635,3 +635,16 @@ console.log(abc);
 var abc = eval('\x27' + 'abc%aaabc'['replace'](/%/gm, '\x5cx') + '\x27');
 
 console.log(abc);
+
+//F200909174242248175
+
+console.log('2020-09-25 14:23:00'.toDate())
+
+console.log('2020-09-25 14:23:00'.toDate().format('ts'))
+
+
+
+330225195607238611
+var id = '500235198508123112';
+
+console.log($.isIdentity(id))
