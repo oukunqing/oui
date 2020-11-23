@@ -1712,7 +1712,11 @@
                     yyyy: y, M: M, d: d, H: H, h: h, m: m, s: s, MM: M.padLeft(2), dd: d.padLeft(2),
                     HH: H.padLeft(2), mm: m.padLeft(2), ss: s.padLeft(2), hh: h.padLeft(2), fff: f.padLeft(3),
                 };
-            return (formatString || 'yyyy-MM-dd HH:mm:ss').replace(p, '{$1}').format(d);
+            //return (formatString || 'yyyy-MM-dd HH:mm:ss').replace(p, '{$1}').format(d);
+            //不采用string.prototype.format，直接获取固定的格式
+            return (formatString || 'yyyy-MM-dd HH:mm:ss').replace(p, function (matches) {
+                return d[matches];
+            });
         },
         compareTo: function (dt) {
             var t1 = this.getTime(), t2 = dt.getTime();
@@ -2122,12 +2126,6 @@
         redirect = function (url) {
             $.isString(url, true) ? location.href = url : null;
         },
-        /*
-        isElement = function (elem, tagName) {
-            var b = elem === doc || elem === win || ($.isObject(elem) && $.isNumber(elem.nodeType) && $.isString(elem.tagName));
-            return b && $.isString(tagName) ? elem.tagName === tagName : b;
-        },
-        */
         isBody = function(body) {
             return body && 
                 body.nodeType === 1 &&

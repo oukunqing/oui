@@ -613,7 +613,7 @@ console.log('{0:O}'.format(123));
 console.log('{0:B}'.format(123).padLeft(8));
 
 
-console.log('2020-07-15 16:38:56'.toDate().format('ts'))
+
 
 var channelid = 4;
 
@@ -648,3 +648,14 @@ console.log('2020-09-25 14:23:00'.toDate().format('ts'))
 var id = '500235198508123112';
 
 console.log($.isIdentity(id))
+
+
+var s = 'QN=?201013091118184;ST=91;PW=123456;MN=7201007;CN=9021;CmdFlag=1;CP=&&VER=ZY720Ver20170308;Mode=0&&';
+console.log(s.length)
+
+
+console.log('2020-07-15 16:38:56'.toDate().format('ts'))
+console.log('1594802336000'.toDate().format())
+console.log('1594802336000'.toDate().format('yyyy-MM-dd HH:mm:ss'))
+console.log('1594802336000'.toDate().format('yyyy-MM-dd HH:mm'))
+console.log('1594802336000'.toDate().format('yyyy年MM月dd日 HH时mm分'))
