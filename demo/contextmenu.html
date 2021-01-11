@@ -50,17 +50,17 @@
                 { name: '百度地图配置', items: [
                     { name: 'WEB版' }, { name: '安卓版' }
                 ] },
-                { name: '谷歌地图配置', key: 'abb1', checkbox: {single:true, checked: false, name: 'emap'} },
-                { name: '高德地图配置', key: 'abb2', checkbox: {single:true, checked: true, name: 'emap'}  },
-                { name: '腾讯地图配置', key: 'abb3', checkbox: {single:true, checked: false, name: 'emap'}  }
+                { name: '谷歌地图配置', key: 'abb1', radio: { name: 'emap'} },
+                { name: '高德地图配置', key: 'abb2', val: 123, radio: {single:true, checked: true, force:true, name: 'emap'}  },
+                { name: '腾讯地图配置', key: 'abb3', checkbox: {single:true, name: 'emap'}  }
             ] }
         ]
     });
     
-    menu.add({key: 'dic2', name: '字典配置2', checkbox: {single:true, checked: false, name: 'dic2'}})
-		.add({key: 'dic3', name: '字典配置3', checkbox: {single:true, checked: false, name: 'dic2'}})
-		.add({key: 'dic4', name: '字典配置4', checkbox: {single:true, checked: false, name: 'dic2'}})
-		.add({key: 'dic5', name: '字典配置5', checkbox: {single:true, checked: false, name: 'dic2'}}).sep('dic2')
+    menu.add({key: 'dic2', name: '字典配置2', radio: {single:true, name: 'dic2'}})
+		.add({key: 'dic3', name: '字典配置3', radio: {single:true, name: 'dic2'}})
+		.add({key: 'dic4', name: '字典配置4', radio: {single:true, name: 'dic2'}})
+		.add({key: 'dic5', name: '字典配置5', radio: {single:true, name: 'dic2'}}).sep('dic2')
         .insert({ key: 'person', pkey: 'map',  name: '人员配置', node: true, items: [
             { name: '使用者' },
             { key: 'partner', name: '经销商', disabled: false }

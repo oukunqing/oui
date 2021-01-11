@@ -51,7 +51,7 @@
                         options = { name: arguments[0], func: arguments[i] };
                         break;
                     }
-                }            
+                }
                 return options;
             }
             return arguments[0];
@@ -295,7 +295,7 @@
                         }
                         elem.innerHTML = Factory.buildMenuText(txt, dr, disabled, box.menuId, chbId);
                     }, box, { items: dr.items, hasChild: hasChild, data: dr });
-                }                
+                }
             }, parent);
 
             var boxSize = $.elemSize(box);
@@ -317,7 +317,7 @@
                     hasChild = $.isArray(dr.items),
                     itemId = Factory.buildItemId(menuId),
                     chbId = Factory.buildChbId(menuId, dr.key),
-                    func = Factory.buildMenuCallback(dr, cfg),                    
+                    func = Factory.buildMenuCallback(dr, cfg),
                     par = Factory.buildMenuPar(dr, cfg, chbId),
                     w = autoWidth ? Factory.getContentWidth(dr) : 0,
                     disabled = $.isBoolean(dr.disabled || dr.disable, false);
@@ -414,36 +414,40 @@
                 var target = dr.target ? 'target="' + dr.target + '"' : '';
                 return '<a class="cmenu-link" href="{url}" {1} onmouseup="$.cancelBubble();">{2}</a>'.format(dr, target, txt);
             }
-            if(!$.isUndefined(dr.checkbox)) {
-                var chbName = 'rb' + dr.checkbox.name,
-                    isSingle = dr.checkbox.single || false,
+            var checkbox = dr.checkbox || dr.radio;
+            if(!$.isUndefined(checkbox)) {
+                var chbName = 'rb' + checkbox.name,
+                    isSingle = (dr.radio || checkbox.single) || false,
                     key = isSingle ? chbName : chbId,
                     cacheChecked = Factory.getChecked(menuId, key), 
                     checked = '';
 
-                if(cacheChecked !== null) {
+                //强制选中指定的选项
+                if(checkbox.checked && checkbox.force) {
+                    if(isSingle) {
+                        Factory.updateChecked(menuId, key, chbId, true);
+                    }
+                    checked = ' checked="checked" ';
+                } else if(cacheChecked !== null) {
                     if(isSingle) {
                         //单选框，判断选中的元素ID是否为当前ID
-                        checked = cacheChecked === chbId ? ' checked="checked"' : '';
+                        checked = cacheChecked === chbId ? ' checked="checked" ' : '';
                     } else {
-                        checked = cacheChecked ? ' checked="checked"' : '';
+                        checked = cacheChecked ? ' checked="checked" ' : '';
                     }
                 } else {
-                    checked = $.isBoolean(dr.checkbox, false) || dr.checkbox.checked ? ' checked="checked" ' : '';
+                    checked = $.isBoolean(checkbox, false) || checkbox.checked ? ' checked="checked" ' : '';
                 }
                 return [
                     '<label class="cm-chb-label">',
-                    (
-                        !isSingle ? 
+                    (!isSingle ? 
                         '<input type="checkbox" class="cm-chb" ' + checked + ' id="' + chbId + '" />' :
-                        '<input type="radio" class="cm-chb" ' + checked + ' id="' + chbId + '"' + ' name="rb' + (dr.checkbox.name) + '" />'
+                        '<input type="radio" class="cm-chb" ' + checked + ' id="' + chbId + '"' + ' name="' + chbName + '" />'
                     ),
-                    '<span>',
-                    txt,
-                    '</span>',
+                    '<span>', txt, '</span>',
                     '</label>'
                 ].join('');
-            }            
+            }
             return txt;
         },
         buildMenuCallback: function(dr, opt) {
@@ -453,6 +457,7 @@
             var par = $.extend({
                 menu_chb_id: chbId,
                 key: dr.key || '',
+                val: dr.val,
                 action: dr.action || dr.key || '',
                 name: dr.name || dr.text || dr.txt
             }, dr.par);
@@ -477,7 +482,7 @@
                     if(item) {
                         items.push(item);
                     }
-                }                
+                }
             }
 
             return items;
@@ -522,7 +527,7 @@
             return index;
         },
         dealOption: function(items, opt, pkey, insertIndex) {
-            if($.isString(pkey, true) || $.isNumber(pkey)) {                
+            if($.isString(pkey, true) || $.isNumber(pkey)) {
                 for(var i = 0; i < items.length; i++) {
                     if(items[i].key === pkey) {
                         if(!$.isArray(items[i].items)) {
