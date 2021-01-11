@@ -241,15 +241,17 @@
 
                 for(var i = 0; i < items.length; i++) {
                     var dr = items[i],
-                        id = Factory.buildItemId(box.menuId),
+                        itemId = Factory.buildItemId(box.menuId),
+                        chbId = Factory.buildChbId(box.menuId, dr.key),
                         txt = dr.name || dr.txt || dr.text,
                         hasChild = $.isArray(dr.items),
                         disabled = $.isBoolean(dr.disabled || dr.disable, false);
 
-                    $.createElement('div', id, function(elem, param) {
+                    $.createElement('div', itemId, function(elem, param) {
                         elem.className = 'cmenu-item' + (disabled ? ' cmenu-disabled' : '');
                         elem.menuId = box.menuId;
-                        elem.itemId = id;
+                        elem.itemId = itemId;
+                        elem.chbId = chbId;
                         elem.level = level;
                         elem.data = param.data;
 
@@ -282,16 +284,16 @@
                         if(!disabled && $.isFunction(func)) {
                             $.addListener(elem, 'mouseup', function(ev) {
                                 $.cancelBubble(ev);
-                                var par = Factory.buildMenuPar(elem.data, cfg);
+                                var par = Factory.buildMenuPar(elem.data, cfg, elem.chbId);
                                 Factory.setChecked(box.menuId, par).hideContextMenu(ev, box.menuId, true);
-                                func(par, this);
+                                func(Factory.dealChecked(par, elem), this);
                             });
                         } else {
                             $.addListener(elem, 'mouseup', function(ev){
                                 $.cancelBubble(ev);
                             });
                         }
-                        elem.innerHTML = Factory.buildMenuText(txt, dr, disabled, box.menuId);
+                        elem.innerHTML = Factory.buildMenuText(txt, dr, disabled, box.menuId, chbId);
                     }, box, { items: dr.items, hasChild: hasChild, data: dr });
                 }                
             }, parent);
@@ -313,19 +315,21 @@
             } else {
                 var txt = dr.name || dr.txt || dr.text,
                     hasChild = $.isArray(dr.items),
-                    id = Factory.buildItemId(menuId),
+                    itemId = Factory.buildItemId(menuId),
+                    chbId = Factory.buildChbId(menuId, dr.key),
                     func = Factory.buildMenuCallback(dr, cfg),                    
-                    par = Factory.buildMenuPar(dr, cfg),
+                    par = Factory.buildMenuPar(dr, cfg, chbId),
                     w = autoWidth ? Factory.getContentWidth(dr) : 0,
                     disabled = $.isBoolean(dr.disabled || dr.disable, false);
                     
                 if(!txt) {
                     return null;
                 }
-                elem = $.createElement('div', id, function(elem) {
+                elem = $.createElement('div', itemId, function(elem) {
                     elem.className = 'cmenu-item' + (disabled ? ' cmenu-disabled' : '');
                     elem.menuId = menuId;
-                    elem.itemId = id;
+                    elem.itemId = itemId;
+                    elem.chbId = chbId;
                     elem.level = level;
 
                     if(!disabled) {
@@ -357,23 +361,38 @@
                         $.addListener(elem, 'mouseup', function(ev) {
                             $.cancelBubble(ev);
                             Factory.setChecked(menuId, par).hideContextMenu(ev, menuId, true);
-                            func(par, this);
+                            func(Factory.dealChecked(par, elem), this);
                         });
                     } else {
                         $.addListener(elem, 'mouseup', function(ev){
                             $.cancelBubble(ev);
                         });
                     }
-                    elem.innerHTML = Factory.buildMenuText(txt, dr, disabled, menuId);
+                    elem.innerHTML = Factory.buildMenuText(txt, dr, disabled, menuId, chbId);
                 });
                 return { type: 'menu', elem: elem, height: 24, width: w };
             }
         },
+        dealChecked: function(par, elem) {
+            //若checked为字符串，表示是单选，判断ID是否为当前ID
+            if($.isString(par.checked) && par.checked === elem.chbId) {
+                par.checked = true;
+            }
+            delete par['menu_chb_id'];
+            return par;
+        },
         setChecked: function(menuId, par) {
-            var chbId = Factory.buildChbId(menuId, par.key), chb = $I(chbId);
+            var chbId = Factory.buildChbId(menuId, par.key), chb = $I(chbId), key = chbId;
             if(chb !== null) {
-                par.checked = !chb.checked;
-                Factory.updateChecked(menuId, chbId, par.checked);
+                var isSingle = chb.type === 'radio';
+                if(chb.type === 'radio') {
+                    //单选框，指定当前选中的元素ID
+                    par.checked = par.menu_chb_id;
+                    key = chb.name;
+                } else {
+                    par.checked = !chb.checked;
+                }
+                Factory.updateChecked(menuId, key, par.checked, isSingle);
             }
             return this;
         },
@@ -390,24 +409,35 @@
             }
             return '';
         },
-        buildMenuText: function(txt, dr, disabled, menuId) {
+        buildMenuText: function(txt, dr, disabled, menuId, chbId) {
             if(!disabled && dr && dr.url) {
                 var target = dr.target ? 'target="' + dr.target + '"' : '';
                 return '<a class="cmenu-link" href="{url}" {1} onmouseup="$.cancelBubble();">{2}</a>'.format(dr, target, txt);
             }
             if(!$.isUndefined(dr.checkbox)) {
-                var chbId = Factory.buildChbId(menuId, dr.key),
-                    cacheChecked = Factory.getChecked(menuId, chbId), 
+                var chbName = 'rb' + dr.checkbox.name,
+                    isSingle = dr.checkbox.single || false,
+                    key = isSingle ? chbName : chbId,
+                    cacheChecked = Factory.getChecked(menuId, key), 
                     checked = '';
 
                 if(cacheChecked !== null) {
-                    checked = cacheChecked ? ' checked="checked"' : '';
+                    if(isSingle) {
+                        //单选框，判断选中的元素ID是否为当前ID
+                        checked = cacheChecked === chbId ? ' checked="checked"' : '';
+                    } else {
+                        checked = cacheChecked ? ' checked="checked"' : '';
+                    }
                 } else {
                     checked = $.isBoolean(dr.checkbox, false) || dr.checkbox.checked ? ' checked="checked" ' : '';
                 }
                 return [
                     '<label class="cm-chb-label">',
-                    '<input type="checkbox" class="cm-chb" ' + checked + ' id="' + chbId + '" />',
+                    (
+                        !isSingle ? 
+                        '<input type="checkbox" class="cm-chb" ' + checked + ' id="' + chbId + '" />' :
+                        '<input type="radio" class="cm-chb" ' + checked + ' id="' + chbId + '"' + ' name="rb' + (dr.checkbox.name) + '" />'
+                    ),
                     '<span>',
                     txt,
                     '</span>',
@@ -419,8 +449,9 @@
         buildMenuCallback: function(dr, opt) {
             return dr.callback || dr.func || opt.callback || opt.func;
         },
-        buildMenuPar: function(dr, opt) {
+        buildMenuPar: function(dr, opt, chbId) {
             var par = $.extend({
+                menu_chb_id: chbId,
                 key: dr.key || '',
                 action: dr.action || dr.key || '',
                 name: dr.name || dr.text || dr.txt

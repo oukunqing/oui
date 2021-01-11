@@ -659,3 +659,38 @@ console.log('1594802336000'.toDate().format())
 console.log('1594802336000'.toDate().format('yyyy-MM-dd HH:mm:ss'))
 console.log('1594802336000'.toDate().format('yyyy-MM-dd HH:mm'))
 console.log('1594802336000'.toDate().format('yyyy年MM月dd日 HH时mm分'))
+
+/*
+console.log(/(Y-m-d H:i:s)/gi.test('AY-m-d H:i:sZ'))
+
+
+            if(/(Y-m-d H:i:s)/gi.test(formatString)) {
+                d = {
+                    Y: y, m: M, d: d, H: H, h: h, i: m, s: s, MM: M.padLeft(2), dd: d.padLeft(2),
+                    HH: H.padLeft(2), mm: m.padLeft(2), ss: s.padLeft(2), hh: h.padLeft(2), fff: f.padLeft(3),
+                }
+            }
+*/
+
+
+//正则替换示例
+var str = 'http://xxxx.xx/xxx.jpg';
+var str2 = str.replace(/[.](jpg|png|gif)$/gi, function(val) {
+    return '_260_360' + val;
+});
+
+console.log(str2);
+
+function test2({id,name}){
+
+    console.log(arguments);
+}
+
+test2(1, 'a')
+
+
+var pattern = /^[\w.!@#$%^&\*\(\)\[\]{}\?,\|~;:'"<>\-+_=\\/]{3,25}$/;
+
+var pwd = 'abc!(;:\'<]?,.|~{}_=+-\\/';
+
+console.log(pattern.test(pwd))

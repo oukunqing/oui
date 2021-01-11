@@ -14,7 +14,7 @@
     <br />
     <label id="lbl1">帮助信息右键菜单</label>
 	<br />
-	<div id="btn1" style="width:200px;height:50px;border:solid 1px #ddd;display:inline-block;margin-left:300px;font-size:12px;">右键菜单示例2（带图标）</div>
+	<div id="btn1" style="width:200px;height:50px;border:solid 1px #ddd;display:inline-block;margin-left:300px;font-size:12px;" oncontextmenu="show2(event,this);return false;">右键菜单示例2（带图标）</div>
 </body>
 </html>
 <script type="text/javascript">
@@ -24,7 +24,7 @@
         //position: 9,
         //event: 'click',
 		//位置跟随鼠标
-		//position: 'follow',
+		position: 'follow',
 		//菜单位置锚接HTML控件元素
         //anchor:'txt1',
 		//target: 'txt1',
@@ -50,14 +50,17 @@
                 { name: '百度地图配置', items: [
                     { name: 'WEB版' }, { name: '安卓版' }
                 ] },
-                { name: '谷歌地图配置', key: 'abb2', checkbox: {checked: true} },
-                { name: '高德地图配置' },
-                { name: '腾讯地图配置' }
+                { name: '谷歌地图配置', key: 'abb1', checkbox: {single:true, checked: false, name: 'emap'} },
+                { name: '高德地图配置', key: 'abb2', checkbox: {single:true, checked: true, name: 'emap'}  },
+                { name: '腾讯地图配置', key: 'abb3', checkbox: {single:true, checked: false, name: 'emap'}  }
             ] }
         ]
     });
     
-    menu.add({key: 'dic2', name: '字典配置2'}).sep('dic2')
+    menu.add({key: 'dic2', name: '字典配置2', checkbox: {single:true, checked: false, name: 'dic2'}})
+		.add({key: 'dic3', name: '字典配置3', checkbox: {single:true, checked: false, name: 'dic2'}})
+		.add({key: 'dic4', name: '字典配置4', checkbox: {single:true, checked: false, name: 'dic2'}})
+		.add({key: 'dic5', name: '字典配置5', checkbox: {single:true, checked: false, name: 'dic2'}}).sep('dic2')
         .insert({ key: 'person', pkey: 'map',  name: '人员配置', node: true, items: [
             { name: '使用者' },
             { key: 'partner', name: '经销商', disabled: false }
@@ -76,38 +79,42 @@
         //.show()
         ;
 
-    $.cmenu({ id: 'menu2', obj: 'lbl1',  func: function(par) {
-            console.log('par menu2: ', par);
-        },
-        width: 'auto',
-        target: 'txt1',
+
+	$.cmenu({ id: 'menu2', obj: 'lbl1',  func: function(par) {
+			console.log('par menu2: ', par);
+		},
+		width: 'auto',
+		target: 'txt1',
 		showIcon: true		//图标大小为20px*20px
-    })
-	//img 表示以 img src 显示图标，图片可能会被拉伸
-    .add({ menuId: 'menu2', key: 'tts', name: '语音播报', img: 'helmet-on.png' })
-	//icon 表示以 div background 显示图标
-    .add({ menuId: 'menu2', key: 'tts', name: '语音播报2', icon: 'helmet-on.png' })
-	//无img和icon，表示直接以cssText显示图片
-    .add({ menuId: 'menu2', key: 'track', name: '轨迹回放', iconStyle: 'background:url(\'helmet-off.png\') no-repeat center;' });
-    
-
-	var menu3 = $.cmenu({
-		id: 'menu3', 
-		obj: 'btn1', 
-		showIcon: true
 	})
-    .add({ key: '001', name: '右键菜单01', icon: 'helmet-on.png' })
-    .add({ key: '002', name: '右键菜单02', icon: 'helmet-off.png' })
-    .add({ key: '003', name: '右键菜单03', icon: 'helmet-on.png' })
-	//插入一个分隔线到 004（项） 之前
-	.sep('004')
-    .add({ key: '004', name: '右键菜单04', icon: 'helmet-on.png' })
-    .add({ key: '005', name: '右键菜单05', icon: 'helmet-off.png' })
-	//增加一个分隔线
-	.add({ sep: 1 })
-    .add({ key: 'other', name: '右键菜单other' });
+	//img 表示以 img src 显示图标，图片可能会被拉伸
+	.add({ menuId: 'menu2', key: 'tts', name: '语音播报', img: 'helmet-on.png' })
+	//icon 表示以 div background 显示图标
+	.add({ menuId: 'menu2', key: 'tts', name: '语音播报2', icon: 'helmet-on.png' })
+	//无img和icon，表示直接以cssText显示图片
+	.add({ menuId: 'menu2', key: 'track', name: '轨迹回放', iconStyle: 'background:url(\'helmet-off.png\') no-repeat center;' });
 
-	//追加菜单项
-	menu3.add({ key: '006', pkey: '003', name: '右键菜单06', icon: 'helmet-on.png' })
-		.add({ key: '007', pkey: '003', name: '右键菜单07', icon: 'helmet-off.png' });
+	function show2(ev, obj) {
+		var menu3 = $.cmenu({
+			id: 'menu3', 
+			obj: obj, 
+			showIcon: true
+		})
+		.add({ key: '001', name: '右键菜单01', icon: 'helmet-on.png' })
+		.add({ key: '002', name: '右键菜单02', icon: 'helmet-off.png' })
+		.add({ key: '003', name: '右键菜单03', icon: 'helmet-on.png' })
+		//插入一个分隔线到 004（项） 之前
+		.sep('004')
+		.add({ key: '004', name: '右键菜单04', icon: 'helmet-on.png' })
+		.add({ key: '005', name: '右键菜单05', icon: 'helmet-off.png' })
+		//增加一个分隔线
+		.add({ sep: 1 })
+		.add({ key: 'other', name: '右键菜单other' });
+
+		//追加菜单项
+		menu3.add({ key: '006', pkey: '003', name: '右键菜单06', icon: 'helmet-on.png' })
+			.add({ key: '007', pkey: '003', name: '右键菜单07', icon: 'helmet-off.png' })
+			.show(ev);
+    }
+
 </script>
