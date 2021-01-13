@@ -642,6 +642,7 @@
                     elem.level = 0;
                     var cssText = 'left:{x}px;top:{y}px;width:{width}px;height:{height}px;'.format(opt);
                     cssText += opt.radius ? 'border-radius:' + opt.radius + 'px;' : '';
+                    cssText += opt.zindex ? 'z-index:' + opt.zindex + ';' : '';
                     elem.style.cssText = cssText;
 
                     $.disableEvent(elem, 'contextmenu');
@@ -714,6 +715,7 @@
             id: 'oui-menu',
             obj: null,
             radius: 5,
+            zindex: 99999999,
             //触发事件，默认为contextmenu（即右键菜单），也可以是 click, mouseover
             event: 'contextmenu', 
             //以下参数作为目标停靠时用
