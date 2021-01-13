@@ -694,3 +694,10 @@ var pattern = /^[\w.!@#$%^&\*\(\)\[\]{}\?,\|~;:'"<>\-+_=\\/]{3,25}$/;
 var pwd = 'abc!(;:\'<]?,.|~{}_=+-\\/';
 
 console.log(pattern.test(pwd))
+
+
+var pattern = /^a(.*)$/;
+
+console.log(pattern.test('a/abc/as'))
+
+console.log($.numberToChinese(25))

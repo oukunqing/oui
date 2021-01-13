@@ -1188,7 +1188,6 @@
                 }
                 ctls.dialog = $.createElement('div');
                 ctls.dialog.className = className;
-                ctls.dialog.style.zIndex = opt.zindex;
                 ctls.dialog.id = _.getDialogId();
 
                 if (opt.coverOCX) {
@@ -1198,6 +1197,9 @@
                 if ((css = Common.toCssText(opt.styles.dialog, 'dialog'))) {
                     ctls.dialog.style.cssText = css;
                 }
+                //注意：需先等设置完cssText，再设置zindex
+                ctls.dialog.style.zIndex = opt.zindex;
+
                 if (!$.isBoolean(shadow, false) || shadow === 'none') {
                     ctls.dialog.style.boxShadow = 'none';
                 }
