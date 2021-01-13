@@ -637,6 +637,10 @@
                 box.style.left = opt.x + 'px';
                 box.style.top = opt.y + 'px';
             } else {
+                var parentNode = op.parentNode || op.parent;
+                if(!$.isElement(parentNode)) {
+                    parentNode = document.body;
+                }
                 box = $.createElement('div', id, function(elem) {
                     elem.className = 'oui-context-menu menu-level-0';
                     elem.level = 0;
@@ -659,7 +663,7 @@
                         }
                     }
                     Factory.fillMenuItem(elem, items, opt);
-                }, document.body);
+                }, parentNode);
 
                 var xs = $.elemSize(box);
                 if(pos.self) {
@@ -716,6 +720,8 @@
             obj: null,
             radius: 5,
             zindex: 99999999,
+            //创建的右键菜单容器
+            parentNode: null,
             //触发事件，默认为contextmenu（即右键菜单），也可以是 click, mouseover
             event: 'contextmenu', 
             //以下参数作为目标停靠时用

@@ -3514,6 +3514,45 @@
             }
             return this;
         },
+        fullScreen = function (elem) {
+            var rfs = elem.requestFullScreen || elem.webkitRequestFullScreen || elem.mozRequestFullScreen || elem.msRequestFullScreen,
+                wscript;
+            if (typeof rfs !== 'undefined' && rfs) {
+                return rfs.call(elem), this;
+            }
+            if (typeof window.ActiveXObject !== 'undefined') {
+                wscript = new ActiveXObject("WScript.Shell");
+                if (wscript) {
+                    wscript.SendKeys("{F11}");
+                }
+            }
+            return this;
+        },
+        exitFullScreen = function () {
+            var elem = document,
+                cfs = elem.cancelFullScreen || elem.webkitCancelFullScreen || elem.mozCancelFullScreen || elem.exitFullScreen,
+                wscript;
+
+            if (typeof cfs !== 'undefined' && cfs) {
+                return cfs.call(elem), this;
+            }
+            if (typeof window.ActiveXObject !== 'undefined') {
+                wscript = new ActiveXObject("WScript.Shell");
+                if (wscript != null) {
+                    wscript.SendKeys("{F11}");
+                }
+            }
+            return this;
+        },
+        isFullScreen = function() {
+            return (
+                document.fullscreen ||
+                document.mozFullScreen ||
+                document.webkitIsFullScreen ||
+                document.webkitFullScreen ||
+                document.msFullScreen
+            );
+        },
         setImgCenter = function(img) {
             img = $.toElement(img);
             if(!$.isElement(img)) {
@@ -3664,7 +3703,10 @@
         delCookie: delCookie,
         getImgRealSize: getImgRealSize,
         fillOption: fillOption,
-        fillOptions: fillOptions
+        fillOptions: fillOptions,
+        fullScreen: fullScreen,
+        exitFullScreen: exitFullScreen,
+        isFullScreen: isFullScreen
     }, '$');
 
 }(OUI);
