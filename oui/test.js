@@ -701,3 +701,10 @@ var pattern = /^a(.*)$/;
 console.log(pattern.test('a/abc/as'))
 
 console.log($.numberToChinese(25))
+
+//D:\Android\Android Studio\bin\studio64.exe
+
+console.log($.chineseToUnicode('\''))
+console.log($.chineseToUnicode('"'))
+console.log($.asciiToUnicode('\''))
+console.log($.asciiToUnicode('"'))

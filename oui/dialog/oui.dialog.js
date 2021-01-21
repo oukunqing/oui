@@ -3658,7 +3658,7 @@
                 debounceLimit: 5000,    //防抖时限，单位：毫秒
                 ok: null,               //点击确定按钮后的回调函数
                 cancel: null,           //点击取消按钮后的回调函数
-                parameter: null,        //回调返回的参数
+                parameter: null,        //回调返回的参数， param || parameter
                 resize: null,           //对话框大小改变后的回调函数
                 resizeDebounce: false,  //尺寸改变回调防抖
                 redirect: null,         //重定向跳转到指定的URL [target]

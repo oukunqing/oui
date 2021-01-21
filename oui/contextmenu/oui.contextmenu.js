@@ -240,61 +240,67 @@
                 $.disableEvent(box, 'contextmenu');
 
                 for(var i = 0; i < items.length; i++) {
-                    var dr = items[i],
-                        itemId = Factory.buildItemId(box.menuId),
-                        chbId = Factory.buildChbId(box.menuId, dr.key),
-                        txt = dr.name || dr.txt || dr.text,
-                        hasChild = $.isArray(dr.items),
-                        disabled = $.isBoolean(dr.disabled || dr.disable, false);
+                    var dr = items[i];
+                    if(dr === 'sep' || dr.sep || dr.type === 'sep') {
+                        $.createElement('div', '', function(elem) {
+                            elem.className = 'cmenu-sep';
+                        }, box);
+                    } else {
+                        var itemId = Factory.buildItemId(box.menuId),
+                            chbId = Factory.buildChbId(box.menuId, dr.key),
+                            txt = dr.name || dr.txt || dr.text,
+                            hasChild = $.isArray(dr.items),
+                            disabled = $.isBoolean(dr.disabled || dr.disable, false);
 
-                    $.createElement('div', itemId, function(elem, param) {
-                        elem.className = 'cmenu-item' + (disabled ? ' cmenu-disabled' : '');
-                        elem.menuId = box.menuId;
-                        elem.itemId = itemId;
-                        elem.chbId = chbId;
-                        elem.level = level;
-                        elem.data = param.data;
+                        $.createElement('div', itemId, function(elem, param) {
+                            elem.className = 'cmenu-item' + (disabled ? ' cmenu-disabled' : '');
+                            elem.menuId = box.menuId;
+                            elem.itemId = itemId;
+                            elem.chbId = chbId;
+                            elem.level = level;
+                            elem.data = param.data;
 
-                        if(!disabled) {
-                            $.disableEvent(elem, 'mousedown', $.cancelBubble);
-                            $.addListener(elem, 'mouseover', function(ev) {
-                                $.cancelBubble();
-                                if(param.hasChild) {
-                                    $.addClass(elem, 'cur');
-                                    Factory.buildSubMenu(this, $.getEventPosition(ev), param.items, true, cfg, cache, autoWidth);
-                                } else {
-                                    Factory.closeOpenedBox(cache, level);
+                            if(!disabled) {
+                                $.disableEvent(elem, 'mousedown', $.cancelBubble);
+                                $.addListener(elem, 'mouseover', function(ev) {
+                                    $.cancelBubble();
+                                    if(param.hasChild) {
+                                        $.addClass(elem, 'cur');
+                                        Factory.buildSubMenu(this, $.getEventPosition(ev), param.items, true, cfg, cache, autoWidth);
+                                    } else {
+                                        Factory.closeOpenedBox(cache, level);
+                                    }
+                                });
+                            }
+
+                            txt += Factory.buildMenuIcon(cfg, dr);
+
+                            if(param.hasChild) {
+                                txt += '<i class="cmenu-arrow"></i>';
+                                if(!dr.node && !dr.leaf) {
+                                    elem.innerHTML = txt;
+                                    $.addListener(elem, 'mouseup', function(ev){
+                                        $.cancelBubble(ev);
+                                    });
+                                    return false;
                                 }
-                            });
-                        }
-
-                        txt += Factory.buildMenuIcon(cfg, dr);
-
-                        if(param.hasChild) {
-                            txt += '<i class="cmenu-arrow"></i>';
-                            if(!dr.node && !dr.leaf) {
-                                elem.innerHTML = txt;
+                            }
+                            var func = Factory.buildMenuCallback(dr, cfg);
+                            if(!disabled && $.isFunction(func)) {
+                                $.addListener(elem, 'mouseup', function(ev) {
+                                    $.cancelBubble(ev);
+                                    var par = Factory.buildMenuPar(elem.data, cfg, elem.chbId);
+                                    Factory.setChecked(box.menuId, par).hideContextMenu(ev, box.menuId, true);
+                                    func(Factory.dealChecked(par, elem), this);
+                                });
+                            } else {
                                 $.addListener(elem, 'mouseup', function(ev){
                                     $.cancelBubble(ev);
                                 });
-                                return false;
                             }
-                        }
-                        var func = Factory.buildMenuCallback(dr, cfg);
-                        if(!disabled && $.isFunction(func)) {
-                            $.addListener(elem, 'mouseup', function(ev) {
-                                $.cancelBubble(ev);
-                                var par = Factory.buildMenuPar(elem.data, cfg, elem.chbId);
-                                Factory.setChecked(box.menuId, par).hideContextMenu(ev, box.menuId, true);
-                                func(Factory.dealChecked(par, elem), this);
-                            });
-                        } else {
-                            $.addListener(elem, 'mouseup', function(ev){
-                                $.cancelBubble(ev);
-                            });
-                        }
-                        elem.innerHTML = Factory.buildMenuText(txt, dr, disabled, box.menuId, chbId);
-                    }, box, { items: dr.items, hasChild: hasChild, data: dr });
+                            elem.innerHTML = Factory.buildMenuText(txt, dr, disabled, box.menuId, chbId);
+                        }, box, { items: dr.items, hasChild: hasChild, data: dr });
+                    }
                 }
             }, parent);
 
