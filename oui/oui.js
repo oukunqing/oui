@@ -3646,6 +3646,7 @@
         setAttribute: setAttribute,
         toCssText: toCssText,
         setStyle: setStyle,
+        setClass: setClass,
         addClass: addClass,
         removeClass: removeClass,
         toggleClass: toggleClass,
