@@ -2705,22 +2705,32 @@
             }
         },
         setAttribute = function (elem, attributes, exempt, serialize) {
-            if ($.isBoolean(exempt, false) || $.isElement(elem)) {
-                if ($.isObject(attributes)) {
-                    for (var key in attributes) {
-                        var val = attributes[key];
-                        if (serialize && $.isObject(val)) {
-                            if ($.isArray(val) || $.isElement(val)) {
-                                elem.setAttribute(key, val);
+            if($.isNullOrUndefined(elem)){
+                return this;
+            }
+            if (isArrayLike(elem)) {
+                elem = makeArray(elem);
+            } else if (!$.isArray(elem)) {
+                elem = [elem];
+            }
+            for (var i = 0, c = elem.length; i < c; i++) {
+                if ($.isBoolean(exempt, false) || $.isElement(elem[i])) {
+                    if ($.isObject(attributes)) {
+                        for (var key in attributes) {
+                            var val = attributes[key];
+                            if (serialize && $.isObject(val)) {
+                                if ($.isArray(val) || $.isElement(val)) {
+                                    elem[i].setAttribute(key, val);
+                                } else {
+                                    elem[i].setAttribute(key, $.toJsonString(val));
+                                }
                             } else {
-                                elem.setAttribute(key, $.toJsonString(val));
+                                setAttribute2(elem[i], key, val);
                             }
-                        } else {
-                            setAttribute2(elem, key, val);
                         }
+                    } else if ($.isString(attributes) && isAttributeValue(exempt)) {
+                        setAttribute2(elem[i], attributes, exempt);
                     }
-                } else if ($.isString(attributes) && isAttributeValue(exempt)) {
-                    setAttribute2(elem, attributes, exempt);
                 }
             }
             return this;
@@ -2742,26 +2752,36 @@
             return cssText.join(' ');
         },
         setStyle = function (elem, styles, value, exempt) {
+            if($.isNullOrUndefined(elem)) {
+                return this;
+            }
+            if (isArrayLike(elem)) {
+                elem = makeArray(elem);
+            } else if (!$.isArray(elem)) {
+                elem = [elem];
+            }
             if ($.isBoolean(value)) {
                 exempt = value, value = null;
             }
-            if ($.isBoolean(exempt, false) || $.isElement(elem)) {
-                if ($.isObject(styles)) {
-                    //当同时设置多个样式时，value 可以当成 单位值 来用
-                    var unit = '';
-                    if ($.isString(value, true)) {
-                        value = value.toLowerCase().trim();
-                        if (value.in(['px', '%'])) {
-                            unit = value;
+            for (var i = 0, c = elem.length; i < c; i++) {
+                if ($.isBoolean(exempt, false) || $.isElement(elem[i])) {
+                    if ($.isObject(styles)) {
+                        //当同时设置多个样式时，value 可以当成 单位值 来用
+                        var unit = '';
+                        if ($.isString(value, true)) {
+                            value = value.toLowerCase().trim();
+                            if (value.in(['px', '%'])) {
+                                unit = value;
+                            }
                         }
+                        for (var key in styles) {
+                            elem[i].style[key] = styles[key] + unit;
+                        }
+                    } else if ($.isString(styles) && isAttributeValue(value)) {
+                        elem[i].style[styles] = value;
+                    } else if ($.isString(styles)) {
+                        elem[i].style.cssText += styles;
                     }
-                    for (var key in styles) {
-                        elem.style[key] = styles[key] + unit;
-                    }
-                } else if ($.isString(styles) && isAttributeValue(value)) {
-                    elem.style[styles] = value;
-                } else if ($.isString(styles)) {
-                    elem.style.cssText += styles;
                 }
             }
             return this;
