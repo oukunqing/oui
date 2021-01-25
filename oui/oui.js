@@ -2735,6 +2735,28 @@
             }
             return this;
         },
+        removeAttribute = function (elem, attributes, exempt) {
+            if($.isNullOrUndefined(elem)){
+                return this;
+            }
+            if (isArrayLike(elem)) {
+                elem = makeArray(elem);
+            } else if (!$.isArray(elem)) {
+                elem = [elem];
+            }
+            for (var i = 0, c = elem.length; i < c; i++) {
+                if ($.isBoolean(exempt, false) || $.isElement(elem[i])) {
+                    if ($.isObject(attributes)) {
+                        for (var key in attributes) {
+                            elem[i].removeAttribute(key);
+                        }
+                    } else if ($.isString(attributes)) {
+                        elem[i].removeAttribute(attributes);
+                    }
+                }
+            }
+            return this;
+        },
         toCssText = function(obj) {
             if($.isString(obj)) {
                 return obj;
@@ -3664,6 +3686,8 @@
         makeArray: makeArray,
         getAttribute: getAttribute,
         setAttribute: setAttribute,
+        removeAttribute: removeAttribute,
+        delAttribute: removeAttribute,
         toCssText: toCssText,
         setStyle: setStyle,
         setClass: setClass,
