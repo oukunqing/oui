@@ -2110,7 +2110,7 @@
 }(OUI);
 
 
-// Web
+// WEB
 !function ($) {
     'use strict';
 
@@ -4084,6 +4084,7 @@
             return this.getCheckedValues(selector, options);
         },
         getCheckedText: function(elem) {
+            elem = $.toElement(elem);
             if(!$.isElement(elem)) {
                 return '';
             }
@@ -4091,6 +4092,7 @@
         },
         getTextCursorPosition: function (elem) {
             try {
+                elem = $.toElement(elem);
                 if (!$.isElement(elem)) {
                     return -1;
                 }
@@ -4109,6 +4111,7 @@
             return -1;
         },
         setTextCursorPosition: function (elem, pos) {
+            elem = $.toElement(elem);
             if (!$.isElement(elem)) {
                 return false;
             }
@@ -4132,6 +4135,10 @@
             return this;
         },
         getSelectedText: function (elem) {
+            elem = $.toElement(elem);
+            if (!$.isElement(elem)) {
+                return '';
+            }
             if (elem.selectionStart || elem.selectionStart === '0') {
                 return elem.value.substring(elem.selectionStart, elem.selectionEnd);
             } else if (document.selection) {
@@ -4167,6 +4174,7 @@
             return len > 1 ? arr : val;
         },
         setElementAttribute: function (elem, value, attributeName) {
+            elem = $.toElement(elem);
             if (attributeName === 'value') {
                 elem.value = value;
             } else {

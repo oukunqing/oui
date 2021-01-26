@@ -587,6 +587,8 @@ var numbers = [1,2,3,5,6,9,21,22,23,99];
 console.log($.collapseNumbers(numbers));
 
 
+
+
 var numbers = '1,2,3,5,6,9,21,22,23,99';
 
 console.log($.collapseNumbers(numbers));
@@ -708,3 +710,10 @@ console.log($.chineseToUnicode('\''))
 console.log($.chineseToUnicode('"'))
 console.log($.asciiToUnicode('\''))
 console.log($.asciiToUnicode('"'))
+
+
+var win = {};
+console.log(win&&win.id)
+
+var num = 11111111111111;
+console.log(num + 2);
