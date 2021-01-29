@@ -38,6 +38,7 @@
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
+	outline: none;
 }
 
 .oui-dialog-max {
@@ -72,6 +73,7 @@
     user-select:none;
     -ms-user-select: none;
     */
+	outline: none;
 }
 
 .oui-dialog .dialog-unselect{
@@ -457,6 +459,7 @@
     border-radius: 3px;
     border-style: solid;
     text-align: center;
+	/*outline: none;*/
 }
 
 .oui-dialog .btn-primary {

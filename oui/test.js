@@ -717,3 +717,9 @@ console.log(win&&win.id)
 
 var num = 11111111111111;
 console.log(num + 2);
+
+
+
+console.log( 128 & 128)
+
+console.log(129-256)
