@@ -285,7 +285,7 @@
                     }
                     return result(true, value);
                 },
-                showTooltip: function (result, element, isSubmit) {
+                showTooltip: function (result, element, isSubmit, forname) {
                     //记录提示信息隐藏次数，防止重复隐藏
                     if ($.isUndefined(element.hideTooltip)) {
                         element.hideTooltip = 0;
@@ -300,7 +300,7 @@
                             if (!$.isNumber(time) || time < -1) {
                                 time = configs.tooltipTime;
                             }
-                            var options = { time: $.isNumber(time) ? time : 0, tipsMore: true };
+                            var options = { time: $.isNumber(time) ? time : 0, tipsMore: true, for: forname };
                             var position = (element.field || {}).position || configs.position;
                             if($.isString(position, true) || $.isNumber(position)) {
                                 options.position = position;
@@ -412,14 +412,15 @@
                         dataKey: field.dataKey, isSingle: isSingle, field: field
                     };
                 },
-                setControlEvent: function (element, configs, fieldConfig) {
+                setControlEvent: function (element, configs, fieldConfig, formElement) {
                     if (!element.isSetEvent) {
+                        var fid = formElement.id;
                         var events = {
-                            focus: function() { op.showTooltip(op.checkValue(this), this); },
-                            blur: function() { op.showTooltip(op.checkValue(this), this); },
-                            change: function() { op.showTooltip(op.checkValue(this), this); },
-                            click: function() { op.showTooltip(op.getCheckValue(this), this); },
-                            keyup: function() { op.showTooltip(op.checkValue(this), this); }
+                            focus: function() { op.showTooltip(op.checkValue(this), this, false, fid); },
+                            blur: function() { op.showTooltip(op.checkValue(this), this, false, fid); },
+                            change: function() { op.showTooltip(op.checkValue(this), this, false, fid); },
+                            click: function() { op.showTooltip(op.getCheckValue(this), this, false, fid); },
+                            keyup: function() { op.showTooltip(op.checkValue(this), this, false, fid); }
                         };
 
                         if(typeof $.OUI === 'boolean') {
@@ -451,7 +452,7 @@
                         }
 
                         element.validate = function() {
-                            op.showTooltip(op.checkValue(element), element);
+                            op.showTooltip(op.checkValue(element), element, false, fid);
                         };
                     }
                     //记录是否被创建事件，防止重复创建
@@ -540,13 +541,14 @@
             if (op.tagPattern.test(tag) && op.typePattern.test(type)) {
                 var fc = op.getFieldConfig(obj, op.fields);
                 obj.configs = op.configs;
-                op.setControlEvent(obj, op.configs, fc);
+                op.setControlEvent(obj, op.configs, fc, formElement);
                 list.push(obj);
             }
         }
         return list;
     },
-    getElementsData = function (warns, arr, op) {
+    getElementsData = function (warns, arr, op, formElem) {
+        formElem = $.toElement(formElem);
         var data = {}, configs = op.configs, len = arr.length;
         for (var i = 0; i < len; i++) {
             var obj = arr[i], tag = obj.tagName, type = obj.type, key = '';
@@ -565,11 +567,11 @@
                 } else {
                     result = op.checkValue(obj, fc.value, fc.field, configs);
                 }
-                op.showTooltip(result, obj, true);
+                op.showTooltip(result, obj, true, formElem.id);
 
                 if (!result.pass) {
                     warns.push({ element: obj, message: result.message });
-                    op.setControlEvent(obj, configs, fc);
+                    op.setControlEvent(obj, configs, fc, formElem);
                     if (configs.singleStep) {
                         //if (configs.focusInvalid) {
                         if (!configs.focusInvalid) {
@@ -625,7 +627,7 @@
         } else {
             arr = op.formElement.getElementsByTagName(configs.tagName || "*");
         }
-        var data = getElementsData(warns, arr, op);
+        var data = getElementsData(warns, arr, op, formElement);
         if ($.isDebug()) {
             console.log('data: ', data, ', warns: ', warns);
         }
@@ -719,7 +721,7 @@
         for (var i = rowIndex; i < rows; i++) {
             var warns = [], op = initFormConfig(tableElement, options), configs = op.configs;
             var tr = tableElement.rows[i], arr = tr.getElementsByTagName(configs.tagName || "*");
-            var data = getElementsData(warns, arr, op);
+            var data = getElementsData(warns, arr, op, tableElement);
             if (data) {
                 list.push(data);
             }

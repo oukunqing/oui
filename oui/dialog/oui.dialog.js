@@ -393,7 +393,7 @@
                 opt.complete = opt.complete || opt.onload || opt.ready;
                 opt.coverOCX = opt.coverOCX || opt.coverOcx || opt.cover;
 
-                //对话框关闭后，要获取停止的HTML控件
+                //对话框关闭后，要获取焦点的HTML控件
                 opt.focusTo = opt.focusTo || opt.focus;
                 if (!$.isElement(opt.focusTo)) {
                     opt.focusTo = $.isString(opt.focusTo, true) ? $I(opt.focusTo) : undefined;
@@ -410,6 +410,11 @@
 
                 if (!$.isElement(opt.parent) && $.isString(opt.parent, true)) {
                     opt.parent = document.getElementById(opt.parent);
+                }
+
+                opt.forname = opt.forname || opt.forid || opt.for;
+                if($.isElement(opt.forname)) {
+                    opt.forname = opt.forname.id || opt.forname.name || '';
                 }
 
                 if ($.isBoolean(opt.boxShadow) || opt.boxShadow === 'none') {
@@ -693,6 +698,16 @@
                     var cache = this.getOptions(op.id);
                     if (cache && cache.dialog.getOptions().closeAble) {
                         cache.dialog.close();
+                    }
+                }
+                return this;
+            },
+            closeFor: function (forname) {
+                for (var k in Cache.dialogs) {
+                    var p = Cache.dialogs[k], d = p.dialog;
+                    if (p && p.controls.dialog && p.options && p.options.forname === forname
+                        && d && !d.isClosed() && d.getOptions().closeAble) {
+                        d.close();
                     }
                 }
                 return this;
@@ -3446,6 +3461,10 @@
                     ctls.body = util.buildBody(_, ctls.dialog);
 
                     $.setAttribute(ctls.dialog, 'target', opt.target.id || '');
+                    //设置for属性
+                    var forname = opt.forname || opt.target.id || '';
+                    $.setAttribute(ctls.dialog, 'for', forname);
+
                     $.setAttribute(opt.target, Config.TooltipAttributeName, opt.id);
                     p.parent.appendChild(ctls.dialog);
 
@@ -3607,6 +3626,7 @@
                 x: 0,                   //x轴(left)偏移量，单位：px
                 y: 0,                   //y轴(top)偏移量，单位：px
                 target: null,           //Element 要跟随位置的html控件 target || anchor
+                forname: '',            //对话框DIV属性for值内容
                 direction: 'auto',      //跟随位置的方向 auto | fixed
                 width: ds.width + 'px',     //初始宽度      px, auto, %, follow|inherit
                 //width: follow|inherit 并且设置了target，则width跟随target控件的宽度
@@ -4229,13 +4249,28 @@
         close: function (id) {
             return Factory.close(id), $;
         },
+        closeFor: function(forname) {
+            return Factory.closeFor(forname), $;
+        },
+        closefor: function(forname) {
+            return Factory.closeFor(forname), $;
+        },
         closeAll: function (type) {
+            return Factory.closeAll(type), $;
+        },
+        closeall: function (type) {
             return Factory.closeAll(type), $;
         },
         closeParent: function (id, param) {
             return Factory.closeParent(id, param), $;
         },
+        closeparent: function (id, param) {
+            return Factory.closeParent(id, param), $;
+        },
         resizeParent: function (id, param) {
+            return Factory.resizeParent(id, param), $;
+        },
+        resizeparent: function (id, param) {
             return Factory.resizeParent(id, param), $;
         }
     });
@@ -4247,7 +4282,16 @@
             }
             return Factory.close(id), $;
         },
+        closeFor: function(forname) {
+            return Factory.closeFor(forname), $;
+        },
+        closefor: function(forname) {
+            return Factory.closeFor(forname), $;
+        },
         closeAll: function (type) {
+            return Factory.closeAll(type || Config.DialogType.tooltip), $;
+        },
+        closeall: function (type) {
             return Factory.closeAll(type || Config.DialogType.tooltip), $;
         }
     });
