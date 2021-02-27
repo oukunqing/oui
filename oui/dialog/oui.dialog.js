@@ -412,7 +412,7 @@
                     opt.parent = document.getElementById(opt.parent);
                 }
 
-                opt.forname = opt.forname || opt.forid || opt.for;
+                opt.forname = (opt.forname || opt.forName) || (opt.forid || opt.forId) || opt.for;
                 if($.isElement(opt.forname)) {
                     opt.forname = opt.forname.id || opt.forname.name || '';
                 }

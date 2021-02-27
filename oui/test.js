@@ -722,4 +722,36 @@ console.log(num + 2);
 
 console.log( 128 & 128)
 
-console.log(129-256)
+
+console.log($.buildAjaxData('setMode', {id:1,name:'acc'}, {id:1,name:'acc'},))
+
+console.log(new Date().getTime())
+
+
+var obj33 = {
+    'A123': 'a123',
+    'C123': 'c123',
+    'B123': 'b123'
+};
+
+for(var k in obj33) {
+    console.log(obj33[k]);
+}
+
+
+var items = [
+    {host: 'abc', len: 3},
+    {host: 'acc', len: 2},
+    {host: 'asd', len: 5}
+];
+
+items.sort(function(a, b) {
+    return a.len - b.len;
+});
+
+console.log(items);
+
+let a = 5;      // 00000000000000000000000000000101
+a |= 3;         // 00000000000000000000000000000011
+
+console.log(a); // 00000000000000000000000000000111
