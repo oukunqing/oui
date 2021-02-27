@@ -817,6 +817,7 @@
                     var id = parent.id;                    
                     if(id && !Factory.FormCache[id]) {
                         var style = $.getElementStyle(parent, 'overflow');
+                        //判断表单容器overflow是否为auto
                         if(style && style.toLowerCase() === 'auto') {
                             //表单输入框父级DIV容器滚动时，重新定位提示框
                             $.addListener(parent, 'scroll', function(e) {

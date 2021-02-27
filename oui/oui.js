@@ -3538,9 +3538,22 @@
             elem.options.add(new Option($.isValue(text, value), value));
             return this;
         },
-        fillOptions = function (elem, list) {
+        fillOptions = function (elem, list, minVal, maxVal, stepVal) {
             elem = $.toElement(elem);
             if (!elem.tagName === 'SELECT') {
+                return this;
+            }
+            if($.isNumber(list)) {
+                stepVal = maxVal;
+                maxVal = minVal;
+                minVal = list;
+                list = null;
+            }
+            if($.isNumber(minVal) && $.isNumber(maxVal)) {
+                stepVal = stepVal || 1;
+                for(var i = minVal; i <= maxVal; i+= stepVal) {
+                    elem.options.add(new Option(i, i));
+                }
                 return this;
             }
             for (var i = 0; i < list.length; i++) {
@@ -3549,7 +3562,7 @@
                     //new Option(text, value);
                     elem.options.add(new Option($.isValue(dr[1], dr[0]), dr[0]));
                 } else if ($.isObject(dr)) {
-                    elem.options.add(new Option(dr.text, dr.value || dr.val));
+                    elem.options.add(new Option(dr.text || dr.txt, dr.value || dr.val));
                 } else {
                     elem.options.add(new Option(dr, dr));
                 }
