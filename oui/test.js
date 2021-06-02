@@ -656,7 +656,7 @@ var s = 'QN=?201013091118184;ST=91;PW=123456;MN=7201007;CN=9021;CmdFlag=1;CP=&&V
 console.log(s.length)
 
 
-console.log('2020-07-15 16:38:56'.toDate().format('ts'))
+console.log('2010-11-15 10:39:30'.toDate().format('ts'))
 console.log('1594802336000'.toDate().format())
 console.log('1594802336000'.toDate().format('yyyy-MM-dd HH:mm:ss'))
 console.log('1594802336000'.toDate().format('yyyy-MM-dd HH:mm'))
@@ -755,3 +755,48 @@ let a = 5;      // 00000000000000000000000000000101
 a |= 3;         // 00000000000000000000000000000011
 
 console.log(a); // 00000000000000000000000000000111
+
+
+var dt = new Date('2010/08/05');
+console.log(dt.format());
+
+console.log(dt.getAge());
+
+
+var str = '&type={type|1}&id={id|0}';
+
+console.log(str.format({type:0}))
+console.log(str.format({id:5}))
+
+
+console.log(505 - 505 % 20);
+
+console.log('2010-11-15 10:39:30'.toDate().format('ts'))
+
+console.log('2021-05-20 14:28:31'.toDate().format('ts'));
+
+
+
+console.log((1622219426).toDate().format())
+
+
+console.log('2021-05-21 13:55:13'.toDate().format('ts'))
+
+
+var str = "4000 42013213421";
+
+str = str.replace(/[\s]/g, '');
+
+console.log(str);
+
+for(var i = 0; i < str.length; i++)
+{
+    console.log(str[i]);
+}
+
+var dt = "2021-05-21 13:55:13";
+console.log($.PATTERN.DateTime.test(dt));
+var dt = "2021-05-21";
+console.log($.PATTERN.Date.test(dt));
+var dt = "13:55:13";
+console.log($.PATTERN.Time.test(dt));
