@@ -147,7 +147,9 @@
             //时间格式，可以省略“:秒”
             Time: /^(20|21|22|23|[0-1]\d):[0-5]\d(:[0-5]\d)?$/,
             //日期时间格式
-            DateTime: /^(19|20)[\d]{2}[\-\/](0[1-9]|1[0-2])[\-\/](0[1-9]|[12][0-9]|3[0-1])\s+(20|21|22|23|[0-1]\d):[0-5]\d(:[0-5]\d)?$/
+            DateTime: /^(19|20)[\d]{2}[\-\/](0[1-9]|1[0-2])[\-\/](0[1-9]|[12][0-9]|3[0-1])\s+(20|21|22|23|[0-1]\d):[0-5]\d(:[0-5]\d)?$/,
+            //IPV4
+            Ip: /^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$/
         }
     });
 
@@ -417,6 +419,32 @@
                 return func;
             }
             return null;
+        },
+        toAscii = function(argv) {
+            var arr = [], s = argv.toString().trim(), len = s.length;
+            for(var i = 0; i < len; i++) {
+                arr.push(s[i].charCodeAt());
+            }
+            return arr;
+        },
+        toAsciiHex = function(argv, isJoin) {
+            if($.isNumber(argv)) {
+                var arr = [argv.toString(16).toUpperCase()];
+                return isJoin ? arr.join('') : arr;
+            }
+            var hex = [], arr = $.isArray(argv) ? argv : toAscii(argv), len = arr.length, idx = 0;
+            for(var i = 0; i < len; i++) {
+                var v = arr[i];
+                if($.isNumber(v)) {
+                    hex[idx++] = v.toString(16).toUpperCase();
+                } else {
+                    var tmp = v.toAscii(), c = tmp.length;
+                    for(var j = 0; j < c; j++) {
+                        hex[idx++] = tmp[j].toString(16).toUpperCase();
+                    }
+                }
+            }
+            return isJoin ? hex.join('') : hex;
         },
         getArguments = function(args, start, end) {
             var par = {}, len = 0, s = start || 0, e = end || args.length;
@@ -743,6 +771,7 @@
         collapseNumberList: collapseNumberList, expandNumberList: expandNumberList,
         collapseNumbers: collapseNumberList, expandNumbers: expandNumberList,
         toJsonString: toJsonString, toJson: toJson, toEncode: toEncode, 
+        toAscii: toAscii, toAsciiHex: toAsciiHex,
         getArguments: getArguments, getArgs: getArguments,
         toFunction: toFunction, toFunc: toFunction, callFunction: callFunction, callFunc: callFunction,
         param: buildParam, buildParam: buildParam, setUrlParam: setUrlParam, buildAjaxData: buildAjaxData,
@@ -1355,36 +1384,6 @@
         isIdentity: function() { return $.isIdentity(this); },
         isEmail: function () { return $.isEmail(this); },
         isNaN: function() { return isNaN(parseFloat(this, 10)); },
-        /*
-        toNumber: function(defaultValue, isFloat, decimalLen) {
-            //这里判断是否是数字的正则规则是 判断从数字开始到非数字结束，根据 parseFloat 的规则
-            var s = this, v = 0, dv = defaultValue, pattern = /^[-+]?(\d+)(.[\d]{0,})/;
-            if ($.isNumeric(dv)) {
-                if ($.isInteger(isFloat)) {
-                    decimalLen = isFloat, isFloat = true;
-                } else {
-                    if ($.isUndefined(isFloat)) {
-                        isFloat = pattern.test(dv) || pattern.test(s);
-                    }
-                    decimalLen = $.isInteger(decimalLen) ? decimalLen : (dv.toString().split('.')[1] || '').length;
-                }
-            } else if ($.isBoolean(dv)) {
-                decimalLen = $.isInteger(isFloat) ? isFloat : decimalLen, isFloat = dv, dv = 0;
-            } else {
-                isFloat = $.isBoolean(isFloat, pattern.test(dv) || pattern.test(s));
-            }
-
-            if (isFloat) {
-                ////当decimalLen>0时，才进行四舍五入处理
-                //v = parseFloat(s, 10), v = !isNaN(v) && $.isInteger(decimalLen) && decimalLen > 0 ? v.round(decimalLen) : v;
-                //只要decimalLen为整数，就进行四舍五入处理
-                v = parseFloat(s, 10), v = !isNaN(v) && $.isInteger(decimalLen) ? v.round(Math.abs(decimalLen)) : v;
-            } else {
-                v = parseInt(s, 10);
-            }
-            return !isNaN(v) ? v : Number(dv) || 0;
-        },
-        */
         toBoolean: function(val) { return $.toBoolean(this, typeof val === 'undefined' ? this : val); },
         toBool: function(val) { return $.toBoolean(this, typeof val === 'undefined' ? this : val); },
         toNumber: function (defaultValue, isFloat, decimalLen) { return $.toNumber(this, defaultValue, isFloat, decimalLen); },
@@ -1497,6 +1496,17 @@
             return u;
             */
             return $.chineseToUnicode(this, returnArray, noPrefix);
+        },        
+        toAscii: function() {
+            return $.toAscii(this);
+        },
+        toAsciiHex: function (arrAscii, isJoin) {
+            if($.isBoolean(arrAscii)) {
+                isJoin = arrAscii;
+                arrAscii = null;
+            }
+            var arr = $.isArray(arrAscii) ? arrAscii : this.toAscii();
+            return $.toAsciiHex(arr, isJoin);
         },
         parseUnicode: function(returnArray) {
             return $.unicodeToChinese(this, returnArray);
@@ -1600,6 +1610,59 @@
             } else {
                 return s + postfix;
             }
+        },
+        isEvenLen: function() {
+            var s = this.trim(), len = s.length;
+            if(len % 2 !== 0) {
+                s = '0' + s;
+            }
+            return s;
+        },
+        reverseHex: function() {
+            var hex = this.isEvenLen(), arr = [], len = hex.length;
+            for(var i = 0; i < len / 2; i++) {
+                arr[len - i * 2 - 1] = hex[i * 2 + 1];
+                arr[len - i * 2 - 2] = hex[i * 2];
+            }
+            return arr.join('');
+        },
+        hexToInt: function(reverse) {
+            var s = this.isEvenLen(),
+                hex = reverse ? s.reverseHex() : s,
+                num = eval('0x' + hex).toString(10);
+            return parseInt(num, 10);
+        },
+        hexToStr: function(reverse) {
+            var s = this.isEvenLen(),
+                hex = reverse ? s.reverseHex() : s,
+                len = hex.length,
+                arr = [];
+
+            for(var i = 0; i < len / 2; i++) {
+                var str = hex[i * 2] + hex[i * 2 + 1],
+                    num = eval('0x' + str).toString(10);
+                arr.push(String.fromCharCode(num));
+            }
+            return arr.join('');
+        },
+        hexToNum: function(reverse) {
+            var s = this.isEvenLen(),
+                hex = reverse ? s.reverseHex() : s,
+                len = hex.length,
+                arr = [];
+            for(var i = 0; i < len / 2; i++) {
+                var str = hex[i * 2] + hex[i * 2 + 1],
+                    num = eval('0x' + str).toString(10);
+                arr.push(parseInt(num, 10));
+            }
+            return arr;
+        },
+        hexToAscii: function(reverse) {
+            return this.hexToNum(reverse);
+        },
+        hexToTime: function(reverse) {
+            var num = this.hexToInt(true);
+            return num.toDate().format();
         }
     }, 'String.prototype');
 
@@ -1643,7 +1706,9 @@
         isInt: function () { return $.isInteger(this); },
         isHexNumber: function () { return $.isHexNumeric(this); },
         isNaN: function() { return isNaN(parseFloat(this, 10)); },
+        toAscii: function() { return this.toString().charCodeAt(); },
         toHex: function () { return this.toString(16).toUpperCase(); },
+        toAsciiHex: function () { return $.toAsciiHex(this, true); },
         toThousand: function (delimiter, len) { return this.toString().toThousand(delimiter, len); },
         toChineseNumber: function (isMoney) { return $.numberToChinese(this, isMoney); },
         toDate: function (format) { return this.toString().toDate(format); },
@@ -2112,7 +2177,6 @@
         throwError((typeof o) + '.format is not a function');
     };
 }(OUI);
-
 
 // WEB
 !function ($) {
@@ -3977,7 +4041,6 @@
         };
     }
 }(OUI);
-
 
 // utils
 !function ($) {

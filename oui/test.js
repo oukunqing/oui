@@ -776,27 +776,93 @@ console.log('2010-11-15 10:39:30'.toDate().format('ts'))
 console.log('2021-05-20 14:28:31'.toDate().format('ts'));
 
 
-
-console.log((1622219426).toDate().format())
-
-
-console.log('2021-05-21 13:55:13'.toDate().format('ts'))
+//ac32fc60
 
 
-var str = "4000 42013213421";
+function parseCapturePlan(plan) {
+    //010103000aff0000ff1600ff
+    if(plan.length < 24) {
+        return plan;
+    }
+    var c = parseInt(plan.substr(4, 2), 10);
+    var times = [];
+    for(var n = 0; n < parseInt(c / 3, 10); n++) {
+        var len = 3 * 2 * 3;
+        var con = plan.substr(6 + len * n, len);
+        var t = '';
+        var j = 0;
+        for(var i = 0; i < con.length; i += 6) {
+            var h = hexToInt(con.substr(i, 2)),
+                m = hexToInt(con.substr(i + 2, 2)),
+                p = hexToInt(con.substr(i + 4, 2));
 
-str = str.replace(/[\s]/g, '');
-
-console.log(str);
-
-for(var i = 0; i < str.length; i++)
-{
-    console.log(str[i]);
+            j++;
+            switch(j % 3) {
+                case 0:
+                    t += ' - ' + h + ':' + m + ' ]';
+                    times.push(t);
+                    t = '';
+                    break;
+                case 1:
+                    t += parseInt(h, 10) * 60 + parseInt(m, 10) + ' ';
+                    break;
+                case 2:
+                    t += '[ ' + h + ':' + m;
+                    break;
+            }
+        }
+    }
+    return times.join(', ');
 }
 
-var dt = "2021-05-21 13:55:13";
-console.log($.PATTERN.DateTime.test(dt));
-var dt = "2021-05-21";
-console.log($.PATTERN.Date.test(dt));
-var dt = "13:55:13";
-console.log($.PATTERN.Time.test(dt));
+
+function reverseHex(hex) {
+    var arr = [], len = parseInt(hex.length, 10);
+    for(var i = 0; i < len / 2; i++) {
+        arr[len - i * 2 - 1] = hex[i * 2 + 1];
+        arr[len - i * 2 - 2] = hex[i * 2];
+    }
+    return arr.join('');
+}
+
+function hexToInt(hex, reverse) {
+    if(reverse) {
+        hex = reverseHex(hex);
+    }
+    var n = eval('0x' + hex).toString(10);
+    return parseInt(n, 10);
+}
+
+function hexToTime(hex, reverse) {
+    var num = hexToInt(hex, reverse);
+    return num.toDate().format();
+}
+
+console.log(parseCapturePlan('010103000aff0000ff1600ff'));
+
+console.log((1629272106).toDate().format());
+console.log((1629272718).toDate().format());
+
+console.log((parseInt(new Date().format('ts')/1000)-300482).toDate().format())
+
+console.log('5c1c2661'.hexToTime(true));
+console.log('5d1c2661'.hexToTime(true));
+
+console.log('3132333435363738393031323334303130'.hexToStr());
+console.log('3132333435363738393031323334303130'.hexToNum());
+
+//console.log('a55a0e00313233343536373839303132333430313005ce0201ffe44c26610000000000000000e30d96'.hexToStr());
+//console.log('a55a0e00313233343536373839303132333430313005ce0201ffe44c26610000000000000000e30d96'.hexToNum());
+//console.log('a55a0e00313233343536373839303132333430313005ce0201ffe44c26610000000000000000e30d96'.hexToAscii());
+
+
+console.log('12345678901234010'.toAscii());
+console.log('12345678901234010'.toAsciiHex(true));
+console.log(''.toAsciiHex([0x5a, 165, 90, '12345678901234010', 96, 90], true));
+console.log($.toAsciiHex([0x5a, 165, 90, '12345678901234010', 96, 90], true).toLowerCase());
+
+console.log((16523).toAsciiHex());
+console.log((165).toAscii());
+console.log(('165').toAsciiHex());
+console.log(('165').toAscii());
+console.log($.toAsciiHex(165, true));
