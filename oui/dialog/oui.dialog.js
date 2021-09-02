@@ -4040,6 +4040,14 @@
             var html = ctls.content.innerHTML;
             return _.update(content + html, title, options);
         },
+        title: function(title) {
+            var _ = this, p = Util.getParam(_), ctls = p.controls;
+            if (p.none || !ctls.content) {
+                return _;
+            }
+            var html = ctls.content.innerHTML;
+            return _.update(html, title);
+        },
         focus: function (obj) {
             var _ = this, p = Util.getParam(_), buttons = p.buttons;
             if (p.none || _.isClosed() || _.isHide()) {

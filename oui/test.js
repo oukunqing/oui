@@ -845,8 +845,8 @@ console.log((1629272718).toDate().format());
 
 console.log((parseInt(new Date().format('ts')/1000)-300482).toDate().format())
 
-console.log('5c1c2661'.hexToTime(true));
-console.log('5d1c2661'.hexToTime(true));
+console.log('bcf42961'.hexToTime(true));
+console.log('bdf42961'.hexToTime(true));
 
 console.log('3132333435363738393031323334303130'.hexToStr());
 console.log('3132333435363738393031323334303130'.hexToNum());
@@ -855,14 +855,31 @@ console.log('3132333435363738393031323334303130'.hexToNum());
 //console.log('a55a0e00313233343536373839303132333430313005ce0201ffe44c26610000000000000000e30d96'.hexToNum());
 //console.log('a55a0e00313233343536373839303132333430313005ce0201ffe44c26610000000000000000e30d96'.hexToAscii());
 
-
 console.log('12345678901234010'.toAscii());
 console.log('12345678901234010'.toAsciiHex(true));
 console.log(''.toAsciiHex([0x5a, 165, 90, '12345678901234010', 96, 90], true));
 console.log($.toAsciiHex([0x5a, 165, 90, '12345678901234010', 96, 90], true).toLowerCase());
 
-console.log((16523).toAsciiHex());
+console.log((1629272106).toAsciiHex().reverseHex().reverseHex());
 console.log((165).toAscii());
 console.log(('165').toAsciiHex());
 console.log(('165').toAscii());
 console.log($.toAsciiHex(165, true));
+
+console.log(parseInt(new Date().getTime() / 1000, 10))
+
+
+function toTime(ts) {
+    var len = ('' + ts).length;
+    if(len < 13) {
+        ts *= Math.pow(10, 13 - len);
+    }
+    var date = new Date(ts + 8 * 3600 * 1000);
+    return date.toISOString().substr(0, 19).replace('T', ' ');
+}
+console.log(toTime(1630304102)); // "2018.08.09 18:25:54"
+
+var arr = ['abc','acc'];
+arr = arr.concat(['123', '456']);
+
+console.log(arr);
