@@ -749,7 +749,7 @@ function tips(){
 }
 
 function tips2(){
-    var win = $.tips('tips: 提示信息2', $I('txtTips2'), {position: 6});
+    var win = $.tips('tips: 提示信息2', $I('txtTips2'), {position: 6, autoClose: true, closeTiming: 3000});
     window.setTimeout(function() {
         //$.tooltip.closeAll();
     }, 6000);

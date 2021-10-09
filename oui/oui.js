@@ -427,6 +427,17 @@
             }
             return arr;
         },
+        asciiToChar = function(argv) {
+            var arr = isArray(argv) ? argv : argv.split(/[\s|,]/g);
+            var list = [];
+            for(var i = 0; i < arr.length; i++) {
+                var num = parseInt(arr[i], 10);
+                if(!isNaN(num)) {
+                    list.push(String.fromCharCode(num));
+                }
+            }
+            return list.join('');
+        },
         toAsciiHex = function(argv, isJoin) {
             if($.isNumber(argv)) {
                 var arr = [argv.toString(16).toUpperCase()];
@@ -771,7 +782,7 @@
         collapseNumberList: collapseNumberList, expandNumberList: expandNumberList,
         collapseNumbers: collapseNumberList, expandNumbers: expandNumberList,
         toJsonString: toJsonString, toJson: toJson, toEncode: toEncode, 
-        toAscii: toAscii, toAsciiHex: toAsciiHex,
+        toAscii: toAscii, toAsciiHex: toAsciiHex, asciiToChar: asciiToChar, asciiToStr: asciiToChar,
         getArguments: getArguments, getArgs: getArguments,
         toFunction: toFunction, toFunc: toFunction, callFunction: callFunction, callFunc: callFunction,
         param: buildParam, buildParam: buildParam, setUrlParam: setUrlParam, buildAjaxData: buildAjaxData,
@@ -1496,7 +1507,13 @@
             return u;
             */
             return $.chineseToUnicode(this, returnArray, noPrefix);
-        },        
+        },
+        asciiToChar: function() {
+            return $.asciiToChar(this);
+        },
+        asciiToStr: function() {
+            return $.asciiToChar(this);
+        },
         toAscii: function() {
             return $.toAscii(this);
         },

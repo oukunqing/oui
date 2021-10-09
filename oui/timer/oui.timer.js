@@ -109,7 +109,7 @@
                 if(!_.cache.enable) {
                     return false;
                 }
-                _.cache.number = Factory.checkNumber(_.cache.number, _.cache.options.interval);
+                _.cache.number = Factory.checkNumber(_.cache.number, _.cache.options.interval + 1);
                 _.cache.number -= 1;
                 if($.isFunction(func)) {
                     func(_.cache.number);

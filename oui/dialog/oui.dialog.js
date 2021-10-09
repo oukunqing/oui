@@ -3483,6 +3483,8 @@
 
                 Factory.setWindowResize();
 
+                util.buildCloseTiming(_);
+
                 return util.setTooltipPosition(_);
             },
             updateTooltip: function (_, options) {

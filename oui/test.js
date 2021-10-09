@@ -840,13 +840,15 @@ function hexToTime(hex, reverse) {
 
 console.log(parseCapturePlan('010103000aff0000ff1600ff'));
 
-console.log((1629272106).toDate().format());
 console.log((1629272718).toDate().format());
 
 console.log((parseInt(new Date().format('ts')/1000)-300482).toDate().format())
 
 console.log('bcf42961'.hexToTime(true));
 console.log('bdf42961'.hexToTime(true));
+
+console.log('bcf42961'.hexToInt(true));
+console.log('8f594b61'.hexToInt(true).toDate().format());
 
 console.log('3132333435363738393031323334303130'.hexToStr());
 console.log('3132333435363738393031323334303130'.hexToNum());
@@ -877,9 +879,44 @@ function toTime(ts) {
     var date = new Date(ts + 8 * 3600 * 1000);
     return date.toISOString().substr(0, 19).replace('T', ' ');
 }
-console.log(toTime(1630304102)); // "2018.08.09 18:25:54"
+console.log(toTime(1631694650)); // "2018.08.09 18:25:54"
 
 var arr = ['abc','acc'];
 arr = arr.concat(['123', '456']);
 
 console.log(arr);
+
+
+
+console.log($.chineseToUnicode('\''))
+console.log($.chineseToUnicode('"'))
+console.log($.asciiToUnicode('\''))
+console.log($.asciiToUnicode('"'))
+
+console.log('abc'.toAscii())
+
+console.log(String.fromCharCode('97'))
+console.log(String.fromCharCode(13))
+console.log(String.fromCharCode(10))
+
+console.log($.asciiToChar([97, 98, 99]));
+console.log($.asciiToChar('97, 98, 99'));
+console.log($.asciiToChar('97, 98, 99'));
+
+console.log($.toAscii('123'));
+console.log($.toAsciiHex('123'));
+
+var dt = new Date('2051/01/01');
+console.log(dt.format('ts'));
+
+console.log('97, 98, 99'.asciiToStr())
+
+console.log($.asciiToStr('32303231'.hexToAscii()))
+console.log('32303231'.hexToAscii().join(',').asciiToStr())
+
+console.log('2021'.toAscii())
+console.log('2021'.toAsciiHex())
+
+
+console.log((1632359990).toDate().format());
+console.log('7B5C4B61'.hexToInt(true).toDate().format());
