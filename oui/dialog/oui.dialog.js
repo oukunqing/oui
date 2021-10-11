@@ -1284,6 +1284,9 @@
 
                 this.buildClose(_, elem, true);
 
+                //设置标题栏鼠标样式
+                elem.style.cursor = opt.moveAble ? 'move' : 'default';
+
                 return !rebuild ? this.appendChild((ctls.head = elem), pNode) : null, this;
             },
             buildCloseTiming: function (_) {
