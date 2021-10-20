@@ -2653,6 +2653,14 @@
                         if (fs.w < w) {
                             res.css = 'left: ' + (w / 2 + res.moveX) + 'px;';
                         }
+
+                        if(res.left + w > bs.width) {
+                            res.left = fs.x - (w - fs.w);
+                            res.css = 'left: ' + (w - distance) + 'px;';
+                        } else if(res.left < bs.x) {
+                            res.left = fs.x;
+                            res.css = 'left: ' + distance + 'px;';
+                        }
                         break;
                     case 'left':
                     case 'right':
@@ -2668,26 +2676,82 @@
                         if (fs.h < h) {
                             res.css = 'top: ' + (h / 2 + res.moveY) + 'px;';
                         }
+
+                        if(res.top + h > bs.height) {
+                            res.top = fs.y - (h - fs.h);
+                            res.css = 'top: ' + (h - distance) + 'px;';
+                        } else if(res.top < bs.y) {
+                            res.top = fs.y;
+                            res.css = 'top: ' + distance + 'px;';
+                        }
                         break;
                     case 'topleft':
                     case 'bottomleft':
                         res.left = fs.x;
                         res.css = 'left: ' + distance + 'px;';
+
+                        if(res.left + w > bs.width) {
+                            res.left = fs.x - (w - fs.w);
+                            res.css = 'left: ' + (w - distance) + 'px;';
+
+                            if(res.left < bs.x) {
+                                res.left = fs.x - (w - fs.w) / 2;
+                                if (fs.w < w) {
+                                    res.css = 'left: ' + (w / 2 + res.moveX) + 'px;';
+                                }
+                            }
+                        }
                         break;
                     case 'topright':
                     case 'bottomright':
                         res.left = fs.x - (w - fs.w);
                         res.css = 'left: ' + (w - distance) + 'px;';
+
+                        if(res.left < bs.x) {
+                            res.left = fs.x;
+                            res.css = 'left: ' + distance + 'px;';
+
+                            if(res.left + w > bs.width) {
+                                res.left = fs.x - (w - fs.w) / 2;
+                                if (fs.w < w) {
+                                    res.css = 'left: ' + (w / 2 + res.moveX) + 'px;';
+                                }
+                            }
+                        }
                         break;
                     case 'lefttop':
                     case 'righttop':
                         res.top = fs.y;
                         res.css = 'top: ' + distance + 'px;';
+
+                        if(res.top + h > bs.height) {
+                            res.top = fs.y - (h - fs.h);
+                            res.css = 'top: ' + (h - distance) + 'px;';
+
+                            if(res.top < bs.y) {
+                                res.top = fs.y - (h - fs.h) / 2;
+                                if (fs.h < h) {
+                                    res.css = 'top: ' + (h / 2 + res.moveY) + 'px;';
+                                }
+                            }
+                        }
                         break;
                     case 'leftbottom':
                     case 'rightbottom':
                         res.top = fs.y - (h - fs.h);
                         res.css = 'top: ' + (h - distance) + 'px;';
+
+                        if(res.top < bs.y) {
+                            res.top = fs.y;
+                            res.css = 'top: ' + distance + 'px;';
+
+                            if(res.top + h > bs.height) {
+                                res.top = fs.y - (h - fs.h) / 2;
+                                if (fs.h < h) {
+                                    res.css = 'top: ' + (h / 2 + res.moveY) + 'px;';
+                                }
+                            }
+                        }
                         break;
                 }
                 if (isFixedSize) {

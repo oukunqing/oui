@@ -13,7 +13,7 @@
     </style>
     <script type="text/javascript" src="../oui/oui.js?12"></script>
     <!--<script type="text/javascript" src="../oui/dialog/oui.dialog.js?12&skin=default&logo=0&reloadPos=right&lang=english"></script>-->
-    <script type="text/javascript" src="../oui/dialog/oui.dialog.js?12"></script>
+    <script type="text/javascript" src="../oui/dialog/oui.dialog.min.js?12"></script>
 </head>
 <body>
     <div id="p1" style="margin:100px 0 0 0;"></div>
@@ -659,7 +659,7 @@ function msg(isFixWidth){
 function tips(){
     var win = $.tips('tips: 请注意：提示信息已经更新。' + new Date().getTime(), 'txtTips', {
         type:'tips', position: 'topright',
-        //parent: 'p2',
+        parent: 'p2',
         //direction: 'fixed',
         //width: 200,
         styles: {
@@ -685,7 +685,8 @@ function tips(){
         + '<img style="width:100px;" src="http://122.227.179.90:81/skin/default/images/home/welcome.jpg" />';
         win//.options('styles', null)
             .update(html, {
-                position: 'rightTop',
+                //position: 'rightTop',
+				position: 'leftbottom',
                 styles: null
             })
     },3000);
