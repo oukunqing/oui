@@ -1983,7 +1983,7 @@
 
                 return util.setOptions(_, 'lastSize', lastSize), this;
             },
-            setSize: function (_, options) {
+            setSize: function (_, options, loop) {
                 var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls;
                 if (p.none) { return this; }
 
@@ -1993,6 +1993,17 @@
                     obj = ctls.dialog,
                     par = {};
 
+                if(!$.isElement(obj)) {
+                    if(!loop) {
+                        if(util.timerLoopSize) {
+                            window.clearTimeout(util.timerLoopSize);
+                        }
+                        util.timerLoopSize = window.setTimeout(function() {
+                            util.setSize(_, options, true);
+                        }, 300);
+                    }
+                    return this;
+                }
                 if ($.isString(options)) {
                     options = { type: options };
                 }
