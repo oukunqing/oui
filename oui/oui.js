@@ -2514,7 +2514,6 @@
                 p.unit = '';
             }
             p.attr = ('' + (p.attr || p.styleName)).toLowerCase();
-            console.log('p:',p);
 
             if(!p.attr) {
                 return null;
@@ -2549,7 +2548,6 @@
                     val = val.replace(/[;]/, '');
                 }
                 val = val.split(/[\s]+/);
-                console.log('val:', val);
             } else if($.isObject(val)) {
                 data = {
                     top: val.top || 0, right: val.right || 0, bottom: val.bottom || 0, left: val.left || 0

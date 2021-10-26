@@ -954,6 +954,9 @@
                 var id = $.isString(_, true) ? _ : _.id;
                 return Factory.setOptions(id, key, subKey, value), this;
             },
+            isWap: function() {
+                return $.isWap;
+            },
             isSelf: function (_, dialog) {
                 if (!dialog || !Factory.getDialog(dialog.id)) {
                     return false;
@@ -1022,7 +1025,7 @@
             },
             build: function (_, options) {
                 var util = this, p = Util.getParam(_), opt = p.options, ctls = p.controls;
-                var status = opt.status || Config.DialogStatus.normal;
+                var status = opt.status || Config.DialogStatus.normal, isWap = util.isWap();
 
                 opt.type = Common.checkType(opt.type, true);
 
@@ -1093,30 +1096,45 @@
                 Factory.setWindowResize();
 
                 if (!opt.form && (!opt.showHead || ctls.iframe || Common.isPlainText(ctls.content))) {
-                    $.addListener([ctls.body, ctls.dialog], 'mousedown', function () {
+                    $.addListener([ctls.body, ctls.dialog], isWap ? 'touchstart' : 'mousedown', function (ev) {
                         _.topMost();
+                        if(isWap) {
+                            ev.preventDefault();
+                        }
                     });
 
-                    $.addListener(ctls.dialog, ['click', 'dblclick'], function () {
+                    $.addListener(ctls.dialog, isWap ? ['touchstart'] : ['click', 'dblclick'], function (ev) {
                         $.cancelBubble();
+                        if(isWap) {
+                            ev.preventDefault();
+                        }
                     });
 
                     if (!opt.copyAble) {
-                        $.addListener(ctls.dialog, ['mousedown'], function () {
+                        $.addListener(ctls.dialog, [isWap ? 'touchstart' : 'mousedown'], function (ev) {
                             $.cancelBubble();
+                            if(isWap) {
+                                ev.preventDefault();
+                            }
                         });
                     }
                 }
 
                 if (ctls.container && opt.cancelBubble) {
                     // 取消背景层 mousedown，防止冒泡 document.mousedown
-                    $.addListener(ctls.container, ['click'], function () {
+                    $.addListener(ctls.container, [isWap ? 'touchstart' : 'click'], function (ev) {
                         $.cancelBubble();
+                        if(isWap) {
+                            ev.preventDefault();
+                        }
                     });
 
                     if (!opt.copyAble) {
-                        $.addListener(ctls.container, ['mousedown'], function () {
+                        $.addListener(ctls.container, [isWap ? 'touchstart' : 'mousedown'], function (ev) {
                             $.cancelBubble();
+                            if(isWap) {
+                                ev.preventDefault();
+                            }
                         });
                     }
                 }
@@ -1381,10 +1399,10 @@
                             btnClose = obj;
                         }
                     }
-                    this.setButtonEvent(_, childs, 'click', false)
+                    util.setButtonEvent(_, childs, 'click', false)
                         .setShortcutKeyEvent(_, btnClose ? [btnClose] : []);
                 }
-                return this;
+                return util;
             },
             buildBody: function (_, pNode) {
                 var p = this.getParam(_), opt = p.options, ctls = p.controls;
@@ -1736,31 +1754,43 @@
                 return this;
             },
             setButtonEvent: function (_, elements, evName, keyEvent) {
-                var p = this.getParam(_), opt = p.options;
+                var util = this, p = util.getParam(_), opt = p.options;
                 if (p.none) { return this; }
-                var util = this, events = p.events, c = elements.length;
+                var events = p.events, c = elements.length, isWap = util.isWap();
                 for (var i = 0; i < c; i++) {
                     var obj = elements[i];
                     if (obj.tagName !== 'A') {
                         continue;
                     }
-                    $.addListener(obj, evName || 'click', function (e) {
+                    $.addListener(obj, isWap ? 'touchstart' : (evName || 'click'), function (e) {
                         $.cancelBubble(e);
+                        if(isWap) {
+                            e.preventDefault();
+                        }
                         util.setAction(_, this);
                     });
 
                     //设置dblclick并阻止冒泡，防止点击按钮时触发标题栏双击事件
                     $.addListener(obj, 'dblclick', function (e) {
                         $.cancelBubble(e);
+                        if(isWap) {
+                            e.preventDefault();
+                        }
                     });
 
-                    $.addListener(obj, 'mousedown', function (e) {
+                    $.addListener(obj, isWap ? 'touchstart' : 'mousedown', function (e) {
                         $.cancelBubble(e);
+                        if(isWap) {
+                            e.preventDefault();
+                        }
                         events.btnMouseDown = true;
                     });
 
-                    $.addListener(obj, 'mouseup', function (e) {
+                    $.addListener(obj, isWap ? 'touchend' : 'mouseup', function (e) {
                         $.cancelBubble(e);
+                        if(isWap) {
+                            e.preventDefault();
+                        }
                         events.btnMouseDown = false;
                     });
 
@@ -1786,7 +1816,7 @@
                         });
                     }
                 }
-                return this;
+                return util;
             },
             isPass: function (key, minInterval) {
                 var util = this, ts = new Date().getTime();
@@ -2782,34 +2812,43 @@
                 var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls;
                 if (p.none) { return this; }
 
-                var obj = ctls.dialog,
-                    docMouseMove = document.onmousemove,
-                    docMouseUp = document.onmouseup;
+                var isWap = util.isWap(),
+                    evNameDown = isWap ? 'ontouchstart' : 'onmousedown',
+                    evNameUp = isWap ? 'ontouchend' : 'onmouseup',
+                    evNameMove = isWap ? 'ontouchmove' : 'onmousemove';
 
-                function moveDialog() {
+                var obj = ctls.dialog,
+                    docMouseMove = document[evNameMove],
+                    docMouseUp = document[evNameUp];
+
+                function moveDialog(ev) {
                     if (!opt.moveAble || !opt.dragMove) {
                         return $.cancelBubble(), false;
                     }
-                    var evt = $.getEvent(),
+                    var evt = ev || $.getEvent(),
                         cp = $.getScrollPosition(),
                         bs = util.getBoundary(opt.parent),
                         clientWidth = bs.width,
                         clientHeight = bs.height,
-                        moveX = evt.clientX,
-                        moveY = evt.clientY,
+                        moveX = isWap ? evt.touches[0].clientX : evt.clientX,
+                        moveY = isWap ? evt.touches[0].clientY : evt.clientY,
                         top = obj.offsetTop,
                         left = obj.offsetLeft,
                         moveAble = true,
                         isToNormal = false;
 
-                    document.onmousemove = function () {
+                    if(isWap) {
+                        evt.preventDefault();
+                    }
+
+                    document[evNameMove] = function (ev) {
                         if (!opt.moveAble || !opt.dragMove || !moveAble || p.events.btnMouseDown) {
                             return false;
                         }
                         util.showIframeShade(ctls, true);
-                        var e = $.getEvent(),
-                            x = left + e.clientX - moveX,
-                            y = top + e.clientY - moveY;
+                        var e = ev || $.getEvent(),
+                            x = left + (isWap ? e.touches[0].clientX : e.clientX) - moveX,
+                            y = top + (isWap ? e.touches[0].clientY : e.clientY) - moveY;
 
                         if (!isToNormal && p.status.max && (x > 2 || y > 2)) {
                             isToNormal = true;
@@ -2820,12 +2859,12 @@
                         }
                         util.movePosition(_, { x: x, y: y }, true);
                     };
-                    document.onmouseup = function () {
+                    document[evNameUp] = function () {
                         if (!opt.moveAble || !opt.dragMove || !moveAble) {
                             return false;
                         }
-                        document.onmousemove = docMouseMove;
-                        document.onmouseup = docMouseUp;
+                        document[evNameMove] = docMouseMove;
+                        document[evNameUp] = docMouseUp;
                         moveAble = false;
                         p.events.btnMouseDown = false;
                         util.showIframeShade(ctls, false);
@@ -2833,12 +2872,12 @@
                 }
 
                 if (opt.showHead && ctls.head) {
-                    $.addListener(ctls.head, 'mousedown', function () {
-                        moveDialog();
+                    $.addListener(ctls.head, evNameDown.substr(2), function (event) {
+                        moveDialog(event);
                     });
                 } else {
-                    $.addListener([ctls.dialog, ctls.body, ctls.content], 'mousedown', function () {
-                        moveDialog();
+                    $.addListener([ctls.dialog, ctls.body, ctls.content], evNameDown.substr(2), function (event) {
+                        moveDialog(event);
                     });
                 }
 
@@ -3256,17 +3295,22 @@
                 var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls;
                 if (p.none || !opt.sizeAble || !opt.dragSize) { return this; }
 
-                var obj = ctls.dialog,
-                    docMouseMove = document.onmousemove,
-                    docMouseUp = document.onmouseup;
+                var isWap = util.isWap(),
+                    evNameDown = isWap ? 'ontouchstart' : 'onmousedown',
+                    evNameUp = isWap ? 'ontouchend' : 'onmouseup',
+                    evNameMove = isWap ? 'ontouchmove' : 'onmousemove';
 
-                function resizeDialog(dir) {
+                var obj = ctls.dialog,
+                    docMouseMove = document[evNameMove],
+                    docMouseUp = document[evNameUp];
+
+                function resizeDialog(ev, dir) {
                     if (!opt.sizeAble || !opt.dragSize) {
                         return $.cancelBubble(), false;
                     }
-                    var evt = $.getEvent(),
-                        moveX = evt.clientX,
-                        moveY = evt.clientY,
+                    var evt = ev || $.getEvent(),
+                        moveX = isWap ? evt.touches[0].clientX : evt.clientX,
+                        moveY = isWap ? evt.touches[0].clientY :evt.clientY,
                         moveAble = true;
 
                     var par = {
@@ -3279,24 +3323,29 @@
                         minWidth: parseInt(opt.minWidth, 10),
                         minHeight: parseInt(opt.minHeight, 10)
                     };
-                    document.onmousemove = function () {
+
+                    if(isWap) {
+                        evt.preventDefault();
+                    }
+
+                    document[evNameMove] = function (ev) {
                         if (!opt.sizeAble || !opt.dragSize || !moveAble) {
                             return false;
                         }
                         p.events.dragingSize = true;
-                        var e = $.getEvent(),
-                            x = (e.clientX - moveX) * (dir.indexOf(Config.Direction.Left) >= 0 ? -1 : 1),
-                            y = (e.clientY - moveY) * (dir.indexOf(Config.Direction.Top) >= 0 ? -1 : 1);
+                        var e = ev || $.getEvent(),
+                            x = ((isWap ? e.touches[0].clientX : e.clientX) - moveX) * (dir.indexOf(Config.Direction.Left) >= 0 ? -1 : 1),
+                            y = ((isWap ? e.touches[0].clientY : e.clientY) - moveY) * (dir.indexOf(Config.Direction.Top) >= 0 ? -1 : 1);
 
                         util.showIframeShade(ctls, true);
                         util.changeSize(_, { dir: dir, x: x, y: y }, true, par);
                     };
-                    document.onmouseup = function () {
+                    document[evNameUp] = function () {
                         if (!opt.sizeAble || !opt.dragSize || !moveAble) {
                             return false;
                         }
-                        document.onmousemove = docMouseMove;
-                        document.onmouseup = docMouseUp;
+                        document[evNameMove] = docMouseMove;
+                        document[evNameUp] = docMouseUp;
                         moveAble = false;
                         p.events.dragingSize = false;
                         util.showIframeShade(ctls, false);
@@ -3304,9 +3353,9 @@
                 }
 
                 util.getZoomSwicths(_).each(function (i, obj) {
-                    $.addListener(obj, 'mousedown', function () {
+                    $.addListener(obj, evNameDown.substr(2), function (event) {
                         _.topMost();
-                        resizeDialog(obj.pos);
+                        resizeDialog(event, obj.pos);
                     });
                 });
                 return this;
