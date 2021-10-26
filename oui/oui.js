@@ -2491,8 +2491,8 @@
             }
             return p;
         },
-        getCssAttrSize = function(val, options) {            
-            if($.isString(val, true) && val.indexOf(':') < 0) {
+        getCssAttrSize = function(val, options) {       
+            if($.isString(val, true) && val.indexOf(':') < 0 && val.trim().indexOf(' ') < 0) {
                 val = $.toElement(val);
             }
             if($.isNullOrUndefined(val)) {
@@ -2514,6 +2514,7 @@
                 p.unit = '';
             }
             p.attr = ('' + (p.attr || p.styleName)).toLowerCase();
+            console.log('p:',p);
 
             if(!p.attr) {
                 return null;
@@ -2535,19 +2536,30 @@
 
             if(isElem) {
                 data = getElementStyleSize(val, p.attr);
-            } else if(typeof val === 'number' || typeof val === 'string') {
+            } else if(typeof val === 'number') {
                 data = {
                     top: val, right: val, bottom: val, left: val
                 };
-            } else if($.isArray(val)) {
-                data.top = val[0] || 0;
-                data.right = val.length >= 2 ? val[1] : data.top;
-                data.bottom = val.length >= 3 ? val[2] : data.top;
-                data.left = val.length >= 4 ? val[3] : data.right;
+            } else if(typeof val === 'string') {
+                val = val.trim();
+                if(val.indexOf(':') >= 0) {
+                    val = val.split(':')[1];
+                }
+                if(val.indexOf(';') >= 0) {
+                    val = val.replace(/[;]/, '');
+                }
+                val = val.split(/[\s]+/);
+                console.log('val:', val);
             } else if($.isObject(val)) {
                 data = {
                     top: val.top || 0, right: val.right || 0, bottom: val.bottom || 0, left: val.left || 0
                 };
+            }
+            if($.isArray(val)) {
+                data.top = val[0] || 0;
+                data.right = val.length >= 2 ? val[1] : data.top;
+                data.bottom = val.length >= 3 ? val[2] : data.top;
+                data.left = val.length >= 4 ? val[3] : data.right;
             }
             for(var i in data) {
                 data[i] = Math.abs(getCssSizeVal(data[i]));

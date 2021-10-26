@@ -2249,7 +2249,8 @@
                     height: opt.height,
                     x: opt.x,
                     y: opt.y
-                }, options), posX, posY,
+                }, options),
+                    posLeft, posTop, posRight, posBottom,
                     bs = util.getBoundary(opt.parent);
 
                 //window.resize
@@ -2294,28 +2295,32 @@
                     isBottom = false,
                     isRight = false;
 
-                if (isCenter) {
-                    posX = (bs.width / 2 - w / 2) + cpLeft;
+                if ($.isPercent(opt.width)) {
+                    posLeft = opt.margin.left || 0;
+                    posRight = opt.margin.right || 0;
+                } else if (isCenter) {
+                    posLeft = (bs.width / 2 - w / 2) + cpLeft;
                 } else {
                     isRight = util.checkPosition(_, Config.Position.Right, par.position);
-                    posX = isRight ? (bs.width - par.x - w + cpLeft - bs.x) : cpLeft + par.x;
+                    posLeft = isRight ? (bs.width - par.x - w + cpLeft - bs.x) : cpLeft + par.x;
                 }
-                if (isMiddle) {
-                    posY = bs.height / 2 - h / 2 + cpTop;
+                if ($.isPercent(opt.height)) {
+                    posTop = opt.margin.top || 0;
+                    posBottom = opt.margin.bottom || 0;
+                } else if (isMiddle) {
+                    posTop = bs.height / 2 - h / 2 + cpTop;
                 } else {
                     isBottom = util.checkPosition(_, Config.Position.Bottom, par.position);
-                    posY = isBottom ? (bs.height - par.y - h + cpTop - bs.y) : cpTop + par.y;
+                    posTop = isBottom ? (bs.height - par.y - h + cpTop - bs.y) : cpTop + par.y;
                 }
 
                 //清除cssText上下左右4个样式
                 util.clearPositionStyle(obj);
 
-                //TODO: margin setting
-
                 if(opt.animate && !isDragTo) {
-                    return util.moveToPosition(_, { left: posX, top: posY });
+                    return util.moveToPosition(_, { left: posLeft, top: posTop, right: posRight, bottom: posBottom });
                 }
-                return $.setStyle(obj, { left: posX, top: posY }, 'px'), util;
+                return $.setStyle(obj, { left: posLeft, top: posTop, right: posRight, bottom: posBottom }, 'px'), util;
             },
             movePosition: function (_, options, isMoveTo) {
                 var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls, obj = ctls.dialog;
@@ -3110,6 +3115,8 @@
                     margin = Common.getCssAttrSize(opt.margin, { attr: 'margin' }),
                     marginHeight = margin.top + margin.bottom;
 
+
+
                 if (par.event === 'show' && $.isObject(par.lastSize)) {
                     boxWidth = par.lastSize.width;
                     boxHeight = par.lastSize.height;
@@ -3120,9 +3127,11 @@
                 //在非拖动大小并且常态状态时，设置对话框百分比尺寸
                 if (!par.drag && _.isNormal() && Common.isPercentSize(opt.width, opt.height)) {
                     if ($.isPercent(opt.width)) {
+                        opt.margin = margin;
                         boxWidth = bs.width * parseInt(opt.width, 10) / 100 - margin.left - margin.right;
                     }
                     if ($.isPercent(opt.height)) {
+                        opt.margin = margin;
                         boxHeight = bs.height * parseInt(opt.height, 10) / 100 - margin.top - margin.bottom;
                     }
                     $.setStyle(ctls.dialog, { width: boxWidth, height: boxHeight }, 'px');

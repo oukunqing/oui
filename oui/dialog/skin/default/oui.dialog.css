@@ -29,6 +29,7 @@
     box-sizing: border-box;
     box-shadow: 0 2px 3px 0 rgba(0,0,0,.32);
     font-size: 14px;
+	overflow: hidden;
     /*
     font-family: 微软雅黑, 宋体, Arial;
     */

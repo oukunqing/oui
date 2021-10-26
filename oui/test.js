@@ -929,3 +929,7 @@ $$.isChrome = function() {
 };
 
 console.log('$$.isChrome:', $$.isChrome);
+
+var css = '1  2    3 4';
+var arr = css.split(/[A]+/);
+console.log(arr);
