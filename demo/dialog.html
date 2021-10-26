@@ -13,7 +13,7 @@
     </style>
     <script type="text/javascript" src="../oui/oui.js?12"></script>
     <!--<script type="text/javascript" src="../oui/dialog/oui.dialog.js?12&skin=default&logo=0&reloadPos=right&lang=english"></script>-->
-    <script type="text/javascript" src="../oui/dialog/oui.dialog.min.js?12"></script>
+    <script type="text/javascript" src="../oui/dialog/oui.dialog.js?12"></script>
 </head>
 <body>
     <div id="p1" style="margin:100px 0 0 0;"></div>
@@ -27,8 +27,8 @@
         <input type="input" name="" id="txtTips2" style="" value="这是文本输入框的内容" />
     </div>
     <div id="t1"></div>
-    <input id="txt2" type="input" />
-    <input id="txt1" type="input" />
+    <input id="txt2" type="input" value="txt2" />
+    <input id="txt1" type="input" value="txt1" />
     <select id="select1">
         <option value="0">abc</option>
         <option value="1">abddc</option>
@@ -411,6 +411,8 @@ function win(){
 		//lock: false,
 		position: 7,
         width: 'auto',
+		//maxWidth: 400,
+		//maxHeight: 400,
         closeType: 'hide',
         content: 'http://122.227.179.90:81<br />hello world<br />您好<br />大家好啊',
         styles: {
@@ -424,6 +426,7 @@ function win(){
         }
     }).resizeTo({width:500});
     $.tooltip.close($I('txtTips'));
+	
     window.setTimeout(function(){
         win.showFoot();
     }, 4000);
@@ -440,6 +443,7 @@ function win(){
         win.showHead(true);
     }, 10000);
     //$.dialog.closeAll('tooltip').dialog('你好');
+	
 }
 
 function form2() {

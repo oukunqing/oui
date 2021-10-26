@@ -3714,6 +3714,7 @@
         isSafari = ua.indexOf('Safari') > -1 && ua.indexOf('Chrome') < 0,
         isChrome = !isOpera && !isEdge && !isSafari && ua.indexOf('Chrome') > -1,
         isIE = ua.indexOf('Trident') > -1 || (ua.indexOf('MSIE') > -1 && ua.indexOf('compatible') > -1),
+        isWap = /Android|webOS|iPhone|iPod|BlackBerry/i.test(ua),
         ieVersion = isIE ? parseFloat('0' + (ua.match(/(MSIE\s|rv:)([\d\.]+)[;]?/) || [])[2], 10) : 0;
     $.extendNative($, {
         isChrome: isChrome,
@@ -3722,6 +3723,7 @@
         isSafari: isSafari,
         isIE: isIE, isMSIE: isIE,
         isEdge: isEdge,
+        isWap: isWap,
         ieVersion: ieVersion,
         keyCode: {
             Esc: 27,

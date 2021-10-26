@@ -1663,7 +1663,7 @@
             },
             setDragSwitch: function (_, dir) {
                 var p = this.getParam(_), opt = p.options, ctls = p.controls;
-                if (p.none) { return this; }
+                if (p.none || !ctls.dialog) { return this; }
                 var arr = [
                     Config.Direction.Top,
                     Config.Direction.Right,
@@ -2658,7 +2658,7 @@
                         res.left = fs.x - (w - fs.w) / 2;
                         if (res.left < ps.left || (res.left + w) > (bs.width + ps.left)) {
                             newLeft = res.left < ps.left ? ps.left : bs.width + ps.left - h;
-                            res.moveX = left - newLeft;
+                            res.moveX = res.left - newLeft;
                             res.left = newLeft;
                         }
                         if (fs.w < w) {
@@ -3937,7 +3937,6 @@
                 return _;
             }
             Util.setOptions(_, 'hide', false)
-                //.hideDocOverflow(_, false)
                 .showDialog(p.controls, true, content, title);
 
             if (p.options.lock) {

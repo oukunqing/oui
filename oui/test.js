@@ -910,7 +910,6 @@ var dt = new Date('2051/01/01');
 console.log(dt.format('ts'));
 
 console.log('97, 98, 99'.asciiToStr())
-
 console.log($.asciiToStr('32303231'.hexToAscii()))
 console.log('32303231'.hexToAscii().join(',').asciiToStr())
 
@@ -920,3 +919,13 @@ console.log('2021'.toAsciiHex())
 
 console.log((1632359990).toDate().format());
 console.log('7B5C4B61'.hexToInt(true).toDate().format());
+
+console.log('isWap: ', $.isWap);
+
+var $$ = {};
+$$.isChrome = true;
+$$.isChrome = function() {
+    return false;
+};
+
+console.log('$$.isChrome:', $$.isChrome);
