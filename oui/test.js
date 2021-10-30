@@ -933,3 +933,9 @@ console.log('$$.isChrome:', $$.isChrome);
 var css = '1  2    3 4';
 var arr = css.split(/[A]+/);
 console.log(arr);
+
+console.log(-1000>>>2)
+console.log(-1000>>2);
+
+var ts = parseInt('4102415999000', 10) + 1;
+console.log('ts:',ts)
