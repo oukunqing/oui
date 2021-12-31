@@ -879,7 +879,7 @@ function toTime(ts) {
     var date = new Date(ts + 8 * 3600 * 1000);
     return date.toISOString().substr(0, 19).replace('T', ' ');
 }
-console.log(toTime(1631694650)); // "2018.08.09 18:25:54"
+console.log(toTime(1636514639)); // "2018.08.09 18:25:54"
 
 var arr = ['abc','acc'];
 arr = arr.concat(['123', '456']);
@@ -917,7 +917,7 @@ console.log('2021'.toAscii())
 console.log('2021'.toAsciiHex())
 
 
-console.log((1632359990).toDate().format());
+console.log((1638518099).toDate().format());
 console.log('7B5C4B61'.hexToInt(true).toDate().format());
 
 console.log('isWap: ', $.isWap);
@@ -939,3 +939,100 @@ console.log(-1000>>2);
 
 var ts = parseInt('4102415999000', 10) + 1;
 console.log('ts:',ts)
+
+
+var opt = [
+    [5, '5'], [10, '10']
+];
+
+console.log(1.5 * 60 * 60);
+
+
+ var getTimeNumber = function() {
+    var dt = new Date(),
+        h = dt.getHours(),
+        m = dt.getMinutes(),
+        s = dt.getSeconds(),
+        val = h + '' + (m < 10 ? '0' + m : m) + '' + (m < 10 ? '0' + s : s),
+        num = parseInt(val, 10);
+    return num;
+};
+
+console.log(getTimeNumber());
+
+
+var points = [{"start":800,"end":1000}, {"start":600,"end":750}];
+points.sort(function(a, b){ return a.start - b.start });
+
+console.log(points);
+console.log('5469a061'.hexToInt(true).toDate().format('ts'));
+console.log('3956aa61'.hexToInt(true).toDate().format());
+
+
+var p2 = /(up|down|left|right)/gi;
+
+console.log(p2.test('topleft'));
+console.log('\n');
+
+
+
+var n = 35,         //总数量
+    x = 2,          //买的数量
+    y = 1,          //送的数量
+    p = 8;          //单价
+
+var num = (n - n % (x + y)) * x / (x + y) * p + (n % (x + y) * p);
+console.log('总价：', num)
+
+var num2 = n * x / (x + y) * p;
+console.log('总价：', num2);
+
+console.log('\n\n\n')
+console.log((1638518099).toDate().format());
+console.log('8d2aab61'.hexToInt(true).toDate().format('ts'));
+
+var con = 'abc<svg xmls="http:///"></svg>acc';
+var pattern = /[<](svg)(.|\n)*?[><\/](svg)[>]/;
+
+console.log(con.match(pattern));
+
+console.log(con.replace(pattern, "$1 $3", "img"))
+
+var con = 'abc<svg xmls="http://www.baidu.com/"></svg><svg xmls="http://www.baidu.com/"></svg>acc';
+console.log(con.replace(/[<](svg)/gi, "<img").replace(/><\/svg>/gi, " />"));
+
+var pattern = /^[0-9A-Z][0-9A-Z_#&$\-]{1,16}$/i;
+var id = '869383054030390@';
+
+console.log(pattern.test(id));
+
+var filesize = 1069238;
+var mb = 1024 * 1024;
+
+var tn = parseInt(filesize / mb, 10);
+console.log(tn);
+                var fs = tn + (Math.round((filesize % mb) / mb * 1000) / 1000) + 'MB';
+
+                console.log(fs);
+                console.log((Math.round((filesize % mb) * 1000) / 1000));
+
+                console.log(filesize % mb/mb);
+
+                console.log(mb);
+
+
+var url = 'http://112.54.97.178:81/api/?id=123&type=udp&line=-1';
+url = url.setUrlParam({line:0,transmode:"udp"}, false);
+console.log(url);
+
+var val = false;
+console.log($.isBoolean(val, true))
+
+console.log($.setUrlParam('key','val', true));
+
+var str = 'line={line|-1_1.01}';
+console.log(str.format({line2:2}));
+
+
+var pattern = /[A-Z]/;
+console.log(pattern.test('B'));

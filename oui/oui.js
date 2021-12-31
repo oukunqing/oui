@@ -565,13 +565,19 @@
             }
             return obj;
         },
-        setQueryString = function (url, data, value) {
+        setQueryString = function (url, data, value, nocache) {
             if (!isString(url)) {
                 return url;
             }
-            var pkey = 'hupts001', time = getTime();
+            if ($.isBoolean(value) && $.isUndefined(nocache)) {
+                nocache = value;
+                value = null;
+            }
             url = buildParam(data, value, true, url);
-            url = buildParam(pkey, time, false, url);
+            if ($.isBoolean(nocache, true)) { 
+                var pkey = 'hupts001', time = getTime();
+                url = buildParam(pkey, time, false, url);
+            }
             return url;
         },
         getUrlHost = function (url) {
@@ -1551,14 +1557,14 @@
             }
             return s1 > s2 ? 1 : s1 < s2 ? -1 : 0;
         },
-        setQueryString: function (data, value) {
-            return $.setQueryString(this, data, value);
+        setQueryString: function (data, value, nocache) {
+            return $.setQueryString(this, data, value, nocache);
         },
         getQueryString: function (name) {
             return $.getQueryString(this, name);
         },
-        setUrlParam: function(data, value) {
-            return $.setQueryString(this, data, value);
+        setUrlParam: function(data, value, nocache) {
+            return $.setQueryString(this, data, value, nocache);
         },
         getUrlHost: function () {
             return $.getUrlHost(this);
@@ -2126,7 +2132,7 @@
                 throwError(err[0], s, vals);
             }
             //var matchs = s.match(/({+[-\d]+(:[\D\d]*?)*?}+)|({+([\D]*?|[:\d]*?)}+)|([{]{1,2}[\w]*?)|([\w]*?[}]{1,2})/g);
-            var matchs = s.match(/({+[-\d]+(:[\D\d]*?)*?}+)|({+([\D]*?|[:\d]*?)}+)|({+([\w\.\|]*?)}+)|([{]{1,2}[\w]*?)|([\w]*?[}]{1,2})/g);
+            var matchs = s.match(/({+[-\d]+(:[\D\d]*?)*?}+)|({+([\D]*?|[:\d]*?)}+)|({+([\w\.\|\-]*?)}+)|([{]{1,2}[\w]*?)|([\w]*?[}]{1,2})/g);
             if (null === matchs) {
                 return s.toString() || s;
             }
@@ -2164,7 +2170,7 @@
                         v = distillObjVal(mv, obj, err[0], s, vals);
                         rst.push(s.substr(0, p) + (c > 1 || d > 1 ? (c % 2 !== 0 || d % 2 !== 0 ? m2.replace('{' + idx + '}', v) : m2) : v));
                     } else {
-                        var mcs = m2.match(/({[\w\.\|]+})/g);
+                        var mcs = m2.match(/({[\w\.\|\-]+})/g);
                         if (mcs != null && mcs.length > 0) {
                             rst.push(s.substr(0, p) + m2.replace(mcs[0], distillObjVal(mcs[0].replace(/({|})/g, ''), obj, err[0], s)));
                         } else {
