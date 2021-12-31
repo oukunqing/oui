@@ -1941,10 +1941,13 @@
     'use strict';
 
     var throwError = function (msg, str, args) {
+        console.log('[FormatError]\r\nerr:', msg);
         try {
-            if (!$.isUndefined(str)) { console.log('str:\r\n\t', str, '\r\nargs:\r\n\t', args); } console.trace();
+            if (!$.isUndefined(str)) { console.log('str:', str, '\r\narg:', args); } console.trace();
         } catch (e) { }
-        throw new Error(msg);
+        if ($.formatThrowError) {
+            throw new Error(msg);
+        }
     }, formatNumberZero = function (arv, arn) {
         var arr = [], idx = arn.length - 1;
         for (var i = arv.length - 1; i >= 0; i--) {
@@ -2121,16 +2124,26 @@
                     }
                 }
                 if ($.isUndefined(v)) {
+                    //如果没有匹配到目标值，则采用默认值，若无默认值则抛出异常
                     v = !$.isUndefined(dv) ? dv : throwError(err, str, vals);
                 }
             }
         } else {
             throwError(err, str, vals);
         }
+        //如果最终获取到的是对象，则采用默认值，若无默认值则抛出异常
         return $.isObject(v) ? !$.isUndefined(dv) ? dv : throwError(err, str, vals) : v;
     };
 
     if ($.isUndefined(String.prototype.format)) {
+        $.formatThrowError = true;
+
+        String.prototype.formatError = function (isThrow) {
+            var err = $.isBoolean(isThrow, true);
+            $.formatThrowError = err;
+            return this;
+        };
+
         String.prototype.format = function (args) {
             var s = this, vals = [], rst = [], pattern = /({|})/g, ms = s.match(pattern);
             if ($.isNull(ms)) {
