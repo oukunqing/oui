@@ -2074,10 +2074,16 @@
         }
         return v;
     }, distillObjVal = function (key, obj, err, str, vals) {
+        //对象关键字允许嵌套和多字段容错
+        //示例：
+        //var str ="val={val}"; console.log(str.format({val:123}));
+        //var str ="val={data.val}"; console.log(str.format({data:{val:123}}));
+        //var str ="id={data>id,code}"; console.log(str.format({data:{code:"abc"}}));
+
         var v;
         if (!$.isUndefined(obj[key])) {
             v = obj[key];
-        } else if (key.indexOf('.') > 0 || key.indexOf('|') > 0) {
+        }/* else if (key.indexOf('.') > 0 || key.indexOf('|') > 0) {
             //嵌套对象，格式: obj.key.key|dv(默认值，因某些key可能不存在或允许为空)
             var arr = key.split('|'), dv = arr[1], ks = arr[0].split('.'), o = obj;
             //console.log('o: ', o, ', ks: ', ks, ', dv: ', dv);
@@ -2089,10 +2095,39 @@
                     v = !$.isUndefined(dv) ? dv : throwError(err, str, vals);
                 }
             }
+        }*/else if(key.split(/[\.,\|]/).length > 1) {
+            //嵌套对象，格式: obj.key.key|dv(默认值，因某些key可能不存在或允许为空)
+            var arr = key.split(/[\|]/), dv = arr[1], ks = arr[0].split(/[\.>]/), o = obj;
+            for (var i in ks) {
+                var s = ks[i].trim();
+                if('' === s) {
+                    continue;
+                }
+                //分割多字段容错
+                var ts = s.split(/[,;]/);
+                if (ts.length <= 1) {                    
+                    if ($.isObject(o)) {
+                        o = o[ks[i].trim()], v = o;
+                    }
+                } else {
+                    //多字段模式
+                    for (var j in ts) {
+                        var k = ts[j].trim();
+                        //依次匹配各个字段
+                        if ($.isObject(o) && !$.isUndefined(o[k])) {
+                            v = o[k];
+                            o = $.isObject(v) ? v : null;
+                        }
+                    }
+                }
+                if ($.isUndefined(v)) {
+                    v = !$.isUndefined(dv) ? dv : throwError(err, str, vals);
+                }
+            }
         } else {
             throwError(err, str, vals);
         }
-        return v;
+        return $.isObject(v) ? !$.isUndefined(dv) ? dv : throwError(err, str, vals) : v;
     };
 
     if ($.isUndefined(String.prototype.format)) {
@@ -2132,7 +2167,7 @@
                 throwError(err[0], s, vals);
             }
             //var matchs = s.match(/({+[-\d]+(:[\D\d]*?)*?}+)|({+([\D]*?|[:\d]*?)}+)|([{]{1,2}[\w]*?)|([\w]*?[}]{1,2})/g);
-            var matchs = s.match(/({+[-\d]+(:[\D\d]*?)*?}+)|({+([\D]*?|[:\d]*?)}+)|({+([\w\.\|\-]*?)}+)|([{]{1,2}[\w]*?)|([\w]*?[}]{1,2})/g);
+            var matchs = s.match(/({+[-\d]+(:[\D\d]*?)*?}+)|({+([\D]*?|[:\d]*?)}+)|({+([\w\.>\-,;\|\d]*?)}+)|([{]{1,2}[\w]*?)|([\w]*?[}]{1,2})/g);
             if (null === matchs) {
                 return s.toString() || s;
             }
@@ -2170,7 +2205,7 @@
                         v = distillObjVal(mv, obj, err[0], s, vals);
                         rst.push(s.substr(0, p) + (c > 1 || d > 1 ? (c % 2 !== 0 || d % 2 !== 0 ? m2.replace('{' + idx + '}', v) : m2) : v));
                     } else {
-                        var mcs = m2.match(/({[\w\.\|\-]+})/g);
+                        var mcs = m2.match(/({[\w\.>\-,;\|\d]+})/g);
                         if (mcs != null && mcs.length > 0) {
                             rst.push(s.substr(0, p) + m2.replace(mcs[0], distillObjVal(mcs[0].replace(/({|})/g, ''), obj, err[0], s)));
                         } else {

@@ -1030,9 +1030,13 @@ console.log($.isBoolean(val, true))
 
 console.log($.setUrlParam('key','val', true));
 
-var str = 'line={line|-1_1.01}';
-console.log(str.format({line2:2}));
+var str = 'line={line|-1_1}&type={type;type2|udp}';
+console.log(str.format({line:2,type3:123}));
 
+var str = 'line={data.key2,key|a}';
+console.log(str.format({data:{key3:'abc'}}));
 
-var pattern = /[A-Z]/;
-console.log(pattern.test('B'));
+var str ="val2={val}"; console.log(str.format({val:123}));
+var str ="val3={data.val}"; console.log(str.format({data:{val:12345}}));
+var str ="id={data>id,code|-1}"; console.log(str.format({data:{ids:"abc"}}));
+var str ="id={0:d3}"; console.log(str.format(1));
