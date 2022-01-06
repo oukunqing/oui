@@ -1780,6 +1780,14 @@
                 m = parseInt((seconds - h * 3600) / 60, 10),
                 s = seconds % 60;
             return h.padLeft(2) + ':' + m.padLeft(2) + ':' + s.padLeft(2);
+        },
+        format2: function(fmt) {
+            fmt = (!$.isString(fmt, true) ? '{0}' : fmt).trim();
+            if (!fmt.startsWith('{') || !fmt.endWith('}')) {
+                return this.toString();
+            }
+            //这里转换成浮点数的原因是this的数据类型是object, 而不是number
+            return fmt.format(parseFloat(this, 10));
         }
     }, 'Number.prototype');
 
@@ -2236,6 +2244,14 @@
             return rst.join('');
         };
     }
+
+    String.prototype.format2 = function(fmt) {
+        fmt = (!$.isString(fmt, true) ? '{0}' : fmt).trim();
+        if (!fmt.startsWith('{') || !fmt.endWith('}')) {
+            return this;
+        }
+        return fmt.format(this);
+    };
 
     //String.format
     String.format = String.format || function (s) {
@@ -4312,6 +4328,12 @@
             return '';
         },
         setInputFormat: function (elements, options) {
+            var elems = [];
+            if (!isArrayLike(elements) || !isArray(elements)) {
+
+            }
+
+
             //TODO:
 
             return this;

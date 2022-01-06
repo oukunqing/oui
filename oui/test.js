@@ -241,39 +241,6 @@ function buildResult(arrActor, arrDub) {
     return res;
 }
 
-var arr3 = ['Tom', 'Jack', 'John', 'Bill'];
-var arr2 = ['张三', '李四', '王五', '赵六'];
-
-console.log(buildResult(arr3, arr2));
-
-var str = '';
-for(var i=1; i<13;i++) {
-    str += "'" + (i < 10 ? '0'+i : i) + "',";
-}
-    console.log(str);
-
-
-
-
-    var s = 'ag我们𠨰奋斗marray jack多,。！、，-+=!年𠨰'.filterRareWord();
-    console.log(s)
-
-
-
-var d2 = null;
-function showTree() {
-    if(d2 !== null) {
-        d2.show();
-    }
-    d2 = $.dialog('<div id="tree"></div>', '标题', {
-        title: '这也是标题',
-        width: 300,
-        height: 400
-    });
-
-    var o2 = new oTree('o2', document.getElementById('tree'), {});
-}
-
 
 var num = -111.;
 console.log(/^[-+]?(\d+)([.][\d]{0,})?$/.test(num));
@@ -1053,15 +1020,18 @@ console.log('{0:X4}'.format(0x79))
 
 
 
-console.log('dt:', '2021-01-06'.toDate(''))
+console.log('dt:', '2021-01-06 13:25:12'.toDate('HH:mm'))
+console.log('{0:F3}'.format(12.5))
 
-function tryToDate(con, dt) {
+console.log('{0:S644}'.format('330226195905265112'))
+console.log('{0:-344}'.format('13626836885'))
+console.log('13626836885'.format2('{0:-}'))
+var num = 12.5;
+console.log(num.format2('{0:C3}'))
+console.log(num.format2('{0:F3}'))
+console.log((12).format2('{0:-d3}'))
 
-}
+var k = 's';
+console.log('a b c'.replace(new RegExp('\\' + k, 'gi'), '2'))
 
-var ab = {};
-console.log('ab:', ab)
-
-for(var k in ab){
-    console.log('k:', k, ab[k])
-}
+console.log('{0:S34}'.substr(2 + 1, 1));

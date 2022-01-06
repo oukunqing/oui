@@ -11,6 +11,7 @@
 !function($){
     var customAttrs = {
         DATE_FORMAT: "date-format,dateformat",
+        DATA_FORMAT: "data-format,dataformat,value-format,valueformat",
         OLD_VALUE: "old-value,oldvalue",
         DATA_TYPE: "data-type,datatype,value-type,valuetype",
         DATA_SHOW: "data-show,data-auto"
@@ -147,12 +148,13 @@
                 },
                 getValue: function (element, noDefault) {
                     //console.log('getValue: ', element.id, ', field: ', element.field, ', value: ', element.value);
+                    var val = element.value;
                     if (element.field) {
                         var attr = element.field.attribute || element.field.attr;
                         // 获取 value 或 指定的属性值 或 默认值
-                        return op.trim((!op.isLegalName(attr) ? element.value : element.getAttribute(attr)) || (!noDefault ? element.field.defaultValue : ''));
+                        return op.trim((!op.isLegalName(attr) ? val : element.getAttribute(attr)) || (!noDefault ? element.field.defaultValue : ''));
                     }
-                    return op.trim(element.value);
+                    return op.trim(val);
                 },
                 getCheckValue: function (element, value, field, isSingle) {
                     value = value || op.getValue(element);
@@ -182,6 +184,20 @@
                     value = value || op.getValue(element);
                     field = field || element.field;
                     configs = configs || element.configs;
+
+                    var fmt = $.getAttribute(element, customAttrs.DATA_FORMAT);
+                    if (value !== '' && fmt) {
+                        var p = fmt.indexOf(':');
+                        //这里一定要把大写的S转换成小写的s
+                        //因为在正则表达式中\s表示空白字符，\S表示非空白字符，意思完全相反
+                        var k = (p > 0 ? fmt.substr(p + 1, 1) : '').replace('S', 's');
+                        console.log('K', k, fmt, p);
+                        if (k) {
+                            console.log('val1:', value);
+                            value = value.replace(new RegExp('\\' + k, 'gi'), '');
+                            console.log('val2:', value);
+                        }
+                    }
 
                     var len = value.length,
                         messages = $.extend({}, op.messages, field.messages),
@@ -468,10 +484,15 @@
                 setValue: function (element, value, fieldConfig, isArray) {
                     var attr = fieldConfig.field.attribute || fieldConfig.field.attr;
                     var val = isArray ? value.join(',') : value;
-                    if (('' + val).trim() !== '') {
+                    if (!isArray && ('' + val).trim() !== '') {
                         var dtfmt = $.getAttribute(element, customAttrs.DATE_FORMAT);
                         if(dtfmt && val.toDate(true).isDate()) {
                             val = val.toDateString(dtfmt);
+                        } else {
+                            var fmt = $.getAttribute(element, customAttrs.DATA_FORMAT);
+                            if (fmt) {
+                                val = fmt.format(val);
+                            }
                         }
                     }
                     if (!op.isLegalName(attr)) {
