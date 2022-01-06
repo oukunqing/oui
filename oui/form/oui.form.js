@@ -185,17 +185,15 @@
                     field = field || element.field;
                     configs = configs || element.configs;
 
+                    //获取元素内容时，若元素指定了dataformat，则需要去除自动添加的分隔符
                     var fmt = $.getAttribute(element, customAttrs.DATA_FORMAT);
                     if (value !== '' && fmt) {
                         var p = fmt.indexOf(':');
                         //这里一定要把大写的S转换成小写的s
                         //因为在正则表达式中\s表示空白字符，\S表示非空白字符，意思完全相反
                         var k = (p > 0 ? fmt.substr(p + 1, 1) : '').replace('S', 's');
-                        console.log('K', k, fmt, p);
                         if (k) {
-                            console.log('val1:', value);
                             value = value.replace(new RegExp('\\' + k, 'gi'), '');
-                            console.log('val2:', value);
                         }
                     }
 

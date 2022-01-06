@@ -1023,7 +1023,7 @@ console.log('{0:X4}'.format(0x79))
 console.log('dt:', '2021-01-06 13:25:12'.toDate('HH:mm'))
 console.log('{0:F3}'.format(12.5))
 
-console.log('{0:S644}'.format('330226195905265112'))
+console.log('{0:s644}'.format('330226195905265112'))
 console.log('{0:-344}'.format('13626836885'))
 console.log('13626836885'.format2('{0:-}'))
 var num = 12.5;
@@ -1035,3 +1035,4 @@ var k = 's';
 console.log('a b c'.replace(new RegExp('\\' + k, 'gi'), '2'))
 
 console.log('{0:S34}'.substr(2 + 1, 1));
+console.log('{0:s4-5}'.format('12345678901234001'))
