@@ -9,7 +9,12 @@
 */
 
 !function($){
-
+    var customAttrs = {
+        DATE_FORMAT: "date-format,dateformat",
+        OLD_VALUE: "old-value,oldvalue",
+        DATA_TYPE: "data-type,datatype,value-type,valuetype",
+        DATA_SHOW: "data-show,data-auto"
+    };
     var isElement = function (element) {
         return element !== null && typeof element === 'object' && typeof element.nodeType === 'number';
     },
@@ -216,7 +221,8 @@
                         //不是必填项的数字，如果没有填写，则取默认值或0
                         if(value === '' && !field.required) {
                             value = field.value || 0;
-                            var dataShow = $.getAttribute(element, 'data-show,data-auto', '1').toInt();
+                            //var dataShow = $.getAttribute(element, 'data-show,data-auto', '1').toInt();
+                            var dataShow = $.getAttribute(element, customAttrs.DATA_SHOW, '1').toInt();
                             if(!isEvent && dataShow === 1 && typeof element.value !== 'undefined') {
                                 element.value = value;
                             }
@@ -336,7 +342,8 @@
                         checkField = function (field, elem) {
                             var arr = ['string', 'int', 'float', 'decimal'];
                             if (!$.isString(field.dataType) || arr.indexOf(field.dataType) < 0) {
-                                var elemDataType = $.getAttribute(elem, 'data-type,datatype,value-type,valuetype', '');
+                                //var elemDataType = $.getAttribute(elem, 'data-type,datatype,value-type,valuetype', '');
+                                var elemDataType = $.getAttribute(elem, customAttrs.DATA_TYPE, '');
                                 field.dataType = elemDataType || arr[0];
                             }
                             //默认值字段设置
@@ -460,14 +467,21 @@
                 },
                 setValue: function (element, value, fieldConfig, isArray) {
                     var attr = fieldConfig.field.attribute || fieldConfig.field.attr;
+                    var val = isArray ? value.join(',') : value;
+                    if (('' + val).trim() !== '') {
+                        var dtfmt = $.getAttribute(element, customAttrs.DATE_FORMAT);
+                        if(dtfmt && val.toDate(true).isDate()) {
+                            val = val.toDateString(dtfmt);
+                        }
+                    }
                     if (!op.isLegalName(attr)) {
                         if(typeof element.value === 'undefined') {
-                            element.innerHTML = isArray ? value.join(',') : value;
+                            element.innerHTML = val;
                         } else {
-                            element.value = isArray ? value.join(',') : value;
+                            element.value = val;
                         }
                     } else {
-                        element.setAttribute(attr, isArray ? value.join(',') : value);
+                        element.setAttribute(attr, val);
                     }
                     return true;
                 },
@@ -820,7 +834,7 @@
             for(var i = 0; i < elems.length; i++) {
                 var elem = $.toElement(elems[i]);
                 if($.isElement(elem)) {
-                    elem.value = $.isValue(elem.getAttribute('old-value'), '');
+                    elem.value = $.isValue($.getAttribute(elem, customAttrs.OLD_VALUE), '');
                 }
             }
             return this;

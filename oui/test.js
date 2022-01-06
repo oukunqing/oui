@@ -1047,3 +1047,21 @@ console.log(str.format({data:{ids:"abc"}}));
 
 var str ="id={0:d3}"; 
 console.log(str.format(1));
+
+console.log('{0:X4}'.format(121))
+console.log('{0:X4}'.format(0x79))
+
+
+
+console.log('dt:', '2021-01-06'.toDate(''))
+
+function tryToDate(con, dt) {
+
+}
+
+var ab = {};
+console.log('ab:', ab)
+
+for(var k in ab){
+    console.log('k:', k, ab[k])
+}

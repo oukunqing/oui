@@ -1440,14 +1440,15 @@
             return num.toFileSize();
         },
         toDate: function (format) {
-            var ts = Date.parse(this.replace(/-/g, '/'));
-            if (isNaN(ts) && /^[\d]{10,13}$/.test(this)) {
-                ts = Number(this.padRight(13));
+            var v = this;
+            var ts = Date.parse(v.replace(/-/g, '/'));
+            if (isNaN(ts) && /^[\d]{10,13}$/.test(v)) {
+                ts = Number(v.padRight(13));
             }
             var dt = new Date(ts);
             if (isNaN(dt.getFullYear())) {
                 if($.isUndefined(format)) {
-                    console.error('Date time format error: ', this);
+                    console.error('Date time format error: ', v);
                     console.trace();
                 }
             }
