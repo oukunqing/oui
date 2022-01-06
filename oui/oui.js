@@ -1781,7 +1781,7 @@
                 s = seconds % 60;
             return h.padLeft(2) + ':' + m.padLeft(2) + ':' + s.padLeft(2);
         },
-        format2: function(fmt) {
+        formatTo: function(fmt) {
             fmt = (!$.isString(fmt, true) ? '{0}' : fmt).trim();
             if (!fmt.startsWith('{') || !fmt.endWith('}')) {
                 return this.toString();
@@ -2245,7 +2245,7 @@
         };
     }
 
-    String.prototype.format2 = function(fmt) {
+    String.prototype.formatTo = function(fmt) {
         fmt = (!$.isString(fmt, true) ? '{0}' : fmt).trim();
         if (!fmt.startsWith('{') || !fmt.endWith('}')) {
             return this;

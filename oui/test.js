@@ -1025,11 +1025,11 @@ console.log('{0:F3}'.format(12.5))
 
 console.log('{0:s644}'.format('330226195905265112'))
 console.log('{0:-344}'.format('13626836885'))
-console.log('13626836885'.format2('{0:-}'))
+console.log('13626836885'.formatTo('{0:-}'))
 var num = 12.5;
-console.log(num.format2('{0:C3}'))
-console.log(num.format2('{0:F3}'))
-console.log((12).format2('{0:-d3}'))
+console.log(num.formatTo('{0:C3}'))
+console.log(num.formatTo('{0:F3}'))
+console.log((12).formatTo('{0:-d3}'))
 
 var k = 's';
 console.log('a b c'.replace(new RegExp('\\' + k, 'gi'), '2'))
