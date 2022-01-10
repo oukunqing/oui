@@ -68,7 +68,7 @@ function buildAssemble(i, j, len, arr) {
             
             for(var m = 0; m < c; m++) {
 
-                for(var n = 0; n < c; n++) {
+                for(var n = 0; n < c; n++) {``
                     console.log(s + arr[n]);
                 }
             }
@@ -537,7 +537,12 @@ console.log('a,bc,d'.replace(/[,]/g,''))
 console.log('{0:E}'.format(1234567890123));
 
 
-var obj = {"deviceid":"002104","curtime":"2020-01-16 08:31:03","gpsinfo":{"latitude":"","longitude":"","gpsdir":"","speed":"","ns":"","height":""},"netinfo":{"signal":"25","netstatus":"FDD LTE"},"other":{"voltage":"116","electricity":"540"}};
+var obj = {
+    "deviceid":"002104","curtime":"2020-01-16 08:31:03",
+    "gpsinfo":{"latitude":"","longitude":"","gpsdir":"","speed":"","ns":"","height":""},
+    "netinfo":{"signal":"25","netstatus":"FDD LTE"},
+    "other":{"voltage":"116","electricity":"540"}
+};
 
 console.log(typeof obj)
 
@@ -1026,13 +1031,23 @@ console.log('{0:F3}'.format(12.5))
 console.log('{0:s644}'.format('330226195905265112'))
 console.log('{0:-344}'.format('13626836885'))
 console.log('13626836885'.formatTo('{0:-}'))
+console.log('{0::}'.format('330226195905265112'))
 var num = 12.5;
 console.log(num.formatTo('{0:C3}'))
 console.log(num.formatTo('{0:F3}'))
-console.log((12).formatTo('{0:-d3}'))
+console.log((12).formatTo('{0:D3}'))
 
 var k = 's';
 console.log('a b c'.replace(new RegExp('\\' + k, 'gi'), '2'))
 
 console.log('{0:S34}'.substr(2 + 1, 1));
-console.log('{0:s4-5}'.format('12345678901234001'))
+console.log('{0:s445}'.format('12345678901234001'))
+
+
+console.log((1+100)*50)
+
+
+var x = 2, y = 100;
+var z = (x + y) * (y - x + 1) / 2;
+
+console.log(z);
