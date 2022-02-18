@@ -306,7 +306,7 @@
 <body>
 base.js demo
 
-请打开浏览器调试工具(按F12)
+请按F12打开浏览器调试工具
 <div id="dv"></div>
 <div id="div1">
     <input id="txt1" type="text" name="txt" value="txt123" />

@@ -1269,6 +1269,15 @@
             return returnArray ? chars : chars.join('');
         }
     }, '$');
+
+    $.extendNative($, {
+        toUnicode: function (str, returnArray, noPrefix) {
+            return $.chineseToUnicode(str, returnArray, noPrefix);
+        },
+        unUnicode: function (code, returnArray) {
+            return $.unicodeToChinese(code, returnArray);
+        }
+    }, '$');
 }(OUI);
 
 // Javascript 原生对象方法扩展
@@ -1332,17 +1341,31 @@
             }
             return s + v;
         },
-        insert: function (v, c) {
-            var s = this;
-            if ($.isNumber(c)) {
-                for (var i = 0; i < c; i++) { s = v + s; }
-                return s;
+        /*
+            v: 要插入的内容
+            c: 要插入的数量
+            pos: 要插入的位置
+        */
+        insert: function (v, c, pos) {
+            var s0 = '',
+                s1 = this,
+                len = s1.length;
+            if ($.isNumber(pos)) {
+                if(len < pos) {
+                    return s1.append(v, c);
+                } else {
+                    s0 = s1.substr(0, pos);
+                    s1 = s1.substr(pos);
+                }
             }
-            return v + s;
+            if ($.isNumber(c)) {
+                for (var i = 0; i < c; i++) { s1 = v + s1; }
+                return s0 + s1;
+            }
+            return s0 + v + s1;
         },
         //插入字符串组元素，
-        insertItem: function(s, index, separator) {
-            
+        insertItem: function(s, index, separator) {            
             var _s = this.trim();
             var arr = _s.split(/[\,\|]/g), c = arr.length, list = [], n = 0;
             if(_s === '' || c <= 0) {
@@ -1514,6 +1537,9 @@
             return u;
             */
             return $.chineseToUnicode(this, returnArray, noPrefix);
+        },
+        unUnicode: function(returnArray) {
+            return $.unicodeToChinese(this, returnArray);
         },
         asciiToChar: function() {
             return $.asciiToChar(this);
@@ -4290,6 +4316,23 @@
             }
             return -1;
         },
+        setTextCursorPosition2: function(elem, pos, len) {
+            elem.focus();
+            if (elem.setSelectionRange) {
+                elem.setSelectionRange(pos, pos);
+            } else {
+                var range = obj.createTextRange();
+                if (!$.isNumber(len)) {
+                    len = elem.value.length;
+                }
+                range.moveStart('character', -len);
+                range.moveEnd('character', -len);
+                range.moveStart('character', pos);
+                range.moveEnd('character', 0);
+                range.select();
+            }
+            return this;
+        },
         setTextCursorPosition: function (elem, pos) {
             elem = $.toElement(elem);
             if (!$.isElement(elem)) {
@@ -4299,19 +4342,12 @@
             if (!$.isNumber(pos) || pos > len) {
                 pos = len;
             }
+            /*
             window.setTimeout(function () {
-                elem.focus();
-                if (elem.setSelectionRange) {
-                    elem.setSelectionRange(pos, pos);
-                } else {
-                    var range = obj.createTextRange();
-                    range.moveStart('character', -len);
-                    range.moveEnd('character', -len);
-                    range.moveStart('character', index);
-                    range.moveEnd('character', 0);
-                    range.select();
-                }
+                $.setTextCursorPosition2(elem, pos, len);
             }, 10);
+            */
+            $.setTextCursorPosition2(elem, pos, len);
             return this;
         },
         getSelectedText: function (elem) {
@@ -4388,6 +4424,31 @@
 
             return this;
         },
+        insertElementValue: function(elements, values, pos, sameValue, append) {
+            var noPos = !$.isNumber(pos);
+            var elems = ($.isArray(elements) || $.isArrayLike(elements)) ? elements : [elements],
+                vals = !$.isArray(values) ? [values] : values;
+            for (var i = 0, c = elems.length; i < c; i++) {
+                var elem = $.toElement(elems[i]);
+                if ($.isElement(elem)) {
+                    var val = $.isUndefined(vals[i]) ? (sameValue ? vals[0] : '') : vals[i],
+                        curVal = elem.value,
+                        c = 1;
+                    if (noPos) {
+                        pos = $.getTextCursorPosition(elem);
+                        if(pos < 0) {
+                            pos = append ? curVal.length : 0;
+                        }
+                    }
+                    elem.value = curVal.insert(val, c, pos);
+                    $.setTextCursorPosition(elem, pos + val.length * c);
+                }
+            }
+            return this;
+        },
+        appendElementValue: function(elements, values) {
+            return $.insertElementValue(elements, values, null, true, true);
+        },
         appendOption: function(obj, val, txt) {
             return obj.options.add(new Option(txt, val)), this;
         },
@@ -4452,6 +4513,10 @@
         getElemVal: $.getElementValue,
         setElemValue: $.setElementValue,
         setElemVal: $.setElementValue,
+        insertElemValue: $.insertElementValue,
+        insertElemVal: $.insertElementValue,
+        appendElemValue: $.appendElementValue,
+        appendElemVal: $.appendElementValue,
         setElemAttribute: $.setElementAttribute,
         setElemAttr: $.setElementAttribute,
         callParentFunc: $.callbackParent

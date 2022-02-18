@@ -40,10 +40,10 @@ console.log(num.toChineseNumber());
 */
 function buildAssemble(i, j, len, arr) {
     var c = arr.length;
-    if((len < 2 && i >= c) || (len >= 2 && i >= c)){
+    if ((len < 2 && i >= c) || (len >= 2 && i >= c)) {
         return;
     }
-    if(len >= 2) {
+    if (len >= 2) {
         /*
         for(var m = 0; m < c; m++) {
             
@@ -63,29 +63,30 @@ function buildAssemble(i, j, len, arr) {
         }
         */
 
-        for(var k = 0; k < len; k++) {
+        for (var k = 0; k < len; k++) {
             var s = arr[i];
-            
-            for(var m = 0; m < c; m++) {
 
-                for(var n = 0; n < c; n++) {``
+            for (var m = 0; m < c; m++) {
+
+                for (var n = 0; n < c; n++) {
+                    ``
                     console.log(s + arr[n]);
                 }
             }
 
         }
 
-        for(var m = 0; m < c; m++) {
+        for (var m = 0; m < c; m++) {
             var s = arr[i] + arr[m];
 
-            for(var n = 0; n < c; n++) {
+            for (var n = 0; n < c; n++) {
                 console.log(s + arr[n]);
             }
         }
 
         buildAssemble(++i, j, len, arr);
     } else {
-        for(n = 0; n < c; n++) {
+        for (n = 0; n < c; n++) {
             console.log(arr[i] + arr[n]);
         }
         buildAssemble(++i, j, len, arr);
@@ -110,10 +111,10 @@ console.log(Math.floor(Math.random() * eval(w.join('+'))));
 
 
 var randoms = {
-    ads_codes: ['a','b','c'],
-    ads_weight: [10,10,10],
+    ads_codes: ['a', 'b', 'c'],
+    ads_weight: [10, 10, 10],
 
-    get_random: function(weight) {
+    get_random: function (weight) {
         var s = eval(weight.join('+'));
         var r = Math.floor(Math.random() * s);
         console.log('s: ', s, ', r:', r, ', Math.random: ', Math.random());
@@ -125,7 +126,7 @@ var randoms = {
         };
         return n;
     },
-    init: function() {
+    init: function () {
 
         var rand = randoms.get_random(randoms.ads_weight);
         console.log(randoms.ads_codes[rand]);
@@ -143,13 +144,13 @@ var num = 349321235000;
 console.log(num.toChineseNumber());
 
 
-var str = {id:1,name:'abc'}
+var str = { id: 1, name: 'abc' }
 
-for(var k in str){
+for (var k in str) {
     console.log(k, ', ', str[k]);
 }
 console.log(str);
-console.log($.contains(str,'name'));
+console.log($.contains(str, 'name'));
 
 
 var d = '1970-01-01 8:0:12.123'.toDate().format('ts');
@@ -170,7 +171,7 @@ console.log(new Date().format('ts'));
 //select  Auto_increment from information_schema.tables where Table_Schema = 'helmet'  and table_name = 'device_data';
 
 
-var mc = {con:'0'};
+var mc = { con: '0' };
 
 var con = mc && mc['con'] ? mc['con'] : '';
 
@@ -221,7 +222,7 @@ console.log(str.replace('http:', 'https:'));
 
 
 function buildResult(arrActor, arrDub) {
-    var len1 = arrActor.length, 
+    var len1 = arrActor.length,
         len2 = arrDub.length,
         reverse = len2 > len1,
         len = reverse ? len2 : len1,
@@ -229,12 +230,12 @@ function buildResult(arrActor, arrDub) {
         y = 0,
         res = [];
 
-    for(var i = 0; i < len; i++) {
-        res.push({'actor': arrActor[x], 'dub': arrDub[y]});
-        if(++x >= len1 && reverse) {
+    for (var i = 0; i < len; i++) {
+        res.push({ 'actor': arrActor[x], 'dub': arrDub[y] });
+        if (++x >= len1 && reverse) {
             x = 0;
         }
-        if(++y >= len2) {
+        if (++y >= len2) {
             y = 0;
         }
     }
@@ -249,17 +250,17 @@ console.log(/^[-+]?(\d+)([.][\d]{0,})?$/.test(num));
 var str = '共';
 console.log(str.toUnicode());
 
-var fd = {id:3, name:'tom'};
+var fd = { id: 3, name: 'tom' };
 
 console.log(fd, $.toJsonString(fd));
 
 console.log(fd.constructor, typeof fd.constructor);
 
-console.log(Math.round(2/135,2))
+console.log(Math.round(2 / 135, 2))
 
-console.log((2/135).round(2))
+console.log((2 / 135).round(2))
 
-console.log(2.5*0.50);
+console.log(2.5 * 0.50);
 
 function distillPlayIndex(con) {
     var pos = con.indexOf('$http'),
@@ -296,14 +297,14 @@ console.log('rows:', rows)
 
 console.log('2019-11-06 16:23:00'.toDate().format('ts'));
 
-console.log(480*3+240);
+console.log(480 * 3 + 240);
 
 var x = 1, y = 2;
 x = x ^ y;
 y = x ^ y;
 x = x ^ y;
 
-console.log(x,y);
+console.log(x, y);
 
 
 var num = 'a';
@@ -344,12 +345,12 @@ console.log(n22.toDate().format('tms'));
 var pp = /\<(img[\w\d\s\=\"\-\:\/\.]+)/i;
 
 var str = '<div id="main" class="main" v-data="accd" lang="2" custom-attr="hello" a-b-c="123"> <div class="left tree t1">左边栏</div>'
-+ '<img src="http://www.baidu.com/logo.png" /> </div>';
+    + '<img src="http://www.baidu.com/logo.png" /> </div>';
 console.log(pp.test(str));
 console.log(str.match(pp));
 
 var mc = str.match(pp);
-for(var i=0; i<mc.length; i++) {
+for (var i = 0; i < mc.length; i++) {
     console.log(mc[i]);
 }
 
@@ -367,7 +368,7 @@ function buildDeviceCodeList(devCode) {
     } else {
         devCodeList = devCode;
     }
-    if(devCodeList.endsWith(',')) {
+    if (devCodeList.endsWith(',')) {
         devCodeList = devCodeList.substr(0, devCodeList.length - 1);
     }
     return devCodeList;
@@ -375,8 +376,8 @@ function buildDeviceCodeList(devCode) {
 
 console.log(buildDeviceCodeList('abc'));
 
-var url ="http://122.227.179.90:40000/device?action=getdeviceinfo&html=1&log=1" +
-                "&status=-1&version=1&data=1&page=a&size=20";
+var url = "http://122.227.179.90:40000/device?action=getdeviceinfo&html=1&log=1" +
+    "&status=-1&version=1&data=1&page=a&size=20";
 var pattern = /(&page=[\d\w]{0,}|&pageIndex=[\d\w]{0,})/i;
 var url2 = url.replace(pattern, '');
 console.log(url2);
@@ -392,8 +393,8 @@ console.log(del(s));
 
 
 function escape2Html(str) {
-    var arrEntities = {'lt':'<','gt':'>','nbsp':' ','amp':'&','quot':'"'};
-    return str.replace(/&(lt|gt|nbsp|amp|quot);/ig,function(all,t){return arrEntities[t];});
+    var arrEntities = { 'lt': '<', 'gt': '>', 'nbsp': ' ', 'amp': '&', 'quot': '"' };
+    return str.replace(/&(lt|gt|nbsp|amp|quot);/ig, function (all, t) { return arrEntities[t]; });
 }
 
 function escape2Html(str) {
@@ -421,12 +422,12 @@ function getDomain(s) {
 
 console.log(getDomain('iqiyi.com'));
 
-var ids = [1,2,3];
+var ids = [1, 2, 3];
 
 console.log(ids.indexOf(2))
 
-if(ids.indexOf(2)>0) {
-    ids.splice(ids.indexOf(2),1);
+if (ids.indexOf(2) > 0) {
+    ids.splice(ids.indexOf(2), 1);
 }
 
 
@@ -441,11 +442,11 @@ console.log(f.match(r))
 console.log($.isArray(f.match(r)))
 
 var mc = f.match(r);
-for(var m in mc){
-    console.log('m:',mc[m]);
+for (var m in mc) {
+    console.log('m:', mc[m]);
 }
 
-console.log(eval('('+'1<2?3:4'+')'));
+console.log(eval('(' + '1<2?3:4' + ')'));
 
 console.log(f.replaceAll('\\[51\\]', '<ac>'))
 
@@ -479,7 +480,7 @@ console.log(/[\d]/.test('abcasdfas'))
 
 var n = 1, v = parseFloat('1.0', 10);
 
-console.log(n===v);
+console.log(n === v);
 
 function build(url, key, val, append) {
     if ($.isString(key, true) && key.indexOf(',') > -1) {
@@ -499,7 +500,7 @@ url = build(url, 'page,pageIndex', 2);
 console.log('url: ', url);
 
 
-var obj = {txt: 'hello'};
+var obj = { txt: 'hello' };
 global.txt = 'world';
 console.log('{txt}'.format(global));
 
@@ -522,7 +523,7 @@ console.log(pattern.test('452402198906571258'))
 console.log($.base64)
 var code = $.base64.encode('12345');
 console.log(code)
-console.log($.base64.decode(code+'ab'))
+console.log($.base64.decode(code + 'ab'))
 console.log(code.base64decode())
 
 console.log('ab cd+ah '.trim().replace(/[\-\s]/g, '+'));
@@ -531,17 +532,19 @@ console.log(/[\-\s]/g.test('ab'))
 
 
 
+//TODO: 测试
 
-console.log('a,bc,d'.replace(/[,]/g,''))
+
+console.log('a,bc,d'.replace(/[,]/g, ''))
 
 console.log('{0:E}'.format(1234567890123));
 
 
 var obj = {
-    "deviceid":"002104","curtime":"2020-01-16 08:31:03",
-    "gpsinfo":{"latitude":"","longitude":"","gpsdir":"","speed":"","ns":"","height":""},
-    "netinfo":{"signal":"25","netstatus":"FDD LTE"},
-    "other":{"voltage":"116","electricity":"540"}
+    "deviceid": "002104", "curtime": "2020-01-16 08:31:03",
+    "gpsinfo": { "latitude": "", "longitude": "", "gpsdir": "", "speed": "", "ns": "", "height": "" },
+    "netinfo": { "signal": "25", "netstatus": "FDD LTE" },
+    "other": { "voltage": "116", "electricity": "540" }
 };
 
 console.log(typeof obj)
@@ -554,7 +557,7 @@ var numbers = '1,3,6-9,,12-16,99';
 
 console.log($.expandNumbers(numbers));
 
-var numbers = [1,2,3,5,6,9,21,22,23,99];
+var numbers = [1, 2, 3, 5, 6, 9, 21, 22, 23, 99];
 
 console.log($.collapseNumbers(numbers));
 
@@ -591,7 +594,7 @@ console.log('{0:B}'.format(123).padLeft(8));
 
 var channelid = 4;
 
-console.log({"length":20,"start":0,"ClientType":5,"searchtext":"","TypeID": "\"" + channelid + "\""})
+console.log({ "length": 20, "start": 0, "ClientType": 5, "searchtext": "", "TypeID": "\"" + channelid + "\"" })
 
 var name = 'pic/1.jpg';
 
@@ -649,13 +652,13 @@ console.log(/(Y-m-d H:i:s)/gi.test('AY-m-d H:i:sZ'))
 
 //正则替换示例
 var str = 'http://xxxx.xx/xxx.jpg';
-var str2 = str.replace(/[.](jpg|png|gif)$/gi, function(val) {
+var str2 = str.replace(/[.](jpg|png|gif)$/gi, function (val) {
     return '_260_360' + val;
 });
 
 console.log(str2);
 
-function test2({id,name}){
+function test2({ id, name }) {
 
     console.log(arguments);
 }
@@ -685,17 +688,17 @@ console.log($.asciiToUnicode('"'))
 
 
 var win = {};
-console.log(win&&win.id)
+console.log(win && win.id)
 
 var num = 11111111111111;
 console.log(num + 2);
 
 
 
-console.log( 128 & 128)
+console.log(128 & 128)
 
 
-console.log($.buildAjaxData('setMode', {id:1,name:'acc'}, {id:1,name:'acc'},))
+console.log($.buildAjaxData('setMode', { id: 1, name: 'acc' }, { id: 1, name: 'acc' },))
 
 console.log(new Date().getTime())
 
@@ -706,18 +709,18 @@ var obj33 = {
     'B123': 'b123'
 };
 
-for(var k in obj33) {
+for (var k in obj33) {
     console.log(obj33[k]);
 }
 
 
 var items = [
-    {host: 'abc', len: 3},
-    {host: 'acc', len: 2},
-    {host: 'asd', len: 5}
+    { host: 'abc', len: 3 },
+    { host: 'acc', len: 2 },
+    { host: 'asd', len: 5 }
 ];
 
-items.sort(function(a, b) {
+items.sort(function (a, b) {
     return a.len - b.len;
 });
 
@@ -737,8 +740,8 @@ console.log(dt.getAge());
 
 var str = '&type={type|1}&id={id|0}';
 
-console.log(str.format({type:0}))
-console.log(str.format({id:5}))
+console.log(str.format({ type: 0 }))
+console.log(str.format({ id: 5 }))
 
 
 console.log(505 - 505 % 20);
@@ -753,23 +756,23 @@ console.log('2021-05-20 14:28:31'.toDate().format('ts'));
 
 function parseCapturePlan(plan) {
     //010103000aff0000ff1600ff
-    if(plan.length < 24) {
+    if (plan.length < 24) {
         return plan;
     }
     var c = parseInt(plan.substr(4, 2), 10);
     var times = [];
-    for(var n = 0; n < parseInt(c / 3, 10); n++) {
+    for (var n = 0; n < parseInt(c / 3, 10); n++) {
         var len = 3 * 2 * 3;
         var con = plan.substr(6 + len * n, len);
         var t = '';
         var j = 0;
-        for(var i = 0; i < con.length; i += 6) {
+        for (var i = 0; i < con.length; i += 6) {
             var h = hexToInt(con.substr(i, 2)),
                 m = hexToInt(con.substr(i + 2, 2)),
                 p = hexToInt(con.substr(i + 4, 2));
 
             j++;
-            switch(j % 3) {
+            switch (j % 3) {
                 case 0:
                     t += ' - ' + h + ':' + m + ' ]';
                     times.push(t);
@@ -790,7 +793,7 @@ function parseCapturePlan(plan) {
 
 function reverseHex(hex) {
     var arr = [], len = parseInt(hex.length, 10);
-    for(var i = 0; i < len / 2; i++) {
+    for (var i = 0; i < len / 2; i++) {
         arr[len - i * 2 - 1] = hex[i * 2 + 1];
         arr[len - i * 2 - 2] = hex[i * 2];
     }
@@ -798,7 +801,7 @@ function reverseHex(hex) {
 }
 
 function hexToInt(hex, reverse) {
-    if(reverse) {
+    if (reverse) {
         hex = reverseHex(hex);
     }
     var n = eval('0x' + hex).toString(10);
@@ -814,7 +817,7 @@ console.log(parseCapturePlan('010103000aff0000ff1600ff'));
 
 console.log((1629272718).toDate().format());
 
-console.log((parseInt(new Date().format('ts')/1000)-300482).toDate().format())
+console.log((parseInt(new Date().format('ts') / 1000) - 300482).toDate().format())
 
 console.log('bcf42961'.hexToTime(true));
 console.log('bdf42961'.hexToTime(true));
@@ -845,7 +848,7 @@ console.log(parseInt(new Date().getTime() / 1000, 10))
 
 function toTime(ts) {
     var len = ('' + ts).length;
-    if(len < 13) {
+    if (len < 13) {
         ts *= Math.pow(10, 13 - len);
     }
     var date = new Date(ts + 8 * 3600 * 1000);
@@ -853,7 +856,7 @@ function toTime(ts) {
 }
 console.log(toTime(1636514639)); // "2018.08.09 18:25:54"
 
-var arr = ['abc','acc'];
+var arr = ['abc', 'acc'];
 arr = arr.concat(['123', '456']);
 
 console.log(arr);
@@ -896,7 +899,7 @@ console.log('isWap: ', $.isWap);
 
 var $$ = {};
 $$.isChrome = true;
-$$.isChrome = function() {
+$$.isChrome = function () {
     return false;
 };
 
@@ -906,11 +909,11 @@ var css = '1  2    3 4';
 var arr = css.split(/[A]+/);
 console.log(arr);
 
-console.log(-1000>>>2)
-console.log(-1000>>2);
+console.log(-1000 >>> 2)
+console.log(-1000 >> 2);
 
 var ts = parseInt('4102415999000', 10) + 1;
-console.log('ts:',ts)
+console.log('ts:', ts)
 
 
 var opt = [
@@ -920,7 +923,7 @@ var opt = [
 console.log(1.5 * 60 * 60);
 
 
- var getTimeNumber = function() {
+var getTimeNumber = function () {
     var dt = new Date(),
         h = dt.getHours(),
         m = dt.getMinutes(),
@@ -933,8 +936,8 @@ console.log(1.5 * 60 * 60);
 console.log(getTimeNumber());
 
 
-var points = [{"start":800,"end":1000}, {"start":600,"end":750}];
-points.sort(function(a, b){ return a.start - b.start });
+var points = [{ "start": 800, "end": 1000 }, { "start": 600, "end": 750 }];
+points.sort(function (a, b) { return a.start - b.start });
 
 console.log(points);
 console.log('5469a061'.hexToInt(true).toDate().format('ts'));
@@ -983,41 +986,41 @@ var mb = 1024 * 1024;
 
 var tn = parseInt(filesize / mb, 10);
 console.log(tn);
-                var fs = tn + (Math.round((filesize % mb) / mb * 1000) / 1000) + 'MB';
+var fs = tn + (Math.round((filesize % mb) / mb * 1000) / 1000) + 'MB';
 
-                console.log(fs);
-                console.log((Math.round((filesize % mb) * 1000) / 1000));
+console.log(fs);
+console.log((Math.round((filesize % mb) * 1000) / 1000));
 
-                console.log(filesize % mb/mb);
+console.log(filesize % mb / mb);
 
-                console.log(mb);
+console.log(mb);
 
 
 var url = 'http://112.54.97.178:81/api/?id=123&type=udp&line=-1';
-url = url.setUrlParam({line:0,transmode:"udp"}, false);
+url = url.setUrlParam({ line: 0, transmode: "udp" }, false);
 console.log(url);
 
 var val = false;
 console.log($.isBoolean(val, true))
 
-console.log($.setUrlParam('key','val', true));
+console.log($.setUrlParam('key', 'val', true));
 
 var str = 'line={line|-1_1}&type={type;type2|udp}';
-console.log(str.format({line:2,type3:123}));
+console.log(str.format({ line: 2, type3: 123 }));
 
 var str = 'line={data.key2,key|a}';
-console.log(str.format({data:{key3:'abc'}}));
+console.log(str.format({ data: { key3: 'abc' } }));
 
-var str ="val2={val}"; 
-console.log(str.formatError(false).format({val2:123}));
+var str = "val2={val}";
+console.log(str.formatError(false).format({ val2: 123 }));
 
-var str ="val3={data.val}"; 
-console.log(str.format({data:{val:12345}}));
+var str = "val3={data.val}";
+console.log(str.format({ data: { val: 12345 } }));
 
-var str ="id={data>id,code|-1}"; 
-console.log(str.format({data:{ids:"abc"}}));
+var str = "id={data>id,code|-1}";
+console.log(str.format({ data: { ids: "abc" } }));
 
-var str ="id={0:d3}"; 
+var str = "id={0:d3}";
 console.log(str.format(1));
 
 console.log('{0:X4}'.format(121))
@@ -1044,10 +1047,34 @@ console.log('{0:S34}'.substr(2 + 1, 1));
 console.log('{0:s445}'.format('12345678901234001'))
 
 
-console.log((1+100)*50)
+console.log((1 + 100) * 50)
 
 
 var x = 2, y = 100;
 var z = (x + y) * (y - x + 1) / 2;
 
 console.log(z);
+
+
+console.log('重新加载'.chineseToUnicode());
+console.log('重新加载'.toUnicode());
+console.log('\\u91cd\\u65b0\\u52a0\\u8f7d'.unUnicode());
+
+console.log($.unUnicode('\\u91cd\\u65b0\\u52a0\\u8f7d'));
+
+
+console.log((1642439910).toDate().format());
+console.log('e1a4e561'.hexToInt(true).toDate().format('ts'));
+console.log('8d2aab61'.hexToInt(true));
+//a55a0e00485a534830303130453637353530303935 05ce21 01 ff 61e5a4e6 0000000000000000 1a1996
+
+console.log('e1a4e561'.hexToInt(true).toDate().format());
+console.log('5e15e661'.hexToInt(true).toDate().format());
+console.log('e2a4e561'.hexToInt(true).toDate().format());
+console.log('0527e661'.hexToInt(true).toDate().format());
+
+//a55a0400485a53483030313045363735353030393507e6010527e661100096
+
+
+var str22 = 'abc123';
+console.log(str22.insert('Hello', 1, 2));
