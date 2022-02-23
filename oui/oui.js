@@ -4425,8 +4425,8 @@
             return this;
         },
         insertElementValue: function(elements, values, pos, sameValue, append) {
-            var noPos = !$.isNumber(pos);
-            var elems = ($.isArray(elements) || $.isArrayLike(elements)) ? elements : [elements],
+            var noPos = !$.isNumber(pos),
+                elems = ($.isArray(elements) || $.isArrayLike(elements)) ? elements : [elements],
                 vals = !$.isArray(values) ? [values] : values;
             for (var i = 0, c = elems.length; i < c; i++) {
                 var elem = $.toElement(elems[i]);
