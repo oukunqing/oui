@@ -43,7 +43,7 @@
                     cssText: 'border:solid 1px #f00;'
                 },
                 op = {
-                    tagPattern: new RegExp('INPUT|SELECT|TEXTAREA' + (opt.tagPattern ? '|' + opt.tagPattern : '')),
+                    tagPattern: new RegExp('INPUT|SELECT|TEXTAREA' + (opt.tagPattern ? '|' + opt.tagPattern : ''), 'i'),
                     typePattern: /text|hidden|password|select-one|checkbox|radio|email|url|number|range|date|search/,
                     valuePattern: {
                         email: /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/,
@@ -220,12 +220,14 @@
                         if (field.dataType === 'string') {
                             if ('' === value) { return result(true, value); }
                             var pattern = field.pattern || op.valuePattern[field.type], validate = field.validate || configs.validate;
+                            var minLen = field.minLength || field.minLen,
+                                maxLen = field.maxLength || field.maxLen;
                             if ($.isFunction(validate)) {    // 外部验证函数（优先）
                                 if (!validate(value, element)) { return result(false); }
-                            } else if ($.isInteger(field.minLength) && len < field.minLength) {
-                                return result(false, (messages.minLength || configs.messages.minLength).format(title, field.minLength));
-                            } else if ($.isInteger(field.maxLength) && len > field.maxLength) {
-                                return result(false, (messages.maxLength || configs.messages.maxLength).format(title, field.maxLength));
+                            } else if ($.isInteger(minLen) && len < minLen) {
+                                return result(false, (messages.minLength || configs.messages.minLength).format(title, minLen));
+                            } else if ($.isInteger(maxLen) && len > maxLen) {
+                                return result(false, (messages.maxLength || configs.messages.maxLength).format(title, maxLen));
                             } else if (pattern && !pattern.test(value)) {   // 正则表达式验证
                                 return result(false, (messages.pattern || configs.messages.pattern).format(title));
                             }
@@ -262,8 +264,8 @@
                                 }
                             }
                             if (configs.checkNumber) {
-                                var min = field.minValue || configs.minValue,
-                                    max = field.maxValue || configs.maxValue,
+                                var min = field.minValue || configs.minValue || field.minVal || configs.minVal || field.min || configs.min,
+                                    max = field.maxValue || configs.maxValue || field.maxVal || configs.maxVal || field.max || configs.max,
                                     msg = '';
 
                                 if ($.isNumeric(min) && $.isNumeric(max)) {
@@ -555,6 +557,12 @@
             if (op.configs.highLight) {
                 op.loadCssCode(op.configs.highLightStyle);
             }
+            //单独设置表单内容或简化参数设置时，把prefix参数字段加到options中
+            //比如整个options只有一个参数prefix
+            //这样就不用嵌套把prefix写成{configs:{prefix:false}},只需要写成{prefix:false}即可
+            if(!$.isUndefined(opt.prefix) && !op.configs.prefix) {
+                op.configs.prefix = opt.prefix;
+            }
 
             op.labels = op.getLabels();
 
@@ -711,7 +719,6 @@
                 if (!op.tagPattern.test(tag) || (typeof type !== 'undefined' && !op.typePattern.test(type))) {
                     continue;
                 }
-
                 var pass = true;
                 if (pass || !obj.isValueSet) {
                     var fc = op.getFieldConfig(obj, op.fields), value = data[fc.key], isArray = $.isArray(value);
