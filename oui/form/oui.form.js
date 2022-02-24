@@ -629,7 +629,7 @@
                             }
                         }
                     } else {
-                        if ((key = fc.dataKey || fc.nameKey || fc.key)) {
+                        if ((key = fc.dataKey || fc.nameKey || fc.key) !== '') {
                             if ($.isUndefined(data[key])) {
                                 data[key] = [];
                             }
@@ -651,7 +651,8 @@
                     var v = data[k];
                     if ($.isArray(v)) {
                         if (v.length <= 1) {
-                            data[k] = v[0] || '';
+                            //data[k] = v[0] || '';
+                            data[k] = ($.isUndefined(v[0]) || v[0] === '') ? '' : v[0];
                         } else if (configs.isJoin) {
                             data[k] = v.join(configs.joinSeparate);
                         }
@@ -722,6 +723,9 @@
                 var pass = true;
                 if (pass || !obj.isValueSet) {
                     var fc = op.getFieldConfig(obj, op.fields), value = data[fc.key], isArray = $.isArray(value);
+                    if ($.isUndefined(value)) {
+                        value = data[fc.nameKey];
+                    }
                     if ($.isUndefined(value)) {
                         continue;
                     }
