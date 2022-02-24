@@ -2014,8 +2014,8 @@
         return fn + '.' + en + (so[f] || f) + symbol + postfix;
     }, regPattern = {
         numberSymbol: /([CDEFGNRX])/gi, number: /^(0x)?[\dA-Fa-f]+$/
-    }, formatNumberSwitch = function (v, f, n, dn, err, str, args) {
-        //console.log('v: ', v, ', f: ', f, ',is: ', (isHexNumber(v) && fu !== 'X'));
+    }, formatNumberSwitch = function (v, f, n, dn, err, str, args, freedom) {
+        //console.log('v: ', v, ', f: ', f, ',is: ', (isHexNumber(v) && fu !== 'X'), ', n: ', n);
         var fu = f.toUpperCase(), pos = 0, numLen = dn[0].length, decimalLen = (dn[1] || '').length;
         //if(isHexNumber(v) && ['C', 'F', 'N'].indexOf(fu) >= 0){
         if (isHexNumber(v) && regPattern.numberSymbol.test(fu)) {
@@ -2072,7 +2072,22 @@
                         pn = parseInt(arr[i], 10);
                         nv += (pos > 0 ? symbol : '') + vc.substr(pos, pn), pos += pn, i += 1;
                     }
-                    v = nv + (pos < len ? symbol + vc.substr(pos) : '');
+                    //v = nv + (pos < len ? symbol + vc.substr(pos) : '');
+                    v = nv;
+                    if (pos < len) {
+                        var spare = vc.substr(pos),
+                            slen = spare.length,
+                            cv = parseInt(slen / pn, 10),
+                            p = 0;
+                        if (freedom && (slen % pn) < parseInt(pn / 2, 10)) {
+                            cv -= 1;
+                        }
+                        for (var i = 0; i < cv; i++) {
+                            v += symbol + spare.substr(p, pn);
+                            p += pn;
+                        }
+                        v += (p < slen ? symbol + spare.substr(p) : '')
+                    }
                 }
                 break;
         }
@@ -2097,10 +2112,16 @@
             }
         } else if (isNum) {
             //C-货币，D-数字，E-科学计数，F-小数，G-标准数字，N-千位分隔，-十六进制
-            var p1 = /([BCDEFGNOPRSX%\-\.\:])/gi, p2 = /([A-Z])/gi, p3 = /^([BCDEFGNOPRSX%\-\.\:][\d]+)$/gi, p4 = /^([A-Z]{1}[\d]+)$/gi;
+            var p1 = /([BCDEFGNOPRSX%\-\.\:])/gi,
+                p2 = /([A-Z])/gi,
+                //最后以(.或-)结尾的表示可以优化截取
+                p3 = /^([BCDEFGNOPRSX%\-\.\:][\d]+[\.\-]?)$/gi,
+                p4 = /^([A-Z]{1}[\d]+)$/gi;
             if ((ss.length === 1 && p1.test(ss)) || (ss.length >= 2 && p3.test(ss))) {
                 var nv = parseInt(ss.substr(1), 10), dn = v.toString().split('.'), n = isNaN(nv) ? (f.toUpperCase() === 'D' ? 0 : 2) : nv;
-                v = formatNumberSwitch(v, f, n, dn, err, str, args);
+                //如果分隔规则以.结果，表示可以优化分隔最后一组内容，不至于出现单吊的内容
+                //比如 1234 1234 5 这样的，可以优化为 1234 12345
+                v = formatNumberSwitch(v, f, n, dn, err, str, args, ss.endsWith('.') || ss.endWith('-'));
             } else if ((ss.length === 1 && p2.test(ss)) || (ss.length >= 2 && p4.test(ss))) {
                 throwError(err[3], str, args);
             } else if (/([0]+)/g.test(ss)) {

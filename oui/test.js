@@ -1078,3 +1078,6 @@ console.log('0527e661'.hexToInt(true).toDate().format());
 
 var str22 = 'abc123';
 console.log(str22.insert('Hello', 1, 2));
+
+
+console.log('{0:s44-}'.format('1234567890123400123456'))
