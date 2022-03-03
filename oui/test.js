@@ -1082,3 +1082,14 @@ console.log(str22.insert('Hello', 1, 2));
 
 console.log('{0:s44-}'.format('1234567890123400123456'))
 console.log('{0:s64-}'.format('330681198103093291'))
+
+var num = 450*2+1080+1500*6+2100+3000*2;
+console.log(num);
+var num = 360*3+1200*9;
+console.log(num);
+
+
+var num = 330*3+890+1100*8;
+console.log(num);
+var num = 240*4+520+800*7;
+console.log(num);
