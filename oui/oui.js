@@ -1558,6 +1558,9 @@
             var arr = $.isArray(arrAscii) ? arrAscii : this.toAscii();
             return $.toAsciiHex(arr, isJoin);
         },
+        toHex: function() {
+            return $.toAsciiHex(this.toAscii(), true);
+        },
         parseUnicode: function(returnArray) {
             return $.unicodeToChinese(this, returnArray);
         },
@@ -4483,8 +4486,7 @@
                     return this;
                 }
                 var args = $.getArguments(arguments, 1);
-                func.apply(this, args);
-                
+                func.apply(this, args);                
             }
             return this;
         },

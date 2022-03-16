@@ -1,5 +1,4 @@
 require('./oui');
-require('./protocol/i1')
 
 //  118.25.125.18   debian 9
 
@@ -1103,14 +1102,3 @@ console.log('a: ', a2);
 var z = (x + y) * ( c / y) / 2;
 
 console.log(z)
-
-console.log('7b22636f6d6d616e64223a226865617274626561745f696e74657276616c222c2274797065223a2272657175657374222c2273657175656e6365223a302c22626f6479223a7b7d7d'.hexToStr());
-console.log('7b22636f6d6d616e64223a226865617274626561745f696e74657276616c222c2274797065223a2272657175657374222c2273657175656e6365223a302c22626f6479223a7b7d7d'.hexToStr().toAscii());
-console.log('7b22636f6d6d616e64223a226865617274626561745f696e74657276616c222c2274797065223a22726573706f6e7365222c2273657175656e6365223a302c22737461747573223a312c22626f6479223a7b22696e74657276616c223a39307d7d'.hexToStr());
-console.log('{"command":"heartbeat_interval","type":"request","sequence":0,"body":{}}'.toAsciiHex(true));
-
-console.log('{"command":"heartbeat_interval","type":"request","sequence":0,"body":{}}'.toHex().toLowerCase());
-console.log('10'.toHex().toLowerCase());
-console.log((10).toHex().toLowerCase());
-
-console.log($.protocol.i1)
