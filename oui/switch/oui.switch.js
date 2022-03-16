@@ -6,21 +6,22 @@
  @License：MIT
 */
 
-;!function ($) {
+!function ($) {
     'use strict';
-    
+
     var Config = {
         id: 0,
         caches: {},
-        buildKey: function(opt) {
+        buildKey: function (opt) {
             return 'sw_' + (opt.id || Config.id);
         },
-        initCache: function(opt) {
+        initCache: function (opt) {
             if (!opt.id) {
                 Config.id += 1;
             }
             var key = Config.buildKey(opt);
             Config.caches[key] = {
+                first: true,
                 shade_id: 'oui_switch_shade_body_001',
                 switch_shade_id: 'oui_switch_shade_switch_001',
                 direction: true,   //true表示水平方向，false表示垂直方向
@@ -45,7 +46,7 @@
             };
             return this;
         },
-        setCache: function(opt, oar) {
+        setCache: function (opt, oar) {
             var key = Config.buildKey(opt),
                 cache = Config.caches[key];
             if (cache) {
@@ -53,7 +54,7 @@
             }
             return this;
         },
-        getCache: function(opt) {
+        getCache: function (opt) {
             var key = Config.buildKey(opt),
                 cache = Config.caches[key];
             return cache;
@@ -61,7 +62,7 @@
     };
 
     var Factory = {
-        initial: function(options) {
+        initial: function (options) {
             if ($.isNullOrUndefined(options)) {
                 return this;
             }
@@ -77,7 +78,7 @@
                 cache.min = cache.options.min;
             }
 
-            if($.isNumber(cache.options.direction) || $.isString(cache.options.direction)) {
+            if ($.isNumber(cache.options.direction) || $.isString(cache.options.direction)) {
                 cache.direction = cache.direction === 1 || ('' + cache.direction).toLowerCase() === 'horizontal';
             }
 
@@ -88,7 +89,7 @@
                     $.cancelBubble(ev);
                 });
 
-                $('#' + cache.options.switchbar).click(function () { 
+                $('#' + cache.options.switchbar).click(function () {
                     if ($.isFunction(cache.options.click)) {
                         cache.options.click();
                     }
@@ -99,23 +100,22 @@
 
             return this;
         },
-        showShade: function(options) {
-            var cache = Config.getCache(options), id = cache.shade_id, shade = $I(id);
+        showShade: function (cache) {
+            var id = cache.shade_id, shade = $I(id);
             var bs = $.getBodySize();
             if (null === shade) {
-                $.createElement('div', id, function(elem) {
+                $.createElement('div', id, function (elem) {
                     elem.style.cssText = 'background:#000;width:' + bs.width + 'px;height:' + bs.height + 'px;'
                         + 'display:block;position:absolute;'
                         + 'overflow:hidden;opacity:0;z-index:' + (cache.zindex - 1) + ';'
                         + '-moz-user-select:none;-khtml-user-select:none;user-select:none;-ms-user-select:none;';
-                }, $I(options.parent) || document.body);
+                }, $I(cache.options.parent) || document.body);
             } else {
                 shade.style.display = 'block';
                 shade.style.width = bs.width + 'px';
                 shade.style.height = bs.height + 'px';
             }
-
-            var box = $I(options.switchbox),
+            var box = $I(cache.options.switchbox),
                 bar = $I(cache.switch_shade_id),
                 size = $.getOffset(box, true),
                 w = size.width,
@@ -123,14 +123,14 @@
                 left = size.left,
                 top = size.top;
             if (null === bar) {
-                $.createElement('div', cache.switch_shade_id, function(elem) {
+                $.createElement('div', cache.switch_shade_id, function (elem) {
                     elem.style.cssText = 'width:' + w + 'px;height:' + h + 'px;'
                         + 'display:block;position:absolute;background:#dfe8f6;border:dotted 1px #99bbe8;color:#999;line-height:1em;'
                         + 'margin:0;padding:0;box-sizing:content-box;font-size:10px;font-family:Arial;word-break:break-all;'
                         + (cache.direction ? 'left:' + left + 'px;cursor:ew-resize;' : 'top:' + top + 'px;cursor:ns-resize;')
                         + 'overflow:hidden;opacity:0.5;z-index:' + cache.zindex + ';text-align:center;vertical-align:middle;'
-                        + '-moz-user-select:none;-khtml-user-select:none;user-select:none;-ms-user-select:none;';                    
-                }, $I(options.parent) || document.body);
+                        + '-moz-user-select:none;-khtml-user-select:none;user-select:none;-ms-user-select:none;';
+                }, $I(cache.options.parent) || document.body);
             } else {
                 //bar.className = options.switch_bar || '';
                 bar.style.display = 'block';
@@ -145,7 +145,7 @@
 
             return this;
         },
-        hideShade: function(cache) {            
+        hideShade: function (cache) {
             var id = cache.shade_id, shade = $I(id), bar = $I(cache.switch_shade_id);
             if (null !== shade) {
                 shade.style.display = 'none';
@@ -157,7 +157,7 @@
             }
             return this;
         },
-        showValue: function(cache, val) {
+        showValue: function (cache, val) {
             if (!cache.options.showValue) {
                 return this;
             }
@@ -173,7 +173,7 @@
             }
             return this;
         },
-        mouseDown: function(options) {
+        mouseDown: function (options) {
             var cache = Config.getCache(options);
             var id = options.switchbox || options.switch, obj = $I(id);
             if (null === obj) {
@@ -186,7 +186,9 @@
                 cache.bs = $.getBodySize();
                 cache.dragStart = true;
 
-                Factory.showShade(options);
+                Config.cache = cache;
+
+                Factory.showShade(cache);
 
                 var size = $.getOffset(cache.switch_shade_id, true);
                 cache.box = { w: size.width, h: size.height };
@@ -194,24 +196,20 @@
                 var ev = $.getEventPosition();
                 cache.start = cache.direction ? ev.x : ev.y;
                 Factory.showValue(cache, cache.start);
-                
-                $.addListener(document, 'mousemove', function(){
-                    Factory.mouseMove(cache);
-                });
-                $.addListener($I(cache.switch_shade_id), 'mousemove', function(){
-                    Factory.mouseMove(cache);
-                });
 
-                $.addListener(document, 'mouseup', function(){
-                    Factory.mouseUp(cache);
-                });
-                $.addListener($I(cache.switch_shade_id), 'mouseup', function(){
-                    Factory.mouseUp(cache);
-                });
+                if (cache.first) {
+                    $.addListener(document, 'mousemove', Factory.mouseMove);
+                    $.addListener($I(cache.switch_shade_id), 'mousemove', Factory.mouseMove);
+
+                    $.addListener(document, 'mouseup', Factory.mouseUp);
+                    $.addListener($I(cache.switch_shade_id), 'mouseup', Factory.mouseUp);
+                }
+                //cache.first = false;
             });
             return this;
         },
-        mouseMove: function(cache) {
+        mouseMove: function () {
+            var cache = Config.cache;
             if (cache.dragStart && !cache.dragAble) {
                 $('#' + cache.switch_shade_id).show();
                 cache.dragAble = true;
@@ -234,7 +232,8 @@
             Factory.showValue(cache, cache.end);
             return this;
         },
-        mouseUp: function(cache) {
+        mouseUp: function () {
+            var cache = Config.cache;
             $('#' + cache.switch_shade_id).hide();
             Factory.hideShade(cache);
 
@@ -244,6 +243,9 @@
             cache.dragAble = false;
             cache.dragStart = false;
 
+            $.removeEventListener(document, 'mousemove', Factory.mouseMove);
+            $.removeEventListener(document, 'mouseup', Factory.mouseUp);
+
             if ($.isFunction(cache.options.callback)) {
                 cache.callback({ start: cache.start, end: cache.end, value: cache.end - cache.start });
             }
@@ -252,7 +254,7 @@
     };
 
     $.extend({
-        switcher: function(options) {
+        switcher: function (options) {
             return Factory.initial(options);
         }
     });
