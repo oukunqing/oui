@@ -161,13 +161,16 @@
             if (!cache.options.showValue) {
                 return this;
             }
-            $I(cache.switch_shade_id).innerHTML = [
-                '<div style="display:block;overflow:hidden;padding:0;margin:0;border:none;',
-                cache.direction ? 'position:absolute;vertical-align:middle;display:table-cell;top:48%;' : 'margin:0 auto;',
-                '">',
-                val,
-                '</div>'
-            ].join('');
+            var bar = $I(cache.switch_shade_id);
+            if (null !== bar) {
+                bar.innerHTML = [
+                    '<div style="display:block;overflow:hidden;padding:0;margin:0;border:none;',
+                    cache.direction ? 'position:absolute;vertical-align:middle;display:table-cell;top:48%;' : 'margin:0 auto;',
+                    '">',
+                    val,
+                    '</div>'
+                ].join('');
+            }
             return this;
         },
         mouseDown: function(options) {
@@ -219,13 +222,13 @@
             var ev = $.getEventPosition();
             if (cache.direction) {
                 if (ev.x > cache.min && ev.x < cache.bs.width - cache.min) {
-                    cache.end = ev.x - parseInt(cache.box.w, 10);
-                    $('#' + cache.switch_shade_id).css('left', cache.end);
+                    cache.end = ev.x;
+                    $('#' + cache.switch_shade_id).css('left', cache.end - parseInt(cache.box.w, 10) / 2);
                 }
             } else {
                 if (ev.y > cache.min && ev.y < cache.bs.height - cache.min) {
-                    cache.end = ev.y - parseInt(cache.box.h, 10);
-                    $('#' + cache.switch_shade_id).css('top', cache.end);
+                    cache.end = ev.y;
+                    $('#' + cache.switch_shade_id).css('top', cache.end - parseInt(cache.box.h, 10) / 2);
                 }
             }
             Factory.showValue(cache, cache.end);
