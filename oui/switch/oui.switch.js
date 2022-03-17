@@ -118,7 +118,7 @@
             }
             var box = $I(cache.options.switchbox),
                 bar = $I(cache.switch_shade_id),
-                size = $.getOffset(box, true),
+                size = $.getOffset(box, false),
                 w = size.width,
                 h = size.height,
                 left = size.left,
@@ -128,7 +128,8 @@
                     elem.style.cssText = 'width:' + w + 'px;height:' + h + 'px;'
                         + 'display:block;position:absolute;background:#dfe8f6;border:dotted 1px #99bbe8;color:#999;line-height:1em;'
                         + 'margin:0;padding:0;box-sizing:content-box;font-size:10px;font-family:Arial;word-break:break-all;'
-                        + (cache.direction ? 'left:' + left + 'px;cursor:ew-resize;' : 'top:' + top + 'px;cursor:ns-resize;')
+                        + 'left:' + left + 'px;top:' + top + 'px;'
+                        + (cache.direction ? 'cursor:ew-resize;' : 'cursor:ns-resize;')
                         + 'overflow:hidden;opacity:0.5;z-index:' + cache.zindex + ';text-align:center;vertical-align:middle;'
                         + '-moz-user-select:none;-khtml-user-select:none;user-select:none;-ms-user-select:none;';
                 }, $I(cache.options.parent) || document.body);

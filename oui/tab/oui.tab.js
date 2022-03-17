@@ -1100,19 +1100,21 @@
             return that;
         },
         setContentSize: function(size, isContent, opt) {
-            //console.log('setContentSize: ', size);
             var that = this, tabHeight = 0, itemId = '',
-                cfg = that.getOptions();
+                cfg = that.getOptions(),
+                parent = that.conContainer.parentNode;
             if($.isObject(size)) {
                 //这里顶部增加2个像素的留白
-                that.conContainer.style.height = (size.height - 2) + 'px';
+                that.conContainer.style.height = (size.height - 0) + 'px';
                 tabHeight = isContent ? 0 : $.getOuterSize(that.tabContainer).height;
             } else {
                 if($.isString(size)) {
                     itemId = size;
                 }
-                size = { width: that.conContainer.clientWidth, height: that.conContainer.clientHeight || opt.conHeight };
+                //size = { width: that.conContainer.clientWidth, height: that.conContainer.clientHeight || opt.conHeight };
             }
+            //获取父级容器的内宽和内高
+            size = { width: parent.clientWidth, height: parent.clientHeight - 2 };
 
             if(tabHeight <= 0) {
                 tabHeight = opt.tabHeight || cfg.tabHeight;
