@@ -41,6 +41,7 @@
 .oui-tabs-bluegray .tab-switch-left {
     left: 0;
     border-top: solid 1px #99bbe8;
+    border-bottom: solid 1px #99bbe8;
     border-right: solid 1px #99bbe8;
     border-top-right-radius: 4px;
     /*border-left: solid 1px #99bbe8;
@@ -51,6 +52,7 @@
 .oui-tabs-bluegray .tab-switch-right {
     right: 0;
     border-top: solid 1px #99bbe8;
+    border-bottom: solid 1px #99bbe8;
     border-left: solid 1px #99bbe8;
     border-top-left-radius: 4px;
     /*border-right: solid 1px #99bbe8;
@@ -113,7 +115,7 @@
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
 	border-bottom: solid 1px #99bbe8;
-    border-bottom: none 0;
+    /*border-bottom: none 0;*/
     float: left;
     display: block;
     margin: 0 2px 0 0;

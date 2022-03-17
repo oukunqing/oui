@@ -91,7 +91,7 @@
 
     var tab3 = $.tab($I('nav3'), $I('content3'), {
         id: 'tab3',
-        skin: 'bluegray',
+        skin: 'green',
     });
 
     tab3.add({ id: 'config', name: '系统配置', html: '系统配置'});
