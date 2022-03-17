@@ -40,21 +40,21 @@
 
 .oui-tabs-orange .tab-switch-left {
     left: 0;
-    border-right: solid 1px #ff9d4a;
-    border-left: solid 1px #ff9d4a;
     border-top: solid 1px #ff9d4a;
+    border-right: solid 1px #ff9d4a;
     border-top-right-radius: 4px;
-    border-top-left-radius: 4px;
+    /*border-left: solid 1px #ff9d4a;
+    border-top-left-radius: 4px;*/
     bottom: -1px;
 }
 
 .oui-tabs-orange .tab-switch-right {
     right: 0;
-    border-left: solid 1px #ff9d4a;
-    border-right: solid 1px #ff9d4a;
     border-top: solid 1px #ff9d4a;
-    border-top-right-radius: 4px;
+    border-left: solid 1px #ff9d4a;
     border-top-left-radius: 4px;
+    /*border-right: solid 1px #ff9d4a;
+    border-top-right-radius: 4px;*/
     bottom: -1px;
 }
 

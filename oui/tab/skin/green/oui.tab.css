@@ -40,21 +40,21 @@
 
 .oui-tabs-green .tab-switch-left {
     left: 0;
-    border-right: solid 1px #6ebd4d;
-    border-left: solid 1px #6ebd4d;
     border-top: solid 1px #6ebd4d;
+    border-right: solid 1px #6ebd4d;
     border-top-right-radius: 4px;
-    border-top-left-radius: 4px;
+    /*border-left: solid 1px #6ebd4d;
+    border-top-left-radius: 4px;*/
     bottom: -1px;
 }
 
 .oui-tabs-green .tab-switch-right {
     right: 0;
-    border-left: solid 1px #6ebd4d;
-    border-right: solid 1px #6ebd4d;
     border-top: solid 1px #6ebd4d;
-    border-top-right-radius: 4px;
+    border-left: solid 1px #6ebd4d;
     border-top-left-radius: 4px;
+    /*border-right: solid 1px #6ebd4d;
+    border-top-right-radius: 4px;*/
     bottom: -1px;
 }
 

@@ -78,6 +78,7 @@
                 cache.min = cache.options.min;
             }
 
+            //判断拉伸方向，1-水平方向，2-垂直方向
             if ($.isNumber(cache.options.direction) || $.isString(cache.options.direction)) {
                 cache.direction = cache.direction === 1 || ('' + cache.direction).toLowerCase() === 'horizontal';
             }

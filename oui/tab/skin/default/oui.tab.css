@@ -1,6 +1,7 @@
 .oui-tabs {
     height: 30px;
     padding: 0;
+    margin: 0;
     border: none 0;
     font-size: 14px;
     line-height: 28px;
@@ -13,7 +14,7 @@
     height: 28px;
     padding: 0;
     border: none 0;
-    margin: 0 2px ;
+    margin: 0 2px;
     left: 17px;
     bottom: -1px;
     overflow: hidden;
@@ -40,21 +41,21 @@
 
 .oui-tabs .tab-switch-left {
     left: 0;
-    border-right: solid 1px #dee1e6;
-    border-left: solid 1px #dee1e6;
     border-top: solid 1px #dee1e6;
+    border-right: solid 1px #dee1e6;
     border-top-right-radius: 4px;
-    border-top-left-radius: 4px;
+    /*border-left: solid 1px #dee1e6;
+    border-top-left-radius: 4px;*/
     bottom: -1px;
 }
 
 .oui-tabs .tab-switch-right {
     right: 0;
-    border-left: solid 1px #dee1e6;
-    border-right: solid 1px #dee1e6;
     border-top: solid 1px #dee1e6;
-    border-top-right-radius: 4px;
+    border-left: solid 1px #dee1e6;
     border-top-left-radius: 4px;
+    /*border-right: solid 1px #dee1e6;
+    border-top-right-radius: 4px;*/
     bottom: -1px;
 }
 
@@ -189,7 +190,8 @@
 
 .oui-tabs-contents {
     margin: 0;
-    padding: 0;
+    /*这里顶部增加2个像素的留白*/
+    padding: 2px 0 0;
     display: block;
     box-sizing: border-box;
 }

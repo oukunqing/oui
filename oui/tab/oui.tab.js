@@ -1104,7 +1104,8 @@
             var that = this, tabHeight = 0, itemId = '',
                 cfg = that.getOptions();
             if($.isObject(size)) {
-                that.conContainer.style.height = size.height + 'px';
+                //这里顶部增加2个像素的留白
+                that.conContainer.style.height = (size.height - 2) + 'px';
                 tabHeight = isContent ? 0 : $.getOuterSize(that.tabContainer).height;
             } else {
                 if($.isString(size)) {
