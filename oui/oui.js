@@ -1464,7 +1464,10 @@
         },
         toDate: function (format) {
             var v = this;
-            var ts = Date.parse(v.replace(/-/g, '/'));
+            if ($.isString(format) && (!v || '0' === v)) {
+                return '';
+            }
+            var ts = !v || '0' === v ? 0 : Date.parse(v.replace(/-/g, '/'));
             if (isNaN(ts) && /^[\d]{10,13}$/.test(v)) {
                 ts = Number(v.padRight(13));
             }
@@ -1478,8 +1481,11 @@
             return $.isString(format) ? dt.format(format) : dt;
         },
         toDateString: function(format) {
-            if(this.trim() === '' || this === '-') {
+            if (this.trim() === '' || this === '-') {
                 return this;
+            }
+            if (this === '0') {
+                return '';
             }
             var dt = this.toDate(true);
             return isNaN(dt.getFullYear()) ? '' : dt.format(format || '');
@@ -1765,6 +1771,7 @@
         toThousand: function (delimiter, len) { return this.toString().toThousand(delimiter, len); },
         toChineseNumber: function (isMoney) { return $.numberToChinese(this, isMoney); },
         toDate: function (format) { return this.toString().toDate(format); },
+        toDateString: function(format) { return this.toString().toDateString(format); },
         toDateFormat: function(format) { return this.toString().toDateFormat(format); },
         toNumberUnit: function (num, kn, unit, decimalLen, force, space) {
             if (typeof decimalLen === 'boolean') {
@@ -1803,12 +1810,26 @@
         join: function() {
             return this.toString();
         },
-        toTimeStr: function() {
+        toTimeData: function(secondDecimalLen) {
+            if (!$.isNumber(secondDecimalLen) || secondDecimalLen <= 0) {
+                secondDecimalLen = 0;
+            }
             var seconds = this,
-                h = parseInt(seconds / 3600, 10),
-                m = parseInt((seconds - h * 3600) / 60, 10),
-                s = seconds % 60;
-            return h.padLeft(2) + ':' + m.padLeft(2) + ':' + s.padLeft(2);
+                d = parseInt(seconds / 86400, 10),
+                h = parseInt((seconds - d * 86400) / 3600, 10),
+                m = parseInt((seconds - d * 86400 - h * 3600) / 60, 10),
+                s = (seconds % 60).round(secondDecimalLen);
+            return { days: d, hours: h, minutes: m, seconds:s, d: d, h: h, m: m, s: s };
+        },
+        toTimeStr: function(secondDecimalLen, daysUnit) {
+            var seconds = this,
+                data = seconds.toTimeData(secondDecimalLen),
+                time = [
+                    data.h.padLeft(2),
+                    data.m.padLeft(2),
+                    data.s.padLeft(2)
+                ];
+            return (data.d ? data.d + (daysUnit || 'days') + ' ' : '') + time.join(':');
         },
         formatTo: function(fmt) {
             fmt = (!$.isString(fmt, true) ? '{0}' : fmt).trim();

@@ -1114,3 +1114,25 @@ console.log('10'.toHex().toLowerCase());
 console.log((10).toHex().toLowerCase());
 
 console.log($.protocol.i1)
+
+
+console.log(new Date().format())
+console.log(new Date().addSeconds(-1).format())
+
+var dic = {"length":"000083","type":"getdevice","seqnum":"1647579997","respcode":"failed","respmsg":"Device [12345678901234013] is offline."}
+
+var caches = {"k1":{id:1},"k2":{id:2}};
+console.log(caches);
+delete caches['k1'];
+console.log(caches);
+
+console.log((86400*3+65).toTimeStr());
+
+console.log((0).toDate().format())
+console.log((0).toDateString())
+
+
+            var dt = new Date('-');
+
+            console.log('dt:', dt, ',', typeof dt, ',', dt.format());
+
