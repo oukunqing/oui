@@ -43,4 +43,27 @@
 			run(true);
 		}
 	}
+
+	/*
+	//项目中实际使用的代码示例
+	$('#chbReload').click(function () {
+		var timing = this.checked;
+		if (!timing) {
+			$.timer.stop('timer01', function () {
+				$('#ts01').html('定时刷新');
+			});
+		} else {
+
+			$.timer({
+				id: 'timer01',
+				interval: $('#ddlInterval').val().toInt()
+			}).start(function (num) {
+				$('#ts01').html('<i>' + num + '</i>秒后刷新');
+				if (num <= 0) {
+					module.getDeviceList();
+				}
+			});
+		}
+	});
+	*/
 </script>

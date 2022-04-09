@@ -1280,6 +1280,63 @@
     }, '$');
 }(OUI);
 
+!function ($) {
+    'use strict';
+
+    $.extendNative($, {        
+        isLeapYear: function (year) {
+            if (!$.isNumber(year)) {
+                year = parseInt('0' + year, 10);
+            }
+            return year % 400 === 0 || (year % 4 === 0 && year % 100 !== 0);
+        },
+        getDays: function(year, month) {
+            var leap = Date.isLeapYear(year),
+                days = 31;
+            switch(month) {
+                case 4:
+                case 6:
+                case 9:
+                case 11:
+                    days = 30;
+                    break;
+                case 2:
+                    days = leap ? 29 : 28;
+                    break;
+            }
+            return days;
+        },
+        getMonthStart: function (month, year) {
+            var dt = new Date();
+            year = year || dt.getFullYear();
+            month = month || (dt.getMonth() + 1);
+            return '{0}-{1:D2}-01 00:00:00'.format(year, month);
+        },
+        getMonthEnd: function (month, year) {
+            var dt = new Date();
+            year = year || dt.getFullYear();
+            month = month || (dt.getMonth() + 1);
+            var days = Date.getDays(year, month);
+            return '{0}-{1:D2}-{2:D2} 23:59:59'.format(year, month, days);
+        },
+        getDayStart: function (date, month, year) {
+            var dt = new Date();
+            year = year || dt.getFullYear();
+            month = month || (dt.getMonth() + 1);
+            date = date || dt.getDate();
+            return '{0}-{1:D2}-{2:D2} 00:00:00'.format(year, month, date);
+        },
+        getDayEnd: function (date, month, year) {
+            var dt = new Date();
+            year = year || dt.getFullYear();
+            month = month || (dt.getMonth() + 1);
+            date = date || dt.getDate();
+            return '{0}-{1:D2}-{2:D2} 23:59:59'.format(year, month, date);
+        }
+    });
+
+} (OUI);
+
 // Javascript 原生对象方法扩展
 !function ($) {
     'use strict';
@@ -1722,6 +1779,16 @@
         hexToTime: function(reverse) {
             var num = this.hexToInt(true);
             return num.toDate().format();
+        },
+        //这个函数是从C语言中仿制过来的，利用左移2位实现
+        charToInt: function (reverse) {
+            var arr = this.hexToNum(false);
+            var len = arr.length, num = 0, i = 0, j = 0;
+            for (i = 0; i < len; i++) {
+                j = len - i - 1;
+                num |= arr[reverse ? j : i] << (j * 8);
+            }
+            return num;
         }
     }, 'String.prototype');
 
@@ -1912,7 +1979,11 @@
                 age -= 1;
             }
             return age;
-        }
+        },
+        getMonthStart: $.getMonthStart,
+        getMonthEnd: $.getMonthEnd,
+        getDayStart: $.getDayStart,
+        getDayEnd: $.getDayEnd
     }, 'Date.prototype');
 
     $.extendNative(Date, {
@@ -1991,7 +2062,9 @@
         },
         timeSpan: function (dt1, dt2) {
             return dt1.timeSpan(dt2);
-        }
+        },
+        isLeapYear: $.isLeapYear,
+        getDays: $.getDays
     }, 'Date');
 }(OUI);
 
@@ -2466,12 +2539,26 @@
             return '';
         },
         getFileName = function (filePath, withoutExtension) {
-            var path = (filePath || '').split('?')[0], p = path.lastIndexOf('/');
+            filePath = filePath || '';
+            if (!filePath) {
+                return '';
+            }
+            var path = filePath.split('?')[0], p = path.lastIndexOf('/');
             var name = p >= 0 ? path.substr(p + 1) : path, pos = name.lastIndexOf('.');
+            if (name.toLowerCase().endWith('.tar.gz')) {
+                pos = name.length - '.tar.gz'.length;
+            }
             return pos >= 0 && withoutExtension ? name.substr(0, pos) : name;
         },
         getExtension = function (filePath) {
-            var name = (filePath || '').split('?')[0], pos = name.lastIndexOf('.');
+            filePath = filePath || '';
+            if (!filePath) {
+                return '';
+            }
+            if (filePath.toLowerCase().endWith('.tar.gz')) {
+                return '.tar.gz';
+            }
+            var name = filePath.split('?')[0], pos = name.lastIndexOf('.');
             return pos >= 0 ? name.substr(pos + 1).toLowerCase() : '';
         },
         createElement = function (nodeName, id, func, parent, options) {
@@ -3747,11 +3834,50 @@
             }
             return this;
         },
+        getImgSize = function(img_url, callback) {
+            var start_time = new Date().getTime();
+            var img = new Image(), load = false;
+
+            if (!$.isFunction(callback)) {
+                callback = function(par) {
+                    console.log('getImgSize: ', par);
+                };
+            }
+
+            img.onerror = function(er) {
+                clearInterval(set);
+                callback({width:0, height:0});
+            };
+            img.onload = function(e) {
+                if (!load) {
+                    load = true;
+                    var duration = new Date().getTime() - start_time;
+                    callback({actino: 'onload', duration: duration, width: img.width, height: img.height});
+                }
+            };
+            img.src = img_url + '?' + start_time;
+            var check = function() {
+                if (img.width > 0 || img.height > 0 || load) {
+                    clearInterval(set);
+                    if (!load) {
+                        load = true;
+                        var duration = new Date().getTime() - start_time;
+                        callback({actino: 'check', duration: duration, width: img.width, height: img.height});
+                    }
+                }
+            };
+            var set = setInterval(check, 5);
+        },
         getImgRealSize = function (img, callback) {
             var w = 0, h = 0;
             img = $.toElement(img);
             if(!$.isElement(img)) {
                 return {width: w, height: h};
+            }
+            if (!$.isFunction(callback)) {
+                callback = function(par) {
+                    console.log('getImgRealSize: ', par);
+                };
             }
             //HTML5
             if (img.naturalWidth) {
@@ -3759,11 +3885,15 @@
                 h = img.naturalHeight;
                 callback({width: w, height: h});
             } else { // IE6/7/8
+                /*
                 var imgae = new Image();
                 image.src = img.src;
                 image.onload = function() {
                     callback({width: image.width, height: image.height});
                 };
+                */
+                
+                getImgSize(img.src, callback);
             }
             return {width: w, height: h};
         },
@@ -3998,6 +4128,7 @@
         setCookie: setCookie,
         getCookie: getCookie,
         delCookie: delCookie,
+        getImgSize: getImgSize,
         getImgRealSize: getImgRealSize,
         fillOption: fillOption,
         fillOptions: fillOptions,

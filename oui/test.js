@@ -491,6 +491,7 @@ function build(url, key, val, append) {
     for (var i in keys) {
         pattern.push('&' + keys[i] + '=[\\d\\w\\-]{0,}');
     }
+    console.log('keys[0]:', keys[0])
     var reg = new RegExp('(' + pattern.join('|') + ')', 'i'), con = '&' + keys[0] + '=' + val;
     return reg.test(url) ? url.replace(reg, add ? con : '') : (!add ? url : url + con);
 }
@@ -1064,15 +1065,14 @@ console.log('\\u91cd\\u65b0\\u52a0\\u8f7d'.unUnicode());
 console.log($.unUnicode('\\u91cd\\u65b0\\u52a0\\u8f7d'));
 
 
-console.log((1642439910).toDate().format());
+console.log((1648606421).toDate().format());
 console.log('e1a4e561'.hexToInt(true).toDate().format('ts'));
 console.log('8d2aab61'.hexToInt(true));
 //a55a0e00485a534830303130453637353530303935 05ce21 01 ff 61e5a4e6 0000000000000000 1a1996
 
 console.log('e1a4e561'.hexToInt(true).toDate().format());
 console.log('5e15e661'.hexToInt(true).toDate().format());
-console.log('e2a4e561'.hexToInt(true).toDate().format());
-console.log('0527e661'.hexToInt(true).toDate().format());
+console.log('499602d2'.hexToInt(true).toDate().format());
 
 //a55a0400485a53483030313045363735353030393507e6010527e661100096
 
@@ -1119,20 +1119,41 @@ console.log($.protocol.i1)
 console.log(new Date().format())
 console.log(new Date().addSeconds(-1).format())
 
-var dic = {"length":"000083","type":"getdevice","seqnum":"1647579997","respcode":"failed","respmsg":"Device [12345678901234013] is offline."}
-
-var caches = {"k1":{id:1},"k2":{id:2}};
-console.log(caches);
-delete caches['k1'];
-console.log(caches);
-
-console.log((86400*3+65).toTimeStr());
-
-console.log((0).toDate().format())
-console.log((0).toDateString())
 
 
-            var dt = new Date('-');
 
-            console.log('dt:', dt, ',', typeof dt, ',', dt.format());
+console.log((1648631412).toDate().format());
 
+var path = "/pic/20220330/12345678901234010/20220330133034_01_12345678901234010_000_01_21.txt";
+
+console.log(path.getFileName());
+console.log(path.getFileName(true));
+console.log(path.getExtension());
+var path = "/pic/20220330/12345678901234010/20220330133034_01_12345678901234010_000_01_21.tar.gz";
+
+console.log(path.getFileName());
+console.log(path.getFileName(true));
+console.log(path.getExtension());
+
+
+console.log($.i1('a55a0c00313233343536373839303132333430393905cc0101ff002e00000000390d2b6267ad96'));
+/*
+console.log('0305'.hexToInt(true));
+console.log('0305'.charToInt(true));
+console.log('6242b5d5'.hexToInt(false));
+console.log('6242b5d5'.charToInt(false));
+
+console.log('6242b5d5'.hexToNum(false));
+
+console.log('6242b5d5'.hexToNum(false));
+*/
+
+console.log($.getMonthStart(3));
+console.log(new Date().getMonthEnd(3));
+
+console.log(new Date().getDate());
+
+console.log((1648631412).toDate().getDate());
+
+console.log('重载'.toUnicode());
+console.log(''.toUnicode());

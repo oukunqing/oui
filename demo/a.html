@@ -2,7 +2,7 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>Document</title>
+	<title>Document - format test</title>
 	<style type="text/css"></style>
     <script type="text/javascript" src="../oui/oui.js?12"></script>
 	<script type="text/javascript">
@@ -22,7 +22,11 @@
 			$.reload("ADD", 12);
 		}
 
-
+		var img_url = 'http://112.54.97.178:81/pic/20220408/198490/20220408105213_01_198490_001_01.jpg';
+		$.getImgSize(img_url, function(par) {
+			console.log('img_url: ', img_url);
+			console.log('getImgSize: ', par);
+		});
 
 	</script>
 </head>

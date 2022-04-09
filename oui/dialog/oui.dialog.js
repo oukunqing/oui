@@ -4187,6 +4187,9 @@
         },
         focus: function (obj) {
             var _ = this, p = Util.getParam(_), buttons = p.buttons;
+            if ($.isWap) {
+                return _;
+            }
             if (p.none || _.isClosed() || _.isHide()) {
                 return _;
             }

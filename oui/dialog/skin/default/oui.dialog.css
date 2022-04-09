@@ -77,7 +77,7 @@
 	outline: none;
 }
 
-.oui-dialog .dialog-unselect{
+.oui-dialog .dialog-unselect, .oui-dialog .temp-unselect{
     -moz-user-select:none;
     -khtml-user-select:none;
     user-select:none;
