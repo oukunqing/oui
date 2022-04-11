@@ -83,6 +83,7 @@
                         tooltip: null,
                         //提示信息显示时长（毫秒），0-表示一直显示，若大于0表示会定时关闭
                         tooltipTime: null,
+                        tooltipStyle: null,
                         //外部验证回调函数 function(value, element){} 返回值为 boolean （true|false）
                         //返回 true - 表示验证通过，false-表示验证失败
                         validate: null,
@@ -324,8 +325,16 @@
                                 }
                                 var options = { time: $.isNumber(time) ? time : 0, tipsMore: true, for: forname };
                                 var position = (element.field || {}).position || configs.position;
+                                var tooltipStyle = configs.tooltipStyle || 
+                                    (configs.styles || configs.style || {}).tooltip || 
+                                    op.configs.tooltipStyle || 
+                                    (op.configs.styles || op.configs.style || {}).tooltip;
+
                                 if ($.isString(position, true) || $.isNumber(position)) {
                                     options.position = position;
+                                }
+                                if (tooltipStyle) {                                    
+                                    options.tooltipStyle = tooltipStyle;
                                 }
                                 $.tooltip(message, element, options);
                                 if (configs.highLight) {
@@ -413,6 +422,7 @@
                             messages: {},               //验证失败时显示的提示信息（为空则显示默认的信息）
                             //tooltip position
                             position: '',
+                            tooltipStyle: null,
                             same: { id: '', msg: '' },
                             distinct: { id: '', msg: '' },
                             //检测字段内容是否已存在
