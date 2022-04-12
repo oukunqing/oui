@@ -598,9 +598,6 @@ var channelid = 4;
 
 console.log({ "length": 20, "start": 0, "ClientType": 5, "searchtext": "", "TypeID": "\"" + channelid + "\"" })
 
-var name = 'pic/1.jpg';
-
-console.log(name.addNamePostfix('_thumb'));
 
 console.log((3750).toTimeStr());
 console.log(('01:02:30').toSeconds());
@@ -1157,3 +1154,12 @@ console.log((1648631412).toDate().getDate());
 
 console.log('重载'.toUnicode());
 console.log(''.toUnicode());
+
+var name = 'pic/1.jpg';
+
+console.log(name.addNamePostfix('_thumb'));
+
+
+console.log('//pic/1.jpg'.checkFilePath());
+console.log('http://baidu.com//pic/1.jpg'.checkFilePath());
+console.log('https://baidu.com//pic/1.jpg'.checkFilePath());

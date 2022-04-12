@@ -1668,6 +1668,7 @@
         getExtension: function() {
             return $.getExtension(this);
         },
+
         formatSimple: function (args) {
             var s = this, sep = '%s', vals = [], rst = [];
             if (arguments.length > 1) {
@@ -1720,12 +1721,10 @@
             return $.expandNumberList(this);
         },
         addNamePostfix: function(postfix) {
-            var s = this, pos = s.lastIndexOf('.');
-            if(pos >= 0) {
-                return s.substr(0, pos) + postfix + s.substr(pos);
-            } else {
-                return s + postfix;
-            }
+            return $.addNamePostfix(this, postfix);
+        },
+        checkFilePath: function() {
+            return $.checkFilePath(this);
         },
         isEvenLen: function() {
             var s = this.trim(), len = s.length;
@@ -2559,7 +2558,31 @@
                 return '.tar.gz';
             }
             var name = filePath.split('?')[0], pos = name.lastIndexOf('.');
-            return pos >= 0 ? name.substr(pos + 1).toLowerCase() : '';
+            return pos >= 0 ? name.substr(pos).toLowerCase() : '';
+        },
+        addNamePostfix = function(filePath, postfix) {
+            if(!$.isString(filePath)) {
+                return filePath;
+            }
+            if (filePath.lastIndexOf('.') < 0) {
+                return filePath + postfix;
+            } else {
+                var ext = getExtension(filePath), len = ext.length;
+                return filePath.substr(0, filePath.length - len) + postfix + ext;
+            }
+        },
+        checkFilePath = function(filePath) {
+            if (!$.isString(filePath) || '' === filePath.trim()) {
+                return filePath;
+            }
+            var tmp = filePath.toLowerCase();
+            if (tmp.startWith('http://')) {
+                return filePath.substr(0, 7) + filePath.substr(7).replace(/[\/]{2,}/g, '/');
+            } else if (tmp.startWith('https://')) {
+                return filePath.substr(0, 8) + filePath.substr(8).replace(/[\/]{2,}/g, '/');
+            } else {
+                return filePath.replace(/[\/]{2,}/g, '/');
+            }
         },
         createElement = function (nodeName, id, func, parent, options) {
             if ($.isFunction(id)) {
@@ -3988,7 +4011,18 @@
 
         };
 
-    var ua = function () { try { return navigator.userAgent } catch (e) { return '' } }(),
+    var browser = {
+        ua: function() { try { return navigator.userAgent; } catch (e) { return ''; } },
+        isFirefox: function (ua) { return (ua || browser.ua()).indexOf('Firefox') > -1; },
+        isEdge: function (ua) { return (ua || browser.ua()).indexOf('Edge') > -1; },
+        isOpera: function (ua) { ua = ua || browser.ua(); return ua.indexOf('Opera') > -1 || ua.indexOf('OPR') > -1; },
+        isSafari: function (ua) { ua = ua || browser.ua(); return ua.indexOf('Safari') > -1 && ua.indexOf('Chrome') < 0; },
+        isIE: function (ua) { ua = ua || browser.ua(); return ua.indexOf('Trident') > -1 || (ua.indexOf('MSIE') > -1 && ua.indexOf('compatible') > -1); },
+        isChrome: function (ua) { ua = ua || browser.ua(); return ua.indexOf('Chrome') > -1 && !browser.isOpera(ua) && !browser.isEdge(ua) && !browser.isSafari(ua); },
+        isWap: function (ua) { ua = ua || browser.ua(); return /Android|webOS|iPhone|iPod|BlackBerry/i.test(ua)},
+        isMobile: function(ua) { return browser.isWap(ua); }
+    };
+    var ua = function () { try { return navigator.userAgent; } catch (e) { return ''; } }(),
         //mc = ua.match(/([A-Z]+)\/([\d\.]+)/ig) || [], ut = mc.join('_').replace(/\//g,''),
         isFirefox = ua.indexOf('Firefox') > -1,
         isEdge = ua.indexOf('Edge') > -1,
@@ -4007,6 +4041,7 @@
         isEdge: isEdge,
         isWap: isWap,
         ieVersion: ieVersion,
+        browser: browser,
         keyCode: {
             Esc: 27,
             Tab: 9,
@@ -4023,6 +4058,8 @@
         getFilePath: getFilePath,
         getFileName: getFileName,
         getExtension: getExtension,
+        addNamePostfix: addNamePostfix,
+        checkFilePath: checkFilePath,
         isBody: isBody,
         isDocument: isDocument,
         isWindow: isWindow,
