@@ -192,6 +192,13 @@
 .oui-dialog .dialog-head .btn-panel {
     margin: 2px 2px 0 0;
     float: right;
+
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 .oui-dialog .dialog-head .dialog-btn {
@@ -204,6 +211,13 @@
     display: inline-block;
     margin: 0 0 0 5px; padding: 0;
     box-sizing: content-box;
+
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 .oui-dialog .dialog-head .dialog-btn:hover {
@@ -455,6 +469,13 @@
     text-align: right;
     margin: 6px 4px 4px;
     padding: 0;
+
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 .oui-dialog .dialog-btn {    
@@ -482,6 +503,13 @@
     border-style: solid;
     text-align: center;
 	/*outline: none;*/
+    
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 .oui-dialog .btn-primary {

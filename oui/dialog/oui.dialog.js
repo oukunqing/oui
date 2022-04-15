@@ -103,7 +103,8 @@
             info: 'info',
             about: 'about',
             toolwindow: 'toolwindow',
-            toolwin: 'toolwin'
+            toolwin: 'toolwin',
+            panel: 'panel'
         },
         DialogStatus: {
             normal: 'normal',
@@ -475,6 +476,8 @@
                     return Config.DialogType.message;
                 } else if (Common.isInKeys(type, ['tooltip', 'tips'], Config.DialogType)) {
                     return Config.DialogType.tooltip;
+                } else if (Common.isInKeys(type, ['panel', 'box'], Config.DialogType)) {
+                    return Config.DialogType.panel;
                 }
                 return type || (isBuild ? Config.DialogType.dialog : '');
             },
@@ -890,6 +893,15 @@
                         opt.showLogo = false;
                         opt.showFoot = false;
                         break;
+                    case Config.DialogType.panel:
+                        opt.minAble = opt.maxAble = opt.sizeAble = opt.dragSize = false;
+                        opt.showLogo = false;
+                        opt.showFoot = false;
+                        opt.showHead = false;
+                        opt.showMin = false;
+                        opt.showMax = false;
+                        opt.showClose = false;
+                        break;
                     default:
                         opt.buttons = Config.DialogButtons.None;
                         opt.showHead = opt.showFoot = opt.dragSize = false;
@@ -1240,6 +1252,11 @@
                 ctls.dialog.style.padding = Common.getCssAttrSize(opt.padding, {
                     attr: 'padding', unit: 'px', isArray: true, isLimit: true, max: 10, val: 4
                 }).join(' ');
+
+                var radius = parseInt(opt.radius, 10);
+                if (!isNaN(radius)) {
+                    ctls.dialog.style.borderRadius = radius + 'px';
+                }
                 return this;
             },
             buildMain: function (_, pNode) {
@@ -1442,6 +1459,7 @@
                         //清除dialog.content边距
                         elem.style.padding = '0px';
                         elem.style.margin = '0px';
+                        elem.style.borderRadius = '0px';
 
                         var isLoaded = false, childs = elem.childNodes;
                         $.extend(ctls, { iframe: childs[0], iframeShade: childs[1], loading: childs[2] });
@@ -1460,6 +1478,12 @@
                         }, 15 * 1000);
                     }
                 } else {
+                    if(opt.type === Config.DialogType.panel) {                        
+                        //清除dialog.content边距
+                        elem.style.padding = '0px';
+                        elem.style.margin = '0px';
+                        elem.style.borderRadius = '0px';
+                    }
                     //elem.innerHTML = opt.content;
                     util.buildIconContent(_, true, elem);
                     if (!opt.showHead && ctls.btnPanel) {
@@ -1659,9 +1683,10 @@
                     }
 
                     if (config) {
+                        var wapAttr = Util.isWap() ? ' style="outline:none;" onfocus="this.blur();"' : '';
                         text = '<a class="dialog-btn {css}{1}" code="{2}" key="{key}" result="{result}" href="{{0}}"'
-                            + ' tabindex="{3}" shortcut-key="{skey}">{text}</a>';
-                        html.push(text.format(config, css, code, tabindex++));
+                            + ' tabindex="{3}" shortcut-key="{skey}" {4}>{text}</a>';
+                        html.push(text.format(config, css, code, tabindex++, wapAttr));
 
                         codes.push(key);
                     }
@@ -2875,7 +2900,7 @@
                     $.addListener(ctls.head, evNameDown.substr(2), function (event) {
                         moveDialog(event);
                     });
-                } else {
+                } else if(opt.type !== Config.DialogType.panel && opt.moveAble) {
                     $.addListener([ctls.dialog, ctls.body, ctls.content], evNameDown.substr(2), function (event) {
                         moveDialog(event);
                     });
@@ -3771,7 +3796,8 @@
                 //width: follow|inherit 并且设置了target，则width跟随target控件的宽度
                 height: ds.height + 'px',   //初始高度      px, auto, %
                 margin: 0,              //当宽度或高度设置为 % 百分比时，启用 margin，margin格式参考css [上右下左] 设置，单位为px
-                padding: 4,             //内边距（拖动边框）宽度，格式参考css设置,单位为px
+                padding: 4,             //内边距（拖动边框）宽度，格式参考css设置，单位为px
+                radius: 4,              //对话框圆角半径，单位为px
                 parent: null,           //Element parentNode DIV
                 limitRange: true,       //窗体范围(位置、大小)限制 true,false
                 opacity: null,          //背景层透明度，默认为 0.2
@@ -4187,7 +4213,7 @@
         },
         focus: function (obj) {
             var _ = this, p = Util.getParam(_), buttons = p.buttons;
-            if ($.isWap) {
+            if (Util.isWap()) {
                 return _;
             }
             if (p.none || _.isClosed() || _.isHide()) {
@@ -4384,6 +4410,9 @@
         },
         toolwin: function(content, title, options) {
             return Factory.show(content, title, options, Config.DialogType.toolwin);
+        },
+        panel: function(content, title, options) {
+            return Factory.show(content, title, options, Config.DialogType.panel);
         }
     });
 

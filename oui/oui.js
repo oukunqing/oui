@@ -2694,7 +2694,7 @@
         getElementStyleSize = function(elem, styleName) {
             var attr = ('' + styleName).toLowerCase(),
                 style = getElementStyle(elem),
-                postfix = attr === 'border' ? 'Width' : attr == 'radius' ? 'Radius' : '',
+                postfix = attr === 'border' ? 'Width' : attr === 'radius' ? 'Radius' : '',
                 data = {
                     top: 0, left: 0, right: 0, bottom: 0, width: 0, height: 0
                 };
@@ -2711,7 +2711,7 @@
                 return getCssSizeVal(style[attr]);
             }
 
-            data = attr == 'radius' ? {
+            data = attr === 'radius' ? {
                 topLeft: getCssSizeVal(style['borderTopLeft' + postfix]),
                 topRight: getCssSizeVal(style['borderTopRight' + postfix]),
                 bottomLeft: getCssSizeVal(style['borderBottomLeft' + postfix]),
@@ -4019,7 +4019,7 @@
         isSafari: function (ua) { ua = ua || browser.ua(); return ua.indexOf('Safari') > -1 && ua.indexOf('Chrome') < 0; },
         isIE: function (ua) { ua = ua || browser.ua(); return ua.indexOf('Trident') > -1 || (ua.indexOf('MSIE') > -1 && ua.indexOf('compatible') > -1); },
         isChrome: function (ua) { ua = ua || browser.ua(); return ua.indexOf('Chrome') > -1 && !browser.isOpera(ua) && !browser.isEdge(ua) && !browser.isSafari(ua); },
-        isWap: function (ua) { ua = ua || browser.ua(); return /Android|webOS|iPhone|iPod|BlackBerry/i.test(ua)},
+        isWap: function (ua) { ua = ua || browser.ua(); return /Android|webOS|iPhone|iPod|iPad|BlackBerry/i.test(ua)},
         isMobile: function(ua) { return browser.isWap(ua); }
     };
     var ua = function () { try { return navigator.userAgent; } catch (e) { return ''; } }(),
@@ -4030,7 +4030,7 @@
         isSafari = ua.indexOf('Safari') > -1 && ua.indexOf('Chrome') < 0,
         isChrome = !isOpera && !isEdge && !isSafari && ua.indexOf('Chrome') > -1,
         isIE = ua.indexOf('Trident') > -1 || (ua.indexOf('MSIE') > -1 && ua.indexOf('compatible') > -1),
-        isWap = /Android|webOS|iPhone|iPod|BlackBerry/i.test(ua),
+        isWap = /Android|webOS|iPhone|iPod|iPad|BlackBerry/i.test(ua),
         ieVersion = isIE ? parseFloat('0' + (ua.match(/(MSIE\s|rv:)([\d\.]+)[;]?/) || [])[2], 10) : 0;
     $.extendNative($, {
         isChrome: isChrome,
