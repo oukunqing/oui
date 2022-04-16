@@ -1163,3 +1163,7 @@ console.log(name.addNamePostfix('_thumb'));
 console.log('//pic/1.jpg'.checkFilePath());
 console.log('http://baidu.com//pic/1.jpg'.checkFilePath());
 console.log('https://baidu.com//pic/1.jpg'.checkFilePath());
+
+var num = '0';
+
+console.log(num ? 'a' : 'b');

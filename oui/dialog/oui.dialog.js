@@ -104,7 +104,8 @@
             about: 'about',
             toolwindow: 'toolwindow',
             toolwin: 'toolwin',
-            panel: 'panel'
+            panel: 'panel',
+            blank: 'blank'
         },
         DialogStatus: {
             normal: 'normal',
@@ -573,6 +574,9 @@
                 if(opt) {
                     return {width: opt.width, height: opt.height};
                 }
+            },
+            isPanelType: function(type) {
+                return type === Config.DialogType.panel || type === Config.DialogType.blank;
             }
         },
         Cache = {
@@ -894,13 +898,15 @@
                         opt.showFoot = false;
                         break;
                     case Config.DialogType.panel:
+                    case Config.DialogType.blank:
                         opt.minAble = opt.maxAble = opt.sizeAble = opt.dragSize = false;
-                        opt.showLogo = false;
-                        opt.showFoot = false;
-                        opt.showHead = false;
-                        opt.showMin = false;
-                        opt.showMax = false;
-                        opt.showClose = false;
+                        opt.showLogo = opt.showMin = opt.showMax = opt.showClose = false;
+                        opt.showFoot = opt.showHead = false;
+                        opt.form = true;
+
+                        if (opt.type === Config.DialogType.blank) {
+                            opt.padding = opt.radius = opt.border = 0;
+                        }
                         break;
                     default:
                         opt.buttons = Config.DialogButtons.None;
@@ -1109,6 +1115,7 @@
 
                 if (!opt.form && (!opt.showHead || ctls.iframe || Common.isPlainText(ctls.content))) {
                     $.addListener([ctls.body, ctls.dialog], isWap ? 'touchstart' : 'mousedown', function (ev) {
+                        $.cancelBubble();
                         _.topMost();
                         if(isWap) {
                             ev.preventDefault();
@@ -1253,9 +1260,21 @@
                     attr: 'padding', unit: 'px', isArray: true, isLimit: true, max: 10, val: 4
                 }).join(' ');
 
+                //增加了边框和圆角参数定制，主要是为了实现空白面板
+                var border = opt.border;
+                if ($.isNumber(border)) {
+                    ctls.dialog.style.borderWidth = border + 'px';
+                } else if (border) {
+                    if('0' === border || 'none' == border) {
+                        ctls.dialog.style.border = 'none 0';
+                    } else {
+                        ctls.dialog.style.border = border;
+                    }
+                }
+
                 var radius = parseInt(opt.radius, 10);
                 if (!isNaN(radius)) {
-                    ctls.dialog.style.borderRadius = radius + 'px';
+                    ctls.dialog.style.borderRadius = radius + (('' + opt.radius).indexOf('%') > 0 ? '' : 'px');
                 }
                 return this;
             },
@@ -1478,7 +1497,7 @@
                         }, 15 * 1000);
                     }
                 } else {
-                    if(opt.type === Config.DialogType.panel) {                        
+                    if (Common.isPanelType(opt.type)) {                     
                         //清除dialog.content边距
                         elem.style.padding = '0px';
                         elem.style.margin = '0px';
@@ -2900,7 +2919,7 @@
                     $.addListener(ctls.head, evNameDown.substr(2), function (event) {
                         moveDialog(event);
                     });
-                } else if(opt.type !== Config.DialogType.panel && opt.moveAble) {
+                } else if(!Common.isPanelType(opt.type) && !opt.form && opt.moveAble) {
                     $.addListener([ctls.dialog, ctls.body, ctls.content], evNameDown.substr(2), function (event) {
                         moveDialog(event);
                     });
@@ -3798,6 +3817,7 @@
                 margin: 0,              //当宽度或高度设置为 % 百分比时，启用 margin，margin格式参考css [上右下左] 设置，单位为px
                 padding: 4,             //内边距（拖动边框）宽度，格式参考css设置，单位为px
                 radius: 4,              //对话框圆角半径，单位为px
+                border: null,           //对话框边框宽度，如：'solid 1px #ccc', 0 或 none 表示不要边框，1-表示边框宽度为1px, null表示不处理
                 parent: null,           //Element parentNode DIV
                 limitRange: true,       //窗体范围(位置、大小)限制 true,false
                 opacity: null,          //背景层透明度，默认为 0.2
@@ -4413,6 +4433,9 @@
         },
         panel: function(content, title, options) {
             return Factory.show(content, title, options, Config.DialogType.panel);
+        },
+        blank: function(content, title, options) {
+            return Factory.show(content, title, options, Config.DialogType.blank);
         }
     });
 
