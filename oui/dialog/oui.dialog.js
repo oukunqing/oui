@@ -1200,6 +1200,7 @@
                 ctls.shade = $.createElement('div');
                 ctls.shade.className = 'oui-dialog-shade';
                 ctls.shade.style.zIndex = opt.zindex;
+                ctls.shade.contentEditable = false;
                 var css,
                     shadeStyle = $.extend({ opacity: opt.opacity }, opt.styles.shade);
 
@@ -1214,6 +1215,7 @@
                 ctls.container = $.createElement('div');
                 ctls.container.className = 'oui-dialog-container';
                 ctls.container.style.zIndex = opt.zindex;
+                ctls.container.contentEditable = false;
                 return this;
             },
             buildCover: function (_, obj) {
@@ -1242,6 +1244,8 @@
                 ctls.dialog = $.createElement('div');
                 ctls.dialog.className = className;
                 ctls.dialog.id = _.getDialogId();
+
+                ctls.dialog.contentEditable = false;
 
                 if (opt.coverOCX) {
                     Util.buildCover(_, ctls.dialog);
@@ -1284,6 +1288,7 @@
                 var elem = $.createElement('div'), css;
                 elem.className = 'dialog-main' + (opt.copyAble ? '' : ' dialog-unselect');
                 elem.tabIndex = 1;
+                elem.contentEditable = false;
                 if ((css = Common.toCssText(opt.styles.main, 'main'))) {
                     elem.style.cssText = css;
                 }
@@ -1302,6 +1307,7 @@
                 if (!rebuild) {
                     elem = $.createElement('div');
                     elem.className = 'dialog-head';
+                    elem.contentEditable = false;
 
                     if ((css = Common.toCssText(opt.styles.top, 'head'))) {
                         elem.style.cssText = css;
@@ -1445,6 +1451,7 @@
                 if (p.none || _.isClosed()) { return this; }
                 var elem = $.createElement('div'), css;
                 elem.className = 'dialog-body' + (opt.copyAble ? '' : ' dialog-unselect');
+                elem.contentEditable = false;
 
                 if (!opt.showHead) {
                     this.buildClose(_, elem, false);
@@ -1462,6 +1469,7 @@
                     elem = $.createElement('div');
                     elem.className = 'dialog-content';
                 }
+                elem.contentEditable = false;
 
                 if ((css = Common.toCssText(opt.styles.content, 'content')) || (isUpdate)) {
                     elem.style.cssText = css;
@@ -1502,7 +1510,7 @@
                         elem.style.padding = '0px';
                         elem.style.margin = '0px';
                         elem.style.borderRadius = '0px';
-                    }
+                    }                    
                     //elem.innerHTML = opt.content;
                     util.buildIconContent(_, true, elem);
                     if (!opt.showHead && ctls.btnPanel) {
@@ -1607,6 +1615,7 @@
                     panel.style.cssText = 'text-align:{0};'.format(opt.buttonPosition);
                 }
                 elem.appendChild((ctls.buttonPanel = panel));
+                elem.contentEditable = false;
 
                 for (var i = 0; i < panel.childNodes.length; i++) {
                     var obj = panel.childNodes[i],
