@@ -1306,32 +1306,65 @@
             }
             return days;
         },
+        isDateObject: function (dt) {
+            if(typeof dt === 'object' && typeof dt.getFullYear === 'function') {
+                return true;
+            }
+            return false;
+        },
+        getDateOptions: function (dt) {
+            if($.isDateObject(dt)) {
+                return { year: dt.getFullYear(), month: dt.getMonth() + 1, date: dt.getDate() };
+            }
+            return null;
+        },
         getMonthStart: function (month, year) {
-            var dt = new Date();
-            year = year || dt.getFullYear();
-            month = month || (dt.getMonth() + 1);
-            return '{0}-{1:D2}-01 00:00:00'.format(year, month);
+            var ds = $.getDateOptions(month);
+            if (ds !== null) {
+                return '{0}-{1:D2}-{2:D2} 00:00:00'.format(ds.year, ds.month);
+            } else {
+                var dt = new Date();
+                year = year || dt.getFullYear();
+                month = month || (dt.getMonth() + 1);
+                return '{0}-{1:D2}-01 00:00:00'.format(year, month);
+            }
         },
         getMonthEnd: function (month, year) {
-            var dt = new Date();
-            year = year || dt.getFullYear();
-            month = month || (dt.getMonth() + 1);
-            var days = Date.getDays(year, month);
-            return '{0}-{1:D2}-{2:D2} 23:59:59'.format(year, month, days);
+            var ds = $.getDateOptions(month);
+            if (ds !== null) {
+                var days = Date.getDays(ds.year, ds.month);
+                return '{0}-{1:D2}-{2:D2} 23:59:59'.format(ds.year, ds.month, days);
+            } else {
+                var dt = new Date();
+                year = year || dt.getFullYear();
+                month = month || (dt.getMonth() + 1);
+                var days = Date.getDays(year, month);
+                return '{0}-{1:D2}-{2:D2} 23:59:59'.format(year, month, days);
+            }
         },
         getDayStart: function (date, month, year) {
-            var dt = new Date();
-            year = year || dt.getFullYear();
-            month = month || (dt.getMonth() + 1);
-            date = date || dt.getDate();
-            return '{0}-{1:D2}-{2:D2} 00:00:00'.format(year, month, date);
+            var ds = $.getDateOptions(date);
+            if (ds !== null) {
+                return '{0}-{1:D2}-{2:D2} 00:00:00'.format(ds.year, ds.month, ds.date);
+            } else {                
+                var dt = new Date();
+                year = year || dt.getFullYear();
+                month = month || (dt.getMonth() + 1);
+                date = date || dt.getDate();
+                return '{0}-{1:D2}-{2:D2} 00:00:00'.format(year, month, date);
+            }
         },
         getDayEnd: function (date, month, year) {
-            var dt = new Date();
-            year = year || dt.getFullYear();
-            month = month || (dt.getMonth() + 1);
-            date = date || dt.getDate();
-            return '{0}-{1:D2}-{2:D2} 23:59:59'.format(year, month, date);
+            var ds = $.getDateOptions(date);
+            if (ds !== null) {
+                return '{0}-{1:D2}-{2:D2} 23:59:59'.format(ds.year, ds.month, ds.date);
+            } else {
+                var dt = new Date();
+                year = year || dt.getFullYear();
+                month = month || (dt.getMonth() + 1);
+                date = date || dt.getDate();
+                return '{0}-{1:D2}-{2:D2} 23:59:59'.format(year, month, date);
+            }
         }
     });
 
@@ -1788,6 +1821,23 @@
                 num |= arr[reverse ? j : i] << (j * 8);
             }
             return num;
+        },
+        getHexStr: function() {
+            var hex = this,
+                len = hex.length;
+            if(len % 2 !== 0) {
+                hex += '0';
+                len += 1;
+            }
+            var pos = 0;
+            for(var i = 0; i < len / 2; i++) {
+                var s = hex.substr(i * 2, 2);
+                if (s === '00') {
+                    break;
+                }
+                pos += 2;
+            }
+            return hex.substr(0, pos);
         }
     }, 'String.prototype');
 
@@ -1979,10 +2029,10 @@
             }
             return age;
         },
-        getMonthStart: $.getMonthStart,
-        getMonthEnd: $.getMonthEnd,
-        getDayStart: $.getDayStart,
-        getDayEnd: $.getDayEnd
+        getMonthStart: function() { return $.getMonthStart(this); },
+        getMonthEnd: function() { return $.getMonthEnd(this); },
+        getDayStart: function() { return $.getDayStart(this); },
+        getDayEnd: function() { return $.getDayEnd(this); },
     }, 'Date.prototype');
 
     $.extendNative(Date, {
@@ -4019,7 +4069,8 @@
         isSafari: function (ua) { ua = ua || browser.ua(); return ua.indexOf('Safari') > -1 && ua.indexOf('Chrome') < 0; },
         isIE: function (ua) { ua = ua || browser.ua(); return ua.indexOf('Trident') > -1 || (ua.indexOf('MSIE') > -1 && ua.indexOf('compatible') > -1); },
         isChrome: function (ua) { ua = ua || browser.ua(); return ua.indexOf('Chrome') > -1 && !browser.isOpera(ua) && !browser.isEdge(ua) && !browser.isSafari(ua); },
-        isWap: function (ua) { ua = ua || browser.ua(); return /Android|webOS|iPhone|iPod|iPad|BlackBerry/i.test(ua)},
+        isWap: function (ua) { ua = ua || browser.ua(); return /Android|webOS|iPhone|iPod|iPad|BlackBerry/i.test(ua); },
+        isWechar: function(ua) { ua = ua || browser.ua(); return /MicroMessenger/i.test(ua); },
         isMobile: function(ua) { return browser.isWap(ua); }
     };
     var ua = function () { try { return navigator.userAgent; } catch (e) { return ''; } }(),
@@ -4031,6 +4082,7 @@
         isChrome = !isOpera && !isEdge && !isSafari && ua.indexOf('Chrome') > -1,
         isIE = ua.indexOf('Trident') > -1 || (ua.indexOf('MSIE') > -1 && ua.indexOf('compatible') > -1),
         isWap = /Android|webOS|iPhone|iPod|iPad|BlackBerry/i.test(ua),
+        isWechar = /MicroMessenger/i.test(ua),
         ieVersion = isIE ? parseFloat('0' + (ua.match(/(MSIE\s|rv:)([\d\.]+)[;]?/) || [])[2], 10) : 0;
     $.extendNative($, {
         isChrome: isChrome,

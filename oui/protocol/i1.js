@@ -48,12 +48,19 @@
             }
             o.body_len = msg_hex.substr(posHead + Config.HEAD_LEN * STEP, Config.FLAG_LEN * STEP).hexToInt(true);
             o.msg_len = o.body_len + Config.MIN_LEN;
-            o.device_id = msg_hex.substr(posHead + Config.HEAD_LEN * STEP + Config.FLAG_LEN * STEP, Config.DEV_LEN * STEP).hexToStr();
+            o.device_id = msg_hex.substr(posHead + Config.HEAD_LEN * STEP + Config.FLAG_LEN * STEP, Config.DEV_LEN * STEP).getHexStr().hexToStr();
             o.frame_type = msg_hex.substr(posHead + Config.PRE_LEN * STEP, STEP).hexToInt();
             o.packet_type = msg_hex.substr(posHead + Config.PRE_LEN * STEP + STEP, STEP).hexToInt();
+            o.packet_type_hex = msg_hex.substr(posHead + Config.PRE_LEN * STEP + STEP, STEP);
             o.frame_no = msg_hex.substr(posHead + Config.PRE_LEN * STEP + 2 * STEP, STEP).hexToInt();
             o.crc = msg_hex.substr(posHead + Config.BASE_LEN * STEP + o.body_len * STEP, Config.CRC_LEN * STEP);
             o.body = msg_hex.substr(posHead + Config.BASE_LEN * STEP, o.body_len * STEP);
+            o.con = o.body.hexToStr();
+
+            var pos = o.con.indexOf('{');
+            if(pos >= 0) {
+                o.cmd = o.con.substr(pos).toJson();
+            }
 
             return o;
         }

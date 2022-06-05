@@ -1133,7 +1133,7 @@ console.log(path.getFileName(true));
 console.log(path.getExtension());
 
 
-console.log($.i1('a55a0c00313233343536373839303132333430393905cc0101ff002e00000000390d2b6267ad96'));
+console.log($.i1('[2022-05-08 09:36:13.553] [i] recv 219 hex bytes: a55ac000313233343536373839313234000000000003f60001017b22636f6d6d616e64223a227365745f6169222c2274797065223a2272657175657374222c2273657175656e6365223a313635313937333737342c22626f6479223a7b22656e61626c65223a312c226970223a223139322e3136382e312e3630222c22706f7274223a333030302c2274696d656f7574223a33302c2273746172745f6475726174696f6e223a34352c22636865636b5f616c61726d5f64617461223a302c227570646174655f74696d65223a313635313937333737347d7dc6bf96'));
 /*
 console.log('0305'.hexToInt(true));
 console.log('0305'.charToInt(true));
@@ -1150,10 +1150,8 @@ console.log(new Date().getMonthEnd(3));
 
 console.log(new Date().getDate());
 
-console.log((1648631412).toDate().getDate());
 
 console.log('重载'.toUnicode());
-console.log(''.toUnicode());
 
 var name = 'pic/1.jpg';
 
@@ -1167,3 +1165,19 @@ console.log('https://baidu.com//pic/1.jpg'.checkFilePath());
 var num = '0';
 
 console.log(num ? 'a' : 'b');
+
+console.log(new Date().getDate());
+
+console.log(''.hexToStr())
+console.log((1652850324).toDate());
+console.log((1652879090).toDate());
+console.log((1654060147).toDate().format());
+
+var val = 1652832000 - 28800;
+console.log('val:', val);
+
+var dt = new Date().addDays(-1).getDayStart();
+console.log(dt.format());
+
+
+console.log(typeof new Date());
