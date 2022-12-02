@@ -869,8 +869,10 @@
             return arr;
         }, strToHexByte = function (s, isFilter) {
             var hex = strToHexChar(s, isFilter).join('').replace(/\s/g, "");
-            //若字符个数为奇数，补一个空格
-            hex += hex.length % 2 != 0 ? " " : "";
+            //若字符个数为奇数，补一个0
+            if (hex.length % 2 !== 0) {
+                hex = '0' + hex;
+            }
 
             var c = hex.length / 2, arr = [];
             for (var i = 0; i < c; i++) {
@@ -893,10 +895,13 @@
         };
 
         return {
-            toCRC16: function (s, isReverse) {
-                return toHex(CRC16(strToByte(s), isReverse), 4);
+            toCRC16: function (s, isReverse, isHex) {
+                return toHex(CRC16(isHex ? strToHexByte(s) : strToByte(s), isReverse), 4);
             },
             toModbusCRC16: function (s, isReverse) {
+                return toHex(CRC16(strToHexByte(s), isReverse), 4);
+            },
+            toHexCRC16: function(s, isReverse) {
                 return toHex(CRC16(strToHexByte(s), isReverse), 4);
             }
         };
@@ -2592,6 +2597,8 @@
             if (!filePath) {
                 return '';
             }
+            filePath = filePath.replace(/(\\)/g, '/');
+            
             var path = filePath.split('?')[0], p = path.lastIndexOf('/');
             var name = p >= 0 ? path.substr(p + 1) : path, pos = name.lastIndexOf('.');
             if (name.toLowerCase().endWith('.tar.gz')) {

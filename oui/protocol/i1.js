@@ -1,5 +1,4 @@
-
-!function($) {
+! function($) {
     'use strict';
 
     $.extendNative($, {
@@ -24,7 +23,7 @@
         HEAD_LEN: 2,
         FLAG_LEN: 2,
         DEV_LEN: 17,
-        PRE_LEN: 21,        
+        PRE_LEN: 21,
         BASE_LEN: 24,
         CRC_LEN: 2
     };
@@ -58,7 +57,7 @@
             o.con = o.body.hexToStr();
 
             var pos = o.con.indexOf('{');
-            if(pos >= 0) {
+            if (pos >= 0) {
                 o.cmd = o.con.substr(pos).toJson();
             }
 

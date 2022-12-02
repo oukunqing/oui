@@ -1046,17 +1046,9 @@ console.log('{0:S34}'.substr(2 + 1, 1));
 console.log('{0:s445}'.format('12345678901234001'))
 
 
-console.log((1 + 100) * 50)
-
-
-var x = 2, y = 100;
-var z = (x + y) * (y - x + 1) / 2;
-
-console.log(z);
 
 
 console.log('重新加载'.chineseToUnicode());
-console.log('重新加载'.toUnicode());
 console.log('\\u91cd\\u65b0\\u52a0\\u8f7d'.unUnicode());
 
 console.log($.unUnicode('\\u91cd\\u65b0\\u52a0\\u8f7d'));
@@ -1142,7 +1134,7 @@ console.log('6242b5d5'.charToInt(false));
 
 console.log('6242b5d5'.hexToNum(false));
 
-console.log('6242b5d5'.hexToNum(false));
+console.log('0029b062'.hexToNum(false));
 */
 
 console.log($.getMonthStart(3));
@@ -1169,15 +1161,184 @@ console.log(num ? 'a' : 'b');
 console.log(new Date().getDate());
 
 console.log(''.hexToStr())
-console.log((1652850324).toDate());
 console.log((1652879090).toDate());
-console.log((1654060147).toDate().format());
+console.log((1661756390).toDate().format());
 
-var val = 1652832000 - 28800;
+var val = 1655683800 + 28800;
 console.log('val:', val);
 
 var dt = new Date().addDays(-1).getDayStart();
 console.log(dt.format());
 
+console.log('0029b062'.hexToNum(true));
+console.log('582bb062'.hexToNum(true));
 
-console.log(typeof new Date());
+
+var data = {channel_no:0,id:123};
+
+console.log(data);
+
+delete data.channel_no;
+
+console.log(data);
+
+var enable = '0';
+
+console.log(parseInt(enable, 10) ? 'a':'b');
+
+console.log(Math.pow(2, -2));
+
+
+console.log(1/Math.pow(2, 2));
+
+console.log(new Date().format('ts'));
+
+var ts = new Date().format('ts');
+console.log(ts);
+console.log(ts.toDate().format());
+
+
+
+
+
+ var toTimeFormat = function (ts) {
+            if (!ts || ts <= 0) {
+                return '';
+            }
+            var len = ('' + ts).length;
+            if (len < 13) {
+                ts *= Math.pow(10, 13 - len);
+            }
+            var date = new Date(ts + 8 * 3600 * 1000);
+            console.log(date.toISOString());
+            return date.toISOString().substr(0, 19).replace('T', ' ');
+        };
+
+
+
+console.log(toTimeFormat(new Date().getTime()));
+
+
+console.log($.crc.toCRC16('a55a0002f20100ff01', true));
+console.log($.crc.toModbusCRC16('a55a0002f20100ff01', true));
+
+
+console.log(JSON.parse('{"id":1}'));
+console.log((1664171400).toDate().format());
+
+console.log('18f30c63'.hexToInt(true).toDate().format());
+console.log('e9f20c63'.hexToInt(true).toDate().format('ts'));
+
+console.log('2022-09-01 16:00:00'.toDate().format());
+console.log('2022-09-07 10:10:25'.toDate().format('ts', 10));
+console.log((1662426572-8*60*60*2).toDate().format());
+
+console.log('905d1863'.hexToInt(true).toDate().format());
+console.log('905d1863'.hexToInt(true).toDate().format('ts'));
+console.log('2022-09-18 00:00:00'.toDate().format('ts', 10));
+console.log((0).toDate().format());
+
+
+//关闭摄像机电源之前，先发送 摄像机重启命令
+//以保护TF卡
+/*
+
+    char cmd[128] = { 0 };
+    char out[128] = { 0 };
+
+    char* app_tmp_path = "/tmp/down/zyrh";
+    sprintf(&cmd[0], "mkdir /tmp/down & curl -o %s \"%s\" && echo ok", app_tmp_path, "http://112.54.97.178:81/download/dtu/zyrh2.zip");
+    get_system_output(cmd, out, 128);
+    app_log_info("down out: %s", out);
+
+    sprintf(&cmd[0], "%s check", "chmod 755 /tmp/down/zyrh && /tmp/down/zyrh");
+    get_system_output(cmd, out, 128);
+    app_log_info("check out: %s", out);
+
+    do_system_call("kill -9 $(pidof zyrh) & cp /tmp/down/zyrh /tmp/zyrh_copy");
+
+    */
+
+console.log($.getFileName);
+var name = $.getFileName('http://112.54.97.178:81/download/dtu/zyrh-20220927.0930-420284.zip', true);
+console.log(name);
+
+var txt = '[\
+    {\
+        "deviceid" : "34020000001110000993",\
+        "index" : 0,\
+        "ip" : "112.54.97.178",\
+        "keepalivetime" : 1665365702,\
+        "online" : 1\
+    }\
+]';
+
+console.log(txt);
+
+var json = JSON.parse(txt);
+
+console.log(json, json[0]);
+
+var path = 'C:\\\\fakepath\\\\mcu.hex-20221012.1100-4a982e356201bdda433069987b05a224-33114.zip';
+
+path = path.replace(/(\\)/g, '/');
+
+console.log(!/^[0-9A-F]{32}$/i.test('968a5a541382740c9ea2806db2611a79'));
+
+
+
+console.log((1666056293000).toDate().format());
+console.log((1666944001).toDate().format());
+
+console.log(''.toUnicode());
+
+console.log(new Date() - new Date().addDays(-1));
+
+
+//1506
+
+; !function () {
+    var dtu = {};
+
+    return dtu;
+}();
+
+
+var measure = {};
+
+
+function makeFunc() {
+    var name = "Mozilla";
+    function displayName() {
+        console.log(name);
+    }
+    return displayName;
+}
+
+var myFunc = makeFunc();
+myFunc();
+
+
+
+var con = '##000169QN=1669537704000;CN=9021;PW=01=ZY-920-;MN=868957048162806;Flag=1;CP=&&Model=ZY-920-GS;CCID=89860473102270000663;HardwareVersion=20190430;SoftwareVersion=20191128custom&&D57A';
+
+var msgs = [
+    '##000169QN=1669537704000;CN=9021;PW=01=ZY-920-;MN=868957048162806;Flag=1;CP=&&Model=ZY-920-GS;CCID=89860473102270000663;HardwareVersion=20190430;SoftwareVersion=20191128custom&&D57A',
+    '##000031CN=9051;MN=868957048175048;MD=033CC'
+];
+
+var m = con.match(/PW=[=\-\d\w_]+;/);
+
+
+34243293ef1f131f8512a67470128e37
+console.log(m[0], m);
+
+if(m[0].substr(3).indexOf('=') >= 0){
+    con = con.replace(m[0], "PW=123456;");
+    console.log(con);
+}
+
+
+{"err": "invalid_key"}
+
+ip.addr==114.215.197.53

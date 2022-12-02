@@ -254,6 +254,13 @@
                                     value = parseFloat(value, 10);
                                     numType = '小数';
                                     break;
+                                case 'port':
+                                    value = parseInt(value, 10);
+                                    if (!isNaN(value) && (value < 0 || value > 65535)) {
+                                        return result(false, '端口数值应介于0 - 65535之间');
+                                    }
+                                    numType = '端口';
+                                    break;
                             }
                             if (isNaN(value)) {
                                 var dv = $.isNumeric(field.value) ? field.value :
@@ -918,6 +925,14 @@
         showAjaxFail = function (data, textStatus, jqXHR) {
             var msg = data.msg || data.Msg || data.message || data.Message,
                 error = data.error || data.Error;
+
+            //定制功能，如果页面上有定制了window.showAjaxFailAlert函数，并且错误信息是noauth（未登录）
+            //则不直接弹出提示信息，而且跳转到定制函数中处理
+            if (error.toLowerCase() === 'noauth' && $.isFunction(window.showAjaxFailAlert)) {
+                window.showAjaxFailAlert(data, msg, error);
+                return false;
+            }
+
             var html = [msg];
             if (error) {
                 html.push('可能的原因：');
