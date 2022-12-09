@@ -768,6 +768,7 @@
         isHexNumeric: isHexNumeric, isHexNumber: isHexNumber, 
         isMobile: isMobile, isTelephone: isTelephone, isIdentity: isIdentity, isEmail: isEmail,
         isRegexp: isRegexp, isNullOrUndefined: isNullOrUndefined, isNullOrUndef: isNullOrUndefined,
+        isUndefinedOrNull: isNullOrUndefined, isUndefOrNull: isNullOrUndefined,
         isEmpty: function (o) {
             if (isUndefined(o) || null === o) { return true; }
             else if (isString(o)) { return '' === trim(o); }
