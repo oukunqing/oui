@@ -1295,7 +1295,7 @@ console.log(''.toUnicode());
 console.log(new Date() - new Date().addDays(-1));
 
 
-//2544
+//2643
 
 ; !function () {
     var dtu = {};
@@ -1330,14 +1330,10 @@ var msgs = [
 var m = con.match(/PW=[=\-\d\w_]+;/);
 
 
-34243293ef1f131f8512a67470128e37
 console.log(m[0], m);
 
 if(m[0].substr(3).indexOf('=') >= 0){
     con = con.replace(m[0], "PW=123456;");
     console.log(con);
 }
-
-
-{"err": "invalid_key"}
 
