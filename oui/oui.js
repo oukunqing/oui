@@ -2512,11 +2512,11 @@
                 typeof elem.tagName === 'string';
             return isElem && ($.isString(tagName, true) ? elem.tagName === tagName : isElem);
         },
-        toElement = function(elemId) {
-            if($.isString(elemId, true)) {
-                return document.getElementById(elemId.replace(/^[#]+/, ''));
+        toElement = function(elem) {
+            if($.isString(elem, true)) {
+                return document.getElementById(elem.replace(/^[#]+/, ''));
             }
-            return elemId;
+            return elem;
         },
         isChildNode = function(parent, elem, recursion) {
             if(!$.isElement(parent) || !$.isElement(elem)) {
@@ -2909,8 +2909,10 @@
                 return { width: 0, height: 0, top: 0, left: 0 };
             }
             var par = { 
-                width: elem.offsetWidth, height: elem.offsetHeight, 
-                left: elem.offsetLeft, top: elem.offsetTop 
+                width: elem.offsetWidth || parseInt(elem.style.width, 10),
+                height: elem.offsetHeight || parseInt(elem.style.height, 10), 
+                left: elem.offsetLeft || parseInt(elem.style.left, 10),
+                top: elem.offsetTop || parseInt(elem.style.top, 10)
             };
 
             if($.isBoolean(basic, false)) {
@@ -5127,6 +5129,26 @@
             return this.each(function(i, obj) {
                 $.trigger(obj, evName);
             });
+        },
+        css: function(attrKey, attrVal) {
+            var attrs = {};
+            if ($.isNullOrUndefined(attrKey)) {
+                return $.getElementStyle(this[0]) || {};
+            } else if($.isString(attrKey, true)) {
+                if ($.isNullOrUndefined(attrVal)) {
+                    return $.getElementStyle(this[0], attrKey) || '';
+                } else if($.isString(attrVal, true) || $.isNumber(attrVal)) {
+                    attrs = { attrKey, attrVal };
+                }
+            } else if ($.isObject(attrKey)) {
+                $.extend(attrs, attrKey);
+            }
+            this.each(function(i, obj) {
+                for (var k in attrs) {
+                    obj.style[k] = attrs[k];
+                }
+            });
+            return this;
         }
     }, '$.fn');
 

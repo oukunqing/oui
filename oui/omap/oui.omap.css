@@ -1,10 +1,10 @@
-.omap-box {
+.oui-omap-box {
     border: solid 1px #ddd;
     overflow: hidden;
     position: relative;
     display: block;
 }
-.omap-status {
+.oui-omap-status {
     position: absolute;
     z-index: 10001;
     left: 0;
@@ -20,13 +20,13 @@
     color: #333;
     opacity: 0.65;
 }
-.omap-unselect {
+.oui-omap-unselect {
     -moz-user-select: none;
     -khtml-user-select: none;
     user-select: none;
     -ms-user-select: none;
 }
-.omap-img {
+.oui-omap-img {
     position: absolute;
     border: solid 1px #f00;
     border: none;
@@ -36,7 +36,7 @@
     z-index: 1000;
     cursor: default;
 }
-.omap-marker {
+.oui-omap-marker {
     position: absolute;
     z-index: 10000;
     background-color: transparent;
@@ -48,14 +48,22 @@
     color: #000;
     cursor: pointer;
 }
-.omap-label {
+.oui-omap-label {
     position: absolute;
     z-index: 10000;
     border: solid 1px #f00;
-    background:#f00;
+    background-color: transparent;
+    font-family: 宋体;
+    font-weight: normal;
+    line-height: 14px;
+    color: #f00;
     opacity: 0.8;
-    padding:0;
+    padding:2px 3px;
     margin:0;
     font-size: 14px;
     cursor: pointer;
+}
+
+.oui-omap-label:hover {
+    background-color: #fff;
 }

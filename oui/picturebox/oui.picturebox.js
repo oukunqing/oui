@@ -29,13 +29,13 @@
             });
             return this;
         },
-        getSize: function(boxWidth, boxHeight, width, height) {
+        getSize: function(boxWidth, boxHeight, width, height, zoom) {
             var w, h, left, top;
             if (width > height) {
-                w = width > boxWidth ? boxWidth : width;
+                w = width > boxWidth ? boxWidth * zoom : width;
                 h = parseInt(w / width * height, 10);
             } else {
-                h = height > boxHeight ? boxHeight : height;
+                h = height > boxHeight ? boxHeight * zoom : height;
                 w = parseInt(h / height * width, 10);
             }
 
@@ -43,7 +43,7 @@
             top = parseInt((boxHeight - h) / 2, 10); 
 
             return { width: w, height: h, left: left, top: top };
-        }
+        },
     };
 
     //先加载样式文件
@@ -66,29 +66,46 @@
                 box.style.height = opt.height + 'px';
             }
 
-            box.className += 'oui-picbox-box';
+            box.className += ' oui-picbox-box';
+            box.style.cssText += 'overflow:hidden;position:relative;';
 
             var img = document.createElement('IMG');
             img.className = 'oui-picbox-img oui-picbox-unselect';
+            img.style.cssText = 'position:absolute;border:none;margin:0;padding:0;';
             img.src = opt.img || opt.pic;
             box.appendChild(img);
 
             var bs = $.getOffsetSize(box);
 
+            _.opt = opt;
             _.img = img;
             _.box = box;
 
+            var minZoom = typeof _.opt.minZoom === 'number' ? _.opt.minZoom : 1,
+                defaultZoom = typeof _.opt.defaultZoom === 'number' ? _.opt.defaultZoom : 1;
+
+            if(minZoom <= 0 || minZoom > 1) {
+                minZoom = 1;
+            }
+            if(defaultZoom <= 0 || defaultZoom > 1) {
+                defaultZoom = 1;
+            }
+
             $.addListener(img, 'load', function(ev) {
-                var size = Factory.getSize(bs.width, bs.height, img.naturalWidth, img.naturalHeight);
+                var size = Factory.getSize(bs.width, bs.height, img.naturalWidth, img.naturalHeight, defaultZoom);
                 _.cfg = {
                     width: img.naturalWidth,
                     height: img.naturalHeight,
+                    sizeRatio: img.naturalWidth / img.naturalHeight,
+                    minZoom: minZoom,
+                    defaultZoom: defaultZoom,
                     w: size.width,
                     h: size.height,
                     left: size.left,
                     top: size.top,
                     x: parseInt(size.width / 2 + size.left, 10),
                     y: parseInt(size.height / 2 + size.top, 10),
+                    scale: size.width / img.naturalWidth,
                     offset: {
                         width: bs.width, height: bs.height,
                         left: bs.left, top: bs.top
@@ -102,10 +119,12 @@
                 _.img.style.left = _.cfg.left + 'px';
                 _.img.style.top = _.cfg.top + 'px';
 
-                _.drag().wheelZoom();
+                if (_.cfg.width > _.cfg.offset.width || _.cfg.height > _.cfg.offset.height) {
+                    _.drag().wheelZoom();
+                }
 
-                if($.isFunction(opt.callback)){
-                    opt.callback(_.cfg);
+                if ($.isFunction(opt.callback)){
+                    opt.callback(_, _.cfg);
                 }
             });
 
@@ -120,15 +139,15 @@
         },
         drag: function () {
             var _ = this;
-            console.log('drag');
+            //console.log('drag');
             $.addListener(_.img, 'pointerdown', function (ev) {
-                console.log('pointerdown');
+                //console.log('pointerdown');
                 _.cfg.pointerdown = true;
                 _.img.setPointerCapture(ev.pointerId);
                 _.cfg.lastpointer = { x: ev.clientX, y: ev.clientY };
                 _.cfg.diffpointer = { x: 0, y: 0 };
 
-                console.log('down:', _.cfg.x, _.cfg.y);
+                //console.log('down:', _.cfg.x, _.cfg.y);
             });
             $.addListener(_.img, 'pointermove', function (ev) {
                 if (ev.target.className.indexOf('oui-picbox-img') < 0) {
@@ -185,10 +204,32 @@
 
             if (!action) {
                 ratio = 1 / 1.1;
-                if (w < _.cfg.offset.width / 4) {
-                    return false;
+                if(_.cfg.sizeRatio >= 1) {
+                    var minWidth = _.cfg.offset.width;
+                    if (typeof _.opt.minZoom === 'number') {
+                        if (_.cfg.width < _.cfg.offset.width) {
+                            minWidth = _.cfg.width;
+                        } if (_.opt.minZoom > 0 && _.opt.minZoom < 1) {
+                            minWidth = parseInt(_.cfg.offset.width * _.opt.minZoom, 10);
+                        }
+                    }
+                    if (w <= minWidth) {
+                        return false;
+                    }
+                } else {
+                    var minHeight = _.cfg.offset.height;
+                    if (typeof _.opt.minZoom === 'number') {
+                        if (_.cfg.height < _.cfg.offset.height) {
+                            minHeight = _.cfg.height;
+                        } else if(_.opt.minZoom > 0 && _.opt.minZoom < 1) {
+                            minHeight = parseInt(_.cfg.offset.height * _.opt.minZoom, 10);
+                        }
+                    }
+                    if (h <= minHeight) {
+                        return false;
+                    }
                 }
-            }else if (scale > 100) {
+            } else if (scale >= 100) {
                 scale = 100;
                 return false;
             }
@@ -222,7 +263,7 @@
             _.img.style.left = left + 'px';
             _.img.style.top = top + 'px';
 
-            console.log('zoom: ', _.cfg);
+            //console.log('zoom: ', _.cfg);
 
             return this;
         },
@@ -288,6 +329,12 @@
             _.box.style.width = size.width + 'px';
             _.box.style.heigth = size.height + 'px';
 
+            var bs = $.getOffsetSize(_.box);
+            _.cfg.offset = {
+                width: bs.width, height: bs.height,
+                left: bs.left, top: bs.top
+            };
+
             return this;
         }
     };
@@ -304,6 +351,5 @@
     $.extend($.picturebox, {
 
     });
-
 
 }(OUI);

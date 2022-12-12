@@ -4,8 +4,6 @@
 	<meta charset="utf-8">
 	<title>Document - undefined</title>
 	<style type="text/css"></style>
-    <script type="text/javascript" src="../oui/oui.js?12"></script>
-    <script type="text/javascript" src="../oui/picturebox/oui.picturebox.js?123"></script>
 </head>
 <body>
 
@@ -13,11 +11,11 @@
 <div id="box2" style="border:none;margin:70px 100px 0 800px;float:right;background: #f1f1f1;"></div>
 </body>
 </html>
-
+<script type="text/javascript" src="../oui/oui.js?12"></script>
+<script type="text/javascript" src="../oui/picturebox/oui.picturebox.js?123"></script>
 <script type="text/javascript">
 window.onload = function() {
-	$.picbox({ obj: 'box', img: 'map_bg.jpg', width: 600, height: 400 });
-	$.picbox({ obj: 'box2', img: 'map_bg.jpg', width: 600, height: 400 });
-
+	$.picbox({ obj: 'box', img: 'imgs/map_bg.jpg', width: 600, height: 400, defaultZoom: 0.5, minZoom: 0.5 });
+	$.picbox({ obj: 'box2', img: 'imgs/1.jpg', width: 600, height: 400 });
 };
 </script>

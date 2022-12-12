@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+    <style type="text/css">
+        body{overflow: hidden;margin:0; padding:0;}
+    </style>
+</head>
+<body>
+    <form id="form1">
+        <div>
+            图片大小：14348 × 6822 px<br />
+            <input type="button" value="清除定位点" onclick="omap.clear();" />
+            ID:<input type="text" id="txtMarkerId" style="width:50px;" />
+            名称:<input type="text" id="txtMarkerName" style="width:80px;" />
+            X坐标:<input type="text" id="txtMarkerX" style="width:50px;" />
+            Y坐标:<input type="text" id="txtMarkerY" style="width:50px;" />
+            <input type="button" value="添加定位点" onclick="addMarker();" />
+            <input type="text" id="txtIds" style="width:100px;" />
+            <input type="button" value="删除定位点" onclick="delMarker();" />
+            <input type="button" value="隐藏定位点" onclick="hideMarker();" />
+            <input type="button" value="显示定位点" onclick="showMarker();" />
+            <input type="button" value="更新定位点" onclick="addMarker(true);" />
+            <input type="button" value="设置中心点" onclick="setCenter();" />
+        </div>
+        <div id="box" class="omap-box"></div>
+    </form>
+</body>
+</html>
+<script type="text/javascript" src="../oui/oui.js?12"></script>
+<script type="text/javascript" src="../oui/omap/oui.omap.js?123"></script>
+<script type="text/javascript">
+    function callback(obj, omap, opt) {
+        console.log('callback: ', obj, omap, opt);
+        $('#txtMarkerX').prop('value', opt.x);
+        $('#txtMarkerY').prop('value', opt.y);
+    }
+
+    var omap;
+
+    window.onload = function() {
+        var bs = $.getBodySize();
+
+        //$('#box').width(bs.width - 180);
+        //$('#box').height(bs.height - 200);
+        $('#box').css({ 'left': '120px', 'top': '80px' });
+
+        omap = $.omap({ obj: 'box', img: 'imgs/map_bg.jpg', minZoom: 0.5, defaultZoom: 0.5, width: 1200, height: 800, icon: 'imgs/icon2.png' }, function(o) {
+            o.buildMarker({ id: 1, name: '定位点1', x: 1479, y: 5577, showLabel: true, callback: callback });
+            o.buildMarker({ id: 2, name: '定位点2', x: 5000, y: 5612, showLabel: true, callback: callback });
+        });
+    };
+
+    window.onresize = function () {
+        if (omap) {
+            var bs = $.getBodySize();
+            omap.resize({width:bs.width - 180, height: bs.height - 200});
+        }
+    };
+
+
+    function addMarker(update) {        
+        var id = $('#txtMarkerId').val(),
+            name = $('#txtMarkerName').val().trim(),
+            x = $('#txtMarkerX').val().toInt(),
+            y = $('#txtMarkerY').val().toInt();
+
+        var opt = {
+            id: id, name: name || ('定位点' + id), x: x, y: y,
+            callback: callback
+        };
+
+        if (update) {
+            omap.update(opt);
+        } else {
+            omap.buildMarker(opt);
+        }
+    }
+
+    function setCenter() {
+        var x = $('#txtMarkerX').val().toInt(),
+            y = $('#txtMarkerY').val().toInt();
+        omap.center({ x: x, y: y });
+    }
+
+    function delMarker() {
+        var id = $('#txtIds').val();
+        omap.delete(id);
+    }    
+    function showMarker() {
+        var id = $('#txtIds').val();
+        omap.show(id);
+    }
+    function hideMarker() {
+        var id = $('#txtIds').val();
+        omap.hide(id);
+    }
+</script>
