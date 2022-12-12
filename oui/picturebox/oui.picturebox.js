@@ -141,6 +141,7 @@
             var _ = this;
             //console.log('drag');
             $.addListener(_.img, 'pointerdown', function (ev) {
+                $.cancelBubble(ev);
                 //console.log('pointerdown');
                 _.cfg.pointerdown = true;
                 _.img.setPointerCapture(ev.pointerId);
@@ -150,6 +151,7 @@
                 //console.log('down:', _.cfg.x, _.cfg.y);
             });
             $.addListener(_.img, 'pointermove', function (ev) {
+                $.cancelBubble(ev);
                 if (ev.target.className.indexOf('oui-picbox-img') < 0) {
                     return false;
                 }
@@ -174,6 +176,7 @@
                 ev.preventDefault();
             });
             $.addListener(_.img, 'pointerup', function (ev) {
+                $.cancelBubble(ev);
                 if (ev.target.className.indexOf('oui-picbox-img') < 0) {
                     return false;
                 }
@@ -181,7 +184,8 @@
                     _.cfg.pointerdown = false;
                 }
             });
-            $.addListener(_.img, 'pointercancel', function (ev) {                
+            $.addListener(_.img, 'pointercancel', function (ev) {
+                $.cancelBubble(ev);              
                 if (ev.target.className.indexOf('oui-picbox-img') < 0) {
                     return false;
                 }
@@ -310,15 +314,18 @@
         wheelZoom: function () {
             var _ = this;
             $.addListener(_.box, 'wheel', function (ev) {
+                $.cancelBubble(ev);
                 _.zoom(ev.deltaY < 0, ev);
             });
             $.addListener(_.box, 'dblclick', function (ev) {
+                $.cancelBubble(ev);
                 if (_.outside()) {
                     _.center();
                 }
                 ev.preventDefault();
             });
             $.addListener(_.img, 'dblclick', function (ev) {
+                $.cancelBubble(ev);
                 _.zoom(true, ev);
                 ev.preventDefault();
             });

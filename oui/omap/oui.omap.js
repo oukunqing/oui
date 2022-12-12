@@ -140,7 +140,7 @@
                 _.img.style.top = _.cfg.top + 'px';
 
                 if (_.cfg.width > _.cfg.offset.width || _.cfg.height > _.cfg.offset.height) {                    
-                    _.control().drag().wheelZoom().status();
+                    _.control().drag().wheelZoom().status().select();
                 }
 
                 if ($.isFunction(opt.callback)){
@@ -191,16 +191,22 @@
         drag: function () {
             var _ = this;
             console.log('drag');
+            _.img.oncontextmenu = function() {
+                return false;
+            };
             $.addListener(_.img, 'pointerdown', function (ev) {
-                //console.log('pointerdown');
-                _.cfg.pointerdown = true;
-                _.img.setPointerCapture(ev.pointerId);
-                _.cfg.lastpointer = { x: ev.clientX, y: ev.clientY };
-                _.cfg.diffpointer = { x: 0, y: 0 };
-
-                console.log('down:', _.cfg.x, _.cfg.y);
+                $.cancelBubble(ev);
+                console.log('map pointerdown', ev);
+                if (0 == ev.button) {
+                    _.cfg.pointerdown = true;
+                    _.img.setPointerCapture(ev.pointerId);
+                    _.cfg.lastpointer = { x: ev.clientX, y: ev.clientY };
+                    _.cfg.diffpointer = { x: 0, y: 0 };
+                    console.log('down:', _.cfg.x, _.cfg.y);
+                }
             });
             $.addListener(_.img, 'pointermove', function (ev) {
+                $.cancelBubble(ev);
                 if (ev.target.className.indexOf('oui-omap-img') < 0) {
                     return false;
                 }
@@ -227,6 +233,7 @@
                 ev.preventDefault();
             });
             $.addListener(_.img, 'pointerup', function (ev) {
+                $.cancelBubble(ev);
                 if (ev.target.className.indexOf('oui-omap-img') < 0) {
                     return false;
                 }
@@ -234,12 +241,57 @@
                     _.cfg.pointerdown = false;
                 }
             });
-            $.addListener(_.img, 'pointercancel', function (ev) {                
+            $.addListener(_.img, 'pointercancel', function (ev) {
+                $.cancelBubble(ev);           
                 if (ev.target.className.indexOf('oui-omap-img') < 0) {
                     return false;
                 }
                 if (_.cfg.pointerdown) {
                     _.cfg.pointerdown = false;
+                }
+            });
+
+            return this;
+        },
+        select: function () {
+            var _ = this;
+            _.box.oncontextmenu = function() {
+                return false;
+            };
+            $.addListener(_.box, 'pointerdown', function (ev) {
+                $.cancelBubble(ev);
+                console.log('box pointerdown', ev);
+                if (2 == ev.button) {
+                    _.cfg.selectdown = true;
+
+                    var cur = { x: ev.clientX, y: ev.clientY };
+                    console.log('start cur:', cur);
+
+                    //鼠标右键框选实现局部放大或缩小
+                    //TODO:
+                }
+            });
+            $.addListener(_.box, 'pointermove', function (ev) {
+                $.cancelBubble(ev);
+                if (_.cfg.selectdown) {
+                    var cur = { x: ev.clientX, y: ev.clientY };
+
+                    console.log('move cur:', cur);
+
+                    //_.move();
+                }
+                ev.preventDefault();
+            });
+            $.addListener(_.box, 'pointerup', function (ev) {
+                $.cancelBubble(ev);
+                if (_.cfg.selectdown) {
+                    _.cfg.selectdown = false;
+                }
+            });
+            $.addListener(_.box, 'pointercancel', function (ev) {
+                $.cancelBubble(ev);
+                if (_.cfg.selectdown) {
+                    _.cfg.selectdown = false;
                 }
             });
 
@@ -373,15 +425,18 @@
         wheelZoom: function () {
             var _ = this;
             $.addListener(_.box, 'wheel', function (ev) {
+                $.cancelBubble(ev);
                 _.zoom(ev.deltaY < 0, ev);
             });
             $.addListener(_.box, 'dblclick', function (ev) {
+                $.cancelBubble(ev);
                 if (_.outside()) {
                     _.center();
                 }
                 ev.preventDefault();
             });
             $.addListener(_.img, 'dblclick', function (ev) {
+                $.cancelBubble(ev);
                 _.zoom(true, ev);
                 ev.preventDefault();
             });
@@ -422,6 +477,7 @@
             marker.style.top = (pos.top - iconSize.height) + 'px';
 
             $.addListener(marker, 'click', function (ev) {
+                $.cancelBubble(ev);
                 if ($.isFunction(opt.callback)) {
                     opt.callback(this, _, opt);
                 }
@@ -440,6 +496,7 @@
                 label.style.top = pos.top + 'px';
                 
                 $.addListener(label, 'click', function (ev) {
+                    $.cancelBubble(ev);
                     if ($.isFunction(opt.callback)) {
                         opt.callback(this, _, opt);
                     }
