@@ -38,7 +38,7 @@
 }
 .oui-omap-marker {
     position: absolute;
-    z-index: 10000;
+    z-index: 1001;
     background-color: transparent;
     overflow: hidden;
     display: block;
@@ -50,7 +50,7 @@
 }
 .oui-omap-label {
     position: absolute;
-    z-index: 10000;
+    z-index: 1001;
     border: solid 1px #f00;
     background-color: transparent;
     font-family: 宋体;
@@ -66,4 +66,16 @@
 
 .oui-omap-label:hover {
     background-color: #fff;
+}
+
+.oui-omap-range {
+    position: absolute;
+    display: block;
+    overflow: hidden;
+    border: solid 1px #f50;
+    box-sizing: border-box;
+    background-color: transparent;
+    margin: 0;
+    padding: 0;
+    z-index: 1010;
 }

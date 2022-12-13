@@ -28,7 +28,7 @@
 </body>
 </html>
 <script type="text/javascript" src="../oui/oui.js?12"></script>
-<script type="text/javascript" src="../oui/omap/oui.omap.js?123"></script>
+<script type="text/javascript" src="../oui/omap/oui.omap.min.js?123"></script>
 <script type="text/javascript">
     function callback(obj, omap, opt) {
         console.log('callback: ', obj, omap, opt);
@@ -45,7 +45,7 @@
         //$('#box').height(bs.height - 200);
         $('#box').css({ 'left': '120px', 'top': '80px' });
 
-        omap = $.omap({ obj: 'box', img: 'imgs/map_bg.jpg', minZoom: 0.5, defaultZoom: 0.5, width: 1200, height: 800, icon: 'imgs/icon2.png' }, function(o) {
+        omap = $.omap({ obj: 'box', img: 'imgs/map_bg2.jpg', minZoom: 0.5, defaultZoom: 0.5, width: 1200, height: 800, icon: 'imgs/icon2.png' }, function(o) {
             o.buildMarker({ id: 1, name: '定位点1', x: 1479, y: 5577, showLabel: true, callback: callback });
             o.buildMarker({ id: 2, name: '定位点2', x: 5000, y: 5612, showLabel: true, callback: callback });
         });

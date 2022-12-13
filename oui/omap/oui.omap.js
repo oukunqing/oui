@@ -60,6 +60,47 @@
             }
             return [];
         },
+        showRange: function (p1, p2, div) {
+            if ($.isNullOrUndefined(div)) {                
+                div = document.createElement('DIV');
+                div.className = 'oui-omap-range';
+                div.style.left = p1.x + 'px';
+                div.style.top = p1.y + 'px';
+            } else {
+                var big = p1.x < p2.x || p1.y < p2.y;
+
+                if (p1.x < p2.x && p1.y < p2.y) {
+                    div.style.left = p1.x + 'px';
+                    div.style.top = p1.y + 'px';                    
+                } else if (p1.x > p2.x && p1.y > p2.y) {
+                    div.style.left = p2.x + 'px';
+                    div.style.top = p2.y + 'px';                    
+                } else if (p1.x < p2.x && p1.y > p2.y) {
+                    div.style.left = p1.x + 'px';
+                    div.style.top = p1.y - Math.abs(p2.y - p1.y) + 'px'; 
+                } else if (p1.x > p2.x && p1.y < p2.y) {
+                    div.style.left = p1.x - Math.abs(p2.x - p1.x) + 'px';
+                    div.style.top = p1.y + 'px';                     
+                }
+                div.style.width = Math.abs(p2.x - p1.x) + 'px';
+                div.style.height = Math.abs(p2.y - p1.y) + 'px';
+            }
+            return div;
+        },
+        checkRange: function (point, cfg) {
+            //console.log('checkRange: ', point, cfg.left, cfg.top, cfg.w, cfg.h);
+            if (point.x < cfg.left) {
+                point.x = cfg.left;
+            } else if(point.x > cfg.left + cfg.w) {
+                point.x = cfg.left + cfg.w;
+            }
+            if (point.y < cfg.top) {
+                point.y = cfg.top;
+            } else if(point.y > cfg.top + cfg.h) {
+                point.y = cfg.top + cfg.h;
+            }
+            return point;
+        }
     };
 
     Config.FileDir = $.getFilePath(Config.FilePath);
@@ -190,14 +231,13 @@
         },
         drag: function () {
             var _ = this;
-            console.log('drag');
             _.img.oncontextmenu = function() {
                 return false;
             };
             $.addListener(_.img, 'pointerdown', function (ev) {
-                $.cancelBubble(ev);
-                console.log('map pointerdown', ev);
                 if (0 == ev.button) {
+                    console.log('map pointerdown', ev);
+                    $.cancelBubble(ev);
                     _.cfg.pointerdown = true;
                     _.img.setPointerCapture(ev.pointerId);
                     _.cfg.lastpointer = { x: ev.clientX, y: ev.clientY };
@@ -206,11 +246,11 @@
                 }
             });
             $.addListener(_.img, 'pointermove', function (ev) {
-                $.cancelBubble(ev);
-                if (ev.target.className.indexOf('oui-omap-img') < 0) {
-                    return false;
-                }
                 if (_.cfg.pointerdown) {
+                    $.cancelBubble(ev);
+                    if (ev.target.className.indexOf('oui-omap-img') < 0) {
+                        return false;
+                    }
                     var cur = { x: ev.clientX, y: ev.clientY };
                     _.cfg.diffpointer.x = cur.x - _.cfg.lastpointer.x;
                     _.cfg.diffpointer.y = cur.y - _.cfg.lastpointer.y;
@@ -233,20 +273,20 @@
                 ev.preventDefault();
             });
             $.addListener(_.img, 'pointerup', function (ev) {
-                $.cancelBubble(ev);
-                if (ev.target.className.indexOf('oui-omap-img') < 0) {
-                    return false;
-                }
                 if (_.cfg.pointerdown) {
+                    $.cancelBubble(ev);
+                    if (ev.target.className.indexOf('oui-omap-img') < 0) {
+                        return false;
+                    }
                     _.cfg.pointerdown = false;
                 }
             });
             $.addListener(_.img, 'pointercancel', function (ev) {
-                $.cancelBubble(ev);           
-                if (ev.target.className.indexOf('oui-omap-img') < 0) {
-                    return false;
-                }
                 if (_.cfg.pointerdown) {
+                    $.cancelBubble(ev);
+                    if (ev.target.className.indexOf('oui-omap-img') < 0) {
+                        return false;
+                    }
                     _.cfg.pointerdown = false;
                 }
             });
@@ -259,41 +299,116 @@
                 return false;
             };
             $.addListener(_.box, 'pointerdown', function (ev) {
-                $.cancelBubble(ev);
-                console.log('box pointerdown', ev);
                 if (2 == ev.button) {
+                    $.cancelBubble(ev);
+                    console.log('box pointerdown', ev);
                     _.cfg.selectdown = true;
+                    _.cfg.startpointer = { x: ev.clientX - _.cfg.offset.left, y: ev.clientY - _.cfg.offset.top };
 
-                    var cur = { x: ev.clientX, y: ev.clientY };
-                    console.log('start cur:', cur);
-
-                    //鼠标右键框选实现局部放大或缩小
-                    //TODO:
+                    var div = Factory.showRange(_.cfg.startpointer);
+                    _.box.appendChild(div);
+                    _.cfg.selection = div;
                 }
             });
             $.addListener(_.box, 'pointermove', function (ev) {
-                $.cancelBubble(ev);
                 if (_.cfg.selectdown) {
-                    var cur = { x: ev.clientX, y: ev.clientY };
-
-                    console.log('move cur:', cur);
-
-                    //_.move();
+                    $.cancelBubble(ev);
+                    _.cfg.endpointer = { x: ev.clientX - _.cfg.offset.left, y: ev.clientY - _.cfg.offset.top };
+                    _.cfg.selection = Factory.showRange(_.cfg.startpointer, _.cfg.endpointer, _.cfg.selection);
                 }
                 ev.preventDefault();
             });
             $.addListener(_.box, 'pointerup', function (ev) {
-                $.cancelBubble(ev);
                 if (_.cfg.selectdown) {
+                    $.cancelBubble(ev);
                     _.cfg.selectdown = false;
+                    var p = { x: ev.clientX - _.cfg.offset.left, y: ev.clientY - _.cfg.offset.top };
+                    _.cfg.endpointer = p;
+
+                    _.cfg.startpointer = Factory.checkRange(_.cfg.startpointer, _.cfg);
+                    _.cfg.endpointer = Factory.checkRange(_.cfg.endpointer, _.cfg);
+                    $.removeElement(_.cfg.selection);
+                    _.rangeScale(_.cfg.startpointer, _.cfg.endpointer);
                 }
             });
             $.addListener(_.box, 'pointercancel', function (ev) {
-                $.cancelBubble(ev);
                 if (_.cfg.selectdown) {
+                    $.cancelBubble(ev);
+                    $.removeElement(_.cfg.selection);
                     _.cfg.selectdown = false;
                 }
             });
+
+            return this;
+        },
+        rangeScale: function (p1, p2) {
+            var _ = this;
+            if (p1.x === p2.x && p1.y === p2.y) {
+                return _;
+            }
+            var w = Math.abs(p1.x - p2.x),
+                h = Math.abs(p1.y - p2.y),
+                small = p1.x > p2.x && p1.y > p2.y,
+                imgRatio = _.cfg.scale,
+                left, top, 
+                p0 = { 
+                    x: p1.x < p2.x ? p1.x : p2.x, 
+                    y: p1.y < p2.y ? p1.y : p2.y
+                };
+
+            if (!small) {
+                var ratio = Math.round((w > h ? (_.cfg.offset.width) / w : (_.cfg.offset.height) / h) * 100) / 100;
+                imgRatio = ratio * _.cfg.scale;
+                if (imgRatio > 1) {
+                    imgRatio = 1;
+                    ratio = imgRatio / _.cfg.scale;
+                }
+            } else {
+                ratio = 0.5;
+                imgRatio = ratio * _.cfg.scale;
+                var minRatio = _.cfg.offset.width * _.cfg.minZoom / _.cfg.width;
+                if(imgRatio < minRatio) {
+                    imgRatio = minRatio;
+                    ratio = imgRatio / _.cfg.scale;
+                }
+            }
+
+            if (ratio === 1) {
+                left = _.cfg.left + (_.cfg.offset.width - p2.x - p1.x) / 2;
+                top = _.cfg.top + (_.cfg.offset.height - p2.y - p1.y) / 2;
+            } else {                
+                left = (_.cfg.left - p0.x) * ratio - (w * ratio - _.cfg.offset.width) / 2;
+                top = (_.cfg.top - p0.y) * ratio - (h * ratio - _.cfg.offset.height) / 2;
+            }
+
+            _.img.style.left = left + 'px';
+            _.img.style.top = top + 'px';
+
+            _.cfg.left = left;
+            _.cfg.top = top;
+
+            _.scale(imgRatio);
+
+            return this;
+        },
+        scale: function (ratio) {
+            var _ = this;
+
+            if (ratio < 0 || ratio > 1) {
+                ratio = 1;
+            }
+
+            _.cfg.scale = ratio;
+            _.cfg.w = parseInt(_.cfg.width * ratio, 10);
+            _.cfg.h = parseInt(_.cfg.height * ratio, 10);
+
+            _.cfg.x = _.cfg.left + _.cfg.w / 2;
+            _.cfg.y = _.cfg.top + _.cfg.h / 2;
+
+            _.img.style.width = _.cfg.w + 'px';
+            _.img.style.height = _.cfg.h + 'px';
+
+            _.move();
 
             return this;
         },
@@ -314,24 +429,20 @@
                 }
                 if(_.cfg.sizeRatio >= 1) {
                     var minWidth = _.cfg.offset.width;
-                    if (typeof _.opt.minZoom === 'number') {
-                        if (_.cfg.width < _.cfg.offset.width) {
-                            minWidth = _.cfg.width;
-                        } if (_.opt.minZoom > 0 && _.opt.minZoom < 1) {
-                            minWidth = parseInt(_.cfg.offset.width * _.opt.minZoom, 10);
-                        }
+                    if (_.cfg.width < _.cfg.offset.width) {
+                        minWidth = _.cfg.width;
+                    } if (_.opt.minZoom > 0 && _.opt.minZoom < 1) {
+                        minWidth = parseInt(_.cfg.offset.width * _.opt.minZoom, 10);
                     }
                     if (w <= minWidth) {
                         return false;
                     }
                 } else {
                     var minHeight = _.cfg.offset.height;
-                    if (typeof _.opt.minZoom === 'number') {
-                        if (_.cfg.height < _.cfg.offset.height) {
-                            minHeight = _.cfg.height;
-                        } else if(_.opt.minZoom > 0 && _.opt.minZoom < 1) {
-                            minHeight = parseInt(_.cfg.offset.height * _.opt.minZoom, 10);
-                        }
+                    if (_.cfg.height < _.cfg.offset.height) {
+                        minHeight = _.cfg.height;
+                    } else if(_.opt.minZoom > 0 && _.opt.minZoom < 1) {
+                        minHeight = parseInt(_.cfg.offset.height * _.opt.minZoom, 10);
                     }
                     if (h <= minHeight) {
                         return false;
