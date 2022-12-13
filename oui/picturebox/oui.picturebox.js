@@ -109,29 +109,36 @@
         initial: function(options) {
             var _ = this,
                 opt = options,
-                box = $.toElement(opt.box || opt.obj);
+                update = false;
 
-            if(opt.width) {
-                box.style.width = opt.width + 'px';
+            if(_.img) {
+                _.box.removeChild(_.img);
+                $.extend(_.opt, opt);
+                update = true;
+            } else {
+                _.opt = opt;
             }
-            if(opt.height) {
-                box.style.height = opt.height + 'px';
+
+            var box = $.toElement(_.opt.box || _.opt.obj);
+
+            if(_.opt.width) {
+                box.style.width = _.opt.width + 'px';
+            }
+            if(_.opt.height) {
+                box.style.height = _.opt.height + 'px';
             }
 
             box.className += ' oui-picbox-box';
             box.style.cssText += 'overflow:hidden;position:relative;';
+            _.box = box;
 
             var img = document.createElement('IMG');
             img.className = 'oui-picbox-img oui-picbox-unselect';
             img.style.cssText = 'position:absolute;border:none;margin:0;padding:0;';
-            img.src = opt.img || opt.pic;
-            box.appendChild(img);
-
-            var bs = $.getOffsetSize(box);
-
-            _.opt = opt;
+            img.src = _.opt.img || _.opt.pic;
+            _.box.appendChild(img);
             _.img = img;
-            _.box = box;
+
 
             var minZoom = typeof _.opt.minZoom === 'number' ? _.opt.minZoom : 1,
                 defaultZoom = typeof _.opt.defaultZoom === 'number' ? _.opt.defaultZoom : 1;
@@ -144,6 +151,7 @@
             }
 
             $.addListener(img, 'load', function(ev) {
+                var bs = $.getOffsetSize(_.box);
                 var size = Factory.getSize(bs.width, bs.height, img.naturalWidth, img.naturalHeight, defaultZoom);
                 _.cfg = {
                     width: img.naturalWidth,
@@ -168,7 +176,10 @@
 
 
                 if(Factory.setImgSize(_)) {
-                    _.drag().select().wheelZoom();
+                    _.drag().wheelZoom();
+                    if(!update) {
+                        _.select();
+                    }
                 }
 
                 if ($.isFunction(opt.callback)){
@@ -178,12 +189,8 @@
 
             return this;
         },
-        resize: function (size) {
-            if($.isElement(this.box)) {
-                this.box.style.width = (size.width || size.w) + 'px';
-                this.box.style.height = (size.height || size.h) + 'px';
-            }
-            return this;
+        update: function (opt) {
+            return this.initial(opt);
         },
         drag: function () {
             var _ = this;
@@ -483,7 +490,7 @@
         resize: function(size) {
             var _ = this;
             _.box.style.width = size.width + 'px';
-            _.box.style.heigth = size.height + 'px';
+            _.box.style.height = size.height + 'px';
 
             var bs = $.getOffsetSize(_.box);
             _.cfg.offset = {

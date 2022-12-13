@@ -127,29 +127,37 @@
         initial: function(options) {
             var _ = this,
                 opt = options,
-                box = $.toElement(opt.box || opt.obj);
+                update = false;
 
-            if(opt.width) {
-                box.style.width = opt.width + 'px';
+            if(_.img) {
+                _.box.removeChild(_.img);
+                $.extend(_.opt, opt);
+                update = true;
+            } else {
+                _.opt = opt;
             }
-            if(opt.height) {
-                box.style.height = opt.height + 'px';
+
+            var box = $.toElement(_.opt.box || _.opt.obj);
+
+            if(_.opt.width) {
+                box.style.width = _.opt.width + 'px';
+            }
+            if(_.opt.height) {
+                box.style.height = _.opt.height + 'px';
             }
 
             box.className += ' oui-omap-box';
             box.style.cssText += 'overflow:hidden;position:relative;';
+            _.box = box;
 
             var img = document.createElement('IMG');
             img.className = 'oui-omap-img oui-omap-map oui-omap-unselect';
             img.style.cssText = 'position:absolute;margin:0;padding:0;';
-            img.src = opt.img || opt.pic;
-            box.appendChild(img);
-
-            var bs = $.getOffsetSize(box);
+            img.src = _.opt.img || _.opt.pic;
+            _.box.appendChild(img);
+            _.img = img;
 
             _.opt = opt;
-            _.img = img;
-            _.box = box;
             _.markers = {};
 
             var minZoom = typeof _.opt.minZoom === 'number' ? _.opt.minZoom : 1,
@@ -163,6 +171,7 @@
             }
 
             $.addListener(img, 'load', function(ev) {
+                var bs = $.getOffsetSize(_.box);
                 var size = Factory.getSize(bs.width, bs.height, img.naturalWidth, img.naturalHeight, defaultZoom);
                 _.cfg = {
                     width: img.naturalWidth,
@@ -187,7 +196,11 @@
                 console.log(_.cfg);
 
                 if(Factory.setImgSize(_)) {
-                    _.control().drag().wheelZoom().status().select();
+                    _.drag().wheelZoom().status();
+
+                    if(!update) {
+                        _.select().control();
+                    }
                 }
 
                 if ($.isFunction(opt.callback)){
@@ -196,6 +209,9 @@
             });
 
             return this;
+        },
+        update: function (opt) {
+            return this.initial(opt);
         },
         control: function () {
             var _ = this;
@@ -614,7 +630,7 @@
         marker: function (opt) {
             return this.buildMarker(opt);
         },
-        update: function (opt) {
+        updateMarker: function (opt) {
             return this.buildMarker($.extend(opt, { update: true }));
         },
         move: function () {

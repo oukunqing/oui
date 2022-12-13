@@ -2,11 +2,11 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>Document - undefined</title>
+	<title></title>
 	<style type="text/css"></style>
 </head>
 <body>
-
+<input type="button" value="换图" onclick="switchpic();" />
 <div id="box" style="border:none;display:block;margin:40px 0 0 200px;float:left;background: #f1f1f1;"></div>
 <div id="box2" style="border:none;margin:70px 100px 0 800px;float:right;background: #f1f1f1;"></div>
 </body>
@@ -14,8 +14,14 @@
 <script type="text/javascript" src="../oui/oui.js?12"></script>
 <script type="text/javascript" src="../oui/picturebox/oui.picturebox.min.js?123"></script>
 <script type="text/javascript">
+var picbox;
 window.onload = function() {
-	$.picbox({ obj: 'box', img: 'imgs/map_bg.jpg', width: 600, height: 400, defaultZoom: 0.5, minZoom: 0.5 });
+	picbox = $.picbox({ obj: 'box', img: 'imgs/map_bg.jpg', width: 600, height: 400, defaultZoom: 0.5, minZoom: 0.5 });
 	$.picbox({ obj: 'box2', img: 'imgs/1.jpg', width: 600, height: 400 });
 };
+
+function switchpic() {
+	//picbox.initial({ obj: 'box', img: 'imgs/pic.jpg', width: 600, height: 400, defaultZoom: 0.5, minZoom: 0.5 });
+	picbox.update({ img: 'imgs/pic.jpg' });
+}
 </script>
