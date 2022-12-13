@@ -84,6 +84,17 @@
                 point.y = cfg.top + cfg.h;
             }
             return point;
+        },        
+        setImgSize: function (_) {            
+            _.img.style.width = _.cfg.w + 'px';
+            _.img.style.height = _.cfg.h + 'px';
+            _.img.style.left = _.cfg.left + 'px';
+            _.img.style.top = _.cfg.top + 'px';
+
+            //图片尺寸是否大于容器框
+            var bigImg = _.cfg.width > _.cfg.offset.width || _.cfg.height > _.cfg.offset.height;
+
+            return bigImg;
         }
     };
 
@@ -155,12 +166,8 @@
 
                 console.log(_.cfg);
 
-                _.img.style.width = _.cfg.w + 'px';
-                _.img.style.height = _.cfg.h + 'px';
-                _.img.style.left = _.cfg.left + 'px';
-                _.img.style.top = _.cfg.top + 'px';
 
-                if (_.cfg.width > _.cfg.offset.width || _.cfg.height > _.cfg.offset.height) {
+                if(Factory.setImgSize(_)) {
                     _.drag().select().wheelZoom();
                 }
 
@@ -327,16 +334,10 @@
                 left = (_.cfg.left - p0.x) * ratio - (w * ratio - _.cfg.offset.width) / 2;
                 top = (_.cfg.top - p0.y) * ratio - (h * ratio - _.cfg.offset.height) / 2;
             }
-
-            _.img.style.left = left + 'px';
-            _.img.style.top = top + 'px';
-
             _.cfg.left = left;
             _.cfg.top = top;
 
-            _.scale(imgRatio);
-
-            return this;
+            return _.scale(imgRatio);
         },
         scale: function (ratio) {
             var _ = this;
@@ -348,19 +349,17 @@
             _.cfg.scale = ratio;
             _.cfg.w = parseInt(_.cfg.width * ratio, 10);
             _.cfg.h = parseInt(_.cfg.height * ratio, 10);
-
             _.cfg.x = _.cfg.left + _.cfg.w / 2;
             _.cfg.y = _.cfg.top + _.cfg.h / 2;
 
-            _.img.style.width = _.cfg.w + 'px';
-            _.img.style.height = _.cfg.h + 'px';
+            Factory.setImgSize(_);
 
             return this;
         },
         zoom: function (action, ev) {
-            var _ = this;
-            var pos = $.getEventPosition(ev);
-            var w = parseInt(_.img.style.width, 10),
+            var _ = this,
+                pos = $.getEventPosition(ev),
+                w = parseInt(_.img.style.width, 10),
                 h = parseInt(_.img.style.height, 10),
                 left = parseInt(_.img.style.left, 10),
                 top = parseInt(_.img.style.top, 10),
@@ -408,7 +407,6 @@
                 }
             }
             scale = w / _.cfg.width;
-
             left = parseInt(_.cfg.x - w / 2, 10);
             top = parseInt(_.cfg.y - h / 2, 10);
             
@@ -418,13 +416,7 @@
             _.cfg.top = top;
             _.cfg.scale = scale;
             
-            _.img.style.width = w + 'px';
-            _.img.style.height = h + 'px';
-
-            _.img.style.left = left + 'px';
-            _.img.style.top = top + 'px';
-
-            //console.log('zoom: ', _.cfg);
+            Factory.setImgSize(_);
 
             return this;
         },
@@ -512,8 +504,6 @@
         }
     });
 
-    $.extend($.picturebox, {
-
-    });
+    //$.extend($.picturebox, {});
 
 }(OUI);
