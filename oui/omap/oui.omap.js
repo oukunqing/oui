@@ -111,6 +111,19 @@
             var bigImg = _.cfg.width > _.cfg.offset.width || _.cfg.height > _.cfg.offset.height;
 
             return bigImg;
+        },
+        getOffsetSize: function(elem) {
+            if (elem === null) {
+                return { width: 0, height: 0, left: 0, top: 0 };
+            }
+            var bs = $.getOffsetSize(elem);
+            if (!bs.width || !bs.height) {
+                bs.width = parseInt(elem.style.width, 10);
+                bs.height = parseInt(elem.style.height, 10);
+                bs.left = parseInt(elem.style.left, 10);
+                bs.top = parseInt(elem.style.top, 10);
+            }
+            return bs;
         }
     };
 
@@ -170,8 +183,15 @@
                 defaultZoom = 1;
             }
 
+            var bs = Factory.getOffsetSize(_.box);
+
+            _.prompt = document.createElement('DIV');
+            _.prompt.innerHTML = '正在加载地图，请稍候...';
+            _.prompt.style.cssText = 'display:block;text-align:center;line-height:' + bs.height + 'px;';
+            _.box.appendChild(_.prompt);
+
             $.addListener(img, 'load', function(ev) {
-                var bs = $.getOffsetSize(_.box);
+                $.removeElement(_.prompt);
                 var size = Factory.getSize(bs.width, bs.height, img.naturalWidth, img.naturalHeight, defaultZoom);
                 _.cfg = {
                     width: img.naturalWidth,
@@ -239,15 +259,18 @@
             return this;
         },
         resize: function (size) {
-            if($.isElement(this.box)) {
-                this.box.style.width = (size.width || size.w) + 'px';
-                this.box.style.height = (size.height || size.h) + 'px';
+            var _ = this;
+            if($.isElement(_.box)) {
+                _.box.style.width = (size.width || size.w) + 'px';
+                _.box.style.height = (size.height || size.h) + 'px';
 
-                var bs = $.getOffsetSize(this.box);
-                this.cfg.offset = {
-                    width: bs.width, height: bs.height,
-                    left: bs.left, top: bs.top
-                };
+                if(_.cfg) {
+                    var bs = Factory.getOffsetSize(_.box);
+                    _.cfg.offset = {
+                        width: bs.width, height: bs.height,
+                        left: bs.left, top: bs.top
+                    };
+                }
             }
             return this;
         },

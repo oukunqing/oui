@@ -95,6 +95,19 @@
             var bigImg = _.cfg.width > _.cfg.offset.width || _.cfg.height > _.cfg.offset.height;
 
             return bigImg;
+        },
+        getOffsetSize: function(elem) {
+            if (elem === null) {
+                return { width: 0, height: 0, left: 0, top: 0 };
+            }
+            var bs = $.getOffsetSize(elem);
+            if (!bs.width || !bs.height) {
+                bs.width = parseInt(elem.style.width, 10);
+                bs.height = parseInt(elem.style.height, 10);
+                bs.left = parseInt(elem.style.left, 10);
+                bs.top = parseInt(elem.style.top, 10);
+            }
+            return bs;
         }
     };
 
@@ -150,8 +163,8 @@
                 defaultZoom = 1;
             }
 
-            $.addListener(img, 'load', function(ev) {
-                var bs = $.getOffsetSize(_.box);
+            $.addListener(_.img, 'load', function(ev) {
+                var bs = Factory.getOffsetSize(_.box);
                 var size = Factory.getSize(bs.width, bs.height, img.naturalWidth, img.naturalHeight, defaultZoom);
                 _.cfg = {
                     width: img.naturalWidth,
@@ -173,7 +186,6 @@
                 };
 
                 console.log(_.cfg);
-
 
                 if(Factory.setImgSize(_)) {
                     _.drag().wheelZoom();
@@ -492,12 +504,13 @@
             _.box.style.width = size.width + 'px';
             _.box.style.height = size.height + 'px';
 
-            var bs = $.getOffsetSize(_.box);
-            _.cfg.offset = {
-                width: bs.width, height: bs.height,
-                left: bs.left, top: bs.top
-            };
-
+            if(_.cfg) {
+                var bs = Factory.getOffsetSize(_.box);
+                _.cfg.offset = {
+                    width: bs.width, height: bs.height,
+                    left: bs.left, top: bs.top
+                };
+            }
             return this;
         }
     };

@@ -2908,11 +2908,11 @@
             if (!isElement(elem)) {
                 return { width: 0, height: 0, top: 0, left: 0 };
             }
-            var par = { 
-                width: elem.offsetWidth || parseInt(elem.style.width, 10),
-                height: elem.offsetHeight || parseInt(elem.style.height, 10), 
-                left: elem.offsetLeft || parseInt(elem.style.left, 10),
-                top: elem.offsetTop || parseInt(elem.style.top, 10)
+            var par = {
+                width: elem.offsetWidth,
+                height: elem.offsetHeight, 
+                left: elem.offsetLeft,
+                top: elem.offsetTop
             };
 
             if($.isBoolean(basic, false)) {
@@ -5138,7 +5138,7 @@
                 if ($.isNullOrUndefined(attrVal)) {
                     return $.getElementStyle(this[0], attrKey) || '';
                 } else if($.isString(attrVal, true) || $.isNumber(attrVal)) {
-                    attrs = { attrKey, attrVal };
+                    attrs = { attrKey: attrVal };
                 }
             } else if ($.isObject(attrKey)) {
                 $.extend(attrs, attrKey);
