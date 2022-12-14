@@ -28,21 +28,6 @@
             });
             return this;
         },
-        getSize: function(boxWidth, boxHeight, width, height, zoom) {
-            var w, h, left, top;
-            if (width > height) {
-                w = width > boxWidth ? boxWidth * zoom : width;
-                h = parseInt(w / width * height, 10);
-            } else {
-                h = height > boxHeight ? boxHeight * zoom : height;
-                w = parseInt(h / height * width, 10);
-            }
-
-            left = parseInt((boxWidth - w) / 2, 10);
-            top = parseInt((boxHeight - h) / 2, 10); 
-
-            return { width: w, height: h, left: left, top: top };
-        },
         checkIds: function (ids) {
             if (typeof ids === 'undefined' || ids === null) {
                 return [];
@@ -59,6 +44,37 @@
                 return [ids];
             }
             return [];
+        },
+        getSize: function(boxWidth, boxHeight, width, height, defZoom, minZoom) {
+            var w, h, left, top;
+            if (width > height) {
+                w = width > boxWidth ? boxWidth * defZoom : width;
+                h = parseInt(w / width * height, 10);
+                if (h > boxHeight * defZoom) {
+                    h = boxHeight * defZoom;
+                    w = parseInt(h / height * width, 10);
+                }
+            } else {
+                h = height > boxHeight ? boxHeight * defZoom : height;
+                w = parseInt(h / height * width, 10);
+                if (w > boxWidth * defZoom) {
+                    w = boxWidth * defZoom;
+                    h = parseInt(w / width * height, 10);
+                }
+            }
+
+            left = parseInt((boxWidth - w) / 2, 10);
+            top = parseInt((boxHeight - h) / 2, 10); 
+
+            var imgRatio = Factory.setRatio(width / height),
+                curScale = Factory.setRatio(w / width),
+                boxScale = Factory.setRatio(curScale / defZoom),
+                minScale = Factory.setRatio(boxScale * minZoom);
+
+            return { 
+                width: w, height: h, left: left, top: top, imgRatio: imgRatio,
+                curScale: curScale, boxScale: boxScale, minScale: minScale
+            };
         },
         showRange: function (p1, p2, div) {
             if ($.isNullOrUndefined(div)) {                
@@ -100,7 +116,7 @@
                 point.y = cfg.top + cfg.h;
             }
             return point;
-        },
+        },        
         setImgSize: function (_) {            
             _.img.style.width = _.cfg.w + 'px';
             _.img.style.height = _.cfg.h + 'px';
@@ -124,6 +140,12 @@
                 bs.top = parseInt(elem.style.top, 10);
             }
             return bs;
+        },
+        setRatio: function(num, ratio) {
+            if (!ratio) {
+                ratio = 10000;
+            }
+            return Math.round(num * ratio) / ratio;
         }
     };
 
@@ -195,26 +217,28 @@
 
             $.addListener(img, 'load', function(ev) {
                 $.removeElement(_.prompt);
-                var size = Factory.getSize(bs.width, bs.height, img.naturalWidth, img.naturalHeight, defaultZoom);
+                var size = Factory.getSize(bs.width, bs.height, img.naturalWidth, img.naturalHeight, defaultZoom, minZoom);
+                console.log('size:', size);
                 _.cfg = {
                     width: img.naturalWidth,
                     height: img.naturalHeight,
-                    sizeRatio: img.naturalWidth / img.naturalHeight,
+                    imgRatio: size.imgRatio,
+                    boxScale: size.boxScale,
+                    curScale: size.curScale,
+                    minScale: size.minScale,
                     minZoom: minZoom,
                     defaultZoom: defaultZoom,
-                    maxScale: maxScale, 
+                    maxScale: maxScale,
                     w: size.width,
                     h: size.height,
                     left: size.left,
                     top: size.top,
                     x: parseInt(size.width / 2 + size.left, 10),
                     y: parseInt(size.height / 2 + size.top, 10),
-                    scale: size.width / img.naturalWidth,
                     offset: {
                         width: bs.width, height: bs.height,
                         left: bs.left, top: bs.top
                     },
-                    icon: opt.icon || '',
                     showScale: $.isBoolean(_.opt.showScale, true),
                     showTitle: $.isBoolean(_.opt.showTitle, false)
                 };
@@ -248,15 +272,15 @@
             });
             _.statusbar = statusbar;
             _.box.appendChild(statusbar);
-            /*
+            
             var titlebar = document.createElement('DIV');
             titlebar.className = 'oui-omap-title oui-omap-unselect';
             $.addListener(titlebar, 'dblclick', function() {
-                _.center();
+                _.scale(_.cfg.boxScale).center();
             });
             _.titlebar = titlebar;
             _.box.appendChild(titlebar);
-            */
+            
 
             return this;
         },
@@ -279,10 +303,10 @@
             if (!_.statusbar || !_.cfg.showScale) {
                 return _;
             }
-            var ratio = Math.round(_.cfg.width / _.cfg.w * 100) / 100;
+            var ratio = Factory.setRatio(_.cfg.width / _.cfg.w, 100);
             var html = ['1:', ratio];
             if (ratio < 1) {
-                ratio = Math.round(1 / ratio * 100) / 100;
+                ratio = Factory.setRatio(1 / ratio, 100);
                 html = [ratio, ':1'];
             }
 
@@ -426,61 +450,61 @@
             var w = Math.abs(p1.x - p2.x),
                 h = Math.abs(p1.y - p2.y),
                 small = p1.x > p2.x && p1.y > p2.y,
-                imgScale = _.cfg.scale,
-                left, top, 
+                scale = _.cfg.curScale,
+                left, top, ratio,
                 p0 = { 
                     x: p1.x < p2.x ? p1.x : p2.x, 
                     y: p1.y < p2.y ? p1.y : p2.y
                 };
 
-            if (!small) {
-                var ratio = Math.round((w > h ? (_.cfg.offset.width) / w : (_.cfg.offset.height) / h) * 100) / 100;
-                imgScale = ratio * _.cfg.scale;
-                if (imgScale > _.cfg.maxScale) {
-                    imgScale = _.cfg.maxScale;
-                    ratio = imgScale / _.cfg.scale;
+            if (small) {
+                ratio = 0.5;
+            } else if (w >= h ) {
+                ratio = Factory.setRatio(_.cfg.offset.width / w);
+                if (h * ratio > _.cfg.offset.height) {
+                    ratio = Factory.setRatio(_.cfg.offset.height / h);
                 }
             } else {
-                ratio = 0.5;
-                imgScale = ratio * _.cfg.scale;
-                var minRatio = _.cfg.offset.width * _.cfg.minZoom / _.cfg.width;
-                if(imgScale < minRatio) {
-                    imgScale = minRatio;
-                    ratio = imgScale / _.cfg.scale;
+                ratio = Factory.setRatio(_.cfg.offset.height / h);
+                if (w * ratio > _.cfg.offset.width) {
+                    ratio = Factory.setRatio(_.cfg.offset.width / w);
                 }
             }
+            scale = ratio * _.cfg.curScale;
 
-            if (ratio === 1) {
-                left = _.cfg.left + (_.cfg.offset.width - p2.x - p1.x) / 2;
-                top = _.cfg.top + (_.cfg.offset.height - p2.y - p1.y) / 2;
-            } else {                
-                left = (_.cfg.left - p0.x) * ratio - (w * ratio - _.cfg.offset.width) / 2;
-                top = (_.cfg.top - p0.y) * ratio - (h * ratio - _.cfg.offset.height) / 2;
+            if(scale < _.cfg.minScale) {
+                scale = _.cfg.minScale;
+            } else if(scale > _.cfg.maxScale) {
+                scale = _.cfg.maxScale;
             }
+            ratio = scale / _.cfg.curScale;
 
-            _.cfg.left = left;
-            _.cfg.top = top;
+            left = (_.cfg.left - p0.x) * ratio - (w * ratio - _.cfg.offset.width) / 2;
+            top = (_.cfg.top - p0.y) * ratio - (h * ratio - _.cfg.offset.height) / 2;
 
-            return _.scale(imgScale);
+            _.cfg.left = parseInt(left, 10);
+            _.cfg.top = parseInt(top, 10);
+
+            return _.scale(scale);
         },
-        scale: function (ratio) {
+        scale: function (scaleRatio) {
             var _ = this;
 
-            if (ratio < 0) {
-                ratio = 1;
-            } else if(ratio > _.cfg.maxScale) {
-                ratio = _.cfg.maxScale;
+            if (scaleRatio < _.cfg.minScale) {
+                scaleRatio = _.cfg.minScale;
+            } else if(scaleRatio > _.cfg.maxScale) {
+                scaleRatio = _.cfg.maxScale;
             }
 
-            _.cfg.scale = ratio;
-            _.cfg.w = parseInt(_.cfg.width * ratio, 10);
-            _.cfg.h = parseInt(_.cfg.height * ratio, 10);
+            _.cfg.curScale = Factory.setRatio(scaleRatio);
+            _.cfg.w = parseInt(_.cfg.width * scaleRatio, 10);
+            _.cfg.h = parseInt(_.cfg.height * scaleRatio, 10);
             _.cfg.x = _.cfg.left + _.cfg.w / 2;
             _.cfg.y = _.cfg.top + _.cfg.h / 2;
 
             Factory.setImgSize(_);
 
-            return _.move().status();
+            return this.status().move();
         },
         zoom: function (action, ev, zoomratio) {
             var _ = this,
@@ -490,53 +514,36 @@
                 left = parseInt(_.img.style.left, 10),
                 top = parseInt(_.img.style.top, 10),
                 ratio = $.isNumber(zoomratio) ? zoomratio : 1.1,
-                scale = Math.round(w * 100 / _.cfg.width) / 100;
+                scale = _.cfg.curScale;
 
-            if (!action) {
+            if((!action && scale <= _.cfg.minScale) || (action && scale >= _.cfg.maxScale)) {
+                return this;
+            }
+
+            if(!action) {
                 ratio = 1 / ratio;
-                if(_.cfg.sizeRatio >= 1) {
-                    var minWidth = _.cfg.offset.width;
-                    if (_.cfg.width < _.cfg.offset.width) {
-                        minWidth = _.cfg.width;
-                    } if (_.opt.minZoom > 0 && _.opt.minZoom < 1) {
-                        minWidth = parseInt(_.cfg.offset.width * _.opt.minZoom, 10);
-                    }
-                    if (w <= minWidth) {
-                        return false;
-                    }
-                } else {
-                    var minHeight = _.cfg.offset.height;
-                    if (_.cfg.height < _.cfg.offset.height) {
-                        minHeight = _.cfg.height;
-                    } else if(_.opt.minZoom > 0 && _.opt.minZoom < 1) {
-                        minHeight = parseInt(_.cfg.offset.height * _.opt.minZoom, 10);
-                    }
-                    if (h <= minHeight) {
-                        return false;
-                    }
-                }
-            } else if (scale >= _.cfg.maxScale) {
+            }
+            //计算缩放后的比率         
+            scale = Factory.setRatio(w * ratio / _.cfg.width);
+
+            if(scale < _.cfg.minScale) {
+                scale = _.cfg.minScale;
+            } else if(scale > _.cfg.maxScale) {
                 scale = _.cfg.maxScale;
-                return false;
             }
 
-            w *= ratio;
-            //判断大小是否超出最大缩放比例
-            if (w > _.cfg.width * _.cfg.maxScale) {
-                w = _.cfg.width * _.cfg.maxScale;
-            }
-            h = w / _.cfg.width * _.cfg.height;
+            w = parseInt(_.cfg.width * scale, 10);
+            h = parseInt(_.cfg.height * scale, 10);
 
             if (ev) {
                 var tar = ev.target;
                 if (tar.className.indexOf('oui-omap-map') >= 0) {
                     //计算中心点的偏移量
                     //鼠标当前位置要减去图片外框的偏移量
-                    _.cfg.x -= (ratio - 1) * (ev.clientX - _.cfg.x - _.cfg.offset.left);
-                    _.cfg.y -= (ratio - 1) * (ev.clientY - _.cfg.y - _.cfg.offset.top);
+                    _.cfg.x -= parseInt((ratio - 1) * (ev.clientX - _.cfg.x - _.cfg.offset.left), 10);
+                    _.cfg.y -= parseInt((ratio - 1) * (ev.clientY - _.cfg.y - _.cfg.offset.top), 10);
                 }
             }
-            scale = w / _.cfg.width;
             left = parseInt(_.cfg.x - w / 2, 10);
             top = parseInt(_.cfg.y - h / 2, 10);
             
@@ -544,40 +551,40 @@
             _.cfg.h = h;
             _.cfg.left = left;
             _.cfg.top = top;
-            _.cfg.scale = scale;
+            _.cfg.curScale = scale;
             
             Factory.setImgSize(_);
 
-            return _.status().move();
+            return this.status().move();
         },
         center: function (opt) {
             var _ = this;
             if ($.isNullOrUndefined(opt)) {
                 opt = {
-                    x: parseInt(_.cfg.w / 2, 10) / _.cfg.scale,
-                    y: parseInt(_.cfg.h / 2, 10) / _.cfg.scale
+                    x: parseInt(_.cfg.w / 2, 10) / _.cfg.curScale,
+                    y: parseInt(_.cfg.h / 2, 10) / _.cfg.curScale
                 };
                 console.log('opt:', opt);
             }
-            var x = _.cfg.scale * opt.x,
-                y = _.cfg.scale * opt.y,
+            var x = _.cfg.curScale * opt.x,
+                y = _.cfg.curScale * opt.y,
                 w = _.cfg.w,
                 h = _.cfg.h,
                 targetX = _.cfg.offset.width / 2,
                 targetY = _.cfg.offset.height / 2;
 
-            var targetLeft = targetX - x,
-                targetTop = targetY - y;
+            var targetLeft = parseInt(targetX - x, 10),
+                targetTop = parseInt(targetY - y, 10);
 
             _.cfg.left = targetLeft;
-            _.cfg.top = targetTop;
-            _.cfg.x = targetLeft + w / 2;
-            _.cfg.y = targetTop + h / 2;
+            _.cfg.top = targetTop;        
+            _.cfg.x = parseInt(targetLeft + w / 2, 10);
+            _.cfg.y = parseInt(targetTop + h / 2, 10);
 
             _.img.style.left = targetLeft + 'px';
             _.img.style.top = targetTop + 'px';
-            
-            return _.move();
+
+            return this.move();
         },
         setCenter: function () {
             return this.center(opt);
@@ -634,8 +641,8 @@
             }
             
             var pos = {
-                left: _.cfg.left + opt.x * _.cfg.scale,
-                top: _.cfg.top + opt.y * _.cfg.scale
+                left: _.cfg.left + opt.x * _.cfg.curScale,
+                top: _.cfg.top + opt.y * _.cfg.curScale
             };
 
             var marker = document.createElement('IMG'),
@@ -700,8 +707,8 @@
                     label = dr.label,
                     pointer = dr.pointer,
                     pos = {
-                        left: _.cfg.left + pointer.x * _.cfg.scale,
-                        top: _.cfg.top + pointer.y * _.cfg.scale
+                        left: _.cfg.left + pointer.x * _.cfg.curScale,
+                        top: _.cfg.top + pointer.y * _.cfg.curScale
                     };
 
                 if(marker) {
