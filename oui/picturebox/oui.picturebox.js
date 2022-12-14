@@ -569,7 +569,7 @@
             });
             $.addListener(_.img, 'dblclick', function (ev) {
                 $.cancelBubble(ev);
-                _.zoom(true, ev);
+                _.zoom(true, ev, 1.25);
                 ev.preventDefault();
             });
             return this;
@@ -585,7 +585,11 @@
                     width: bs.width, height: bs.height,
                     left: bs.left, top: bs.top
                 };
-
+                var size = Factory.getSize(bs.width, bs.height, _.cfg.width, _.cfg.height, _.cfg.defaultZoom, _.cfg.minZoom);
+                _.cfg.imgRatio = size.imgRatio;
+                _.cfg.boxScale = size.boxScale;
+                _.cfg.curScale = size.curScale;
+                _.cfg.minScale = size.minScale;
             }
             return this;
         }
