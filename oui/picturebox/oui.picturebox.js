@@ -152,15 +152,18 @@
             _.box.appendChild(img);
             _.img = img;
 
-
             var minZoom = typeof _.opt.minZoom === 'number' ? _.opt.minZoom : 1,
-                defaultZoom = typeof _.opt.defaultZoom === 'number' ? _.opt.defaultZoom : 1;
+                defaultZoom = typeof _.opt.defaultZoom === 'number' ? _.opt.defaultZoom : 1,
+                maxScale = $.isNumber(opt.maxScale) ? opt.maxScale : 1;
 
             if(minZoom <= 0 || minZoom > 1) {
                 minZoom = 1;
             }
             if(defaultZoom <= 0 || defaultZoom > 1) {
                 defaultZoom = 1;
+            }
+            if(maxScale <= 0 || maxScale > 5) {
+                maxScale = 1;
             }
 
             $.addListener(_.img, 'load', function(ev) {
@@ -172,6 +175,7 @@
                     sizeRatio: img.naturalWidth / img.naturalHeight,
                     minZoom: minZoom,
                     defaultZoom: defaultZoom,
+                    maxScale: maxScale, 
                     w: size.width,
                     h: size.height,
                     left: size.left,
@@ -182,20 +186,22 @@
                     offset: {
                         width: bs.width, height: bs.height,
                         left: bs.left, top: bs.top
-                    }
+                    },
+                    showScale: $.isBoolean(_.opt.showScale, true),
+                    showTitle: $.isBoolean(_.opt.showTitle, false)
                 };
 
                 console.log(_.cfg);
 
                 if(Factory.setImgSize(_)) {
-                    _.drag().wheelZoom();
                     if(!update) {
-                        _.select();
-                    }
+                        _.select().control();
+                    }                    
+                    _.drag().wheelZoom().title().status();
                 }
 
-                if ($.isFunction(opt.callback)){
-                    opt.callback(_, _.cfg);
+                if ($.isFunction(_.opt.callback)){
+                    _.opt.callback(_, _.cfg);
                 }
             });
 
@@ -203,6 +209,56 @@
         },
         update: function (opt) {
             return this.initial(opt);
+        },
+        control: function () {
+            var _ = this;
+            var statusbar = document.createElement('DIV');
+            statusbar.className = 'oui-picbox-status oui-picbox-unselect';
+            $.addListener(statusbar, 'dblclick', function() {
+                _.center();
+            });
+            _.statusbar = statusbar;
+            _.box.appendChild(statusbar);
+
+            var titlebar = document.createElement('DIV');
+            titlebar.className = 'oui-picbox-title oui-picbox-unselect';
+            $.addListener(titlebar, 'dblclick', function() {
+                _.center();
+            });
+            _.titlebar = titlebar;
+            _.box.appendChild(titlebar);
+
+            return this;
+        },
+        title: function (title) {
+            var _ = this;
+            if (!_.titlebar || !_.cfg.showTitle) {
+                return _;
+            }
+            if ($.isNullOrUndefined(title)) {
+                var html = ['&nbsp;[', _.cfg.width, '×', _.cfg.height, '] ', $.getFileName(_.img.src), '&nbsp;'];
+                _.titlebar.innerHTML = html.join('');
+                return _;
+            }
+            _.titlebar.innerHTML = title || '';
+
+            return this;
+        },
+        status: function () {
+            var _ = this;
+            if (!_.statusbar || !_.cfg.showScale) {
+                return _;
+            }
+            var ratio = Math.round(_.cfg.width / _.cfg.w * 100) / 100;
+            var html = ['1:', ratio];
+            if (ratio < 1) {
+                ratio = Math.round(1 / ratio * 100) / 100;
+                html = [ratio, ':1'];
+            }
+
+            _.statusbar.innerHTML = '&nbsp;' + html.join('') + '&nbsp;';
+
+            return this;
         },
         drag: function () {
             var _ = this;
@@ -322,7 +378,7 @@
             var w = Math.abs(p1.x - p2.x),
                 h = Math.abs(p1.y - p2.y),
                 small = p1.x > p2.x && p1.y > p2.y,
-                imgRatio = _.cfg.scale,
+                imgScale = _.cfg.scale,
                 left, top, 
                 p0 = { 
                     x: p1.x < p2.x ? p1.x : p2.x, 
@@ -331,18 +387,18 @@
 
             if (!small) {
                 var ratio = Math.round((w > h ? (_.cfg.offset.width) / w : (_.cfg.offset.height) / h) * 100) / 100;
-                imgRatio = ratio * _.cfg.scale;
-                if (imgRatio > 1) {
-                    imgRatio = 1;
-                    ratio = imgRatio / _.cfg.scale;
+                imgScale = ratio * _.cfg.scale;
+                if (imgScale > _.cfg.maxScale) {
+                    imgScale = _.cfg.maxScale;
+                    ratio = imgScale / _.cfg.scale;
                 }
             } else {
                 ratio = 0.5;
-                imgRatio = ratio * _.cfg.scale;
+                imgScale = ratio * _.cfg.scale;
                 var minRatio = _.cfg.offset.width * _.cfg.minZoom / _.cfg.width;
-                if(imgRatio < minRatio) {
-                    imgRatio = minRatio;
-                    ratio = imgRatio / _.cfg.scale;
+                if(imgScale < minRatio) {
+                    imgScale = minRatio;
+                    ratio = imgScale / _.cfg.scale;
                 }
             }
 
@@ -353,16 +409,19 @@
                 left = (_.cfg.left - p0.x) * ratio - (w * ratio - _.cfg.offset.width) / 2;
                 top = (_.cfg.top - p0.y) * ratio - (h * ratio - _.cfg.offset.height) / 2;
             }
+
             _.cfg.left = left;
             _.cfg.top = top;
 
-            return _.scale(imgRatio);
+            return _.scale(imgScale);
         },
         scale: function (ratio) {
             var _ = this;
 
-            if (ratio < 0 || ratio > 1) {
+            if (ratio < 0) {
                 ratio = 1;
+            } else if(ratio > _.cfg.maxScale) {
+                ratio = _.cfg.maxScale;
             }
 
             _.cfg.scale = ratio;
@@ -373,17 +432,17 @@
 
             Factory.setImgSize(_);
 
-            return this;
+            return this.status();
         },
-        zoom: function (action, ev) {
+        zoom: function (action, ev, zoomratio) {
             var _ = this,
                 pos = $.getEventPosition(ev),
                 w = parseInt(_.img.style.width, 10),
                 h = parseInt(_.img.style.height, 10),
                 left = parseInt(_.img.style.left, 10),
                 top = parseInt(_.img.style.top, 10),
-                ratio = 1.1,
-                scale = parseInt(w * 100 / _.cfg.width, 10);
+                ratio = $.isNumber(zoomratio) ? zoomratio : 1.1,
+                scale = Math.round(w * 100 / _.cfg.width) / 100;
 
             if (!action) {
                 ratio = 1 / 1.1;
@@ -408,12 +467,16 @@
                         return false;
                     }
                 }
-            } else if (scale >= 100) {
-                scale = 100;
+            } else if (scale >= _.cfg.maxScale) {
+                scale = _.cfg.maxScale;
                 return false;
             }
 
             w *= ratio;
+            //判断大小是否超出最大缩放比例
+            if (w > _.cfg.width * _.cfg.maxScale) {
+                w = _.cfg.width * _.cfg.maxScale;
+            }
             h = w / _.cfg.width * _.cfg.height;
 
             if (ev) {
@@ -437,7 +500,7 @@
             
             Factory.setImgSize(_);
 
-            return this;
+            return this.status();
         },
         center: function (opt) {
             var _ = this;

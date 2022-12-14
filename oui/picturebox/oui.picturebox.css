@@ -12,12 +12,31 @@
     height: 24px;
     border: none;
     margin: 0;
-    padding: 0 5px;
+    padding: 0;
+    text-indent: 0px;
     font-size: 14px;
+    font-family: Arial;
     line-height: 1.8em;
     background: #fff;
     color: #333;
-    opacity: 0.65;
+    opacity: 0.5;
+}
+.oui-picbox-title {
+    position: absolute;
+    z-index: 10001;
+    left: 0;
+    top: 0;
+    height: 24px;
+    border: none;
+    margin: 0;
+    padding: 0;
+    text-indent: 0px;
+    font-size: 14px;
+    font-family: Arial;
+    line-height: 1.8em;
+    background: #fff;
+    color: #333;
+    opacity: 0.5;
 }
 .oui-picbox-unselect {
     -moz-user-select: none;
