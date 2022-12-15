@@ -2623,26 +2623,35 @@
         },
         //获取远程文件大小(不能跨域)
         getFileSize = function (fileUrl, callback) {
-            var xhr = new XMLHttpRequest();
-            //异步方式
-            xhr.open('HEAD', fileUrl, true);
-            xhr.onreadystatechange = function() {
-                var size = -1;
-                if (xhr.readyState === 4) {
-                    if (xhr.status === 200) {
-                        size = xhr.getResponseHeader('Content-Length');
-                    } else {
-                        //获取文件信息失败
-                        console.log('getFileSize: ', 'ERROR');
-                    }
-                }
-                console.log('getFileSize: ', fileUrl, size);
+            try {
                 if ($.isFunction(callback)) {
-                    callback(size);
+                        callback(-1);
+                    }
+                    return this;
+                var xhr = new XMLHttpRequest();
+                //异步方式
+                xhr.open('HEAD', fileUrl, true);
+                xhr.onreadystatechange = function() {
+                    var size = -1;
+                    if (xhr.readyState === 4) {
+                        if (xhr.status === 200) {
+                            size = xhr.getResponseHeader('Content-Length');
+                        } else {
+                            //获取文件信息失败
+                            console.log('getFileSize: ', 'ERROR');
+                        }
+                    }
+                    console.log('getFileSize: ', fileUrl, size);
+                    if ($.isFunction(callback)) {
+                        callback(size);
+                    }
+                };
+                xhr.send(null);
+            } catch (e) {
+                if ($.isFunction(callback)) {
+                    callback(-1);
                 }
-            };
-            xhr.send(null);
-
+            }
             return this;
         },
         addNamePostfix = function(filePath, postfix) {
@@ -3339,6 +3348,9 @@
             return appendChild(parent, elem, isRemove);
         },
         removeElement = function(elem) {
+            if ($.isNullOrUndefined(elem)) {
+                return this;
+            }
             if($.isString(elem, true)) {
                 elem = $.toElement(elem);
             }            

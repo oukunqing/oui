@@ -60,32 +60,25 @@
                 curScale: curScale, boxScale: boxScale, minScale: minScale
             };
         },
-        showRange: function (p1, p2, div) {
+        showRange: function (p1, p2, div, box) {
             if ($.isNullOrUndefined(div)) {
                 div = document.createElement('DIV');
                 div.className = 'oui-picbox-range';
                 div.style.left = p1.x + 'px';
                 div.style.top = p1.y + 'px';
                 div.innerHTML = '<div class="oui-picbox-range-panel"></div>';
-            } else {
-                var big = p1.x < p2.x || p1.y < p2.y;
-
-                if (p1.x < p2.x && p1.y < p2.y) {
-                    div.style.left = p1.x + 'px';
-                    div.style.top = p1.y + 'px';
-                } else if (p1.x > p2.x && p1.y > p2.y) {
-                    div.style.left = p2.x + 'px';
-                    div.style.top = p2.y + 'px';
-                } else if (p1.x < p2.x && p1.y > p2.y) {
-                    div.style.left = p1.x + 'px';
-                    div.style.top = p1.y - Math.abs(p2.y - p1.y) + 'px'; 
-                } else if (p1.x > p2.x && p1.y < p2.y) {
-                    div.style.left = p1.x - Math.abs(p2.x - p1.x) + 'px';
-                    div.style.top = p1.y + 'px';
-                }
+                box.appendChild(div);
+            } else if(p2) {
+                div.style.left = (p1.x < p2.x ? p1.x : p2.x) + 'px';
+                div.style.top = (p1.y < p2.y ? p1.y : p2.y) + 'px';
                 div.style.width = Math.abs(p2.x - p1.x) + 'px';
                 div.style.height = Math.abs(p2.y - p1.y) + 'px';
+                div.style.display = 'block';
             }
+            return div;
+        },
+        hideRange: function (div) {
+            div.style.display = 'none';
             return div;
         },
         checkRange: function (point, cfg) {
@@ -119,10 +112,10 @@
             }
             var bs = $.getOffsetSize(elem);
             if (!bs.width || !bs.height) {
-                bs.width = parseInt(elem.style.width, 10);
-                bs.height = parseInt(elem.style.height, 10);
-                bs.left = parseInt(elem.style.left, 10);
-                bs.top = parseInt(elem.style.top, 10);
+                bs.width = parseInt('0' + elem.style.width, 10);
+                bs.height = parseInt('0' + elem.style.height, 10);
+                bs.left = parseInt('0' + elem.style.left, 10);
+                bs.top = parseInt('0' + elem.style.top, 10);
             }
             return bs;
         },
@@ -370,14 +363,10 @@
             $.addListener(_.box, 'pointerdown', function (ev) {
                 if (2 == ev.button) {
                     $.cancelBubble(ev);
-                    console.log('box pointerdown', ev);
                     var pos = $.getEventPos(ev);
                     _.cfg.selectdown = true;
                     _.cfg.startpointer = { x: pos.x - _.cfg.offset.left, y: pos.y - _.cfg.offset.top };
-
-                    var div = Factory.showRange(_.cfg.startpointer);
-                    _.box.appendChild(div);
-                    _.cfg.selection = div;
+                    _.cfg.selection = Factory.showRange(_.cfg.startpointer, null, _.cfg.selection, _.box);
                 }
             });
             $.addListener(_.box, 'pointermove', function (ev) {
@@ -385,7 +374,7 @@
                     $.cancelBubble(ev);
                     var pos = $.getEventPos(ev);
                     _.cfg.endpointer = { x: pos.x - _.cfg.offset.left, y: pos.y - _.cfg.offset.top };
-                    _.cfg.selection = Factory.showRange(_.cfg.startpointer, _.cfg.endpointer, _.cfg.selection);
+                    _.cfg.selection = Factory.showRange(_.cfg.startpointer, _.cfg.endpointer, _.cfg.selection, _.box);
                 }
                 ev.preventDefault();
             });
@@ -394,19 +383,18 @@
                     $.cancelBubble(ev);
                     var pos = $.getEventPos(ev);
                     _.cfg.selectdown = false;
-                    var p = { x: pos.x - _.cfg.offset.left, y: pos.y - _.cfg.offset.top };
-                    _.cfg.endpointer = p;
+                    _.cfg.endpointer = { x: pos.x - _.cfg.offset.left, y: pos.y - _.cfg.offset.top };
 
                     _.cfg.startpointer = Factory.checkRange(_.cfg.startpointer, _.cfg);
                     _.cfg.endpointer = Factory.checkRange(_.cfg.endpointer, _.cfg);
-                    $.removeElement(_.cfg.selection);
+                    _.cfg.selection = Factory.hideRange(_.cfg.selection);
                     _.rangeScale(_.cfg.startpointer, _.cfg.endpointer);
                 }
             });
             $.addListener(_.box, 'pointercancel', function (ev) {
                 if (_.cfg.selectdown) {
                     $.cancelBubble(ev);
-                    $.removeElement(_.cfg.selection);
+                    _.cfg.selection = Factory.hideRange(_.cfg.selection);
                     _.cfg.selectdown = false;
                 }
             });
