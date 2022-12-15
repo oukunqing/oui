@@ -387,18 +387,18 @@
             $.addListener(_.img, 'pointerup', function (ev) {
                 if (_.cfg.pointerdown) {
                     $.cancelBubble(ev);
-                    if (ev.target.className.indexOf('oui-omap-img') < 0) {
-                        return false;
-                    }
+                    _.cfg.pointerdown = false;
+                }
+            });
+            $.addListener(_.img, 'pointerout', function (ev) {
+                if (_.cfg.pointerdown) {
+                    $.cancelBubble(ev);
                     _.cfg.pointerdown = false;
                 }
             });
             $.addListener(_.img, 'pointercancel', function (ev) {
                 if (_.cfg.pointerdown) {
                     $.cancelBubble(ev);
-                    if (ev.target.className.indexOf('oui-omap-img') < 0) {
-                        return false;
-                    }
                     _.cfg.pointerdown = false;
                 }
             });
