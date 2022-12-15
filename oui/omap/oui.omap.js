@@ -246,22 +246,21 @@
                     showScale: $.isBoolean(_.opt.showScale, true),
                     showTitle: $.isBoolean(_.opt.showTitle, false)
                 };
+                //console.log(_.cfg);
 
-                console.log(_.cfg);
+                Factory.setImgSize(_);
 
-                if(Factory.setImgSize(_)) {
-                    if(!update) {
-                        _.select().control();
-                    }
-                    _.drag().wheelZoom().status().title();                    
-
-                    $.getFileSize(_.cfg.filePath, function(size) {
-                        var fileSize = size >= 0 ? size.toFileSize(2) : '';
-                        _.title(null, fileSize);
-                    });
+                if(!update) {
+                    _.select().control();
                 }
+                _.drag().wheelZoom().status().title();
 
-                if ($.isFunction(opt.callback)){
+                $.getFileSize(_.cfg.filePath, function(size) {
+                    var fileSize = size >= 0 ? size.toFileSize(2) : '';
+                    _.title(null, fileSize);
+                });
+
+                if ($.isFunction(opt.callback)) {
                     opt.callback(_, _.cfg);
                 }
             });
@@ -361,7 +360,7 @@
                     $.cancelBubble(ev);
                     _.cfg.pointerdown = true;
                     _.img.setPointerCapture(ev.pointerId);
-                    _.cfg.lastpointer = { x: ev.clientX, y: ev.clientY };
+                    _.cfg.lastpointer = $.getEventPos(ev);
                     _.cfg.diffpointer = { x: 0, y: 0 };
                     console.log('down:', _.cfg.x, _.cfg.y);
                 }
@@ -372,7 +371,7 @@
                     if (ev.target.className.indexOf('oui-omap-img') < 0) {
                         return false;
                     }
-                    var cur = { x: ev.clientX, y: ev.clientY };
+                    var cur = $.getEventPos(ev);
                     _.cfg.diffpointer.x = cur.x - _.cfg.lastpointer.x;
                     _.cfg.diffpointer.y = cur.y - _.cfg.lastpointer.y;
                     _.cfg.lastpointer = { x: cur.x, y: cur.y };
@@ -423,8 +422,9 @@
                 if (2 == ev.button) {
                     $.cancelBubble(ev);
                     console.log('box pointerdown', ev);
+                    var pos = $.getEventPos(ev);
                     _.cfg.selectdown = true;
-                    _.cfg.startpointer = { x: ev.clientX - _.cfg.offset.left, y: ev.clientY - _.cfg.offset.top };
+                    _.cfg.startpointer = { x: pos.x - _.cfg.offset.left, y: pos.y - _.cfg.offset.top };
 
                     var div = Factory.showRange(_.cfg.startpointer);
                     _.box.appendChild(div);
@@ -434,7 +434,8 @@
             $.addListener(_.box, 'pointermove', function (ev) {
                 if (_.cfg.selectdown) {
                     $.cancelBubble(ev);
-                    _.cfg.endpointer = { x: ev.clientX - _.cfg.offset.left, y: ev.clientY - _.cfg.offset.top };
+                    var pos = $.getEventPos(ev);
+                    _.cfg.endpointer = { x: pos.x - _.cfg.offset.left, y: pos.y - _.cfg.offset.top };
                     _.cfg.selection = Factory.showRange(_.cfg.startpointer, _.cfg.endpointer, _.cfg.selection);
                 }
                 ev.preventDefault();
@@ -442,8 +443,9 @@
             $.addListener(_.box, 'pointerup', function (ev) {
                 if (_.cfg.selectdown) {
                     $.cancelBubble(ev);
+                    var pos = $.getEventPos(ev);
                     _.cfg.selectdown = false;
-                    var p = { x: ev.clientX - _.cfg.offset.left, y: ev.clientY - _.cfg.offset.top };
+                    var p = { x: pos.x - _.cfg.offset.left, y: pos.y - _.cfg.offset.top };
                     _.cfg.endpointer = p;
 
                     _.cfg.startpointer = Factory.checkRange(_.cfg.startpointer, _.cfg);
@@ -556,12 +558,12 @@
             h = parseInt(_.cfg.height * scale, 10);
 
             if (ev) {
-                var tar = ev.target;
+                var tar = ev.target, pos = $.getEventPos(ev);
                 if (tar.className.indexOf('oui-omap-map') >= 0) {
                     //计算中心点的偏移量
                     //鼠标当前位置要减去图片外框的偏移量
-                    _.cfg.x -= parseInt((ratio - 1) * (ev.clientX - _.cfg.x - _.cfg.offset.left), 10);
-                    _.cfg.y -= parseInt((ratio - 1) * (ev.clientY - _.cfg.y - _.cfg.offset.top), 10);
+                    _.cfg.x -= parseInt((ratio - 1) * (pos.x - _.cfg.x - _.cfg.offset.left), 10);
+                    _.cfg.y -= parseInt((ratio - 1) * (pos.y - _.cfg.y - _.cfg.offset.top), 10);
                 }
             }
             left = parseInt(_.cfg.x - w / 2, 10);
