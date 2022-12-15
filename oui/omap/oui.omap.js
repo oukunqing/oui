@@ -77,26 +77,27 @@
             };
         },
         showRange: function (p1, p2, div) {
-            if ($.isNullOrUndefined(div)) {                
+            if ($.isNullOrUndefined(div)) {
                 div = document.createElement('DIV');
                 div.className = 'oui-omap-range';
                 div.style.left = p1.x + 'px';
                 div.style.top = p1.y + 'px';
+                div.innerHTML = '<div class="oui-omap-range-panel"></div>';
             } else {
                 var big = p1.x < p2.x || p1.y < p2.y;
 
                 if (p1.x < p2.x && p1.y < p2.y) {
                     div.style.left = p1.x + 'px';
-                    div.style.top = p1.y + 'px';                    
+                    div.style.top = p1.y + 'px';
                 } else if (p1.x > p2.x && p1.y > p2.y) {
                     div.style.left = p2.x + 'px';
-                    div.style.top = p2.y + 'px';                    
+                    div.style.top = p2.y + 'px';
                 } else if (p1.x < p2.x && p1.y > p2.y) {
                     div.style.left = p1.x + 'px';
                     div.style.top = p1.y - Math.abs(p2.y - p1.y) + 'px'; 
                 } else if (p1.x > p2.x && p1.y < p2.y) {
                     div.style.left = p1.x - Math.abs(p2.x - p1.x) + 'px';
-                    div.style.top = p1.y + 'px';                     
+                    div.style.top = p1.y + 'px';
                 }
                 div.style.width = Math.abs(p2.x - p1.x) + 'px';
                 div.style.height = Math.abs(p2.y - p1.y) + 'px';
@@ -194,18 +195,19 @@
 
             _.markers = {};
 
-            var minZoom = typeof _.opt.minZoom === 'number' ? _.opt.minZoom : 1,
-                defaultZoom = typeof _.opt.defaultZoom === 'number' ? _.opt.defaultZoom : 1,
-                maxScale = $.isNumber(opt.maxScale) ? opt.maxScale : 1;
+            var minZoom = $.isNumber(_.opt.minScale || _.opt.minZoom) ? (_.opt.minScale || _.opt.minZoom) : 1,
+                defZoom = $.isNumber(_.opt.defaultScale || _.opt.defScale || _.opt.defaultZoom || _.opt.defZoom) ? 
+                    (_.opt.defaultScale || _.opt.defScale || _.opt.defaultZoom || _.opt.defZoom) : 1,
+                maxZoom = $.isNumber(_.opt.maxScale || _.opt.maxZoom) ? (_.opt.maxScale || _.opt.maxZoom) : 1;
 
             if(minZoom <= 0 || minZoom > 1) {
                 minZoom = 1;
             }
-            if(defaultZoom <= 0 || defaultZoom > 1) {
-                defaultZoom = 1;
+            if(defZoom <= 0 || defZoom > 1) {
+                defZoom = 1;
             }
-            if(maxScale <= 0 || maxScale > 5) {
-                maxScale = 1;
+            if(maxZoom <= 0 || maxZoom > 5) {
+                maxZoom = 1;
             }
 
             var bs = Factory.getOffsetSize(_.box);
@@ -217,18 +219,20 @@
 
             $.addListener(img, 'load', function(ev) {
                 $.removeElement(_.prompt);
-                var size = Factory.getSize(bs.width, bs.height, img.naturalWidth, img.naturalHeight, defaultZoom, minZoom);
+                var size = Factory.getSize(bs.width, bs.height, img.naturalWidth, img.naturalHeight, defZoom, minZoom);
                 console.log('size:', size);
                 _.cfg = {
+                    filePath: _.img.src,
                     width: img.naturalWidth,
                     height: img.naturalHeight,
                     imgRatio: size.imgRatio,
                     boxScale: size.boxScale,
                     curScale: size.curScale,
                     minScale: size.minScale,
+                    maxScale: maxZoom,
                     minZoom: minZoom,
-                    defaultZoom: defaultZoom,
-                    maxScale: maxScale,
+                    defaultZoom: defZoom,
+                    maxZoom: maxZoom,
                     w: size.width,
                     h: size.height,
                     left: size.left,
@@ -249,7 +253,12 @@
                     if(!update) {
                         _.select().control();
                     }
-                    _.drag().wheelZoom().status().title();
+                    _.drag().wheelZoom().status().title();                    
+
+                    $.getFileSize(_.cfg.filePath, function(size) {
+                        var fileSize = size >= 0 ? size.toFileSize(2) : '';
+                        _.title(null, fileSize);
+                    });
                 }
 
                 if ($.isFunction(opt.callback)){
@@ -284,13 +293,19 @@
 
             return this;
         },
-        title: function (title) {
+        title: function (title, fileSize) {
             var _ = this;
             if (!_.titlebar || !_.cfg.showTitle) {
                 return _;
             }
             if ($.isNullOrUndefined(title)) {
-                var html = ['&nbsp;[', _.cfg.width, '×', _.cfg.height, '] ', $.getFileName(_.img.src), '&nbsp;'];
+                var html = [
+                    '&nbsp;',
+                    '[', _.cfg.width, '×', _.cfg.height, '] ',
+                    (fileSize ? '[' + fileSize + '] ' : ''), 
+                    $.getFileName(_.img.src),
+                    '&nbsp;'
+                ];
                 _.titlebar.innerHTML = html.join('');
                 return _;
             }

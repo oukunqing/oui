@@ -1707,6 +1707,9 @@
         getExtension: function() {
             return $.getExtension(this);
         },
+        getFileSize: function(callback) {
+            return $.getFileSize(this, callback);
+        },
 
         formatSimple: function (args) {
             var s = this, sep = '%s', vals = [], rst = [];
@@ -2617,6 +2620,30 @@
             }
             var name = filePath.split('?')[0], pos = name.lastIndexOf('.');
             return pos >= 0 ? name.substr(pos).toLowerCase() : '';
+        },
+        //获取远程文件大小(不能跨域)
+        getFileSize = function (fileUrl, callback) {
+            var xhr = new XMLHttpRequest();
+            //异步方式
+            xhr.open('HEAD', fileUrl, true);
+            xhr.onreadystatechange = function() {
+                var size = -1;
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        size = xhr.getResponseHeader('Content-Length');
+                    } else {
+                        //获取文件信息失败
+                        console.log('getFileSize: ', 'ERROR');
+                    }
+                }
+                console.log('getFileSize: ', fileUrl, size);
+                if ($.isFunction(callback)) {
+                    callback(size);
+                }
+            };
+            xhr.send(null);
+
+            return this;
         },
         addNamePostfix = function(filePath, postfix) {
             if(!$.isString(filePath)) {
@@ -4119,6 +4146,7 @@
         getScriptSelfPath: getScriptSelfPath,
         getFilePath: getFilePath,
         getFileName: getFileName,
+        getFileSize: getFileSize,
         getExtension: getExtension,
         addNamePostfix: addNamePostfix,
         checkFilePath: checkFilePath,
