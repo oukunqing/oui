@@ -1337,3 +1337,28 @@ if(m[0].substr(3).indexOf('=') >= 0){
     console.log(con);
 }
 
+console.log('c' && '' || 'a' + 'b');
+
+console.log(2000 - 800 > 1000);
+
+console.log('' || 'b' && 'c' ? 1 : 0);
+
+console.log(9**3, 9*9*9, Math.pow(9, 3), Math.pow(9, 1), Math.pow(9, 0), 9**1, 9**0);
+
+
+
+console.log(''.toUnicode());
+
+
+        var str ="val={val}"; console.log(str.format({val:123}));
+        var str ="val={data.val}"; console.log(str.format({data:{val:123}}));
+        var str ="id={data>id,code}"; console.log(str.format({data:{code:"abc"}}));
+
+
+console.log('1345'.toHex().padLeft(4));
+console.log((1345).toHex().padLeft(4));
+console.log((10).toHex(4, true).padLeft(4));
+
+console.log('3039'.hexToInt());
+
+

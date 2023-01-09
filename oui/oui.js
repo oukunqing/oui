@@ -1891,7 +1891,13 @@
         isHexNumber: function () { return $.isHexNumeric(this); },
         isNaN: function() { return isNaN(parseFloat(this, 10)); },
         toAscii: function() { return this.toString().charCodeAt(); },
-        toHex: function () { return this.toString(16).toUpperCase(); },
+        toHex: function (len, lower) { 
+            var hex = this.toString(16);
+            if(len) {
+                hex = hex.padLeft(len, '0');
+            }
+            return lower ? hex.toLowerCase() : hex.toUpperCase();
+        },
         toAsciiHex: function () { return $.toAsciiHex(this, true); },
         toThousand: function (delimiter, len) { return this.toString().toThousand(delimiter, len); },
         toChineseNumber: function (isMoney) { return $.numberToChinese(this, isMoney); },
@@ -2309,7 +2315,7 @@
                     v = !$.isUndefined(dv) ? dv : throwError(err, str, vals);
                 }
             }
-        }*/else if(key.split(/[\.,\|]/).length > 1) {
+        }*/ else if(key.split(/[\.,\|]/).length > 1) {
             //嵌套对象，格式: obj.key.key|dv(默认值，因某些key可能不存在或允许为空)
             var arr = key.split(/[\|]/), dv = arr[1], ks = arr[0].split(/[\.>]/), o = obj;
             for (var i in ks) {
@@ -5260,7 +5266,7 @@
                     return func(), this;
                 }
             } catch(e) {
-                console.log(moduleName, funcName, e);
+                console.log(mouleName, funcName, e);
             }
         }
         return $;
