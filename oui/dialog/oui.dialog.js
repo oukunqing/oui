@@ -2339,7 +2339,47 @@
                 //window.resize
                 if (par.event === 'window.resize') {
                     if (p.status.max) {
-                        return $.setStyle(obj, { left: bs.x, top: bs.y }, 'px'), util;
+                        posLeft = bs.x;
+                        posTop = bs.y;
+                        var boxSize = $.getOffset(obj),
+                            boxWidth = boxSize.width,
+                            boxHeight = boxSize.height;
+
+                        if(opt.maxWidth !== '100%') {                            
+                            //当对话框最大化的宽度小于容器宽度时，可以设置对话框水平位置
+                            switch(opt.maxPosition) {
+                            case 0:
+                                break;
+                            case 1:case 4:case 7:
+                                posLeft = bs.x + opt.x;
+                                break;
+                            case 2:case 5:case 8:
+                                posLeft = parseInt((bs.width - boxWidth) / 2, 10) + opt.x;
+                                break;
+                            case 3:case 6:case 9:
+                                posLeft = bs.width - boxWidth - opt.x;
+                                break;
+                            }
+                        }
+
+                        if(opt.maxHeight !== '100%') {
+                            //当对话框最大化的高度小于容器高度时，可以设置对话框垂直位置
+                            switch(opt.maxPosition) {
+                            case 0:
+                                break;
+                            case 1:case 2:case 3:
+                                posTop = bs.y + opt.y;
+                                break;
+                            case 4:case 5:case 6:
+                                posTop = parseInt((bs.height - boxHeight) / 2, 10) + opt.y;
+                                break;
+                            case 7:case 8:case 9:
+                                posTop = bs.height - boxHeight - opt.y;
+                                break;
+                            }                            
+                        }
+
+                        return $.setStyle(obj, { left: posLeft, top: posTop }, 'px'), util;
                     } else {
 
                         //TODO:

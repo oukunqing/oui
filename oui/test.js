@@ -1364,3 +1364,6 @@ console.log('3039'.hexToInt());
 
 
 console.log('设置十字光标'.toUnicode());
+
+
+console.log(parseInt('833:1234', 10));

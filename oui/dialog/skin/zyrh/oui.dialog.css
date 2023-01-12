@@ -4,7 +4,7 @@
     /*width: auto; */
     position: absolute;
     border: solid 1px #dee1e6;
-    /*background: #dee1e6;*/
+    background: #dee1e6;
     border-radius: 4px;
     box-sizing: border-box;
     box-shadow: 0 2px 3px 0 rgba(0,0,0,.32);
@@ -22,7 +22,7 @@
 }
 
 .oui-dialog-zyrh .dialog-main {
-    /*background: #dee1e6;*/
+    background: #dee1e6;
 }
 
 .oui-dialog-max {
