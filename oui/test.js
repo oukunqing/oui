@@ -1362,3 +1362,5 @@ console.log((10).toHex(4, true).padLeft(4));
 console.log('3039'.hexToInt());
 
 
+
+console.log('设置十字光标'.toUnicode());

@@ -3253,6 +3253,20 @@
                 } else if (maxSize.maxWidth && boxWidth > maxSize.maxWidth) {
                     boxWidth = maxSize.maxWidth;
                     obj.style.width = boxWidth + 'px';
+                    //当对话框最大化的宽度小于容器宽度时，可以设置对话框水平位置
+                    switch(opt.maxPosition) {
+                    case 0:
+                        break;
+                    case 1:case 4:case 7:
+                        obj.style.left = bs.x + opt.x + 'px';
+                        break;
+                    case 2:case 5:case 8:
+                        obj.style.left = parseInt((bs.width - boxWidth) / 2, 10) + opt.x + 'px';
+                        break;
+                    case 3:case 6:case 9:
+                        obj.style.left = bs.width - boxWidth - opt.x + 'px';
+                        break;
+                    }
                 } else if (maxSize.minWidth && boxWidth < maxSize.minWidth) {
                     boxWidth = maxSize.minWidth;
                     obj.style.width = boxWidth + 'px';
@@ -3264,6 +3278,20 @@
                 } else if (maxSize.maxHeight && boxHeight > maxSize.maxHeight) {
                     boxHeight = maxSize.maxHeight;
                     obj.style.height = boxHeight + 'px';
+                    //当对话框最大化的高度小于容器高度时，可以设置对话框垂直位置
+                    switch(opt.maxPosition) {
+                    case 0:
+                        break;
+                    case 1:case 2:case 3:
+                        obj.style.top = bs.y + opt.y + 'px';
+                        break;
+                    case 4:case 5:case 6:
+                        obj.style.top = parseInt((bs.height - boxHeight) / 2, 10) + opt.y + 'px';
+                        break;
+                    case 7:case 8:case 9:
+                        obj.style.top = bs.height - boxHeight - opt.y + 'px';
+                        break;
+                    }
                 } else if (maxSize.minHeight && boxHeight < maxSize.minHeight) {
                     boxHeight = maxSize.minHeight;
                     obj.style.height = boxHeight + 'px';
@@ -3815,6 +3843,7 @@
                 maxWidth: '100%',           //最大宽度
                 maxHeight: '100%',          //最大高度
                 position: 5,            //对话框初始位置, 0,1,2,3,4,5,6,7,8,9，共10种位置设置
+                maxPosition: 0,         //对话框最大化时的位置, 0,1,2,3 (只有在最大化的宽度小于当前容器宽度时才启用)
                 x: 0,                   //x轴(left)偏移量，单位：px
                 y: 0,                   //y轴(top)偏移量，单位：px
                 target: null,           //Element 要跟随位置的html控件 target || anchor

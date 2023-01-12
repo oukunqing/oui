@@ -56,6 +56,8 @@
     <button onclick="percent();">百分比尺寸</button>
 	<a onmouseover="showTooltip(this);" onmouseout="hideTooltip(this);">Tooltip</a>
 
+	<button onclick="test12345();">最大化位置</button>
+
     <div id="divArticle" style="display: none;">
         这是来自 DIV #divArticle 的内容
         <br />
@@ -87,6 +89,19 @@ if($.isDebug()) {
     console.log('offset: ', $.offset(div));
 
 }
+
+var test12345 = function(){
+	console.log('onload');
+	$.dialog.win('测试最大化位置', '', {
+		skin: 'blue',
+		maxWidth: 600,
+		//maxHeight: 500,
+		maxPosition: 3,
+		x: 5,
+		y: 6,
+		position: 6
+	});
+};
 /*
 $.dialog.win('测试', '', {
 	width: '100%',
