@@ -3608,7 +3608,9 @@
                     } else if(typeof keyCode === 'string' && e.key.toUpperCase() === keyCode.toUpperCase()) {
                         pass = true;
                     }
-                } else if(type.startsWith('mouse')) {
+                } else if(type.startsWith('mouse') && e.target === elem) {
+                    //若是鼠标连击，则必须点击在指定的元素，冒泡的不算
+                    //比如指定了某个DIV，则点击DIV中的元素（按钮或链接）无效，必须点击在DIV空白处
                     pass = true;
                 }
                 if(!pass) {
@@ -3621,7 +3623,7 @@
                     tc = ts - elem[keyTimes];
                 }
                 console.log('HitListener: ', evName + (keyCode ? ':' + keyCode : ''), e.keyCode || '', elem[keyCount]);
-                if (elem[keyCount]  >= times) {
+                if (elem[keyCount] >= times) {
                     try{ func(e, elem[keyCount]); } catch(e){}
                     elem[keyCount] = 1;
                     elem[keyTimes] = 0;
