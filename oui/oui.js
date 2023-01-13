@@ -4052,17 +4052,58 @@
                 return this;
             }
             for (var i = 0; i < list.length; i++) {
-                var dr = list[i];
+                var dr = list[i], val = '', txt = '';
                 if ($.isArray(dr)) {
-                    //new Option(text, value);
-                    elem.options.add(new Option($.isValue(dr[1], dr[0]), dr[0]));
+                    val = dr[0];
+                    txt = $.isValue(dr[1], dr[0]);
                 } else if ($.isObject(dr)) {
-                    elem.options.add(new Option(dr.text || dr.txt, dr.value || dr.val));
+                    val = dr.value || dr.val;
+                    txt = dr.text || dr.txt;
                 } else {
-                    elem.options.add(new Option(dr, dr));
+                    val = dr;
+                    txt = dr;
                 }
+                //new Option(text, value);
+                elem.options.add(new Option(txt, val));
             }
             return this;
+        },
+        buildOption = function (value, text) {
+            return '<option value="' + value + '">' + text + '</option>';
+        },
+        buildOptions = function(list, minVal, maxVal, stepVal, curVal) {
+            var html = [];
+            if($.isNumber(list)) {
+                curVal = stepVal;
+                stepVal = maxVal;
+                maxVal = minVal;
+                minVal = list;
+                list = null;
+            }
+            if($.isNumber(minVal) && $.isNumber(maxVal)) {
+                stepVal = stepVal || 1;
+                for(var i = minVal; i <= maxVal; i+= stepVal) {
+                    var selected = curVal === i ? ' selected="selected"' : '';
+                    html.push('<option value="' + i + '"' + selected + '>' + i + '</option>');
+                }
+                return html.join('');
+            }
+            for (var i = 0; i < list.length; i++) {
+                var dr = list[i], val = '', txt = '';
+                if ($.isArray(dr)) {
+                    val = dr[0];
+                    txt = $.isValue(dr[1], dr[0]);
+                } else if ($.isObject(dr)) {
+                    val = dr.value || dr.val;
+                    txt = dr.text || dr.txt;
+                } else {
+                    val = dr;
+                    txt = dr;
+                }
+                var selected = curVal === val ? ' selected="selected"' : '';
+                html.push('<option value="' + val + '"' + selected + '>' + txt + '</option>');
+            }
+            return html.join('');
         },
         fullScreen = function (elem) {
             var rfs = elem.requestFullScreen || elem.webkitRequestFullScreen || elem.mozRequestFullScreen || elem.msRequestFullScreen,
@@ -4277,6 +4318,8 @@
         getImgRealSize: getImgRealSize,
         fillOption: fillOption,
         fillOptions: fillOptions,
+        buildOption: buildOption,
+        buildOptions: buildOptions,
         fullScreen: fullScreen,
         exitFullScreen: exitFullScreen,
         isFullScreen: isFullScreen

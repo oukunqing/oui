@@ -3247,8 +3247,6 @@
                     margin = Common.getCssAttrSize(opt.margin, { attr: 'margin' }),
                     marginHeight = margin.top + margin.bottom;
 
-
-
                 if (par.event === 'show' && $.isObject(par.lastSize)) {
                     boxWidth = par.lastSize.width;
                     boxHeight = par.lastSize.height;
@@ -3625,17 +3623,17 @@
                     ctls = p.controls;
                     obj = ctls.body;
                 }
-                if (p.none || !ctls || !ctls.dialog || !$.isElement(obj)) { return {}; }     
+                if (p.none || !ctls || !ctls.dialog || !$.isElement(obj)) { return {}; } 
                 var box = ctls.dialog,
                     ds = $.getElementSize(box),
                     ps = $.getElementStyleSize(obj, 'padding'),
-                    psCon = $.getElementStyleSize(ctls.content, 'padding'),
-                    size = { 
-                        width: obj.clientWidth - ps.width - psCon.width, 
-                        height: obj.clientHeight - ps.height - psCon.height,
-                        dialog: ds
-                    };
-                return size;
+                    psCon = $.getElementStyleSize(ctls.content, 'padding');
+
+                return {
+                    width: (opt.noScroll ? obj.offsetWidth : obj.clientWidth) - ps.width - psCon.width,
+                    height: (opt.noScroll ? obj.offsetHeight : obj.clientHeight) - ps.height - psCon.height,
+                    dialog: ds
+                };
             },
             resize: function (_) {
                 var util = this, p = util.getParam(_), opt = p.options, ctls = p.controls;
@@ -3884,6 +3882,7 @@
                 maxHeight: '100%',          //最大高度
                 position: 5,            //对话框初始位置, 0,1,2,3,4,5,6,7,8,9，共10种位置设置
                 maxPosition: 0,         //对话框最大化时的位置, 0,1,2,3 (只有在最大化的宽度小于当前容器宽度时才启用)
+                noScroll: false,        //对话框主体没有滚动条，固定宽高
                 x: 0,                   //x轴(left)偏移量，单位：px
                 y: 0,                   //y轴(top)偏移量，单位：px
                 target: null,           //Element 要跟随位置的html控件 target || anchor
