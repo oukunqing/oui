@@ -202,7 +202,7 @@
 }
 
 .oui-dialog .dialog-head .dialog-btn {
-    border: solid 1px #f1f1f1;
+    border: solid 1px #fff;
     border-radius: 3px;
     background-color: transparent;
 
@@ -226,27 +226,28 @@
 }
 
 .oui-dialog .dialog-head .btn-min {
-    background:transparent url('imgs/icon.png?20200407') no-repeat -20px 0;
+    background:transparent url('imgs/icon.png?202301291') no-repeat -20px 0;
 }
 
 .oui-dialog .dialog-head .btn-max {
-    background:transparent url('imgs/icon.png?20200407') no-repeat -40px 0;
+    background:transparent url('imgs/icon.png?202301291') no-repeat -40px 0;
 }
 
 .oui-dialog .dialog-head .btn-normal {
-    background:transparent url('imgs/icon.png?20200407') no-repeat -60px 0;
+    background:transparent url('imgs/icon.png?202301291') no-repeat -60px 0;
 }
 
 .oui-dialog .dialog-head .btn-close {
-    background:transparent url('imgs/icon.png?20200407') no-repeat -80px 0;
+    background:transparent url('imgs/icon.png?202301291') no-repeat -80px 0;
 }
 
 .oui-dialog .dialog-head .btn-reload {
-    background:transparent url('imgs/icon.png?20200407') no-repeat -320px 0;
+    background:transparent url('imgs/icon.png?202301291') no-repeat -320px 0;
 }
 
 .oui-dialog .dialog-head .left-reload {
-	float: left; margin: 2px 0 0 0;
+	float: left; 
+	margin: 2px 0 0 0;
 }
 
 .oui-dialog .dialog-body, .oui-dialog-max .dialog-body {
@@ -287,28 +288,28 @@
     margin: 0 0 0 5px; padding: 0;
     box-sizing: content-box;
 
-    background:transparent url('imgs/icon.png?20200407') no-repeat -80px 0;
+    background:transparent url('imgs/icon.png?202301291') no-repeat -80px 0;
 }
 
 
 .oui-dialog .dialog-body .close0 {
     border: none 0;
-    background:transparent url('imgs/icon.png?20200407') no-repeat -80px 0;
+    background:transparent url('imgs/icon.png?202301291') no-repeat -80px 0;
 }
 
 .oui-dialog .dialog-body .close1 {
     border: none 0;
-    background:transparent url('imgs/icon.png?20200407') no-repeat -100px 0;
+    background:transparent url('imgs/icon.png?202301291') no-repeat -100px 0;
 }
 
 .oui-dialog .dialog-body .close2 {
     border: none 0;
-    background:transparent url('imgs/icon.png?20200407') no-repeat -120px 0;
+    background:transparent url('imgs/icon.png?202301291') no-repeat -120px 0;
 }
 
 .oui-dialog .dialog-body .close3 {
     border: none 0;
-    background:transparent url('imgs/icon.png?20200407') no-repeat -140px 0;
+    background:transparent url('imgs/icon.png?202301291') no-repeat -140px 0;
 }
 
 .oui-dialog .dialog-body .dialog-content {
@@ -339,35 +340,35 @@
 }
 
 .oui-dialog .dialog-body .icon-warning {
-    background: url('imgs/icon.png') no-repeat 0px -60px;
+    background: url('imgs/icon.png') no-repeat 0px -140px;
 }
 
 .oui-dialog .dialog-body .icon-error {
-    background: url('imgs/icon.png') no-repeat -40px -60px;
+    background: url('imgs/icon.png') no-repeat -40px -140px;
 }
 
 .oui-dialog .dialog-body .icon-stop {
-    background: url('imgs/icon.png') no-repeat -80px -60px;
+    background: url('imgs/icon.png') no-repeat -80px -140px;
 }
 
 .oui-dialog .dialog-body .icon-success {
-    background: url('imgs/icon.png') no-repeat -120px -60px;
+    background: url('imgs/icon.png') no-repeat -120px -140px;
 }
 
 .oui-dialog .dialog-body .icon-question {
-    background: url('imgs/icon.png') no-repeat -160px -60px;
+    background: url('imgs/icon.png') no-repeat -160px -140px;
 }
 
 .oui-dialog .dialog-body .icon-info {
-    background: url('imgs/icon.png') no-repeat -200px -60px;
+    background: url('imgs/icon.png') no-repeat -200px -140px;
 }
 
 .oui-dialog .dialog-body .icon-cry {
-    background: url('imgs/icon.png') no-repeat -240px -60px;
+    background: url('imgs/icon.png') no-repeat -240px -140px;
 }
 
 .oui-dialog .dialog-body .icon-smile {
-    background: url('imgs/icon.png') no-repeat -280px -60px;
+    background: url('imgs/icon.png') no-repeat -280px -140px;
 }
 
 .oui-dialog .dialog-body .icon-loading {

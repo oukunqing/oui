@@ -275,6 +275,13 @@
                                 var min = field.minValue || configs.minValue || field.minVal || configs.minVal || field.min || configs.min,
                                     max = field.maxValue || configs.maxValue || field.maxVal || configs.maxVal || field.max || configs.max,
                                     msg = '';
+                                
+                                if($.isUndefined(min)){
+                                    min = parseFloat($.getAttribute(element, 'min-value,min-val', ''), 10);
+                                }
+                                if($.isUndefined(max)){
+                                    max = parseFloat($.getAttribute(element, 'max-value,max-val', ''), 10);
+                                }
 
                                 if ($.isNumeric(min) && $.isNumeric(max)) {
                                     msg = (messages.minMax || configs.messages.minMax).format(min, max, numType);
@@ -923,8 +930,8 @@
         $.alert(html.join('<br />'), '服务异常', { id: 'appServerError', icon: 'error', copyAble: true });
     },
         showAjaxFail = function (data, textStatus, jqXHR) {
-            var msg = data.msg || data.Msg || data.message || data.Message,
-                error = data.error || data.Error;
+            var msg = data.msg || data.Msg || data.message || data.Message || '',
+                error = data.error || data.Error || '';
 
             //定制功能，如果页面上有定制了window.showAjaxFailAlert函数，并且错误信息是noauth（未登录）
             //则不直接弹出提示信息，而且跳转到定制函数中处理

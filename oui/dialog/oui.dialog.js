@@ -1395,7 +1395,7 @@
                     } else {
                         $.createElement('a', function (elem) {
                             elem.className = 'dialog-btn btn-reload left-reload';
-                            elem.style.margin = '2px 0 0 2px';
+                            elem.style.margin = '4px 0 0 2px';
                             $.setAttribute(elem, { title: reload, code: 'reload', key: 'reload'});
                             pNode.insertBefore((ctls.reload = elem), ctls.title);
                             util.setButtonEvent(_, [elem], 'click', true);
@@ -4075,6 +4075,12 @@
             return $.extend({}, Factory.getOptions(this.id, 'buttons'));
         },
         */
+        getContentWindow: function() {
+            var id = this.getDialogId() + '-iframe',
+                iframe = document.getElementById(id);
+
+            return (iframe !== null ? iframe.contentWindow : null) || document.frames[id];
+        },
         getStatus: function () {
             return $.extend({}, Factory.getOptions(this.id, 'status'));
         },

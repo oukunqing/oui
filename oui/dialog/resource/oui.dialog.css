@@ -1,5 +1,5 @@
-/*
-.oui-dialog-blue-shade {
+
+.oui-dialog-shade {
     width: 100%; height: 100%;
     position: fixed; top: 0; left: 0;
     margin: 0; padding: 0;
@@ -7,7 +7,7 @@
     overflow: auto;
 }
 
-.oui-dialog-blue-container {
+.oui-dialog-container {
     width: 100%; height: 100%;
     position: fixed; top: 0; left: 0; right: 0; bottom: 0;
     margin: 0; padding: 0;
@@ -17,19 +17,19 @@
     text-align: center;
     border-top-left-radius: 0;
 }
-*/
-.oui-dialog-blue {
+
+.oui-dialog {
     padding: 5px; 
     margin: 0px;
     /*width: auto; */
     position: absolute;
     border: solid 1px #ddd;
-    background: #99bbe8;
+    background: #fff;
     border-radius: 4px;
     box-sizing: border-box;
     box-shadow: 0 2px 3px 0 rgba(0,0,0,.32);
-    box-shadow: 0 2px 3px 0 rgba(153,187,232,.32);
     font-size: 14px;
+	overflow: hidden;
     /*
     font-family: 微软雅黑, 宋体, Arial;
     */
@@ -39,16 +39,18 @@
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
+	outline: none;
 }
-/*
-.oui-dialog-blue-max {
+
+.oui-dialog-max {
     width: 100%; height: 100%; 
     border-radius: 0px;
     box-sizing: border-box;
     top: 0; left: 0;
+    /*border: none 0;*/
 }
 
-.oui-dialog-blue-min {
+.oui-dialog-min {
     width: auto; 
     height: 35px; 
     min-width: 200px; 
@@ -57,8 +59,8 @@
     box-sizing: border-box;
     border-radius: 4px;
 }
-*/
-.oui-dialog-blue .dialog-main {
+
+.oui-dialog .dialog-main {
     border: none 0;
     background: #fff;
     margin: 0px; padding: 0px;
@@ -72,19 +74,24 @@
     user-select:none;
     -ms-user-select: none;
     */
+	outline: none;
 }
 
-.oui-dialog-blue .dialog-unselect{
+.oui-dialog .dialog-unselect, .oui-dialog .temp-unselect{
     -moz-user-select:none;
     -khtml-user-select:none;
     user-select:none;
-    -ms-user-select: none;
+    -ms-user-select: none; /*IE10*/
+	
+	touch-callout:none;
+	-webkit-touch-callout:none;
+	-ms-touch-callout:none;
+	-moz-touch-callout:none;
 }
 
-.oui-dialog-blue .dialog-head{
+.oui-dialog .dialog-head{
     padding:0; margin:0;
     border: none 0;
-    background: #99bbe8;
     width: 100%;
     height: 30px;
     max-height: 50px;
@@ -98,9 +105,14 @@
     -khtml-user-select:none;
     user-select:none;
     -ms-user-select: none;
+
+	touch-callout:none;
+	-webkit-touch-callout:none;
+	-ms-touch-callout:none;
+	-moz-touch-callout:none;
 }
 
-.oui-dialog-blue .dialog-head .dialog-title {
+.oui-dialog .dialog-head .dialog-title {
     margin: 0; 
     padding: 0;
     width: auto;
@@ -115,13 +127,27 @@
     line-height: 28px;
     text-overflow: ellipsis;
     overflow: hidden;
+	
+    -moz-user-select:none;
+    -khtml-user-select:none;
+    user-select:none;
+    -ms-user-select: none;
+
+	touch-callout:none;
+	-webkit-touch-callout:none;
+	-ms-touch-callout:none;
+	-moz-touch-callout:none;
 }
 
-.oui-dialog-blue-title-size {
+.oui-dialog-title-size {
     display: block;
     position: absolute;
+    /*
     left: 0;
     top: -1000px;
+    */
+    left: -5000px;
+    top: -3000px;
     color: #fff;
     border: none 0;
     margin: 0;
@@ -135,24 +161,24 @@
     line-height: 28px;
 }
 
-.oui-dialog-blue .dialog-head .dialog-logo {
+.oui-dialog .dialog-head .dialog-logo {
     width: 20px; height: 20px;
-    margin: 3px 0 0 2px;
+    margin: 3px 3px 0 2px;
     padding: 0;
     /*border: solid 1px #f5f5f5;*/
     border: none 0;
     border-radius: 3px;
     box-sizing: content-box;
     float: left;
-    background:transparent url('imgs/icon-blue.png') no-repeat 0 0;
+    background:transparent url('imgs/icon.png') no-repeat 0 0;
 }
 
-.oui-dialog-blue .dialog-head .dialog-logo:hover {
+.oui-dialog .dialog-head .dialog-logo:hover {
     /*border: solid 1px #ddd;*/
     border: none 0;
 }
 
-.oui-dialog-blue .dialog-head .dialog-timing {
+.oui-dialog .dialog-head .dialog-timing {
     margin: 0; 
     padding: 5px 5px;
     font-size: 14px;
@@ -163,64 +189,22 @@
     width: auto;
 }
 
-.oui-dialog-blue .dialog-head .btn-panel {
+.oui-dialog .dialog-head .btn-panel {
     margin: 2px 2px 0 0;
     float: right;
+
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
-.oui-dialog-blue .dialog-head .dialog-btn {
-    border: none 0;
-    border-radius: 3px;
-    background-color: transparent;
-
-    cursor: pointer;
-    width: 20px; height: 20px;
-    display: inline-block;
-    margin: 0 0 0 5px; padding: 0;
-    box-sizing: content-box;
-}
-
-.oui-dialog-blue .dialog-head .dialog-btn:hover {
-    background-color: transparent;
-    border: none 0;
-}
-
-.oui-dialog-blue .dialog-head .btn-min {
-    background:transparent url('imgs/icon-blue.png') no-repeat -20px 0;
-}
-.oui-dialog-blue .dialog-head .btn-min:hover {
-    background:transparent url('imgs/icon-blue.png') no-repeat -20px -20px;
-}
-
-.oui-dialog-blue .dialog-head .btn-max {
-    background:transparent url('imgs/icon-blue.png') no-repeat -40px 0;
-}
-.oui-dialog-blue .dialog-head .btn-max:hover {
-    background:transparent url('imgs/icon-blue.png') no-repeat -40px -20px;
-}
-
-.oui-dialog-blue .dialog-head .btn-normal {
-    background:transparent url('imgs/icon-blue.png') no-repeat -60px 0;
-}
-.oui-dialog-blue .dialog-head .btn-normal:hover {
-    background:transparent url('imgs/icon-blue.png') no-repeat -60px -20px;
-}
-
-.oui-dialog-blue .dialog-head .btn-close {
-    background:transparent url('imgs/icon-blue.png') no-repeat -80px 0;
-}
-.oui-dialog-blue .dialog-head .btn-close:hover {
-    background:transparent url('imgs/icon-blue.png') no-repeat -80px -20px;
-}
-
-.oui-dialog-blue .dialog-body .btn-panel {
-    margin: 2px 2px 0 0;
-}
-
-.oui-dialog-blue .dialog-body .btn-close {
+.oui-dialog .dialog-head .dialog-btn {
     border: solid 1px #f1f1f1;
     border-radius: 3px;
-    background-color: #fff;
+    background-color: transparent;
 
     cursor: pointer;
     width: 20px; height: 20px;
@@ -228,34 +212,49 @@
     margin: 0 0 0 5px; padding: 0;
     box-sizing: content-box;
 
-    background:transparent url('imgs/icon.png') no-repeat -80px 0;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
-.oui-dialog-blue .dialog-body .close0 {
-    border: none 0;
-    background:transparent url('imgs/icon.png') no-repeat -80px 0;
+.oui-dialog .dialog-head .dialog-btn:hover {
+    background-color: #f8f8f8;
+    border: solid 1px #ddd;
 }
 
-.oui-dialog-blue .dialog-body .close1 {
-    border: none 0;
-    background:transparent url('imgs/icon.png') no-repeat -100px 0;
+.oui-dialog .dialog-head .btn-min {
+    background:transparent url('imgs/icon.png?20230129') no-repeat -20px 0;
 }
 
-.oui-dialog-blue .dialog-body .close2 {
-    border: none 0;
-    background:transparent url('imgs/icon.png') no-repeat -120px 0;
+.oui-dialog .dialog-head .btn-max {
+    background:transparent url('imgs/icon.png?20230129') no-repeat -40px 0;
 }
 
-.oui-dialog-blue .dialog-body .close3 {
-    border: none 0;
-    background:transparent url('imgs/icon.png') no-repeat -140px 0;
+.oui-dialog .dialog-head .btn-normal {
+    background:transparent url('imgs/icon.png?20230129') no-repeat -60px 0;
 }
 
-.oui-dialog-blue .dialog-body, .oui-dialog-blue-max .dialog-body {
+.oui-dialog .dialog-head .btn-close {
+    background:transparent url('imgs/icon.png?20230129') no-repeat -80px 0;
+}
+
+.oui-dialog .dialog-head .btn-reload {
+    background:transparent url('imgs/icon.png?20230129') no-repeat -320px 0;
+}
+
+.oui-dialog .dialog-head .left-reload {
+	float: left; margin: 2px 0 0 0;
+}
+
+.oui-dialog .dialog-body, .oui-dialog-max .dialog-body {
     position: relative;
     text-align: left;
     background: #fff;
-    margin: 0; padding: 0;
+    margin: 0;
+	padding: 0;
     border: none 0; 
     /*
     border: solid 1px #eee;
@@ -273,7 +272,46 @@
     /*margin-bottom: 40px;*/
 }
 
-.oui-dialog-blue .dialog-body .dialog-content {
+.oui-dialog .dialog-body .btn-panel {
+    margin: 2px 2px 0 0;
+}
+
+.oui-dialog .dialog-body .btn-close {
+    border: solid 1px #f1f1f1;
+    border-radius: 3px;
+    background-color: #fff;
+
+    cursor: pointer;
+    width: 20px; height: 20px;
+    display: inline-block;
+    margin: 0 0 0 5px; padding: 0;
+    box-sizing: content-box;
+
+    background:transparent url('imgs/icon.png?20230129') no-repeat -80px 0;
+}
+
+
+.oui-dialog .dialog-body .close0 {
+    border: none 0;
+    background:transparent url('imgs/icon.png?20230129') no-repeat -80px 0;
+}
+
+.oui-dialog .dialog-body .close1 {
+    border: none 0;
+    background:transparent url('imgs/icon.png?20230129') no-repeat -100px 0;
+}
+
+.oui-dialog .dialog-body .close2 {
+    border: none 0;
+    background:transparent url('imgs/icon.png?20230129') no-repeat -120px 0;
+}
+
+.oui-dialog .dialog-body .close3 {
+    border: none 0;
+    background:transparent url('imgs/icon.png?20230129') no-repeat -140px 0;
+}
+
+.oui-dialog .dialog-body .dialog-content {
     border: none 0;
     padding: 4px; margin: 0px;
     line-height: 24px;
@@ -282,106 +320,106 @@
     text-decoration: none;
 }
 
-.oui-dialog-blue .dialog-body .icon-padding {
+.oui-dialog .dialog-body .icon-padding {
     padding-left: 45px;
 }
 
-.oui-dialog-blue .dialog-body .dialog-icon {
+.oui-dialog .dialog-body .dialog-icon {
     border: none 0;
     width: 32px;
     height: 32px;
     position: absolute;
-    left: 3px; top: 3px;
+    left: 3px; top: 0px;
     display: block;
 }
 
-.oui-dialog-blue .dialog-body .dialog-icon-none {
+.oui-dialog .dialog-body .dialog-icon-none {
     border: none 0;
     display: none;
 }
 
-.oui-dialog-blue .dialog-body .icon-warning {
-    background: url('imgs/icon.png') no-repeat 0px -60px;
+.oui-dialog .dialog-body .icon-warning {
+    background: url('imgs/icon.png') no-repeat 0px -140px;
 }
 
-.oui-dialog-blue .dialog-body .icon-error {
-    background: url('imgs/icon.png') no-repeat -40px -60px;
+.oui-dialog .dialog-body .icon-error {
+    background: url('imgs/icon.png') no-repeat -40px -140px;
 }
 
-.oui-dialog-blue .dialog-body .icon-stop {
-    background: url('imgs/icon.png') no-repeat -80px -60px;
+.oui-dialog .dialog-body .icon-stop {
+    background: url('imgs/icon.png') no-repeat -80px -140px;
 }
 
-.oui-dialog-blue .dialog-body .icon-success {
-    background: url('imgs/icon.png') no-repeat -120px -60px;
+.oui-dialog .dialog-body .icon-success {
+    background: url('imgs/icon.png') no-repeat -120px -140px;
 }
 
-.oui-dialog-blue .dialog-body .icon-question {
-    background: url('imgs/icon.png') no-repeat -160px -60px;
+.oui-dialog .dialog-body .icon-question {
+    background: url('imgs/icon.png') no-repeat -160px -140px;
 }
 
-.oui-dialog-blue .dialog-body .icon-info {
-    background: url('imgs/icon.png') no-repeat -200px -60px;
+.oui-dialog .dialog-body .icon-info {
+    background: url('imgs/icon.png') no-repeat -200px -140px;
 }
 
-.oui-dialog-blue .dialog-body .icon-cry {
-    background: url('imgs/icon.png') no-repeat -240px -60px;
+.oui-dialog .dialog-body .icon-cry {
+    background: url('imgs/icon.png') no-repeat -240px -140px;
 }
 
-.oui-dialog-blue .dialog-body .icon-smile {
-    background: url('imgs/icon.png') no-repeat -280px -60px;
+.oui-dialog .dialog-body .icon-smile {
+    background: url('imgs/icon.png') no-repeat -280px -140px;
 }
 
-.oui-dialog-blue .dialog-body .icon-loading {
+.oui-dialog .dialog-body .icon-loading {
     background: url('imgs/loading.gif') no-repeat center;
 }
 
-.oui-dialog-blue .dialog-head .dialog-icon,.oui-dialog-blue .dialog-head .dialog-icon:hover {
+.oui-dialog .dialog-head .dialog-icon,.oui-dialog .dialog-head .dialog-icon:hover {
     border: none 0;
     width: 20px;
     height: 20px;
 }
 
-.oui-dialog-blue .dialog-head .icon-warning {
+.oui-dialog .dialog-head .icon-warning {
     background: url('imgs/icon.png') no-repeat -160px 0;
 }
 
-.oui-dialog-blue .dialog-head .icon-error {
+.oui-dialog .dialog-head .icon-error {
     background: url('imgs/icon.png') no-repeat -180px 0;
 }
 
-.oui-dialog-blue .dialog-head .icon-stop {
+.oui-dialog .dialog-head .icon-stop {
     background: url('imgs/icon.png') no-repeat -200px 0;
 }
 
-.oui-dialog-blue .dialog-head .icon-success {
+.oui-dialog .dialog-head .icon-success {
     background: url('imgs/icon.png') no-repeat -220px 0;
 }
 
-.oui-dialog-blue .dialog-head .icon-question {
+.oui-dialog .dialog-head .icon-question {
     background: url('imgs/icon.png') no-repeat -240px 0;
 }
 
-.oui-dialog-blue .dialog-head .icon-info {
+.oui-dialog .dialog-head .icon-info {
     background: url('imgs/icon.png') no-repeat -260px 0;
 }
 
-.oui-dialog-blue .dialog-head .icon-cry {
+.oui-dialog .dialog-head .icon-cry {
     background: url('imgs/icon.png') no-repeat -280px 0;
 }
 
-.oui-dialog-blue .dialog-head .icon-smile {
+.oui-dialog .dialog-head .icon-smile {
     background: url('imgs/icon.png') no-repeat -300px 0;
 }
 
-.oui-dialog-blue .dialog-body .dialog-iframe {
+.oui-dialog .dialog-body .dialog-iframe {
     width: 100%; height: 100%;
     margin: 0px; padding: 0px;
     background: transparent;
     box-sizing: border-box;
 }
 
-.oui-dialog-blue .dialog-body .iframe-shade {
+.oui-dialog .dialog-body .iframe-shade {
     width: 100%; height: 100%;
     margin: 0px; padding: 0px;
     background: #fff;
@@ -393,7 +431,7 @@
     top: 0; left: 0; bottom: 0; right: 0;
 }
 
-.oui-dialog-blue .dialog-body .dialog-loading {
+.oui-dialog .dialog-body .dialog-loading {
     color: #666;
     border-radius: 3px;
     border: solid 1px #ddd;
@@ -407,7 +445,7 @@
     float: left;
 }
 
-.oui-dialog-blue .dialog-foot {
+.oui-dialog .dialog-foot {
     position: absolute;
     left: 0; bottom: 0;
     border: none 0;
@@ -424,16 +462,23 @@
     -ms-user-select: none;
 }
 
-.oui-dialog-blue .dialog-foot .button-panel {
+.oui-dialog .dialog-foot .button-panel {
     border: none 0;
     box-sizing: border-box;
     /*border-top: solid 1px #ddd;*/
     text-align: right;
     margin: 6px 4px 4px;
     padding: 0;
+
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
-.oui-dialog-blue .dialog-btn {    
+.oui-dialog .dialog-btn {    
     margin: 0 0 0;
     color: #fff;
     background: #337ab7;
@@ -444,7 +489,7 @@
     height: 30px;
     font-size: 14px;
     line-height: 1.8em;
-    line-height: 30px;
+    line-height: 28px;
     text-decoration: none;
     display: inline-block;
     font-style: normal;
@@ -457,79 +502,87 @@
     border-radius: 3px;
     border-style: solid;
     text-align: center;
+	/*outline: none;*/
+    
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
-.oui-dialog-blue .btn-primary {
+.oui-dialog .btn-primary {
     color: #fff;
     background-color: #337ab7;
     border-color: #2e6da4;
 }
 
-.oui-dialog-blue .btn-primary:hover {
+.oui-dialog .btn-primary:hover {
     color: #fff;
     background-color: #286090;
     border-color: #204d74;
 }
 
-.oui-dialog-blue .btn-default {
+.oui-dialog .btn-default {
     color: #333;
     background: #fff;
     border: solid 1px #ccc;
 }
 
-.oui-dialog-blue .btn-default:hover {
+.oui-dialog .btn-default:hover {
     color: #333;
     background-color: #e6e6e6;
     border-color: #adadad;
 }
 
-.oui-dialog-blue .btn-success {
+.oui-dialog .btn-success {
     color: #fff;
     background: #5cb85c;
     border: solid 1px #4cae4c;
 }
 
-.oui-dialog-blue .btn-success:hover {
+.oui-dialog .btn-success:hover {
     color: #fff;
     background-color: #449d44;
     border-color: #398439;
 }
 
-.oui-dialog-blue .btn-warning {
+.oui-dialog .btn-warning {
     color: #fff;
     background: #f0ad4e;
     border: solid 1px #eea236;
 }
 
-.oui-dialog-blue .btn-warning:hover {
+.oui-dialog .btn-warning:hover {
     color: #fff;
     background-color: #ec971f;
     border-color: #d58512;
 }
 
-.oui-dialog-blue .btn-danger {
+.oui-dialog .btn-danger {
     color: #fff;
     background: #d9534f;
     border: solid 1px #d43f3a;
 }
 
-.oui-dialog-blue .btn-danger:hover {
+.oui-dialog .btn-danger:hover {
     color: #fff;
     background-color: #c9302c;
     border-color: #c9302c;
 }
 
-.oui-dialog-blue .dialog-foot .btn-ml {
+.oui-dialog .dialog-foot .btn-ml {
     margin-left: 8px;
 }
 
-.oui-dialog-blue .dialog-foot .btn-mr {
+.oui-dialog .dialog-foot .btn-mr {
     margin-right: 8px;
 }
 
 /*关于拖放开关*/
 
-.oui-dialog-blue .drag-switch {
+.oui-dialog .drag-switch {
     background: transparent;
     margin: 0; padding: 0; 
     position: absolute;
@@ -537,64 +590,65 @@
     display: inline-block;
 }
 
-.oui-dialog-blue .top-switch,.oui-dialog-blue .bottom-switch {
+.oui-dialog .top-switch,.oui-dialog .bottom-switch {
     width: 100%; height: 5px;
     cursor: ns-resize;
 }
 
-.oui-dialog-blue .left-switch,.oui-dialog-blue .right-switch {
+.oui-dialog .left-switch,.oui-dialog .right-switch {
     width: 5px; height: 100%;
     cursor: ew-resize;
 }
 
-.oui-dialog-blue .top-switch,.oui-dialog-blue .left-switch{
+.oui-dialog .top-switch,.oui-dialog .left-switch{
     top: 0; left: 0;
 }
 
-.oui-dialog-blue .bottom-switch,.oui-dialog-blue .right-switch {
+.oui-dialog .bottom-switch,.oui-dialog .right-switch {
     bottom: 0; right: 0;
 }
 
-.oui-dialog-blue .top-left-switch,.oui-dialog-blue .top-right-switch,
-.oui-dialog-blue .bottom-left-switch,.oui-dialog-blue .bottom-right-switch {
+.oui-dialog .top-left-switch,.oui-dialog .top-right-switch,
+.oui-dialog .bottom-left-switch,.oui-dialog .bottom-right-switch {
     width: 10px; height: 10px;
     border-radius: 3px;
     background: transparent;
     margin: 0; padding: 0;
 }
 
-.oui-dialog-blue .top-left-switch {
+.oui-dialog .top-left-switch {
     top: 0; left: 0;
     cursor: se-resize;
 }
 
-.oui-dialog-blue .top-right-switch {
+.oui-dialog .top-right-switch {
     top: 0; right: 0;
     cursor: sw-resize;
 }
 
-.oui-dialog-blue .bottom-left-switch {
+.oui-dialog .bottom-left-switch {
     bottom: 0; left: 0;
     cursor: sw-resize;
 }
 
-.oui-dialog-blue .bottom-right-switch {
+.oui-dialog .bottom-right-switch {
     bottom: 0; right: 0;
     cursor: se-resize;
 }
 
-.oui-dialog-blue .display-none {
+.oui-dialog .display-none {
     display: none;
 }
 
-.oui-dialog-blue .cursor-move {    
+.oui-dialog .cursor-move {    
     cursor: move;
 }
 
-.oui-dialog-blue .no-select {
+.oui-dialog .no-select {
     -moz-user-select:none;
     -khtml-user-select:none;
     user-select:none;
+    -ms-user-select: none;
 }
 
 
@@ -610,7 +664,7 @@
     position: fixed;
 }
 
-.oui-dialog-blue-pos {
+.oui-dialog-pos {
     position: absolute;
     margin: 0;
 }
@@ -623,11 +677,11 @@
     margin-top: auto; margin-bottom: auto;
 }
 
-.oui-dialog-blue .form {
+.oui-dialog .form {
     line-height: 35px;
 }
 
-.oui-dialog-blue .form .table {
+.oui-dialog .form .table {
 
 }
 

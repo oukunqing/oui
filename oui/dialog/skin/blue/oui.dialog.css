@@ -111,10 +111,10 @@
 }
 
 .oui-dialog-blue .dialog-head .dialog-btn:hover {
-    background-color: transparent;
+    /*background-color: transparent;*/
     border: none 0;
 }
-
+/*
 .oui-dialog-blue .dialog-head .btn-min {
     background:transparent url('imgs/icon-blue.png') no-repeat -20px 0;
 }
@@ -141,6 +141,10 @@
 }
 .oui-dialog-blue .dialog-head .btn-close:hover {
     background:transparent url('imgs/icon-blue.png') no-repeat -80px -20px;
+}
+*/
+.oui-dialog-blue .dialog-head .btn-reload:hover {
+    background-color: #fff;
 }
 
 .oui-dialog-blue .dialog-body .dialog-icon {

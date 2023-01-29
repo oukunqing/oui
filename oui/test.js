@@ -1367,3 +1367,10 @@ console.log('设置十字光标'.toUnicode());
 
 
 console.log(parseInt('833:1234', 10));
+
+
+var aa = 1, bb = 2, cc = 3, dd = 4;
+
+console.log(aa,bb,cc,dd);
+
+console.log(aa >= 1 && bb >= 2 || cc <=3 && dd >= 4);

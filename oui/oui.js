@@ -1508,7 +1508,7 @@
             return this.toString();
         },
         isEmpty: function () { return this.trim() === ''; },
-        isNumeric: function () { return $.isnumeric(this); },
+        isNumeric: function () { return $.isNumeric(this); },
         isDecimal: function () { return $.isDecimal(this); },
         isInteger: function () { return $.isInteger(this); },
         isFloat: function () { return $.isDecimal(this); },
