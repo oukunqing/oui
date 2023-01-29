@@ -92,14 +92,25 @@ if($.isDebug()) {
 
 var test12345 = function(){
 	console.log('onload');
-	$.dialog.url('测试最大化位置', '', {
-		skin: 'blue',
+	var html = [
+		'<div style="">',
+		'测试最大化位置',
+		'<br />',
+		'对话框最大化时，最大宽度600px，依靠在浏览器窗口右侧，水平间距5px',
+		'</div>'
+	];
+	$.dialog.win(html.join(''), '', {
+		skin: '',
 		maxWidth: 600,
 		//maxHeight: 500,
 		maxPosition: 3,
 		x: 5,
 		y: 6,
-		position: 6
+		position: 6,
+		logoIcon: 'imgs/helmet-on.png',
+		//width: 400,
+		//height: 400,
+		//radius: 200
 	});
 };
 /*

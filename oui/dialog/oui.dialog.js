@@ -1331,6 +1331,9 @@
                 if (opt.showLogo && Config.ShowLogo()) {
                     var logo = $.createElement('div');
                     logo.className = 'dialog-logo';
+                    if ($.isString(opt.logoIcon, true)) {
+                        logo.style.background = 'transparent url(\'' + opt.logoIcon + '\') no-repeat center';
+                    }
                     elem.appendChild((ctls.logo = logo));
                 }
 
@@ -2148,6 +2151,7 @@
                     isSetBodySize = isFullScreen = true;
 
                     $.addClass(obj, 'oui-dialog-max').addClass(btns.max, 'btn-normal');
+                    ctls.dialog.style.borderRadius = '0px';
 
                     if (ctls.container) {
                         $.addClass(ctls.container, 'dialog-overflow-hidden');
@@ -2215,6 +2219,13 @@
                             }
                             par = { width: sp.width, height: sp.height };
                         }
+                    }
+                }
+                if (sp.type !== Config.DialogStatus.max) {
+                    //不是最大化状态，需要设置border-radius
+                    var radius = parseInt(opt.radius, 10);
+                    if (!isNaN(radius)) {
+                        ctls.dialog.style.borderRadius = radius + (('' + opt.radius).indexOf('%') > 0 ? '' : 'px');
                     }
                 }
 
@@ -3893,7 +3904,7 @@
                 height: ds.height + 'px',   //初始高度      px, auto, %
                 margin: 0,              //当宽度或高度设置为 % 百分比时，启用 margin，margin格式参考css [上右下左] 设置，单位为px
                 padding: 4,             //内边距（拖动边框）宽度，格式参考css设置，单位为px
-                radius: 4,              //对话框圆角半径，单位为px
+                radius: 4,              //对话框圆角半径，单位为px，默认为4px
                 border: null,           //对话框边框宽度，如：'solid 1px #ccc', 0 或 none 表示不要边框，1-表示边框宽度为1px, null表示不处理
                 parent: null,           //Element parentNode DIV
                 limitRange: true,       //窗体范围(位置、大小)限制 true,false
@@ -3950,6 +3961,7 @@
                 defaultButton: '',      //默认按钮，数字（按顺序），字符串（按编码）
                 showHead: true,         //是否显示顶部标题栏 
                 showLogo: true,         //是否显示logo图标
+                logoIcon: '',           //可以指定LOGO图标URL,图标大小为20×20像素
                 showMin: true,          //是否显示最小化按钮
                 showMax: true,          //是否显示最大化按钮
                 showClose: true,        //是否显示关闭按钮
