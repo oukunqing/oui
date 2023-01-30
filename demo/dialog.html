@@ -13,7 +13,7 @@
     </style>
     <script type="text/javascript" src="../oui/oui.js?12"></script>
     <!--<script type="text/javascript" src="../oui/dialog/oui.dialog.js?12&skin=default&logo=0&reloadPos=right&lang=english"></script>-->
-    <script type="text/javascript" src="../oui/dialog/oui.dialog.js?12"></script>
+    <script type="text/javascript" src="../oui/dialog/oui.dialog.js?12&reloadPos=left"></script>
 </head>
 <body>
     <div id="p1" style="margin:100px 0 0 0;"></div>
@@ -99,8 +99,9 @@ var test12345 = function(){
 		'对话框最大化时，最大宽度600px，依靠在浏览器窗口右侧，水平间距5px',
 		'</div>'
 	];
-	$.dialog.win(html.join(''), '', {
-		skin: '',
+	$.dialog.url(html.join(''), '', {
+		skin: 'blue',
+		//reloadPosition: 'left',
 		maxWidth: 600,
 		//maxHeight: 500,
 		maxPosition: 3,
@@ -108,6 +109,10 @@ var test12345 = function(){
 		y: 6,
 		position: 6,
 		logoIcon: 'imgs/helmet-on.png',
+		showReload: true,
+		reloadCallback: function() {
+			console.log('reloadCallback:');
+		}
 		//width: 400,
 		//height: 400,
 		//radius: 200

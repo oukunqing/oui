@@ -18,20 +18,21 @@
         Skin: '',
         GetSkin: function() {
             if(!Config.Skin) {
-                Config.Skin = Config.FilePath.getQueryString('skin') || Config.DefaultSkin;
+                Config.Skin = $.getQueryString(Config.FilePath, 'skin') || Config.DefaultSkin;
             }
             return Config.Skin;
         },
         //是否显示logo小图标
         ShowLogo: function() {
-            return Config.FilePath.getQueryString('logo') !== '0';
+            var show = $.getQueryString(Config.FilePath, 'logo');
+            return show !== '0' && show !== 'false';
         },
         //重载图标的位置 left 或 right
         ReloadPosition: function() {
-            return Config.FilePath.getQueryString(['reloadPosition','reloadPos']) || 'right';
+            return $.getQueryString(Config.FilePath, ['reloadPosition','reloadPos']) || 'right';
         },
         GetLang: function() {
-            return Config.FilePath.getQueryString(['lang']) || 'chinese';
+            return $.getQueryString(Config.FilePath, ['lang']) || 'chinese';
         },
         Index: 1,
         IdIndex: 1,
@@ -454,6 +455,14 @@
                 if($.isBoolean(opt.copyAble, false) || $.isBoolean(opt.selectAble || opt.selectable, false)) {
                     opt.copyAble = true;
                 }
+
+                opt.reloadPosition = opt.reloadPosition || opt.reloadPos;
+                if (!$.isString(opt.reloadPosition, true)) {
+                    opt.reloadPosition = Config.ReloadPosition(); 
+                }
+
+                opt.showReload = opt.showReload || opt.showLoad;
+                opt.reloadCallback = opt.reloadCallback || opt.reloadFunc || opt.reload;
 
                 return this.checkCustomStyle(opt, isUpdate).checkTiming(opt), opt;
             },
@@ -1391,18 +1400,20 @@
                 if (!ctls.dialog) {
                     return util;
                 }
-                if (opt.reloadable && util.isIframe(opt)) {
-                    var reload = Common.getStatusText('reload', opt.lang);
-                    if(opt.reloadPosition === 'right') {
-                        html.push('<a class="dialog-btn btn-reload" code="reload" key="reload" title="' + reload + '"></a>');
-                    } else {
-                        $.createElement('a', function (elem) {
-                            elem.className = 'dialog-btn btn-reload left-reload';
-                            elem.style.margin = '4px 0 0 2px';
-                            $.setAttribute(elem, { title: reload, code: 'reload', key: 'reload'});
-                            pNode.insertBefore((ctls.reload = elem), ctls.title);
-                            util.setButtonEvent(_, [elem], 'click', true);
-                        });
+                if (opt.reloadAble) {
+                    if (util.isIframe(opt) || (opt.showReload && $.isFunction(opt.reloadCallback))) {
+                        var reload = Common.getStatusText('reload', opt.lang);
+                        if(opt.reloadPosition === 'right') {
+                            html.push('<a class="dialog-btn btn-reload" code="reload" key="reload" title="' + reload + '"></a>');
+                        } else {
+                            $.createElement('a', function (elem) {
+                                elem.className = 'dialog-btn btn-reload left-reload';
+                                elem.style.margin = '4px 0 0 2px';
+                                $.setAttribute(elem, { title: reload, code: 'reload', key: 'reload'});
+                                pNode.insertBefore((ctls.reload = elem), ctls.title);
+                                util.setButtonEvent(_, [elem], 'click', true);
+                            });
+                        }
                     }
                 }
 
@@ -1575,8 +1586,14 @@
             reload: function(_) {
                 var util = this, p = util.getParam(_), opt = p.options,
                     iframe = $I(_.getDialogId() + '-iframe');
-                if (opt.reloadable && util.isIframe(opt) && iframe !== null && iframe.src) {
-                    iframe.src = iframe.src.setUrlParam();
+
+                if (opt.reloadAble) {
+                    if (util.isIframe(opt) && iframe !== null && iframe.src) {
+                        iframe.src = iframe.src.setUrlParam();
+                    }
+                    if (opt.showReload && $.isFunction(opt.reloadCallback)) {
+                        opt.reloadCallback();
+                    }
                 }
                 return util;
             },
@@ -3916,7 +3933,7 @@
                 content: null,          //文字内容
                 url: null,              //加载的URL
                 form: false,            //是否为Form表单，Form表单则默认允许复制和选择内容
-                reloadable: true,       //是否可以重新加载
+                reloadAble: true,       //是否可以重新加载
                 reloadInterval: 3500,   //重新加载的时间间隔，单位：毫秒
                 reloadPosition: Config.ReloadPosition(),//重新按钮位置 left,right, 默认：right
                 element: null,          //Element 要加载内容的html控件
@@ -3960,8 +3977,10 @@
                 buttonText: null,       // {OK: '确定', Cancel: '取消'}  ｛OK: '提交'}
                 defaultButton: '',      //默认按钮，数字（按顺序），字符串（按编码）
                 showHead: true,         //是否显示顶部标题栏 
-                showLogo: true,         //是否显示logo图标
+                showLogo: false,        //是否显示logo图标，默认不显示logo
                 logoIcon: '',           //可以指定LOGO图标URL,图标大小为20×20像素
+                showReload: false,      //是否显示“重新加载”按钮，当对话框为iframe时默认显示
+                reloadCallback: null,   //重新加载回调函数，与showReload参数配套使用
                 showMin: true,          //是否显示最小化按钮
                 showMax: true,          //是否显示最大化按钮
                 showClose: true,        //是否显示关闭按钮

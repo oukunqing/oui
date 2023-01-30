@@ -1374,3 +1374,6 @@ var aa = 1, bb = 2, cc = 3, dd = 4;
 console.log(aa,bb,cc,dd);
 
 console.log(aa >= 1 && bb >= 2 || cc <=3 && dd >= 4);
+
+var url = '/libs/oui/dialog/oui.dialog.min.js?skin=zyrh&logo=0&reloadPos=left&140733';
+console.log('pos: ', url.getQueryString(['reloadPosition','reloadPos']));

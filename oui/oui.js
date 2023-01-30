@@ -554,8 +554,8 @@
             }
             if(!isNullOrUndefined(name)) {
                 if($.isArray(name)) {
-                    for(var i = 0; i < name.length; i++) {
-                        var v = obj[name[i]];
+                    for (var j = 0; j < name.length; j++) {
+                        var v = obj[name[j]];
                         if(!$.isUndefined(v)) {
                             return v;
                         }
