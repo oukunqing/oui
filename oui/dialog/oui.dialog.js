@@ -1592,7 +1592,7 @@
                         iframe.src = iframe.src.setUrlParam();
                     }
                     if (opt.showReload && $.isFunction(opt.reloadCallback)) {
-                        opt.reloadCallback();
+                        opt.reloadCallback(_, opt.parameter);
                     }
                 }
                 return util;
