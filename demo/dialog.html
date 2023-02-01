@@ -13,7 +13,7 @@
     </style>
     <script type="text/javascript" src="../oui/oui.js?12"></script>
     <!--<script type="text/javascript" src="../oui/dialog/oui.dialog.js?12&skin=default&logo=0&reloadPos=right&lang=english"></script>-->
-    <script type="text/javascript" src="../oui/dialog/oui.dialog.js?12&reloadPos=left"></script>
+    <script type="text/javascript" src="../oui/dialog/oui.dialog.min.js?12&reloadPos=left"></script>
 </head>
 <body>
     <div id="p1" style="margin:100px 0 0 0;"></div>
@@ -97,10 +97,15 @@ var test12345 = function(){
 		'测试最大化位置',
 		'<br />',
 		'对话框最大化时，最大宽度600px，依靠在浏览器窗口右侧，水平间距5px',
+		'<br />',
+		'对话框的标题栏内容是空的',
 		'</div>'
 	];
-	$.dialog.url(html.join(''), '', {
+	$.dialog(html.join(''), {
+		id: 'test12345',
 		skin: 'blue',
+		//title: 'ab',
+		//title: [],
 		//reloadPosition: 'left',
 		maxWidth: 600,
 		//maxHeight: 500,
@@ -112,7 +117,7 @@ var test12345 = function(){
 		showReload: true,
 		reloadCallback: function() {
 			console.log('reloadCallback:');
-		}
+		},
 		//width: 400,
 		//height: 400,
 		//radius: 200
@@ -384,7 +389,7 @@ function buttons() {
     var html = '自定义按钮示例：'
         + '<br />'
         + '<input type="text" id="txtKeywords" class="dis-none" />';
-    var win = $.dialog(html, '自定义按钮', {
+    var win = $.dialog.win(html, '自定义按钮', {
         //buttons: $.DialogButtons.YesNoCancel,
         //buttons: ['cancel', 'ok'],
         //buttons: { cancel: '取消', ok: '确认提交', close: '关闭' },

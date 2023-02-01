@@ -1377,3 +1377,9 @@ console.log(aa >= 1 && bb >= 2 || cc <=3 && dd >= 4);
 
 var url = '/libs/oui/dialog/oui.dialog.min.js?skin=zyrh&logo=0&reloadPos=left&140733';
 console.log('pos: ', url.getQueryString(['reloadPosition','reloadPos']));
+
+console.log($.base64.encode('abcdefghi'));
+console.log($.base64.decode('YWJjZGVmZ2hp'));
+
+console.log((18*3-12)/3 );
+console.log('关于'.toUnicode());

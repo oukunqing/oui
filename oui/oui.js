@@ -769,7 +769,10 @@
         isMobile: isMobile, isTelephone: isTelephone, isIdentity: isIdentity, isEmail: isEmail,
         isRegexp: isRegexp, isNullOrUndefined: isNullOrUndefined, isNullOrUndef: isNullOrUndefined,
         isUndefinedOrNull: isNullOrUndefined, isUndefOrNull: isNullOrUndefined,
-        isEmpty: function (o) {
+        isEmpty: function (o, strict) {
+            if (strict) {
+                return isString(o) && '' === trim(o);
+            }
             if (isUndefined(o) || null === o) { return true; }
             else if (isString(o)) { return '' === trim(o); }
             else if (isArray(o)) { return 0 === o.length; }
@@ -983,16 +986,18 @@
 
 //Base64
 !function($) {
-    var encodeChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-    var decodeChars = new Array(
-        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-        -1, -1, -1, -1, -1, -1, -1, 62, -1, -1, -1, 63, 52, 53, 54, 55, 56, 57,
-        58, 59, 60, 61, -1, -1, -1, -1, -1, -1, -1, 0,  1,  2,  3,  4,  5,  6,
-        7,  8,  9,  10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
-        25, -1, -1, -1, -1, -1, -1, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36,
-        37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, -1, -1, -1,
-        -1, -1);
+    var encodeChars64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/",
+        decodeChars64 = new Array(
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, 62, -1, -1, -1, 63, 52, 53, 54, 55, 56, 57,
+            58, 59, 60, 61, -1, -1, -1, -1, -1, -1, -1, 0,  1,  2,  3,  4,  5,  6,
+            7,  8,  9,  10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+            25, -1, -1, -1, -1, -1, -1, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36,
+            37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, -1, -1, -1,
+            -1, -1
+        );
+
     $.extend($, {
         base64: {
             encode: function(s) {
@@ -1001,24 +1006,24 @@
                 while (i < len) {
                     c1 = s.charCodeAt(i++) & 0xff;
                     if (i == len) {
-                        out += encodeChars.charAt(c1 >> 2);
-                        out += encodeChars.charAt((c1 & 0x3) << 4);
+                        out += encodeChars64.charAt(c1 >> 2);
+                        out += encodeChars64.charAt((c1 & 0x3) << 4);
                         out += "==";
                         break;
                     }
                     c2 = s.charCodeAt(i++);
                     if (i == len) {
-                        out += encodeChars.charAt(c1 >> 2);
-                        out += encodeChars.charAt(((c1 & 0x3) << 4) | ((c2 & 0xF0) >> 4));
-                        out += encodeChars.charAt((c2 & 0xF) << 2);
+                        out += encodeChars64.charAt(c1 >> 2);
+                        out += encodeChars64.charAt(((c1 & 0x3) << 4) | ((c2 & 0xF0) >> 4));
+                        out += encodeChars64.charAt((c2 & 0xF) << 2);
                         out += "=";
                         break;
                     }
                     c3 = s.charCodeAt(i++);
-                    out += encodeChars.charAt(c1 >> 2);
-                    out += encodeChars.charAt(((c1 & 0x3) << 4) | ((c2 & 0xF0) >> 4));
-                    out += encodeChars.charAt(((c2 & 0xF) << 2) | ((c3 & 0xC0) >> 6));
-                    out += encodeChars.charAt(c3 & 0x3F);
+                    out += encodeChars64.charAt(c1 >> 2);
+                    out += encodeChars64.charAt(((c1 & 0x3) << 4) | ((c2 & 0xF0) >> 4));
+                    out += encodeChars64.charAt(((c2 & 0xF) << 2) | ((c3 & 0xC0) >> 6));
+                    out += encodeChars64.charAt(c3 & 0x3F);
                 }
                 return out;
             },
@@ -1030,13 +1035,13 @@
                 var i = 0, len = s.length, out = '';
                 while (i < len) {
                     do {
-                        c1 = decodeChars[s.charCodeAt(i++) & 0xff];
+                        c1 = decodeChars64[s.charCodeAt(i++) & 0xff];
                     } while ( i < len && c1 === - 1 );
                     if (c1 === -1) {
                         break;
                     }
                     do {
-                        c2 = decodeChars[s.charCodeAt(i++) & 0xff];
+                        c2 = decodeChars64[s.charCodeAt(i++) & 0xff];
                     } while ( i < len && c2 === - 1 );
                     if (c2 === -1) {
                         break;
@@ -1047,7 +1052,7 @@
                         if (c3 === 61) {
                             return out;
                         }
-                        c3 = decodeChars[c3];
+                        c3 = decodeChars64[c3];
                     } while ( i < len && c3 === - 1 );
                     if (c3 === -1) {
                         break;
@@ -1058,7 +1063,7 @@
                         if (c4 === 61) {
                             return out;
                         }
-                        c4 = decodeChars[c4];
+                        c4 = decodeChars64[c4];
                     } while ( i < len && c4 === - 1 );
                     if (c4 === -1)  {
                         break;
@@ -1066,6 +1071,14 @@
                     out += String.fromCharCode(((c3 & 0x03) << 6) | c4);
                 }
                 return out;
+            }
+        },
+        base62: {
+            encode: function(s) {
+
+            },
+            decode: function(s) {
+
             }
         }
     });

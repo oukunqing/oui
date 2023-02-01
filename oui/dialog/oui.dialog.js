@@ -106,6 +106,7 @@
             toolwindow: 'toolwindow',
             toolwin: 'toolwin',
             panel: 'panel',
+            box: 'box',
             blank: 'blank'
         },
         DialogStatus: {
@@ -233,14 +234,23 @@
             Loading: {
                 english: 'Loading, please wait a moment.',
                 chinese: '\u6b63\u5728\u52aa\u529b\u52a0\u8f7d\uff0c\u8bf7\u7a0d\u5019'
+            },
+            About: {
+                english: 'About',
+                chinese: '\u5173\u4e8e'
             }
         }
     },
         Common = {
             isInKeys: function (key, keys, config) {
                 var hasConfig = $.isObject(config);
-                for (var i in keys) {
-                    if ((hasConfig && config[keys[i]] === key) || keys[i] === key) {
+                for (var i = 0; i < keys.length; i++) {
+                    if (hasConfig) {
+                        var cfg = config[keys[i]];
+                        if (!$.isUndefined(cfg) && cfg === key) {
+                            return true;
+                        }
+                    } else if (keys[i] === key) {
                         return true;
                     }
                 }
@@ -361,6 +371,7 @@
                 var target = null,  //目标控件，用于位置停靠
                     elem = null,    //内容控件，用于加载内容
                     func = null;    //回调函数
+
                 if (content && $.isElement(content)) {
                     elem = content;
                     content = '';
@@ -389,12 +400,16 @@
                     opt = {};
                 }
                 opt.element = elem || opt.element;
-                opt.content = content || opt.content;
-                opt.title = title || opt.title;
+                opt.content = content || opt.content || content;
+                opt.title = title || opt.title || title;
                 opt.target = target || opt.anchor || opt.target;
                 opt.callback = func || opt.callback;
                 opt.complete = opt.complete || opt.onload || opt.ready;
                 opt.coverOCX = opt.coverOCX || opt.coverOcx || opt.cover;
+
+                if (!$.isString(opt.title) && !$.isNumber(opt.title)) {
+                    opt.title = undefined;
+                }
 
                 //对话框关闭后，要获取焦点的HTML控件
                 opt.focusTo = opt.focusTo || opt.focus;
@@ -583,6 +598,7 @@
                 if(opt) {
                     return {width: opt.width, height: opt.height};
                 }
+                return { width: 0, height: 0 };
             },
             isPanelType: function(type) {
                 return type === Config.DialogType.panel || type === Config.DialogType.blank;
@@ -855,12 +871,13 @@
                 return this;
             },
             show: function (content, title, options, type, target, okButton) {
-                options = Common.checkOptions(content, title, options, false, type);
-                var opt = {
-                    id: Common.buildId(options.id),
-                    type: Common.checkType(type || options.type, true)
-                };
-                $.extend(options, { target: target });
+                var par = Common.checkOptions(content, title, options, false, type),
+                    opt = {
+                        id: Common.buildId(par.id),
+                        type: Common.checkType(type || par.type, true)
+                    };
+
+                $.extend(par, { target: target });
 
                 switch (opt.type) {
                     case Config.DialogType.alert:
@@ -884,7 +901,7 @@
                         opt.height = 'auto';
                         break;
                     case Config.DialogType.win:
-                        opt.showFoot = $.isBoolean(options.showFoot, false);
+                        opt.showFoot = $.isBoolean(par.showFoot, false);
                         opt.height = 'auto';
                         break;
                     case Config.DialogType.form:
@@ -895,7 +912,7 @@
                     case Config.DialogType.url:
                     case Config.DialogType.load:
                     case Config.DialogType.iframe:
-                        opt.showFoot = $.isBoolean(options.showFoot, false);
+                        opt.showFoot = $.isBoolean(par.showFoot, false);
                         opt.codeCallback = true;
                         opt.keyClose = opt.escClose = opt.clickBgClose = false;
                         break;
@@ -917,6 +934,9 @@
                             opt.padding = opt.radius = opt.border = 0;
                         }
                         break;
+                    case Config.DialogType.message:
+                    case Config.DialogType.msg:
+                    case Config.DialogType.tooltip:
                     default:
                         opt.buttons = Config.DialogButtons.None;
                         opt.showHead = opt.showFoot = opt.dragSize = false;
@@ -931,10 +951,11 @@
                 }
 
                 if(opt.type === Config.DialogType.about) {
-                    opt.title = '关于';
+                    //opt.title = '关于';
+                    opt.title = Common.getDialogText('About', opt.lang) || '';
                 }
 
-                var p = this.getOptions($.extend(opt, options).id);
+                var p = this.getOptions($.extend(opt, par).id);
                 if (!p && (opt.target || opt.type === Config.DialogType.tooltip)) {
                     var attrName = opt.type === Config.DialogType.tooltip ? Config.TooltipAttributeName : Config.TargetAttributeName;
                     var tid = $.getAttribute(opt.target, attrName);
@@ -2002,7 +2023,7 @@
             setActionParam: function (p, cfg) {
                 if (this.isDefaultResult(cfg.code || cfg.key)) {
                     p.actions = Config.DefaultResult[cfg.key];
-                } else {
+                } else if (cfg.obj !== null) {
                     var result = parseInt(cfg.obj.getAttribute('result'), 10);
                     p.actions = { key: cfg.key, code: cfg.code, result: result };
                 }
@@ -2279,7 +2300,7 @@
                     ctls.title.style.maxWidth = (titleWidth) + 'px';
                     var realSize = Common.getRealSize(ctls.title.innerHTML);
 
-                    if (realSize.width > titleWidth) {
+                    if (realSize && realSize.width > titleWidth) {
                         ctls.title.title = $.filterHtmlCode(opt.title);
                     } else {
                         ctls.title.title = '';
@@ -3896,6 +3917,7 @@
 
     function Dialog(content, title, options) {
         var ds = Common.getDefaultSize(),
+            par = Common.checkOptions(content, title, options),
             opt = $.extend({
                 id: null,                       //id
                 skin: Config.DefaultSkin,       //样式: default, blue
@@ -4010,7 +4032,7 @@
                 footStyle: '',          //底部样式
                 tooltipStyle: '',       //Tooltip样式
                 coverOCX: false         //是否覆盖在OCX控件之上
-            }, Common.checkOptions(content, title, options));
+            }, par);
 
         return this.id = opt.id, this.initial(opt);
     }
@@ -4024,7 +4046,6 @@
                 p.parent = opt.parent;
                 p.hasParent = true;
             }
-
             if (!$.isString(opt.title) && !$.isNumber(opt.title)) {
                 opt.title = Common.getDialogText('Title', opt.lang);
             }
