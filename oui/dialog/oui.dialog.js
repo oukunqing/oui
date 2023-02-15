@@ -4245,9 +4245,9 @@
 
             return _;
         },
-        close: function () {
+        close: function (force) {
             var _ = this, util = Util, p = util.getParam(_), opt = p.options;
-            if (_.isClosed() || !p || !opt.closeAble) {
+            if (_.isClosed() || !p || (!opt.closeAble && !force)) {
                 return _;
             }
             var ctls = p.controls,
@@ -4264,7 +4264,7 @@
                 && (func.callback || func.ok)) {
                 return util.delAction(_).callback(_, p, actions), _;
             }
-            if (opt.closeType === 'hide') {
+            if (!force && opt.closeType === 'hide') {
                 return _.hide();
             }
 
