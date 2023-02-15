@@ -1345,15 +1345,11 @@ console.log('' || 'b' && 'c' ? 1 : 0);
 
 console.log(9**3, 9*9*9, Math.pow(9, 3), Math.pow(9, 1), Math.pow(9, 0), 9**1, 9**0);
 
-
-
 console.log(''.toUnicode());
 
-
-        var str ="val={val}"; console.log(str.format({val:123}));
-        var str ="val={data.val}"; console.log(str.format({data:{val:123}}));
-        var str ="id={data>id,code}"; console.log(str.format({data:{code:"abc"}}));
-
+var str ="val={val}"; console.log(str.format({val:123}));
+var str ="val={data.val}"; console.log(str.format({data:{val:123}}));
+var str ="id={data>id,code}"; console.log(str.format({data:{code:"abc"}}));
 
 console.log('1345'.toHex().padLeft(4));
 console.log((1345).toHex().padLeft(4));
@@ -1361,13 +1357,7 @@ console.log((10).toHex(4, true).padLeft(4));
 
 console.log('3039'.hexToInt());
 
-
-
-console.log('设置十字光标'.toUnicode());
-
-
 console.log(parseInt('833:1234', 10));
-
 
 var aa = 1, bb = 2, cc = 3, dd = 4;
 
@@ -1378,8 +1368,38 @@ console.log(aa >= 1 && bb >= 2 || cc <=3 && dd >= 4);
 var url = '/libs/oui/dialog/oui.dialog.min.js?skin=zyrh&logo=0&reloadPos=left&140733';
 console.log('pos: ', url.getQueryString(['reloadPosition','reloadPos']));
 
-console.log($.base64.encode('abcdefghi'));
-console.log($.base64.decode('YWJjZGVmZ2hp'));
-
-console.log((18*3-12)/3 );
 console.log('关于'.toUnicode());
+
+console.log(new Date().getDay());
+console.log('000160'.hexToInt());
+
+
+var data = {
+    "result": 1,
+    "list": [
+        {
+            "Device": "869383054027644",
+            "Sequence": "1676010492",
+            "Status": 1,
+            "Body": {
+                "count": 13,
+                "list": [],
+                "msg": "a55a0078c60101ff00010000000001600001200013dc00014f000120001d7800016000012000238a0001600001200027d0000160000120002b2c000160000120002de200016000012000303a0001600001200034170001600001200035cb00016000012000375b000160000120003fad000160000120004000000160000120515396"
+            },
+            "Message": "a55a0078c60101ff00010000000001600001200013dc00014f000120001d7800016000012000238a0001600001200027d0000160000120002b2c000160000120002de200016000012000303a0001600001200034170001600001200035cb00016000012000375b000160000120003fad000160000120004000000160000120515396",
+            "CreateTime": "/Date(1676010492432)/",
+            "FinishTime": "/Date(1676010493060)/"
+        }
+    ]
+};
+
+var msg = $.getValue(data.list[0], 'Body.msg');
+console.log('showCursorConfig:', msg);
+
+console.log(data.list[0].Body.msg);
+
+$.console.info('123', '456', 'abc').timeformat('tms').log('123', '456', 'abc');
+$.console.debug('123', '456', 'abc');
+$.console.warn('123', '456', 'abc');
+$.console.error('123', '456', 'abc');
+$.console.trace('123', '456', 'abc');

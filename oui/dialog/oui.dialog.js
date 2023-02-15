@@ -372,6 +372,9 @@
                     elem = null,    //内容控件，用于加载内容
                     func = null;    //回调函数
 
+                if (arguments.length <= 1 || title === undefined) {
+                    title = '';
+                }
                 if (content && $.isElement(content)) {
                     elem = content;
                     content = '';
@@ -476,8 +479,13 @@
                     opt.reloadPosition = Config.ReloadPosition(); 
                 }
 
+                //关于窗口内容重新加载：点击重载按钮，可以实现内容重新加载，具体实现由回调函数实现
+                if ($.isFunction(opt.reload)) {
+                    opt.showReload = true;
+                    opt.reloadCallback = opt.reload;
+                }
                 opt.showReload = opt.showReload || opt.showLoad;
-                opt.reloadCallback = opt.reloadCallback || opt.reloadFunc || opt.reload;
+                opt.reloadCallback = opt.reloadCallback || opt.reloadFunc;
 
                 return this.checkCustomStyle(opt, isUpdate).checkTiming(opt), opt;
             },
@@ -3676,11 +3684,17 @@
                 var box = ctls.dialog,
                     ds = $.getElementSize(box),
                     ps = $.getElementStyleSize(obj, 'padding'),
-                    psCon = $.getElementStyleSize(ctls.content, 'padding');
+                    psCon = $.getElementStyleSize(ctls.content, 'padding'),
+                    bodyW = (opt.noScroll ? obj.offsetWidth : obj.clientWidth) - ps.width - psCon.width,
+                    bodyH = (opt.noScroll ? obj.offsetHeight : obj.clientHeight) - ps.height - psCon.height;
 
                 return {
-                    width: (opt.noScroll ? obj.offsetWidth : obj.clientWidth) - ps.width - psCon.width,
-                    height: (opt.noScroll ? obj.offsetHeight : obj.clientHeight) - ps.height - psCon.height,
+                    width: bodyW,
+                    height: bodyH,
+                    body: {
+                        width: bodyW,
+                        height: bodyH,
+                    },
                     dialog: ds
                 };
             },
@@ -4003,6 +4017,7 @@
                 logoIcon: '',           //可以指定LOGO图标URL,图标大小为20×20像素
                 showReload: false,      //是否显示“重新加载”按钮，当对话框为iframe时默认显示
                 reloadCallback: null,   //重新加载回调函数，与showReload参数配套使用
+                reload: null,           //showReload + reloadCallback的简化版，若reload参数为Function，则showReload=ture,reloadCallback=reload
                 showMin: true,          //是否显示最小化按钮
                 showMax: true,          //是否显示最大化按钮
                 showClose: true,        //是否显示关闭按钮
@@ -4514,18 +4529,18 @@
             if(arguments.length <= 3 && ($.isFunction(title) || $.isObject(title))) {
                 okButton = options;
                 options = title;
-                title = undefined;
+                title = '';
             }
             return Factory.show(content, title, options, Config.DialogType.confirm, null, okButton);
         },
         message: function (content, options) {
-            return Factory.show(content, undefined, options, Config.DialogType.message);
+            return Factory.show(content, '', options, Config.DialogType.message);
         },
         tips: function (content, target, options) {
-            return Factory.show(content, undefined, options, Config.DialogType.tips, target);
+            return Factory.show(content, '', options, Config.DialogType.tips, target);
         },
         tooltip: function (content, target, options) {
-            return Factory.show(content, undefined, options, Config.DialogType.tooltip, target);
+            return Factory.show(content, '', options, Config.DialogType.tooltip, target);
         },
         toolwin: function(content, title, options) {
             return Factory.show(content, title, options, Config.DialogType.toolwin);
@@ -4543,7 +4558,7 @@
             var opt = $.extend({
                 autoClose: true, timing: 2560
             }, options);
-            return Factory.show(content, undefined, opt, Config.DialogType.msg);
+            return Factory.show(content, '', opt, Config.DialogType.msg);
         },
         win: function (content, title, options) {
             return Factory.show(content, title, options, Config.DialogType.win);
@@ -4575,6 +4590,13 @@
     });
 
     $.extend($.dialog, {
+        get: function (id) {
+            var p = Factory.getOptions(id) || {}, dialog = p.dialog;
+            if (dialog && !dialog.isClosed()) {
+                return dialog;
+            }
+            return null;
+        },
         show: function (id) {
             var p = Factory.getOptions(id) || {}, dialog = p.dialog;
             if (dialog && !dialog.isClosed()) {

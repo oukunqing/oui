@@ -13,7 +13,7 @@
     </style>
     <script type="text/javascript" src="../oui/oui.js?12"></script>
     <!--<script type="text/javascript" src="../oui/dialog/oui.dialog.js?12&skin=default&logo=0&reloadPos=right&lang=english"></script>-->
-    <script type="text/javascript" src="../oui/dialog/oui.dialog.min.js?12&reloadPos=left"></script>
+    <script type="text/javascript" src="../oui/dialog/oui.dialog.js?12&reloadPos=left"></script>
 </head>
 <body>
     <div id="p1" style="margin:100px 0 0 0;"></div>
@@ -57,6 +57,7 @@
 	<a onmouseover="showTooltip(this);" onmouseout="hideTooltip(this);">Tooltip</a>
 
 	<button onclick="test12345();">最大化位置</button>
+	<button onclick="test23456();">没有标题</button>
 
     <div id="divArticle" style="display: none;">
         这是来自 DIV #divArticle 的内容
@@ -91,7 +92,6 @@ if($.isDebug()) {
 }
 
 var test12345 = function(){
-	console.log('onload');
 	var html = [
 		'<div style="">',
 		'测试最大化位置',
@@ -122,6 +122,16 @@ var test12345 = function(){
 		//height: 400,
 		//radius: 200
 	});
+};
+
+var test23456 = function(skin) {
+	$.alert('这是一个没有标题的对话框', {
+		id: 'dialog123'
+	});
+	/*.update('这是一个没有标题的对话框', {
+		skin: skin
+	});
+	*/
 };
 /*
 $.dialog.win('测试', '', {
@@ -300,7 +310,7 @@ function confirm2(){
         /*
         + '<a href="http://www.baidu.com" target="_blank">baidu</a>'
         + '<div><a href="http://www.163.com">163</a><span onclick="alert(126);">126</span></div>';*/
-    var win = $.confirm(html, '确认提示信息', {
+    var win = $.confirm(html,  {
         buttons: $.DialogButtons.OKCancel,
         //clickBgClose: 'dblclick',
         icon: 'question',

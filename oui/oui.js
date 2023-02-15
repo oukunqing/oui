@@ -1340,7 +1340,7 @@
         getMonthStart: function (month, year) {
             var ds = $.getDateOptions(month);
             if (ds !== null) {
-                return '{0}-{1:D2}-{2:D2} 00:00:00'.format(ds.year, ds.month);
+                return '{0}-{1:D2}-01 00:00:00'.format(ds.year, ds.month);
             } else {
                 var dt = new Date();
                 year = year || dt.getFullYear();
@@ -1998,6 +1998,8 @@
                 return $.isNumber(len) ? t.getTime().toString().substr(0, len) : t.getTime().toString();
             } else if(['tl','tms'].indexOf(formatString) >= 0) {
                 formatString = 'yyyy-MM-dd HH:mm:ss.fff';
+            } else if(['log'].indexOf(formatString) >= 0) {
+                formatString = 'yyyyMMddHHmmss.fff';
             }
             var p = /([y]+|[M]+|[d]+|[H]+|[s]+|[f]+)/gi,
                 y = year + (year < 1900 ? 1900 : 0), M = t.getMonth() + 1, d = t.getDate(),
@@ -5298,6 +5300,52 @@
             return self;
         }
     }, '$.fn');
+}(OUI);
+
+// oui.console
+!function($) {
+    var getArguments = function(args, prefix) {
+        var par = typeof prefix !== 'undefined' ? { 0: prefix, length: 1 } : { length: 0 },
+            len = par.length;
+
+        for(var i = 0; i < args.length; i++) {
+            par[len++] = args[i];
+        }
+
+        return par.length += len - 1, par;
+    }, log = function(type, formatstring) {
+        var str = '[' + new Date().format(formatstring || _tf) + ']' + (type ? '[' + type + ']' : '');
+        return str;
+    }, _tf = 'log';
+
+    $.extendNative($, {
+        console: {
+            timeformat: function(formatstring) {
+                return _tf = formatstring, this;
+            },
+            tf: function(formatstring) {
+                return this.timeformat(formatstring);
+            },
+            log: function() {
+                return console.log.apply(this, getArguments(arguments, log(null))), this;
+            },
+            info: function() {
+                return console.info.apply(this, getArguments(arguments, log('i'))), this;
+            },
+            warn: function() {
+                return console.warn.apply(this, getArguments(arguments, log('w'))), this;
+            },
+            debug: function() {
+                return console.debug.apply(this, getArguments(arguments, log('d'))), this;
+            },
+            error: function() {
+                return console.error.apply(this, getArguments(arguments, log('e'))), this;
+            },
+            trace: function() {
+                return console.trace.apply(this, getArguments(arguments, log('t'))), this;
+            }
+        }
+    });
 }(OUI);
 
 // oui.dialog
