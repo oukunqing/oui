@@ -4247,7 +4247,8 @@
         },
         close: function (force) {
             var _ = this, util = Util, p = util.getParam(_), opt = p.options;
-            if (_.isClosed() || !p || (!opt.closeAble && !force)) {
+            var forceClose = $.isBoolean(force, false);
+            if (_.isClosed() || !p || (!opt.closeAble && !forceClose)) {
                 return _;
             }
             var ctls = p.controls,
@@ -4264,7 +4265,7 @@
                 && (func.callback || func.ok)) {
                 return util.delAction(_).callback(_, p, actions), _;
             }
-            if (!force && opt.closeType === 'hide') {
+            if (!forceClose && opt.closeType === 'hide') {
                 return _.hide();
             }
 
