@@ -1403,3 +1403,15 @@ $.console.debug('123', '456', 'abc');
 $.console.warn('123', '456', 'abc');
 $.console.error('123', '456', 'abc');
 $.console.trace('123', '456', 'abc');
+
+
+var dt =new Date();
+
+console.log(dt.toISOString());
+
+console.log(new Date().format('utc'))
+
+console.log(new Date('20230221T154314418'));
+
+
+console.log((100/1000))

@@ -1056,6 +1056,17 @@
                 }
                 return this;
             },
+            //判断对话框是否在窗口可见范围内
+            isVisible: function(ctls) {
+                var bs = $.getBodySize(),
+                    ds = $.getOffset(ctls.dialog);
+
+                //判断对话框是否在窗口范围外（保留20像素）
+                if(ds.left >= bs.width - 20 || ds.top >= bs.height - 20) {
+                    return false;
+                }
+                return true;
+            },
             showDialog: function (ctls, isShow, content, title) {
                 var display = isShow ? '' : 'none';
                 if (ctls.container) {
@@ -4205,7 +4216,7 @@
                 Util.setClickBgClose(_);
             }
 
-            if($.isBoolean(content, false)) {
+            if($.isBoolean(content, false) || !Util.isVisible(p.controls)) {
                 _.position();
             }
 
@@ -4247,7 +4258,11 @@
         },
         close: function (force) {
             var _ = this, util = Util, p = util.getParam(_), opt = p.options;
+            
+            //是否强制关闭对话框，参数类型必须是 boolean 类型
+            //当前forceClose为true时，将忽略closeAble和closeType
             var forceClose = $.isBoolean(force, false);
+
             if (_.isClosed() || !p || (!opt.closeAble && !forceClose)) {
                 return _;
             }

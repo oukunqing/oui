@@ -2000,6 +2000,8 @@
                 formatString = 'yyyy-MM-dd HH:mm:ss.fff';
             } else if(['log'].indexOf(formatString) >= 0) {
                 formatString = 'yyyyMMddHHmmss.fff';
+            } else if(['utc', 'UTC'].indexOf(formatString) >= 0) {
+                formatString = 'yyyy-MM-ddTHH:mm:ss.fffZ';
             }
             var p = /([y]+|[M]+|[d]+|[H]+|[s]+|[f]+)/gi,
                 y = year + (year < 1900 ? 1900 : 0), M = t.getMonth() + 1, d = t.getDate(),
