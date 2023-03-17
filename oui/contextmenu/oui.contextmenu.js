@@ -245,7 +245,7 @@
                         $.createElement('div', '', function(elem) {
                             elem.className = 'cmenu-sep';
                         }, box);
-                    } else {
+                    } else if (!$.isFunction(dr.condition) || dr.condition()) {
                         var itemId = Factory.buildItemId(box.menuId),
                             chbId = Factory.buildChbId(box.menuId, dr.key),
                             txt = dr.name || dr.txt || dr.text,
@@ -319,6 +319,9 @@
                 });
                 return { type: 'sep', elem: elem, height: 9 };
             } else {
+                if($.isFunction(dr.condition) && !dr.condition()) {
+                    return null;
+                }
                 var txt = dr.name || dr.txt || dr.text,
                     hasChild = $.isArray(dr.items),
                     itemId = Factory.buildItemId(menuId),
@@ -669,6 +672,10 @@
                         }
                     }
                     Factory.fillMenuItem(elem, items, opt);
+                    //如果没有菜单项，不显示菜单DIV框
+                    if (items.length <= 0) {
+                        elem.style.display = 'none';
+                    }
                 }, parentNode);
 
                 var xs = $.elemSize(box);
@@ -733,6 +740,8 @@
             //以下参数作为目标停靠时用
             target: null,   //anchor
             position: 7,
+            //菜单出现的条件
+            condition: null,
             x: 0,
             y: -1,
             //是否显示图标
@@ -754,11 +763,17 @@
             if($.isElement(obj)) {
                 if(opt.event.toLowerCase() === 'contextmenu') {
                     obj['on' + opt.event] = function(ev) {
-                        return Factory.buildContextMenu(ev, that, obj), false;
+                        if (!$.isFunction(opt.condition) || opt.condition()) {
+                            Factory.buildContextMenu(ev, that, obj);
+                        }
+                        return false;
                     };
                 } else {
                     $.addListener(obj, opt.event, function(ev) {
-                        return Factory.buildContextMenu(ev, that, obj), false;
+                        if (!$.isFunction(opt.condition) || opt.condition()) {
+                            Factory.buildContextMenu(ev, that, obj);
+                        }
+                        return false;
                     });
                 }
             }

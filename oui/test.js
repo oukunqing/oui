@@ -1415,3 +1415,12 @@ console.log(new Date('20230221T154314418'));
 
 
 console.log((100/1000))
+console.log((1678118400).toDate().format());
+console.log((1678419000).toDate().format());
+
+
+var obj = { id: 123, name: 'abc', data: undefined, str: 'undefined' };
+
+console.log(obj);
+
+
