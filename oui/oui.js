@@ -4052,12 +4052,13 @@
             elem.options.add(new Option($.isValue(text, value), value));
             return this;
         },
-        fillOptions = function (elem, list, minVal, maxVal, stepVal) {
+        fillOptions = function (elem, list, minVal, maxVal, stepVal, valUnit) {
             elem = $.toElement(elem);
             if (!elem.tagName === 'SELECT') {
                 return this;
             }
             if($.isNumber(list)) {
+                valUnit = stepVal;
                 stepVal = maxVal;
                 maxVal = minVal;
                 minVal = list;
@@ -4066,7 +4067,7 @@
             if($.isNumber(minVal) && $.isNumber(maxVal)) {
                 stepVal = stepVal || 1;
                 for(var i = minVal; i <= maxVal; i+= stepVal) {
-                    elem.options.add(new Option(i, i));
+                    elem.options.add(new Option(i + (valUnit || ''), i));
                 }
                 return this;
             }
@@ -4090,9 +4091,10 @@
         buildOption = function (value, text) {
             return '<option value="' + value + '">' + text + '</option>';
         },
-        buildOptions = function(list, minVal, maxVal, stepVal, curVal) {
+        buildOptions = function(list, minVal, maxVal, stepVal, curVal, valUnit) {
             var html = [];
             if($.isNumber(list)) {
+                valUnit = curVal;
                 curVal = stepVal;
                 stepVal = maxVal;
                 maxVal = minVal;
@@ -4103,7 +4105,7 @@
                 stepVal = stepVal || 1;
                 for(var i = minVal; i <= maxVal; i+= stepVal) {
                     var selected = curVal === i ? ' selected="selected"' : '';
-                    html.push('<option value="' + i + '"' + selected + '>' + i + '</option>');
+                    html.push('<option value="' + i + '"' + selected + '>' + i + (valUnit || '') + '</option>');
                 }
                 return html.join('');
             }

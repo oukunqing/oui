@@ -163,7 +163,7 @@
             ['yes', 'no', 'cancel'],
             ['yes', 'no'],
             ['retry', 'cancel']
-        ],
+            ],
         DialogIcon: {
             none: '',
             hand: 'error',
@@ -196,8 +196,8 @@
         },
         CustomButtonConfig: function (code, opt) {
             var key = (opt.key || '').toLowerCase(),
-                cfg = this.ButtonConfig[key] || {},
-                result = cfg.result || 0;
+            cfg = this.ButtonConfig[key] || {},
+            result = cfg.result || 0;
             return {
                 key: (key || 'none').toLowerCase(), text: opt.text || '',
                 result: opt.result || result, skey: opt.skey || '', css: opt.css || 'btn-default'
@@ -241,256 +241,256 @@
             }
         }
     },
-        Common = {
-            isInKeys: function (key, keys, config) {
-                var hasConfig = $.isObject(config);
-                for (var i = 0; i < keys.length; i++) {
-                    if (hasConfig) {
-                        var cfg = config[keys[i]];
-                        if (!$.isUndefined(cfg) && cfg === key) {
-                            return true;
-                        }
-                    } else if (keys[i] === key) {
+    Common = {
+        isInKeys: function (key, keys, config) {
+            var hasConfig = $.isObject(config);
+            for (var i = 0; i < keys.length; i++) {
+                if (hasConfig) {
+                    var cfg = config[keys[i]];
+                    if (!$.isUndefined(cfg) && cfg === key) {
                         return true;
                     }
+                } else if (keys[i] === key) {
+                    return true;
                 }
+            }
+            return false;
+        },
+        isChildFocus: function (elem, parent) {
+            if ($.isString(elem, true)) {
+                elem = document.getElementById(elem.replace('#', ''));
+            }
+            if (!$.isElement(elem) || elem === parent || elem.disabled
+                || !this.isInKeys(elem.tagName, ['A', 'INPUT', 'BUTTON', 'SELECT', 'TEXTAREA'])
+                || $.getElementStyle(elem, 'display') === 'none'
+                || $.getElementStyle(elem, 'visibility') === 'hidden') {
                 return false;
-            },
-            isChildFocus: function (elem, parent) {
-                if ($.isString(elem, true)) {
-                    elem = document.getElementById(elem.replace('#', ''));
-                }
-                if (!$.isElement(elem) || elem === parent || elem.disabled
-                    || !this.isInKeys(elem.tagName, ['A', 'INPUT', 'BUTTON', 'SELECT', 'TEXTAREA'])
-                    || $.getElementStyle(elem, 'display') === 'none'
-                    || $.getElementStyle(elem, 'visibility') === 'hidden') {
-                    return false;
-                }
-                var pNode = elem.parentNode;
-                while (pNode) {
-                    if (pNode === parent) {
-                        return elem.focus(), true;
-                    }
-                    pNode = pNode.parentNode;
-                }
-                return false;
-            },
-            getDialogText: function (key, lang) {
-                var txt = Config.DialogText[key];
-                if (txt) {
-                    return txt[(lang || '').toLowerCase()];
-                }
-                return '';
-            },
-            getStatusText: function (key, lang) {
-                var txt = Config.DialogStatusText[(key || '').toLowerCase()];
-                if (txt) {
-                    return txt[(lang || '').toLowerCase()];
-                }
-                return '';
-            },
-            getButtonText: function (key, lang) {
-                var txt = Config.ButtonText[(key || '').toLowerCase()];
-                if (txt) {
-                    return txt[(lang || '').toLowerCase()];
-                }
-                return '';
-            },
-            getDialogButtons: function (type) {
-                var buttons = Config.DialogButtons.None;
-                switch (type) {
-                    case Config.DialogType.alert:
-                        buttons = Config.DialogButtons.OK;
-                        break;
-                    case Config.DialogType.confirm:
-                        buttons = Config.DialogButtons.OKCancel;
-                        break;
-                    case Config.DialogType.dialog:
-                        buttons = Config.DialogButtons.OKCancel;
-                        break;
-                }
-                return buttons;
-            },
-            checkStyleUnit: function (s) {
-                if ($.isNumber(s)) {
-                    return s + 'px';
-                }
-                if ($.isString(s, true)) {
-                    if (s.toLowerCase() === 'auto' || $.isStyleUnit(s)) {
-                        return s;
-                    }
-                    return s + 'px';
-                }
+        }
+        var pNode = elem.parentNode;
+        while (pNode) {
+            if (pNode === parent) {
+                return elem.focus(), true;
+            }
+            pNode = pNode.parentNode;
+        }
+        return false;
+    },
+    getDialogText: function (key, lang) {
+        var txt = Config.DialogText[key];
+        if (txt) {
+            return txt[(lang || '').toLowerCase()];
+        }
+        return '';
+    },
+    getStatusText: function (key, lang) {
+        var txt = Config.DialogStatusText[(key || '').toLowerCase()];
+        if (txt) {
+            return txt[(lang || '').toLowerCase()];
+        }
+        return '';
+    },
+    getButtonText: function (key, lang) {
+        var txt = Config.ButtonText[(key || '').toLowerCase()];
+        if (txt) {
+            return txt[(lang || '').toLowerCase()];
+        }
+        return '';
+    },
+    getDialogButtons: function (type) {
+        var buttons = Config.DialogButtons.None;
+        switch (type) {
+        case Config.DialogType.alert:
+            buttons = Config.DialogButtons.OK;
+            break;
+        case Config.DialogType.confirm:
+            buttons = Config.DialogButtons.OKCancel;
+            break;
+        case Config.DialogType.dialog:
+            buttons = Config.DialogButtons.OKCancel;
+            break;
+        }
+        return buttons;
+    },
+    checkStyleUnit: function (s) {
+        if ($.isNumber(s)) {
+            return s + 'px';
+        }
+        if ($.isString(s, true)) {
+            if (s.toLowerCase() === 'auto' || $.isStyleUnit(s)) {
                 return s;
-            },
-            isNumberSize: function (num) {
-                return $.isNumberSize(num);
-            },
-            getTs: function (start, len) {
-                var tick = new Date().getTime(),
-                    num = ('' + tick).substr(start || 4, len || 8);
-                if(num.indexOf('0') === 0) {
-                    num = '1' + num;
-                }
-                return parseInt(num, 10);
-            },
-            buildId: function (id, prefix) {
-                if (!$.isString(id, true) && !$.isNumber(id)) {
-                    return this.getTs(5, 8) + '-' + Config.Index++;
-                }
-                return (prefix || '') + id;
-            },
-            buildZindex: function (start, len) {
-                return this.getTs(start, len);
-            },
-            checkTiming: function (opt) {
-                if (!$.isNumber(opt.closeTiming)) {
-                    opt.closeTiming = opt.timeout || opt.timing || opt.time;
-                }
-                opt.closeTiming = Math.abs(parseInt('0' + opt.closeTiming, 10));
-                return opt;
-            },
-            checkCustomStyle: function (opt, isUpdate) {
-                if (isUpdate && opt.styles === null) {
-                    opt.newStyles = null;
-                }
+            }
+            return s + 'px';
+        }
+        return s;
+    },
+    isNumberSize: function (num) {
+        return $.isNumberSize(num);
+    },
+    getTs: function (start, len) {
+        var tick = new Date().getTime(),
+        num = ('' + tick).substr(start || 4, len || 8);
+        if(num.indexOf('0') === 0) {
+            num = '1' + num;
+        }
+        return parseInt(num, 10);
+    },
+    buildId: function (id, prefix) {
+        if (!$.isString(id, true) && !$.isNumber(id)) {
+            return this.getTs(5, 8) + '-' + Config.Index++;
+        }
+        return (prefix || '') + id;
+    },
+    buildZindex: function (start, len) {
+        return this.getTs(start, len);
+    },
+    checkTiming: function (opt) {
+        if (!$.isNumber(opt.closeTiming)) {
+            opt.closeTiming = opt.timeout || opt.timing || opt.time;
+        }
+        opt.closeTiming = Math.abs(parseInt('0' + opt.closeTiming, 10));
+        return opt;
+    },
+    checkCustomStyle: function (opt, isUpdate) {
+        if (isUpdate && opt.styles === null) {
+            opt.newStyles = null;
+        }
                 //检测自定义样式设置
-                if (!opt.styles || !$.isObject(opt.styles)) {
-                    opt.styles = {};
-                }
-                if (!isUpdate) {
-                    opt.styles = $.extend({}, Config.CustomStyles, opt.styles);
-                }
+        if (!opt.styles || !$.isObject(opt.styles)) {
+            opt.styles = {};
+        }
+        if (!isUpdate) {
+            opt.styles = $.extend({}, Config.CustomStyles, opt.styles);
+        }
                 //合并自定义的样式
-                for (var k in opt.styles) {
-                    $.extend(opt.styles[k], opt[k + 'Style']);
-                }
-                return this;
-            },
-            checkOptions: function (content, title, opt, isUpdate, dialogType) {
+        for (var k in opt.styles) {
+            $.extend(opt.styles[k], opt[k + 'Style']);
+        }
+        return this;
+    },
+    checkOptions: function (content, title, opt, isUpdate, dialogType) {
                 var target = null,  //目标控件，用于位置停靠
                     elem = null,    //内容控件，用于加载内容
                     func = null;    //回调函数
 
-                if (arguments.length <= 1 || title === undefined) {
-                    title = '';
-                }
-                if (content && $.isElement(content)) {
-                    elem = content;
-                    content = '';
-                }
-                if (content && $.isObject(content)) {
-                    opt = content;
-                    content = title = '';
-                } else if (title && $.isObject(title) && !$.isElement(title)) {
-                    opt = title;
-                    title = '';
-                } else if ($.isElement(title)) {
-                    target = title;
-                    title = '';
-                } else if ($.isFunction(title)) {
-                    if(dialogType === Config.DialogType.confirm) {
-                        opt = { ok: title };
-                    } else {
-                        func = title;
+                    if (arguments.length <= 1 || title === undefined) {
+                        title = '';
                     }
-                    title = '';
-                }
-                if ($.isFunction(opt)) {
-                    opt = dialogType === Config.DialogType.confirm ? { ok: opt } : { callback: opt };
-                }
-                if (!$.isObject(opt)) {
-                    opt = {};
-                }
-                opt.element = elem || opt.element;
-                opt.content = content || opt.content || content;
-                opt.title = title || opt.title || title;
-                opt.target = target || opt.anchor || opt.target;
-                opt.callback = func || opt.callback;
-                opt.complete = opt.complete || opt.onload || opt.ready;
-                opt.coverOCX = opt.coverOCX || opt.coverOcx || opt.cover;
+                    if (content && $.isElement(content)) {
+                        elem = content;
+                        content = '';
+                    }
+                    if (content && $.isObject(content)) {
+                        opt = content;
+                        content = title = '';
+                    } else if (title && $.isObject(title) && !$.isElement(title)) {
+                        opt = title;
+                        title = '';
+                    } else if ($.isElement(title)) {
+                        target = title;
+                        title = '';
+                    } else if ($.isFunction(title)) {
+                        if(dialogType === Config.DialogType.confirm) {
+                            opt = { ok: title };
+                        } else {
+                            func = title;
+                        }
+                        title = '';
+                    }
+                    if ($.isFunction(opt)) {
+                        opt = dialogType === Config.DialogType.confirm ? { ok: opt } : { callback: opt };
+                    }
+                    if (!$.isObject(opt)) {
+                        opt = {};
+                    }
+                    opt.element = elem || opt.element;
+                    opt.content = content || opt.content || content;
+                    opt.title = title || opt.title || title;
+                    opt.target = target || opt.anchor || opt.target;
+                    opt.callback = func || opt.callback;
+                    opt.complete = opt.complete || opt.onload || opt.ready;
+                    opt.coverOCX = opt.coverOCX || opt.coverOcx || opt.cover;
 
-                if (!$.isString(opt.title) && !$.isNumber(opt.title)) {
-                    opt.title = undefined;
-                }
+                    if (!$.isString(opt.title) && !$.isNumber(opt.title)) {
+                        opt.title = undefined;
+                    }
 
                 //对话框关闭后，要获取焦点的HTML控件
-                opt.focusTo = opt.focusTo || opt.focus;
-                if (!$.isElement(opt.focusTo)) {
-                    opt.focusTo = $.isString(opt.focusTo, true) ? $I(opt.focusTo) : undefined;
-                }
+                    opt.focusTo = opt.focusTo || opt.focus;
+                    if (!$.isElement(opt.focusTo)) {
+                        opt.focusTo = $.isString(opt.focusTo, true) ? $I(opt.focusTo) : undefined;
+                    }
 
                 //对话框尺寸改变后，要回调的函数
-                opt.resize = opt.resize || opt.onresize;
+                    opt.resize = opt.resize || opt.onresize;
 
-                opt.type = this.checkType(opt.type, false);
+                    opt.type = this.checkType(opt.type, false);
 
-                if (!$.isElement(opt.target) && $.isString(opt.target, true)) {
-                    opt.target = document.getElementById(opt.target);
-                }
-
-                if (!$.isElement(opt.parent) && $.isString(opt.parent, true)) {
-                    opt.parent = document.getElementById(opt.parent);
-                }
-
-                opt.forname = (opt.forname || opt.forName) || (opt.forid || opt.forId) || opt.for;
-                if($.isElement(opt.forname)) {
-                    opt.forname = opt.forname.id || opt.forname.name || '';
-                }
-
-                if ($.isBoolean(opt.boxShadow) || opt.boxShadow === 'none') {
-                    opt.shadow = opt.boxShadow;
-                }
-
-                if ($.isNumeric(opt.closeIcon)) {
-                    opt.closeIcon = 'close' + opt.closeIcon;
-                } else {
-                    opt.closeIcon = ('' + (opt.closeIcon || '')).toLowerCase();
-                }
-
-                if ($.isUndefined(opt.parameter) && !$.isUndefined(opt.param)) {
-                    opt.parameter = opt.param;
-                }
-
-                if ($.isBoolean(opt.clickBgClose)) {
-                    if (opt.clickBgClose) {
-                        opt.clickBgClose = 'click';
+                    if (!$.isElement(opt.target) && $.isString(opt.target, true)) {
+                        opt.target = document.getElementById(opt.target);
                     }
-                } else {
-                    if (!('' + opt.clickBgClose).toLowerCase().in(['dblclick', 'click'])) {
-                        opt.clickBgClose = false;
-                    }
-                }
 
-                if ($.isString(opt.skin, true)) {
-                    opt.skin = opt.skin.toLowerCase();
-                } else {
+                    if (!$.isElement(opt.parent) && $.isString(opt.parent, true)) {
+                        opt.parent = document.getElementById(opt.parent);
+                    }
+
+                    opt.forname = (opt.forname || opt.forName) || (opt.forid || opt.forId) || opt.for;
+                    if($.isElement(opt.forname)) {
+                        opt.forname = opt.forname.id || opt.forname.name || '';
+                    }
+
+                    if ($.isBoolean(opt.boxShadow) || opt.boxShadow === 'none') {
+                        opt.shadow = opt.boxShadow;
+                    }
+
+                    if ($.isNumeric(opt.closeIcon)) {
+                        opt.closeIcon = 'close' + opt.closeIcon;
+                    } else {
+                        opt.closeIcon = ('' + (opt.closeIcon || '')).toLowerCase();
+                    }
+
+                    if ($.isUndefined(opt.parameter) && !$.isUndefined(opt.param)) {
+                        opt.parameter = opt.param;
+                    }
+
+                    if ($.isBoolean(opt.clickBgClose)) {
+                        if (opt.clickBgClose) {
+                            opt.clickBgClose = 'click';
+                        }
+                    } else {
+                        if (!('' + opt.clickBgClose).toLowerCase().in(['dblclick', 'click'])) {
+                            opt.clickBgClose = false;
+                        }
+                    }
+
+                    if ($.isString(opt.skin, true)) {
+                        opt.skin = opt.skin.toLowerCase();
+                    } else {
                     //opt.skin = Config.DefaultSkin;
                     //指定默认样式
-                    opt.skin = Config.GetSkin();
-                }
+                        opt.skin = Config.GetSkin();
+                    }
 
-                if($.isBoolean(opt.copyAble, false) || $.isBoolean(opt.selectAble || opt.selectable, false)) {
-                    opt.copyAble = true;
-                }
+                    if($.isBoolean(opt.copyAble, false) || $.isBoolean(opt.selectAble || opt.selectable, false)) {
+                        opt.copyAble = true;
+                    }
 
-                opt.reloadPosition = opt.reloadPosition || opt.reloadPos;
-                if (!$.isString(opt.reloadPosition, true)) {
-                    opt.reloadPosition = Config.ReloadPosition(); 
-                }
+                    opt.reloadPosition = opt.reloadPosition || opt.reloadPos;
+                    if (!$.isString(opt.reloadPosition, true)) {
+                        opt.reloadPosition = Config.ReloadPosition(); 
+                    }
 
                 //关于窗口内容重新加载：点击重载按钮，可以实现内容重新加载，具体实现由回调函数实现
-                if ($.isFunction(opt.reload)) {
-                    opt.showReload = true;
-                    opt.reloadCallback = opt.reload;
-                }
-                opt.showReload = opt.showReload || opt.showLoad;
-                opt.reloadCallback = opt.reloadCallback || opt.reloadFunc;
+                    if ($.isFunction(opt.reload)) {
+                        opt.showReload = true;
+                        opt.reloadCallback = opt.reload;
+                    }
+                    opt.showReload = opt.showReload || opt.showLoad;
+                    opt.reloadCallback = opt.reloadCallback || opt.reloadFunc;
 
-                return this.checkCustomStyle(opt, isUpdate).checkTiming(opt), opt;
-            },
-            getCssAttrSize: function (val, options) {
-                var p = $.extend({
+                    return this.checkCustomStyle(opt, isUpdate).checkTiming(opt), opt;
+                },
+                getCssAttrSize: function (val, options) {
+                    var p = $.extend({
                     attr: 'margin',      // margin, padding, border
                     unit: '',
                     isArray: false,
@@ -499,149 +499,149 @@
                     max: Config.MaxPadding,
                     val: Config.Padding
                 }, options);
-                return $.getCssAttrSize(val, p);
-            },
-            checkType: function (type, isBuild) {
-                if (!$.isString(type, true) && !isBuild) {
-                    return type;
-                }
-                if (Common.isInKeys(type, ['message', 'msg'], Config.DialogType)) {
-                    return Config.DialogType.message;
-                } else if (Common.isInKeys(type, ['tooltip', 'tips'], Config.DialogType)) {
-                    return Config.DialogType.tooltip;
-                } else if (Common.isInKeys(type, ['panel', 'box'], Config.DialogType)) {
-                    return Config.DialogType.panel;
-                }
-                return type || (isBuild ? Config.DialogType.dialog : '');
-            },
-            checkIcon: function (opt) {
-                if (!$.isString(opt.icon, true)) {
+                    return $.getCssAttrSize(val, p);
+                },
+                checkType: function (type, isBuild) {
+                    if (!$.isString(type, true) && !isBuild) {
+                        return type;
+                    }
+                    if (Common.isInKeys(type, ['message', 'msg'], Config.DialogType)) {
+                        return Config.DialogType.message;
+                    } else if (Common.isInKeys(type, ['tooltip', 'tips'], Config.DialogType)) {
+                        return Config.DialogType.tooltip;
+                    } else if (Common.isInKeys(type, ['panel', 'box'], Config.DialogType)) {
+                        return Config.DialogType.panel;
+                    }
+                    return type || (isBuild ? Config.DialogType.dialog : '');
+                },
+                checkIcon: function (opt) {
+                    if (!$.isString(opt.icon, true)) {
+                        return false;
+                    }
+                    var icon = ('' + opt.icon).toLowerCase();
+                    if (Config.DialogIcon[icon]) {
+                        opt.icon = Config.DialogIcon[icon];
+                        return true;
+                    }
                     return false;
-                }
-                var icon = ('' + opt.icon).toLowerCase();
-                if (Config.DialogIcon[icon]) {
-                    opt.icon = Config.DialogIcon[icon];
-                    return true;
-                }
-                return false;
-            },
-            isPercentSize: function (width, height) {
-                return $.isPercent(width) || (typeof height !== 'undefined' && $.isPercent(height));
-            },
-            toCssText: function (styles, type) {
+                },
+                isPercentSize: function (width, height) {
+                    return $.isPercent(width) || (typeof height !== 'undefined' && $.isPercent(height));
+                },
+                toCssText: function (styles, type) {
                 //TODO:
-                switch (type) {
+                    switch (type) {
                     case 'shade':
                         break;
                     case 'dialog':
                         break;
 
-                }
-                return $.toCssText(styles);
-            },
-            hasEvent: function (elem) {
-                var keys = ['onclick', 'ondblclick', 'onmousedown'], attr;
-                for (var i in keys) {
-                    attr = elem.getAttribute(keys[i]);
-                    if (attr) {
-                        return true;
                     }
-                }
-                return false;
-            },
-            isPlainText: function (obj) {
-                var childs = obj.getElementsByTagName('*'),
+                    return $.toCssText(styles);
+                },
+                hasEvent: function (elem) {
+                    var keys = ['onclick', 'ondblclick', 'onmousedown'], attr;
+                    for (var i in keys) {
+                        attr = elem.getAttribute(keys[i]);
+                        if (attr) {
+                            return true;
+                        }
+                    }
+                    return false;
+                },
+                isPlainText: function (obj) {
+                    var childs = obj.getElementsByTagName('*'),
                     len = childs.length,
                     pass = ['BR', 'IFRAME', 'P', 'FONT'],
                     tags = ['INPUT', 'A', 'TEXTAREA', 'BUTTON'],
                     isText = true,
                     elem, tag, attr;
 
-                if (len === 0) {
+                    if (len === 0) {
+                        return isText;
+                    }
+                    for (var i = 0; i < len; i++) {
+                        elem = childs[i];
+                        tag = elem.tagName;
+                        if (pass.indexOf(tag) >= 0) {
+                            continue;
+                        }
+                        if (tags.indexOf(tag) >= 0 || this.hasEvent(elem)) {
+                            isText = false;
+                            break;
+                        }
+                    }
                     return isText;
-                }
-                for (var i = 0; i < len; i++) {
-                    elem = childs[i];
-                    tag = elem.tagName;
-                    if (pass.indexOf(tag) >= 0) {
-                        continue;
+                },
+                getDefaultSize: function () {
+                    var screenWidth = window.screen.width, size = {};
+                    if (screenWidth <= 1366) {
+                        size = { width: 360, height: 180 };
+                    } else if (screenWidth <= 1440) {
+                        size = { width: 400, height: 200 };
+                    } else if (screenWidth <= 1920) {
+                        size = { width: 500, height: 250 };
+                    } else {
+                        size = { width: 600, height: 300 };
                     }
-                    if (tags.indexOf(tag) >= 0 || this.hasEvent(elem)) {
-                        isText = false;
-                        break;
+                    return size;
+                },
+                getSizeNumber: function (num) {
+                    var n = ('' + num).indexOf('%') < 0 ? parseInt(num, 10) : 0;
+                    return isNaN(n) ? 0 : n;
+                },
+                getMaxSize: function (opt) {
+                    var size = {
+                        minWidth: this.getSizeNumber(opt.minWidth),
+                        minHeight: this.getSizeNumber(opt.minHeight),
+                        maxWidth: this.getSizeNumber(opt.maxWidth),
+                        maxHeight: this.getSizeNumber(opt.maxHeight)
+                    };
+                    return size;
+                },
+                getRealSize: function (txt, opt) {
+                    if($.isString(txt, true)) {
+                        return $.getContentSize(txt, {className: 'oui-dialog-title-size', id: 'div-oui-dialog-text-size-01'});
                     }
+                    if(opt) {
+                        return {width: opt.width, height: opt.height};
+                    }
+                    return { width: 0, height: 0 };
+                },
+                isPanelType: function(type) {
+                    return type === Config.DialogType.panel || type === Config.DialogType.blank;
                 }
-                return isText;
             },
-            getDefaultSize: function () {
-                var screenWidth = window.screen.width, size = {};
-                if (screenWidth <= 1366) {
-                    size = { width: 360, height: 180 };
-                } else if (screenWidth <= 1440) {
-                    size = { width: 400, height: 200 };
-                } else if (screenWidth <= 1920) {
-                    size = { width: 500, height: 250 };
-                } else {
-                    size = { width: 600, height: 300 };
-                }
-                return size;
+            Cache = {
+                ids: [],
+                dialogs: {},
+                events: {},
+                docCloses: {
+                    click: [],
+                    dblclick: [],
+                    mousedown: []
+                },
+                docOverflow: {}
             },
-            getSizeNumber: function (num) {
-                var n = ('' + num).indexOf('%') < 0 ? parseInt(num, 10) : 0;
-                return isNaN(n) ? 0 : n;
-            },
-            getMaxSize: function (opt) {
-                var size = {
-                    minWidth: this.getSizeNumber(opt.minWidth),
-                    minHeight: this.getSizeNumber(opt.minHeight),
-                    maxWidth: this.getSizeNumber(opt.maxWidth),
-                    maxHeight: this.getSizeNumber(opt.maxHeight)
-                };
-                return size;
-            },
-            getRealSize: function (txt, opt) {
-                if($.isString(txt, true)) {
-                    return $.getContentSize(txt, {className: 'oui-dialog-title-size', id: 'div-oui-dialog-text-size-01'});
-                }
-                if(opt) {
-                    return {width: opt.width, height: opt.height};
-                }
-                return { width: 0, height: 0 };
-            },
-            isPanelType: function(type) {
-                return type === Config.DialogType.panel || type === Config.DialogType.blank;
-            }
-        },
-        Cache = {
-            ids: [],
-            dialogs: {},
-            events: {},
-            docCloses: {
-                click: [],
-                dblclick: [],
-                mousedown: []
-            },
-            docOverflow: {}
-        },
-        Factory = {
-            isRepeat: function (name) {
-                return Cache.events[name] ? true : (Cache.events[name] = true, false);
-            },
-            buildCacheId: function (id) {
-                return 'd-' + id;
-            },
-            initCache: function (id, dialog) {
-                var key = this.buildCacheId(id);
-                Cache.ids.push({ key: key, id: id });
-                Cache.dialogs[key] = {
-                    dialog: dialog,
-                    parent: document.body,
-                    hasParent: false,
-                    options: {},
-                    controls: {},
-                    btns: {},
-                    buttons: {},
-                    defaultButton: '',
+            Factory = {
+                isRepeat: function (name) {
+                    return Cache.events[name] ? true : (Cache.events[name] = true, false);
+                },
+                buildCacheId: function (id) {
+                    return 'd-' + id;
+                },
+                initCache: function (id, dialog) {
+                    var key = this.buildCacheId(id);
+                    Cache.ids.push({ key: key, id: id });
+                    Cache.dialogs[key] = {
+                        dialog: dialog,
+                        parent: document.body,
+                        hasParent: false,
+                        options: {},
+                        controls: {},
+                        btns: {},
+                        buttons: {},
+                        defaultButton: '',
                     buttonCallback: { //自定义按钮回调函数
 
                     },
@@ -748,213 +748,213 @@
                     if (p && p.controls.dialog && p.options && p.options.forname === forname
                         && d && !d.isClosed() && d.getOptions().closeAble) {
                         d.close();
-                    }
                 }
-                return this;
-            },
-            closeAll: function (type) {
-                var isType = $.isString(Common.checkType(type), true);
-                for (var k in Cache.dialogs) {
-                    var p = Cache.dialogs[k], d = p.dialog;
-                    if (p && p.controls.dialog
-                        && d && !d.isClosed() && d.getOptions().closeAble
-                        && (!isType || (isType && d.getOptions().type === type))) {
-                        d.close();
-                    }
-                }
-                return this;
-            },
+            }
+            return this;
+        },
+        closeAll: function (type) {
+            var isType = $.isString(Common.checkType(type), true);
+            for (var k in Cache.dialogs) {
+                var p = Cache.dialogs[k], d = p.dialog;
+                if (p && p.controls.dialog
+                    && d && !d.isClosed() && d.getOptions().closeAble
+                    && (!isType || (isType && d.getOptions().type === type))) {
+                    d.close();
+            }
+        }
+        return this;
+    },
             //子页面关闭父页面当前对话框，并返回参数
-            closeParent: function (id, param) {
-                if (!$.isUndefined(id)) {
-                    var cache = this.getOptions(id), dialog = cache.dialog;
-                    if (cache && dialog && dialog.getOptions().closeAble) {
-                        Util.setAction(dialog, Config.CloseType.child, param);
-                    }
-                }
-                return this;
-            },
+    closeParent: function (id, param) {
+        if (!$.isUndefined(id)) {
+            var cache = this.getOptions(id), dialog = cache.dialog;
+            if (cache && dialog && dialog.getOptions().closeAble) {
+                Util.setAction(dialog, Config.CloseType.child, param);
+            }
+        }
+        return this;
+    },
             //根据子页面设置当前对话框尺寸
-            resizeParent: function (id, param) {
-                if (!$.isUndefined(id)) {
-                    var cache = this.getOptions(id), dialog = cache.dialog;
-                    if (cache && dialog && !dialog.isClosed()) {
-                        dialog.resizeTo($.extend(param, { isBody: true })).position();
-                    }
+    resizeParent: function (id, param) {
+        if (!$.isUndefined(id)) {
+            var cache = this.getOptions(id), dialog = cache.dialog;
+            if (cache && dialog && !dialog.isClosed()) {
+                dialog.resizeTo($.extend(param, { isBody: true })).position();
+            }
+        }
+        return this;
+    },
+    setEscClose: function () {
+        if (this.isRepeat('escClose')) {
+            return false;
+        }
+        $.addListener(document, 'keyup', function (e) {
+            if (Config.KEY_CODE.Esc === $.getKeyCode(e)) {
+                var d = Factory.getLast();
+                if (d && !d.isClosed() && d.getOptions().escClose) {
+                    d.close();
                 }
-                return this;
-            },
-            setEscClose: function () {
-                if (this.isRepeat('escClose')) {
-                    return false;
-                }
-                $.addListener(document, 'keyup', function (e) {
-                    if (Config.KEY_CODE.Esc === $.getKeyCode(e)) {
-                        var d = Factory.getLast();
-                        if (d && !d.isClosed() && d.getOptions().escClose) {
-                            d.close();
-                        }
-                    }
-                });
-                return this;
-            },
+            }
+        });
+        return this;
+    },
             //检测是否可以关闭对话框，当创建时长超过500毫秒时才可以关闭
             //这是为了防止当document点击事件时，不会导致刚创建的对话框被立即关闭
-            allowClose: function (curTime, buildTime) {
-                return curTime - buildTime > 500;
-            },
-            setClickDocClose: function (id, eventName) {
-                var _ = this;
-                if (Cache.docCloses[eventName].indexOf(id) < 0) {
-                    Cache.docCloses[eventName].push(id);
+    allowClose: function (curTime, buildTime) {
+        return curTime - buildTime > 500;
+    },
+    setClickDocClose: function (id, eventName) {
+        var _ = this;
+        if (Cache.docCloses[eventName].indexOf(id) < 0) {
+            Cache.docCloses[eventName].push(id);
+        }
+        if (_.isRepeat('doc' + eventName)) {
+            return _;
+        }
+        $.addListener(document, eventName, function (e) {
+            var list = Cache.docCloses[eventName], ts = new Date().getTime();
+            for (var i = list.length - 1; i >= 0; i--) {
+                var p = Factory.getOptions(list[i]) || {}, d = p.dialog;
+                if (d && !d.isClosed() && !d.isHide() && _.allowClose(ts, p.buildTime)) {
+                    list.splice(i, 1);
+                    d.close();
+                    break;
                 }
-                if (_.isRepeat('doc' + eventName)) {
-                    return _;
-                }
-                $.addListener(document, eventName, function (e) {
-                    var list = Cache.docCloses[eventName], ts = new Date().getTime();
-                    for (var i = list.length - 1; i >= 0; i--) {
-                        var p = Factory.getOptions(list[i]) || {}, d = p.dialog;
-                        if (d && !d.isClosed() && !d.isHide() && _.allowClose(ts, p.buildTime)) {
-                            list.splice(i, 1);
-                            d.close();
-                            break;
-                        }
-                    }
-                });
-                return _;
-            },
-            setWindowResize: function () {
-                if (this.isRepeat('resize')) {
-                    return this;
-                }
-                $.addListener(window, 'resize', function (e) {
+            }
+        });
+        return _;
+    },
+    setWindowResize: function () {
+        if (this.isRepeat('resize')) {
+            return this;
+        }
+        $.addListener(window, 'resize', function (e) {
                     //for (var i = Cache.ids.length - 1; i >= 0; i--) {
-                    for (var i = 0; i < Cache.ids.length; i++) {
-                        var d = Factory.getDialog(Cache.ids[i].id);
-                        if (d && !d.isClosed()) {
-                            var p = Util.getParam(d), opt = p.options;
-                            if (opt.type === Config.DialogType.tooltip) {
-                                Util.setTooltipPosition(d);
-                            } else {
-                                var par = { event: 'window.resize' }, fullScreen = d.isMaximized();
-                                if (fullScreen || d.isPercent()) {
-                                    Util.setBodySize(d, $.extend(par, { fullScreen: fullScreen }));
+            for (var i = 0; i < Cache.ids.length; i++) {
+                var d = Factory.getDialog(Cache.ids[i].id);
+                if (d && !d.isClosed()) {
+                    var p = Util.getParam(d), opt = p.options;
+                    if (opt.type === Config.DialogType.tooltip) {
+                        Util.setTooltipPosition(d);
+                    } else {
+                        var par = { event: 'window.resize' }, fullScreen = d.isMaximized();
+                        if (fullScreen || d.isPercent()) {
+                            Util.setBodySize(d, $.extend(par, { fullScreen: fullScreen }));
+                        }
+                        Util.setPosition(d, par);
+                    }
+                }
+            }
+        });
+        return this;
+    },
+            //表单容器缓存，防止重复设置
+    FormCache: {},
+            //设置表单滚动事件
+    setFormScroll: function(obj) {
+        var parent = obj.parentNode;
+        while(parent.tagName === 'DIV') {
+            var id = parent.id;
+            if(id && !Factory.FormCache[id]) {
+                var style = $.getElementStyle(parent, 'overflow');
+                        //判断表单容器overflow是否为auto
+                if(style && style.toLowerCase() === 'auto') {
+                            //表单输入框父级DIV容器滚动时，重新定位提示框
+                    $.addListener(parent, 'scroll', function(e) {
+                        for (var i = 0; i < Cache.ids.length; i++) {
+                            var d = Factory.getDialog(Cache.ids[i].id);
+                            if (d && !d.isClosed()) {
+                                var p = Util.getParam(d), opt = p.options;
+                                if (opt.type === Config.DialogType.tooltip) {
+                                    Util.setTooltipPosition(d);
                                 }
-                                Util.setPosition(d, par);
                             }
                         }
-                    }
-                });
-                return this;
-            },
-            //表单容器缓存，防止重复设置
-            FormCache: {},
-            //设置表单滚动事件
-            setFormScroll: function(obj) {
-                var parent = obj.parentNode;
-                while(parent.tagName === 'DIV') {
-                    var id = parent.id;                    
-                    if(id && !Factory.FormCache[id]) {
-                        var style = $.getElementStyle(parent, 'overflow');
-                        //判断表单容器overflow是否为auto
-                        if(style && style.toLowerCase() === 'auto') {
-                            //表单输入框父级DIV容器滚动时，重新定位提示框
-                            $.addListener(parent, 'scroll', function(e) {
-                                for (var i = 0; i < Cache.ids.length; i++) {
-                                    var d = Factory.getDialog(Cache.ids[i].id);
-                                    if (d && !d.isClosed()) {
-                                        var p = Util.getParam(d), opt = p.options;
-                                        if (opt.type === Config.DialogType.tooltip) {
-                                            Util.setTooltipPosition(d);
-                                        }
-                                    }
-                                }
-                            });
-                        }
-                        Factory.FormCache[id] = id;
-                    }
-                    parent = parent.parentNode;
+                    });
                 }
-                return this;
-            },
-            show: function (content, title, options, type, target, okButton) {
-                var par = Common.checkOptions(content, title, options, false, type),
-                    opt = {
-                        id: Common.buildId(par.id),
-                        type: Common.checkType(type || par.type, true)
-                    };
+                Factory.FormCache[id] = id;
+            }
+            parent = parent.parentNode;
+        }
+        return this;
+    },
+    show: function (content, title, options, type, target, okButton) {
+        var par = Common.checkOptions(content, title, options, false, type),
+        opt = {
+            id: Common.buildId(par.id),
+            type: Common.checkType(type || par.type, true)
+        };
 
-                $.extend(par, { target: target });
+        $.extend(par, { target: target });
 
-                switch (opt.type) {
-                    case Config.DialogType.alert:
-                        opt.buttons = Config.DialogButtons.OK;
-                        opt.showMin = opt.showMax = opt.maxAble = false;
-                        opt.keyClose = opt.escClose = opt.clickBgClose = false;
-                        opt.buttonPosition = 'right';
-                        break;
-                    case Config.DialogType.confirm:
-                        opt.buttons = Config.DialogButtons.OKCancel;
-                        opt.showMin = opt.showMax = opt.maxAble = false;
-                        opt.keyClose = opt.escClose = opt.clickBgClose = false;
-                        opt.buttonPosition = 'right';
-                        if($.isBoolean(okButton, false) || $.isUndefined(okButton)) {
-                            opt.defaultButton = 'OK';
-                        } else if($.isString(okButton, true) || $.isNumber(okButton)) {
-                            opt.defaultButton = okButton;
-                        }
-                        break;
-                    case Config.DialogType.dialog:
-                        opt.height = 'auto';
-                        break;
-                    case Config.DialogType.win:
-                        opt.showFoot = $.isBoolean(par.showFoot, false);
-                        opt.height = 'auto';
-                        break;
-                    case Config.DialogType.form:
-                        opt.height = 'auto';
-                        opt.delayClose = true;
-                        opt.form = true;
-                        break;
-                    case Config.DialogType.url:
-                    case Config.DialogType.load:
-                    case Config.DialogType.iframe:
-                        opt.showFoot = $.isBoolean(par.showFoot, false);
-                        opt.codeCallback = true;
-                        opt.keyClose = opt.escClose = opt.clickBgClose = false;
-                        break;
-                    case Config.DialogType.about:
-                    case Config.DialogType.toolwindow:
-                    case Config.DialogType.toolwin:
-                        opt.minAble = opt.maxAble = opt.sizeAble = opt.dragSize = false;
-                        opt.showLogo = false;
-                        opt.showFoot = false;
-                        break;
-                    case Config.DialogType.panel:
-                    case Config.DialogType.blank:
-                        opt.minAble = opt.maxAble = opt.sizeAble = opt.dragSize = false;
-                        opt.showLogo = opt.showMin = opt.showMax = opt.showClose = false;
-                        opt.showFoot = opt.showHead = false;
-                        opt.form = true;
+        switch (opt.type) {
+        case Config.DialogType.alert:
+            opt.buttons = Config.DialogButtons.OK;
+            opt.showMin = opt.showMax = opt.maxAble = false;
+            opt.keyClose = opt.escClose = opt.clickBgClose = false;
+            opt.buttonPosition = 'right';
+            break;
+        case Config.DialogType.confirm:
+            opt.buttons = Config.DialogButtons.OKCancel;
+            opt.showMin = opt.showMax = opt.maxAble = false;
+            opt.keyClose = opt.escClose = opt.clickBgClose = false;
+            opt.buttonPosition = 'right';
+            if($.isBoolean(okButton, false) || $.isUndefined(okButton)) {
+                opt.defaultButton = 'OK';
+            } else if($.isString(okButton, true) || $.isNumber(okButton)) {
+                opt.defaultButton = okButton;
+            }
+            break;
+        case Config.DialogType.dialog:
+            opt.height = 'auto';
+            break;
+        case Config.DialogType.win:
+            opt.showFoot = $.isBoolean(par.showFoot, false);
+            opt.height = 'auto';
+            break;
+        case Config.DialogType.form:
+            opt.height = 'auto';
+            opt.delayClose = true;
+            opt.form = true;
+            break;
+        case Config.DialogType.url:
+        case Config.DialogType.load:
+        case Config.DialogType.iframe:
+            opt.showFoot = $.isBoolean(par.showFoot, false);
+            opt.codeCallback = true;
+            opt.keyClose = opt.escClose = opt.clickBgClose = false;
+            break;
+        case Config.DialogType.about:
+        case Config.DialogType.toolwindow:
+        case Config.DialogType.toolwin:
+            opt.minAble = opt.maxAble = opt.sizeAble = opt.dragSize = false;
+            opt.showLogo = false;
+            opt.showFoot = false;
+            break;
+        case Config.DialogType.panel:
+        case Config.DialogType.blank:
+            opt.minAble = opt.maxAble = opt.sizeAble = opt.dragSize = false;
+            opt.showLogo = opt.showMin = opt.showMax = opt.showClose = false;
+            opt.showFoot = opt.showHead = false;
+            opt.form = true;
 
-                        if (opt.type === Config.DialogType.blank) {
-                            opt.padding = opt.radius = opt.border = 0;
-                        }
-                        break;
-                    case Config.DialogType.message:
-                    case Config.DialogType.msg:
-                    case Config.DialogType.tooltip:
-                    default:
-                        opt.buttons = Config.DialogButtons.None;
-                        opt.showHead = opt.showFoot = opt.dragSize = false;
+            if (opt.type === Config.DialogType.blank) {
+                opt.padding = opt.radius = opt.border = 0;
+            }
+            break;
+        case Config.DialogType.message:
+        case Config.DialogType.msg:
+        case Config.DialogType.tooltip:
+        default:
+            opt.buttons = Config.DialogButtons.None;
+            opt.showHead = opt.showFoot = opt.dragSize = false;
                         //opt.width = opt.minWidth = 'auto';
-                        opt.height = opt.minHeight = 'auto';
-                        opt.minAble = opt.maxAble = opt.lock = false;
-                        break;
-                }
+            opt.height = opt.minHeight = 'auto';
+            opt.minAble = opt.maxAble = opt.lock = false;
+            break;
+        }
                 //设置 tooltip 默认位置为 right
-                if (opt.type === Config.DialogType.tooltip && !opt.position) {
+        if (opt.type === Config.DialogType.tooltip && !opt.position) {
                     opt.position = 6; //right
                 }
 
@@ -984,8 +984,8 @@
             },
             loadCss: function (skin, func) {
                 var path = Config.FilePath,
-                    name = $.getFileName(path, true),
-                    dir = $.getFilePath(path);
+                name = $.getFileName(path, true),
+                dir = $.getFilePath(path);
 
                 if ($.isString(skin, true)) {
                     dir += 'skin/' + skin + '/';
@@ -1059,7 +1059,7 @@
             //判断对话框是否在窗口可见范围内
             isVisible: function(ctls) {
                 var bs = $.getBodySize(),
-                    ds = $.getOffset(ctls.dialog);
+                ds = $.getOffset(ctls.dialog);
 
                 //判断对话框是否在窗口范围外（保留20像素）
                 if(ds.left >= bs.width - 20 || ds.top >= bs.height - 20) {
@@ -1106,18 +1106,18 @@
                     return util.buildTooltip(_, options), util;
                 } else if (opt.lock) {
                     util.hideDocOverflow(_)
-                        .buildShade(_)
-                        .buildContainer(_);
+                    .buildShade(_)
+                    .buildContainer(_);
                 }
 
                 //设置创建时间，防止被document事件关闭
                 p.buildTime = new Date().getTime();
 
                 util.buildDialog(_)
-                    .buildMain(_, ctls.dialog)
-                    .buildHead(_, ctls.main, false)
-                    .buildBody(_, ctls.main)
-                    .buildFoot(_, ctls.main, false);
+                .buildMain(_, ctls.dialog)
+                .buildHead(_, ctls.main, false)
+                .buildBody(_, ctls.main)
+                .buildFoot(_, ctls.main, false);
 
                 if (opt.fixed) {
                     ctls.dialog.style.position = 'fixed';
@@ -1153,9 +1153,9 @@
                 util.setPosition(_, { position: opt.position, x: opt.x, y: opt.y });
 
                 util.setCache(_)
-                    .dragPosition(_)
-                    .dragSize(_)
-                    .setClickBgClose(_);
+                .dragPosition(_)
+                .dragSize(_)
+                .setClickBgClose(_);
 
                 if (opt.escClose) {
                     Factory.setEscClose();
@@ -1251,7 +1251,7 @@
                 ctls.shade.style.zIndex = opt.zindex;
                 ctls.shade.contentEditable = false;
                 var css,
-                    shadeStyle = $.extend({ opacity: opt.opacity }, opt.styles.shade);
+                shadeStyle = $.extend({ opacity: opt.opacity }, opt.styles.shade);
 
                 if ((css = Common.toCssText(shadeStyle, 'shade'))) {
                     ctls.shade.style.cssText = css;
@@ -1269,9 +1269,9 @@
             },
             buildCover: function (_, obj) {
                 obj.innerHTML = '<iframe id="' + _.getDialogId() + '-cover" src="about:blank"'
-                    + ' style="position:absolute; visibility:inherit; top:-1px; left:-1px;'
-                    + ' width:0px; height:0px; border:none; z-index:-1;'
-                    + ' filter=\'progid:DXImageTransform.Microsoft.Alpha(style=0,opacity=0)\';"></iframe>';
+                + ' style="position:absolute; visibility:inherit; top:-1px; left:-1px;'
+                + ' width:0px; height:0px; border:none; z-index:-1;'
+                + ' filter=\'progid:DXImageTransform.Microsoft.Alpha(style=0,opacity=0)\';"></iframe>';
                 return this;
             },
             setCoverSize: function (_) {
@@ -1459,9 +1459,9 @@
 
                 if (isTop) {
                     var isMin = opt.minAble && opt.showMin,
-                        isMax = opt.maxAble && opt.showMax,
-                        min = Common.getStatusText('min', opt.lang),
-                        max = Common.getStatusText('max', opt.lang);
+                    isMax = opt.maxAble && opt.showMax,
+                    min = Common.getStatusText('min', opt.lang),
+                    max = Common.getStatusText('max', opt.lang);
 
                     if (isMin) {
                         html.push('<a class="dialog-btn btn-min" code="min" key="min" title="' + min + '"></a>');
@@ -1473,9 +1473,9 @@
                 }
                 if (opt.closeAble && opt.showClose) {
                     var config = Config.ButtonConfig['close'],
-                        close = Common.getStatusText('close', opt.lang),
-                        text = '<a class="dialog-btn btn-close {1}" title="{2}" code="close" key="close"'
-                            + ' result="{result}" shortcut-key="{skey}"></a>';
+                    close = Common.getStatusText('close', opt.lang),
+                    text = '<a class="dialog-btn btn-close {1}" title="{2}" code="close" key="close"'
+                    + ' result="{result}" shortcut-key="{skey}"></a>';
                     html.push(text.format(config, opt.closeIcon, close));
                 }
 
@@ -1496,7 +1496,7 @@
                         }
                     }
                     util.setButtonEvent(_, childs, 'click', false)
-                        .setShortcutKeyEvent(_, btnClose ? [btnClose] : []);
+                    .setShortcutKeyEvent(_, btnClose ? [btnClose] : []);
                 }
                 return util;
             },
@@ -1559,12 +1559,12 @@
                         }, 15 * 1000);
                     }
                 } else {
-                    if (Common.isPanelType(opt.type)) {                     
+                    if (Common.isPanelType(opt.type)) {
                         //清除dialog.content边距
                         elem.style.padding = '0px';
                         elem.style.margin = '0px';
                         elem.style.borderRadius = '0px';
-                    }                    
+                    }
                     //elem.innerHTML = opt.content;
                     util.buildIconContent(_, true, elem);
                     if (!opt.showHead && ctls.btnPanel) {
@@ -1593,7 +1593,7 @@
             showIcon: function (_, elem) {
                 var util = this, p = util.getParam(_), opt = p.options, ctls = p.controls;
                 var isShow = Common.checkIcon(opt),
-                    isMin = p.status.min;
+                isMin = p.status.min;
 
                 if (!elem) {
                     elem = ctls.content;
@@ -1609,13 +1609,13 @@
             },
             buildIframe: function (_, opt, url) {
                 var height = '100%',
-                    html = ['<iframe class="dialog-iframe" width="100%"',
-                        ' id="{0}-iframe" height="{1}" src="{2}"',
-                        ' frameborder="0" scrolling="{3}"></iframe>',
-                        '<div id="{0}-iframe-shade" class="iframe-shade"></div>',
-                        '<div id="{0}-loading" class="dialog-loading">{4}</div>'
+                html = ['<iframe class="dialog-iframe" width="100%"',
+                    ' id="{0}-iframe" height="{1}" src="{2}"',
+                    ' frameborder="0" scrolling="{3}"></iframe>',
+                    '<div id="{0}-iframe-shade" class="iframe-shade"></div>',
+                    '<div id="{0}-loading" class="dialog-loading">{4}</div>'
                     ].join(''),
-                    param = $.isObject(opt.parameter) ? $.toJsonString(opt.parameter) : opt.parameter;
+                param = $.isObject(opt.parameter) ? $.toJsonString(opt.parameter) : opt.parameter;
 
                 return html.format(_.getDialogId(),
                     height,
@@ -1625,7 +1625,7 @@
             },
             reload: function(_) {
                 var util = this, p = util.getParam(_), opt = p.options,
-                    iframe = $I(_.getDialogId() + '-iframe');
+                iframe = $I(_.getDialogId() + '-iframe');
 
                 if (opt.reloadAble) {
                     if (util.isIframe(opt) && iframe !== null && iframe.src) {
@@ -1679,8 +1679,8 @@
 
                 for (var i = 0; i < panel.childNodes.length; i++) {
                     var obj = panel.childNodes[i],
-                        code = obj.getAttribute('code'),
-                        key = obj.getAttribute('key');
+                    code = obj.getAttribute('code'),
+                    key = obj.getAttribute('key');
                     buttons[code || key] = obj;
                 }
                 $.addListener(elem, ['mousedown', 'dblclick', 'click'], function () {
@@ -1689,7 +1689,7 @@
                 });
 
                 util.setButtonEvent(_, panel.childNodes, 'click', true)
-                    .setShortcutKeyEvent(_, panel.childNodes);
+                .setShortcutKeyEvent(_, panel.childNodes);
 
                 return !rebuild ? util.appendChild((ctls.foot = elem), pNode) : null, util;
             },
@@ -1725,8 +1725,8 @@
 
                 for (var k in keys) {
                     var config = {}, key = '', code = '', txt = '',
-                        func = null, par = null,
-                        css = i++ > 0 ? ' btn-ml' : '';
+                    func = null, par = null,
+                    css = i++ > 0 ? ' btn-ml' : '';
 
                     if (isCustom) {
                         key = k.toLowerCase();
@@ -1739,7 +1739,7 @@
                             code = key;
                         } else if ($.isObject(keys[k])) {
                             var cfg = keys[k];
-                            //记录code,用于获取自定义的回调函数                        
+                            //记录code,用于获取自定义的回调函数
                             code = key;
                             txt = cfg.text || '';
                             key = (cfg.key || key).toLowerCase();
@@ -1773,7 +1773,7 @@
                     if (config) {
                         var wapAttr = Util.isWap() ? ' style="outline:none;" onfocus="this.blur();"' : '';
                         text = '<a class="dialog-btn {css}{1}" code="{2}" key="{key}" result="{result}" href="{{0}}"'
-                            + ' tabindex="{3}" shortcut-key="{skey}" {4}>{text}</a>';
+                        + ' tabindex="{3}" shortcut-key="{skey}" {4}>{text}</a>';
                         html.push(text.format(config, css, code, tabindex++, wapAttr));
 
                         codes.push(key);
@@ -1804,7 +1804,7 @@
                     Config.Direction.TopRight,
                     Config.Direction.BottomLeft,
                     Config.Direction.BottomRight
-                ];
+                    ];
                 dir = $.isString(dir) ? [dir] : arr;
 
                 if (opt.sizeAble && opt.dragSize) {
@@ -1835,16 +1835,16 @@
                 div.dialogId = opt.id;
                 $.addClass(div, dir + '-switch');
                 switch (dir) {
-                    case 'top':
-                    case 'bottom':
+                case 'top':
+                case 'bottom':
                         //div.style.height = opt.padding + 'px';
-                        div.style.height = padding[dir];
-                        break;
-                    case 'left':
-                    case 'right':
+                    div.style.height = padding[dir];
+                    break;
+                case 'left':
+                case 'right':
                         //div.style.width = opt.padding + 'px';
-                        div.style.width = padding[dir];
-                        break;
+                    div.style.width = padding[dir];
+                    break;
                 }
                 return div;
             },
@@ -1910,9 +1910,9 @@
                     if (keyEvent) {
                         $.addListener(obj, 'keyup', function (e) {
                             var keyCode = $.cancelBubble().getKeyCode(e),
-                                keyChar = String.fromCharCode(keyCode).toUpperCase(),
-                                shortcutKey = this.getAttribute('shortcut-key') || '',
-                                next;
+                            keyChar = String.fromCharCode(keyCode).toUpperCase(),
+                            shortcutKey = this.getAttribute('shortcut-key') || '',
+                            next;
                             //if(32 == keyCode || (shkey >= 3 && keyChar == cg.shortcutKey[2].toUpperCase())){FuncCancel();}
                             // 判断是否为空格键 或 是否按下快捷键
                             if (Config.KEY_CODE.Space === keyCode || keyChar === shortcutKey) {
@@ -1961,9 +1961,9 @@
                         return false;
                     }
                     var keyCode = $.cancelBubble().getKeyCode(e),
-                        keyChar = String.fromCharCode(keyCode).toUpperCase(),
-                        btn = p.dics[keyChar],
-                        last = Factory.getLast();
+                    keyChar = String.fromCharCode(keyCode).toUpperCase(),
+                    btn = p.dics[keyChar],
+                    last = Factory.getLast();
 
                     if (!last || last.id !== p.dialog.id || (btn === p.btns.close && !p.options.keyClose)) {
                         return false;
@@ -2106,23 +2106,23 @@
                 if (p.none) { return util; }
 
                 var obj = ctls.dialog,
-                    bs = util.getBoundary(opt.parent),
-                    w = obj.offsetWidth,
-                    h = obj.offsetHeight,
-                    size = {
-                        percent: Common.isPercentSize(opt.width, opt.height),
-                        width: w,
-                        height: h,
-                        bs: bs
-                    },
-                    lastSize = opt.height === 'auto' ? size : $.extend({
-                        top: obj.offsetTop,
-                        left: obj.offsetLeft,
+                bs = util.getBoundary(opt.parent),
+                w = obj.offsetWidth,
+                h = obj.offsetHeight,
+                size = {
+                    percent: Common.isPercentSize(opt.width, opt.height),
+                    width: w,
+                    height: h,
+                    bs: bs
+                },
+                lastSize = opt.height === 'auto' ? size : $.extend({
+                    top: obj.offsetTop,
+                    left: obj.offsetLeft,
                         //right: (obj.offsetLeft + obj.offsetWidth),
                         //bottom: (obj.offsetTop + obj.offsetHeight)
-                        right: bs.width - (obj.offsetLeft + obj.offsetWidth),
-                        bottom: bs.height - (obj.offsetTop + obj.offsetHeight)
-                    }, size);
+                    right: bs.width - (obj.offsetLeft + obj.offsetWidth),
+                    bottom: bs.height - (obj.offsetTop + obj.offsetHeight)
+                }, size);
 
                 return util.setOptions(_, 'lastSize', lastSize), this;
             },
@@ -2131,10 +2131,10 @@
                 if (p.none) { return this; }
 
                 var opt = p.options,
-                    ctls = p.controls,
-                    btns = p.btns,
-                    obj = ctls.dialog,
-                    par = {};
+                ctls = p.controls,
+                btns = p.btns,
+                obj = ctls.dialog,
+                par = {};
 
                 if(!$.isElement(obj)) {
                     if(!loop) {
@@ -2185,10 +2185,10 @@
                 }
 
                 var cp = $.getScrollPosition(),
-                    bs = util.getBoundary(opt.parent),
-                    isSetBodySize = false,
-                    isSetPosition = false,
-                    isFullScreen = false;
+                bs = util.getBoundary(opt.parent),
+                isSetBodySize = false,
+                isSetPosition = false,
+                isFullScreen = false;
 
                 if (sp.type === Config.DialogStatus.max) {
                     if (!opt.maxAble) {
@@ -2217,8 +2217,8 @@
                         $.removeClass(obj, 'oui-dialog-min');
                     }
                     util.hideDocOverflow(_)
-                        .hideDragSwitch(_)
-                        .setStatus(_, Config.DialogStatus.max);
+                    .hideDragSwitch(_)
+                    .setStatus(_, Config.DialogStatus.max);
 
                 } else if (sp.type === Config.DialogStatus.min) {
                     if (!opt.minAble) {
@@ -2229,20 +2229,20 @@
 
                     par = { width: minW, height: minH };
                     $.addClass(ctls.foot, 'display-none')
-                        .addClass(obj, 'oui-dialog-min')
-                        .removeClass(btns.max, 'btn-normal');
+                    .addClass(obj, 'oui-dialog-min')
+                    .removeClass(btns.max, 'btn-normal');
                     if (p.status.max) {
                         $.removeClass(obj, 'oui-dialog-max');
                     }
                     $.setStyle(obj, { width: minW, height: minH }, 'px');
 
                     util.hideDragSwitch(_)
-                        .setStatus(_, Config.DialogStatus.min)
-                        .setPosition(_, { position: opt.position })
-                        .showIcon(_);
+                    .setStatus(_, Config.DialogStatus.min)
+                    .setPosition(_, { position: opt.position })
+                    .showIcon(_);
 
                     var pSize = $.getPaddingSize(obj),
-                        topWidth = minW - pSize.left - pSize.right;
+                    topWidth = minW - pSize.left - pSize.right;
                     util.setTitleSize(_, topWidth);
                 } else {
                     isSetBodySize = true;
@@ -2309,11 +2309,11 @@
                     return this;
                 }
                 var topWidth = width || ctls.head.clientWidth,
-                    logoWidth = ctls.logo ? ctls.logo.offsetWidth : 0,
-                    reloadWidth = ctls.reload ? ctls.reload.offsetWidth : 0,
-                    btnWidth = ctls.btnPanel ? ctls.btnPanel.offsetWidth : 0,
-                    timerWidth = ctls.timer ? ctls.timer.offsetWidth : 0,
-                    titleWidth = topWidth - logoWidth - reloadWidth - timerWidth - btnWidth - 10;
+                logoWidth = ctls.logo ? ctls.logo.offsetWidth : 0,
+                reloadWidth = ctls.reload ? ctls.reload.offsetWidth : 0,
+                btnWidth = ctls.btnPanel ? ctls.btnPanel.offsetWidth : 0,
+                timerWidth = ctls.timer ? ctls.timer.offsetWidth : 0,
+                titleWidth = topWidth - logoWidth - reloadWidth - timerWidth - btnWidth - 10;
 
                 if (ctls.title) {
                     ctls.title.style.maxWidth = (titleWidth) + 'px';
@@ -2347,7 +2347,7 @@
                     left: [1, 4, 7], center: [2, 5, 8], right: [3, 6, 9],
                     custom: [0, 10]
                 },
-                    keys = $.isArray(key) ? key : [key];
+                keys = $.isArray(key) ? key : [key];
 
                 for (var i in keys) {
                     if ((dic[keys[i]] || []).indexOf(pos) >= 0) {
@@ -2401,8 +2401,8 @@
                     x: opt.x,
                     y: opt.y
                 }, options),
-                    posLeft, posTop, posRight, posBottom,
-                    bs = util.getBoundary(opt.parent);
+                posLeft, posTop, posRight, posBottom,
+                bs = util.getBoundary(opt.parent);
 
                 //window.resize
                 if (par.event === 'window.resize') {
@@ -2410,10 +2410,10 @@
                         posLeft = bs.x;
                         posTop = bs.y;
                         var boxSize = $.getOffset(obj),
-                            boxWidth = boxSize.width,
-                            boxHeight = boxSize.height;
+                        boxWidth = boxSize.width,
+                        boxHeight = boxSize.height;
 
-                        if(opt.maxWidth !== '100%') {                            
+                        if(opt.maxWidth !== '100%') {
                             //当对话框最大化的宽度小于容器宽度时，可以设置对话框水平位置
                             switch(opt.maxPosition) {
                             case 0:
@@ -2444,7 +2444,7 @@
                             case 7:case 8:case 9:
                                 posTop = bs.height - boxHeight - opt.y;
                                 break;
-                            }                            
+                            }
                         }
 
                         return $.setStyle(obj, { left: posLeft, top: posTop }, 'px'), util;
@@ -2475,16 +2475,16 @@
                 }
 
                 var cp = $.getScrollPosition(),
-                    w = obj.offsetWidth,
-                    h = obj.offsetHeight,
+                w = obj.offsetWidth,
+                h = obj.offsetHeight,
                     //锁定界面相当于固定位置
-                    fixed = opt.lock || opt.fixed,
-                    cpTop = fixed ? bs.y : cp.top,
-                    cpLeft = fixed ? bs.x : cp.left,
-                    isCenter = util.checkPosition(_, Config.Position.Center, par.position),
-                    isMiddle = util.checkPosition(_, Config.Position.Middle, par.position),
-                    isBottom = false,
-                    isRight = false;
+                fixed = opt.lock || opt.fixed,
+                cpTop = fixed ? bs.y : cp.top,
+                cpLeft = fixed ? bs.x : cp.left,
+                isCenter = util.checkPosition(_, Config.Position.Center, par.position),
+                isMiddle = util.checkPosition(_, Config.Position.Middle, par.position),
+                isBottom = false,
+                isRight = false;
 
                 if ($.isPercent(opt.width)) {
                     posLeft = opt.margin.left || 0;
@@ -2532,20 +2532,20 @@
                 }
 
                 var cp = $.getScrollPosition(),
-                    moveTo = $.isBoolean(isMoveTo, false),
-                    bs = util.getBoundary(opt.parent),
-                    left = obj.offsetLeft,
-                    top = obj.offsetTop,
-                    w = obj.offsetWidth,
-                    h = obj.offsetHeight,
-                    x = parseInt(par.x || par.left, 10),
-                    y = parseInt(par.y || par.top, 10);
+                moveTo = $.isBoolean(isMoveTo, false),
+                bs = util.getBoundary(opt.parent),
+                left = obj.offsetLeft,
+                top = obj.offsetTop,
+                w = obj.offsetWidth,
+                h = obj.offsetHeight,
+                x = parseInt(par.x || par.left, 10),
+                y = parseInt(par.y || par.top, 10);
 
                 if (isNaN(x)) { x = moveTo ? left : bs.x; }
                 if (isNaN(y)) { y = moveTo ? top : bs.y; }
 
                 var posX = moveTo ? x : left + x,
-                    posY = moveTo ? y : top + y;
+                posY = moveTo ? y : top + y;
 
                 if (opt.limitRange) {
                     if (posX < bs.x) {
@@ -2572,17 +2572,17 @@
             getMoveDirection: function(pos) {
                 var dir = '';
                 switch(pos) {
-                    case 1: case 2: case 3:
-                    case 7: case 8: case 9:
-                        dir = 'vertical';
-                        break;
-                    case 4:
-                    case 6:
-                        dir = 'horizontal';
-                        break;
-                    case 5:
-                        dir = 'animate';
-                        break;
+                case 1: case 2: case 3:
+                case 7: case 8: case 9:
+                    dir = 'vertical';
+                    break;
+                case 4:
+                case 6:
+                    dir = 'horizontal';
+                    break;
+                case 5:
+                    dir = 'animate';
+                    break;
                 }
                 return dir;
             },
@@ -2606,19 +2606,19 @@
                 if (p.none || !obj) { return this; }
 
                 var cp = $.getScrollPosition(),
-                    x = pos.left, 
-                    y = pos.top,
-                    ani = opt.animate,
-                    dir = ani.direction || ani.dir || util.getMoveDirection(opt.position), 
-                    distance = ani.distance || 10,
-                    interval = ani.interval || 5,
-                    start = ani.start || 7,
-                    add = false,
-                    addX = false,
-                    addY = false,
-                    os = $.elemSize(obj),
-                    bs = util.getBoundary(opt.parent),
-                    rate = (pos.left - bs.x) / (pos.top - bs.y);
+                x = pos.left, 
+                y = pos.top,
+                ani = opt.animate,
+                dir = ani.direction || ani.dir || util.getMoveDirection(opt.position), 
+                distance = ani.distance || 10,
+                interval = ani.interval || 5,
+                start = ani.start || 7,
+                add = false,
+                addX = false,
+                addY = false,
+                os = $.elemSize(obj),
+                bs = util.getBoundary(opt.parent),
+                rate = (pos.left - bs.x) / (pos.top - bs.y);
 
                 //转换Position关键字为数字
                 util.convertPositionNumber(_, opt);
@@ -2666,20 +2666,20 @@
                         if(util.isAnimetePosOver(addX, x, pos, 'left')
                             && util.isAnimetePosOver(addY, y, pos, 'top')) {
                             x = pos.left;
-                            y = pos.top;
-                            window.clearInterval(util.timerMoveTo);
-                        } else {                            
-                            if(util.isAnimetePosOver(addX, x, pos, 'left')) {
-                                x = pos.left;
-                            }
-                            if(util.isAnimetePosOver(addY, y, pos, 'top')) {
-                                y = pos.top;
-                            }
+                        y = pos.top;
+                        window.clearInterval(util.timerMoveTo);
+                    } else {                            
+                        if(util.isAnimetePosOver(addX, x, pos, 'left')) {
+                            x = pos.left;
                         }
-
-                        $.setStyle(obj, { left: x - cp.left, top: y - cp.top }, 'px');
+                        if(util.isAnimetePosOver(addY, y, pos, 'top')) {
+                            y = pos.top;
+                        }
                     }
-                }, interval);
+
+                    $.setStyle(obj, { left: x - cp.left, top: y - cp.top }, 'px');
+                }
+            }, interval);
 
                 return util;
             },
@@ -2695,7 +2695,7 @@
                     'bottomleft',
                     'bottom',
                     'bottomright'
-                ];
+                    ];
                 var keys = {
                     topleft: 1, lefttop: 1,
                     top: 2,
@@ -2723,7 +2723,7 @@
             },
             setFinalPosition: function (pos, w, h, res, xs, ys, parent) {
                 var bs = this.getBoundary(parent),
-                    f = 0, s = 0;
+                f = 0, s = 0;
 
                 if (pos.indexOf('left') === 0) {
                     res.dir = 'left';
@@ -2758,10 +2758,10 @@
             },
             setTargetPosition: function (options, obj, isFixedSize) {
                 var util = this,
-                    par = $.extend({
-                        target: null,
-                        direction: 'auto',
-                        parent: null,
+                par = $.extend({
+                    target: null,
+                    direction: 'auto',
+                    parent: null,
                         position: 'bottomleft',    //默认停靠在目标控件左下方位置
                         x: null,
                         y: null
@@ -2776,31 +2776,31 @@
                 util.convertPositionKey(par);
 
                 var pos = par.position,
-                    p = $.getOffset(par.target),
-                    w = obj.offsetWidth,
-                    h = obj.offsetHeight,
-                    bs = util.getBoundary(par.parent),
-                    ps = $.getScrollPosition(),
-                    fs = {
-                        w: p.width,
-                        h: p.height,
-                        x: p.left,
-                        y: p.top
-                    },
-                    res = {
-                        left: fs.x,
-                        top: fs.y,
-                        moveX: 0,
-                        moveY: 0,
-                        css: ''
-                    },
-                    newTop = res.top,
-                    newLeft = res.left,
-                    isOver = true;
+                p = $.getOffset(par.target),
+                w = obj.offsetWidth,
+                h = obj.offsetHeight,
+                bs = util.getBoundary(par.parent),
+                ps = $.getScrollPosition(),
+                fs = {
+                    w: p.width,
+                    h: p.height,
+                    x: p.left,
+                    y: p.top
+                },
+                res = {
+                    left: fs.x,
+                    top: fs.y,
+                    moveX: 0,
+                    moveY: 0,
+                    css: ''
+                },
+                newTop = res.top,
+                newLeft = res.left,
+                isOver = true;
 
                 var ys = { top: fs.y - h - par.y, bottom: fs.y + fs.h + par.y },
-                    xs = { left: fs.x - w - par.x, right: fs.x + fs.w + par.x },
-                    distance = 12;
+                xs = { left: fs.x - w - par.x, right: fs.x + fs.w + par.x },
+                distance = 12;
 
                 //如果左右边距小于100px，则将左右位置改为上下位置
                 if(xs.left < 100 && (bs.width - xs.right) < 100 && (pos.startsWith('left') || pos.startsWith('right'))) {
@@ -2849,29 +2849,29 @@
                 }
 
                 switch (pos) {
-                    case 'top':
-                    case 'bottom':
-                        res.left = fs.x - (w - fs.w) / 2;
-                        if (res.left < ps.left || (res.left + w) > (bs.width + ps.left)) {
-                            newLeft = res.left < ps.left ? ps.left : bs.width + ps.left - h;
-                            res.moveX = res.left - newLeft;
-                            res.left = newLeft;
-                        }
-                        if (fs.w < w) {
-                            res.css = 'left: ' + (w / 2 + res.moveX) + 'px;';
-                        }
+                case 'top':
+                case 'bottom':
+                    res.left = fs.x - (w - fs.w) / 2;
+                    if (res.left < ps.left || (res.left + w) > (bs.width + ps.left)) {
+                        newLeft = res.left < ps.left ? ps.left : bs.width + ps.left - h;
+                        res.moveX = res.left - newLeft;
+                        res.left = newLeft;
+                    }
+                    if (fs.w < w) {
+                        res.css = 'left: ' + (w / 2 + res.moveX) + 'px;';
+                    }
 
-                        if(res.left + w > bs.width) {
-                            res.left = fs.x - (w - fs.w);
-                            res.css = 'left: ' + (w - distance) + 'px;';
-                        } else if(res.left < bs.x) {
-                            res.left = fs.x;
-                            res.css = 'left: ' + distance + 'px;';
-                        }
-                        break;
-                    case 'left':
-                    case 'right':
-                        res.top = fs.y - (h - fs.h) / 2;
+                    if(res.left + w > bs.width) {
+                        res.left = fs.x - (w - fs.w);
+                        res.css = 'left: ' + (w - distance) + 'px;';
+                    } else if(res.left < bs.x) {
+                        res.left = fs.x;
+                        res.css = 'left: ' + distance + 'px;';
+                    }
+                    break;
+                case 'left':
+                case 'right':
+                    res.top = fs.y - (h - fs.h) / 2;
                         //注释以下代码，当DIV容器滚动时，以便让提示框跟随目标输入框移动位置
                         /* 
                         if (res.top < ps.top || (res.top + h) > (bs.height + ps.top)) {
@@ -2880,86 +2880,86 @@
                             res.top = newTop;
                         }
                         */
-                        if (fs.h < h) {
-                            res.css = 'top: ' + (h / 2 + res.moveY) + 'px;';
-                        }
+                    if (fs.h < h) {
+                        res.css = 'top: ' + (h / 2 + res.moveY) + 'px;';
+                    }
 
-                        if(res.top + h > bs.height) {
-                            res.top = fs.y - (h - fs.h);
-                            res.css = 'top: ' + (h - distance) + 'px;';
-                        } else if(res.top < bs.y) {
-                            res.top = fs.y;
-                            res.css = 'top: ' + distance + 'px;';
-                        }
-                        break;
-                    case 'topleft':
-                    case 'bottomleft':
-                        res.left = fs.x;
-                        res.css = 'left: ' + distance + 'px;';
+                    if(res.top + h > bs.height) {
+                        res.top = fs.y - (h - fs.h);
+                        res.css = 'top: ' + (h - distance) + 'px;';
+                    } else if(res.top < bs.y) {
+                        res.top = fs.y;
+                        res.css = 'top: ' + distance + 'px;';
+                    }
+                    break;
+                case 'topleft':
+                case 'bottomleft':
+                    res.left = fs.x;
+                    res.css = 'left: ' + distance + 'px;';
 
-                        if(res.left + w > bs.width) {
-                            res.left = fs.x - (w - fs.w);
-                            res.css = 'left: ' + (w - distance) + 'px;';
-
-                            if(res.left < bs.x) {
-                                res.left = fs.x - (w - fs.w) / 2;
-                                if (fs.w < w) {
-                                    res.css = 'left: ' + (w / 2 + res.moveX) + 'px;';
-                                }
-                            }
-                        }
-                        break;
-                    case 'topright':
-                    case 'bottomright':
+                    if(res.left + w > bs.width) {
                         res.left = fs.x - (w - fs.w);
                         res.css = 'left: ' + (w - distance) + 'px;';
 
                         if(res.left < bs.x) {
-                            res.left = fs.x;
-                            res.css = 'left: ' + distance + 'px;';
-
-                            if(res.left + w > bs.width) {
-                                res.left = fs.x - (w - fs.w) / 2;
-                                if (fs.w < w) {
-                                    res.css = 'left: ' + (w / 2 + res.moveX) + 'px;';
-                                }
+                            res.left = fs.x - (w - fs.w) / 2;
+                            if (fs.w < w) {
+                                res.css = 'left: ' + (w / 2 + res.moveX) + 'px;';
                             }
                         }
-                        break;
-                    case 'lefttop':
-                    case 'righttop':
-                        res.top = fs.y;
-                        res.css = 'top: ' + distance + 'px;';
+                    }
+                    break;
+                case 'topright':
+                case 'bottomright':
+                    res.left = fs.x - (w - fs.w);
+                    res.css = 'left: ' + (w - distance) + 'px;';
 
-                        if(res.top + h > bs.height) {
-                            res.top = fs.y - (h - fs.h);
-                            res.css = 'top: ' + (h - distance) + 'px;';
+                    if(res.left < bs.x) {
+                        res.left = fs.x;
+                        res.css = 'left: ' + distance + 'px;';
 
-                            if(res.top < bs.y) {
-                                res.top = fs.y - (h - fs.h) / 2;
-                                if (fs.h < h) {
-                                    res.css = 'top: ' + (h / 2 + res.moveY) + 'px;';
-                                }
+                        if(res.left + w > bs.width) {
+                            res.left = fs.x - (w - fs.w) / 2;
+                            if (fs.w < w) {
+                                res.css = 'left: ' + (w / 2 + res.moveX) + 'px;';
                             }
                         }
-                        break;
-                    case 'leftbottom':
-                    case 'rightbottom':
+                    }
+                    break;
+                case 'lefttop':
+                case 'righttop':
+                    res.top = fs.y;
+                    res.css = 'top: ' + distance + 'px;';
+
+                    if(res.top + h > bs.height) {
                         res.top = fs.y - (h - fs.h);
                         res.css = 'top: ' + (h - distance) + 'px;';
 
                         if(res.top < bs.y) {
-                            res.top = fs.y;
-                            res.css = 'top: ' + distance + 'px;';
-
-                            if(res.top + h > bs.height) {
-                                res.top = fs.y - (h - fs.h) / 2;
-                                if (fs.h < h) {
-                                    res.css = 'top: ' + (h / 2 + res.moveY) + 'px;';
-                                }
+                            res.top = fs.y - (h - fs.h) / 2;
+                            if (fs.h < h) {
+                                res.css = 'top: ' + (h / 2 + res.moveY) + 'px;';
                             }
                         }
-                        break;
+                    }
+                    break;
+                case 'leftbottom':
+                case 'rightbottom':
+                    res.top = fs.y - (h - fs.h);
+                    res.css = 'top: ' + (h - distance) + 'px;';
+
+                    if(res.top < bs.y) {
+                        res.top = fs.y;
+                        res.css = 'top: ' + distance + 'px;';
+
+                        if(res.top + h > bs.height) {
+                            res.top = fs.y - (h - fs.h) / 2;
+                            if (fs.h < h) {
+                                res.css = 'top: ' + (h / 2 + res.moveY) + 'px;';
+                            }
+                        }
+                    }
+                    break;
                 }
                 if (isFixedSize) {
                     $.setStyle(obj, { width: w, height: h }, 'px');
@@ -2974,29 +2974,29 @@
                 if (p.none) { return this; }
 
                 var isWap = util.isWap(),
-                    evNameDown = isWap ? 'ontouchstart' : 'onmousedown',
-                    evNameUp = isWap ? 'ontouchend' : 'onmouseup',
-                    evNameMove = isWap ? 'ontouchmove' : 'onmousemove';
+                evNameDown = isWap ? 'ontouchstart' : 'onmousedown',
+                evNameUp = isWap ? 'ontouchend' : 'onmouseup',
+                evNameMove = isWap ? 'ontouchmove' : 'onmousemove';
 
                 var obj = ctls.dialog,
-                    docMouseMove = document[evNameMove],
-                    docMouseUp = document[evNameUp];
+                docMouseMove = document[evNameMove],
+                docMouseUp = document[evNameUp];
 
                 function moveDialog(ev) {
                     if (!opt.moveAble || !opt.dragMove) {
                         return $.cancelBubble(), false;
                     }
                     var evt = ev || $.getEvent(),
-                        cp = $.getScrollPosition(),
-                        bs = util.getBoundary(opt.parent),
-                        clientWidth = bs.width,
-                        clientHeight = bs.height,
-                        moveX = isWap ? evt.touches[0].clientX : evt.clientX,
-                        moveY = isWap ? evt.touches[0].clientY : evt.clientY,
-                        top = obj.offsetTop,
-                        left = obj.offsetLeft,
-                        moveAble = true,
-                        isToNormal = false;
+                    cp = $.getScrollPosition(),
+                    bs = util.getBoundary(opt.parent),
+                    clientWidth = bs.width,
+                    clientHeight = bs.height,
+                    moveX = isWap ? evt.touches[0].clientX : evt.clientX,
+                    moveY = isWap ? evt.touches[0].clientY : evt.clientY,
+                    top = obj.offsetTop,
+                    left = obj.offsetLeft,
+                    moveAble = true,
+                    isToNormal = false;
 
                     if(isWap) {
                         evt.preventDefault();
@@ -3008,8 +3008,8 @@
                         }
                         util.showIframeShade(ctls, true);
                         var e = ev || $.getEvent(),
-                            x = left + (isWap ? e.touches[0].clientX : e.clientX) - moveX,
-                            y = top + (isWap ? e.touches[0].clientY : e.clientY) - moveY;
+                        x = left + (isWap ? e.touches[0].clientX : e.clientX) - moveX,
+                        y = top + (isWap ? e.touches[0].clientY : e.clientY) - moveY;
 
                         if (!isToNormal && p.status.max && (x > 2 || y > 2)) {
                             isToNormal = true;
@@ -3060,7 +3060,7 @@
                     x: 0,
                     y: 0
                 }, options),
-                    isMin = p.status.min;
+                isMin = p.status.min;
 
                 par.x = parseInt(par.x || par.width || 0, 10);
                 par.y = parseInt(par.y || par.height || 0, 10);
@@ -3089,11 +3089,11 @@
                     };
                 }
                 var bs = util.getBoundary(opt.parent),
-                    headHeight = (ctls.head ? ctls.head.offsetHeight : 0),
-                    footHeight = (ctls.foot ? ctls.foot.offsetHeight : 0),
-                    w, h;
+                headHeight = (ctls.head ? ctls.head.offsetHeight : 0),
+                footHeight = (ctls.foot ? ctls.foot.offsetHeight : 0),
+                w, h;
 
-                if (par.resizeTo && !isDrag) {                    
+                if (par.resizeTo && !isDrag) {
                     w = par.x;
                     h = par.y;
                     var ds = util.getSize(_, opt, ctls, obj);
@@ -3101,11 +3101,11 @@
                         if(w <= 0){ w = ds.width; }
                         if(h <= 0) { h = ds.height; }
                         var padding = Common.getCssAttrSize(opt.padding, { attr: 'padding', isLimit: true }),
-                            ph = padding.top + padding.bottom,
-                            pw = padding.left + padding.right,
-                            conPadding = Common.getCssAttrSize(ctls.content, { attr: 'padding', isLimit: true }),
-                            cph = conPadding.top + conPadding.bottom,
-                            cpw = conPadding.left + conPadding.right;
+                        ph = padding.top + padding.bottom,
+                        pw = padding.left + padding.right,
+                        conPadding = Common.getCssAttrSize(ctls.content, { attr: 'padding', isLimit: true }),
+                        cph = conPadding.top + conPadding.bottom,
+                        cpw = conPadding.left + conPadding.right;
 
                         w += pw + cpw;
                         h += headHeight + footHeight + padding.top + ph + cph;
@@ -3119,11 +3119,11 @@
                 }
 
                 var newWidth = w < dp.minWidth ? dp.minWidth : w,
-                    newHeight = h < dp.minHeight ? dp.minHeight : h,
-                    newLeft = bs.x,
-                    newTop = bs.y,
-                    x = bs.x,
-                    y = bs.y;
+                newHeight = h < dp.minHeight ? dp.minHeight : h,
+                newLeft = bs.x,
+                newTop = bs.y,
+                x = bs.x,
+                y = bs.y;
 
                 var mw = parseInt(opt.maxWidth, 10);
                 if (opt.maxWidth !== '100%' && !isNaN(mw) && newWidth > mw) {
@@ -3176,7 +3176,7 @@
                 }
 
                 switch (par.dir) {
-                    case Config.Direction.BottomRight:
+                case Config.Direction.BottomRight:
                     case Config.Direction.RightBottom: //不用处理
                         break;
                     case Config.Direction.Right:
@@ -3204,108 +3204,108 @@
                     case Config.Direction.LeftBottom:
                         $.setStyle(obj, { left: newLeft }, 'px');
                         break;
-                }
-                util.setBodySize(_, { fullScreen: false, drag: isDrag });
+                    }
+                    util.setBodySize(_, { fullScreen: false, drag: isDrag });
 
-                if (ctls.foot && ctls.dialog.offsetHeight < minHeight) {
-                    ctls.foot.style.visibility = 'hidden';
-                    _.dragScaleHideBottom = true;
-                } else if (_.dragScaleHideBottom) {
-                    ctls.foot.style.visibility = 'visible';
-                }
+                    if (ctls.foot && ctls.dialog.offsetHeight < minHeight) {
+                        ctls.foot.style.visibility = 'hidden';
+                        _.dragScaleHideBottom = true;
+                    } else if (_.dragScaleHideBottom) {
+                        ctls.foot.style.visibility = 'visible';
+                    }
 
-                if (!isDrag && par.dir === Config.Direction.Center) {
-                    util.setPosition(_, par);
-                }
+                    if (!isDrag && par.dir === Config.Direction.Center) {
+                        util.setPosition(_, par);
+                    }
 
                 //判断对话框当前状态是否被最小化，若最小化，设置完尺寸之后需要重新最小化
-                if (isMin) {
-                    util.setSize(_, { type: Config.DialogStatus.min });
-                }
+                    if (isMin) {
+                        util.setSize(_, { type: Config.DialogStatus.min });
+                    }
 
-                return util.showIcon(_);
-            },
-            isAutoSize: function (_, options) {
-                var util = this, p = this.getParam(_), opt = options || p.options, ctls = p.controls;
-                if (p.none) { return false; }
+                    return util.showIcon(_);
+                },
+                isAutoSize: function (_, options) {
+                    var util = this, p = this.getParam(_), opt = options || p.options, ctls = p.controls;
+                    if (p.none) { return false; }
 
-                var isAutoSize = false;
-                if (_.isClosed()) {
-                    return false;
-                }
-                if (opt.width === 'auto') {
-                    ctls.dialog.style.width = 'auto';
-                    ctls.main ? ctls.main.style.width = 'auto' : '';
-                    ctls.body ? ctls.body.style.width = 'auto' : '';
-                    ctls.content ? ctls.content.style.width = 'auto' : '';
-                    isAutoSize = true;
-                }
-                if (opt.height === 'auto') {
-                    ctls.dialog.style.height = 'auto';
-                    ctls.main ? ctls.main.style.height = 'auto' : '';
-                    ctls.body && ctls.body.style ? ctls.body.style.height = 'auto' : '';
-                    ctls.content ? ctls.content.style.height = 'auto' : '';
-                    isAutoSize = true;
-                }
+                    var isAutoSize = false;
+                    if (_.isClosed()) {
+                        return false;
+                    }
+                    if (opt.width === 'auto') {
+                        ctls.dialog.style.width = 'auto';
+                        ctls.main ? ctls.main.style.width = 'auto' : '';
+                        ctls.body ? ctls.body.style.width = 'auto' : '';
+                        ctls.content ? ctls.content.style.width = 'auto' : '';
+                        isAutoSize = true;
+                    }
+                    if (opt.height === 'auto') {
+                        ctls.dialog.style.height = 'auto';
+                        ctls.main ? ctls.main.style.height = 'auto' : '';
+                        ctls.body && ctls.body.style ? ctls.body.style.height = 'auto' : '';
+                        ctls.content ? ctls.content.style.height = 'auto' : '';
+                        isAutoSize = true;
+                    }
 
-                return isAutoSize;
-            },
-            isChange: function (newContent, oldContent) {
-                return newContent !== oldContent;
-            },
-            getAutoSize: function (_, isLimit) {
-                var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls;
-                if (p.none) { return this; }
+                    return isAutoSize;
+                },
+                isChange: function (newContent, oldContent) {
+                    return newContent !== oldContent;
+                },
+                getAutoSize: function (_, isLimit) {
+                    var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls;
+                    if (p.none) { return this; }
 
-                var pH = parseInt($.getElementStyle(ctls.dialog, 'padding', 0), 10),
+                    var pH = parseInt($.getElementStyle(ctls.dialog, 'padding', 0), 10),
                     cH = parseInt($.getElementStyle(ctls.main, 'padding', 0), 10),
                     s = {
                         width: ctls.content.offsetWidth + pH * 2 + cH * 2,
                         height: ctls.content.offsetHeight + pH * 2 + cH * 2
                     };
 
-                if (ctls.head) {
-                    s.height += ctls.head.offsetHeight;
-                }
+                    if (ctls.head) {
+                        s.height += ctls.head.offsetHeight;
+                    }
 
-                if (ctls.foot) {
-                    s.height += ctls.foot.offsetHeight;
-                }
+                    if (ctls.foot) {
+                        s.height += ctls.foot.offsetHeight;
+                    }
 
                 //增加20px高度留白
-                s.height += 20;
+                    s.height += 20;
 
-                if (isLimit) {
-                    var mw = parseInt('0' + opt.minWidth, 10),
+                    if (isLimit) {
+                        var mw = parseInt('0' + opt.minWidth, 10),
                         mh = parseInt('0' + opt.minHeight, 10);
 
-                    if (s.width < mw) {
-                        s.width = mw;
-                    }
+                        if (s.width < mw) {
+                            s.width = mw;
+                        }
 
-                    if (s.height < mh) {
-                        s.height = mh;
+                        if (s.height < mh) {
+                            s.height = mh;
+                        }
                     }
-                }
-                return s;
-            },
-            setBodySize: function (_, options) {
-                var util = this, p = util.getParam(_), opt = p.options, ctls = p.controls;
-                if (p.none) { return util; }
+                    return s;
+                },
+                setBodySize: function (_, options) {
+                    var util = this, p = util.getParam(_), opt = p.options, ctls = p.controls;
+                    if (p.none) { return util; }
 
-                var par = $.extend({
+                    var par = $.extend({
                     event: '',          //window.resize, show
                     drag: false,
                     lastSize: undefined
                 }, options);
 
-                var obj = ctls.dialog,
+                    var obj = ctls.dialog,
                     bs = util.getBoundary(opt.parent);
-                if (!obj) {
-                    return util;
-                }
+                    if (!obj) {
+                        return util;
+                    }
 
-                var boxWidth = obj.clientWidth,
+                    var boxWidth = obj.clientWidth,
                     boxHeight = obj.clientHeight,
                     padding = Common.getCssAttrSize(opt.padding, { attr: 'padding', isLimit: true }),
                     //paddingHeight = parseInt('0' + $.getElementStyle(obj, 'padding'), 10),
@@ -3315,110 +3315,110 @@
                     margin = Common.getCssAttrSize(opt.margin, { attr: 'margin' }),
                     marginHeight = margin.top + margin.bottom;
 
-                if (par.event === 'show' && $.isObject(par.lastSize)) {
-                    boxWidth = par.lastSize.width;
-                    boxHeight = par.lastSize.height;
-                    obj.style.width = boxWidth + 'px';
-                    obj.style.height = boxHeight + 'px';
-                }
+                    if (par.event === 'show' && $.isObject(par.lastSize)) {
+                        boxWidth = par.lastSize.width;
+                        boxHeight = par.lastSize.height;
+                        obj.style.width = boxWidth + 'px';
+                        obj.style.height = boxHeight + 'px';
+                    }
 
                 //在非拖动大小并且常态状态时，设置对话框百分比尺寸
-                if (!par.drag && _.isNormal() && Common.isPercentSize(opt.width, opt.height)) {
-                    if ($.isPercent(opt.width)) {
-                        opt.margin = margin;
-                        boxWidth = bs.width * parseInt(opt.width, 10) / 100 - margin.left - margin.right;
+                    if (!par.drag && _.isNormal() && Common.isPercentSize(opt.width, opt.height)) {
+                        if ($.isPercent(opt.width)) {
+                            opt.margin = margin;
+                            boxWidth = bs.width * parseInt(opt.width, 10) / 100 - margin.left - margin.right;
+                        }
+                        if ($.isPercent(opt.height)) {
+                            opt.margin = margin;
+                            boxHeight = bs.height * parseInt(opt.height, 10) / 100 - margin.top - margin.bottom;
+                        }
+                        $.setStyle(ctls.dialog, { width: boxWidth, height: boxHeight }, 'px');
                     }
-                    if ($.isPercent(opt.height)) {
-                        opt.margin = margin;
-                        boxHeight = bs.height * parseInt(opt.height, 10) / 100 - margin.top - margin.bottom;
-                    }
-                    $.setStyle(ctls.dialog, { width: boxWidth, height: boxHeight }, 'px');
-                }
 
-                if (opt.height !== 'auto') {
+                    if (opt.height !== 'auto') {
                     /*
                     if(boxHeight < opt.height && !_.events.dragingSize) {
                         boxHeight = opt.height;
                         obj.style.height = boxHeight + 'px';
                     } else 
                     */
-                    if (!par.fullScreen) {
-                        if (Common.isNumberSize(opt.maxHeight)) {
-                            var mh = parseInt(opt.maxHeight, 10);
-                            if (boxHeight > mh) {
-                                boxHeight = mh;
-                                obj.style.height = boxHeight + 'px';
+                        if (!par.fullScreen) {
+                            if (Common.isNumberSize(opt.maxHeight)) {
+                                var mh = parseInt(opt.maxHeight, 10);
+                                if (boxHeight > mh) {
+                                    boxHeight = mh;
+                                    obj.style.height = boxHeight + 'px';
+                                }
                             }
                         }
                     }
-                }
 
-                if (boxWidth > bs.width) {
-                    boxWidth = bs.width - 20;
-                    obj.style.width = boxWidth + 'px';
-                } else if (maxSize.maxWidth && boxWidth > maxSize.maxWidth) {
-                    boxWidth = maxSize.maxWidth;
-                    obj.style.width = boxWidth + 'px';
+                    if (boxWidth > bs.width) {
+                        boxWidth = bs.width - 20;
+                        obj.style.width = boxWidth + 'px';
+                    } else if (maxSize.maxWidth && boxWidth > maxSize.maxWidth) {
+                        boxWidth = maxSize.maxWidth;
+                        obj.style.width = boxWidth + 'px';
                     //当对话框最大化的宽度小于容器宽度时，可以设置对话框水平位置
-                    switch(opt.maxPosition) {
-                    case 0:
-                        break;
-                    case 1:case 4:case 7:
-                        obj.style.left = bs.x + opt.x + 'px';
-                        break;
-                    case 2:case 5:case 8:
-                        obj.style.left = parseInt((bs.width - boxWidth) / 2, 10) + opt.x + 'px';
-                        break;
-                    case 3:case 6:case 9:
-                        obj.style.left = bs.width - boxWidth - opt.x + 'px';
-                        break;
+                        switch(opt.maxPosition) {
+                        case 0:
+                            break;
+                        case 1:case 4:case 7:
+                            obj.style.left = bs.x + opt.x + 'px';
+                            break;
+                        case 2:case 5:case 8:
+                            obj.style.left = parseInt((bs.width - boxWidth) / 2, 10) + opt.x + 'px';
+                            break;
+                        case 3:case 6:case 9:
+                            obj.style.left = bs.width - boxWidth - opt.x + 'px';
+                            break;
+                        }
+                    } else if (maxSize.minWidth && boxWidth < maxSize.minWidth) {
+                        boxWidth = maxSize.minWidth;
+                        obj.style.width = boxWidth + 'px';
                     }
-                } else if (maxSize.minWidth && boxWidth < maxSize.minWidth) {
-                    boxWidth = maxSize.minWidth;
-                    obj.style.width = boxWidth + 'px';
-                }
 
-                if (boxHeight > bs.height) {
-                    boxHeight = bs.height - 20;
-                    obj.style.height = boxHeight + 'px';
-                } else if (maxSize.maxHeight && boxHeight > maxSize.maxHeight) {
-                    boxHeight = maxSize.maxHeight;
-                    obj.style.height = boxHeight + 'px';
+                    if (boxHeight > bs.height) {
+                        boxHeight = bs.height - 20;
+                        obj.style.height = boxHeight + 'px';
+                    } else if (maxSize.maxHeight && boxHeight > maxSize.maxHeight) {
+                        boxHeight = maxSize.maxHeight;
+                        obj.style.height = boxHeight + 'px';
                     //当对话框最大化的高度小于容器高度时，可以设置对话框垂直位置
-                    switch(opt.maxPosition) {
-                    case 0:
-                        break;
-                    case 1:case 2:case 3:
-                        obj.style.top = bs.y + opt.y + 'px';
-                        break;
-                    case 4:case 5:case 6:
-                        obj.style.top = parseInt((bs.height - boxHeight) / 2, 10) + opt.y + 'px';
-                        break;
-                    case 7:case 8:case 9:
-                        obj.style.top = bs.height - boxHeight - opt.y + 'px';
-                        break;
+                        switch(opt.maxPosition) {
+                        case 0:
+                            break;
+                        case 1:case 2:case 3:
+                            obj.style.top = bs.y + opt.y + 'px';
+                            break;
+                        case 4:case 5:case 6:
+                            obj.style.top = parseInt((bs.height - boxHeight) / 2, 10) + opt.y + 'px';
+                            break;
+                        case 7:case 8:case 9:
+                            obj.style.top = bs.height - boxHeight - opt.y + 'px';
+                            break;
+                        }
+                    } else if (maxSize.minHeight && boxHeight < maxSize.minHeight) {
+                        boxHeight = maxSize.minHeight;
+                        obj.style.height = boxHeight + 'px';
                     }
-                } else if (maxSize.minHeight && boxHeight < maxSize.minHeight) {
-                    boxHeight = maxSize.minHeight;
-                    obj.style.height = boxHeight + 'px';
-                }
 
-                boxWidth = obj.clientWidth;
-                boxHeight = obj.clientHeight;
+                    boxWidth = obj.clientWidth;
+                    boxHeight = obj.clientHeight;
 
                 //拖动大小时，重新设置尺寸百分比
-                if (par.drag) {
-                    if ($.isPercent(opt.width)) {
-                        opt.width = parseInt(((obj.offsetWidth + margin.left + margin.right) * 100 / bs.width), 10) + '%';
+                    if (par.drag) {
+                        if ($.isPercent(opt.width)) {
+                            opt.width = parseInt(((obj.offsetWidth + margin.left + margin.right) * 100 / bs.width), 10) + '%';
+                        }
+                        if ($.isPercent(opt.height)) {
+                            opt.height = parseInt(((obj.offsetHeight + margin.top + margin.bottom) * 100 / bs.height), 10) + '%';
+                        }
                     }
-                    if ($.isPercent(opt.height)) {
-                        opt.height = parseInt(((obj.offsetHeight + margin.top + margin.bottom) * 100 / bs.height), 10) + '%';
-                    }
-                }
 
-                $.setStyle(ctls.main, { height: boxHeight - paddingHeight }, 'px');
+                    $.setStyle(ctls.main, { height: boxHeight - paddingHeight }, 'px');
 
-                var mainHeight = ctls.main ? ctls.main.offsetHeight : ctls.dialog.offsetHeight,
+                    var mainHeight = ctls.main ? ctls.main.offsetHeight : ctls.dialog.offsetHeight,
                     titleHeight = ctls.head ? ctls.head.offsetHeight : 0,
                     bottomHeight = ctls.foot ? ctls.foot.offsetHeight : 0,
                     size = {
@@ -3426,329 +3426,329 @@
                         height: (mainHeight - titleHeight - bottomHeight) + 'px'
                     };
 
-                if (ctls.foot) {
-                    size.marginBottom = ctls.foot.offsetHeight + 'px';
-                }
-                if (ctls.iframe) {
-                    $.setStyle(ctls.iframe, { height: size.height });
-                }
-
-                $.setStyle(ctls.body, size);
-
-                if (p.timerCover) {
-                    window.clearTimeout(p.timerCover);
-                }
-                p.timerCover = window.setTimeout(function () {
-                    util.setCoverSize(_);
-                }, 100);
-
-                util.setTitleSize(_).showIcon(_);
-
-                if($.isFunction(opt.resize)) {
-                    if(par.drag && opt.resizeDebounce) {
-                        if(p.timerResize) { window.clearTimeout(p.timerResize); }
-                        p.timerResize = window.setTimeout(function() { util.resize(_); }, 30);
-                    } else {
-                        util.resize(_);
+                    if (ctls.foot) {
+                        size.marginBottom = ctls.foot.offsetHeight + 'px';
                     }
-                }
-                return util;
-            },
-            dragToNormal: function (_, evt, bs, moveX, moveY) {
-                var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls, obj = ctls.dialog;
-                if (p.none) { return this; }
+                    if (ctls.iframe) {
+                        $.setStyle(ctls.iframe, { height: size.height });
+                    }
+
+                    $.setStyle(ctls.body, size);
+
+                    if (p.timerCover) {
+                        window.clearTimeout(p.timerCover);
+                    }
+                    p.timerCover = window.setTimeout(function () {
+                        util.setCoverSize(_);
+                    }, 100);
+
+                    util.setTitleSize(_).showIcon(_);
+
+                    if($.isFunction(opt.resize)) {
+                        if(par.drag && opt.resizeDebounce) {
+                            if(p.timerResize) { window.clearTimeout(p.timerResize); }
+                            p.timerResize = window.setTimeout(function() { util.resize(_); }, 30);
+                        } else {
+                            util.resize(_);
+                        }
+                    }
+                    return util;
+                },
+                dragToNormal: function (_, evt, bs, moveX, moveY) {
+                    var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls, obj = ctls.dialog;
+                    if (p.none) { return this; }
 
                 //对话框最大化时，拖动对话框，先切换到标准模式（尺寸、定位）
-                util.setSize(_, { type: Config.DialogStatus.normal });
+                    util.setSize(_, { type: Config.DialogStatus.normal });
 
-                var offsetRateX = (evt.clientX / bs.width),
+                    var offsetRateX = (evt.clientX / bs.width),
                     offsetX = evt.clientX,
                     offsetY = evt.clientY - moveY,
                     btnPanelWidth = ctls.btnPanel ? ctls.btnPanel.offsetWidth : 0;
 
-                if (offsetRateX > 0.5) {
-                    offsetX = evt.clientX - obj.offsetWidth + (obj.offsetWidth) * (1 - offsetRateX) + btnPanelWidth * offsetRateX;
-                } else if (offsetX > (obj.offsetWidth) / 2) {
-                    offsetX = evt.clientX - (obj.offsetWidth) / 2;
-                } else {
-                    offsetX = evt.clientX - moveX;
-                }
+                    if (offsetRateX > 0.5) {
+                        offsetX = evt.clientX - obj.offsetWidth + (obj.offsetWidth) * (1 - offsetRateX) + btnPanelWidth * offsetRateX;
+                    } else if (offsetX > (obj.offsetWidth) / 2) {
+                        offsetX = evt.clientX - (obj.offsetWidth) / 2;
+                    } else {
+                        offsetX = evt.clientX - moveX;
+                    }
                 //移动对话框到当前鼠标位置
-                util.setPosition(_, { position: 'custom', event: 'drag', x: offsetX, y: offsetY }, true);
+                    util.setPosition(_, { position: 'custom', event: 'drag', x: offsetX, y: offsetY }, true);
 
-                return this;
-            },
-            dragSize: function (_) {
-                var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls;
-                if (p.none || !opt.sizeAble || !opt.dragSize) { return this; }
+                    return this;
+                },
+                dragSize: function (_) {
+                    var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls;
+                    if (p.none || !opt.sizeAble || !opt.dragSize) { return this; }
 
-                var isWap = util.isWap(),
+                    var isWap = util.isWap(),
                     evNameDown = isWap ? 'ontouchstart' : 'onmousedown',
                     evNameUp = isWap ? 'ontouchend' : 'onmouseup',
                     evNameMove = isWap ? 'ontouchmove' : 'onmousemove';
 
-                var obj = ctls.dialog,
+                    var obj = ctls.dialog,
                     docMouseMove = document[evNameMove],
                     docMouseUp = document[evNameUp];
 
-                function resizeDialog(ev, dir) {
-                    if (!opt.sizeAble || !opt.dragSize) {
-                        return $.cancelBubble(), false;
-                    }
-                    var evt = ev || $.getEvent(),
+                    function resizeDialog(ev, dir) {
+                        if (!opt.sizeAble || !opt.dragSize) {
+                            return $.cancelBubble(), false;
+                        }
+                        var evt = ev || $.getEvent(),
                         moveX = isWap ? evt.touches[0].clientX : evt.clientX,
                         moveY = isWap ? evt.touches[0].clientY :evt.clientY,
                         moveAble = true;
 
-                    var par = {
-                        width: obj.offsetWidth,
-                        height: obj.offsetHeight,
-                        top: obj.offsetTop,
-                        left: obj.offsetLeft,
-                        right: obj.offsetWidth + obj.offsetLeft,
-                        bottom: obj.offsetHeight + obj.offsetTop,
-                        minWidth: parseInt(opt.minWidth, 10),
-                        minHeight: parseInt(opt.minHeight, 10)
-                    };
+                        var par = {
+                            width: obj.offsetWidth,
+                            height: obj.offsetHeight,
+                            top: obj.offsetTop,
+                            left: obj.offsetLeft,
+                            right: obj.offsetWidth + obj.offsetLeft,
+                            bottom: obj.offsetHeight + obj.offsetTop,
+                            minWidth: parseInt(opt.minWidth, 10),
+                            minHeight: parseInt(opt.minHeight, 10)
+                        };
 
-                    if(isWap) {
-                        evt.preventDefault();
-                    }
-
-                    document[evNameMove] = function (ev) {
-                        if (!opt.sizeAble || !opt.dragSize || !moveAble) {
-                            return false;
+                        if(isWap) {
+                            evt.preventDefault();
                         }
-                        p.events.dragingSize = true;
-                        var e = ev || $.getEvent(),
+
+                        document[evNameMove] = function (ev) {
+                            if (!opt.sizeAble || !opt.dragSize || !moveAble) {
+                                return false;
+                            }
+                            p.events.dragingSize = true;
+                            var e = ev || $.getEvent(),
                             x = ((isWap ? e.touches[0].clientX : e.clientX) - moveX) * (dir.indexOf(Config.Direction.Left) >= 0 ? -1 : 1),
                             y = ((isWap ? e.touches[0].clientY : e.clientY) - moveY) * (dir.indexOf(Config.Direction.Top) >= 0 ? -1 : 1);
 
-                        util.showIframeShade(ctls, true);
-                        util.changeSize(_, { dir: dir, x: x, y: y }, true, par);
-                    };
-                    document[evNameUp] = function () {
-                        if (!opt.sizeAble || !opt.dragSize || !moveAble) {
-                            return false;
-                        }
-                        document[evNameMove] = docMouseMove;
-                        document[evNameUp] = docMouseUp;
-                        moveAble = false;
-                        p.events.dragingSize = false;
-                        util.showIframeShade(ctls, false);
-                    };
-                }
+                            util.showIframeShade(ctls, true);
+                            util.changeSize(_, { dir: dir, x: x, y: y }, true, par);
+                        };
+                        document[evNameUp] = function () {
+                            if (!opt.sizeAble || !opt.dragSize || !moveAble) {
+                                return false;
+                            }
+                            document[evNameMove] = docMouseMove;
+                            document[evNameUp] = docMouseUp;
+                            moveAble = false;
+                            p.events.dragingSize = false;
+                            util.showIframeShade(ctls, false);
+                        };
+                    }
 
-                util.getZoomSwicths(_).each(function (i, obj) {
-                    $.addListener(obj, evNameDown.substr(2), function (event) {
-                        _.topMost();
-                        resizeDialog(event, obj.pos);
+                    util.getZoomSwicths(_).each(function (i, obj) {
+                        $.addListener(obj, evNameDown.substr(2), function (event) {
+                            _.topMost();
+                            resizeDialog(event, obj.pos);
+                        });
                     });
-                });
-                return this;
-            },
-            showHeadFoot: function (_, isShow, type, rebuild, key) {
-                var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls;
-                if (p.none) { return this; }
+                    return this;
+                },
+                showHeadFoot: function (_, isShow, type, rebuild, key) {
+                    var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls;
+                    if (p.none) { return this; }
 
-                if (_.isClosed()) {
-                    return util;
-                }
-                if ($.isString(isShow, true)) {
-                    rebuild = type;
-                    type = isShow;
-                    isShow = true;
-                } else if ($.isBoolean(type)) {
-                    rebuild = type;
-                    type = null;
-                }
+                    if (_.isClosed()) {
+                        return util;
+                    }
+                    if ($.isString(isShow, true)) {
+                        rebuild = type;
+                        type = isShow;
+                        isShow = true;
+                    } else if ($.isBoolean(type)) {
+                        rebuild = type;
+                        type = null;
+                    }
 
-                var show = $.isBoolean(isShow, true),
+                    var show = $.isBoolean(isShow, true),
                     has, obj, h, dir;
 
-                if (key === 'head') {
-                    has = ctls.head && ctls.head.style.display !== 'none';
-                    obj = ctls.head;
-                    h = has ? obj.offsetHeight : Config.TitleHeight;
-                    dir = Config.Direction.Top;
-                } else {
-                    has = ctls.foot && ctls.foot.style.display !== 'none';
-                    obj = ctls.foot;
-                    h = has ? obj.offsetHeight : Config.BottomHeight;
-                    dir = Config.Direction.Bottom;
-                }
-                h = (obj && show) || (!obj && !show) ? 0 : h;
-
-                if (show) {
-                    rebuild = rebuild || (type && opt.type !== type);
-                    if (obj && !rebuild) {
-                        obj.style.display = '';
+                    if (key === 'head') {
+                        has = ctls.head && ctls.head.style.display !== 'none';
+                        obj = ctls.head;
+                        h = has ? obj.offsetHeight : Config.TitleHeight;
+                        dir = Config.Direction.Top;
                     } else {
-                        util.setOptions(_, 'options', key === 'head' ? 'showHead' : 'showFoot', true);
-                        if (key === 'head') {
-                            util.buildHead(_, ctls.main, rebuild);
-                        } else {
-                            util.buildFoot(_, ctls.main, rebuild);
-                        }
+                        has = ctls.foot && ctls.foot.style.display !== 'none';
+                        obj = ctls.foot;
+                        h = has ? obj.offsetHeight : Config.BottomHeight;
+                        dir = Config.Direction.Bottom;
                     }
-                } else if (obj) {
-                    obj.style.display = 'none';
-                }
+                    h = (obj && show) || (!obj && !show) ? 0 : h;
 
-                if (h !== 0) {
-                    util.changeSize(_, { dir: dir, y: show ? h : -h });
-                }
-                return util.setBodySize(_), this;
-            },
-            setZindex: function (_, zindex) {
-                var util = this, p = util.getParam(_), ctls = p.controls;
-                if (p.none || !ctls.dialog) { return util; }
+                    if (show) {
+                        rebuild = rebuild || (type && opt.type !== type);
+                        if (obj && !rebuild) {
+                            obj.style.display = '';
+                        } else {
+                            util.setOptions(_, 'options', key === 'head' ? 'showHead' : 'showFoot', true);
+                            if (key === 'head') {
+                                util.buildHead(_, ctls.main, rebuild);
+                            } else {
+                                util.buildFoot(_, ctls.main, rebuild);
+                            }
+                        }
+                    } else if (obj) {
+                        obj.style.display = 'none';
+                    }
 
-                if (typeof zindex !== 'number') {
-                    zindex = Common.buildZindex();
-                }
-                if (ctls.container) {
-                    ctls.container.style.zIndex = zindex;
-                } else {
-                    ctls.dialog.style.zIndex = zindex;
-                }
-                return p.options.zindex = zindex, util;
-            },
-            checkCallback: function (p, actions) {
-                var opt = p.options,
+                    if (h !== 0) {
+                        util.changeSize(_, { dir: dir, y: show ? h : -h });
+                    }
+                    return util.setBodySize(_), this;
+                },
+                setZindex: function (_, zindex) {
+                    var util = this, p = util.getParam(_), ctls = p.controls;
+                    if (p.none || !ctls.dialog) { return util; }
+
+                    if (typeof zindex !== 'number') {
+                        zindex = Common.buildZindex();
+                    }
+                    if (ctls.container) {
+                        ctls.container.style.zIndex = zindex;
+                    } else {
+                        ctls.dialog.style.zIndex = zindex;
+                    }
+                    return p.options.zindex = zindex, util;
+                },
+                checkCallback: function (p, actions) {
+                    var opt = p.options,
                     actions = actions || {},
                     callback = $.isFunction(opt.callback) ? opt.callback : undefined;
 
                 //如果没有设置回调函数callback，则查找自定义的回调函数
-                if (!callback) {
-                    var custom = p.buttonCallback[(actions.code || '').toLowerCase()];
-                    if (custom && $.isFunction(custom.func)) {
-                        callback = custom.func;
+                    if (!callback) {
+                        var custom = p.buttonCallback[(actions.code || '').toLowerCase()];
+                        if (custom && $.isFunction(custom.func)) {
+                            callback = custom.func;
+                        }
                     }
-                }
                 //检测是否设置了 ok | success 以及 cancel 这些指定的回调函数
-                var ok = $.isFunction(opt.ok) ? opt.ok : ($.isFunction(opt.success) ? opt.success : callback),
+                    var ok = $.isFunction(opt.ok) ? opt.ok : ($.isFunction(opt.success) ? opt.success : callback),
                     cancel = $.isFunction(opt.cancel) ? opt.cancel : callback;
 
-                return (ok || cancel) ? { callback: callback, ok: ok, cancel: cancel } : undefined;
-            },
-            callback: function (_, p, actions) {
-                var util = this,
+                    return (ok || cancel) ? { callback: callback, ok: ok, cancel: cancel } : undefined;
+                },
+                callback: function (_, p, actions) {
+                    var util = this,
                     opt = p.options,
                     func = util.checkCallback(p, actions);
 
-                if (!func || !$.isObject(actions)) {
-                    if ($.isElement(opt.focusTo)) {
-                        $.setFocus(opt.focusTo);
+                    if (!func || !$.isObject(actions)) {
+                        if ($.isElement(opt.focusTo)) {
+                            $.setFocus(opt.focusTo);
+                        }
+                        return util;
                     }
-                    return util;
-                }
-                var dr = {},
+                    var dr = {},
                     parameter = actions.param || opt.parameter,
                     key = (actions.key || '').toLowerCase(),
                     code = (actions.code || '').toLowerCase(),
                     result = actions.result || 0;
 
-                dr[key] = dr[key.toUpperCase()] = dr[key.firstLetterCapital()] = true;
-                if (code && code !== key) {
-                    dr['code'] = code;
-                }
-                dr['key'] = key;
-                dr['value'] = result;
+                    dr[key] = dr[key.toUpperCase()] = dr[key.firstLetterCapital()] = true;
+                    if (code && code !== key) {
+                        dr['code'] = code;
+                    }
+                    dr['key'] = key;
+                    dr['value'] = result;
 
                 //根据按钮code 获取自定义的回调函数与参数
-                var custom = p.buttonCallback[code];
-                if (custom && $.isFunction(custom.func)) {
-                    custom.func(dr, _, custom.param || parameter);
-                } else if (Common.isInKeys(result, ['ok', 'yes'], Config.DialogResult)) {
-                    func.ok && func.ok(dr, _, parameter);
-                } else if (Common.isInKeys(result, ['cancel', 'ignore', 'no'], Config.DialogResult)) {
-                    func.cancel && func.cancel(dr, _, parameter);
-                } else {
-                    func.callback && func.callback(dr, _, parameter);
-                }
+                    var custom = p.buttonCallback[code];
+                    if (custom && $.isFunction(custom.func)) {
+                        custom.func(dr, _, custom.param || parameter);
+                    } else if (Common.isInKeys(result, ['ok', 'yes'], Config.DialogResult)) {
+                        func.ok && func.ok(dr, _, parameter);
+                    } else if (Common.isInKeys(result, ['cancel', 'ignore', 'no'], Config.DialogResult)) {
+                        func.cancel && func.cancel(dr, _, parameter);
+                    } else {
+                        func.callback && func.callback(dr, _, parameter);
+                    }
 
-                if ($.isElement(opt.focusTo)) {
-                    $.setFocus(opt.focusTo);
-                }
-                return util;
-            },
-            compare: function(obj1, obj2) {
-                if($.isUndefined(obj1) || $.isUndefined(obj2)) {
-                    return false;
-                }
-                for(var k in obj1) {
-                    if(obj1[k] !== obj2[k]) {
+                    if ($.isElement(opt.focusTo)) {
+                        $.setFocus(opt.focusTo);
+                    }
+                    return util;
+                },
+                compare: function(obj1, obj2) {
+                    if($.isUndefined(obj1) || $.isUndefined(obj2)) {
                         return false;
                     }
-                }
-                return true;
-            },
-            getSize: function(_, opt, ctls, obj) {
-                var util = this, p = util.getParam(_);
-                if(!opt) {
-                    opt = p.options;
-                    ctls = p.controls;
-                    obj = ctls.body;
-                }
-                if (p.none || !ctls || !ctls.dialog || !$.isElement(obj)) { return {}; } 
-                var box = ctls.dialog,
+                    for(var k in obj1) {
+                        if(obj1[k] !== obj2[k]) {
+                            return false;
+                        }
+                    }
+                    return true;
+                },
+                getSize: function(_, opt, ctls, obj) {
+                    var util = this, p = util.getParam(_);
+                    if(!opt) {
+                        opt = p.options;
+                        ctls = p.controls;
+                        obj = ctls.body;
+                    }
+                    if (p.none || !ctls || !ctls.dialog || !$.isElement(obj)) { return {}; } 
+                    var box = ctls.dialog,
                     ds = $.getElementSize(box),
                     ps = $.getElementStyleSize(obj, 'padding'),
                     psCon = $.getElementStyleSize(ctls.content, 'padding'),
                     bodyW = (opt.noScroll ? obj.offsetWidth : obj.clientWidth) - ps.width - psCon.width,
                     bodyH = (opt.noScroll ? obj.offsetHeight : obj.clientHeight) - ps.height - psCon.height;
 
-                return {
-                    width: bodyW,
-                    height: bodyH,
-                    body: {
+                    return {
                         width: bodyW,
                         height: bodyH,
-                    },
-                    dialog: ds
-                };
-            },
-            resize: function (_) {
-                var util = this, p = util.getParam(_), opt = p.options, ctls = p.controls;
-                if (p.none || !ctls.dialog) { return util; }
-                var obj = ctls.body;
-                if ($.isFunction(opt.resize) && $.isElement(obj)) {
-                    var size = util.getSize(_, opt, ctls, obj);
+                        body: {
+                            width: bodyW,
+                            height: bodyH,
+                        },
+                        dialog: ds
+                    };
+                },
+                resize: function (_) {
+                    var util = this, p = util.getParam(_), opt = p.options, ctls = p.controls;
+                    if (p.none || !ctls.dialog) { return util; }
+                    var obj = ctls.body;
+                    if ($.isFunction(opt.resize) && $.isElement(obj)) {
+                        var size = util.getSize(_, opt, ctls, obj);
                     //判断尺寸是否改变，防止重复回调相同的尺寸
-                    if(!util.compare(p.lastResize, size)) {
-                        p.lastResize = size;
-                        opt.resize(size, _);
+                        if(!util.compare(p.lastResize, size)) {
+                            p.lastResize = size;
+                            opt.resize(size, _);
+                        }
                     }
-                }
-                return util;
-            },
-            dispose: function (_) {
-                var util = this, p = util.getParam(_);
-                for (var k in p.controls) {
-                    p.controls[k] = null;
-                }
-                for (var k in p.buttons) {
-                    p.buttons[k] = null;
-                }
-                if (p.styleElement) {
-                    p.styleElement.parentNode.removeChild(p.styleElement);
-                }
-                for (var k in p.debounceTimers) {
-                    delete p.debounceTimers[k];
-                }
-                for (var k in p.debounceActions) {
-                    delete p.debounceActions[k];
-                }
+                    return util;
+                },
+                dispose: function (_) {
+                    var util = this, p = util.getParam(_);
+                    for (var k in p.controls) {
+                        p.controls[k] = null;
+                    }
+                    for (var k in p.buttons) {
+                        p.buttons[k] = null;
+                    }
+                    if (p.styleElement) {
+                        p.styleElement.parentNode.removeChild(p.styleElement);
+                    }
+                    for (var k in p.debounceTimers) {
+                        delete p.debounceTimers[k];
+                    }
+                    for (var k in p.debounceActions) {
+                        delete p.debounceActions[k];
+                    }
                 //TODO:
 
-                return this;
-            },
-            remove: function (_) {
-                return Factory.remove(_.id), this;
-            },
-            redirect: function (url) {
-                if ($.isString(url, true)) {
+                    return this;
+                },
+                remove: function (_) {
+                    return Factory.remove(_.id), this;
+                },
+                redirect: function (url) {
+                    if ($.isString(url, true)) {
                     /*
                     var str = url.toLowerCase();
                     if(str.startsWith('http:') || str.startsWith('https:')) {
@@ -3756,164 +3756,164 @@
                         return true;
                     }
                     */
-                    location.href = url.setUrlParam('_t_s_', new Date().getMilliseconds());
-                }
-                return false;
-            },
-            //以下方法为 tooltip        
-            buildTooltip: function (_, options) {
-                var util = this, p = util.getParam(_), opt = p.options, ctls = p.controls;
-                if (p.none || _.isClosed()) { return util; }
-
-                if (!$.isElement(opt.target)) {
-                    return false;
-                }
-                var tipId = undefined, d = undefined;
-                try {
-                    tipId = opt.target.getAttribute(Config.TooltipAttributeName);
-                } catch (e) {
-                    tipId = undefined;
-                }
-                if (tipId) {
-                    d = Factory.getDialog(tipId);
-                }
-
-                if (tipId && d && ctls.content) {
-                    p.controls = util.getParam(d).controls;
-                    util.updateTooltip(_, opt.content, opt.target, opt);
-                } else {
-                    //对话框
-                    ctls.dialog = $.createElement('div');
-                    ctls.dialog.className = 'oui-tooltip';
-                    ctls.dialog.style.zIndex = opt.zindex;
-                    ctls.dialog.id = _.getDialogId();
-
-                    ctls.body = util.buildBody(_, ctls.dialog);
-
-                    $.setAttribute(ctls.dialog, 'target', opt.target.id || '');
-                    //设置for属性
-                    var forname = opt.forname || opt.target.id || '';
-                    $.setAttribute(ctls.dialog, 'for', forname);
-
-                    $.setAttribute(opt.target, Config.TooltipAttributeName, opt.id);
-                    p.parent.appendChild(ctls.dialog);
-
-                    if($.isElement(opt.target)) {
-                        Factory.setFormScroll(opt.target);
+                        location.href = url.setUrlParam('_t_s_', new Date().getMilliseconds());
                     }
-                }
+                    return false;
+                },
+            //以下方法为 tooltip        
+                buildTooltip: function (_, options) {
+                    var util = this, p = util.getParam(_), opt = p.options, ctls = p.controls;
+                    if (p.none || _.isClosed()) { return util; }
+
+                    if (!$.isElement(opt.target)) {
+                        return false;
+                    }
+                    var tipId = undefined, d = undefined;
+                    try {
+                        tipId = opt.target.getAttribute(Config.TooltipAttributeName);
+                    } catch (e) {
+                        tipId = undefined;
+                    }
+                    if (tipId) {
+                        d = Factory.getDialog(tipId);
+                    }
+
+                    if (tipId && d && ctls.content) {
+                        p.controls = util.getParam(d).controls;
+                        util.updateTooltip(_, opt.content, opt.target, opt);
+                    } else {
+                    //对话框
+                        ctls.dialog = $.createElement('div');
+                        ctls.dialog.className = 'oui-tooltip';
+                        ctls.dialog.style.zIndex = opt.zindex;
+                        ctls.dialog.id = _.getDialogId();
+
+                        ctls.body = util.buildBody(_, ctls.dialog);
+
+                        $.setAttribute(ctls.dialog, 'target', opt.target.id || '');
+                    //设置for属性
+                        var forname = opt.forname || opt.target.id || '';
+                        $.setAttribute(ctls.dialog, 'for', forname);
+
+                        $.setAttribute(opt.target, Config.TooltipAttributeName, opt.id);
+                        p.parent.appendChild(ctls.dialog);
+
+                        if($.isElement(opt.target)) {
+                            Factory.setFormScroll(opt.target);
+                        }
+                    }
 
                 //指定焦点目标，或默认焦点目标
-                var focusObj = $.isBoolean(opt.focusTo, false) ? opt.target : opt.focusTo;
+                    var focusObj = $.isBoolean(opt.focusTo, false) ? opt.target : opt.focusTo;
 
-                if ($.isElement(focusObj) && $.isDisplay(focusObj, true)) {
-                    $.setFocus(focusObj);
-                }
-
-                Factory.setWindowResize();
-
-                util.buildCloseTiming(_);
-
-                return util.setTooltipPosition(_);
-            },
-            updateTooltip: function (_, options) {
-                var util = this, p = util.getParam(_), opt = p.options, ctls = p.controls;
-                if (p.none || _.isClosed()) { return util; }
-
-                if (ctls.content) {
-                    ctls.content.innerHTML = opt.content;
-                }
-                return util.setTooltipPosition(_);
-            },
-            setTooltipStyle: function (_, opt, keys) {
-                var styles = {};
-                for (var i in keys) {
-                    var k = keys[i];
-                    if (opt[k] !== 'auto') {
-                        styles[k] = opt[k];
+                    if ($.isElement(focusObj) && $.isDisplay(focusObj, true)) {
+                        $.setFocus(focusObj);
                     }
-                }
-                return styles;
-            },
-            setTooltipSize: function (_) {
-                var util = this, p = util.getParam(_), opt = p.options, ctls = p.controls;
-                var styles = util.setTooltipStyle(_, opt, [
-                    'width', 'height', 'maxWidth', 'maxHeight', 'minWidth', 'minHeight'
-                ]);
-                $.setStyle(ctls.dialog, styles, 'px');
-                return util;
-            },
-            buildTooltipStyle: function (_, par, p, isShow) {
-                var util = this,
+
+                    Factory.setWindowResize();
+
+                    util.buildCloseTiming(_);
+
+                    return util.setTooltipPosition(_);
+                },
+                updateTooltip: function (_, options) {
+                    var util = this, p = util.getParam(_), opt = p.options, ctls = p.controls;
+                    if (p.none || _.isClosed()) { return util; }
+
+                    if (ctls.content) {
+                        ctls.content.innerHTML = opt.content;
+                    }
+                    return util.setTooltipPosition(_);
+                },
+                setTooltipStyle: function (_, opt, keys) {
+                    var styles = {};
+                    for (var i in keys) {
+                        var k = keys[i];
+                        if (opt[k] !== 'auto') {
+                            styles[k] = opt[k];
+                        }
+                    }
+                    return styles;
+                },
+                setTooltipSize: function (_) {
+                    var util = this, p = util.getParam(_), opt = p.options, ctls = p.controls;
+                    var styles = util.setTooltipStyle(_, opt, [
+                        'width', 'height', 'maxWidth', 'maxHeight', 'minWidth', 'minHeight'
+                        ]);
+                    $.setStyle(ctls.dialog, styles, 'px');
+                    return util;
+                },
+                buildTooltipStyle: function (_, par, p, isShow) {
+                    var util = this,
                     opt = p.options,
                     obj = p.controls.dialog;
 
-                if (!opt || !obj) {
-                    return false;
-                }
-                //设置自定义的样式
-                var styles = opt.styles.tooltip || opt.styles.tips || {},
-                    cssText = Common.toCssText(styles, 'tooltip');
-                obj.style.cssText = cssText;
-                obj.style.zIndex = opt.zindex;
-
-                var res = util.setTooltipSize(_).setTargetPosition(par, obj), cssName = '';
-                if (res.css || styles['border-color']) {
-                    if (styles['border-color']) {
-                        res.css += 'border-' + res.dir + '-color:' + styles['border-color'] + ';';
+                    if (!opt || !obj) {
+                        return false;
                     }
-                    cssName = 'tip-pos-' + _.id;
-                    var cssCon = '.{0}:after,.{0}:before{{{1}}}'.format(cssName, res.css);
-                    $.createCssStyle(cssCon, 'tip-css-' + _.id, function (elem) {
-                        p.styleElement = elem;
-                    });
-                }
-                obj.className = 'oui-tooltip oui-tip-' + res.dir + ' ' + cssName;
-                if (isShow) {
-                    //图片加载完之后，显示对话框
-                    obj.style.display = '';
-                }
-            },
-            loadComplete: function (c, i, func) {
-                if (i >= c) {
-                    func();
-                }
-            },
-            loadImg: function (_, imgs, func) {
-                var util = this, c = imgs.length;
-                util.loads[_.id] = { idx: 0 };
+                //设置自定义的样式
+                    var styles = opt.styles.tooltip || opt.styles.tips || {},
+                    cssText = Common.toCssText(styles, 'tooltip');
+                    obj.style.cssText = cssText;
+                    obj.style.zIndex = opt.zindex;
 
-                for (var i = 0; i < c; i++) {
-                    imgs[i].onload = function () {
-                        util.loads[_.id].idx += 1;
-                        util.loadComplete(c, util.loads[_.id].idx, func);
-                    };
-                    imgs[i].onerror = function () {
-                        util.loads[_.id].idx += 1;
-                        util.loadComplete(c, util.loads[_.id].idx, func);
-                        //尝试加载默认的图片
-                        var defaultSrc = this.getAttribute('default-src');
-                        if (defaultSrc) {
-                            //默认图片只加载一次，不管加载是否成功，都要清除默认图片设置，防止无限循环
-                            this.setAttribute('default-src', '');
-                            this.src = defaultSrc;
+                    var res = util.setTooltipSize(_).setTargetPosition(par, obj), cssName = '';
+                    if (res.css || styles['border-color']) {
+                        if (styles['border-color']) {
+                            res.css += 'border-' + res.dir + '-color:' + styles['border-color'] + ';';
                         }
-                    };
-                }
-            },
-            setTooltipPosition: function (_) {
-                var util = this,
+                        cssName = 'tip-pos-' + _.id;
+                        var cssCon = '.{0}:after,.{0}:before{{{1}}}'.format(cssName, res.css);
+                        $.createCssStyle(cssCon, 'tip-css-' + _.id, function (elem) {
+                            p.styleElement = elem;
+                        });
+                    }
+                    obj.className = 'oui-tooltip oui-tip-' + res.dir + ' ' + cssName;
+                    if (isShow) {
+                    //图片加载完之后，显示对话框
+                        obj.style.display = '';
+                    }
+                },
+                loadComplete: function (c, i, func) {
+                    if (i >= c) {
+                        func();
+                    }
+                },
+                loadImg: function (_, imgs, func) {
+                    var util = this, c = imgs.length;
+                    util.loads[_.id] = { idx: 0 };
+
+                    for (var i = 0; i < c; i++) {
+                        imgs[i].onload = function () {
+                            util.loads[_.id].idx += 1;
+                            util.loadComplete(c, util.loads[_.id].idx, func);
+                        };
+                        imgs[i].onerror = function () {
+                            util.loads[_.id].idx += 1;
+                            util.loadComplete(c, util.loads[_.id].idx, func);
+                        //尝试加载默认的图片
+                            var defaultSrc = this.getAttribute('default-src');
+                            if (defaultSrc) {
+                            //默认图片只加载一次，不管加载是否成功，都要清除默认图片设置，防止无限循环
+                                this.setAttribute('default-src', '');
+                                this.src = defaultSrc;
+                            }
+                        };
+                    }
+                },
+                setTooltipPosition: function (_) {
+                    var util = this,
                     p = util.getParam(_),
                     opt = p.options,
                     ctls = p.controls,
                     obj = p.controls.dialog;
-                if (p.none || _.isClosed()) { return util; }
+                    if (p.none || _.isClosed()) { return util; }
 
-                var par = {
-                    target: opt.target,
-                    content: opt.content,
-                    direction: opt.direction,
-                    parent: opt.parent,
+                    var par = {
+                        target: opt.target,
+                        content: opt.content,
+                        direction: opt.direction,
+                        parent: opt.parent,
                     position: opt.position,    //默认停靠在目标控件左下方位置
                     x: opt.x || 7,
                     y: opt.y || 7
@@ -3934,14 +3934,14 @@
         };
 
     //先加载(默认)样式文件
-    Factory.loadCss(Config.DefaultSkin);
+        Factory.loadCss(Config.DefaultSkin);
     //加载指定的(默认)样式文件
-    if(!Config.IsDefaultSkin()) {
-        Factory.loadCss(Config.GetSkin());
-    }
+        if(!Config.IsDefaultSkin()) {
+            Factory.loadCss(Config.GetSkin());
+        }
 
-    function Dialog(content, title, options) {
-        var ds = Common.getDefaultSize(),
+        function Dialog(content, title, options) {
+            var ds = Common.getDefaultSize(),
             par = Common.checkOptions(content, title, options),
             opt = $.extend({
                 id: null,                       //id
@@ -4060,91 +4060,91 @@
                 coverOCX: false         //是否覆盖在OCX控件之上
             }, par);
 
-        return this.id = opt.id, this.initial(opt);
+return this.id = opt.id, this.initial(opt);
+}
+
+Dialog.prototype = {
+    initial: function (options) {
+        var _ = this, p = Util.getParam(_), opt = options || p.options, id = opt.id;
+
+        if ($.isElement(opt.parent) &&
+            ['DIV'].indexOf(opt.parent.tagName) >= 0) {
+            p.parent = opt.parent;
+        p.hasParent = true;
+    }
+    if (!$.isString(opt.title) && !$.isNumber(opt.title)) {
+        opt.title = Common.getDialogText('Title', opt.lang);
     }
 
-    Dialog.prototype = {
-        initial: function (options) {
-            var _ = this, p = Util.getParam(_), opt = options || p.options, id = opt.id;
-
-            if ($.isElement(opt.parent) &&
-                ['DIV'].indexOf(opt.parent.tagName) >= 0) {
-                p.parent = opt.parent;
-                p.hasParent = true;
-            }
-            if (!$.isString(opt.title) && !$.isNumber(opt.title)) {
-                opt.title = Common.getDialogText('Title', opt.lang);
-            }
-
-            if (!opt.showHead && !opt.showFoot && !opt.lock &&
-                $.isBoolean(opt.closeAble, true) &&
-                opt.type !== Config.DialogType.tooltip) {
-                opt.escClose = true;
+    if (!opt.showHead && !opt.showFoot && !opt.lock &&
+        $.isBoolean(opt.closeAble, true) &&
+        opt.type !== Config.DialogType.tooltip) {
+        opt.escClose = true;
                 //opt.clickBgClose = opt.clickBgClose || 'click';
                 //没有标题没有底部的消息框，设置内容边距为1px
-                opt.contentStyle = $.extend({ 'padding': '1px' }, opt.contentStyle);
-            }
-            if (opt.lock) {
-                opt.fixed = false;
-            }
+    opt.contentStyle = $.extend({ 'padding': '1px' }, opt.contentStyle);
+}
+if (opt.lock) {
+    opt.fixed = false;
+}
 
-            var dialog = Factory.getDialog(id);
-            if (!dialog) {
-                Factory.setDialog(id, _)
-                    .setOptions(id, opt)
-                    .setOptions(id, 'dialogId', Common.buildId(id, 'd-'));
-            }
+var dialog = Factory.getDialog(id);
+if (!dialog) {
+    Factory.setDialog(id, _)
+    .setOptions(id, opt)
+    .setOptions(id, 'dialogId', Common.buildId(id, 'd-'));
+}
 
-            Util.setOptions(_, 'options', opt);
+Util.setOptions(_, 'options', opt);
 
-            if (!Config.IsDefaultSkin(opt.skin)) {
-                Factory.loadCss(opt.skin, function () {
-                    Util.build(_, opt);
-                });
-            } else {
-                Util.build(_, opt);
-            }
+if (!Config.IsDefaultSkin(opt.skin)) {
+    Factory.loadCss(opt.skin, function () {
+        Util.build(_, opt);
+    });
+} else {
+    Util.build(_, opt);
+}
 
-            if($.isFunction(opt.complete)) {
-                window.setTimeout(function() {
-                    opt.complete(_);
-                }, 50);
-            }
+if($.isFunction(opt.complete)) {
+    window.setTimeout(function() {
+        opt.complete(_);
+    }, 50);
+}
 
-            return _;
-        },
-        getOptions: function (key) {
-            var opt = $.extend({}, Factory.getOptions(this.id, 'options'));
-            return $.isString(key, true) ? opt[key] : opt;
-        },
-        setOptions: function (key, value) {
-            var p = Util.getParam(this).options;
-            if (!$.isObject(p)) { return this; }
-            if ($.isObject(key)) {
-                for (var k in key) {
-                    if ($.containsKey(p, k)) {
-                        p[k] = key[k];
-                    }
-                }
-            } else if ($.isString(key, true)) {
-                if ($.containsKey(p, key)) {
-                    p[key] = value;
-                }
+return _;
+},
+getOptions: function (key) {
+    var opt = $.extend({}, Factory.getOptions(this.id, 'options'));
+    return $.isString(key, true) ? opt[key] : opt;
+},
+setOptions: function (key, value) {
+    var p = Util.getParam(this).options;
+    if (!$.isObject(p)) { return this; }
+    if ($.isObject(key)) {
+        for (var k in key) {
+            if ($.containsKey(p, k)) {
+                p[k] = key[k];
             }
+        }
+    } else if ($.isString(key, true)) {
+        if ($.containsKey(p, key)) {
+            p[key] = value;
+        }
+    }
             //检测参数
-            Common.checkOptions(p.options);
+    Common.checkOptions(p.options);
 
-            return this;
-        },
-        options: function (key, value) {
-            if ($.isUndefined(value)) {
-                return this.getOptions(key);
-            }
-            return this.setOptions(key, value);
-        },
-        getDialogId: function () {
-            return Factory.getOptions(this.id, 'dialogId', '');
-        },
+    return this;
+},
+options: function (key, value) {
+    if ($.isUndefined(value)) {
+        return this.getOptions(key);
+    }
+    return this.setOptions(key, value);
+},
+getDialogId: function () {
+    return Factory.getOptions(this.id, 'dialogId', '');
+},
         /*
         getControls: function() {
             return $.extend({}, Factory.getOptions(this.id, 'controls'));
@@ -4153,521 +4153,521 @@
             return $.extend({}, Factory.getOptions(this.id, 'buttons'));
         },
         */
-        getContentWindow: function() {
-            var id = this.getDialogId() + '-iframe',
-                iframe = document.getElementById(id);
+getContentWindow: function() {
+    var id = this.getDialogId() + '-iframe',
+    iframe = document.getElementById(id);
 
-            return (iframe !== null ? iframe.contentWindow : null) || document.frames[id];
-        },
-        getStatus: function () {
-            return $.extend({}, Factory.getOptions(this.id, 'status'));
-        },
-        isPercent: function () {
-            var opt = this.getOptions();
-            return Common.isPercentSize(opt.width, opt.height);
-        },
-        isClosed: function () {
-            return $.isBoolean(Factory.getOptions(this.id, 'closed'), true);
-        },
-        isHide: function () {
-            if ($.isBoolean(Factory.getOptions(this.id, 'hide'), false)) {
-                return true;
-            }
-            var p = Util.getParam(this), ctls = p.controls || {};
-            if (ctls.container) {
-                return $.getElementStyle(ctls.container, 'display') === 'none';
-            } else if (ctls.dialog) {
-                return $.getElementStyle(ctls.dialog, 'display') === 'none';
-            }
-            return false;
-        },
-        isMaximized: function () {
-            return this.getStatus().max;
-        },
-        isMax: function () {
-            return this.isMaximized();
-        },
-        isMinimized: function () {
-            return this.getStatus().min;
-        },
-        isMin: function () {
-            return this.isMinimized();
-        },
-        isNormal: function () {
-            return this.getStatus().normal;
-        },
-        show: function (content, title) {
-            var _ = this, p = Util.getParam(_);
-            if (_.isClosed() || !p || !_.isHide()) {
-                return _;
-            }
-            Util.setOptions(_, 'hide', false)
-                .showDialog(p.controls, true, content, title);
+    return (iframe !== null ? iframe.contentWindow : null) || document.frames[id];
+},
+getStatus: function () {
+    return $.extend({}, Factory.getOptions(this.id, 'status'));
+},
+isPercent: function () {
+    var opt = this.getOptions();
+    return Common.isPercentSize(opt.width, opt.height);
+},
+isClosed: function () {
+    return $.isBoolean(Factory.getOptions(this.id, 'closed'), true);
+},
+isHide: function () {
+    if ($.isBoolean(Factory.getOptions(this.id, 'hide'), false)) {
+        return true;
+    }
+    var p = Util.getParam(this), ctls = p.controls || {};
+    if (ctls.container) {
+        return $.getElementStyle(ctls.container, 'display') === 'none';
+    } else if (ctls.dialog) {
+        return $.getElementStyle(ctls.dialog, 'display') === 'none';
+    }
+    return false;
+},
+isMaximized: function () {
+    return this.getStatus().max;
+},
+isMax: function () {
+    return this.isMaximized();
+},
+isMinimized: function () {
+    return this.getStatus().min;
+},
+isMin: function () {
+    return this.isMinimized();
+},
+isNormal: function () {
+    return this.getStatus().normal;
+},
+show: function (content, title) {
+    var _ = this, p = Util.getParam(_);
+    if (_.isClosed() || !p || !_.isHide()) {
+        return _;
+    }
+    Util.setOptions(_, 'hide', false)
+    .showDialog(p.controls, true, content, title);
 
-            if (p.options.lock) {
-                Util.hideDocOverflow(_, false);
-            }
-
-            if (p.options.type !== 'tooltip') {
-                Util.setBodySize(_, { event: 'show', lastSize: p.hideSize });
-            }
-
-            if (!p.options.lock) {
-                Util.setClickBgClose(_);
-            }
-
-            if($.isBoolean(content, false) || !Util.isVisible(p.controls)) {
-                _.position();
-            }
-
-            return _;
-        },
-        hide: function (action, dialogResult) {
-            var _ = this, p = Util.getParam(_), opt = p.options;
-            if (_.isClosed() || _.isHide() || !p || !opt.closeAble) {
-                return _;
-            }
-            if(action === 'initial-hide') {
-                console.log(action + ': ' + _.id);
-            }
-            var ctls = p.controls,
-                timers = p.timers,
-                url = opt.redirect || opt.targetUrl,
-                actions = Util.getAction(_);
-
-            if(!ctls.dialog) {
-                return _;
-            }
-
-            //记录隐藏之前的对话框尺寸大小，以便再次显示时，还原尺寸大小
-            Util.setOptions(_, 'hideSize', { width: ctls.dialog.offsetWidth, height: ctls.dialog.offsetHeight });
-
-            Util.showDialog(ctls, false)
-                .setOptions(_, 'hide', true)
-                .delAction(_)
-                .clearTimer(timers)
-                //.hideDocOverflow(_, true)
-                .callback(_, p, actions)
-                .redirect(url);
-
-            if (p.options.lock) {
-                Util.hideDocOverflow(_, true);
-            }
-
-            return _;
-        },
-        close: function (force) {
-            var _ = this, util = Util, p = util.getParam(_), opt = p.options;
-            
-            //是否强制关闭对话框，参数类型必须是 boolean 类型
-            //当前forceClose为true时，将忽略closeAble和closeType
-            var forceClose = $.isBoolean(force, false);
-
-            if (_.isClosed() || !p || (!opt.closeAble && !forceClose)) {
-                return _;
-            }
-            var ctls = p.controls,
-                timers = p.timers,
-                url = opt.redirect || opt.targetUrl,
-                actions = util.getAction(_),
-                func = util.checkCallback(p, actions);
-
-            // 点击确定按钮时，若延时关闭，则仅回调而不关闭
-            if (opt.delayClose
-                && actions.result !== Config.DialogResult.close
-                && (util.isIframe(opt) || util.isSure(actions.result))
-                && func
-                && (func.callback || func.ok)) {
-                return util.delAction(_).callback(_, p, actions), _;
-            }
-            if (!forceClose && opt.closeType === 'hide') {
-                return _.hide();
-            }
-
-            $.removeChild(p.parent, [ctls.container || ctls.dialog, ctls.shade]);
-
-            util.setOptions(_, 'closed', true)
-                .delAction(_)
-                .clearTimer(timers)
-                .hideDocOverflow(_, true)
-                .callback(_, p, actions)
-                .dispose(_)
-                .remove(_)
-                .redirect(url);
-
-            return _;
-        },
-        update: function (content, title, options) {
-            if ($.isString(options)) {
-                if (options === 'autosize') {
-                    options = { width: 'auto', height: 'auto' };
-                } else if (options === 'autoheight') {
-                    options = { height: 'auto' };
-                } else if (options === 'autowidth') {
-                    options = { width: 'auto' };
-                } else {
-                    options = {};
-                }
-            }
-            var opt = Common.checkOptions(content, title, options, true);
-            var _ = this, p = Util.getParam(_), ctls = p.controls;
-
-            //设置创建时间，防止被document事件关闭
-            p.buildTime = new Date().getTime();
-
-            if (opt.type && !opt.buttons) {
-                opt.buttons = Common.getDialogButtons(opt.type);
-            }
-
-            //更新时，若样式设置为null,则清除之前的样式设置
-            if (opt.newStyles === null) {
-                this.setOptions('styles', {});
-            }
-            //更新时，若没有设置新的样式，则复制之前的样式设置
-            if ($.isUndefined(opt.styles) || $.isEmpty(opt.styles)) {
-                $.extend(opt.styles, p.options.styles);
-            }
-
-            // 判断内容是否改变，以决定是否需要重新设置位置
-            var isChanged = Util.isChange(opt.content, p.options.content);
-
-            if ($.extend(p.options, opt).type === Config.DialogType.tooltip) {
-                Util.updateTooltip(_, p.options);
-                return _;
-            }
-            if (ctls.content) {
-                var isAutoSize = Util.isAutoSize(_),
-                    isMin = p.status.min;
-
-                if (ctls.title && opt.title) {
-                    ctls.title.innerHTML = opt.title;
-                }
-
-                if (isMin) {
-                    Util.setSize(_, { type: Config.DialogStatus.normal });
-                    Util.setPosition(_);
-                }
-                Util.buildContent(_, true).setBodySize(_).setCache(_);
-
-                if (isMin) {
-                    Util.setSize(_, { type: Config.DialogStatus.min });
-                }
-
-                if (isAutoSize && isChanged) {
-                    window.setTimeout(function () { Util.setPosition(_); }, 10);
-                }
-
-                if (!p.options.lock) {
-                    Util.setClickBgClose(_);
-                }
-
-                if (_.isHide() && !_.isClosed()) {
-                    _.show();
-                }
-            }
-            return _;
-        },
-        append: function (content, title, options) {
-            var _ = this, p = Util.getParam(_), ctls = p.controls;
-            if (p.none || !ctls.content) {
-                return this;
-            }
-            if (ctls.icon) {
-                $.removeChild(ctls.content, ctls.icon);
-            }
-            var html = ctls.content.innerHTML;
-            return this.update(html + content, title, options);
-        },
-        insert: function (content, title, options) {
-            var _ = this, p = Util.getParam(_), ctls = p.controls;
-            if (p.none || !ctls.content) {
-                return _;
-            }
-            if (ctls.icon) {
-                $.removeChild(ctls.content, ctls.icon);
-            }
-            var html = ctls.content.innerHTML;
-            return _.update(content + html, title, options);
-        },
-        title: function(title) {
-            var _ = this, p = Util.getParam(_), ctls = p.controls;
-            if (p.none || !ctls.content) {
-                return _;
-            }
-            var html = ctls.content.innerHTML;
-            return _.update(html, title);
-        },
-        focus: function (obj) {
-            var _ = this, p = Util.getParam(_), buttons = p.buttons;
-            if (Util.isWap()) {
-                return _;
-            }
-            if (p.none || _.isClosed() || _.isHide()) {
-                return _;
-            }
-
-            if (Common.isChildFocus(obj, p.controls.dialog)) {
-                return _;
-            }
-
-            var dbKey = p.options.defaultButton;
-            if (dbKey && buttons[dbKey]) {
-                buttons[dbKey].focus();
-                return _;
-            }
-
-            var btn = null;
-            for (var k in buttons) {
-                btn = buttons[k];
-            }
-            return btn && btn.focus(), _;
-        },
-        min: function () {
-            //return Util.setSize(this, { type: Config.DialogStatus.min });
-            var _ = this, p = Util.getParam(_);
-            if (p.none) { return _; }
-
-            var type = Config.DialogStatus.min, lastStatus = p.lastStatus;
-            if (p.status.min && lastStatus === Config.DialogStatus.max) {
-                type = Config.DialogStatus.max;
-            } else if (p.status.min) {
-                type = Config.DialogStatus.normal;
-            }
-            return Util.setSize(_, { type: type }), _;
-        },
-        max: function () {
-            var _ = this, p = Util.getParam(_);
-            if (p.none) { return _; }
-
-            var type = Config.DialogStatus.max, lastStatus = p.lastStatus;
-
-            if (p.status.max || (p.status.min && lastStatus === Config.DialogStatus.normal)) {
-                type = Config.DialogStatus.normal;
-            }
-            return Util.setSize(_, { type: type }), _;
-        },
-        reload: function() {
-            var _ = this, p = Util.getParam(_);
-            if (p.none || _.isClosed() || _.isHide() || _.isMin()) {
-                return _;
-            }
-            return Util.reload(_), _;
-        },
-        restore: function () {
-            return Util.setSize(this, { type: Config.DialogStatus.normal }), this;
-        },
-        normal: function () {
-            return Util.setSize(this, { type: Config.DialogStatus.normal }), this;
-        },
-        size: function(options) {
-            return $.isObject(options) ? this.resize(options) : Util.getSize(this);
-        },
-        resize: function (options) {
-            $.extend(options, { resizeTo: false });
-            return Util.changeSize(this, options), this;
-        },
-        resizeTo: function (options) {
-            $.extend(options, { resizeTo: true });
-            return Util.changeSize(this, options), this;
-        },
-        position: function (options) {
-            var _ = this, p = Util.getParam(_);
-            if (_.isClosed() || p.none) { return this; }
-            return Util.setPosition(_, options), this;
-        },
-        move: function (options) {
-            return Util.movePosition(this, options, false), this;
-        },
-        moveTo: function (options) {
-            return Util.movePosition(this, options, true), this;
-        },
-        appendChild: function (elem, pNode) {
-            return $.appendChild(pNode || this.getControls().content, elem), this;
-        },
-        zindex: function (zindex) {
-            if ($.isUndefined(zindex)) {
-                return this.getOptions().zindex;
-            }
-            return Util.setZindex(this, zindex), this;
-        },
-        topMost: function () {
-            var _ = this, p = Util.getParam(_);
-            if (p.none || _.isClosed() || !p.options.topMost) {
-                return false;
-            }
-            var d = Factory.getTop();
-            if (d && !Util.isSelf(_, d)) {
-                var zindex = d.getOptions().zindex;
-                Util.setZindex(d, _.getOptions().zindex);
-                return Util.setZindex(_, zindex);
-            }
-            return _;
-        },
-        showHead: function (isShow, type, rebuild) {
-            return Util.showHeadFoot(this, isShow, type, rebuild, 'head'), this;
-        },
-        showFoot: function (isShow, type, rebuild) {
-            Util.showHeadFoot(this, isShow, type, rebuild, 'foot');
-            return this.position(), this;
-        }
-    };
-
-    $.extend({
-        DialogButtons: $.extend({}, Config.DialogButtons),
-        DialogType: $.extend({}, Config.DialogType),
-        DialogIcon: $.extend({}, Config.DialogIcons),
-        DialogButtonKey: (function () {
-            var keys = {};
-            for (var k in Config.ButtonConfig) {
-                if (k !== 'None') {
-                    keys[k] = k;
-                }
-            }
-            return keys;
-        })()
-    });
-
-    if ($.getQueryString(location.href, 'dialog_help')) {
-        console.log('$.DialogType: ', $.DialogType);
-        console.log('$.DialogIcon: ', $.DialogIcon);
-        console.log('$.DialogButtons: ', $.DialogButtons);
-        console.log('$.DialogButtonKey: ', $.DialogButtonKey);
+    if (p.options.lock) {
+        Util.hideDocOverflow(_, false);
     }
 
-    $.extend({
-        dialog: function (content, title, options) {
-            return Factory.show(content, title, options);
-        },
-        alert: function (content, title, options) {
-            return Factory.show(content, title, options, Config.DialogType.alert);
-        },
-        confirm: function (content, title, options, okButton) {
-            if(arguments.length <= 3 && ($.isFunction(title) || $.isObject(title))) {
-                okButton = options;
-                options = title;
-                title = '';
-            }
-            return Factory.show(content, title, options, Config.DialogType.confirm, null, okButton);
-        },
-        message: function (content, options) {
-            return Factory.show(content, '', options, Config.DialogType.message);
-        },
-        tips: function (content, target, options) {
-            return Factory.show(content, '', options, Config.DialogType.tips, target);
-        },
-        tooltip: function (content, target, options) {
-            return Factory.show(content, '', options, Config.DialogType.tooltip, target);
-        },
-        toolwin: function(content, title, options) {
-            return Factory.show(content, title, options, Config.DialogType.toolwin);
-        },
-        toolwindow: function(content, title, options) {
-            return Factory.show(content, title, options, Config.DialogType.toolwindow);
-        },
-        window: function(content, title, options) {
-            return Factory.show(content, title, options, Config.DialogType.window);
-        }
-    });
+    if (p.options.type !== 'tooltip') {
+        Util.setBodySize(_, { event: 'show', lastSize: p.hideSize });
+    }
 
-    $.extend($.dialog, {
-        msg: function (content, options) {
-            var opt = $.extend({
-                autoClose: true, timing: 2560
-            }, options);
-            return Factory.show(content, '', opt, Config.DialogType.msg);
-        },
-        win: function (content, title, options) {
-            return Factory.show(content, title, options, Config.DialogType.win);
-        },
-        form: function (content, title, options) {
-            return Factory.show(content, title, options, Config.DialogType.form);
-        },
-        load: function (urlOrElement, title, options) {
-            return Factory.show(urlOrElement, title, options, Config.DialogType.load);
-        },
-        iframe: function (url, title, options) {
-            return Factory.show(url, title, options, Config.DialogType.iframe);
-        },
-        url: function (url, title, options) {
-            return Factory.show(url, title, options, Config.DialogType.url);
-        },
-        about: function(content, title, options) {
-            return Factory.show(content, title, options, Config.DialogType.about);
-        },
-        toolwin: function(content, title, options) {
-            return Factory.show(content, title, options, Config.DialogType.toolwin);
-        },
-        panel: function(content, title, options) {
-            return Factory.show(content, title, options, Config.DialogType.panel);
-        },
-        blank: function(content, title, options) {
-            return Factory.show(content, title, options, Config.DialogType.blank);
-        }
-    });
+    if (!p.options.lock) {
+        Util.setClickBgClose(_);
+    }
 
-    $.extend($.dialog, {
-        get: function (id) {
-            var p = Factory.getOptions(id) || {}, dialog = p.dialog;
-            if (dialog && !dialog.isClosed()) {
-                return dialog;
-            }
-            return null;
-        },
-        show: function (id) {
-            var p = Factory.getOptions(id) || {}, dialog = p.dialog;
-            if (dialog && !dialog.isClosed()) {
-                dialog.show();
-            }
-            return $;
-        },
-        close: function (id) {
-            return Factory.close(id), $;
-        },
-        closeFor: function(forname) {
-            return Factory.closeFor(forname), $;
-        },
-        closefor: function(forname) {
-            return Factory.closeFor(forname), $;
-        },
-        closeAll: function (type) {
-            return Factory.closeAll(type), $;
-        },
-        closeall: function (type) {
-            return Factory.closeAll(type), $;
-        },
-        closeParent: function (id, param) {
-            return Factory.closeParent(id, param), $;
-        },
-        closeparent: function (id, param) {
-            return Factory.closeParent(id, param), $;
-        },
-        resizeParent: function (id, param) {
-            return Factory.resizeParent(id, param), $;
-        },
-        resizeparent: function (id, param) {
-            return Factory.resizeParent(id, param), $;
-        }
-    });
+    if($.isBoolean(content, false) || !Util.isVisible(p.controls)) {
+        _.position();
+    }
 
-    $.extend($.tooltip, {
-        close: function (id) {
-            if ($.isElement(id)) {
-                id = id.getAttribute(Config.TooltipAttributeName);
-            }
-            return Factory.close(id), $;
-        },
-        closeFor: function(forname) {
-            return Factory.closeFor(forname), $;
-        },
-        closefor: function(forname) {
-            return Factory.closeFor(forname), $;
-        },
-        closeAll: function (type) {
-            return Factory.closeAll(type || Config.DialogType.tooltip), $;
-        },
-        closeall: function (type) {
-            return Factory.closeAll(type || Config.DialogType.tooltip), $;
+    return _;
+},
+hide: function (action, dialogResult) {
+    var _ = this, p = Util.getParam(_), opt = p.options;
+    if (_.isClosed() || _.isHide() || !p || !opt.closeAble) {
+        return _;
+    }
+    if(action === 'initial-hide') {
+        console.log(action + ': ' + _.id);
+    }
+    var ctls = p.controls,
+    timers = p.timers,
+    url = opt.redirect || opt.targetUrl,
+    actions = Util.getAction(_);
+
+    if(!ctls.dialog) {
+        return _;
+    }
+
+            //记录隐藏之前的对话框尺寸大小，以便再次显示时，还原尺寸大小
+    Util.setOptions(_, 'hideSize', { width: ctls.dialog.offsetWidth, height: ctls.dialog.offsetHeight });
+
+    Util.showDialog(ctls, false)
+    .setOptions(_, 'hide', true)
+    .delAction(_)
+    .clearTimer(timers)
+                //.hideDocOverflow(_, true)
+    .callback(_, p, actions)
+    .redirect(url);
+
+    if (p.options.lock) {
+        Util.hideDocOverflow(_, true);
+    }
+
+    return _;
+},
+close: function (force) {
+    var _ = this, util = Util, p = util.getParam(_), opt = p.options;
+
+            //是否强制关闭对话框，参数类型必须是 boolean 类型
+            //当前forceClose为true时，将忽略closeAble和closeType
+    var forceClose = $.isBoolean(force, false);
+
+    if (_.isClosed() || !p || (!opt.closeAble && !forceClose)) {
+        return _;
+    }
+    var ctls = p.controls,
+    timers = p.timers,
+    url = opt.redirect || opt.targetUrl,
+    actions = util.getAction(_),
+    func = util.checkCallback(p, actions);
+
+            // 点击确定按钮时，若延时关闭，则仅回调而不关闭
+    if (opt.delayClose
+        && actions.result !== Config.DialogResult.close
+        && (util.isIframe(opt) || util.isSure(actions.result))
+        && func
+        && (func.callback || func.ok)) {
+        return util.delAction(_).callback(_, p, actions), _;
+}
+if (!forceClose && opt.closeType === 'hide') {
+    return _.hide();
+}
+
+$.removeChild(p.parent, [ctls.container || ctls.dialog, ctls.shade]);
+
+util.setOptions(_, 'closed', true)
+.delAction(_)
+.clearTimer(timers)
+.hideDocOverflow(_, true)
+.callback(_, p, actions)
+.dispose(_)
+.remove(_)
+.redirect(url);
+
+return _;
+},
+update: function (content, title, options) {
+    if ($.isString(options)) {
+        if (options === 'autosize') {
+            options = { width: 'auto', height: 'auto' };
+        } else if (options === 'autoheight') {
+            options = { height: 'auto' };
+        } else if (options === 'autowidth') {
+            options = { width: 'auto' };
+        } else {
+            options = {};
         }
-    });
+    }
+    var opt = Common.checkOptions(content, title, options, true);
+    var _ = this, p = Util.getParam(_), ctls = p.controls;
+
+            //设置创建时间，防止被document事件关闭
+    p.buildTime = new Date().getTime();
+
+    if (opt.type && !opt.buttons) {
+        opt.buttons = Common.getDialogButtons(opt.type);
+    }
+
+            //更新时，若样式设置为null,则清除之前的样式设置
+    if (opt.newStyles === null) {
+        this.setOptions('styles', {});
+    }
+            //更新时，若没有设置新的样式，则复制之前的样式设置
+    if ($.isUndefined(opt.styles) || $.isEmpty(opt.styles)) {
+        $.extend(opt.styles, p.options.styles);
+    }
+
+            // 判断内容是否改变，以决定是否需要重新设置位置
+    var isChanged = Util.isChange(opt.content, p.options.content);
+
+    if ($.extend(p.options, opt).type === Config.DialogType.tooltip) {
+        Util.updateTooltip(_, p.options);
+        return _;
+    }
+    if (ctls.content) {
+        var isAutoSize = Util.isAutoSize(_),
+        isMin = p.status.min;
+
+        if (ctls.title && opt.title) {
+            ctls.title.innerHTML = opt.title;
+        }
+
+        if (isMin) {
+            Util.setSize(_, { type: Config.DialogStatus.normal });
+            Util.setPosition(_);
+        }
+        Util.buildContent(_, true).setBodySize(_).setCache(_);
+
+        if (isMin) {
+            Util.setSize(_, { type: Config.DialogStatus.min });
+        }
+
+        if (isAutoSize && isChanged) {
+            window.setTimeout(function () { Util.setPosition(_); }, 10);
+        }
+
+        if (!p.options.lock) {
+            Util.setClickBgClose(_);
+        }
+
+        if (_.isHide() && !_.isClosed()) {
+            _.show();
+        }
+    }
+    return _;
+},
+append: function (content, title, options) {
+    var _ = this, p = Util.getParam(_), ctls = p.controls;
+    if (p.none || !ctls.content) {
+        return this;
+    }
+    if (ctls.icon) {
+        $.removeChild(ctls.content, ctls.icon);
+    }
+    var html = ctls.content.innerHTML;
+    return this.update(html + content, title, options);
+},
+insert: function (content, title, options) {
+    var _ = this, p = Util.getParam(_), ctls = p.controls;
+    if (p.none || !ctls.content) {
+        return _;
+    }
+    if (ctls.icon) {
+        $.removeChild(ctls.content, ctls.icon);
+    }
+    var html = ctls.content.innerHTML;
+    return _.update(content + html, title, options);
+},
+title: function(title) {
+    var _ = this, p = Util.getParam(_), ctls = p.controls;
+    if (p.none || !ctls.content) {
+        return _;
+    }
+    var html = ctls.content.innerHTML;
+    return _.update(html, title);
+},
+focus: function (obj) {
+    var _ = this, p = Util.getParam(_), buttons = p.buttons;
+    if (Util.isWap()) {
+        return _;
+    }
+    if (p.none || _.isClosed() || _.isHide()) {
+        return _;
+    }
+
+    if (Common.isChildFocus(obj, p.controls.dialog)) {
+        return _;
+    }
+
+    var dbKey = p.options.defaultButton;
+    if (dbKey && buttons[dbKey]) {
+        buttons[dbKey].focus();
+        return _;
+    }
+
+    var btn = null;
+    for (var k in buttons) {
+        btn = buttons[k];
+    }
+    return btn && btn.focus(), _;
+},
+min: function () {
+            //return Util.setSize(this, { type: Config.DialogStatus.min });
+    var _ = this, p = Util.getParam(_);
+    if (p.none) { return _; }
+
+    var type = Config.DialogStatus.min, lastStatus = p.lastStatus;
+    if (p.status.min && lastStatus === Config.DialogStatus.max) {
+        type = Config.DialogStatus.max;
+    } else if (p.status.min) {
+        type = Config.DialogStatus.normal;
+    }
+    return Util.setSize(_, { type: type }), _;
+},
+max: function () {
+    var _ = this, p = Util.getParam(_);
+    if (p.none) { return _; }
+
+    var type = Config.DialogStatus.max, lastStatus = p.lastStatus;
+
+    if (p.status.max || (p.status.min && lastStatus === Config.DialogStatus.normal)) {
+        type = Config.DialogStatus.normal;
+    }
+    return Util.setSize(_, { type: type }), _;
+},
+reload: function() {
+    var _ = this, p = Util.getParam(_);
+    if (p.none || _.isClosed() || _.isHide() || _.isMin()) {
+        return _;
+    }
+    return Util.reload(_), _;
+},
+restore: function () {
+    return Util.setSize(this, { type: Config.DialogStatus.normal }), this;
+},
+normal: function () {
+    return Util.setSize(this, { type: Config.DialogStatus.normal }), this;
+},
+size: function(options) {
+    return $.isObject(options) ? this.resize(options) : Util.getSize(this);
+},
+resize: function (options) {
+    $.extend(options, { resizeTo: false });
+    return Util.changeSize(this, options), this;
+},
+resizeTo: function (options) {
+    $.extend(options, { resizeTo: true });
+    return Util.changeSize(this, options), this;
+},
+position: function (options) {
+    var _ = this, p = Util.getParam(_);
+    if (_.isClosed() || p.none) { return this; }
+    return Util.setPosition(_, options), this;
+},
+move: function (options) {
+    return Util.movePosition(this, options, false), this;
+},
+moveTo: function (options) {
+    return Util.movePosition(this, options, true), this;
+},
+appendChild: function (elem, pNode) {
+    return $.appendChild(pNode || this.getControls().content, elem), this;
+},
+zindex: function (zindex) {
+    if ($.isUndefined(zindex)) {
+        return this.getOptions().zindex;
+    }
+    return Util.setZindex(this, zindex), this;
+},
+topMost: function () {
+    var _ = this, p = Util.getParam(_);
+    if (p.none || _.isClosed() || !p.options.topMost) {
+        return false;
+    }
+    var d = Factory.getTop();
+    if (d && !Util.isSelf(_, d)) {
+        var zindex = d.getOptions().zindex;
+        Util.setZindex(d, _.getOptions().zindex);
+        return Util.setZindex(_, zindex);
+    }
+    return _;
+},
+showHead: function (isShow, type, rebuild) {
+    return Util.showHeadFoot(this, isShow, type, rebuild, 'head'), this;
+},
+showFoot: function (isShow, type, rebuild) {
+    Util.showHeadFoot(this, isShow, type, rebuild, 'foot');
+    return this.position(), this;
+}
+};
+
+$.extend({
+    DialogButtons: $.extend({}, Config.DialogButtons),
+    DialogType: $.extend({}, Config.DialogType),
+    DialogIcon: $.extend({}, Config.DialogIcons),
+    DialogButtonKey: (function () {
+        var keys = {};
+        for (var k in Config.ButtonConfig) {
+            if (k !== 'None') {
+                keys[k] = k;
+            }
+        }
+        return keys;
+    })()
+});
+
+if ($.getQueryString(location.href, 'dialog_help')) {
+    console.log('$.DialogType: ', $.DialogType);
+    console.log('$.DialogIcon: ', $.DialogIcon);
+    console.log('$.DialogButtons: ', $.DialogButtons);
+    console.log('$.DialogButtonKey: ', $.DialogButtonKey);
+}
+
+$.extend({
+    dialog: function (content, title, options) {
+        return Factory.show(content, title, options);
+    },
+    alert: function (content, title, options) {
+        return Factory.show(content, title, options, Config.DialogType.alert);
+    },
+    confirm: function (content, title, options, okButton) {
+        if(arguments.length <= 3 && ($.isFunction(title) || $.isObject(title))) {
+            okButton = options;
+            options = title;
+            title = '';
+        }
+        return Factory.show(content, title, options, Config.DialogType.confirm, null, okButton);
+    },
+    message: function (content, options) {
+        return Factory.show(content, '', options, Config.DialogType.message);
+    },
+    tips: function (content, target, options) {
+        return Factory.show(content, '', options, Config.DialogType.tips, target);
+    },
+    tooltip: function (content, target, options) {
+        return Factory.show(content, '', options, Config.DialogType.tooltip, target);
+    },
+    toolwin: function(content, title, options) {
+        return Factory.show(content, title, options, Config.DialogType.toolwin);
+    },
+    toolwindow: function(content, title, options) {
+        return Factory.show(content, title, options, Config.DialogType.toolwindow);
+    },
+    window: function(content, title, options) {
+        return Factory.show(content, title, options, Config.DialogType.window);
+    }
+});
+
+$.extend($.dialog, {
+    msg: function (content, options) {
+        var opt = $.extend({
+            autoClose: true, timing: 2560
+        }, options);
+        return Factory.show(content, '', opt, Config.DialogType.msg);
+    },
+    win: function (content, title, options) {
+        return Factory.show(content, title, options, Config.DialogType.win);
+    },
+    form: function (content, title, options) {
+        return Factory.show(content, title, options, Config.DialogType.form);
+    },
+    load: function (urlOrElement, title, options) {
+        return Factory.show(urlOrElement, title, options, Config.DialogType.load);
+    },
+    iframe: function (url, title, options) {
+        return Factory.show(url, title, options, Config.DialogType.iframe);
+    },
+    url: function (url, title, options) {
+        return Factory.show(url, title, options, Config.DialogType.url);
+    },
+    about: function(content, title, options) {
+        return Factory.show(content, title, options, Config.DialogType.about);
+    },
+    toolwin: function(content, title, options) {
+        return Factory.show(content, title, options, Config.DialogType.toolwin);
+    },
+    panel: function(content, title, options) {
+        return Factory.show(content, title, options, Config.DialogType.panel);
+    },
+    blank: function(content, title, options) {
+        return Factory.show(content, title, options, Config.DialogType.blank);
+    }
+});
+
+$.extend($.dialog, {
+    get: function (id) {
+        var p = Factory.getOptions(id) || {}, dialog = p.dialog;
+        if (dialog && !dialog.isClosed()) {
+            return dialog;
+        }
+        return null;
+    },
+    show: function (id) {
+        var p = Factory.getOptions(id) || {}, dialog = p.dialog;
+        if (dialog && !dialog.isClosed()) {
+            dialog.show();
+        }
+        return $;
+    },
+    close: function (id) {
+        return Factory.close(id), $;
+    },
+    closeFor: function(forname) {
+        return Factory.closeFor(forname), $;
+    },
+    closefor: function(forname) {
+        return Factory.closeFor(forname), $;
+    },
+    closeAll: function (type) {
+        return Factory.closeAll(type), $;
+    },
+    closeall: function (type) {
+        return Factory.closeAll(type), $;
+    },
+    closeParent: function (id, param) {
+        return Factory.closeParent(id, param), $;
+    },
+    closeparent: function (id, param) {
+        return Factory.closeParent(id, param), $;
+    },
+    resizeParent: function (id, param) {
+        return Factory.resizeParent(id, param), $;
+    },
+    resizeparent: function (id, param) {
+        return Factory.resizeParent(id, param), $;
+    }
+});
+
+$.extend($.tooltip, {
+    close: function (id) {
+        if ($.isElement(id)) {
+            id = id.getAttribute(Config.TooltipAttributeName);
+        }
+        return Factory.close(id), $;
+    },
+    closeFor: function(forname) {
+        return Factory.closeFor(forname), $;
+    },
+    closefor: function(forname) {
+        return Factory.closeFor(forname), $;
+    },
+    closeAll: function (type) {
+        return Factory.closeAll(type || Config.DialogType.tooltip), $;
+    },
+    closeall: function (type) {
+        return Factory.closeAll(type || Config.DialogType.tooltip), $;
+    }
+});
 
 }(OUI);
