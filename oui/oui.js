@@ -3174,7 +3174,12 @@
             if($.isNullOrUndefined(elem)){
                 return this;
             }
-            if (isArrayLike(elem)) {
+            if ($.isString(elem)) {
+                elem = $.toElement(elem);
+            }
+            if ($.isElement(elem)) {
+                elem = [elem];
+            } else if (isArrayLike(elem)) {
                 elem = makeArray(elem);
             } else if (!$.isArray(elem)) {
                 elem = [elem];
@@ -4101,13 +4106,18 @@
                 minVal = list;
                 list = null;
             }
-            if($.isNumber(minVal) && $.isNumber(maxVal)) {
+            if ($.isNumber(minVal) && $.isNumber(maxVal)) {
                 stepVal = stepVal || 1;
                 for(var i = minVal; i <= maxVal; i+= stepVal) {
                     var selected = curVal === i ? ' selected="selected"' : '';
                     html.push('<option value="' + i + '"' + selected + '>' + i + (valUnit || '') + '</option>');
                 }
                 return html.join('');
+            }
+            //如果是数组参数，则curVal和valUnit参数位置前移
+            if ($.isArray(list) && $.isUndefined(curVal)) {
+                curVal = minVal;
+                valUnit = maxVal;
             }
             for (var i = 0; i < list.length; i++) {
                 var dr = list[i], val = '', txt = '';
@@ -4122,7 +4132,7 @@
                     txt = dr;
                 }
                 var selected = curVal === val ? ' selected="selected"' : '';
-                html.push('<option value="' + val + '"' + selected + '>' + txt + '</option>');
+                html.push('<option value="' + val + '"' + selected + '>' + txt + (valUnit || '') + '</option>');
             }
             return html.join('');
         },

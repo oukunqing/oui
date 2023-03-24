@@ -14,7 +14,10 @@
         DATA_FORMAT: "data-format,dataformat,value-format,valueformat",
         OLD_VALUE: "old-value,oldvalue",
         DATA_TYPE: "data-type,datatype,value-type,valuetype",
-        DATA_SHOW: "data-show,data-auto"
+        DATA_SHOW: "data-show,data-auto",
+        MIN_VALUE: "min-value,minvalue,minValue,min-val",
+        MAX_VALUE: "max-value,maxvalue,maxValue,max-val",
+        DEFAULT_VALUE: "default-value,defaultvalue,def-val,defval,dval,dv"
     };
     var isElement = function (element) {
         return element !== null && typeof element === 'object' && typeof element.nodeType === 'number';
@@ -277,10 +280,10 @@
                                     msg = '';
                                 
                                 if($.isUndefined(min)){
-                                    min = parseFloat($.getAttribute(element, 'min-value,min-val', ''), 10);
+                                    min = parseFloat($.getAttribute(element, customAttrs.MIN_VALUE, ''), 10);
                                 }
                                 if($.isUndefined(max)){
-                                    max = parseFloat($.getAttribute(element, 'max-value,max-val', ''), 10);
+                                    max = parseFloat($.getAttribute(element, customAttrs.MAX_VALUE, ''), 10);
                                 }
 
                                 if ($.isNumeric(min) && $.isNumeric(max)) {
@@ -347,7 +350,7 @@
                                 if ($.isString(position, true) || $.isNumber(position)) {
                                     options.position = position;
                                 }
-                                if (tooltipStyle) {                                    
+                                if (tooltipStyle) {
                                     options.tooltipStyle = tooltipStyle;
                                 }
                                 $.tooltip(message, element, options);
@@ -389,6 +392,16 @@
                                 if (field.value === '') {
                                     field.value = isValue(field.val) ? field.val : isValue(field.defaultValue) ? field.defaultValue : field.value;
                                 }
+                                //如果没有设置默认值，则取用（自定义的）默认值属性的值
+                                if (field.value === '') {
+                                    var defVal = $.getAttribute(elem, customAttrs.DEFAULT_VALUE, '');
+                                    if (!$.isUndefined(defVal)) {
+                                        field.value = defVal;
+                                    }
+                                }
+                                if (field.required === null) {
+                                    field.required = $.getAttribute(elem, 'required', '') === 'required' || false;
+                                }
                                 return field;
                             },
                             id = element.id, name = element.name, nodeType = element.nodeType,
@@ -403,7 +416,7 @@
                             keyField = {};
                         } else if ($.isObject(keyField)) {
                             if (!$.isBoolean(keyField.required)) {
-                                keyField.required = keyField.require || false;
+                                keyField.required = keyField.require || null;
                             }
                             keyField.pattern = keyField.regex || keyField.pattern || '';
                         }
@@ -417,7 +430,7 @@
                             value: '',                  //获取到的字段内容
                             attribute: '',              //获取指定的属性值作为value
                             minValue: '', maxValue: '',   //最小值、最大值（用于验证输入的数字大小）
-                            required: false,            //是否必填项
+                            required: null,            //是否必填项
                             empty: false,               //是否允许空值
                             strict: false,              //是否严格模式（检测输入内容的类型）
                             md5: false,                 //是否MD5加密
@@ -472,16 +485,16 @@
 
                             if (typeof $.OUI === 'boolean') {
                                 if (!configs.focusInvalid) {
-                                    element.onfocus = events['focus'];
+                                    $.addListener(element, 'focus', events['focus']);
                                 }
-                                element.onblur = events['blur'];
+                                $.addListener(element, 'blur', events['blur']);
 
                                 if (fieldConfig.field.tag === 'SELECT') {
-                                    element.onchange = events['change'];
+                                    $.addListener(element, 'change', events['change']);
                                 } else if (op.isCheckBox(element, element.type)) {
-                                    element.onclick = events['click'];
+                                    $.addListener(element, 'click', events['click']);
                                 } else {
-                                    element.onkeyup = events['keyup'];
+                                    $.addListener(element, 'keyup', events['keyup']);
                                 }
                             } else {
                                 if (!configs.focusInvalid) {

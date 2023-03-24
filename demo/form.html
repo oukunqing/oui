@@ -8,7 +8,7 @@
         <table cellpadding="5" cellspacing="0">
             <tr>
                 <td><label for="txtId">ID</label></td>
-                <td><input type="text" id="txtId" /></td>
+                <td><input type="text" id="txtId" minvalue="12" max-value="100" data-show="0" /></td>
             </tr>
             <tr>
                 <td><label for="txtName">Name</label></td>
@@ -17,7 +17,7 @@
             <tr>
                 <td><label for="ddlAge">Age</label></td>
                 <td>
-                    <select id="ddlAge">
+                    <select id="ddlAge" onchange="console.log(123,this.value);">
                         <option value="">请选择Age</option>
                         <option value="20">20</option>
                         <option value="30">30</option>
@@ -39,7 +39,7 @@
 </body>
 </html>
 <script type="text/javascript" src="../oui/oui.js?"></script>
-<script type="text/javascript" src="../oui/dialog/oui.dialog.min.js?12"></script>
+<script type="text/javascript" src="../oui/dialog/oui.dialog.js?12"></script>
 <script type="text/javascript" src="../oui/form/oui.form.min.js?12"></script>
 <script type="text/javascript">
     //没有引用jquery.js
