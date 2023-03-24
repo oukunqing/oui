@@ -90,6 +90,40 @@ if($.isDebug()) {
     console.log('offset: ', $.offset(div));
 
 }
+function showDialog() {
+	var d01 = $.alert('Hello world!<br />skin: default', 'oui.dialog', {
+		id: 'd01',
+		skin: 'default'
+	});
+	window.setTimeout(function() {
+		$.alert('Hello world!<br />skin: orange', 'oui.dialog', {
+			id: 'd01',
+			skin: 'orange'
+		});
+	}, 2000);
+	window.setTimeout(function() {
+		$.alert('Hello world!<br />skin: red', 'oui.dialog', {
+			id: 'd01',
+			skin: 'red'
+		});
+	}, 4000);
+	window.setTimeout(function() {
+		$.alert('Hello world!<br />skin: green', 'oui.dialog', {
+			id: 'd01',
+			skin: 'green'
+		});
+	}, 6000);
+	window.setTimeout(function() {
+		$.alert('Hello world!<br />skin: orange2', 'oui.dialog', {
+			id: 'd01',
+			skin: 'orange'
+		});
+	}, 8000);
+}
+
+window.onload = function() {
+	showDialog();
+};
 
 var test12345 = function(){
 	var html = [

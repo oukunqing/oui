@@ -487,6 +487,8 @@
                 opt.showReload = opt.showReload || opt.showLoad;
                 opt.reloadCallback = opt.reloadCallback || opt.reloadFunc;
 
+                opt.icon = opt.icon || opt.iconType;
+
                 return this.checkCustomStyle(opt, isUpdate).checkTiming(opt), opt;
             },
             getCssAttrSize: function (val, options) {
@@ -4335,7 +4337,8 @@
                 Util.updateTooltip(_, p.options);
                 return _;
             }
-            if (ctls.content) {
+
+            function updateDialog(_) {
                 var isAutoSize = Util.isAutoSize(_),
                     isMin = p.status.min;
 
@@ -4364,6 +4367,24 @@
                 if (_.isHide() && !_.isClosed()) {
                     _.show();
                 }
+            }
+
+            if (ctls.content) {
+                updateDialog(_);
+            }
+
+            return _.skin(opt.skin);
+        },
+        skin: function(skin) {
+            var _ = this, p = Util.getParam(_), ctls = p.controls;
+            if (p.none || !ctls.content || Config.IsDefaultSkin(skin)) {
+                return _;
+            }
+            if($.isString(skin, true)) {
+                Factory.loadCss(skin, function () {
+                    console.log('skin:', skin);
+                    ctls.dialog.className = 'oui-dialog oui-dialog-' + skin;
+                });
             }
             return _;
         },
