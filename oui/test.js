@@ -1424,3 +1424,25 @@ var obj = { id: 123, name: 'abc', data: undefined, str: 'undefined' };
 console.log(obj);
 
 
+var measure = {
+    getAngleRange: function (a, b, loopback) {
+        var c = b - a;
+        return c >= 0 ? c : loopback ? c + 360 : a - b;
+    },
+    isSameAngleArea: function (a, b, angle_range) {
+        angle_range = !angle_range ? 180 : parseInt(angle_range, 10);
+
+        if (!angle_range) {
+            return false;
+        }
+        return parseInt(a, 10) / angle_range === parseInt(b, 10) / angle_range;
+    },
+    getRowCol: function (angle, step) {
+        var c = step === 0 ? 0 : angle === 0 ? 1 : angle / step,
+            n = parseInt(c, 10);
+        return c - n > 0 ? n + 1 : n;
+    }
+};
+
+console.log(measure.getAngleRange(355, 6, 1));
+console.log(measure.getRowCol(11, 0.15));

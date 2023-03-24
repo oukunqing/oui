@@ -584,7 +584,8 @@
                         }
                     },
                     setFocus: function (element) {
-                        $(element).focus();
+                        //$(element).focus();
+                        element.focus();
                     }
                 };
 
@@ -651,9 +652,8 @@
                         warns.push({ element: obj, message: result.message });
                         op.setControlEvent(obj, configs, fc, formElem);
                         if (configs.singleStep) {
-                            //if (configs.focusInvalid) {
                             if (!configs.focusInvalid) {
-                                op.setFocus(element);
+                                op.setFocus(obj);
                             }
                             return false;
                         }

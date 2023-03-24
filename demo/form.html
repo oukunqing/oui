@@ -46,6 +46,7 @@
     window.onload = function() {
 		console.log($.getAttribute('txtScore', 'valuetype'), typeof $.getAttribute('txtScore', 'valuetype'));
         $.formValidate(['form1','btnOK'], {
+			configs: {singleStep:true},
             rules: {
                 Id: { dataType: 'int' },
                 Name: { required: true },
