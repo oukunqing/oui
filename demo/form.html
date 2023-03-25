@@ -46,7 +46,12 @@
     window.onload = function() {
 		console.log($.getAttribute('txtScore', 'valuetype'), typeof $.getAttribute('txtScore', 'valuetype'));
         $.formValidate(['form1','btnOK'], {
-			configs: {singleStep:true},
+			configs: {
+				//是否单步验证
+				//单步验证表示依次只验证一个元素，若该元素验证失败，则停留
+				//非单步验证，则验证所有元素
+				singleStep:false
+			},
             rules: {
                 Id: { dataType: 'int' },
                 Name: { required: true },

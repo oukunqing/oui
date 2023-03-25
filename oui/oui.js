@@ -3996,6 +3996,8 @@
                 };
             }
 
+            img.src = img_url + '?' + start_time;
+
             img.onerror = function(er) {
                 clearInterval(set);
                 callback({width:0, height:0});
@@ -4004,17 +4006,16 @@
                 if (!load) {
                     load = true;
                     var duration = new Date().getTime() - start_time;
-                    callback({actino: 'onload', duration: duration, width: img.width, height: img.height});
+                    callback({ actino: 'onload', duration: duration, width: img.width, height: img.height });
                 }
             };
-            img.src = img_url + '?' + start_time;
             var check = function() {
                 if (img.width > 0 || img.height > 0 || load) {
                     clearInterval(set);
                     if (!load) {
                         load = true;
                         var duration = new Date().getTime() - start_time;
-                        callback({actino: 'check', duration: duration, width: img.width, height: img.height});
+                        callback({ actino: 'check', duration: duration, width: img.width, height: img.height });
                     }
                 }
             };

@@ -161,10 +161,17 @@
             box.style.cssText += 'overflow:hidden;position:relative;';
             _.box = box;
 
-            var img = document.createElement('IMG');
+            var img = document.createElement('IMG'),
+                picurl = _.opt.img || _.opt.pic;
+
+            if (location.href.indexOf('http') === 0) {
+                //设置图片跨域
+                //img.setAttribute('crossorigin', 'anonymous');
+                img.crossOrigin = 'anonymous';
+            }
             img.className = 'oui-picbox-img oui-picbox-unselect';
             img.style.cssText = 'position:absolute;border:none;margin:0;padding:0;';
-            img.src = _.opt.img || _.opt.pic;
+            img.src = picurl;
             _.box.appendChild(img);
             _.img = img;
 
@@ -241,6 +248,7 @@
             var statusbar = document.createElement('DIV');
             statusbar.className = 'oui-picbox-status oui-picbox-unselect';
             $.addListener(statusbar, 'dblclick', function() {
+                $.cancelBubble();
                 _.center();
             });
             _.statusbar = statusbar;
@@ -249,6 +257,7 @@
             var titlebar = document.createElement('DIV');
             titlebar.className = 'oui-picbox-title oui-picbox-unselect';
             $.addListener(titlebar, 'dblclick', function() {
+                $.cancelBubble();
                 _.scale(_.cfg.boxScale).center();
             });
             _.titlebar = titlebar;
@@ -267,7 +276,8 @@
                     '[', _.cfg.width, '×', _.cfg.height, '] ',
                     (fileSize ? '[' + fileSize + '] ' : ''), 
                     $.getFileName(_.img.src),
-                    '&nbsp;'
+                    '&nbsp;',
+                    ''
                 ];
                 _.titlebar.innerHTML = html.join('');
                 return _;
@@ -295,9 +305,6 @@
         },
         drag: function () {
             var _ = this;
-            _.img.oncontextmenu = function() {
-                return false;
-            };
             $.addListener(_.img, 'pointerdown', function (ev) {
                 if (0 == ev.button) {
                     console.log('map pointerdown', ev);
@@ -358,15 +365,22 @@
         select: function () {
             var _ = this;
             _.box.oncontextmenu = function() {
-                return false;
+                //鼠标右键若有拖动动作，或者鼠标位置不在图片范围内，则不显示默认的右键菜单
+                if (_.cfg.selectdrag || !_.cfg.selectonpic) {
+                    return false;
+                }
             };
             $.addListener(_.box, 'pointerdown', function (ev) {
                 if (2 == ev.button) {
                     $.cancelBubble(ev);
                     var pos = $.getEventPos(ev);
                     _.cfg.selectdown = true;
+                    //鼠标右键是否有拖动动作
+                    _.cfg.selectdrag = false;
                     _.cfg.startpointer = { x: pos.x - _.cfg.offset.left, y: pos.y - _.cfg.offset.top };
                     _.cfg.selection = Factory.showRange(_.cfg.startpointer, null, _.cfg.selection, _.box);
+                    //鼠标位置是否在图片范围内
+                    _.cfg.selectonpic = _.onpicture(_.cfg.startpointer, _.cfg);
                 }
             });
             $.addListener(_.box, 'pointermove', function (ev) {
@@ -406,6 +420,8 @@
             if (p1.x === p2.x && p1.y === p2.y) {
                 return _;
             }
+            _.cfg.selectdrag = true;
+
             var w = Math.abs(p1.x - p2.x),
                 h = Math.abs(p1.y - p2.y),
                 small = p1.x > p2.x && p1.y > p2.y,
@@ -597,6 +613,10 @@
                 _.cfg.minScale = size.minScale;
             }
             return this;
+        },
+        //判断鼠标位置是否在图片范围内（图片位置不是固定的）
+        onpicture: function(p, cfg) {
+            return p.x >= cfg.left && p.x <= cfg.left + cfg.w && p.y >= cfg.top && p.y <= cfg.top + cfg.h;
         }
     };
 
@@ -608,7 +628,5 @@
             return $.picturebox(opt, callback);
         }
     });
-
-    //$.extend($.picturebox, {});
 
 }(OUI);
