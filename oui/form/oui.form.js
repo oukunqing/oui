@@ -855,7 +855,9 @@
                             if ($.isUndefined(data[key])) {
                                 data[key] = [];
                             }
-                            if ($.isArray(data[key]) && '' !== $.trim(result.value)) {
+                            if(!$.isArray(data[key])) {
+                                console.log('[Warning] The name is repeated with the id.', obj);
+                            } else if ('' !== $.trim(result.value)) {
                                 data[key].push(result.value);
                             }
                         }
