@@ -856,7 +856,7 @@
                                 data[key] = [];
                             }
                             if(!$.isArray(data[key])) {
-                                console.log('[Warning] The name is repeated with the id.', obj);
+                                $.console.warn('The name is repeated with the id.', obj);
                             } else if ('' !== $.trim(result.value)) {
                                 data[key].push(result.value);
                             }

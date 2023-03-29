@@ -304,8 +304,9 @@
             return this;
         },
         drag: function () {
-            var _ = this;
-            $.addListener(_.img, 'pointerdown', function (ev) {
+            var _ = this,
+                ie = $.browser.isIE();
+            $.addListener(_.img, ie ? 'mousedown' : 'pointerdown', function (ev) {
                 if (0 == ev.button) {
                     console.log('map pointerdown', ev);
                     $.cancelBubble(ev);
@@ -316,7 +317,7 @@
                     console.log('down:', _.cfg.x, _.cfg.y);
                 }
             });
-            $.addListener(_.img, 'pointermove', function (ev) {
+            $.addListener(_.img, ie ? 'mousemove' : 'pointermove', function (ev) {
                 if (_.cfg.pointerdown) {
                     $.cancelBubble(ev);
                     if (ev.target.className.indexOf('oui-picbox-img') < 0) {
@@ -341,7 +342,7 @@
                 }
                 ev.preventDefault();
             });
-            $.addListener(_.img, 'pointerup', function (ev) {
+            $.addListener(_.img, ie ? 'mouseup' : 'pointerup', function (ev) {
                 if (_.cfg.pointerdown) {
                     $.cancelBubble(ev);
                     _.cfg.pointerdown = false;
@@ -363,14 +364,15 @@
             return this;
         },
         select: function () {
-            var _ = this;
+            var _ = this,
+                ie = $.browser.isIE();
             _.box.oncontextmenu = function() {
                 //鼠标右键若有拖动动作，或者鼠标位置不在图片范围内，则不显示默认的右键菜单
                 if (_.cfg.selectdrag || !_.cfg.selectonpic) {
                     return false;
                 }
             };
-            $.addListener(_.box, 'pointerdown', function (ev) {
+            $.addListener(_.box, ie ? 'mousedown' : 'pointerdown', function (ev) {
                 if (2 == ev.button) {
                     $.cancelBubble(ev);
                     var pos = $.getEventPos(ev);
@@ -383,7 +385,7 @@
                     _.cfg.selectonpic = _.onpicture(_.cfg.startpointer, _.cfg);
                 }
             });
-            $.addListener(_.box, 'pointermove', function (ev) {
+            $.addListener(_.box, ie ? 'mousemove' : 'pointermove', function (ev) {
                 if (_.cfg.selectdown) {
                     $.cancelBubble(ev);
                     var pos = $.getEventPos(ev);
@@ -392,7 +394,7 @@
                 }
                 ev.preventDefault();
             });
-            $.addListener(_.box, 'pointerup', function (ev) {
+            $.addListener(_.box, ie ? 'mouseup' : 'pointerup', function (ev) {
                 if (_.cfg.selectdown) {
                     $.cancelBubble(ev);
                     var pos = $.getEventPos(ev);

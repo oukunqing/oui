@@ -44,7 +44,8 @@
                 options: options,
                 interval: options.interval,
                 timing: 0,
-                enable: false
+                enable: false,
+                pause: false
             };
             return this;
         },
@@ -134,6 +135,11 @@
             }
             return _;
         },
+        pause: function(action) {
+            var _ this;
+
+            return _;
+        },
         reset: function(func, options) {
             var _ = this;
 
@@ -166,6 +172,9 @@
         },
         stop: function(id, options, func) {
             return Factory.timerAction(id, 'stop', options, func);
+        },
+        pause: function(id, action) {
+            return Factory.timerAction(id, "pause", action);
         },
         reset: function(id, options, func) {
             return Factory.timerAction(id, 'reset', options, func);
