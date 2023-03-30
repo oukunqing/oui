@@ -44,8 +44,7 @@
                 options: options,
                 interval: options.interval,
                 timing: 0,
-                enable: false,
-                pause: false
+                enable: false
             };
             return this;
         },
@@ -81,6 +80,7 @@
             timer: null,
             number: opt.interval,
             enable: false,
+            paused: false,
             options: opt
         };
 
@@ -102,12 +102,16 @@
         start: function(func, options) {
             var _ = this;
             _.cache.enable = true;
+            _.cache.paused = false;
 
             if(_.cache.timer !== null) {
                 window.clearInterval(_.cache.timer);
             }
             _.cache.timer = window.setInterval(function() {
                 if(!_.cache.enable) {
+                    return false;
+                }
+                if(_.cache.paused) {
                     return false;
                 }
                 _.cache.number = Factory.checkNumber(_.cache.number, _.cache.options.interval + 1);
@@ -135,9 +139,12 @@
             }
             return _;
         },
-        pause: function(action) {
-            var _ this;
-
+        pause: function(func, action) {
+            var _ = this;
+            _.cache.paused = action ? true : false;
+            if($.isFunction(func)) {
+                func();
+            }
             return _;
         },
         reset: function(func, options) {
@@ -173,8 +180,8 @@
         stop: function(id, options, func) {
             return Factory.timerAction(id, 'stop', options, func);
         },
-        pause: function(id, action) {
-            return Factory.timerAction(id, "pause", action);
+        pause: function(id, action, func) {
+            return Factory.timerAction(id, 'pause', action, func);
         },
         reset: function(id, options, func) {
             return Factory.timerAction(id, 'reset', options, func);

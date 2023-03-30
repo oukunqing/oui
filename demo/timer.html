@@ -15,6 +15,8 @@
 
 	<button onclick="run();">启动</button>
 	<button onclick="run(true);">停止</button>
+	<button onclick="pause(true);">暂停</button>
+	<button onclick="pause(false);">取消暂停</button>
 	<button onclick="run(false, true);">重置</button>
 </body>
 </html>
@@ -33,6 +35,10 @@
 			console.log('start:', num);
 			$('#ts01').html(num + '秒后刷新');
 		});
+	}
+
+	function pause(action) {
+		$.timer.pause('timer1', action);
 	}
 
 	function test(chb) {
