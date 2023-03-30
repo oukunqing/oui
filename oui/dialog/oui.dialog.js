@@ -4375,12 +4375,12 @@
 
             return _.skin(opt.skin);
         },
-        skin: function(skin) {
+        skin: function (skin) {
             var _ = this, p = Util.getParam(_), ctls = p.controls;
             if (p.none || !ctls.content || Config.IsDefaultSkin(skin)) {
                 return _;
             }
-            if($.isString(skin, true)) {
+            if ($.isString(skin, true)) {
                 Factory.loadCss(skin, function () {
                     console.log('skin:', skin);
                     ctls.dialog.className = 'oui-dialog oui-dialog-' + skin;

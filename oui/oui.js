@@ -7,7 +7,7 @@
 */
 
 // OUI
-;!function () {
+; !function () {
     'use strict';
 
     var isWindow = function () {
@@ -178,20 +178,20 @@
         isNull = function (o) { return o === null; },
         isNullOrUndefined = function (o) { return isUndefined(o) || isNull(o); },
         isProperty = function (o, property) { return o.hasOwnProperty(property) && (property in o); },
-        isPercent = function(val) {
+        isPercent = function (val) {
             return (!isNaN(parseFloat(val, 10)) && ('' + val).endsWith('%'));
         },
-        toBoolean = function(key, val) {
-            if(isBoolean(val)) {
+        toBoolean = function (key, val) {
+            if (isBoolean(val)) {
                 return val;
             }
-            if(isNumber(val)) {
+            if (isNumber(val)) {
                 return val === 1;
             }
-            if(isString(val, true)) {
+            if (isString(val, true)) {
                 return val.toLowerCase() === 'true';
             }
-            if(isString(key, true)) {
+            if (isString(key, true)) {
                 return key.toLowerCase() === 'true';
             }
             return false;
@@ -315,7 +315,7 @@
             if (!isBoolean(distinct)) {
                 distinct = false;
             }
-            if(!$.isArray(numbers)) {
+            if (!$.isArray(numbers)) {
                 numbers = ('' + numbers).split(/[\,\|]/g);
             }
             numbers.sort(function (a, b) {
@@ -326,7 +326,7 @@
 
             for (var i = 0, c = numbers.length; i < c; i++) {
                 var num = numbers[i];
-                if(!$.isNumeric(num)) {
+                if (!$.isNumeric(num)) {
                     continue;
                 }
 
@@ -399,7 +399,7 @@
         toJsonString = function (o) { return JSON.stringify(o); },
         toJson = function (s) { return JSON.parse(s); },
         toEncode = function (s) { return encodeURIComponent(s); },
-        toFunction = function(funcName) {
+        toFunction = function (funcName) {
             if ($.isFunction(funcName)) {
                 return funcName;
             }
@@ -407,7 +407,7 @@
                 var func = null, arr = funcName.split('.'), first = true;
                 for (var i = 0; i < arr.length; i++) {
                     var str = arr[i].trim();
-                    if($.isString(str, true)) {
+                    if ($.isString(str, true)) {
                         if (first) {
                             func = eval('(' + str + ')');
                             first = false;
@@ -420,75 +420,75 @@
             }
             return null;
         },
-        toAscii = function(argv) {
+        toAscii = function (argv) {
             var arr = [], s = argv.toString().trim(), len = s.length;
-            for(var i = 0; i < len; i++) {
+            for (var i = 0; i < len; i++) {
                 arr.push(s[i].charCodeAt());
             }
             return arr;
         },
-        asciiToChar = function(argv) {
+        asciiToChar = function (argv) {
             var arr = isArray(argv) ? argv : argv.split(/[\s|,]/g);
             var list = [];
-            for(var i = 0; i < arr.length; i++) {
+            for (var i = 0; i < arr.length; i++) {
                 var num = parseInt(arr[i], 10);
-                if(!isNaN(num)) {
+                if (!isNaN(num)) {
                     list.push(String.fromCharCode(num));
                 }
             }
             return list.join('');
         },
-        toAsciiHex = function(argv, isJoin) {
-            if($.isNumber(argv)) {
+        toAsciiHex = function (argv, isJoin) {
+            if ($.isNumber(argv)) {
                 var arr = [argv.toString(16).toUpperCase()];
                 return isJoin ? arr.join('') : arr;
             }
             var hex = [], arr = $.isArray(argv) ? argv : toAscii(argv), len = arr.length, idx = 0;
-            for(var i = 0; i < len; i++) {
+            for (var i = 0; i < len; i++) {
                 var v = arr[i];
-                if($.isNumber(v)) {
+                if ($.isNumber(v)) {
                     hex[idx++] = v.toString(16).toUpperCase();
                 } else {
                     var tmp = v.toAscii(), c = tmp.length;
-                    for(var j = 0; j < c; j++) {
+                    for (var j = 0; j < c; j++) {
                         hex[idx++] = tmp[j].toString(16).toUpperCase();
                     }
                 }
             }
             return isJoin ? hex.join('') : hex;
         },
-        getArguments = function(args, start, end) {
+        getArguments = function (args, start, end) {
             var par = {}, len = 0, s = start || 0, e = end || args.length;
-            for(var i = s; i < e; i++) {
+            for (var i = s; i < e; i++) {
                 par[len++] = args[i];
             }
             return par.length = len, par;
         },
-        callFunction = function(funcName) {
+        callFunction = function (funcName) {
             var func = toFunction(funcName);
-            if(isFunction(func)) {
+            if (isFunction(func)) {
                 var args = getArguments(arguments, 1);
                 func.apply(this, args);
-            } else if($.isDebug()) {
+            } else if ($.isDebug()) {
                 console.log('callFunction: ', ('' + funcName) + ' is not a function.');
             }
             return this;
         },
-        getUrlVal = function(url, key) {
+        getUrlVal = function (url, key) {
             return !url ? '' : getQueryString(url, key);
         },
-        getUrlSymbol = function(url) {
-            if(!url) {
+        getUrlSymbol = function (url) {
+            if (!url) {
                 return '';
             }
             var end = url.endsWith('?') || url.endsWith('&'),
                 symbol = end ? '' : url.indexOf('?') > -1 ? '&' : '?';
             return symbol;
         },
-        _buildParam = function(url, s, key, val, oldVal) {
-            if(!isNullOrUndefined(val)) {
+        _buildParam = function (url, s, key, val, oldVal) {
+            if (!isNullOrUndefined(val)) {
                 var ps = key + '=' + toEncode(isObject(val) ? toJsonString(val) : val);
-                if(oldVal !== '') {
+                if (oldVal !== '') {
                     url = url.replace(key + '=' + oldVal, ps);
                 } else {
                     s.push(ps);
@@ -501,7 +501,7 @@
                 isObj = isObject(a),
                 isStrict = isBoolean(strict, true);
 
-            if(isNullOrUndefined(a) || (!isObj && isStrict && isNullOrUndefined(v))) {
+            if (isNullOrUndefined(a) || (!isObj && isStrict && isNullOrUndefined(v))) {
                 return isUrl ? url : '';
             }
             if (isString(a)) {
@@ -527,10 +527,10 @@
             var ps = s.join('&');
             return isUrl ? url + (ps ? getUrlSymbol(url) : '') + ps : ps;
         },
-        buildAjaxData = function(action, formData, param) {
+        buildAjaxData = function (action, formData, param) {
             var data = { action: action, data: formData };
             var str = buildParam(data);
-            if($.isString(str, true)) {
+            if ($.isString(str, true)) {
                 return str + '&' + buildParam(param, null, false);
             }
             return buildParam(param, null, false);
@@ -538,7 +538,7 @@
         setUrlParam = function (a, v, strict) {
             return buildParam(a, v, strict);
         },
-        getTime = function() {
+        getTime = function () {
             return ('' + new Date().getTime());//.substr(0, 10);
         },
         getQueryString = function (url, name) {
@@ -552,11 +552,11 @@
                     }
                 }
             }
-            if(!isNullOrUndefined(name)) {
-                if($.isArray(name)) {
+            if (!isNullOrUndefined(name)) {
+                if ($.isArray(name)) {
                     for (var j = 0; j < name.length; j++) {
                         var v = obj[name[j]];
-                        if(!$.isUndefined(v)) {
+                        if (!$.isUndefined(v)) {
                             return v;
                         }
                     }
@@ -574,7 +574,7 @@
                 value = null;
             }
             url = buildParam(data, value, true, url);
-            if ($.isBoolean(nocache, true)) { 
+            if ($.isBoolean(nocache, true)) {
                 var pkey = 'hupts001', time = getTime();
                 url = buildParam(pkey, time, false, url);
             }
@@ -594,14 +594,14 @@
                 return false;
             }
         },
-        isTelephone = function(num) {
+        isTelephone = function (num) {
             return $.PATTERN.Telephone.test(num);
         },
         isMobile = function (num) {
             //return /^1([38][0-9]|4[579]|5[0-3,5-9]|6[6]|7[0135678]|9[89])\d{8}$/.test(num);
             return $.PATTERN.Mobile.test(num);
         },
-        isIdentity = function(num) {
+        isIdentity = function (num) {
             //return /^[1-8][1-9][\d]{4}(19|20)[\d]{2}(0[1-9]|1[0-2])(0[1-9]|[12][0-9]|3[0-1])[\d]{3}[\dX]$/i.test(num);
             return $.PATTERN.Identity.test(num);
         },
@@ -609,123 +609,123 @@
             //return /^[A-Z0-9\u4e00-\u9fa5]+@[A-Z0-9_-]+(\.[A-Z0-9_-]+)+$/gi.test(email);
             return $.PATTERN.Email.test(num);
         },
-        padLeft = function(s, totalWidth, paddingChar, isRight) {
+        padLeft = function (s, totalWidth, paddingChar, isRight) {
             var char = paddingChar || '0', c = totalWidth - s.length;
             for (var i = 0; i < c; i++) {
                 s = isRight ? s + char : char + s;
             }
             return s;
         },
-        filterValue = function(vals, dval, valType) {
-            if(!$.isArray(vals)) {
+        filterValue = function (vals, dval, valType) {
+            if (!$.isArray(vals)) {
                 vals = [vals];
             }
             var noval = $.isNullOrUndefined(dval),
                 numval = $.isNumber(dval),
                 isInt = $.isBoolean(valType, false) || valType === 'int';
 
-            for(var i = 0; i < vals.length; i++) {
+            for (var i = 0; i < vals.length; i++) {
                 var v = vals[i], undef = $.isUndefined(v);
-                if(!undef && noval) {
+                if (!undef && noval) {
                     return v;
                 }
-                if(!undef && !noval) {
-                    if(numval) {
+                if (!undef && !noval) {
+                    if (numval) {
                         v = isInt ? parseInt(v, 10) : parseFloat(v, 10);
-                        if(!isNaN(v) && v >= dval) {
+                        if (!isNaN(v) && v >= dval) {
                             return v;
                         }
-                    } else if(v !== '') {
+                    } else if (v !== '') {
                         return v;
                     }
                 }
             }
             return !noval ? dval : undefined;
         },
-        keywordOverload = function(opt, keys, val, valType) {
-            if(!opt) {
+        keywordOverload = function (opt, keys, val, valType) {
+            if (!opt) {
                 return undefined;
             }
             var vals = [];
-            for(var i in keys) {
+            for (var i in keys) {
                 var k = keys[i];
                 vals.push(opt[k]);
             }
             return filterValue(vals, val, valType);
         },
-        setValue = function(obj, key, val, par) {
+        setValue = function (obj, key, val, par) {
             par = $.extend({
                 cover: false,
                 add: true,
                 set: true
             }, par);
 
-            if(!$.isObject(obj)) {
+            if (!$.isObject(obj)) {
                 obj = {};
             }
-            if(!par.set) {
+            if (!par.set) {
                 return obj;
             }
-            if(!$.isUndefined(obj[key])) {
-                if(par.cover) {
+            if (!$.isUndefined(obj[key])) {
+                if (par.cover) {
                     obj[key] = val;
                 }
-            } else if(par.add) {
+            } else if (par.add) {
                 obj[key] = val;
             }
             return obj;
         },
-        toList = function(key, delimiter) {
+        toList = function (key, delimiter) {
             var keys = [];
-            if($.isArray(key)) {
+            if ($.isArray(key)) {
                 keys = key;
-            } else if($.isString(key, true)) {
+            } else if ($.isString(key, true)) {
                 keys = key.split(delimiter);
             }
             return keys;
         },
         //获取Object对象（嵌套）的值
-        getValue = function(obj, key, dval) {
-            if(!$.isObject(obj)) {
+        getValue = function (obj, key, dval) {
+            if (!$.isObject(obj)) {
                 return dval;
             }
             var keys = toList(key, '.'), len = keys.length;
-            for(var i = 0; i < keys.length; i++) {
+            for (var i = 0; i < keys.length; i++) {
                 var k = keys[i];
-                if(k) {
+                if (k) {
                     obj = obj[k];
                 }
                 //若键值为null，则返回默认值
-                if(obj === null || typeof obj === 'undefined') {
+                if (obj === null || typeof obj === 'undefined') {
                     return typeof dval !== 'undefined' ? dval : '';
                 }
                 //若键值不为对象，则直接返回键值
-                if(i < len - 1 && !$.isObject(obj)) {
+                if (i < len - 1 && !$.isObject(obj)) {
                     return obj;
                 }
             }
             return obj;
         },
         //判断是否为空值，如果设置了默认值，则返回值或默认值；如果没有设置默认值，则返回布尔值
-        isValue = function(val, dval) {
+        isValue = function (val, dval) {
             var isBoolean = typeof dval === 'undefined';
-            if(null === val || typeof val === 'undefined') {
+            if (null === val || typeof val === 'undefined') {
                 return isBoolean ? false : dval;
             }
             return isBoolean ? true : val;
         },
         //获取参数值（参数名重载）
-        getParam = function(opt, key, dval) {
-            if(!$.isObject(opt)) {
+        getParam = function (opt, key, dval) {
+            if (!$.isObject(opt)) {
                 return dval;
             }
             var keys = toList(key, /[\|\,]/g), len = keys.length;
-            for(var i = 0; i < keys.length; i++) {
+            for (var i = 0; i < keys.length; i++) {
                 var k = keys[i], val;
-                if(k) {
+                if (k) {
                     val = opt[k];
                 }
-                if(!$.isNullOrUndefined(val)) {
+                if (!$.isNullOrUndefined(val)) {
                     return val;
                 }
             }
@@ -760,12 +760,12 @@
     };
 
     $.extendNative($, {
-        trim: trim, isUndefined: isUndefined, isUndef: isUndefined, isString: isString, isNumber: isNumber, 
+        trim: trim, isUndefined: isUndefined, isUndef: isUndefined, isString: isString, isNumber: isNumber,
         isFunction: isFunction, isFunc: isFunction,
         isObject: isObject, isArray: isArray, isBoolean: isBoolean, isBool: isBoolean, isNull: isNull,
         isProperty: isProperty, isPercent: isPercent, isPercentSize: isPercent, version: version,
         isNumeric: isNumeric, isDecimal: isDecimal, isInteger: isInteger, isFloat: isDecimal, isInt: isInteger,
-        isHexNumeric: isHexNumeric, isHexNumber: isHexNumber, 
+        isHexNumeric: isHexNumeric, isHexNumber: isHexNumber,
         isMobile: isMobile, isTelephone: isTelephone, isIdentity: isIdentity, isEmail: isEmail,
         isRegexp: isRegexp, isNullOrUndefined: isNullOrUndefined, isNullOrUndef: isNullOrUndefined,
         isUndefinedOrNull: isNullOrUndefined, isUndefOrNull: isNullOrUndefined,
@@ -791,24 +791,24 @@
         containsKey: containsKey, containsValue: containsValue, contains: contains, distinctList: distinctList,
         collapseNumberList: collapseNumberList, expandNumberList: expandNumberList,
         collapseNumbers: collapseNumberList, expandNumbers: expandNumberList,
-        toJsonString: toJsonString, toJson: toJson, toEncode: toEncode, 
+        toJsonString: toJsonString, toJson: toJson, toEncode: toEncode,
         toAscii: toAscii, toAsciiHex: toAsciiHex, asciiToChar: asciiToChar, asciiToStr: asciiToChar,
         getArguments: getArguments, getArgs: getArguments,
         toFunction: toFunction, toFunc: toFunction, callFunction: callFunction, callFunc: callFunction,
         param: buildParam, buildParam: buildParam, setUrlParam: setUrlParam, buildAjaxData: buildAjaxData,
         setQueryString: setQueryString, getQueryString: getQueryString, getUrlHost: getUrlHost,
         isDebug: isDebug,
-        filterValue: filterValue, keywordOverload : keywordOverload, keyOverload: keywordOverload,
+        filterValue: filterValue, keywordOverload: keywordOverload, keyOverload: keywordOverload,
         setValue: setValue, getValue: getValue, isValue: isValue, getParam: getParam,
-        toGpsString: function(gps, decimalLen) {
-            var con = [], 
+        toGpsString: function (gps, decimalLen) {
+            var con = [],
                 len = $.checkNumber(decimalLen, 3, 14) ? decimalLen : 8;
-            if($.isString(gps)) {
+            if ($.isString(gps)) {
                 var arr = gps.split(',');
-                for(var i = 0; i < arr.length; i++) {
+                for (var i = 0; i < arr.length; i++) {
                     con.push(arr[i].round(len));
                 }
-            } else if($.isObject(gps)) {
+            } else if ($.isObject(gps)) {
                 con.push(gps.lat.round(len));
                 con.push(gps.lng.round(len));
             }
@@ -826,10 +826,10 @@
             try { console.trace(); console.log(err); } catch (e) { }
             throw new Error(err);
         },
-        checkValue: function() {
+        checkValue: function () {
             var args = arguments;
-            for(var i = 0; i < args.length; i++) {
-                if(typeof args[i] !== 'undefined') {
+            for (var i = 0; i < args.length; i++) {
+                if (typeof args[i] !== 'undefined') {
                     return args[i];
                 }
             }
@@ -905,7 +905,7 @@
             toModbusCRC16: function (s, isReverse) {
                 return toHex(CRC16(strToHexByte(s), isReverse), 4);
             },
-            toHexCRC16: function(s, isReverse) {
+            toHexCRC16: function (s, isReverse) {
                 return toHex(CRC16(strToHexByte(s), isReverse), 4);
             }
         };
@@ -971,28 +971,28 @@
         window.Dictionary = Dictionary;
     }
 
-    $.extendNative($, { 
-        Dictionary: Dictionary, 
-        dict: function(id) {
-            if(dicCache[id]) {
+    $.extendNative($, {
+        Dictionary: Dictionary,
+        dict: function (id) {
+            if (dicCache[id]) {
                 return dicCache[id];
             }
             var dic = new Dictionary(id);
             dicCache[id] = dic;
             return dic;
-        } 
+        }
     }, '$');
 }(OUI);
 
 //Base64
-!function($) {
+!function ($) {
     var encodeChars64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/",
         decodeChars64 = new Array(
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
             -1, -1, -1, -1, -1, -1, -1, 62, -1, -1, -1, 63, 52, 53, 54, 55, 56, 57,
-            58, 59, 60, 61, -1, -1, -1, -1, -1, -1, -1, 0,  1,  2,  3,  4,  5,  6,
-            7,  8,  9,  10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+            58, 59, 60, 61, -1, -1, -1, -1, -1, -1, -1, 0, 1, 2, 3, 4, 5, 6,
+            7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
             25, -1, -1, -1, -1, -1, -1, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36,
             37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, -1, -1, -1,
             -1, -1
@@ -1000,7 +1000,7 @@
 
     $.extend($, {
         base64: {
-            encode: function(s) {
+            encode: function (s) {
                 var out = '', i = 0, len = s.length;
                 var c1, c2, c3;
                 while (i < len) {
@@ -1027,8 +1027,8 @@
                 }
                 return out;
             },
-            decode: function(s) {
-                if(/[\-\s]/.test(s)) {
+            decode: function (s) {
+                if (/[\-\s]/.test(s)) {
                     s = s.trim().replace(/[\-\s]/g, '+');
                 }
                 var c1, c2, c3, c4;
@@ -1036,13 +1036,13 @@
                 while (i < len) {
                     do {
                         c1 = decodeChars64[s.charCodeAt(i++) & 0xff];
-                    } while ( i < len && c1 === - 1 );
+                    } while (i < len && c1 === - 1);
                     if (c1 === -1) {
                         break;
                     }
                     do {
                         c2 = decodeChars64[s.charCodeAt(i++) & 0xff];
-                    } while ( i < len && c2 === - 1 );
+                    } while (i < len && c2 === - 1);
                     if (c2 === -1) {
                         break;
                     }
@@ -1053,7 +1053,7 @@
                             return out;
                         }
                         c3 = decodeChars64[c3];
-                    } while ( i < len && c3 === - 1 );
+                    } while (i < len && c3 === - 1);
                     if (c3 === -1) {
                         break;
                     }
@@ -1064,8 +1064,8 @@
                             return out;
                         }
                         c4 = decodeChars64[c4];
-                    } while ( i < len && c4 === - 1 );
-                    if (c4 === -1)  {
+                    } while (i < len && c4 === - 1);
+                    if (c4 === -1) {
                         break;
                     }
                     out += String.fromCharCode(((c3 & 0x03) << 6) | c4);
@@ -1074,10 +1074,10 @@
             }
         },
         base62: {
-            encode: function(s) {
+            encode: function (s) {
 
             },
-            decode: function(s) {
+            decode: function (s) {
 
             }
         }
@@ -1302,17 +1302,17 @@
 !function ($) {
     'use strict';
 
-    $.extendNative($, {        
+    $.extendNative($, {
         isLeapYear: function (year) {
             if (!$.isNumber(year)) {
                 year = parseInt('0' + year, 10);
             }
             return year % 400 === 0 || (year % 4 === 0 && year % 100 !== 0);
         },
-        getDays: function(year, month) {
+        getDays: function (year, month) {
             var leap = Date.isLeapYear(year),
                 days = 31;
-            switch(month) {
+            switch (month) {
                 case 4:
                 case 6:
                 case 9:
@@ -1326,13 +1326,13 @@
             return days;
         },
         isDateObject: function (dt) {
-            if(typeof dt === 'object' && typeof dt.getFullYear === 'function') {
+            if (typeof dt === 'object' && typeof dt.getFullYear === 'function') {
                 return true;
             }
             return false;
         },
         getDateOptions: function (dt) {
-            if($.isDateObject(dt)) {
+            if ($.isDateObject(dt)) {
                 return { year: dt.getFullYear(), month: dt.getMonth() + 1, date: dt.getDate() };
             }
             return null;
@@ -1365,7 +1365,7 @@
             var ds = $.getDateOptions(date);
             if (ds !== null) {
                 return '{0}-{1:D2}-{2:D2} 00:00:00'.format(ds.year, ds.month, ds.date);
-            } else {                
+            } else {
                 var dt = new Date();
                 year = year || dt.getFullYear();
                 month = month || (dt.getMonth() + 1);
@@ -1387,7 +1387,7 @@
         }
     });
 
-} (OUI);
+}(OUI);
 
 // Javascript 原生对象方法扩展
 !function ($) {
@@ -1460,7 +1460,7 @@
                 s1 = this,
                 len = s1.length;
             if ($.isNumber(pos)) {
-                if(len < pos) {
+                if (len < pos) {
                     return s1.append(v, c);
                 } else {
                     s0 = s1.substr(0, pos);
@@ -1474,25 +1474,25 @@
             return s0 + v + s1;
         },
         //插入字符串组元素，
-        insertItem: function(s, index, separator) {            
+        insertItem: function (s, index, separator) {
             var _s = this.trim();
             var arr = _s.split(/[\,\|]/g), c = arr.length, list = [], n = 0;
-            if(_s === '' || c <= 0) {
+            if (_s === '' || c <= 0) {
                 return s;
             }
-            if(!$.isNumber(index)) {
+            if (!$.isNumber(index)) {
                 index = 0;
             }
-            if(index <= 0) {
+            if (index <= 0) {
                 list.push(s);
             }
-            for(var i = 0; i < c; i++) {
+            for (var i = 0; i < c; i++) {
                 var v = arr[i];
-                if(v !== '' && v !== s) {
+                if (v !== '' && v !== s) {
                     list.push(v);
                     n++;
                 }
-                if(index === n && n > 0) {
+                if (index === n && n > 0) {
                     list.push(s);
                 }
             }
@@ -1517,7 +1517,7 @@
             var reg = new RegExp('(.{' + itemLen + '}(?!$))', 'g');
             return this.replace(reg, '$1' + delimiter);
         },
-        join: function() {
+        join: function () {
             return this.toString();
         },
         isEmpty: function () { return this.trim() === ''; },
@@ -1527,21 +1527,21 @@
         isFloat: function () { return $.isDecimal(this); },
         isInt: function () { return $.isInteger(this); },
         isHexNumeric: function () { return $.isHexNumeric(this); },
-        isPercent: function() { return $.isPercent(this); },
+        isPercent: function () { return $.isPercent(this); },
         isTelephone: function () { return $.isTelephone(this); },
         isMobile: function () { return $.isMobile(this); },
-        isIdentity: function() { return $.isIdentity(this); },
+        isIdentity: function () { return $.isIdentity(this); },
         isEmail: function () { return $.isEmail(this); },
-        isNaN: function() { return isNaN(parseFloat(this, 10)); },
-        toBoolean: function(val) { return $.toBoolean(this, typeof val === 'undefined' ? this : val); },
-        toBool: function(val) { return $.toBoolean(this, typeof val === 'undefined' ? this : val); },
+        isNaN: function () { return isNaN(parseFloat(this, 10)); },
+        toBoolean: function (val) { return $.toBoolean(this, typeof val === 'undefined' ? this : val); },
+        toBool: function (val) { return $.toBoolean(this, typeof val === 'undefined' ? this : val); },
         toNumber: function (defaultValue, isFloat, decimalLen) { return $.toNumber(this, defaultValue, isFloat, decimalLen); },
         toNumberList: function (separator, decimalLen) { return $.toNumberList(this, separator, decimalLen); },
         toInt: function (defaultValue) { return $.toInteger(this, defaultValue); },
         toInteger: function (defaultValue) { return $.toInteger(this, defaultValue); },
         toFloat: function (defaultValue, decimalLen) { return $.toDecimal(this, defaultValue, decimalLen); },
         toDecimal: function (defaultValue, decimalLen) { return $.toDecimal(this, defaultValue, decimalLen); },
-        round: function(decimalLen) { return $.toNumber(this).round(decimalLen); },
+        round: function (decimalLen) { return $.toNumber(this).round(decimalLen); },
         expandNumberList: function () { return $.expandNumberList(this); },
         toChineseNumber: function (isMoney) { return $.numberToChinese(this, isMoney); },
         chineseToNumber: function (isMoney) { return $.chineseToNumber(this, isMoney); },
@@ -1582,14 +1582,14 @@
             }
             var dt = new Date(ts);
             if (isNaN(dt.getFullYear())) {
-                if($.isUndefined(format)) {
+                if ($.isUndefined(format)) {
                     console.error('Date time format error: ', v);
                     console.trace();
                 }
             }
             return $.isString(format) ? dt.format(format) : dt;
         },
-        toDateString: function(format) {
+        toDateString: function (format) {
             if (this.trim() === '' || this === '-') {
                 return this;
             }
@@ -1599,19 +1599,19 @@
             var dt = this.toDate(true);
             return isNaN(dt.getFullYear()) ? '' : dt.format(format || '');
         },
-        toDateFormat: function(format) {
+        toDateFormat: function (format) {
             return this.toDateString(format);
         },
-        toDateStr: function(format) {
+        toDateStr: function (format) {
             return this.toDateString(format);
         },
-        toTimeStr: function() {
+        toTimeStr: function () {
             return parseInt('0' + this, 10).toTimeStr();
         },
-        toSeconds: function() {
+        toSeconds: function () {
             var arr = this.split(':');
             var s = parseInt('0' + arr[0], 10) * 3600;
-            if(arr.length > 2) {                
+            if (arr.length > 2) {
                 s += parseInt('0' + arr[1], 10) * 60;
                 s += parseInt('0' + arr[2], 10);
             }
@@ -1653,33 +1653,33 @@
             */
             return $.chineseToUnicode(this, returnArray, noPrefix);
         },
-        unUnicode: function(returnArray) {
+        unUnicode: function (returnArray) {
             return $.unicodeToChinese(this, returnArray);
         },
-        asciiToChar: function() {
+        asciiToChar: function () {
             return $.asciiToChar(this);
         },
-        asciiToStr: function() {
+        asciiToStr: function () {
             return $.asciiToChar(this);
         },
-        toAscii: function() {
+        toAscii: function () {
             return $.toAscii(this);
         },
         toAsciiHex: function (arrAscii, isJoin) {
-            if($.isBoolean(arrAscii)) {
+            if ($.isBoolean(arrAscii)) {
                 isJoin = arrAscii;
                 arrAscii = null;
             }
             var arr = $.isArray(arrAscii) ? arrAscii : this.toAscii();
             return $.toAsciiHex(arr, isJoin);
         },
-        toHex: function() {
+        toHex: function () {
             return $.toAsciiHex(this.toAscii(), true);
         },
-        parseUnicode: function(returnArray) {
+        parseUnicode: function (returnArray) {
             return $.unicodeToChinese(this, returnArray);
         },
-        toJson: function() {
+        toJson: function () {
             return $.toJson(this);
         },
         timeSpan: function (dt2) {
@@ -1708,19 +1708,19 @@
         getQueryString: function (name) {
             return $.getQueryString(this, name);
         },
-        setUrlParam: function(data, value, nocache) {
+        setUrlParam: function (data, value, nocache) {
             return $.setQueryString(this, data, value, nocache);
         },
         getUrlHost: function () {
             return $.getUrlHost(this);
         },
-        getFileName: function(withoutExtension) {
+        getFileName: function (withoutExtension) {
             return $.getFileName(this, withoutExtension);
         },
-        getExtension: function() {
+        getExtension: function () {
             return $.getExtension(this);
         },
-        getFileSize: function(callback) {
+        getFileSize: function (callback) {
             return $.getFileSize(this, callback);
         },
 
@@ -1746,91 +1746,91 @@
             }
             return rst.join('');
         },
-        filterRareWord: function() {
+        filterRareWord: function () {
             return this.replace(/[^\uff01-\uff0e|\u0000-\u9fa5]*/g, '');
         },
-        getAge: function() {
+        getAge: function () {
             var dt = this.toDate();
-            if(dt.isDate()) {
+            if (dt.isDate()) {
                 return dt.getAge();
             }
             return 0;
         },
-        base64Decode: function() {
+        base64Decode: function () {
             return $.base64.decode(this);
         },
-        base64Encode: function() {
+        base64Encode: function () {
             return $.base64.encode(this);
         },
-        base64decode: function() {
+        base64decode: function () {
             return $.base64.decode(this);
         },
-        base64encode: function() {
+        base64encode: function () {
             return $.base64.encode(this);
         },
-        collapseNumbers: function() {
+        collapseNumbers: function () {
             var arr = this.split(/[\,\|]/g);
             return $.collapseNumberList(arr);
         },
-        expandNumbers: function() {
+        expandNumbers: function () {
             return $.expandNumberList(this);
         },
-        addNamePostfix: function(postfix) {
+        addNamePostfix: function (postfix) {
             return $.addNamePostfix(this, postfix);
         },
-        checkFilePath: function() {
+        checkFilePath: function () {
             return $.checkFilePath(this);
         },
-        isEvenLen: function() {
+        isEvenLen: function () {
             var s = this.trim(), len = s.length;
-            if(len % 2 !== 0) {
+            if (len % 2 !== 0) {
                 s = '0' + s;
             }
             return s;
         },
-        reverseHex: function() {
+        reverseHex: function () {
             var hex = this.isEvenLen(), arr = [], len = hex.length;
-            for(var i = 0; i < len / 2; i++) {
+            for (var i = 0; i < len / 2; i++) {
                 arr[len - i * 2 - 1] = hex[i * 2 + 1];
                 arr[len - i * 2 - 2] = hex[i * 2];
             }
             return arr.join('');
         },
-        hexToInt: function(reverse) {
+        hexToInt: function (reverse) {
             var s = this.isEvenLen(),
                 hex = reverse ? s.reverseHex() : s,
                 num = eval('0x' + hex).toString(10);
             return parseInt(num, 10);
         },
-        hexToStr: function(reverse) {
+        hexToStr: function (reverse) {
             var s = this.isEvenLen(),
                 hex = reverse ? s.reverseHex() : s,
                 len = hex.length,
                 arr = [];
 
-            for(var i = 0; i < len / 2; i++) {
+            for (var i = 0; i < len / 2; i++) {
                 var str = hex[i * 2] + hex[i * 2 + 1],
                     num = eval('0x' + str).toString(10);
                 arr.push(String.fromCharCode(num));
             }
             return arr.join('');
         },
-        hexToNum: function(reverse) {
+        hexToNum: function (reverse) {
             var s = this.isEvenLen(),
                 hex = reverse ? s.reverseHex() : s,
                 len = hex.length,
                 arr = [];
-            for(var i = 0; i < len / 2; i++) {
+            for (var i = 0; i < len / 2; i++) {
                 var str = hex[i * 2] + hex[i * 2 + 1],
                     num = eval('0x' + str).toString(10);
                 arr.push(parseInt(num, 10));
             }
             return arr;
         },
-        hexToAscii: function(reverse) {
+        hexToAscii: function (reverse) {
             return this.hexToNum(reverse);
         },
-        hexToTime: function(reverse) {
+        hexToTime: function (reverse) {
             var num = this.hexToInt(true);
             return num.toDate().format();
         },
@@ -1844,15 +1844,15 @@
             }
             return num;
         },
-        getHexStr: function() {
+        getHexStr: function () {
             var hex = this,
                 len = hex.length;
-            if(len % 2 !== 0) {
+            if (len % 2 !== 0) {
                 hex += '0';
                 len += 1;
             }
             var pos = 0;
-            for(var i = 0; i < len / 2; i++) {
+            for (var i = 0; i < len / 2; i++) {
                 var s = hex.substr(i * 2, 2);
                 if (s === '00') {
                     break;
@@ -1902,11 +1902,11 @@
         isFloat: function () { return $.isDecimal(this); },
         isInt: function () { return $.isInteger(this); },
         isHexNumber: function () { return $.isHexNumeric(this); },
-        isNaN: function() { return isNaN(parseFloat(this, 10)); },
-        toAscii: function() { return this.toString().charCodeAt(); },
-        toHex: function (len, lower) { 
+        isNaN: function () { return isNaN(parseFloat(this, 10)); },
+        toAscii: function () { return this.toString().charCodeAt(); },
+        toHex: function (len, lower) {
             var hex = this.toString(16);
-            if(len) {
+            if (len) {
                 hex = hex.padLeft(len, '0');
             }
             return lower ? hex.toLowerCase() : hex.toUpperCase();
@@ -1915,8 +1915,8 @@
         toThousand: function (delimiter, len) { return this.toString().toThousand(delimiter, len); },
         toChineseNumber: function (isMoney) { return $.numberToChinese(this, isMoney); },
         toDate: function (format) { return this.toString().toDate(format); },
-        toDateString: function(format) { return this.toString().toDateString(format); },
-        toDateFormat: function(format) { return this.toString().toDateFormat(format); },
+        toDateString: function (format) { return this.toString().toDateString(format); },
+        toDateFormat: function (format) { return this.toString().toDateFormat(format); },
         toNumberUnit: function (num, kn, unit, decimalLen, force, space) {
             if (typeof decimalLen === 'boolean') {
                 space = force;
@@ -1951,10 +1951,10 @@
             }
             return '';
         },
-        join: function() {
+        join: function () {
             return this.toString();
         },
-        toTimeData: function(secondDecimalLen) {
+        toTimeData: function (secondDecimalLen) {
             if (!$.isNumber(secondDecimalLen) || secondDecimalLen <= 0) {
                 secondDecimalLen = 0;
             }
@@ -1963,9 +1963,9 @@
                 h = parseInt((seconds - d * 86400) / 3600, 10),
                 m = parseInt((seconds - d * 86400 - h * 3600) / 60, 10),
                 s = (seconds % 60).round(secondDecimalLen);
-            return { days: d, hours: h, minutes: m, seconds:s, d: d, h: h, m: m, s: s };
+            return { days: d, hours: h, minutes: m, seconds: s, d: d, h: h, m: m, s: s };
         },
-        toTimeStr: function(secondDecimalLen, daysUnit) {
+        toTimeStr: function (secondDecimalLen, daysUnit) {
             var seconds = this,
                 data = seconds.toTimeData(secondDecimalLen),
                 time = [
@@ -1975,7 +1975,7 @@
                 ];
             return (data.d ? data.d + (daysUnit || 'days') + ' ' : '') + time.join(':');
         },
-        formatTo: function(fmt) {
+        formatTo: function (fmt) {
             fmt = (!$.isString(fmt, true) ? '{0}' : fmt).trim();
             if (!fmt.startsWith('{') || !fmt.endWith('}')) {
                 return this.toString();
@@ -1996,11 +1996,11 @@
             }
             if (['timestamp', 'time', 'tick', 'ts'].indexOf(formatString) >= 0) {
                 return $.isNumber(len) ? t.getTime().toString().substr(0, len) : t.getTime().toString();
-            } else if(['tl','tms'].indexOf(formatString) >= 0) {
+            } else if (['tl', 'tms'].indexOf(formatString) >= 0) {
                 formatString = 'yyyy-MM-dd HH:mm:ss.fff';
-            } else if(['log'].indexOf(formatString) >= 0) {
+            } else if (['log'].indexOf(formatString) >= 0) {
                 formatString = 'yyyyMMddHHmmss.fff';
-            } else if(['utc', 'UTC'].indexOf(formatString) >= 0) {
+            } else if (['utc', 'UTC'].indexOf(formatString) >= 0) {
                 formatString = 'yyyy-MM-ddTHH:mm:ss.fffZ';
             }
             var p = /([y]+|[M]+|[d]+|[H]+|[s]+|[f]+)/gi,
@@ -2041,30 +2041,30 @@
             }
             return list;
         },
-        isDate: function() {
+        isDate: function () {
             if (isNaN(this.getFullYear())) {
                 return false;
             }
             return true;
         },
-        getAge: function(dtNow) {
-            if(!dtNow || typeof dtNow.isDate === 'undefined' || !dtNow.isDate()) {
+        getAge: function (dtNow) {
+            if (!dtNow || typeof dtNow.isDate === 'undefined' || !dtNow.isDate()) {
                 dtNow = new Date();
             }
             var age = dtNow.getFullYear() - this.getFullYear();
-            var m1 = dtNow.getMonth(), m2 = this.getMonth(), 
+            var m1 = dtNow.getMonth(), m2 = this.getMonth(),
                 d1 = dtNow.getDate(), d2 = this.getDate();
 
             //周岁算法：每过一个生日就长一岁
-            if(m1 <= m2 && d1 <= d2) {
+            if (m1 <= m2 && d1 <= d2) {
                 age -= 1;
             }
             return age;
         },
-        getMonthStart: function() { return $.getMonthStart(this); },
-        getMonthEnd: function() { return $.getMonthEnd(this); },
-        getDayStart: function() { return $.getDayStart(this); },
-        getDayEnd: function() { return $.getDayEnd(this); },
+        getMonthStart: function () { return $.getMonthStart(this); },
+        getMonthEnd: function () { return $.getMonthEnd(this); },
+        getDayStart: function () { return $.getDayStart(this); },
+        getDayEnd: function () { return $.getDayEnd(this); },
     }, 'Date.prototype');
 
     $.extendNative(Date, {
@@ -2090,29 +2090,29 @@
                 //先除以10000，将ticks换算回毫秒
                 return Date.timeTick(Date.addTick(this.ticks / 10000, v, type));
             },
-            show = function (formatString, hideMilliseconds) {
-                var s = this, fs = formatString, hide = hideMilliseconds;
-                if (typeof hide === 'undefined' && typeof fs === 'boolean') {
-                    hide = fs, fs = '';
-                }
-                if (typeof fs !== 'string' || ['en', 'cn', 'time'].indexOf(fs) >= 0) {
-                    //\u5929 天, \u5c0f\u65f6 小时, \u5206\u949f 分钟, \u79d2 秒, \u6beb\u79d2 毫秒
-                    var a = ['{days}\u5929', '{hours}\u5c0f\u65f6', '{minutes}\u5206\u949f', '{seconds}\u79d2', '{milliseconds}\u6beb\u79d2'],
-                        p = s.days ? 0 : (s.hours ? 1 : (s.minutes ? 2 : s.seconds ? 3 : 4)), len = a.length - (hide ? 1 : 0);
-                    if (fs === 'en') {
-                        a = ['{days}days ', '{hours}h ', '{minutes}m ', '{seconds}s ', '{milliseconds}ms'];
-                    } else if (fs === 'time') {
-                        a = ['{days}days ', '{hours}:', '{minutes}:', '{seconds}.', '{milliseconds}'];
+                show = function (formatString, hideMilliseconds) {
+                    var s = this, fs = formatString, hide = hideMilliseconds;
+                    if (typeof hide === 'undefined' && typeof fs === 'boolean') {
+                        hide = fs, fs = '';
                     }
-                    fs = '';
-                    for (var i = p; i < len; i++) {
-                        fs += a[i];
+                    if (typeof fs !== 'string' || ['en', 'cn', 'time'].indexOf(fs) >= 0) {
+                        //\u5929 天, \u5c0f\u65f6 小时, \u5206\u949f 分钟, \u79d2 秒, \u6beb\u79d2 毫秒
+                        var a = ['{days}\u5929', '{hours}\u5c0f\u65f6', '{minutes}\u5206\u949f', '{seconds}\u79d2', '{milliseconds}\u6beb\u79d2'],
+                            p = s.days ? 0 : (s.hours ? 1 : (s.minutes ? 2 : s.seconds ? 3 : 4)), len = a.length - (hide ? 1 : 0);
+                        if (fs === 'en') {
+                            a = ['{days}days ', '{hours}h ', '{minutes}m ', '{seconds}s ', '{milliseconds}ms'];
+                        } else if (fs === 'time') {
+                            a = ['{days}days ', '{hours}:', '{minutes}:', '{seconds}.', '{milliseconds}'];
+                        }
+                        fs = '';
+                        for (var i = p; i < len; i++) {
+                            fs += a[i];
+                        }
+                        return fs.format(s);
                     }
-                    return fs.format(s);
-                }
-                var p = /[{]?(days|hours|minutes|seconds|milliseconds)[}]?/gi;
-                return fs.replace(p, '{$1}').format(s);
-            };
+                    var p = /[{]?(days|hours|minutes|seconds|milliseconds)[}]?/gi;
+                    return fs.replace(p, '{$1}').format(s);
+                };
 
             if (tick === 0) {
                 return {
@@ -2332,17 +2332,17 @@
                     v = !$.isUndefined(dv) ? dv : throwError(err, str, vals);
                 }
             }
-        }*/ else if(key.split(/[\.,\|]/).length > 1) {
+        }*/ else if (key.split(/[\.,\|]/).length > 1) {
             //嵌套对象，格式: obj.key.key|dv(默认值，因某些key可能不存在或允许为空)
             var arr = key.split(/[\|]/), dv = arr[1], ks = arr[0].split(/[\.>]/), o = obj;
             for (var i in ks) {
                 var s = ks[i].trim();
-                if('' === s) {
+                if ('' === s) {
                     continue;
                 }
                 //分割多字段容错
                 var ts = s.split(/[,;]/);
-                if (ts.length <= 1) {                    
+                if (ts.length <= 1) {
                     if ($.isObject(o)) {
                         o = o[ks[i].trim()], v = o;
                     }
@@ -2470,7 +2470,7 @@
         };
     }
 
-    String.prototype.formatTo = function(fmt) {
+    String.prototype.formatTo = function (fmt) {
         fmt = (!$.isString(fmt, true) ? '{0}' : fmt).trim();
         if (!fmt.startsWith('{') || !fmt.endWith('}')) {
             return this;
@@ -2507,18 +2507,18 @@
         redirect = function (url) {
             $.isString(url, true) ? location.href = url : null;
         },
-        isBody = function(body) {
-            return body && 
+        isBody = function (body) {
+            return body &&
                 body.nodeType === 1 &&
                 body.nodeName === 'BODY' &&
                 body.tagName === 'BODY';
         },
-        isDocument = function(doc) {
+        isDocument = function (doc) {
             return doc &&
                 //typeof doc === 'object' &&
                 doc.nodeType === 9 &&
                 doc.nodeName === '#document' &&
-                typeof doc.body === 'object' && 
+                typeof doc.body === 'object' &&
                 typeof doc.tagName === 'undefined' &&
                 doc.nodeValue === null &&
                 doc.rootElement === null &&
@@ -2530,7 +2530,7 @@
                 win === win.window &&
                 isDocument(win.document);
         },
-        isElement = function(elem, tagName) {
+        isElement = function (elem, tagName) {
             var isElem = elem &&
                 //typeof elem === 'object' &&
                 elem.nodeType === 1 &&
@@ -2538,52 +2538,52 @@
                 typeof elem.tagName === 'string';
             return isElem && ($.isString(tagName, true) ? elem.tagName === tagName : isElem);
         },
-        toElement = function(elem) {
-            if($.isString(elem, true)) {
+        toElement = function (elem) {
+            if ($.isString(elem, true)) {
                 return document.getElementById(elem.replace(/^[#]+/, ''));
             }
             return elem;
         },
-        isChildNode = function(parent, elem, recursion) {
-            if(!$.isElement(parent) || !$.isElement(elem)) {
+        isChildNode = function (parent, elem, recursion) {
+            if (!$.isElement(parent) || !$.isElement(elem)) {
                 return false;
             }
-            if(!recursion) {
+            if (!recursion) {
                 return elem.parentNode === parent;
             }
             var pNode = elem.parentNode;
-            while(pNode) {
-                if(pNode === parent) {
+            while (pNode) {
+                if (pNode === parent) {
                     return true;
                 }
                 pNode = pNode.parentNode;
             }
             return false;
         },
-        isForm = function(form) {
+        isForm = function (form) {
             return isElement(form) &&
                 form.nodeName === 'FORM' &&
                 form.tagName === 'FORM';
         },
-        isDisplay = function(elem, recursion) {
+        isDisplay = function (elem, recursion) {
             elem = toElement(elem);
-            if(!isElement(elem)) {
+            if (!isElement(elem)) {
                 return false;
             }
-            if(!$.isBoolean(recursion, true)) {
+            if (!$.isBoolean(recursion, true)) {
                 return elem.style.display !== 'none';
             }
             var show = true;
-            while(isElement(elem)) {
-                if(elem.style.display === 'none') {
+            while (isElement(elem)) {
+                if (elem.style.display === 'none') {
                     return false;
                 }
                 elem = elem.parentNode;
             }
             return show;
         },
-        isStyleUnit = function(val, units) {
-            if($.isNumber(val) || isNaN(parseFloat(val, 10))) {
+        isStyleUnit = function (val, units) {
+            if ($.isNumber(val) || isNaN(parseFloat(val, 10))) {
                 return false;
             }
             var s = ('' + val).toLowerCase();
@@ -2596,7 +2596,7 @@
             return false;
         },
         isNumberSize = function (val) {
-            if(isNaN(parseFloat(val, 10))) {
+            if (isNaN(parseFloat(val, 10))) {
                 return false;
             }
             return !('' + val).endsWith('%');
@@ -2625,7 +2625,7 @@
                 return '';
             }
             filePath = filePath.replace(/(\\)/g, '/');
-            
+
             var path = filePath.split('?')[0], p = path.lastIndexOf('/');
             var name = p >= 0 ? path.substr(p + 1) : path, pos = name.lastIndexOf('.');
             if (name.toLowerCase().endWith('.tar.gz')) {
@@ -2648,13 +2648,13 @@
         getFileSize = function (fileUrl, callback) {
             try {
                 if ($.isFunction(callback)) {
-                        callback(-1);
-                    }
-                    return this;
+                    callback(-1);
+                }
+                return this;
                 var xhr = new XMLHttpRequest();
                 //异步方式
                 xhr.open('HEAD', fileUrl, true);
-                xhr.onreadystatechange = function() {
+                xhr.onreadystatechange = function () {
                     var size = -1;
                     if (xhr.readyState === 4) {
                         if (xhr.status === 200) {
@@ -2677,8 +2677,8 @@
             }
             return this;
         },
-        addNamePostfix = function(filePath, postfix) {
-            if(!$.isString(filePath)) {
+        addNamePostfix = function (filePath, postfix) {
+            if (!$.isString(filePath)) {
                 return filePath;
             }
             if (filePath.lastIndexOf('.') < 0) {
@@ -2688,7 +2688,7 @@
                 return filePath.substr(0, filePath.length - len) + postfix + ext;
             }
         },
-        checkFilePath = function(filePath) {
+        checkFilePath = function (filePath) {
             if (!$.isString(filePath) || '' === filePath.trim()) {
                 return filePath;
             }
@@ -2705,11 +2705,11 @@
             if ($.isFunction(id)) {
                 options = parent, parent = func, func = id, id = null;
             }
-            if($.isUndefined(options) && (($.isObject(parent) && !$.isElement(parent)) || $.isArray(parent))) {
+            if ($.isUndefined(options) && (($.isObject(parent) && !$.isElement(parent)) || $.isArray(parent))) {
                 options = parent;
                 parent = undefined;
             }
-            if($.isUndefined(parent) && options) {
+            if ($.isUndefined(parent) && options) {
                 parent = options.parent || undefined;
             }
             var elem = null, hasId = false,
@@ -2733,21 +2733,21 @@
 
             if (hasId) { elem.id = id; }
 
-            if(!opt.exempt) {
-                if($.isString(parent, true)) {
+            if (!opt.exempt) {
+                if ($.isString(parent, true)) {
                     parent = toElement(parent);
                 }
-                if (!isElement(parent) && !isDocument(parent)) { 
-                    parent = undefined; 
+                if (!isElement(parent) && !isDocument(parent)) {
+                    parent = undefined;
                 }
             }
 
-            if(opt.cssText && opt.cssText.indexOf(':') > 0) {
+            if (opt.cssText && opt.cssText.indexOf(':') > 0) {
                 elem.style.cssText = opt.cssText;
             }
             return parent && parent.appendChild(elem), $.isFunction(func) && func(elem, opt.param), elem;
         },
-        createIframe = function(id, func, parent, options) {
+        createIframe = function (id, func, parent, options) {
             var opt = $.extend({}, options);
             var elem = createElement('IFRAME', id, func, parent, opt);
             elem.width = '100%';
@@ -2756,18 +2756,18 @@
             elem.scrolling = 'auto';
             return elem;
         },
-        loadIframe = function(iframe, url, complete, forceLoad) {
-            if($.isBoolean(complete)) {
+        loadIframe = function (iframe, url, complete, forceLoad) {
+            if ($.isBoolean(complete)) {
                 forceLoad = complete;
                 complete = null;
             }
-            if(!iframe || !url || (iframe.loaded && !forceLoad)) {
+            if (!iframe || !url || (iframe.loaded && !forceLoad)) {
                 return this;
             }
             iframe.src = $.setQueryString(url);
             iframe.onload = iframe.onreadystatechange = function () {
                 if (!this.readyState || this.readyState === 'complete') {
-                    if($.isFunction(complete)) {
+                    if ($.isFunction(complete)) {
                         complete();
                     }
                 }
@@ -2805,26 +2805,26 @@
             var style = elem.currentStyle || document.defaultView.getComputedStyle(elem, null);
             return $.isString(styleName, true) ? $.checkValue(style[styleName], defaultValue) : style;
         },
-        getCssSizeVal = function(val) {
+        getCssSizeVal = function (val) {
             return Math.ceil(('' + val).replace(/[^\d\.\-]+/, ''));
         },
-        getElementStyleSize = function(elem, styleName) {
+        getElementStyleSize = function (elem, styleName) {
             var attr = ('' + styleName).toLowerCase(),
                 style = getElementStyle(elem),
                 postfix = attr === 'border' ? 'Width' : attr === 'radius' ? 'Radius' : '',
                 data = {
                     top: 0, left: 0, right: 0, bottom: 0, width: 0, height: 0
                 };
-                
-            if(!$.isElement(elem)) {
+
+            if (!$.isElement(elem)) {
                 return data;
             }
 
-            if(!$.isString(attr, true) || !style) {
+            if (!$.isString(attr, true) || !style) {
                 return 0;
             }
 
-            if(['padding', 'margin', 'border', 'radius'].indexOf(attr) < 0) {
+            if (['padding', 'margin', 'border', 'radius'].indexOf(attr) < 0) {
                 return getCssSizeVal(style[attr]);
             }
 
@@ -2839,142 +2839,142 @@
                 bottom: getCssSizeVal(style[attr + 'Bottom' + postfix]),
                 left: getCssSizeVal(style[attr + 'Left' + postfix])
             };
-            if(attr !== 'radius') {
+            if (attr !== 'radius') {
                 data.height = data.top + data.bottom;
                 data.width = data.left + data.right;
             }
             return data;
         },
-        checkMinMax = function(p) {
+        checkMinMax = function (p) {
             p.min = parseInt('0' + p.min, 10);
             p.max = parseInt('0' + p.max, 10);
             p.val = parseInt('0' + p.val, 10);
 
-            if(p.min > p.max) {
+            if (p.min > p.max) {
                 var tmp = p.min;
                 p.min = p.max;
                 p.max = tmp;
             }
-            if(p.val < p.min || p.val > p.max) {
+            if (p.val < p.min || p.val > p.max) {
                 p.val = parseInt((p.min + p.max) / 2, 10);
             }
             return p;
         },
-        getCssAttrSize = function(val, options) {       
-            if($.isString(val, true) && val.indexOf(':') < 0 && val.trim().indexOf(' ') < 0) {
+        getCssAttrSize = function (val, options) {
+            if ($.isString(val, true) && val.indexOf(':') < 0 && val.trim().indexOf(' ') < 0) {
                 val = $.toElement(val);
             }
-            if($.isNullOrUndefined(val)) {
-                return { width:0, height: 0 };
+            if ($.isNullOrUndefined(val)) {
+                return { width: 0, height: 0 };
             }
             var p = checkMinMax($.extend({
-                    attr: '',      //margin, padding, border, radius
-                    unit: '',
-                    isArray: false,
-                    isLimit: false,
-                    min: 0,
-                    max: 10,
-                    val: 4
-                }, options)),
+                attr: '',      //margin, padding, border, radius
+                unit: '',
+                isArray: false,
+                isLimit: false,
+                min: 0,
+                max: 10,
+                val: 4
+            }, options)),
                 isElem = $.isElement(val),
                 data = {}, list = [];
 
-            if(['px', 'pt', 'em'].indexOf(('' + p.unit).toLowerCase()) < 0) {
+            if (['px', 'pt', 'em'].indexOf(('' + p.unit).toLowerCase()) < 0) {
                 p.unit = '';
             }
             p.attr = ('' + (p.attr || p.styleName)).toLowerCase();
 
-            if(!p.attr) {
+            if (!p.attr) {
                 return null;
             }
-            if(p.attr === 'style') {
+            if (p.attr === 'style') {
                 return {
                     width: getCssSizeVal(getElementStyle(val, 'width')),
                     height: getCssSizeVal(getElementStyle(val, 'height')),
                     left: getCssSizeVal(getElementStyle(val, 'left')),
                     top: getCssSizeVal(getElementStyle(val, 'top'))
                 };
-            } else if(['padding', 'margin', 'border', 'radius'].indexOf(p.attr) < 0) {
+            } else if (['padding', 'margin', 'border', 'radius'].indexOf(p.attr) < 0) {
                 var v = isElem ? getElementStyleSize(val, p.attr) : getCssSizeVal(val);
-                if(p.unit) {
+                if (p.unit) {
                     v += p.unit;
                 }
                 return v;
             }
 
-            if(isElem) {
+            if (isElem) {
                 data = getElementStyleSize(val, p.attr);
-            } else if(typeof val === 'number') {
+            } else if (typeof val === 'number') {
                 data = {
                     top: val, right: val, bottom: val, left: val
                 };
-            } else if(typeof val === 'string') {
+            } else if (typeof val === 'string') {
                 val = val.trim();
-                if(val.indexOf(':') >= 0) {
+                if (val.indexOf(':') >= 0) {
                     val = val.split(':')[1];
                 }
-                if(val.indexOf(';') >= 0) {
+                if (val.indexOf(';') >= 0) {
                     val = val.replace(/[;]/, '');
                 }
                 val = val.split(/[\s]+/);
-            } else if($.isObject(val)) {
+            } else if ($.isObject(val)) {
                 data = {
                     top: val.top || 0, right: val.right || 0, bottom: val.bottom || 0, left: val.left || 0
                 };
             }
-            if($.isArray(val)) {
+            if ($.isArray(val)) {
                 data.top = val[0] || 0;
                 data.right = val.length >= 2 ? val[1] : data.top;
                 data.bottom = val.length >= 3 ? val[2] : data.top;
                 data.left = val.length >= 4 ? val[3] : data.right;
             }
-            for(var i in data) {
+            for (var i in data) {
                 data[i] = Math.abs(getCssSizeVal(data[i]));
-                if(p.isLimit) {
+                if (p.isLimit) {
                     data[i] = data[i] > p.max || data[i] < p.min ? p.val : data[i];
                 }
-                if(p.unit) {
+                if (p.unit) {
                     data[i] += p.unit;
                 }
-                if(p.isArray) {
+                if (p.isArray) {
                     list.push(data[i]);
                 }
             }
-            if(p.isArray) {
+            if (p.isArray) {
                 return list;
             }
-            if(p.attr !== 'radius') {
+            if (p.attr !== 'radius') {
                 data[p.attr + 'Width'] = getCssSizeVal(data.left) + getCssSizeVal(data.right);
                 data[p.attr + 'Height'] = getCssSizeVal(data.top) + getCssSizeVal(data.bottom);
             }
 
             return p.isArray ? list : data;
         },
-        getStyleSize = function(elem, options) {
-            return getCssAttrSize(elem, $.extend({}, options, {attr:'style'}));
+        getStyleSize = function (elem, options) {
+            return getCssAttrSize(elem, $.extend({}, options, { attr: 'style' }));
         },
-        getPaddingSize = function(elem, options) {
-            return getCssAttrSize(elem, $.extend({}, options, {attr:'padding'}));
+        getPaddingSize = function (elem, options) {
+            return getCssAttrSize(elem, $.extend({}, options, { attr: 'padding' }));
         },
-        getMarginSize = function(elem, options) {
-            return getCssAttrSize(elem, $.extend({}, options, {attr:'margin'}));
+        getMarginSize = function (elem, options) {
+            return getCssAttrSize(elem, $.extend({}, options, { attr: 'margin' }));
         },
-        getBorderSize = function(elem, options) {
-            return getCssAttrSize(elem, $.extend({}, options, {attr:'border'}));
+        getBorderSize = function (elem, options) {
+            return getCssAttrSize(elem, $.extend({}, options, { attr: 'border' }));
         },
-        getOffsetSize = function(elem, basic) {
+        getOffsetSize = function (elem, basic) {
             elem = $.toElement(elem);
             if (!isElement(elem)) {
                 return { width: 0, height: 0, top: 0, left: 0 };
             }
             var par = {
                 width: elem.offsetWidth,
-                height: elem.offsetHeight, 
+                height: elem.offsetHeight,
                 left: elem.offsetLeft,
                 top: elem.offsetTop
             };
 
-            if($.isBoolean(basic, false)) {
+            if ($.isBoolean(basic, false)) {
                 return par;
             }
 
@@ -2989,15 +2989,15 @@
                 left = elem.offsetLeft,
                 top = elem.offsetTop;
 
-            while((elem = elem.parentNode) && elem !== body && elem !== docElem) {
-                if(prevComputedStyle.position === 'fixed') {
+            while ((elem = elem.parentNode) && elem !== body && elem !== docElem) {
+                if (prevComputedStyle.position === 'fixed') {
                     break;
                 }
                 computedStyle = getElementStyle(elem);
                 top -= elem.scrollTop;
                 left -= elem.scrollLeft;
 
-                if(elem === offsetParent) {
+                if (elem === offsetParent) {
                     top += elem.offsetTop;
                     left += elem.offsetLeft;
 
@@ -3005,14 +3005,14 @@
                     offsetParent = elem.offsetParent;
                 }
 
-                if(computedStyle.overflow !== 'visible') {
+                if (computedStyle.overflow !== 'visible') {
                     top += parseFloat(computedStyle.borderTopWidth) || 0;
                     left += parseFloat(computedStyle.borderLeftWidth) || 0;
                 }
                 prevComputedStyle = computedStyle;
             }
 
-            if(prevComputedStyle.position === 'relative' || prevComputedStyle.position === 'static') {
+            if (prevComputedStyle.position === 'relative' || prevComputedStyle.position === 'static') {
                 top += body.offsetTop;
                 left += body.offsetLeft;
             }
@@ -3024,33 +3024,33 @@
 
             return $.extend(par, { left: left, top: top });
         },
-        getClientSize = function(elem) {
+        getClientSize = function (elem) {
             elem = $.toElement(elem);
             return isElement(elem) ? { width: elem.clientWidth, height: elem.clientHeight } : { width: 0, height: 0 };
         },
-        getOuterSize = function(elem) {
+        getOuterSize = function (elem) {
             var os = getOffsetSize(elem, true),
                 ms = getMarginSize(elem);
             return { width: os.width + ms.width, height: os.height + ms.height };
         },
-        getInnerSize = function(elem) {
+        getInnerSize = function (elem) {
             var cs = getClientSize(elem),
                 ps = getPaddingSize(elem);
             return { width: cs.width - ps.width, height: cs.height - ps.height };
         },
-        getScrollSize = function(elem) {
+        getScrollSize = function (elem) {
             elem = $.toElement(elem);
-            if(isElement(elem)) {
+            if (isElement(elem)) {
                 return {
                     left: elem.scrollLeft, width: elem.scrollWidth, top: elem.scrollTop, height: elem.scrollHeight,
                 };
             }
-            return { left: 0, top: 0, width: 0, height: 0};
+            return { left: 0, top: 0, width: 0, height: 0 };
         },
-        getElementSize = function(elem, basic) {
+        getElementSize = function (elem, basic) {
             elem = $.toElement(elem);
             var ns = { left: 0, top: 0, width: 0, height: 0 };
-            if(!$.isElement(elem)) {
+            if (!$.isElement(elem)) {
                 return {
                     width: 0, height: 0, totalWidth: 0, totalHeight: 0,
                     offsetWidth: 0, offsetHeight: 0, clientWidth: 0, clientHeight: 0,
@@ -3075,7 +3075,7 @@
                     outerWidth: us.width, outerHeight: us.height,
                     totalWidth: us.width, totalHeight: us.height,
                     inner: is, outer: us, client: cs, offset: os,
-                    border: bs, padding: ps, margin: ms, scroll: rs, style: ss                    
+                    border: bs, padding: ps, margin: ms, scroll: rs, style: ss
                 };
 
             return $.extend(par, os);
@@ -3087,15 +3087,15 @@
             } else if (typeof document.body !== 'undefined') {
                 doc = document.body;
             }
-            if(isOffset) {
+            if (isOffset) {
                 return { width: doc.offsetWidth, height: doc.offsetHeight };
             }
             return { width: doc.clientWidth, height: doc.clientHeight };
         },
-        getDocumentSize = function(isOffset) {
+        getDocumentSize = function (isOffset) {
             return getBodySize(isOffset);
         },
-        getScreenSize = function(avail) {
+        getScreenSize = function (avail) {
             var size = avail ? {
                 width: screen.availWidth,
                 height: screen.availHeight
@@ -3144,18 +3144,18 @@
             }
             return arr;
         },
-        getAttribute = function(elem, attributes, defaultValue) {
+        getAttribute = function (elem, attributes, defaultValue) {
             elem = $.toElement(elem);
-            if($.isElement(elem)) {
+            if ($.isElement(elem)) {
                 var val = '', keys = [];
-                if($.isArray(attributes)) {
+                if ($.isArray(attributes)) {
                     keys = attributes;
                 } else {
                     keys = attributes.split(/[,|]/);
                 }
-                for(var i = 0; i < keys.length; i++) {
+                for (var i = 0; i < keys.length; i++) {
                     val = elem.getAttribute(keys[i]);
-                    if(typeof val === 'string') {
+                    if (typeof val === 'string') {
                         return val;
                     }
                 }
@@ -3163,15 +3163,15 @@
             }
             return null;
         },
-        setAttribute2 = function(elem, key, val) {
-            if(key.toLowerCase() === 'class') {
+        setAttribute2 = function (elem, key, val) {
+            if (key.toLowerCase() === 'class') {
                 $.addClass(elem, val);
             } else {
                 elem.setAttribute(key, val);
             }
         },
         setAttribute = function (elem, attributes, exempt, serialize) {
-            if($.isNullOrUndefined(elem)){
+            if ($.isNullOrUndefined(elem)) {
                 return this;
             }
             if ($.isString(elem)) {
@@ -3207,7 +3207,7 @@
             return this;
         },
         removeAttribute = function (elem, attributes, exempt) {
-            if($.isNullOrUndefined(elem)){
+            if ($.isNullOrUndefined(elem)) {
                 return this;
             }
             if (isArrayLike(elem)) {
@@ -3228,24 +3228,24 @@
             }
             return this;
         },
-        toCssText = function(obj) {
-            if($.isString(obj)) {
+        toCssText = function (obj) {
+            if ($.isString(obj)) {
                 return obj;
             }
-            if(!obj || !$.isObject(obj)) {
+            if (!obj || !$.isObject(obj)) {
                 return '';
             }
             var cssText = [];
-            for(var i in obj) {
+            for (var i in obj) {
                 var val = obj[i];
-                if($.isString(val) || $.isNumber(val)) {
-                    cssText.push(i + ':' + (''+ val).trim() + ';');
+                if ($.isString(val) || $.isNumber(val)) {
+                    cssText.push(i + ':' + ('' + val).trim() + ';');
                 }
             }
             return cssText.join(' ');
         },
         setStyle = function (elem, styles, value, exempt) {
-            if($.isNullOrUndefined(elem)) {
+            if ($.isNullOrUndefined(elem)) {
                 return this;
             }
             if (isArrayLike(elem)) {
@@ -3315,7 +3315,7 @@
             return cur;
         },
         setClass = function (elem, value, action) {
-            if($.isNullOrUndefined(elem)){
+            if ($.isNullOrUndefined(elem)) {
                 return this;
             }
             if (isArrayLike(elem)) {
@@ -3356,13 +3356,13 @@
         },
         appendChild = function (parent, elem, isRemove) {
             if ($.isElement(parent) || $.isDocument(parent)) {
-                var elems = $.isArray(elem) ? elem : [elem], 
+                var elems = $.isArray(elem) ? elem : [elem],
                     evName = isRemove ? 'removeChild' : 'appendChild',
                     obj, pObj;
-                for(var i in elems) {
+                for (var i in elems) {
                     obj = elems[i], pObj = (obj || {}).parentNode;
-                    if(!$.isElement(obj) 
-                        || (isRemove && pObj !== parent) 
+                    if (!$.isElement(obj)
+                        || (isRemove && pObj !== parent)
                         || (!isRemove && pObj === parent)) {
                         continue;
                     }
@@ -3375,14 +3375,14 @@
             var isRemove = true;
             return appendChild(parent, elem, isRemove);
         },
-        removeElement = function(elem) {
+        removeElement = function (elem) {
             if ($.isNullOrUndefined(elem)) {
                 return this;
             }
-            if($.isString(elem, true)) {
+            if ($.isString(elem, true)) {
                 elem = $.toElement(elem);
-            }            
-            if(!$.isElement(elem)) {
+            }
+            if (!$.isElement(elem)) {
                 return this;
             }
             var parent = elem.parentNode;
@@ -3517,14 +3517,14 @@
             return xml;
         },
         cancelBubble = function (ev, func) {
-            if($.isFunction(ev)) {
+            if ($.isFunction(ev)) {
                 func = ev;
                 ev = undefined;
             }
             var e = ev || window.event || arguments.callee.caller.arguments[0];
             if (e.stopPropagation) { e.stopPropagation(); } else { e.cancelBubble = true; }
             if (e.preventDefault) { e.preventDefault(); } else { e.returnValue = false; }
-            if($.isFunction(func)) {
+            if ($.isFunction(func)) {
                 func();
             }
             return this;
@@ -3535,14 +3535,14 @@
                 name = isRemove ? 'removeEventListener' : 'addEventListener',
                 other = isRemove ? 'detachEvent' : 'attachEvent',
                 normal = typeof doc.addEventListener !== 'undefined';
-            for(var i in events) {
+            for (var i in events) {
                 var evn = events[i];
-                if(!$.isString(evn, true)) {
+                if (!$.isString(evn, true)) {
                     continue;
                 }
-                for(var j in elems) {
+                for (var j in elems) {
                     var o = elems[j];
-                    if(($.isElement(o) || $.isDocument(o) || $.isWindow(o)) && $.isFunction(func)) {
+                    if (($.isElement(o) || $.isDocument(o) || $.isWindow(o)) && $.isFunction(func)) {
                         normal ? o[name](evn, func, useCapture || false) : o[other]('on' + evn, func);
                     }
                 }
@@ -3551,14 +3551,14 @@
         },
         //键盘按键事件监听  keyCode 可以设置为 keyCode (数字) 如：70, 也可以设置 key（字符）, 如 F
         //可以作为快捷键
-        addKeyListener = function(elem, evName, keyCode, func, isShiftKey) {
-            if(!$.isDocument(elem)) {
+        addKeyListener = function (elem, evName, keyCode, func, isShiftKey) {
+            if (!$.isDocument(elem)) {
                 elem = $.toElement(elem);
-                if(!$.isElement(elem)) {
+                if (!$.isElement(elem)) {
                     return false;
                 }
             }
-            if(typeof keyCode === 'function') {
+            if (typeof keyCode === 'function') {
                 isShiftKey = func;
                 func = keyCode;
                 keyCode = undefined;
@@ -3567,19 +3567,19 @@
             //设置一个变量以记录按键次数
             elem.keyEventTimes = 0;
 
-            var callback = function(ev) {
+            var callback = function (ev) {
                 var e = ev || event, elem = this;
                 if ((isShiftKey && !e.shiftKey) || !$.isFunction(func)) {
                     return false;
                 }
                 $.cancelBubble(ev);
 
-                if(typeof keyCode === 'undefined') {
+                if (typeof keyCode === 'undefined') {
                     func(e, ++elem.keyEventTimes);
-                } else if(typeof keyCode === 'number' && e.keyCode === keyCode) {
+                } else if (typeof keyCode === 'number' && e.keyCode === keyCode) {
                     console.log('KeyListener: ', e.keyCode);
                     func(e, ++elem.keyEventTimes);
-                } else if(typeof keyCode === 'string' && e.key.toUpperCase() === keyCode.toUpperCase()) {
+                } else if (typeof keyCode === 'string' && e.key.toUpperCase() === keyCode.toUpperCase()) {
                     console.log('KeyListener: ', e.keyCode, e.key, keyCode);
                     func(e, ++elem.keyEventTimes);
                 }
@@ -3587,14 +3587,14 @@
             return $.addEventListener(elem, evName, callback), this;
         },
         //键盘或鼠标连击事件监听
-        addHitListener = function(elem, evName, keyCode, func, timout, times, isShiftKey) {
-            if(!$.isDocument(elem)) {
+        addHitListener = function (elem, evName, keyCode, func, timout, times, isShiftKey) {
+            if (!$.isDocument(elem)) {
                 elem = $.toElement(elem);
-                if(!$.isElement(elem)) {
+                if (!$.isElement(elem)) {
                     return false;
                 }
             }
-            if(typeof keyCode === 'function') {
+            if (typeof keyCode === 'function') {
                 isShiftKey = times;
                 times = timout;
                 timout = func;
@@ -3607,63 +3607,63 @@
             times = times || 5;
 
             //设置一个变量以记录按键次数
-            var keyCount = evName + (keyCode || '') + 'HitCount', 
+            var keyCount = evName + (keyCode || '') + 'HitCount',
                 keyTimes = evName + (keyCode || '') + 'HitTimes';
             elem[keyCount] = 1;
             elem[keyTimes] = 0;
 
-            var callback = function(ev) {
+            var callback = function (ev) {
                 var e = ev || event, type = e.type, pass = false;
                 if ((isShiftKey && !e.shiftKey) || !$.isFunction(func)) {
                     return false;
                 }
                 $.cancelBubble(ev);
-                if(type.startsWith('key')) {
+                if (type.startsWith('key')) {
                     //如果是监听document,则必须在body空白处输入才有效
-                    if($.isDocument(elem)) {
-                        if(!$.isBody(e.target)) {
+                    if ($.isDocument(elem)) {
+                        if (!$.isBody(e.target)) {
                             return false;
                         }
                     }
-                    if(typeof keyCode === 'number' && e.keyCode === keyCode) {
+                    if (typeof keyCode === 'number' && e.keyCode === keyCode) {
                         pass = true;
-                    } else if(typeof keyCode === 'string' && e.key.toUpperCase() === keyCode.toUpperCase()) {
+                    } else if (typeof keyCode === 'string' && e.key.toUpperCase() === keyCode.toUpperCase()) {
                         pass = true;
                     }
-                } else if(type.startsWith('mouse') && e.target === elem) {
+                } else if (type.startsWith('mouse') && e.target === elem) {
                     //若是鼠标连击，则必须点击在指定的元素，冒泡的不算
                     //比如指定了某个DIV，则点击DIV中的元素（按钮或链接）无效，必须点击在DIV空白处
                     pass = true;
                 }
-                if(!pass) {
+                if (!pass) {
                     return false;
                 }
                 var ts = new Date().getTime(), tc = ts - elem[keyTimes];
-                if (elem[keyCount] == 1 || (elem[keyCount]  > 1 && tc > timout)) {
-                    elem[keyCount]  = 1;
+                if (elem[keyCount] == 1 || (elem[keyCount] > 1 && tc > timout)) {
+                    elem[keyCount] = 1;
                     elem[keyTimes] = ts;
                     tc = ts - elem[keyTimes];
                 }
                 console.log('HitListener: ', evName + (keyCode ? ':' + keyCode : ''), e.keyCode || '', elem[keyCount]);
                 if (elem[keyCount] >= times) {
-                    try{ func(e, elem[keyCount]); } catch(e){}
+                    try { func(e, elem[keyCount]); } catch (e) { }
                     elem[keyCount] = 1;
                     elem[keyTimes] = 0;
                     return false;
                 }
-                elem[keyCount]  = tc < timout ? elem[keyCount]  + 1 : 1;
+                elem[keyCount] = tc < timout ? elem[keyCount] + 1 : 1;
             };
 
             return $.addEventListener(elem, evName, callback), this;
         },
-        disableEvent = function(elem, evName, func) {
+        disableEvent = function (elem, evName, func) {
             elem = $.toElement(elem);
-            if($.isElement(elem) && $.isString(evName, true)) {
-                if(!evName.startsWith('on')) {
+            if ($.isElement(elem) && $.isString(evName, true)) {
+                if (!evName.startsWith('on')) {
                     evName = 'on' + evName;
                 }
-                elem[evName] = function(ev) {
-                    if($.isFunction(func)) {
+                elem[evName] = function (ev) {
+                    if ($.isFunction(func)) {
                         func();
                     }
                     return false;
@@ -3672,11 +3672,11 @@
             return this;
         },
         removeEventListener = function (elem, evName, func, useCapture) {
-            var isRemove = true;            
+            var isRemove = true;
             return addEventListener(elem, evName, func, useCapture, isRemove);
         },
-        bind = function(obj, func, args) {
-            return function() {
+        bind = function (obj, func, args) {
+            return function () {
                 return func.apply(obj, args || []);
             };
         },
@@ -3695,7 +3695,7 @@
         getEvent = function () {
             return window.event || arguments.callee.caller.arguments[0];
         },
-        getEventPosition = function(ev, elem) {
+        getEventPosition = function (ev, elem) {
             var e = ev || getEvent();
             if (e.pageX || e.pageY) {
                 return { x: e.pageX, y: e.pageY };
@@ -3720,7 +3720,7 @@
             var e = e || window.event;
             return e.keyCode || e.which || e.charCode;
         },
-        getKeyChar = function(e) {
+        getKeyChar = function (e) {
             var keyCode = $.isNumber(e) ? e : getKeyCode(e);
             return String.fromCharCode(keyCode).toUpperCase();
         },
@@ -3731,7 +3731,7 @@
             return str;
         },
         getContentSize = function (txt, options) {
-            if(!$.isObject(options)) {
+            if (!$.isObject(options)) {
                 options = {};
             }
             var id = options.id || 'div-get-content-size-001',
@@ -3743,10 +3743,10 @@
                 div.style.cssText = css + 'margin:0;padding:0;font-size:14px;';
                 document.body.appendChild(div);
             }
-            if($.isString(options.className, true)) {
+            if ($.isString(options.className, true)) {
                 div.className = options.className;
             }
-            if($.isString(options.cssText, true)) {
+            if ($.isString(options.cssText, true)) {
                 div.style.cssText = options.cssText + css;
             }
             div.innerHTML = txt;
@@ -3754,108 +3754,108 @@
             //return size;
             return div.innerHTML = '', size;
         },
-        getInnerText = function(elem) {
-            if(typeof elem.innerText === 'string') {
+        getInnerText = function (elem) {
+            if (typeof elem.innerText === 'string') {
                 return elem.innerText;
             } else {
                 return elem.textContent;
             }
         },
-        isOnElem = function(elem, pos) {
+        isOnElem = function (elem, pos) {
             var offset = getOffsetSize(elem);
-            if(pos.x >= offset.left && pos.y >= offset.top
+            if (pos.x >= offset.left && pos.y >= offset.top
                 && pos.x <= (offset.left + offset.width)
                 && pos.y <= (offset.top + offset.height)) {
                 return true;
             }
             return false;
         },
-        isOnElement = function(elem, ev) {
+        isOnElement = function (elem, ev) {
             elem = toElement(elem);
-            if(!isElement(elem)) {
+            if (!isElement(elem)) {
                 return false;
             }
             var pos = ev.fromElement ? getEventPosition(ev) : ev,
                 isOn = isOnElem(elem, pos);
 
-            if(isOn) {
+            if (isOn) {
                 return true;
             }
-            
+
             var childs = elem.childNodes;
-            for(var i = 0; i < childs.length; i++) {
-                var sub = childs[i];                
-                if(sub.childNodes.length > 0) {
+            for (var i = 0; i < childs.length; i++) {
+                var sub = childs[i];
+                if (sub.childNodes.length > 0) {
                     return isOnElement(sub, pos);
-                } else if(isOnElem(sub, pos)) {
+                } else if (isOnElem(sub, pos)) {
                     return true;
                 }
             }
             return false;
         },
-        changeLink = function(aTag, url) {
+        changeLink = function (aTag, url) {
             aTag = toElement(aTag);
-            if($.isElement(aTag) && aTag.tagName === 'A' && $.isString(url)) {
+            if ($.isElement(aTag) && aTag.tagName === 'A' && $.isString(url)) {
                 aTag.setAttribute('href', url);
             }
             return $;
         },
-        gotoLink = function(url, isTop) {
-            if(isTop) {
+        gotoLink = function (url, isTop) {
+            if (isTop) {
                 window.top.location.href = url;
             } else {
                 window.location.href = url;
             }
             return $;
         },
-        size = function(elem, key, val) {
-            if($.isUndefined(elem)) {
+        size = function (elem, key, val) {
+            if ($.isUndefined(elem)) {
                 return $.isUndefined(val) ? 0 : $;
             }
             var elems = $.isArray(elem) ? elem : [elem];
 
-            if($.isObject(key)) {
-                for(var i = 0; i < elems.length; i++) {
+            if ($.isObject(key)) {
+                for (var i = 0; i < elems.length; i++) {
                     var el = toElement(elems[i]);
-                    if($.isElement(el)) {
-                        for(var k in key) {
+                    if ($.isElement(el)) {
+                        for (var k in key) {
                             var unit = $.isNumeric(key[k]) ? 'px' : '';
                             el.style[k] = key[k] + unit;
                         }
                     }
                 }
                 return $;
-            } else if($.isUndefined(val)) {
+            } else if ($.isUndefined(val)) {
                 var el = toElement(elems[0]),
                     es = getElementSize(el);
                 return es.outer[key];
             } else {
                 var unit = $.isNumeric(val) ? 'px' : '';
-                for(var i = 0; i < elems.length; i++) {
+                for (var i = 0; i < elems.length; i++) {
                     var el = toElement(elems[i]);
-                    if($.isElement(el)) {
+                    if ($.isElement(el)) {
                         el.style[key] = val + unit;
                     }
                 }
                 return $;
             }
         },
-        width = function(elem, val) {
+        width = function (elem, val) {
             return size(elem, 'width', val);
         },
-        height = function(elem, val) {
+        height = function (elem, val) {
             return size(elem, 'height', val);
         },
-        toggleDisplay = function(elem, options, func) {
+        toggleDisplay = function (elem, options, func) {
             elem = $.toElement(elem);
-            if(!$.isElement(elem)){
+            if (!$.isElement(elem)) {
                 return false;
             }
-            if($.isBoolean(options)) {
+            if ($.isBoolean(options)) {
                 options = { show: options };
-            } else if($.isNumber(options)) {
+            } else if ($.isNumber(options)) {
                 options = { width: options, size: true };
-            } else if($.isFunction(options)) {
+            } else if ($.isFunction(options)) {
                 func = options;
                 options = {};
             }
@@ -3867,35 +3867,35 @@
                 callback: func
             }, options);
 
-            if(!$.isBoolean(opt.show)) {
+            if (!$.isBoolean(opt.show)) {
                 opt.show = elem.style.display === 'none';
             }
             var w = parseInt('0' + $.getElementStyle(elem, 'width')),
                 h = parseInt('0' + $.getElementStyle(elem, 'height'));
 
-            if(opt.size) {
-                if(w > 0) {
+            if (opt.size) {
+                if (w > 0) {
                     elem.widthCache = w;
                 }
-                if(h > 0) {
+                if (h > 0) {
                     elem.heightCache = h;
                 }
-                w = opt.show ? (parseInt('0' + opt.width, 10) || elem.widthCache): 0;
-                h = opt.show ? (parseInt('0' + opt.height, 10) || elem.heightCache): 0;
+                w = opt.show ? (parseInt('0' + opt.width, 10) || elem.widthCache) : 0;
+                h = opt.show ? (parseInt('0' + opt.height, 10) || elem.heightCache) : 0;
 
                 elem.style.width = w + 'px';
                 elem.style.height = h + 'px';
-            }          
+            }
             elem.style.display = opt.show ? '' : 'none';
 
-            if(opt.show && w <= 0 && elem.widthCache) {
+            if (opt.show && w <= 0 && elem.widthCache) {
                 elem.style.width = elem.widthCache + 'px';
                 elem.style.height = elem.heightCache + 'px';
             }
 
             var result = { show: opt.show, width: w, height: h };
 
-            if($.isFunction(opt.callback)) {
+            if ($.isFunction(opt.callback)) {
                 opt.callback(result);
             }
 
@@ -3903,7 +3903,7 @@
         },
         //触发事件，比如触发 window.resize 事件
         trigger = function (elem, evName) {
-            if(!$.isString(evName, true)) {
+            if (!$.isString(evName, true)) {
                 return this;
             }
             if ($.isString(elem)) {
@@ -3922,7 +3922,7 @@
                 }
             }
             if ($.isWindow(elem) || $.isDocument(elem) || $.isElement(elem)) {
-                if(elem.tagName === 'A' && (evName === 'href' || evName.indexOf('click') > -1)) {
+                if (elem.tagName === 'A' && (evName === 'href' || evName.indexOf('click') > -1)) {
                     elem.click();
                 } else {
                     isEvent ? elem['dispatchEvent'](ev) : elem['fireEvent'](evName);
@@ -3931,7 +3931,7 @@
                 for (var i = 0; i < elem.length; i++) {
                     var e = $.toElement(elem[i]);
                     if ($.isElement(e)) {
-                        if(e.tagName === 'A' && (evName === 'href' || evName.indexOf('click') > -1)) {
+                        if (e.tagName === 'A' && (evName === 'href' || evName.indexOf('click') > -1)) {
                             e.click();
                         } else {
                             isEvent ? e['dispatchEvent'](ev) : e['fireEvent'](evName);
@@ -3941,13 +3941,13 @@
             }
             return this;
         },
-        findParentElement = function(obj, tagName) {
+        findParentElement = function (obj, tagName) {
             var tag = tagName;
-            if(!$.isString(tag, true)) {
+            if (!$.isString(tag, true)) {
                 return null;
             }
             if ($.isElement(obj)) {
-                if(obj.tagName === tag) {
+                if (obj.tagName === tag) {
                     return obj;
                 }
                 var parent = obj.parentNode;
@@ -3960,7 +3960,7 @@
         findRow = function (obj, tagName) {
             return findParentElement(obj, 'TR');
         },
-        findCell = function(obj, tagName) {
+        findCell = function (obj, tagName) {
             return findParentElement(obj, 'TD');
         },
         setCookie = function (name, value, expireMinutes) {
@@ -3986,30 +3986,30 @@
             }
             return this;
         },
-        getImgSize = function(img_url, callback) {
+        getImgSize = function (img_url, callback) {
             var start_time = new Date().getTime();
             var img = new Image(), load = false;
 
             if (!$.isFunction(callback)) {
-                callback = function(par) {
+                callback = function (par) {
                     console.log('getImgSize: ', par);
                 };
             }
 
             img.src = img_url + '?' + start_time;
 
-            img.onerror = function(er) {
+            img.onerror = function (er) {
                 clearInterval(set);
-                callback({width:0, height:0});
+                callback({ width: 0, height: 0 });
             };
-            img.onload = function(e) {
+            img.onload = function (e) {
                 if (!load) {
                     load = true;
                     var duration = new Date().getTime() - start_time;
                     callback({ actino: 'onload', duration: duration, width: img.width, height: img.height });
                 }
             };
-            var check = function() {
+            var check = function () {
                 if (img.width > 0 || img.height > 0 || load) {
                     clearInterval(set);
                     if (!load) {
@@ -4024,11 +4024,11 @@
         getImgRealSize = function (img, callback) {
             var w = 0, h = 0;
             img = $.toElement(img);
-            if(!$.isElement(img)) {
-                return {width: w, height: h};
+            if (!$.isElement(img)) {
+                return { width: w, height: h };
             }
             if (!$.isFunction(callback)) {
-                callback = function(par) {
+                callback = function (par) {
                     console.log('getImgRealSize: ', par);
                 };
             }
@@ -4036,7 +4036,7 @@
             if (img.naturalWidth) {
                 w = img.naturalWidth;
                 h = img.naturalHeight;
-                callback({width: w, height: h});
+                callback({ width: w, height: h });
             } else { // IE6/7/8
                 /*
                 var imgae = new Image();
@@ -4045,10 +4045,10 @@
                     callback({width: image.width, height: image.height});
                 };
                 */
-                
+
                 getImgSize(img.src, callback);
             }
-            return {width: w, height: h};
+            return { width: w, height: h };
         },
         fillOption = function (elem, value, text) {
             elem = $.toElement(elem);
@@ -4063,16 +4063,16 @@
             if (!elem.tagName === 'SELECT') {
                 return this;
             }
-            if($.isNumber(list)) {
+            if ($.isNumber(list)) {
                 valUnit = stepVal;
                 stepVal = maxVal;
                 maxVal = minVal;
                 minVal = list;
                 list = null;
             }
-            if($.isNumber(minVal) && $.isNumber(maxVal)) {
+            if ($.isNumber(minVal) && $.isNumber(maxVal)) {
                 stepVal = stepVal || 1;
-                for(var i = minVal; i <= maxVal; i+= stepVal) {
+                for (var i = minVal; i <= maxVal; i += stepVal) {
                     elem.options.add(new Option(i + (valUnit || ''), i));
                 }
                 return this;
@@ -4097,9 +4097,9 @@
         buildOption = function (value, text) {
             return '<option value="' + value + '">' + text + '</option>';
         },
-        buildOptions = function(list, minVal, maxVal, stepVal, curVal, valUnit) {
+        buildOptions = function (list, minVal, maxVal, stepVal, curVal, valUnit) {
             var html = [];
-            if($.isNumber(list)) {
+            if ($.isNumber(list)) {
                 valUnit = curVal;
                 curVal = stepVal;
                 stepVal = maxVal;
@@ -4109,7 +4109,7 @@
             }
             if ($.isNumber(minVal) && $.isNumber(maxVal)) {
                 stepVal = stepVal || 1;
-                for(var i = minVal; i <= maxVal; i+= stepVal) {
+                for (var i = minVal; i <= maxVal; i += stepVal) {
                     var selected = curVal === i ? ' selected="selected"' : '';
                     html.push('<option value="' + i + '"' + selected + '>' + i + (valUnit || '') + '</option>');
                 }
@@ -4167,7 +4167,7 @@
             }
             return this;
         },
-        isFullScreen = function() {
+        isFullScreen = function () {
             return (
                 document.fullscreen ||
                 document.mozFullScreen ||
@@ -4176,9 +4176,9 @@
                 document.msFullScreen
             );
         },
-        setImgCenter = function(img) {
+        setImgCenter = function (img) {
             img = $.toElement(img);
-            if(!$.isElement(img)) {
+            if (!$.isElement(img)) {
                 return false;
             }
             var parent = img.parentNode;
@@ -4190,7 +4190,7 @@
         };
 
     var browser = {
-        ua: function() { try { return navigator.userAgent; } catch (e) { return ''; } },
+        ua: function () { try { return navigator.userAgent; } catch (e) { return ''; } },
         isFirefox: function (ua) { return (ua || browser.ua()).indexOf('Firefox') > -1; },
         isEdge: function (ua) { return (ua || browser.ua()).indexOf('Edge') > -1; },
         isOpera: function (ua) { ua = ua || browser.ua(); return ua.indexOf('Opera') > -1 || ua.indexOf('OPR') > -1; },
@@ -4198,8 +4198,8 @@
         isIE: function (ua) { ua = ua || browser.ua(); return ua.indexOf('Trident') > -1 || (ua.indexOf('MSIE') > -1 && ua.indexOf('compatible') > -1); },
         isChrome: function (ua) { ua = ua || browser.ua(); return ua.indexOf('Chrome') > -1 && !browser.isOpera(ua) && !browser.isEdge(ua) && !browser.isSafari(ua); },
         isWap: function (ua) { ua = ua || browser.ua(); return /Android|webOS|iPhone|iPod|iPad|BlackBerry/i.test(ua); },
-        isWechar: function(ua) { ua = ua || browser.ua(); return /MicroMessenger/i.test(ua); },
-        isMobile: function(ua) { return browser.isWap(ua); }
+        isWechar: function (ua) { ua = ua || browser.ua(); return /MicroMessenger/i.test(ua); },
+        isMobile: function (ua) { return browser.isWap(ua); }
     };
     var ua = function () { try { return navigator.userAgent; } catch (e) { return ''; } }(),
         //mc = ua.match(/([A-Z]+)\/([\d\.]+)/ig) || [], ut = mc.join('_').replace(/\//g,''),
@@ -4445,10 +4445,10 @@
         $.extendNative(window, {
             $I: function (id, parent) {
                 if (typeof id === 'string') {
-                    if(id.startsWith('#')) {
+                    if (id.startsWith('#')) {
                         id = id.substr(1);
                     }
-                } else if($.isElement(id)) {
+                } else if ($.isElement(id)) {
                     return id;
                 }
                 return (parent || doc).getElementById(id);
@@ -4527,15 +4527,15 @@
             }
             return wsi(func, delay);
         };
-        window.clearTimeout = function(id) {
-            if(id) { cwst(id); }
+        window.clearTimeout = function (id) {
+            if (id) { cwst(id); }
         };
-        window.clearInterval = function(id) {
-            if(id) { cwsi(id); }
+        window.clearInterval = function (id) {
+            if (id) { cwsi(id); }
         };
 
         //获取窗口缩放比例
-        window.getZoomRatio = function() {
+        window.getZoomRatio = function () {
             var ratio = 0,
                 screen = window.screen,
                 ua = navigator.userAgent.toLowerCase();
@@ -4558,7 +4558,7 @@
         };
 
         //判断窗口是否缩放
-        window.isZoom = function() {
+        window.isZoom = function () {
             return window.getZoomRatio() !== 100;
         };
     }
@@ -4575,10 +4575,10 @@
             if ($.isBoolean(action)) {
                 return action;
             } else {
-                var checked = false, 
-                    dic = {cancel: 0, checked: 1, all: 1, reverse: 2},
+                var checked = false,
+                    dic = { cancel: 0, checked: 1, all: 1, reverse: 2 },
                     oper = dic[('' + action).toLowerCase()];
-                    
+
                 switch ($.isNumber(oper) ? oper : parseInt(action, 10)) {
                     //Cancel
                     case 0: checked = false; break;
@@ -4622,11 +4622,11 @@
             }
             return this;
         },
-        setCheckedClass: function(selector, className) {
+        setCheckedClass: function (selector, className) {
             var arr = isName(selector) ? $N(selector) : $QA(selector), c = arr.length;
-            for(var i = 0; i < c; i++) {
+            for (var i = 0; i < c; i++) {
                 var obj = arr[i];
-                if(obj.checked) {
+                if (obj.checked) {
                     $.addClass(obj.parentNode, className);
                 } else {
                     $.removeClass(obj.parentNode, className);
@@ -4634,7 +4634,7 @@
             }
             return this;
         },
-        setCheckedCss: function(selector, className) {
+        setCheckedCss: function (selector, className) {
             return this.setCheckedClass(selector, className);
         },
         getChecked: function (selector) {
@@ -4647,17 +4647,17 @@
                 return $QA(selector);
             }
         },
-        getCheckedValues: function(selector, options) {
-            if(!$.isObject(options)) {
+        getCheckedValues: function (selector, options) {
+            if (!$.isObject(options)) {
                 options = {};
             }
-            if($.isString(options.target, true)) {
+            if ($.isString(options.target, true)) {
                 options.target = document.getElementById(options.target);
             }
-            if($.isString(options.parent, true)) {
+            if ($.isString(options.parent, true)) {
                 options.parent = document.getElementById(options.parent);
             }
-            if($.isString(options.root, true)) {
+            if ($.isString(options.root, true)) {
                 options.root = document.getElementById(options.root);
             }
             var elements = $.getChecked(selector),
@@ -4667,30 +4667,30 @@
                 hasParent = options.parent && $.isElement(options.parent),
                 hasTarget = options.target && $.isElement(options.target);
 
-            for(var i = 0; i < len; i++) {
+            for (var i = 0; i < len; i++) {
                 var elem = elements[i];
-                if(hasParent && elem.parentNode !== options.parent) {
+                if (hasParent && elem.parentNode !== options.parent) {
                     continue;
-                } else if(hasRoot && !$.isChildNode(options.root, elem, true)) {
+                } else if (hasRoot && !$.isChildNode(options.root, elem, true)) {
                     continue;
                 }
                 var val = elem.value;
                 values.push(val);
             }
-            if(hasTarget) {
+            if (hasTarget) {
                 options.target.value = values.join(',');
             }
             return values;
         },
-        getCheckedValue: function(selector, options) {
+        getCheckedValue: function (selector, options) {
             return this.getCheckedValues(selector, options);
         },
-        getCheckedText: function(elem) {
+        getCheckedText: function (elem) {
             elem = $.toElement(elem);
-            if(!$.isElement(elem)) {
+            if (!$.isElement(elem)) {
                 return '';
             }
-            return obj.options[obj.selectedIndex].text;           
+            return obj.options[obj.selectedIndex].text;
         },
         getTextCursorPosition: function (elem) {
             try {
@@ -4712,7 +4712,7 @@
             }
             return -1;
         },
-        setTextCursorPosition2: function(elem, pos, len) {
+        setTextCursorPosition2: function (elem, pos, len) {
             elem.focus();
             if (elem.setSelectionRange) {
                 elem.setSelectionRange(pos, pos);
@@ -4771,17 +4771,17 @@
             return this;
         },
         getElementValue: function (elements, defaultValue, attributeName, func) {
-            if($.isUndefined(defaultValue)) {
+            if ($.isUndefined(defaultValue)) {
                 defaultValue = '';
             }
             var elems = ($.isArray(elements) || $.isArrayLike(elements)) ? elements : [elements],
                 isAttr = $.isString(attributeName),
-                arr = [], 
-                len = elems.length, 
+                arr = [],
+                len = elems.length,
                 val = defaultValue;
             for (var i = 0; i < len; i++) {
                 var elem = $.toElement(elems[i]);
-                if($.isElement(elem)) {
+                if ($.isElement(elem)) {
                     val = (isAttr ? elem.getAttribute(attributeName) : elem.value) || defaultValue;
                     arr.push(val);
                 }
@@ -4808,11 +4808,11 @@
 
             var elems = ($.isArray(elements) || $.isArrayLike(elements)) ? elements : [elements],
                 isAttr = $.isString(attributeName),
-                len = elems.length, 
+                len = elems.length,
                 vals = !$.isArray(values) ? [values] : values;
             for (var i = 0; i < len; i++) {
                 var elem = $.toElement(elems[i]);
-                if($.isElement(elem)) {
+                if ($.isElement(elem)) {
                     var val = $.isUndefined(vals[i]) ? (sameValue ? vals[0] : '') : vals[i];
                     $.setElementAttribute(elem, val, attributeName);
                 }
@@ -4820,7 +4820,7 @@
 
             return this;
         },
-        insertElementValue: function(elements, values, pos, sameValue, append) {
+        insertElementValue: function (elements, values, pos, sameValue, append) {
             var noPos = !$.isNumber(pos),
                 elems = ($.isArray(elements) || $.isArrayLike(elements)) ? elements : [elements],
                 vals = !$.isArray(values) ? [values] : values;
@@ -4832,7 +4832,7 @@
                         c = 1;
                     if (noPos) {
                         pos = $.getTextCursorPosition(elem);
-                        if(pos < 0) {
+                        if (pos < 0) {
                             pos = append ? curVal.length : 0;
                         }
                     }
@@ -4842,15 +4842,15 @@
             }
             return this;
         },
-        appendElementValue: function(elements, values) {
+        appendElementValue: function (elements, values) {
             return $.insertElementValue(elements, values, null, true, true);
         },
-        appendOption: function(obj, val, txt) {
+        appendOption: function (obj, val, txt) {
             return obj.options.add(new Option(txt, val)), this;
         },
-        callbackParent: function(funcName) {
+        callbackParent: function (funcName) {
             if (top.location.href !== location.href) {
-                if($.isString(funcName, true) && funcName.indexOf('parent.') < 0) {
+                if ($.isString(funcName, true) && funcName.indexOf('parent.') < 0) {
                     funcName = 'parent.' + funcName;
                 }
                 var func = $.toFunction(funcName);
@@ -4858,27 +4858,27 @@
                     return this;
                 }
                 var args = $.getArguments(arguments, 1);
-                func.apply(this, args);                
+                func.apply(this, args);
             }
             return this;
         },
-        resetForm: function(formId) {
+        resetForm: function (formId) {
             var form = $I(formId || 'form1');
-            if(null === form || form.tagName !== 'FORM') {
+            if (null === form || form.tagName !== 'FORM') {
                 return this;
             }
             return form.reset(), this;
         },
-        reload: function(key, val) {
+        reload: function (key, val) {
             var url = location.href;
             return location.href = url.setQueryString(key, val), this;
         },
         //还原输入框原始值，原始值保存在输入框 自定义属性 old-value 中
-        restoreValue: function(elements) {
+        restoreValue: function (elements) {
             var elems = $.isArray(elements) ? elements : [elements];
-            for(var i = 0; i < elems.length; i++) {
+            for (var i = 0; i < elems.length; i++) {
                 var elem = $.toElement(elems[i]);
-                if($.isElement(elem)) {
+                if ($.isElement(elem)) {
                     elem.value = $.isValue(elem.getAttribute('old-value'), '');
                 }
             }
@@ -4886,11 +4886,11 @@
         },
         //把数组中的数据分别赋值给（ID)输入框和（Name）输入框
         //数组格式：[{"Id":1,"Name":"名称1"},{"Id":2,"Name":"名称2"}]
-        setIdAndName: function(datas, idElem, nameElem) {
+        setIdAndName: function (datas, idElem, nameElem) {
             idElem = $.toElement(idElem);
             nameElem = $.toElement(nameElem);
             var ids = [], names = [];
-            for(var i = 0; i < datas.length; i++) {
+            for (var i = 0; i < datas.length; i++) {
                 var dr = datas[i];
                 ids.push($.getValue(dr, ['Id', 'id']));
                 names.push($.getValue(dr, ['Name', 'name']));
@@ -4951,7 +4951,7 @@
         var xhr = new XmlHttpRequest();
 
         if (o.async) {
-            try{ xhr.timeout = o.timeout || 4000; } catch(e) {}            
+            try { xhr.timeout = o.timeout || 4000; } catch (e) { }
         }
 
         xhr.open(o.method, o.url, o.async);
@@ -5146,11 +5146,11 @@
         }
     }, '$');
 
-    var $size = function($fn, key, val) {
-        if($.isUndefined(val)) {
+    var $size = function ($fn, key, val) {
+        if ($.isUndefined(val)) {
             var self = $fn, elem = self[0] || null;
             return $.getElementSize(elem)[key];
-        } else {                
+        } else {
             var _val = $.isNumeric(val) ? val + 'px' : val;
             return $fn.each(function (i, obj) {
                 obj.style[key] = _val;
@@ -5200,19 +5200,19 @@
                 return self.each(function (i, obj) { obj.setAttribute(name, value); }), self;
             }
         },
-        clear: function(attrName) {
-            if(!$.isString(attrName, true)) {
+        clear: function (attrName) {
+            if (!$.isString(attrName, true)) {
                 attrName = 'value';
             }
             return this.each(function (i, obj) {
                 obj[attrName] = '';
             });
         },
-        offset: function() {
+        offset: function () {
             var self = this, elem = self[0] || {};
             return $.offset(elem);
         },
-        getOffset: function() {
+        getOffset: function () {
             var self = this, elem = self[0] || {};
             return $.getOffset(elem);
         },
@@ -5231,40 +5231,40 @@
                 $.removeClass(obj, value);
             });
         },
-        size: function(key, val) {
+        size: function (key, val) {
             return $size(this, key, val);
         },
-        width: function(w) {
+        width: function (w) {
             return $size(this, 'width', w);
         },
-        w: function(w) {
+        w: function (w) {
             return $size(this, 'width', w);
         },
-        height: function(h) {
+        height: function (h) {
             return $size(this, 'height', h);
         },
-        h: function(h) {
+        h: function (h) {
             return $size(this, 'height', h);
         },
-        trigger: function(evName) {
-            return this.each(function(i, obj) {
+        trigger: function (evName) {
+            return this.each(function (i, obj) {
                 $.trigger(obj, evName);
             });
         },
-        css: function(attrKey, attrVal) {
+        css: function (attrKey, attrVal) {
             var attrs = {};
             if ($.isNullOrUndefined(attrKey)) {
                 return $.getElementStyle(this[0]) || {};
-            } else if($.isString(attrKey, true)) {
+            } else if ($.isString(attrKey, true)) {
                 if ($.isNullOrUndefined(attrVal)) {
                     return $.getElementStyle(this[0], attrKey) || '';
-                } else if($.isString(attrVal, true) || $.isNumber(attrVal)) {
+                } else if ($.isString(attrVal, true) || $.isNumber(attrVal)) {
                     attrs = { attrKey: attrVal };
                 }
             } else if ($.isObject(attrKey)) {
                 $.extend(attrs, attrKey);
             }
-            this.each(function(i, obj) {
+            this.each(function (i, obj) {
                 for (var k in attrs) {
                     obj.style[k] = attrs[k];
                 }
@@ -5277,7 +5277,7 @@
         event: function (action, func) {
             return this.each(function (i, obj) {
                 $.addEventListener(obj, action, function (e) {
-                    if($.isFunction(func)) {
+                    if ($.isFunction(func)) {
                         func(e, i, this);
                     }
                 });
@@ -5318,45 +5318,45 @@
 }(OUI);
 
 // oui.console
-!function($) {
-    var getArguments = function(args, prefix) {
+!function ($) {
+    var getArguments = function (args, prefix) {
         var par = typeof prefix !== 'undefined' ? { 0: prefix, length: 1 } : { length: 0 },
             len = par.length;
 
-        for(var i = 0; i < args.length; i++) {
+        for (var i = 0; i < args.length; i++) {
             par[len++] = args[i];
         }
 
         return par.length += len - 1, par;
-    }, log = function(type, formatstring) {
+    }, log = function (type, formatstring) {
         var str = '[' + new Date().format(formatstring || _tf) + ']' + (type ? '[' + type + ']' : '');
         return str;
     }, _tf = 'log';
 
     $.extendNative($, {
         console: {
-            timeformat: function(formatstring) {
+            timeformat: function (formatstring) {
                 return _tf = formatstring, this;
             },
-            tf: function(formatstring) {
+            tf: function (formatstring) {
                 return this.timeformat(formatstring);
             },
-            log: function() {
+            log: function () {
                 return console.log.apply(this, getArguments(arguments, log(null))), this;
             },
-            info: function() {
+            info: function () {
                 return console.info.apply(this, getArguments(arguments, log('i'))), this;
             },
-            warn: function() {
+            warn: function () {
                 return console.warn.apply(this, getArguments(arguments, log('w'))), this;
             },
-            debug: function() {
+            debug: function () {
                 return console.debug.apply(this, getArguments(arguments, log('d'))), this;
             },
-            error: function() {
+            error: function () {
                 return console.error.apply(this, getArguments(arguments, log('e'))), this;
             },
-            trace: function() {
+            trace: function () {
                 return console.trace.apply(this, getArguments(arguments, log('t'))), this;
             }
         }
@@ -5365,48 +5365,48 @@
 
 // oui.dialog
 !function ($) {
-    var callParentFunc = function(funcName, param) {
-        if(window.location !== top.window.location) {
-            try{
+    var callParentFunc = function (funcName, param) {
+        if (window.location !== top.window.location) {
+            try {
                 var func = parent.$.dialog[funcName],
                     id = $.getQueryString(location.href, ['dialog_id', 'dialogid']);
-                if($.isFunction(func) && !$.isUndefined(id)) {
+                if ($.isFunction(func) && !$.isUndefined(id)) {
                     return func(id, param), this;
                 }
-            } catch(e) {
+            } catch (e) {
                 console.log(funcName, e);
             }
         }
         return $;
     },
-    closeParentMenu = function(moduleName, funcName) {
-        if(window.location !== top.window.location) {
-            try{
-                var func = parent.$[moduleName][funcName];
-                if($.isFunction(func)) {
-                    return func(), this;
+        closeParentMenu = function (moduleName, funcName) {
+            if (window.location !== top.window.location) {
+                try {
+                    var func = parent.$[moduleName][funcName];
+                    if ($.isFunction(func)) {
+                        return func(), this;
+                    }
+                } catch (e) {
+                    console.log(mouleName, funcName, e);
                 }
-            } catch(e) {
-                console.log(mouleName, funcName, e);
             }
-        }
-        return $;
-    };
+            return $;
+        };
     $.extend($, {
         //通过子窗口关闭父窗口对话框(oui.dialog)
-        closeParentDialog: function(param) {
+        closeParentDialog: function (param) {
             return callParentFunc('closeParent', param);
         },
         //根据子窗口内容重置父空口对话框(oui.dialog)大小
-        resizeParentDialog: function(param) {
+        resizeParentDialog: function (param) {
             return callParentFunc('resizeParent', param);
         },
         //关闭父窗口可能出现的Tab(oui.tab)标签的右键菜单
-        hideParentTabMenu: function() {
+        hideParentTabMenu: function () {
             return closeParentMenu('tab', 'hideParentTabMenu');
         },
         //关闭父窗口可能出现的右键菜单
-        hideParentMenu: function() {
+        hideParentMenu: function () {
             return closeParentMenu('contextmenu', 'hideParentMenu');
         }
     });
