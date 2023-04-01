@@ -1446,3 +1446,6 @@ var measure = {
 
 console.log(measure.getAngleRange(355, 6, 1));
 console.log(measure.getRowCol(11, 0.15));
+
+
+console.log(('abc'.match(/[A-Z]/g) || '').length);

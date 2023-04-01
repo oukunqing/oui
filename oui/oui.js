@@ -1426,6 +1426,7 @@
         startWith: function (s) { return this.startsWith(s); },
         endWith: function (s) { return this.endsWith(s); },
         len: function () { return this.replace(/([^\x00-\xff])/g, 'aa').length; },
+        uppercaseLen: function() { return (this.match(/[A-Z]/g) || '').length; },
         contains: function (obj) {
             if ($.isArray(obj)) {
                 return obj.indexOf(this) >= 0;
@@ -3118,7 +3119,7 @@
             return $.isArray(obj) || length === 0 || $.isNumber(length) && length > 0 && (length - 1) in obj;
         },
         merge = function (first, second) {
-            var len = +second.length,
+            var len = second.length,
                 j = 0,
                 i = first.length;
 

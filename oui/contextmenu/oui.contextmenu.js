@@ -578,9 +578,11 @@
                 if ($.isArray(dr.items) && dr.items.length > 0) {
                     w += Config.ItemArrowWidth;
                 }
-                //数字的宽度相对窄一些，需要加上5像素
-                if (/[a-z0-9]/ig.test(txt)) {
+                //字母或数字的文字宽度相对窄一些，需要加上15像素
+                if (txt && /[a-z0-9]/ig.test(txt)) {
                     w += 5;
+                    //每个大写字母宽度加1
+                    w += txt.uppercaseLen();
                 }
                 //宽度加上10像素
                 //额外增加2像素
