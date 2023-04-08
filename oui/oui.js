@@ -1789,7 +1789,10 @@
             }
             return s;
         },
-        reverseHex: function () {
+        reverseHex: function (reverse) {
+            if(!$.isBoolean(reverse, true)) {
+                return this;
+            }
             var hex = this.isEvenLen(), arr = [], len = hex.length;
             for (var i = 0; i < len / 2; i++) {
                 arr[len - i * 2 - 1] = hex[i * 2 + 1];
@@ -1799,13 +1802,85 @@
         },
         hexToInt: function (reverse) {
             var s = this.isEvenLen(),
-                hex = reverse ? s.reverseHex() : s,
+                hex = reverse ? s.reverseHex(reverse) : s,
                 num = eval('0x' + hex).toString(10);
             return parseInt(num, 10);
         },
+        hexToFloat: function (reverse, decimalLen) {
+            var a = reverse ? this.reverseHex(reverse) : this;
+            var b = parseInt(a, 16);
+            var s = (b & 0x80000000) ? -1 : 1;
+            var e = (b & 0x7f800000) / 0x800000 - 127;
+            var c = (b & 0x7fffff) / 0x800000;
+            var f = s * (1 + c) * Math.pow(2, e);
+            return decimalLen > 0 ? f.round(decimalLen) : f;
+        },
+        floatToHex: function(reverse) {
+            var num = (this || '').trim(),
+                decVal = parseFloat(Math.abs(num), 10),
+                fraction, exponent;
+
+            if(decVal === 0) {
+                fraction = 0;
+                exponent = 0;
+            } else {
+                //偏置常数
+                exponent = 127;
+                if(decVal >= 2) {
+                    while(decVal >= 2) {
+                        exponent++;
+                        decVal /= 2;
+                    }
+                } else if(decVal < 1) {
+                    while(decVal < 1) {
+                        exponent--;
+                        decVal *= 2;
+                        if(exponent === 0) {
+                            break;
+                        }
+                    }
+                }
+                if(exponent !== 0) {
+                    decVal -= 1;
+                } else {
+                    decVal /= 2;
+                }
+            }
+
+            function decToBinTail(dec, pad) {
+                var bin = '', i;
+                for (i = 0; i < pad; i++) {
+                    dec *= 2;
+                    if (dec >= 1) {
+                        dec -= 1;
+                        bin += '1';
+                    } else {
+                        bin += '0';
+                    }
+                }
+                return bin;
+            }
+
+            function decToBinHead(dec, pad) {
+                var bin = '', i;
+                for (i = 0; i < pad; i++) {
+                    bin = (parseInt(dec % 2).toString()) + bin;
+                    dec /= 2;
+                }
+                return bin;
+            }
+            //1位符号
+            var signStr = num.toString().charAt(0) === '-' ? '1' : '0';
+            //8位阶码
+            var exponentStr = decToBinHead(exponent, 8);
+            //23位尾数
+            var fractionStr = decToBinTail(decVal, 23);
+
+            return $.padLeft(parseInt(signStr + exponentStr + fractionStr, 2).toString(16), 8).reverseHex(reverse);
+        },
         hexToStr: function (reverse) {
             var s = this.isEvenLen(),
-                hex = reverse ? s.reverseHex() : s,
+                hex = reverse ? s.reverseHex(reverse) : s,
                 len = hex.length,
                 arr = [];
 
@@ -1816,9 +1891,10 @@
             }
             return arr.join('');
         },
+        //十六进制字符串转换成字节数组
         hexToNum: function (reverse) {
             var s = this.isEvenLen(),
-                hex = reverse ? s.reverseHex() : s,
+                hex = reverse ? s.reverseHex(reverse) : s,
                 len = hex.length,
                 arr = [];
             for (var i = 0; i < len / 2; i++) {
@@ -1911,6 +1987,9 @@
                 hex = hex.padLeft(len, '0');
             }
             return lower ? hex.toLowerCase() : hex.toUpperCase();
+        },
+        floatToHex: function(reverse) {
+            return this.toString().floatToHex(reverse);
         },
         toAsciiHex: function () { return $.toAsciiHex(this, true); },
         toThousand: function (delimiter, len) { return this.toString().toThousand(delimiter, len); },

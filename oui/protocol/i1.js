@@ -56,9 +56,9 @@
             o.body = msg_hex.substr(posHead + Config.BASE_LEN * STEP, o.body_len * STEP);
             o.con = o.body.hexToStr();
 
-            var pos = o.con.indexOf('{');
-            if (pos >= 0) {
-                o.cmd = o.con.substr(pos).toJson();
+            var pos = o.con.indexOf('{'), posEnd = o.con.lastIndexOf('}');
+            if (pos >= 0 && posEnd > 0) {
+                o.cmd = o.con.substr(pos, posEnd - pos + 1).toJson();
             }
 
             return o;

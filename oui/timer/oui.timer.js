@@ -99,7 +99,7 @@
             Factory.initCache(this, opt);
             return this;
         },
-        start: function (func, options) {
+        start: function (func) {
             var _ = this;
             _.cache.enable = true;
             _.cache.paused = false;
@@ -107,27 +107,34 @@
             if (_.cache.timer !== null) {
                 window.clearInterval(_.cache.timer);
             }
+            var pause_times = 0, interval_ms = 200;
+
             _.cache.timer = window.setInterval(function () {
                 if (!_.cache.enable) {
                     return false;
                 }
-                if (_.cache.paused) {
-                    return false;
+                if (!_.cache.paused) {
+                    _.cache.number = Factory.checkNumber(_.cache.number, _.cache.options.interval + 1);
+                    _.cache.number = (_.cache.number - 1 * interval_ms / 1000).round(3);
+                    if(_.cache.number < 0) {
+                        _.cache.number = 0;
+                    }
+                    pause_times = 0;
+                } else {
+                    pause_times++;
                 }
-                _.cache.number = Factory.checkNumber(_.cache.number, _.cache.options.interval + 1);
-                _.cache.number -= 1;
-                if ($.isFunction(func)) {
-                    func(_.cache.number);
+                if (pause_times < 2 && $.isFunction(func)) {
+                    func(parseInt(_.cache.number, 10), _.cache.paused);
                 }
-            }, 1000);
+            }, interval_ms);
 
             if ($.isFunction(func)) {
                 _.cache.number = Factory.checkNumber(_.cache.number, _.cache.options.interval);
-                func(_.cache.number);
+                func(parseInt(_.cache.number, 10), _.cache.paused);
             }
             return _;
         },
-        stop: function (func, options) {
+        stop: function (func) {
             var _ = this;
             _.cache.enable = false;
 
@@ -161,7 +168,7 @@
             }
             _.cache.number = _.cache.options.interval;
 
-            _.start(func, options);
+            _.start(func);
 
             return _;
         }

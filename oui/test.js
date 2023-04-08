@@ -1234,9 +1234,11 @@ console.log('2022-09-07 10:10:25'.toDate().format('ts', 10));
 console.log((1662426572-8*60*60*2).toDate().format());
 
 console.log('905d1863'.hexToInt(true).toDate().format());
-console.log('905d1863'.hexToInt(true).toDate().format('ts'));
+console.log('12345678'.hexToInt(true).toDate().format('ts'));
 console.log('2022-09-18 00:00:00'.toDate().format('ts', 10));
 console.log((0).toDate().format());
+
+
 
 
 //关闭摄像机电源之前，先发送 摄像机重启命令
@@ -1448,4 +1450,74 @@ console.log(measure.getAngleRange(355, 6, 1));
 console.log(measure.getRowCol(11, 0.15));
 
 
-console.log(('abc'.match(/[A-Z]/g) || '').length);
+console.log('905d1863'.hexToInt(true).toDate().format());
+console.log('905d1863'.hexToInt(true));
+
+console.log((12345.56).toString(16));
+console.log((12345).toHex());
+console.log(('3039').hexToInt());
+
+
+function HexToDouble(ca2){
+    var t = parseInt(ca2,16).toString(2);
+    if (t.length < 64) {
+        t = FillString(t, "0", 64, true);
+    };
+    var s = t.substring(0, 1);
+    var e = t.substring(1, 12);
+    var m = t.substring(12);
+    e = parseInt(e, 2) - 1023;
+    m = "1" + m;
+    if (e >= 0) {
+        m = m.substring(0, e + 1) + "." + m.substring(e + 1)
+    }
+    else {
+        m = "0." + FillString(m, "0", m.length - e - 1, true)
+    }
+    if (m.indexOf(".") == -1) {
+        m = m + ".0";
+    }
+    var a = m.split(".");
+    var mi = parseInt(a[0], 2);
+    var mf = 0;
+    for (var i = 0; i < a[1].length; i++) {
+        mf += parseFloat(a[1].charAt(i)) * Math.pow(2, -(i + 1));
+    }
+    m = parseInt(mi) + parseFloat(mf);
+    if (s == 1) {
+        m = 0 - m;
+    }
+    return m;
+}
+function FillString(t, c, n, b) {
+    if ((t == "") || (c.length != 1) || (n <= t.length)) {
+        return t;
+    }
+    var l = t.length;
+    for (var i = 0; i < n - l; i++) {
+        if (b == true) {
+            t = c + t;
+        }
+         else {
+            t += c;
+        }
+    }
+    return t;
+}
+
+console.log('123.456:', '123.456'.floatToHex(true));
+console.log('78e9f642:', '78e9f642'.hexToFloat(true, 3));
+
+console.log('0029b062:', '0029b062'.hexToNum(true));
+console.log('582bb062:', '582bb062'.hexToNum(true));
+
+
+console.log(HexToDouble('40dd7ac4b41562f9'));
+console.log('c640e600'.hexToFloat(false));
+
+
+console.log('905d1863'.hexToInt(true));
+
+console.log($.padLeft('123', 8));
+
+console.log(3 + 50 + 10 + 4 + 50 + 4 + 20 + 30);

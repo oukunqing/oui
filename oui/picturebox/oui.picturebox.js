@@ -229,7 +229,8 @@
                 _.drag().wheelZoom().title().status().title();
 
                 $.getFileSize(_.cfg.filePath, function(size) {
-                    var fileSize = size >= 0 ? size.toFileSize(2) : '';
+                    var fileSize = size >= 0 ? size : (opt.fileSize || 0);
+                    fileSize = fileSize > 0 ? fileSize.toFileSize(2) : '';
                     _.title(null, fileSize);
                 });
 

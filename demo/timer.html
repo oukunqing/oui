@@ -31,8 +31,12 @@
 		var timer = $.timer({
 			id: 'timer1',
 			interval: 30
-		})[action](function(num) {
-			console.log('start:', num);
+		})[action](function(num, paused) {
+			console.log('start:', num, paused);
+			if(paused) {
+				$('#ts01').html('暂停刷新');
+				return false;
+			}
 			$('#ts01').html(num + '秒后刷新');
 		});
 	}
