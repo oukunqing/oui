@@ -52,6 +52,9 @@
                 //指定默认样式
                 opt.skin = getSkin();
             }
+
+			opt.showSizeSelect = opt.showSizeSelect || opt.showPageSize;
+
             return opt;
         },
         setOptions = function (op, options, dataCount) {
@@ -415,52 +418,73 @@
                 obj.setAttribute('value', value);
             }
         },
+		isPageItem = function(items, pageSize) {
+			if(!$.isArray(items)) {
+				return false;
+			}
+			if(items.indexOf(pageSize) >= 0) {
+				return true;
+			}
+
+			for(var i = 0; i < items.length; i++) {
+				if($.isArray(items[i]) && items[i][0] === pageSize) {
+					return true;
+				} else if(items[i] === pageSize) {
+					return true;
+				}
+			}
+
+			return false;
+		},
         buildPageSize = function (enabled, that, arr, minuend) {
-            if (enabled) {
-                var op = that.options, html = ['<select class="select">'];
-                if (!$.isArray(op.pageSizeItems) || $.isEmpty(op.pageSizeItems)) {
-                    op.pageSizeItems = defaultPageSizeItems;
-                }
+			var op = that.options,
+				html = [
+					'<select class="select"',
+					enabled ? '' : ' style="display:none;"',
+					'>'
+				];
+			if (!$.isArray(op.pageSizeItems) || $.isEmpty(op.pageSizeItems)) {
+				op.pageSizeItems = defaultPageSizeItems;
+			}
 
-                if ($.isArray(op.sizeOptions)) {
-                    for (var i = 0; i < op.sizeOptions.length; i++) {
-                        var n = op.sizeOptions[i];
-                        if (op.pageSizeItems.indexOf(n) < 0) {
-                            op.pageSizeItems.push(n);
-                        }
-                    }
-                }
+			if ($.isArray(op.sizeOptions)) {
+				for (var i = 0; i < op.sizeOptions.length; i++) {
+					var n = op.sizeOptions[i];
+					if (op.pageSizeItems.indexOf(n) < 0) {
+						op.pageSizeItems.push(n);
+					}
+				}
+			}
+			//if (op.pageSizeItems.indexOf(op.pageSize) < 0) {
+			if (!isPageItem(op.pageSizeItems, op.pageSize)) {
+				if ($.isArray(op.pageSizeItems[0])) {
+					var text = (op.pageSizeItems[0][1] || '').replace(/[\d]+/, op.pageSize);
+					op.pageSizeItems.push([op.pageSize, text]);
+				} else {
+					op.pageSizeItems.push(op.pageSize);
+				}
+				op.pageSizeItems.sort(function (a, b) { return (a[0] || a) - (b[0] || b); });
 
-                if (op.pageSizeItems.indexOf(op.pageSize) < 0) {
-                    if ($.isArray(op.pageSizeItems[0])) {
-                        var text = (op.pageSizeItems[0][1] || '').replace(/[\d]+/, op.pageSize);
-                        op.pageSizeItems.push([op.pageSize, text]);
-                    } else {
-                        op.pageSizeItems.push(op.pageSize);
-                    }
-                    op.pageSizeItems.sort(function (a, b) { return (a[0] || a) - (b[0] || b); });
+				//将自定义pageSize追加到默认的选项中
+				if (defaultPageSizeItems.indexOf(op.pageSize) < 0) {
+					defaultPageSizeItems.push(op.pageSize);
+					defaultPageSizeItems.sort(function (a, b) { return a - b; });
+				}
+			}
+			if ($.isArray(op.pageSizeItems)) {
+				for (var i in op.pageSizeItems) {
+					var dr = op.pageSizeItems[i];
+					if ($.isInteger(dr)) {
+						html.push('<option value="' + dr + '">' + dr + '</option>');
+					} else if ($.isArray(dr)) {
+						html.push('<option value="' + dr[0] + '">' + (dr[1] || dr[0]) + '</option>');
+					}
+				}
+			}
+			html.push('</select>');
 
-                    //将自定义pageSize追加到默认的选项中
-                    if (defaultPageSizeItems.indexOf(op.pageSize) < 0) {
-                        defaultPageSizeItems.push(op.pageSize);
-                        defaultPageSizeItems.sort(function (a, b) { return a - b; });
-                    }
-                }
+			arr.push(html.join(''));
 
-                if ($.isArray(op.pageSizeItems)) {
-                    for (var i in op.pageSizeItems) {
-                        var dr = op.pageSizeItems[i];
-                        if ($.isInteger(dr)) {
-                            html.push('<option value="' + dr + '">' + dr + '</option>');
-                        } else if ($.isArray(dr)) {
-                            html.push('<option value="' + dr[0] + '">' + (dr[1] || dr[0]) + '</option>');
-                        }
-                    }
-                }
-                html.push('</select>');
-
-                arr.push(html.join(''));
-            }
             return that;
         };
 

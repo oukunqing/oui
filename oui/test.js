@@ -1520,4 +1520,7 @@ console.log('905d1863'.hexToInt(true));
 
 console.log($.padLeft('123', 8));
 
-console.log(3 + 50 + 10 + 4 + 50 + 4 + 20 + 30);
+console.log(43 + 50 + 10 + 4 + 50 + 4 + 20 + 30);
+
+
+

@@ -107,7 +107,7 @@
             if (_.cache.timer !== null) {
                 window.clearInterval(_.cache.timer);
             }
-            var pause_times = 0, interval_ms = 200;
+            var pause_times = 0, interval_ms = 1000;
 
             _.cache.timer = window.setInterval(function () {
                 if (!_.cache.enable) {
