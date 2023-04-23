@@ -586,6 +586,12 @@
                 pos1 = str.indexOf('/');
             return pos1 > -1 ? str.substr(0, pos1) : str;
         },
+        getUrlPage = function(url) {
+            var pos = url.indexOf('?'),
+                str = pos > -1 ? url.substr(0, pos) : url,
+                pos1 = str.lastIndexOf('/');
+            return pos1 > -1 ? str.substr(pos1 + 1) : str;
+        },
         isDebug = function (key) {
             try {
                 var debug = getQueryString()[key || 'debug'];
@@ -796,7 +802,7 @@
         getArguments: getArguments, getArgs: getArguments,
         toFunction: toFunction, toFunc: toFunction, callFunction: callFunction, callFunc: callFunction,
         param: buildParam, buildParam: buildParam, setUrlParam: setUrlParam, buildAjaxData: buildAjaxData,
-        setQueryString: setQueryString, getQueryString: getQueryString, getUrlHost: getUrlHost,
+        setQueryString: setQueryString, getQueryString: getQueryString, getUrlHost: getUrlHost, getUrlPage: getUrlPage,
         isDebug: isDebug,
         filterValue: filterValue, keywordOverload: keywordOverload, keyOverload: keywordOverload,
         setValue: setValue, getValue: getValue, isValue: isValue, getParam: getParam,
@@ -1715,6 +1721,9 @@
         getUrlHost: function () {
             return $.getUrlHost(this);
         },
+        getUrlPage: function() {
+            return $.getUrlPage(this);
+        },
         getFileName: function (withoutExtension) {
             return $.getFileName(this, withoutExtension);
         },
@@ -1724,7 +1733,6 @@
         getFileSize: function (callback) {
             return $.getFileSize(this, callback);
         },
-
         formatSimple: function (args) {
             var s = this, sep = '%s', vals = [], rst = [];
             if (arguments.length > 1) {
@@ -5459,19 +5467,25 @@
         }
         return $;
     },
-        closeParentMenu = function (moduleName, funcName) {
-            if (window.location !== top.window.location) {
-                try {
-                    var func = parent.$[moduleName][funcName];
-                    if ($.isFunction(func)) {
-                        return func(), this;
-                    }
-                } catch (e) {
-                    console.log(mouleName, funcName, e);
+    closeParentMenu = function (moduleName, funcName) {
+        if($.isDebug()) {
+            console.log('closeParentMenu:', location.href.getUrlPage(), moduleName, funcName);
+        }
+        if (window.location !== top.window.location) {
+            try {
+                var func = typeof parent.$[moduleName] !== 'undefined' ? parent.$[moduleName][funcName] : null;
+                if ($.isFunction(func)) {
+                    func();
                 }
-            }
-            return $;
-        };
+                if(typeof parent.$ !== 'undefined' && $.isFunction(parent.$[funcName])) {
+                    parent.$[funcName]();
+                }
+                return this;
+            } catch (e) {}
+        }
+        
+        return $;
+    };
     $.extend($, {
         //通过子窗口关闭父窗口对话框(oui.dialog)
         closeParentDialog: function (param) {

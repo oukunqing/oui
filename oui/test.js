@@ -1524,3 +1524,7 @@ console.log(43 + 50 + 10 + 4 + 50 + 4 + 20 + 30);
 
 
 
+var name22 = '12342-V2';
+var len22 = name22.length;
+
+console.log(name22.substr(len22-3, 3));
