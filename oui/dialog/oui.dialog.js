@@ -4644,6 +4644,9 @@
         close: function (id) {
             return Factory.close(id), $;
         },
+        hide: function (id) {
+            return Factory.close(id), $;
+        },
         closeFor: function (forname) {
             return Factory.closeFor(forname), $;
         },

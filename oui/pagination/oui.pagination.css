@@ -2,7 +2,7 @@
     display: block;
     font-size: 14px;
     font-family: Arial;
-    color: #333;
+    color: #000;
     overflow: hidden;
     border: none 0 #ccc;
     margin: 0;
@@ -22,16 +22,18 @@
     font-size:14px;
     font-family: Arial;
 	font-weight: normal;
-    color: #333;
+    color: #000;
+    background-color: transparent;
 }
 
 .oui-pagination .left, .oui-pagination .label {
 	width: auto;
     float: left;
-	color: #333;
+	color: #000;
 	border: none 0;
 	padding: 0;
 	margin: 0;
+    background-color: transparent;
 }
 
 .oui-pagination .right {
@@ -44,17 +46,19 @@
 
 .oui-pagination ul,.oui-pagination li {
     margin: 0; padding: 0; float: left; list-style: normal; display: inline-table;
+    background-color: transparent;
 }
 
 .oui-pagination a,.oui-pagination input,.oui-pagination button,.oui-pagination select{
     margin: 0; padding: 0; float: left; height: 22px; font-size: 14px; font-weight: normal; text-align: center; 
     border-radius: 5px; box-sizing: border-box; background-image: none; background-color: transparent;    
-    border: 1px solid #ccc; color: #333; background: #fff; white-space: nowrap; vertical-align: middle; display: inline-block;
+    border: 1px solid #ccc; color: #000; background: #fff; white-space: nowrap; vertical-align: middle; display: inline-block;
 }
 
 .oui-pagination a {
     box-sizing: content-box; cursor: pointer; height: 20px; line-height: 20px; 
     text-decoration: none;  padding: 0 6px; margin: 0 2px 0; display: inline-block;
+    background-color: transparent;
 
     -ms-touch-action: manipulation;
     touch-action: manipulation;
@@ -69,13 +73,14 @@
 }
 
 .oui-pagination span {
-    margin: 0; padding: 0;
+    margin: 0; padding: 0; background-color: transparent;
 }
 
-.oui-pagination .list {
+.oui-pagination ul.list {
 	width: auto;
 	margin: 0; padding: 0;
 	border: none 0;
+    background-color: transparent;
 }
 
 .oui-pagination .stat {
@@ -83,12 +88,12 @@
 }
 
 .oui-pagination .label {
-    float: left; padding: 0 2px; line-height: 22px; color: #333;
+    float: left; padding: 0 2px; line-height: 22px; color: #000;
 }
 
 /*链接文字颜色默认为蓝色*/
 .oui-pagination a.link { 
-    color: #333; border: solid 1px #005eac;
+    color: #000; border: solid 1px #005eac;
 }
 
 .oui-pagination a.num {
@@ -111,7 +116,7 @@
 
 /*非链接文字默认颜色为灰色*/
 .oui-pagination a.none {
-    color: #999; border: solid 1px #ccc; cursor: default;
+    color: #999; border: solid 1px #999; cursor: default;
 }
 
 .oui-pagination a.ellipsis { padding: 0 4px; }
@@ -120,7 +125,9 @@
     display: inline-block;
     width: 50px;
     padding: 0 3px;
-    background: #fff;
+    /*background: #fff;*/
+    background-color: transparent;
+    border: solid 1px #005eac;
     -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
     box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
     -webkit-transition: border-color ease-in-out .15s, -webkit-box-shadow ease-in-out .15s;
@@ -158,8 +165,10 @@
 
 .oui-pagination .select {
     padding: 1px 3px;
+    border: solid 1px #005eac;
     -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
     box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+    background-color: transparent;
     -webkit-transition: border-color ease-in-out .15s, -webkit-box-shadow ease-in-out .15s;
     -o-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
     transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
@@ -168,36 +177,48 @@
 /*以下为定制样式 blue,red,green,black等，调用时指定参数中的 skin 为相应的样式名称*/
 
 .oui-pagination .blue { }
+.oui-pagination .blue input.text { border:solid 1px #2e6da4; }
+.oui-pagination .blue .select { border:solid 1px #2e6da4; }
 .oui-pagination .blue a.link { border: solid 1px #2e6da4; }
 .oui-pagination .blue a.link:hover { background: #2e6da4; }
 .oui-pagination .blue a.cur {background: #2e6da4; }
 .oui-pagination .blue button.btn { background: #337ab7; border-color: #2e6da4; }
 
 .oui-pagination .red { }
+.oui-pagination .red input.text { border:solid 1px #f00; }
+.oui-pagination .red .select { border:solid 1px #f00; }
 .oui-pagination .red a.link { border: solid 1px #f00; }
 .oui-pagination .red a.link:hover { background: #f00; }
 .oui-pagination .red a.cur { background: #f00; }
 .oui-pagination .red button.btn { background: #f00; border-color: #f00; }
 
 .oui-pagination .orange { }
+.oui-pagination .orange input.text { border:solid 1px #f50; }
+.oui-pagination .orange .select { border:solid 1px #f50; }
 .oui-pagination .orange a.link { border: solid 1px #f50; }
 .oui-pagination .orange a.link:hover { background: #f50; }
 .oui-pagination .orange a.cur { background: #f50; }
 .oui-pagination .orange button.btn { background: #f50; border-color: #f50; }
 
 .oui-pagination .green { }
+.oui-pagination .green input.text { border:solid 1px #008000; }
+.oui-pagination .green .select { border:solid 1px #008000; }
 .oui-pagination .green a.link { border: solid 1px #008000; }
 .oui-pagination .green a.link:hover { background: #008000; }
 .oui-pagination .green a.cur { background: #008000; }
 .oui-pagination .green button.btn { background: #008000; border-color: #008000; }
 
 .oui-pagination .black { }
+.oui-pagination .black input.text { border:solid 1px #000; }
+.oui-pagination .black .select { border:solid 1px #000; }
 .oui-pagination .black a.link { border: solid 1px #000; }
 .oui-pagination .black a.link:hover { background: #000; }
 .oui-pagination .black a.cur { background: #000; }
 .oui-pagination .black button.btn { background: #000; border-color: #000; }
 
 .oui-pagination .gray { }
+.oui-pagination .gray input.text { border:solid 1px #ddd; }
+.oui-pagination .gray .select { border:solid 1px #ddd; }
 .oui-pagination .gray a.link { border: solid 1px #ddd; }
 .oui-pagination .gray a.link:hover { background: #ddd; }
 .oui-pagination .gray a.cur { background: #ddd;}

@@ -1528,3 +1528,19 @@ var name22 = '12342-V2';
 var len22 = name22.length;
 
 console.log(name22.substr(len22-3, 3));
+
+var isNumber = function (n) { return typeof n === 'number'; };
+var setNumber = function(n, min, max) {
+    var isNum = isNumber(n), isMin = isNumber(min), isMax = isNumber(max);
+    return isNum ? (isMin && isMax ? (n < min ? min : (n > max ? max : n)) : (isMin ? (n < min ? min : n) : isMax ? (n > max ? max : n) : n)) : n;
+};
+
+console.log(setNumber(3, 1, 5));
+
+console.log((32).check(1, 5));
+console.log((32).set(1, 5));
+
+
+var str = 'http://www.bmwzy.com/vod/1/f3aa6d9b-a09f-453e-aa8d-202c9858fb03/c89cacaaf48e46f9';
+var reg = /([\da-f]{8}(\-[\da-f]{4}){3}\-[\da-f]{12})/ig;
+console.log(str.match(reg))

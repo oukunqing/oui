@@ -162,6 +162,10 @@
             var isNum = isNumber(n), isMin = isNumber(min), isMax = isNumber(max);
             return isNum ? (isMin && isMax ? n >= min && n <= max : (isMin ? n >= min : isMax ? n <= max : true)) : false;
         },
+        setNumber = function(n, min, max) {
+            var isNum = isNumber(n), isMin = isNumber(min), isMax = isNumber(max);
+            return isNum ? (isMin && isMax ? (n < min ? min : (n > max ? max : n)) : (isMin ? (n < min ? min : n) : isMax ? (n > max ? max : n) : n)) : n;
+        },
         isObject = function (o) { return o !== null && typeof o === 'object'; },
         isArray = Array.isArray || function (a) { return Object.prototype.toString.call(a) === '[object Array]'; },
         isBoolean = function (b, dv) {
@@ -791,7 +795,7 @@
         padRight: function (s, totalWidth, paddingChar) {
             return padLeft(s, totalWidth, paddingChar, true);
         },
-        toDecimal: toDecimal, toFloat: toDecimal, checkNumber: checkNumber,
+        toDecimal: toDecimal, toFloat: toDecimal, checkNumber: checkNumber, setNumber: setNumber,
         toInteger: toInteger, toInt: toInteger, toNumber: toNumber, toNumberList: toNumberList,
         toBoolean: toBoolean, toBool: toBoolean,
         containsKey: containsKey, containsValue: containsValue, contains: contains, distinctList: distinctList,
@@ -2070,6 +2074,19 @@
             }
             //这里转换成浮点数的原因是this的数据类型是object, 而不是number
             return fmt.format(parseFloat(this, 10));
+        },
+        checkNumber: function (min, max) {
+            return $.checkNumber(this, min, max);
+        },
+        check: function (min, max) {
+            return this.checkNumber(min, max);
+        },
+        setNumber: function (min, max) {
+            var n = this;
+            return n = $.setNumber(n, min, max);
+        },
+        set: function (min, max) {
+            return this.setNumber(min, max);
         }
     }, 'Number.prototype');
 
@@ -2501,6 +2518,7 @@
             if (ms.length % 2 !== 0) {
                 throwError(err[0], s, vals);
             }
+            //匹配提取{}的正则
             //var matchs = s.match(/({+[-\d]+(:[\D\d]*?)*?}+)|({+([\D]*?|[:\d]*?)}+)|([{]{1,2}[\w]*?)|([\w]*?[}]{1,2})/g);
             var matchs = s.match(/({+[-\d]+(:[\D\d]*?)*?}+)|({+([\D]*?|[:\d]*?)}+)|({+([\w\.>\-,;\|\d]*?)}+)|([{]{1,2}[\w]*?)|([\w]*?[}]{1,2})/g);
             if (null === matchs) {
@@ -5468,9 +5486,6 @@
         return $;
     },
     closeParentMenu = function (moduleName, funcName) {
-        if($.isDebug()) {
-            console.log('closeParentMenu:', location.href.getUrlPage(), moduleName, funcName);
-        }
         if (window.location !== top.window.location) {
             try {
                 var func = typeof parent.$[moduleName] !== 'undefined' ? parent.$[moduleName][funcName] : null;

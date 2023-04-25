@@ -6,7 +6,8 @@
     <script type="text/javascript" src="../oui/oui.js?1"></script>
     <script type="text/javascript" src="../oui/pagination/oui.pagination.js?1&skin=default"></script>
 </head>
-<body>
+<body id="body">
+
 <div id="p1"></div>
 <br />
 <div id="p2"></div>
@@ -20,11 +21,18 @@
 <div id="p6"></div>
 <br />
 <div id="p7"></div>
+<br />
+<div id="p8"></div>
 
 
 </body>
 </html>
 <script type="text/javascript">
+	var bg = $.getQueryString(location.href, 'bg') || '#fff';
+	//var bg = $.getQueryString()['bg'] || '#fff';
+	$I('body').style.backgroundColor = bg;
+	console.log('bg:', bg);
+
     var pageIndex = $.getQueryString()['pageIndex'] || 1;
     var timer = null;
     var p1 = $.pagination({
@@ -36,6 +44,9 @@
         pageSize: 12,
         showPageInput: true,
         showPageJump: true,
+		showCountStat: true,
+		showDataStat: true,
+		showPageStat: true,
         showList: true,
         className: '',
         //skin: 'red',
@@ -144,17 +155,34 @@
         showList: true,
         position: 'left',
         markType: 'en',
-        skin: 'gray',
+        skin: 'black',
         callback: function(pageIndex){
             console.log('p6-callback: ', pageIndex);
 
             p6.paging(pageIndex);
         }
     });
+	
+   var p7 = $.pagination({
+        //element: document.getElementById('p7'),
+        element: 'p7',
+        dataCount: 689,
+        pageIndex: 0,
+        pageStart: 0,
+        showList: true,
+        position: 'left',
+        markType: 'en',
+        skin: 'gray',
+        callback: function(pageIndex){
+            console.log('p7-callback: ', pageIndex);
 
-	var p7 = $.pagination('p7', 389, 0, 10, function(pageIndex, pageSize) {		
-		console.log('p7-callback: ', pageIndex);
+            p7.paging(pageIndex);
+        }
+    });
 
-		p7.paging(pageIndex);
+	var p8 = $.pagination('p8', 389, 0, 10, function(pageIndex, pageSize) {		
+		console.log('p8-callback: ', pageIndex);
+
+		p8.paging(pageIndex);
 	});
 </script>

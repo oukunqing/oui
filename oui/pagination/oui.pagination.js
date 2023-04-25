@@ -183,7 +183,7 @@
             if (enabled) {
                 var text = that.options.markText[textKey], css = className + (className === textKey ? '' : ' ' + textKey);
                 if (noLink) {
-                    arr.push(['<li>', '<a class="none ' + (css || '') + '">', text, '</a>', '</li>'].join(''));
+                    arr.push(['<li>', '<a class="none ' + (css || '') + '" disabled="disabled">', text, '</a>', '</li>'].join(''));
                 } else {
                     arr.push(['<li>', '<a class="link ' + (css || '') + '" value="' + pageIndex + '">', text, '</a>', '</li>'].join(''));
                 }
@@ -195,7 +195,8 @@
             if (enabled) {
                 var op = that.options, maxlength = op.pageCount.toString().length, className = showButton ? ' group' : '',
                     input = '<input type="text" class="text ' + className + '" value="' + (op.pageIndex + op.minuend)
-                        + '" maxlength="' + maxlength + '" t="' + t + '"' + ' style="width:' + op.inputWidth + 'px;" />';
+                        + '" maxlength="' + maxlength + '" t="' + t + '"' + ' style="width:' + op.inputWidth + 'px;"'
+                        + 'autocomplete="off" />';
                 arr.push(input);
                 if (showButton) {
                     arr.push('<button class="btn group">' + op.markText['jump'] + '</button>');
@@ -208,6 +209,16 @@
                 var str = text || '';
                 str = str.indexOf('{0}') < 0 ? '{0}' + str : str;
                 arr.push('<span class="label">' + str.format(count) + '</span>');
+            }
+            return that;
+        },
+        buildPageStat = function(enabled, that, arr, text, count) {
+            if (enabled) {
+                var op = that.options, str = text || '{0}/{1}页', datas = [0, 0];
+                if (op.dataCount > 0) {
+                    datas = [op.pageIndex - op.pageStart + 1, count];
+                }
+                arr.push('<div class="stat ' + getPosition(that, false) + '">' + str.format(datas) + '</div>');
             }
             return that;
         },
@@ -319,7 +330,7 @@
             return that.options.className || defaultClassName;
         },
         getPosition = function (that, isMain) {
-            return isMain ? that.options.position : positions[that.options.position] ? 'right' : 'left';
+            return isMain ? that.options.position : positions[that.options.position] ? 'left' : 'right';
         },
         longPressPaging = function (that, obj, isStop) {
             var op = that.options;
@@ -555,7 +566,9 @@
             showPageInput: false,       //是否显示页码输入框
             showPageJump: false,        //是否显示页码跳转输入框
             showDataCount: true,        //是否显示数据条数
+            showCountStat: false,       //是否显示数据统计(示例：1-10条/共100条)
             showPageCount: true,        //是否显示总页数
+            showPageStat: false,        //是否显示页面统计(示例：1/2页)
             showDataStat: false,        //是否显示数据统计
             showSizeSelect: true,       //是否显示PageSize下拉框
             pageSizeItems: [],          //PageSize下拉框默认选项
@@ -617,6 +630,8 @@
 
             buildDataCount(op.showDataCount, that, html, op.markText['dataCount'], op.dataCount);
 
+            buildDataStat(op.showCountStat, that, html, op.markText['dataStat']);
+
             buildPageSize(op.showSizeSelect, that, html, op.minuend);
 
             if (op.pageIndex != min && op.pageCount > 0) {
@@ -675,7 +690,7 @@
                 if (op.alwaysEllipsis) {
                     buildLinkText(true, that, html, 'NQ', 'ellipsis', true, 'ellipsis');
                 }
-                buildLinkText(op.showFirstLast, that, html, 0, 'last', true, false, className);
+                buildLinkText(op.showFirstLast, that, html, 0, 'last', true, className);
             }
 
             buildPageInput(op.showPageJump, that, html, true, 'j');
@@ -683,6 +698,7 @@
             buildLinkText(op.showReload, that, html, op.pageIndex, 'reload', false, 'text');
 
             buildDataCount(op.showPageCount, that, html, op.markText['pageCount'], op.pageCount);
+            buildPageStat(op.showPageStat, that, html, op.markText['pageStat'], op.pageCount);
 
             html.push('</ul></div>');
 
