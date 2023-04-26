@@ -23,7 +23,8 @@
         minPageSize = 1,                //pageSize最小值
         //默认的每页显示条数选项
         defaultPageSizeItems = [1, 5, 10, 20, 30, 50, 100, 200],
-        defaultInputWidth = 35,         //输入框默认宽度，单位px
+        defaultInputWidth = 35,         //输入框默认宽度，单位：px
+        defaultInputHeight = 22,        //按钮、输入框默认高度，单位：px
         defaultDebounceTime = 50,       //防抖最小时长，单位：毫秒
         defaultLongPressTime = 1024,    //长按最小时长，单位：毫秒
         defaultLongPressInterval = 50,          //长按分页间隔，单位：毫秒
@@ -187,11 +188,13 @@
         },
         buildLinkText = function (enabled, that, arr, pageIndex, textKey, noLink, className) {
             if (enabled) {
-                var text = that.options.markText[textKey], css = className + (className === textKey ? '' : ' ' + textKey);
+                var op = that.options,
+                    text = op.markText[textKey], css = className + (className === textKey ? '' : ' ' + textKey),
+                    height = 'height:' + op.height + 'px;line-height:' + (op.height - 2) + 'px;';
                 if (noLink) {
-                    arr.push(['<li>', '<a class="none ' + (css || '') + '" disabled="disabled">', text, '</a>', '</li>'].join(''));
+                    arr.push(['<li>', '<a class="none ' + (css || '') + ' disabled" disabled="disabled" style="' + height + '">', text, '</a>', '</li>'].join(''));
                 } else {
-                    arr.push(['<li>', '<a class="link ' + (css || '') + '" value="' + pageIndex + '">', text, '</a>', '</li>'].join(''));
+                    arr.push(['<li>', '<a class="link ' + (css || '') + '" value="' + pageIndex + '" style="' + height + '">', text, '</a>', '</li>'].join(''));
                 }
             }
             return that;
@@ -205,13 +208,14 @@
                     w = op.inputWidth,
                     c = op.pageCount.toString().length - 3,
                     width = w > defaultInputWidth ? w : (w + (c > 0 ? c : 0) * 11),
-                    margin = t === 'j' ? 'margin-left:2px;' : '',
+                    height = 'height:' + op.height + 'px;line-height:' + (op.height - 2) + 'px;',
+                    margin = t === 'j' ? 'margin-left:2px;padding-right:5px;' : '',
                     input = '<input type="text" class="text ' + className + '" value="' + (op.pageIndex + op.minuend)
-                        + '" maxlength="' + maxlength + '" t="' + t + '"' + ' style="width:' + width + 'px;' + margin + '"'
+                        + '" maxlength="' + maxlength + '" t="' + t + '"' + ' style="width:' + width + 'px;' + height + margin + '"'
                         + 'autocomplete="off" />';
                 arr.push(input);
                 if (showButton) {
-                    arr.push('<button class="btn group">' + (op.markText['jump'] || op.markText['goto']) + '</button>');
+                    arr.push('<button class="btn group" style="' + height + '">' + (op.markText['jump'] || op.markText['goto']) + '</button>');
                 }
             }
             return that;
@@ -228,9 +232,10 @@
         },
         buildDataCount = function (enabled, that, arr, text, count) {
             if (enabled) {
-                var str = text || '';
+                var str = text || '',
+                    op = that.options;
                 str = str.indexOf('{0}') < 0 ? '{0}' + str : str;
-                arr.push('<span class="label">' + str.format(count) + '</span>');
+                arr.push('<span class="label" style="line-height:' + (op.height - 1) + 'px;">' + str.format(count) + '</span>');
             }
             return that;
         },
@@ -245,11 +250,12 @@
         },
         buildDataStat = function (enabled, that, arr, text) {
             if (enabled) {
-                var str = text || '{0}', datas = [0, 0, 0], stat = getDataStat(that);
+                var str = text || '{0}', datas = [0, 0, 0], stat = getDataStat(that),
+                    op = that.options;
                 if (stat.count > 0) {
                     datas = [stat.min, stat.max, stat.count];
                 }
-                arr.push('<div class="stat ' + getPosition(that, false) + '">' + str.format(datas) + '</div>');
+                arr.push('<div class="stat ' + getPosition(that, false) + '" style="line-height:' + (op.height - 1) + 'px;">' + str.format(datas) + '</div>');
             }
             return that;
         },
@@ -470,9 +476,9 @@
         buildPageSize = function (enabled, that, arr, minuend) {
             var op = that.options,
                 html = [
-                    '<select class="select"',
-                    enabled ? '' : ' style="display:none;"',
-                    '>'
+                    '<select class="select" style="height:', op.height, 'px;',
+                    enabled ? '' : 'display:none;',
+                    '">'
                 ];
             if (!$.isArray(op.pageSizeItems) || $.isEmpty(op.pageSizeItems)) {
                 op.pageSizeItems = defaultPageSizeItems;
@@ -589,10 +595,10 @@
 
             showTextEnable: true,       //是否显示数据/页数文字（包含下面6项内容）
 
-            showDataCount: true,        //是否显示数据条数（位于左边）
-            showPageCount: true,        //是否显示总页数（位于右边）
-            showPageStat: false,        //是否显示页面统计(示例：1/2页)（位于右边）
-            showDataStat: false,        //是否显示数据统计（位于右边）
+            showDataCount: false,        //是否显示数据条数（位于左边）
+            showPageCount: false,        //是否显示总页数（位于右边）
+            showPageStat: true,        //是否显示页面统计(示例：1/2页)（位于右边）
+            showDataStat: true,        //是否显示数据统计（位于右边）
             showPageStatLeft: false,    //是否显示页面统计（位于左边）
             showDataStatLeft: false,    //是否显示数据统计（位于左边）
 
@@ -616,6 +622,7 @@
             className: defaultClassName,            //默认样式名称，可以修改为外置样式
             skin: defaultSkin,                      //样式，若skin=null则不启用内置样式
             inputWidth: defaultInputWidth,          //输入框宽度，默认为50px
+            height: defaultInputHeight,             //高度，默认为22px
             debounce: true,                         //是否启用防抖功能（或者值为number，且大于50即为启用）
             debounceTime: defaultDebounceTime,      //抖动时长，单位：毫秒
             focus: false                            //是否锁定焦点
@@ -682,7 +689,8 @@
             }
 
             if (op.showList) {
-                var c = 0;
+                var c = 0,
+                    h = ' style="height:' + op.height + 'px;line-height:' + (op.height - 2) + 'px;"';
                 for (var i = min; i < max; i++) {
                     var num = i + op.minuend;
                     if (i > op.pageCount || c > op.markCount) {
@@ -692,9 +700,9 @@
                         buildPageInput(op.showPageInput, that, html, false, 'i');
                     }
                     if (i === op.pageIndex) {
-                        html.push('<li><a class="link cur">' + num + '</a></li>');
+                        html.push('<li><a class="link cur"' + h + '>' + num + '</a></li>');
                     } else {
-                        html.push('<li><a class="link num" value="' + i + '">' + num + '</a></li>');
+                        html.push('<li><a class="link num" value="' + i + '"' + h + '>' + num + '</a></li>');
                     }
                     c++;
                 }
