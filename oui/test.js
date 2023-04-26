@@ -1541,6 +1541,22 @@ console.log((32).check(1, 5));
 console.log((32).set(1, 5));
 
 
-var str = 'http://www.bmwzy.com/vod/1/f3aa6d9b-a09f-453e-aa8d-202c9858fb03/c89cacaaf48e46f9';
+var str = '/vod/1/f3aa6d9b-a09f-453e-aa8d-202c9858fb03/c89cacaaf48e46f9';
 var reg = /([\da-f]{8}(\-[\da-f]{4}){3}\-[\da-f]{12})/ig;
 console.log(str.match(reg))
+
+
+
+//用于获取参数名重载
+var getParVal = function(par0, par1, par2) {
+    for(var i = 0; i < arguments.length; i++) {
+        if(typeof arguments[i] !== 'undefined') {
+            return arguments[i];
+        }
+    }
+    return undefined;
+};
+
+var obj = {Id:45};
+
+console.log(getParVal(obj.id, obj.ID, 34));

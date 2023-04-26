@@ -740,6 +740,15 @@
                 }
             }
             return dval;
+        },
+        //用于获取参数名重载
+        getParamValue = function() {
+            for(var i = 0; i < arguments.length; i++) {
+                if(typeof arguments[i] !== 'undefined') {
+                    return arguments[i];
+                }
+            }
+            return undefined;
         };
 
     var counter = 1, debug = isBoolean(isDebug(), true);
@@ -810,6 +819,7 @@
         isDebug: isDebug,
         filterValue: filterValue, keywordOverload: keywordOverload, keyOverload: keywordOverload,
         setValue: setValue, getValue: getValue, isValue: isValue, getParam: getParam,
+        getParamValue: getParamValue, getParVal: getParamValue,
         toGpsString: function (gps, decimalLen) {
             var con = [],
                 len = $.checkNumber(decimalLen, 3, 14) ? decimalLen : 8;

@@ -44,9 +44,12 @@
         pageSize: 12,
         showPageInput: true,
         showPageJump: true,
-		showCountStat: true,
+		showDataStatLeft: true,
+		showPageStatLeft: true,
 		showDataStat: true,
 		showPageStat: true,
+		showDataCount: false,
+		showPageCount: true,
         showList: true,
         className: '',
         //skin: 'red',
@@ -59,7 +62,7 @@
             that.paging(pageIndex);
         },
         useKeyEvent: true,
-        inputWidth: 55,
+        //inputWidth: 55,
         callbackParam: {
             id: 123, prompt: '这是回调参数'
         }
@@ -92,13 +95,18 @@
 
    var p3 = $.pagination({
         element: document.getElementById('p3'),
-        dataCount: 666,
+        dataCount: 66666,
         pageIndex: 0,
         pageStart: 0,
         showList: true,
         position: 'left',
         markType: 'chinese',
         markText: {last:'末页',reload:'刷',jump:'跳一跳', dataCount: '人员'},
+		showPageStat: true,
+		showDataStat: true,
+		showCountStat: true,
+		//不显示数量/页数统计等文字
+		showTextEnable: false,
         skin: 'blue',
         callback: function(pageIndex){
             console.log('p3-callback: ', pageIndex);
