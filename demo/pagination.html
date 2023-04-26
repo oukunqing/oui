@@ -23,7 +23,17 @@
 <div id="p7"></div>
 <br />
 <div id="p8"></div>
+<br />
+<div id="p9"></div>
+<br />
+<div id="p10"></div>
+<br />
+<div id="p11"></div>
 
+<br />
+<div style="background:#666;overflow:hidden;display:block;padding:5px;">
+<div id="p12"></div>
+</div>
 
 </body>
 </html>
@@ -80,9 +90,9 @@
         position: 'right',
         markType: 'symbol',
         showPageInput: true,
-        showPageJump: false,
+        showPageGoto: true,
         skin: 'green',
-        inputWidth: '55px',
+        inputWidth: '35px',
         callback: function(pageIndex){
             console.log('p2-callback: ', pageIndex);
 
@@ -193,4 +203,70 @@
 
 		p8.paging(pageIndex);
 	});
+	
+   var p9 = $.pagination({
+        //element: document.getElementById('p9'),
+        element: 'p9',
+        dataCount: 689,
+        pageIndex: 0,
+        pageStart: 0,
+        showList: false,
+		showPageGoto: true,
+        position: 'left',
+        markType: 'en',
+        skin: 'gray',
+        callback: function(pageIndex){
+            console.log('p9-callback: ', pageIndex);
+
+            p9.paging(pageIndex);
+        }
+    });
+	
+   var p10 = $.pagination({
+        //element: document.getElementById('p10'),
+        element: 'p10',
+        dataCount: 689,
+        pageIndex: 0,
+        pageStart: 0,
+        showList: false,
+		showPageGoto: true,
+        position: 'left',
+        markType: 'en',
+        skin: 'red',
+        callback: function(pageIndex){
+            console.log('p10-callback: ', pageIndex);
+
+            p10.paging(pageIndex);
+        }
+    });
+	
+   var p11 = $.pagination({
+        element: 'p11',
+        dataCount: 689,
+        pageIndex: 0,
+        pageStart: 0,
+        showList: false,
+		showPageGoto: true,
+        skin: 'dark',
+        callback: function(pageIndex){
+            console.log('p11-callback: ', pageIndex);
+
+            p11.paging(pageIndex);
+        }
+    });
+	
+   var p12 = $.pagination({
+        element: 'p12',
+        dataCount: 689,
+        pageIndex: 0,
+        pageStart: 0,
+        showList: false,
+		showPageGoto: true,
+        skin: 'dark',
+        callback: function(pageIndex){
+            console.log('p12-callback: ', pageIndex);
+
+            p12.paging(pageIndex);
+        }
+    });
 </script>

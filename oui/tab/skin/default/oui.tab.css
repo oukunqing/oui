@@ -278,6 +278,7 @@
 .oui-tabs-context-menu .disabled,.oui-tabs-context-menu .disabled:hover {
     color: #999;
     background: #fff;
+    cursor: not-allowed;
 }
 
 .oui-tabs-context-menu .cmenu-sep {

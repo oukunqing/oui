@@ -190,11 +190,14 @@
             if (enabled) {
                 var op = that.options,
                     text = op.markText[textKey], css = className + (className === textKey ? '' : ' ' + textKey),
-                    height = 'height:' + op.height + 'px;line-height:' + (op.height - 2) + 'px;';
+                    ellipsis = textKey === 'ellipsis',
+                    symbol = className.indexOf('symbol') > -1 && 'first,previous,next,last'.indexOf(textKey) > -1 || ellipsis,
+                    height = 'height:' + op.height + 'px;line-height:' + (op.height - (ellipsis ? 0 : 2)) + 'px;',
+                    fs = symbol ? 'font-size:18px;' : '';
                 if (noLink) {
-                    arr.push(['<li>', '<a class="none ' + (css || '') + ' disabled" disabled="disabled" style="' + height + '">', text, '</a>', '</li>'].join(''));
+                    arr.push(['<li>', '<a class="none ' + (css || '') + ' disabled" disabled="disabled" style="' + height + fs + '">', text, '</a>', '</li>'].join(''));
                 } else {
-                    arr.push(['<li>', '<a class="link ' + (css || '') + '" value="' + pageIndex + '" style="' + height + '">', text, '</a>', '</li>'].join(''));
+                    arr.push(['<li>', '<a class="link ' + (css || '') + '" value="' + pageIndex + '" style="' + height + fs + '">', text, '</a>', '</li>'].join(''));
                 }
             }
             return that;

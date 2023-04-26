@@ -42,6 +42,7 @@
 
 .oui-context-menu .cmenu-disabled {
     color: #999;
+    cursor: not-allowed;
 }
 
 .oui-context-menu .cmenu-item .cmenu-link {
@@ -62,6 +63,7 @@
 
 .oui-context-menu .cmenu-disabled:hover {
     background: #fff;
+    cursor: not-allowed;
 }
 
 .oui-context-menu .cmenu-item .cmenu-arrow {
@@ -80,11 +82,13 @@
 
 .oui-context-menu .cmenu-disabled .cmenu-arrow {
     border-left-color: #999;
+    cursor: not-allowed;
 }
 
 .oui-context-menu .disabled,.oui-context-menu .disabled:hover {
     color: #999;
     background: #fff;
+    cursor: not-allowed;
 }
 
 .oui-context-menu .cmenu-sep {
