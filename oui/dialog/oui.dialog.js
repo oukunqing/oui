@@ -4412,11 +4412,30 @@
         },
         title: function (title) {
             var _ = this, p = Util.getParam(_), ctls = p.controls;
-            if (p.none || !ctls.content) {
-                return _;
+            if (p.none || !ctls.title) {
+                return $.isUndefined(title) ? '' : _;
             }
-            var html = ctls.content.innerHTML;
-            return _.update(html, title);
+            if($.isUndefined(title)) {
+                return ctls.title.innerHTML;
+            } else {
+                ctls.title.innerHTML = title;
+            }
+            return _;
+        },
+        content: function (content, title) {
+            var _ = this, p = Util.getParam(_), ctls = p.controls;
+            if (p.none || !ctls.content) {
+                return $.isUndefined(content)? '' : _;
+            }
+            if($.isUndefined(content)) {
+                return ctls.content.innerHTML;
+            } else {
+                ctls.content.innerHTML = content;
+                if(!$.isUndefinedOrNull(title) && ctls.title) {
+                    ctls.title.innerHTML = title;
+                }
+            }
+            return _;
         },
         focus: function (obj) {
             var _ = this, p = Util.getParam(_), buttons = p.buttons;
@@ -4638,6 +4657,20 @@
             var p = Factory.getOptions(id) || {}, dialog = p.dialog;
             if (dialog && !dialog.isClosed()) {
                 dialog.show();
+            }
+            return $;
+        },
+        title: function (id, title) {
+            var dialog = $.dialog.get(id);
+            if(dialog) {
+                return dialog.title(title);
+            }
+            return $;
+        },
+        content: function (id, content, title) {
+            var dialog = $.dialog.get(id);
+            if(dialog) {
+                return dialog.content(content, title);
             }
             return $;
         },
