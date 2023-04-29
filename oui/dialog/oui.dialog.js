@@ -555,7 +555,7 @@
                 var childs = obj.getElementsByTagName('*'),
                     len = childs.length,
                     pass = ['BR', 'IFRAME', 'P', 'FONT'],
-                    tags = ['INPUT', 'A', 'TEXTAREA', 'BUTTON'],
+                    tags = ['INPUT', 'A', 'TEXTAREA', 'BUTTON', 'SELECT'],
                     isText = true,
                     elem, tag, attr;
 
@@ -3264,7 +3264,7 @@
                     pH = parseInt($.getElementStyle(ctls.dialog, 'padding', 0), 10),
                     cH = parseInt($.getElementStyle(ctls.main, 'padding', 0), 10),
                     pdW = parseInt('0' + $.getElementStyle(ctls.content, 'padding'), 10),
-                    btnW = !ctls.head ? ctls.btnPanel.offsetWidth + 5 : 0,
+                    btnW = !ctls.head && ctls.btnPanel ? ctls.btnPanel.offsetWidth + 5 : 0,
                     s = {
                         width: ctls.content.offsetWidth + pH * 2 + cH * 2 + pdW + btnW,
                         //height: ctls.content.offsetHeight + pH * 2 + cH * 2,

@@ -175,7 +175,11 @@
 
             return _;
         },
-        interval: function(interval) {
+        interval: function(func, interval) {
+            if($.isNumber(func)) {
+                interval = func;
+                func = null;
+            }
             var _ = this;
 
             if(!$.isNumber(interval) || interval <= 0) {
