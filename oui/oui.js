@@ -4301,6 +4301,12 @@
                 document.msFullScreen
             );
         },
+        isSubWindow = function() {
+            return window.location !== top.window.location;
+        },
+        isTopWindow = function() {
+            return window.location === top.window.location;
+        },
         setImgCenter = function (img) {
             img = $.toElement(img);
             if (!$.isElement(img)) {
@@ -4479,7 +4485,9 @@
         buildOptions: buildOptions,
         fullScreen: fullScreen,
         exitFullScreen: exitFullScreen,
-        isFullScreen: isFullScreen
+        isFullScreen: isFullScreen,
+        isSubWindow: isSubWindow,
+        isTopWindow: isTopWindow
     }, '$');
 
 }(OUI);
@@ -5505,7 +5513,7 @@
         return $;
     },
     closeParentMenu = function (moduleName, funcName) {
-        if (window.location !== top.window.location) {
+        if ($.isSubWindow()) {
             try {
                 var func = typeof parent.$[moduleName] !== 'undefined' ? parent.$[moduleName][funcName] : null;
                 if ($.isFunction(func)) {

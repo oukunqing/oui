@@ -3259,11 +3259,16 @@
                 var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls;
                 if (p.none) { return this; }
 
-                var pH = parseInt($.getElementStyle(ctls.dialog, 'padding', 0), 10),
+                var ismsg = opt.type === 'message',
+                    cs = ismsg ? $.getContentSize(ctls.content.innerHTML) : {},
+                    pH = parseInt($.getElementStyle(ctls.dialog, 'padding', 0), 10),
                     cH = parseInt($.getElementStyle(ctls.main, 'padding', 0), 10),
+                    pdW = parseInt('0' + $.getElementStyle(ctls.content, 'padding'), 10),
+                    btnW = !ctls.head ? ctls.btnPanel.offsetWidth + 5 : 0,
                     s = {
-                        width: ctls.content.offsetWidth + pH * 2 + cH * 2,
-                        height: ctls.content.offsetHeight + pH * 2 + cH * 2
+                        width: ctls.content.offsetWidth + pH * 2 + cH * 2 + pdW + btnW,
+                        //height: ctls.content.offsetHeight + pH * 2 + cH * 2,
+                        height: (ismsg ? cs.height : ctls.content.offsetHeight) + pH * 2 + cH * 2
                     };
 
                 if (ctls.head) {
@@ -3274,8 +3279,13 @@
                     s.height += ctls.foot.offsetHeight;
                 }
 
+                if (ismsg) {
+                    ctls.body.style.overflow = 'hidden';
+                    ctls.content.style.overflow = 'hidden';
+                }
+
                 //增加20px高度留白
-                s.height += 20;
+                s.height += ismsg ? 10 : 20;
 
                 if (isLimit) {
                     var mw = parseInt('0' + opt.minWidth, 10),
