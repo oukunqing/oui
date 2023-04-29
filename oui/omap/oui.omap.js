@@ -182,7 +182,7 @@
             var img = document.createElement('IMG');
             img.className = 'oui-omap-img oui-omap-map oui-omap-unselect';
             img.style.cssText = 'position:absolute;margin:0;padding:0;';
-            img.src = _.opt.img || _.opt.pic;
+            img.src = (_.opt.img || _.opt.pic || '').cleanSlash();
             _.box.appendChild(img);
             _.img = img;
 

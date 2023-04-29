@@ -39,6 +39,7 @@
     <button onclick="win();">Win</button>
     <button onclick="form2();">Form</button>
     <button onclick="buttons();">Button</button>
+    <button onclick="escClose();">EscClose</button>
     <br />
     <button onclick="iframe();">Iframe</button>
     <button onclick="load();">Load</button>
@@ -486,6 +487,12 @@ function buttons() {
         console.log('set focus: txtKeywords');
         win.setOptions('icon', 'success').update().focus('txtKeywords');
     }, 3000);
+}
+
+function escClose() {
+	$.dialog.win('EscClose', 'Esc', {
+		escClose: true
+	});
 }
 
 function win(){

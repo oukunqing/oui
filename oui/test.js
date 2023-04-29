@@ -1560,3 +1560,7 @@ var getParVal = function(par0, par1, par2) {
 var obj = {Id:45};
 
 console.log(getParVal(obj.id, obj.ID, 34));
+
+var path = 'Https:///3gvs.net////pic///abc/123.jpg?url=HTTP:///3gvs.net/abc//1.jpg';
+
+console.log(path.replace(/[\/]{2,}/g, '/').replace(/(http:\/|https:\/)/ig, '$1/'));

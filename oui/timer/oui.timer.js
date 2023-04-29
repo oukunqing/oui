@@ -90,6 +90,9 @@
 
     Timer.prototype = {
         initial: function (opt) {
+            if($.isNumber(opt) && opt > 0) {
+                opt = { interval: opt };
+            }
             //频率参数有变化时
             if (opt.interval !== this.cache.options.interval) {
                 $.extend(this.cache.options, opt);
@@ -150,25 +153,36 @@
             var _ = this;
             _.cache.paused = action ? true : false;
             if ($.isFunction(func)) {
-                func();
+                func(parseInt(_.cache.number, 10), _.cache.paused);
             }
             return _;
         },
         reset: function (func, options) {
             var _ = this;
+            if($.isNumber(options) && options > 0) {
+                options = { interval: options };
+            }
 
             var opt = $.extend({
                 interval: null
             }, options);
 
-            _.stop();
-
             if ($.isNumber(opt.interval) && opt.interval > 0) {
-                _.options.interval = opt.interval;
+                _.cache.options.interval = opt.interval;
             }
             _.cache.number = _.cache.options.interval;
+            _.cache.paused ? _.pause(func, true) : _.start(func);
 
-            _.start(func);
+            return _;
+        },
+        interval: function(interval) {
+            var _ = this;
+
+            if(!$.isNumber(interval) || interval <= 0) {
+                return _;
+            }
+            _.cache.options.interval = interval;
+            _.cache.number = _.cache.options.interval;
 
             return _;
         }
@@ -192,6 +206,9 @@
         },
         reset: function (id, options, func) {
             return Factory.timerAction(id, 'reset', options, func);
+        },
+        interval: function (id, interval) {
+            return Factory.timerAction(id, 'interval', interval);
         }
     });
 

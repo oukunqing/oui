@@ -749,6 +749,12 @@
                 }
             }
             return undefined;
+        },
+        cleanSlash = function(urlpath) {
+            if(!urlpath || urlpath.indexOf('/') < 0) {
+                return urlpath;
+            }
+            return urlpath.replace(/[\/]{2,}/g, '/').replace(/(http:\/|https:\/)/ig, '$1/');
         };
 
     var counter = 1, debug = isBoolean(isDebug(), true);
@@ -819,7 +825,7 @@
         isDebug: isDebug,
         filterValue: filterValue, keywordOverload: keywordOverload, keyOverload: keywordOverload,
         setValue: setValue, getValue: getValue, isValue: isValue, getParam: getParam,
-        getParamValue: getParamValue, getParVal: getParamValue,
+        getParamValue: getParamValue, getParVal: getParamValue, cleanSlash: cleanSlash,
         toGpsString: function (gps, decimalLen) {
             var con = [],
                 len = $.checkNumber(decimalLen, 3, 14) ? decimalLen : 8;
@@ -1722,6 +1728,9 @@
                 s1 = s1.toString(), s2 = s2.toString();
             }
             return s1 > s2 ? 1 : s1 < s2 ? -1 : 0;
+        },
+        cleanSlash: function() {
+            return $.cleanSlash(this);
         },
         setQueryString: function (data, value, nocache) {
             return $.setQueryString(this, data, value, nocache);

@@ -171,7 +171,7 @@
             }
             img.className = 'oui-picbox-img oui-picbox-unselect';
             img.style.cssText = 'position:absolute;border:none;margin:0;padding:0;';
-            img.src = picurl;
+            img.src = picurl.cleanSlash();
             _.box.appendChild(img);
             _.img = img;
 
