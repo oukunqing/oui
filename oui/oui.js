@@ -3832,12 +3832,12 @@
             }
             return scrollPos;
         },
-        getKeyCode = function (e) {
-            var e = e || window.event;
+        getKeyCode = function (ev) {
+            var e = ev || window.event;
             return e.keyCode || e.which || e.charCode;
         },
-        getKeyChar = function (e) {
-            var keyCode = $.isNumber(e) ? e : getKeyCode(e);
+        getKeyChar = function (ev) {
+            var keyCode = $.isNumber(ev) ? ev : getKeyCode(ev);
             return String.fromCharCode(keyCode).toUpperCase();
         },
         filterHtmlCode = function (str) {
@@ -4826,16 +4826,14 @@
             return this.getCheckedValues(selector, options);
         },
         getCheckedText: function (elem) {
-            elem = $.toElement(elem);
-            if (!$.isElement(elem)) {
+            if (!$.isElement(elem = $.toElement(elem))) {
                 return '';
             }
             return obj.options[obj.selectedIndex].text;
         },
         getTextCursorPosition: function (elem) {
             try {
-                elem = $.toElement(elem);
-                if (!$.isElement(elem)) {
+                if (!$.isElement(elem = $.toElement(elem))) {
                     return -1;
                 }
                 if (elem.selectionStart) {
@@ -4870,8 +4868,7 @@
             return this;
         },
         setTextCursorPosition: function (elem, pos) {
-            elem = $.toElement(elem);
-            if (!$.isElement(elem)) {
+            if (!$.isElement(elem = $.toElement(elem))) {
                 return false;
             }
             var val = elem.value, len = val.length;
@@ -4887,8 +4884,7 @@
             return this;
         },
         getSelectedText: function (elem) {
-            elem = $.toElement(elem);
-            if (!$.isElement(elem)) {
+            if (!$.isElement(elem = $.toElement(elem))) {
                 return '';
             }
             if (elem.selectionStart || elem.selectionStart === '0') {
@@ -4899,15 +4895,111 @@
             }
             return '';
         },
-        setInputFormat: function (elements, options) {
-            var elems = [];
-            if (!isArrayLike(elements) || !isArray(elements)) {
+        checkInputKey: function (ev, codes, shift) {
+            var e = ev || window.event,
+                keyCode = $.getKeyCode(e);
 
+            //console.log('checkInputKey: ',keyCode, codes, shift);
+
+            //不允许shift键的情况下，只允许 shift + tab 组合键
+            if (!shift && e.shiftKey && keyCode !== 9) {
+                return false;
+            } else {
+                return (codes || []).indexOf(keyCode) >= 0;
+            }
+        },
+        //设置输入框内容格式
+        //禁止粘贴、禁止输入 '=,-/\ shift 以及 空格
+        setInputFormat: function (elements, options) {
+            var elems = [], elem;
+            if ($.isArrayLike(elements) || $.isArray(elements)) {
+                elems = elements;
+            } else if ($.isElement(elements)) {
+                elems = [elements];
+            } else if ($.isString(elements, true)) {
+                elems = [$.toElement(elements)];
+            }
+            if (!$.isArrayLike(elems) && !$.isArray(elems)) {
+                return this;
             }
 
+            var opt = $.extend({
+                shift: true,
+                paste: false,
+                minus: false,
+                dot: false,
+                types: ['char', 'number', 'control', 'symbol'],
+                codes: []
+            }, options), i, j;
 
-            //TODO:
 
+            var all = $.isNullOrUndefined(opt.types) || opt.types.length <= 0,
+                keys = [
+                    8,      // backspace
+                    9,      // tab
+                    13,     // enter
+                    108,    // enter
+                    37,     // left arrow
+                    38,     // up arrow
+                    39,     // right arrow
+                    40,     // down arrow
+                    46,     // delete
+                ].concat(opt.codes || []);
+
+            if (opt.minus) {
+                keys = keys.concat([109, 189]); //109是小键盘中的减号-
+            }
+            if (opt.dot) {
+                keys = keys.concat([110, 190]); //110是小键盘中的点号.
+            }
+
+            // F1-F12功能键
+            for (j = 112; j <= 123; j++) {
+                keys.push(j);
+            }
+
+            //console.log('setInputFormat: ', opt, ', all: ', all, ', keys: ', keys);
+
+            if (all) {
+                return this;
+            }
+
+            for (i = 0; i < opt.types.length; i++) {
+                var type = (opt.types[i] || '').toLowerCase();
+                if (type === 'char') {
+                    // A-Z 键
+                    for (j = 65; j <= 90; j++) {
+                        keys.push(j);
+                    }
+                } else if (type === 'number') {
+                    // 0-9键
+                    keys = keys.concat([48, 49, 50, 51, 52, 53, 54, 55, 56, 57]);
+                    // 0-9键（小键盘）
+                    keys = keys.concat([96, 97, 98, 99, 100, 101, 102, 103, 104, 105]);
+                } else if (type === 'control') {
+                    // ;: =+ ,< -_ .> /? `~
+                    keys = keys.concat([186, 187, 188, 189, 190, 191, 192]);
+                    // [{ \| ]} '"
+                    keys = keys.concat([219, 220, 221, 222]);
+                } else if (type === 'symbol') {
+                    // * + - . / (小键盘)  * + - . /
+                    keys = keys.concat([106, 107, 109, 110, 111, 56, 187, 189, 190, 191]);
+                }
+            }
+
+            for (i = 0; i < elems.length; i++) {
+                if (!$.isElement(elem = elems[i])) {
+                    continue;
+                }
+                elem.onkeydown = function(ev) {
+                    return $.checkInputKey(ev, keys, opt.shift);
+                };
+                if (!opt.paste) {
+                    elem.onpaste = function() {
+                        return false;
+                    };
+                }
+            }
             return this;
         },
         getElementValue: function (elements, defaultValue, attributeName, func) {
@@ -4918,10 +5010,10 @@
                 isAttr = $.isString(attributeName),
                 arr = [],
                 len = elems.length,
-                val = defaultValue;
+                val = defaultValue,
+                elem;
             for (var i = 0; i < len; i++) {
-                var elem = $.toElement(elems[i]);
-                if ($.isElement(elem)) {
+                if ($.isElement(elem = $.toElement(elems[i]))) {
                     val = (isAttr ? elem.getAttribute(attributeName) : elem.value) || defaultValue;
                     arr.push(val);
                 }
@@ -4949,10 +5041,10 @@
             var elems = ($.isArray(elements) || $.isArrayLike(elements)) ? elements : [elements],
                 isAttr = $.isString(attributeName),
                 len = elems.length,
-                vals = !$.isArray(values) ? [values] : values;
+                vals = !$.isArray(values) ? [values] : values,
+                elem;
             for (var i = 0; i < len; i++) {
-                var elem = $.toElement(elems[i]);
-                if ($.isElement(elem)) {
+                if ($.isElement(elem = $.toElement(elems[i]))) {
                     var val = $.isUndefined(vals[i]) ? (sameValue ? vals[0] : '') : vals[i];
                     $.setElementAttribute(elem, val, attributeName);
                 }
@@ -4963,10 +5055,10 @@
         insertElementValue: function (elements, values, pos, sameValue, append) {
             var noPos = !$.isNumber(pos),
                 elems = ($.isArray(elements) || $.isArrayLike(elements)) ? elements : [elements],
-                vals = !$.isArray(values) ? [values] : values;
+                vals = !$.isArray(values) ? [values] : values,
+                elem;
             for (var i = 0, c = elems.length; i < c; i++) {
-                var elem = $.toElement(elems[i]);
-                if ($.isElement(elem)) {
+                if ($.isElement(elem = $.toElement(elems[i]))) {
                     var val = $.isUndefined(vals[i]) ? (sameValue ? vals[0] : '') : vals[i],
                         curVal = elem.value,
                         c = 1;
@@ -5015,10 +5107,9 @@
         },
         //还原输入框原始值，原始值保存在输入框 自定义属性 old-value 中
         restoreValue: function (elements) {
-            var elems = $.isArray(elements) ? elements : [elements];
+            var elems = $.isArray(elements) ? elements : [elements], elem;
             for (var i = 0; i < elems.length; i++) {
-                var elem = $.toElement(elems[i]);
-                if ($.isElement(elem)) {
+                if ($.isElement(elem = $.toElement(elems[i]))) {
                     elem.value = $.isValue(elem.getAttribute('old-value'), '');
                 }
             }
@@ -5506,16 +5597,14 @@
 // oui.dialog
 !function ($) {
     var callParentFunc = function (funcName, param) {
-        if (window.location !== top.window.location) {
+        if ($.isSubWindow()) {
             try {
                 var func = parent.$.dialog[funcName],
                     id = $.getQueryString(location.href, ['dialog_id', 'dialogid']);
                 if ($.isFunction(func) && !$.isUndefined(id)) {
                     return func(id, param), this;
                 }
-            } catch (e) {
-                console.log(funcName, e);
-            }
+            } catch (e) {}
         }
         return $;
     },
@@ -5531,18 +5620,17 @@
                 }
                 return this;
             } catch (e) {}
-        }
-        
+        }        
         return $;
     };
     $.extend($, {
         //通过子窗口关闭父窗口对话框(oui.dialog)
         closeParentDialog: function (param) {
-            return callParentFunc('closeParent', param);
+            return callParentFunc('closeParentDialog', param);
         },
         //根据子窗口内容重置父空口对话框(oui.dialog)大小
         resizeParentDialog: function (param) {
-            return callParentFunc('resizeParent', param);
+            return callParentFunc('resizeParentDialog', param);
         },
         //关闭父窗口可能出现的Tab(oui.tab)标签的右键菜单
         hideParentTabMenu: function () {

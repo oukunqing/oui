@@ -1570,3 +1570,16 @@ console.log((5 || 6) + 'KV');
 console.log(5 || 6 + 'KV');
 
 console.log('' || 0 ? true : false);
+
+
+function toVal(val) {
+    return 'toVal' + val;
+}
+
+var list = [188, 187, 220];
+
+console.log(list.indexOf(188));
+
+list = list.concat([123,134]);
+
+console.log(list);
