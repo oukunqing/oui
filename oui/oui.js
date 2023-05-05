@@ -2691,8 +2691,7 @@
                 form.tagName === 'FORM';
         },
         isDisplay = function (elem, recursion) {
-            elem = toElement(elem);
-            if (!isElement(elem)) {
+            if (!isElement(elem = toElement(elem))) {
                 return false;
             }
             if (!$.isBoolean(recursion, true)) {
@@ -3088,8 +3087,7 @@
             return getCssAttrSize(elem, $.extend({}, options, { attr: 'border' }));
         },
         getOffsetSize = function (elem, basic) {
-            elem = $.toElement(elem);
-            if (!isElement(elem)) {
+            if (!isElement(elem = $.toElement(elem))) {
                 return { width: 0, height: 0, top: 0, left: 0 };
             }
             var par = {
@@ -3150,8 +3148,7 @@
             return $.extend(par, { left: left, top: top });
         },
         getClientSize = function (elem) {
-            elem = $.toElement(elem);
-            return isElement(elem) ? { width: elem.clientWidth, height: elem.clientHeight } : { width: 0, height: 0 };
+            return isElement(elem = $.toElement(elem)) ? { width: elem.clientWidth, height: elem.clientHeight } : { width: 0, height: 0 };
         },
         getOuterSize = function (elem) {
             var os = getOffsetSize(elem, true),
@@ -3164,8 +3161,7 @@
             return { width: cs.width - ps.width, height: cs.height - ps.height };
         },
         getScrollSize = function (elem) {
-            elem = $.toElement(elem);
-            if (isElement(elem)) {
+            if (isElement(elem = $.toElement(elem))) {
                 return {
                     left: elem.scrollLeft, width: elem.scrollWidth, top: elem.scrollTop, height: elem.scrollHeight,
                 };
@@ -3173,9 +3169,8 @@
             return { left: 0, top: 0, width: 0, height: 0 };
         },
         getElementSize = function (elem, basic) {
-            elem = $.toElement(elem);
             var ns = { left: 0, top: 0, width: 0, height: 0 };
-            if (!$.isElement(elem)) {
+            if (!$.isElement(elem = $.toElement(elem))) {
                 return {
                     width: 0, height: 0, totalWidth: 0, totalHeight: 0,
                     offsetWidth: 0, offsetHeight: 0, clientWidth: 0, clientHeight: 0,
@@ -3270,8 +3265,7 @@
             return arr;
         },
         getAttribute = function (elem, attributes, defaultValue) {
-            elem = $.toElement(elem);
-            if ($.isElement(elem)) {
+            if ($.isElement(elem = $.toElement(elem))) {
                 var val = '', keys = [];
                 if ($.isArray(attributes)) {
                     keys = attributes;
@@ -3678,8 +3672,7 @@
         //可以作为快捷键
         addKeyListener = function (elem, evName, keyCode, func, isShiftKey) {
             if (!$.isDocument(elem)) {
-                elem = $.toElement(elem);
-                if (!$.isElement(elem)) {
+                if (!$.isElement(elem = $.toElement(elem))) {
                     return false;
                 }
             }
@@ -3714,8 +3707,7 @@
         //键盘或鼠标连击事件监听
         addHitListener = function (elem, evName, keyCode, func, timout, times, isShiftKey) {
             if (!$.isDocument(elem)) {
-                elem = $.toElement(elem);
-                if (!$.isElement(elem)) {
+                if (!$.isElement(elem = $.toElement(elem))) {
                     return false;
                 }
             }
@@ -3782,8 +3774,7 @@
             return $.addEventListener(elem, evName, callback), this;
         },
         disableEvent = function (elem, evName, func) {
-            elem = $.toElement(elem);
-            if ($.isElement(elem) && $.isString(evName, true)) {
+            if ($.isElement(elem = $.toElement(elem)) && $.isString(evName, true)) {
                 if (!evName.startsWith('on')) {
                     evName = 'on' + evName;
                 }
@@ -3896,8 +3887,7 @@
             return false;
         },
         isOnElement = function (elem, ev) {
-            elem = toElement(elem);
-            if (!isElement(elem)) {
+            if (!isElement(elem = toElement(elem))) {
                 return false;
             }
             var pos = ev.fromElement ? getEventPosition(ev) : ev,
@@ -3919,8 +3909,7 @@
             return false;
         },
         changeLink = function (aTag, url) {
-            aTag = toElement(aTag);
-            if ($.isElement(aTag) && aTag.tagName === 'A' && $.isString(url)) {
+            if ($.isElement(aTag = toElement(aTag)) && aTag.tagName === 'A' && $.isString(url)) {
                 aTag.setAttribute('href', url);
             }
             return $;
@@ -3972,8 +3961,7 @@
             return size(elem, 'height', val);
         },
         toggleDisplay = function (elem, options, func) {
-            elem = $.toElement(elem);
-            if (!$.isElement(elem)) {
+            if (!$.isElement(elem = $.toElement(elem))) {
                 return false;
             }
             if ($.isBoolean(options)) {
@@ -4148,8 +4136,7 @@
         },
         getImgRealSize = function (img, callback) {
             var w = 0, h = 0;
-            img = $.toElement(img);
-            if (!$.isElement(img)) {
+            if (!$.isElement(img = $.toElement(img))) {
                 return { width: w, height: h };
             }
             if (!$.isFunction(callback)) {
@@ -4176,16 +4163,14 @@
             return { width: w, height: h };
         },
         fillOption = function (elem, value, text) {
-            elem = $.toElement(elem);
-            if (!elem.tagName === 'SELECT') {
+            if (!$.isElement(elem = $.toElement(elem)) || !elem.tagName === 'SELECT') {
                 return this;
             }
             elem.options.add(new Option($.isValue(text, value), value));
             return this;
         },
-        fillOptions = function (elem, list, minVal, maxVal, stepVal, valUnit) {
-            elem = $.toElement(elem);
-            if (!elem.tagName === 'SELECT') {
+        fillOptions = function (elem, list, minVal, maxVal, stepVal, curVal, valUnit) {
+            if (!$.isElement(elem = $.toElement(elem)) || !elem.tagName === 'SELECT') {
                 return this;
             }
             if ($.isNumber(list)) {
@@ -4194,6 +4179,11 @@
                 maxVal = minVal;
                 minVal = list;
                 list = null;
+            }
+            //如果是数组参数，则curVal和valUnit参数位置前移
+            else if ($.isArray(list) && $.isUndefined(curVal)) {
+                curVal = minVal;
+                valUnit = maxVal;
             }
             if ($.isNumber(minVal) && $.isNumber(maxVal)) {
                 stepVal = stepVal || 1;
@@ -4206,16 +4196,18 @@
                 var dr = list[i], val = '', txt = '';
                 if ($.isArray(dr)) {
                     val = dr[0];
-                    txt = $.isValue(dr[1], dr[0]);
+                    txt = $.isNullOrUndefined(dr[1]) ? dr[0] + valUnit : dr[1];
                 } else if ($.isObject(dr)) {
                     val = dr.value || dr.val;
                     txt = dr.text || dr.txt;
                 } else {
                     val = dr;
-                    txt = dr;
+                    txt = dr + valUnit;
                 }
-                //new Option(text, value);
                 elem.options.add(new Option(txt, val));
+            }
+            if (!$.isNullOrUndefined(curVal)) {
+                elem.value = curVal;
             }
             return this;
         },
@@ -4307,9 +4299,23 @@
         isTopWindow = function() {
             return window.location === top.window.location;
         },
+        setSelectValue = function(elem, value, append, text) {
+            if (!$.isElement(elem = $.toElement(elem))) {
+                return this;
+            }
+            elem.value = value;
+
+            if (append) {
+                if (elem.value === value.toString()) {
+                    return this;
+                }
+                elem.options.add(new Option(text || value, value));
+                elem.value = value;
+            }
+            return this;
+        },
         setImgCenter = function (img) {
-            img = $.toElement(img);
-            if (!$.isElement(img)) {
+            if (!$.isElement(img = $.toElement(img))) {
                 return false;
             }
             var parent = img.parentNode;
@@ -4487,7 +4493,8 @@
         exitFullScreen: exitFullScreen,
         isFullScreen: isFullScreen,
         isSubWindow: isSubWindow,
-        isTopWindow: isTopWindow
+        isTopWindow: isTopWindow,
+        setSelectValue: setSelectValue
     }, '$');
 
 }(OUI);
