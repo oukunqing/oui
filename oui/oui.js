@@ -1813,6 +1813,9 @@
         checkFilePath: function () {
             return $.checkFilePath(this);
         },
+        checkPicPath: function() {
+            return $.checkFilePath(this);
+        },
         isEvenLen: function () {
             var s = this.trim(), len = s.length;
             if (len % 2 !== 0) {
@@ -2744,29 +2747,36 @@
             return '';
         },
         getFileName = function (filePath, withoutExtension) {
-            filePath = filePath || '';
-            if (!filePath) {
+            if (!filePath || typeof filePath !== 'string') {
                 return '';
             }
-            filePath = filePath.replace(/(\\)/g, '/');
-
-            var path = filePath.split('?')[0], p = path.lastIndexOf('/');
-            var name = p >= 0 ? path.substr(p + 1) : path, pos = name.lastIndexOf('.');
-            if (name.toLowerCase().endWith('.tar.gz')) {
-                pos = name.length - '.tar.gz'.length;
+            var path = filePath.replace(/(\\)/g, '/').split('?')[0],
+                p = path.lastIndexOf('/'),
+                name = p >= 0 ? path.substr(p + 1) : path;
+            
+            if (withoutExtension) {
+                var pattern = /(\.tar)\.[a-z0-9]{0,}$/i;
+                if (pattern.test(name)) {
+                    return name.replace(pattern, '');
+                }
+                var pos = name.lastIndexOf('.');
+                return pos >= 0 ? name.substr(0, pos) : name;
             }
-            return pos >= 0 && withoutExtension ? name.substr(0, pos) : name;
+            return name;
         },
         getExtension = function (filePath) {
-            filePath = filePath || '';
-            if (!filePath) {
+            var name = getFileName(filePath, false);
+            if (!name) {
                 return '';
             }
-            if (filePath.toLowerCase().endWith('.tar.gz')) {
-                return '.tar.gz';
+            var pos = name.lastIndexOf('.'), pattern = /((\.tar)\.[a-z0-9]{0,})$/i;
+            if (pos < 0) {
+                return '';
             }
-            var name = filePath.split('?')[0], pos = name.lastIndexOf('.');
-            return pos >= 0 ? name.substr(pos).toLowerCase() : '';
+            if (pattern.test(name)) {
+                return name.match(pattern)[0];
+            }
+            return name.substr(pos);            
         },
         //获取远程文件大小(不能跨域)
         getFileSize = function (fileUrl, callback) {
@@ -4895,7 +4905,7 @@
             }
             return '';
         },
-        checkInputKey: function (ev, codes, shift) {
+        checkInputKey: function (ev, codes, excepts, shift) {
             var e = ev || window.event,
                 keyCode = $.getKeyCode(e);
 
@@ -4905,13 +4915,13 @@
             if (!shift && e.shiftKey && keyCode !== 9) {
                 return false;
             } else {
-                return (codes || []).indexOf(keyCode) >= 0;
+                return (codes || []).indexOf(keyCode) >= 0 && (excepts || []).indexOf(keyCode) < 0;
             }
         },
-        //设置输入框内容格式
-        //禁止粘贴、禁止输入 '=,-/\ shift 以及 空格
+        // 设置输入框内容格式
+        // 需要设置输入格式的文本框，默认情况下是不允许空格和特殊字符的
         setInputFormat: function (elements, options) {
-            var elems = [], elem;
+            var elems = [], elem, keyTypes = ['char', 'number', 'control', 'symbol'];
             if ($.isArrayLike(elements) || $.isArray(elements)) {
                 elems = elements;
             } else if ($.isElement(elements)) {
@@ -4924,16 +4934,18 @@
             }
 
             var opt = $.extend({
-                shift: true,
-                paste: false,
-                minus: false,
-                dot: false,
-                types: ['char', 'number', 'control', 'symbol'],
-                codes: []
+                shift: true,    //是否允许shift键
+                space: false,   //是否允许空格
+                paste: false,   //是否允许粘贴
+                minus: false,   //是否允许减号（负号）
+                dot: false,     //是否允许小数点号
+                types: keyTypes,
+                codes: [],
+                excepts: []
             }, options), i, j;
 
-
-            var all = $.isNullOrUndefined(opt.types) || opt.types.length <= 0,
+            var types = $.isArray(opt.types) && opt.types.length > 0 ? opt.types : keyTypes,
+                excepts = $.isArray(opt.excepts) && opt.excepts.length > 0 ? opt.excepts : [],
                 keys = [
                     8,      // backspace
                     9,      // tab
@@ -4946,26 +4958,17 @@
                     46,     // delete
                 ].concat(opt.codes || []);
 
-            if (opt.minus) {
-                keys = keys.concat([109, 189]); //109是小键盘中的减号-
-            }
-            if (opt.dot) {
-                keys = keys.concat([110, 190]); //110是小键盘中的点号.
-            }
+            keys = opt.space ? keys.concat([32]) : keys;
+            keys = !opt.minus ? keys : keys.concat([109, 189]); //109是小键盘中的减号-
+            keys = !opt.dot ? keys : keys.concat([110, 190]); //110是小键盘中的点号.
 
             // F1-F12功能键
-            for (j = 112; j <= 123; j++) {
-                keys.push(j);
-            }
+            keys = keys.concat([112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123]);
 
             //console.log('setInputFormat: ', opt, ', all: ', all, ', keys: ', keys);
 
-            if (all) {
-                return this;
-            }
-
-            for (i = 0; i < opt.types.length; i++) {
-                var type = (opt.types[i] || '').toLowerCase();
+            for (i = 0; i < types.length; i++) {
+                var type = (types[i] || '').toLowerCase();
                 if (type === 'char') {
                     // A-Z 键
                     for (j = 65; j <= 90; j++) {
@@ -4978,7 +4981,7 @@
                     keys = keys.concat([96, 97, 98, 99, 100, 101, 102, 103, 104, 105]);
                 } else if (type === 'control') {
                     // ;: =+ ,< -_ .> /? `~
-                    keys = keys.concat([186, 187, 188, 189, 190, 191, 192]);
+                    keys = keys.concat([opt.space ? 32 : 0, 186, 187, 188, 189, 190, 191, 192]);
                     // [{ \| ]} '"
                     keys = keys.concat([219, 220, 221, 222]);
                 } else if (type === 'symbol') {
@@ -4992,7 +4995,7 @@
                     continue;
                 }
                 elem.onkeydown = function(ev) {
-                    return $.checkInputKey(ev, keys, opt.shift);
+                    return $.checkInputKey(ev, keys, excepts, opt.shift);
                 };
                 if (!opt.paste) {
                     elem.onpaste = function() {
@@ -5000,6 +5003,8 @@
                     };
                 }
             }
+            console.log('setInputFormat: ');
+
             return this;
         },
         getElementValue: function (elements, defaultValue, attributeName, func) {

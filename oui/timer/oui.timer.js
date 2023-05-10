@@ -17,11 +17,19 @@
 
     var Factory = {
         buildTimer: function (options) {
-            var cache = Factory.getCache(options.id);
+            var opt = $.extend({
+                id: 'oui-timer'
+            }, options);
+
+            if ($.isFunction(options)) {
+                opt.callback = options;
+            }
+            
+            var cache = Factory.getCache(opt.id);
             if (cache !== null) {
-                return cache.timer.initial(options);
+                return cache.timer.initial($.extend(cache.options, opt));
             } else {
-                return new Timer(options);
+                return new Timer(opt);
             }
         },
         timerAction: function (id, action, options, func) {
@@ -67,7 +75,7 @@
 
     function Timer(options) {
         var opt = $.extend({
-            id: '',
+            id: 'oui-timer',
             interval: 60,
             callback: null
         }, options);

@@ -35,6 +35,11 @@
 <div id="p12"></div>
 </div>
 
+<br />
+<div style="background:#666;overflow:hidden;display:block;padding:5px;">
+<div id="p13"></div>
+</div>
+
 </body>
 </html>
 <script type="text/javascript">
@@ -267,6 +272,22 @@
             console.log('p12-callback: ', pageIndex);
 
             p12.paging(pageIndex);
+        }
+    });
+	
+   var p13 = $.pagination({
+        element: 'p13',
+        dataCount: 689,
+        pageIndex: 0,
+        pageStart: 0,
+        showList: false,
+		showPageGoto: true,
+        skin: 'dark',
+		textColor: '#fff',
+        callback: function(pageIndex){
+            console.log('p13-callback: ', pageIndex);
+
+            p13.paging(pageIndex);
         }
     });
 </script>

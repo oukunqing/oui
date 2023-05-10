@@ -9,6 +9,7 @@
 */
 
 !function ($) {
+    'use strict';
 
     var customAttrs = {
         DATE_FORMAT: "date-format,dateformat",
@@ -1305,4 +1306,119 @@
         }
     });
 
+}(OUI);
+
+!function ($) {
+    'use strict';
+
+    var Cache = {
+        debounces: {}
+    };
+
+    var Factory = {
+        buildDebounce: function(options, callback) {
+            if ($.isFunction(options)) {
+                callback = options;
+                options = {};
+            }
+            var opt = $.extend({ id: 'debounce' }, options);
+            if ($.isFunction(callback)) {
+                opt.callback = callback;
+            }
+            var cache = Factory.getCache(opt.id);
+            if (cache !== null) {
+                return cache.debounce.initial($.extend(cache.options, opt));
+            } else {
+                return new Debounce(opt);
+            }
+        },
+        initCache: function (debounce, options) {
+            var key = 'debounce-' + debounce.id;
+            Cache.debounces[key] = {
+                id: debounce.id,
+                debounce: debounce,
+                options: options
+            };
+            return this;
+        },
+        updateCache: function (debounce, options) {
+            var key = 'debounce-' + debounce.id;
+            $.extend(Cache.debounces[key], options);
+            return this;
+        },
+        getCache: function (id) {
+            var key = 'debounce-' + id;
+            return Cache.debounces[key] || null;
+        },
+        isFirst: function (debounce, timeout) {
+             var ts = new Date().getTime();
+            //上次点击若超过5秒钟，则不启用延时
+            if (!debounce.lastTime || (ts - debounce.lastTime > timeout)) {
+                return debounce.lastTime = ts, true;
+            }
+            return false;
+        }
+    };
+
+    function Debounce (options) {
+        var opt = $.extend({
+            id: 'debounce',
+            enable: true,
+            //延时时长，默认300毫秒
+            delay: 300,
+            //防抖时限，默认5000毫秒
+            timeout: 5000,
+            callback: function () {
+                console.log('debounce: ');
+            }
+        }, options);
+
+        this.id = opt.id;
+        this.timer = null;
+        this.lastTime = 0;
+
+        this.initial(opt);
+    }
+
+    Debounce.prototype = {
+        initial: function (opt) {
+            Factory.initCache(this, opt);
+
+            return this.callback(opt);
+        },
+        callback: function(opt) {
+            if (!opt.enable || !opt.delay) {
+                if ($.isFunction(opt.callback)) {
+                    opt.callback();
+                }
+            } else {
+                this.delayCallback(opt);
+            }
+            return this;
+        },
+        delayCallback: function(opt) {
+            var _ = this;
+            var func = opt.callback;
+            if (!$.isFunction(func)) {
+                return _;
+            }
+            if (Factory.isFirst(_, opt.timeout)) {
+                return func(), _;
+            }
+            if (_.timer) {
+                window.clearTimeout(_.timer);
+            }
+            _.timer = window.setTimeout(function() {
+                func();
+            }, opt.delay);
+
+            return _;
+        }
+    };
+
+    $.extend({
+        debounce: function(options, callback) {
+            return Factory.buildDebounce(options, callback);
+        }
+    });
 }(OUI);

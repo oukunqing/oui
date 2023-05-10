@@ -61,6 +61,7 @@
 
             opt.showPageSize = $.getParam(opt, 'showPageSize|showSizeSelect', true);
             opt.showPageGoto = $.getParam(opt, 'showPageGoto|showPageJump');
+            opt.showStatText = $.getParam(opt, 'showStatText|showTextEnable');
 
             return opt;
         },
@@ -223,13 +224,25 @@
             }
             return that;
         },
+        getTextColor = function (textColor) {
+            //过滤提取颜色,如: #000000; 提取 000000
+            var m = (textColor || '').match(/[#]{0,}([0-9A-F]{6}|[0-9A-F]{3})[;]{0,}/i);
+            textColor = m && m[1] ? m[1] : '';
+            return textColor ? 'color:#' + textColor + ';' : '';
+        },
         buildPageStat = function(enabled, that, arr, text, count) {
             if (enabled) {
                 var op = that.options, str = text || '{0}/{1}页', datas = [0, 0];
                 if (op.dataCount > 0) {
                     datas = [op.pageIndex - op.pageStart + 1, op.pageCount];
                 }
-                arr.push('<div class="stat ' + getPosition(that, false) + '">' + str.format(datas) + '</div>');
+                arr.push([
+                    '<div class="stat {0}" style="line-height:{1}px;{2}">'.format(
+                        getPosition(that, false), op.height - 1, getTextColor(op.textColor)
+                    ),
+                    str.format(datas),
+                    '</div>'
+                ].join(''));
             }
             return that;
         },
@@ -238,7 +251,13 @@
                 var str = text || '',
                     op = that.options;
                 str = str.indexOf('{0}') < 0 ? '{0}' + str : str;
-                arr.push('<span class="label" style="line-height:' + (op.height - 1) + 'px;">' + str.format(count) + '</span>');
+                arr.push([
+                    '<span class="label" style="line-height:{0}px;{1}">'.format(
+                        op.height - 1, getTextColor(op.textColor)
+                    ),
+                    str.format(count),
+                    '</span>'
+                ].join(''));
             }
             return that;
         },
@@ -258,7 +277,14 @@
                 if (stat.count > 0) {
                     datas = [stat.min, stat.max, stat.count];
                 }
-                arr.push('<div class="stat ' + getPosition(that, false) + '" style="line-height:' + (op.height - 1) + 'px;">' + str.format(datas) + '</div>');
+
+                arr.push([
+                    '<div class="stat {0}" style="line-height:{1}px;{2}">'.format(
+                        getPosition(that, false), op.height - 1, getTextColor(op.textColor)
+                    ),
+                    str.format(datas),
+                    '</div>'
+                ].join(''));
             }
             return that;
         },
@@ -596,12 +622,12 @@
             showPageInput: false,       //是否显示页码输入框
             showPageGoto: false,        //是否显示页码跳转输入框
 
-            showTextEnable: true,       //是否显示数据/页数文字（包含下面6项内容）
+            showStatText: true,         //是否显示数据/页数文字（包含下面6项内容）
 
-            showDataCount: false,        //是否显示数据条数（位于左边）
-            showPageCount: false,        //是否显示总页数（位于右边）
-            showPageStat: true,        //是否显示页面统计(示例：1/2页)（位于右边）
-            showDataStat: true,        //是否显示数据统计（位于右边）
+            showDataCount: false,       //是否显示数据条数（位于左边）
+            showPageCount: false,       //是否显示总页数（位于右边）
+            showPageStat: true,         //是否显示页面统计(示例：1/2页)（位于右边）
+            showDataStat: true,         //是否显示数据统计（位于右边）
             showPageStatLeft: false,    //是否显示页面统计（位于左边）
             showDataStatLeft: false,    //是否显示数据统计（位于左边）
 
@@ -626,6 +652,7 @@
             skin: defaultSkin,                      //样式，若skin=null则不启用内置样式
             inputWidth: defaultInputWidth,          //输入框宽度，默认为50px
             height: defaultInputHeight,             //高度，默认为22px
+            textColor: '',                          //指定（非链接或按钮）文字的颜色
             debounce: true,                         //是否启用防抖功能（或者值为number，且大于50即为启用）
             debounceTime: defaultDebounceTime,      //抖动时长，单位：毫秒
             focus: false                            //是否锁定焦点
@@ -667,9 +694,9 @@
             //创建CssStyle，防止闪烁
             $.createCssStyle(cssData, cssId);
 
-            buildDataCount(op.showTextEnable && op.showDataCount, that, html, op.markText['dataCount'], op.dataCount);
-            buildDataStat(op.showTextEnable && op.showDataStatLeft, that, html, op.markText['dataStat']);
-            buildDataStat(op.showTextEnable && op.showPageStatLeft, that, html, op.markText['pageStat']);
+            buildDataCount(op.showStatText && op.showDataCount, that, html, op.markText['dataCount'], op.dataCount);
+            buildDataStat(op.showStatText && op.showDataStatLeft, that, html, op.markText['dataStat']);
+            buildDataStat(op.showStatText && op.showPageStatLeft, that, html, op.markText['pageStat']);
 
             buildPageSize(op.showPageSize, that, html, op.minuend);
 
@@ -737,12 +764,12 @@
 
             buildLinkText(op.showReload, that, html, op.pageIndex, 'reload', false, 'text');
 
-            buildDataCount(op.showTextEnable && op.showPageCount, that, html, op.markText['pageCount'], op.pageCount);
-            buildPageStat(op.showTextEnable && op.showPageStat, that, html, op.markText['pageStat'], op.pageCount);
+            buildDataCount(op.showStatText && op.showPageCount, that, html, op.markText['pageCount'], op.pageCount);
+            buildPageStat(op.showStatText && op.showPageStat, that, html, op.markText['pageStat'], op.pageCount);
 
             html.push('</ul></div>');
 
-            buildDataStat(op.showTextEnable && op.showDataStat, that, html, op.markText['dataStat']);
+            buildDataStat(op.showStatText && op.showDataStat, that, html, op.markText['dataStat']);
 
             html.push('</div>');
 

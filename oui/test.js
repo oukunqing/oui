@@ -1580,6 +1580,59 @@ var list = [188, 187, 220];
 
 console.log(list.indexOf(188));
 
-list = list.concat([123,134]);
+list = list.concat(12345);
 
 console.log(list);
+
+console.log(list.push(125));
+
+console.log(list);
+
+$.extend(list, [1111]);
+
+console.log(list);
+
+function quickSort(arr) {
+    if (arr.length <= 1) {
+        return arr;
+    } else {
+        const pivot = arr[0];
+        const left = [];
+        const right = [];
+        for (let i = 1; i < arr.length; i++) {
+            if (arr[i] < pivot) {
+                left.push(arr[i]);
+            } else {
+                right.push(arr[i]);
+            }
+        }
+        return [...quickSort(left), pivot, ...quickSort(right)];
+    }
+}
+
+list = quickSort(list);
+
+console.log(list);
+
+
+
+
+var path = 'http://abc.com/acc/12345.tar.az';
+
+console.log($.getFileName('http://abc.com/acc.tar.gz/12345.tar.az_s=a.tar.gz', true));
+console.log($.getFileName('http://abc.com/acc/12345.tar.az_s=a.tar.gz', false));
+console.log($.getExtension('http://abc.com/acc/12345.tar.az_s=a.tar.gz'));
+console.log($.getFileName('http://abc.com/acc/12345.zip', true));
+console.log($.getFileName('http://abc.com/acc/12345.zip', false));
+console.log($.getExtension('http://abc.com/acc/12345.zip'));
+
+var color = '#fff';
+
+console.log(color);
+
+console.log(/^[#]?([0-9A-F]{3}|[0-9A-F]{6})[;]$/i.test(color));
+
+
+console.log(color.match(/[#]{0,}([0-9A-F]{6}|[0-9A-F]{3})[;]{0,}/i)[1] || '');
+
+console.log(-1*2);
