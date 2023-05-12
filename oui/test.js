@@ -1635,4 +1635,4 @@ console.log(/^[#]?([0-9A-F]{3}|[0-9A-F]{6})[;]$/i.test(color));
 
 console.log(color.match(/[#]{0,}([0-9A-F]{6}|[0-9A-F]{3})[;]{0,}/i)[1] || '');
 
-console.log(-1*2);
+console.log({size:5}.size);

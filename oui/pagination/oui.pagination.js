@@ -780,7 +780,7 @@
             if($.isFunction(op.complete)) {
                 var stat = getDataStat(that);
                 op.complete({
-                    page: { index: op.pageIndex, start: op.pageStart, count: op.pageCount, number: stat.page },
+                    page: { count: op.pageCount, index: op.pageIndex, number: stat.page, size: op.pageSize, start: op.pageStart },
                     data: { count: op.dataCount, start: stat.min, end: stat.max }
                 }, that);
             }

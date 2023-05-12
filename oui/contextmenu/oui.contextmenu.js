@@ -89,12 +89,44 @@
                 }
                 return this;
             },
-            updateCache: function (menu, options) {
-                var key = this.buildKey(menu.id);
+            updateCache: function (menuId, options) {
+                var cache = this.getCache(menuId);
+                if (!cache) {
+                    return this;
+                }
                 options = Factory.checkOptions(options);
-                Cache.menus[key].options = $.extend({
+                cache.options = $.extend({
                     items: []
                 }, options);
+                return this;
+            },
+            updateItem: function(menuId, items, del) {
+                var cache = this.getCache(menuId);
+                if (!cache) {
+                    return this;
+                }
+                if (!$.isArray(items)) {
+                    items = [items];
+                }
+                for (var i = 0; i < items.length; i++) {
+                    var exist = false;
+                    for (var j = 0; j < cache.options.items.length; j++) {
+                        var dr = cache.options.items[j];
+                        if (items[i].key === dr.key) {
+                            if (del) {
+                                delete cache.options.items[j];
+                            } else {
+                                $.extend(dr, items[i]);
+                            }
+                            exist = true;
+                            break;
+                        }
+                    }
+                    if (!exist && !del) {
+                        cache.options.items.push(items[i]);
+                    }
+                }
+
                 return this;
             },
             updateChecked: function (menuId, chbId, checked) {
@@ -214,7 +246,7 @@
                 }
                 return !$.isFunction(condition);
             },
-            buildSubMenu: function (parent, pos, items, isSub, cfg, cache, autoWidth) {
+            buildSubMenu: function (parent, pos, items, isSub, cfg, cache, autoWidth, menu) {
                 var offset = $.getOffset(parent);
                 var opt = {
                     width: cfg.width,
@@ -279,7 +311,7 @@
                                         $.cancelBubble();
                                         if (param.hasChild) {
                                             $.addClass(elem, 'cur');
-                                            Factory.buildSubMenu(this, $.getEventPosition(ev), param.items, true, cfg, cache, autoWidth);
+                                            Factory.buildSubMenu(this, $.getEventPosition(ev), param.items, true, cfg, cache, autoWidth, menu);
                                         } else {
                                             Factory.closeOpenedBox(cache, level);
                                         }
@@ -304,7 +336,7 @@
                                         $.cancelBubble(ev);
                                         var par = Factory.buildMenuPar(elem.data, cfg, elem.chbId);
                                         Factory.setChecked(box.menuId, par).hideContextMenu(ev, box.menuId, true);
-                                        func(Factory.dealChecked(par, elem), this);
+                                        func(Factory.dealChecked(par, elem), this, menu);
                                     });
                                 } else {
                                     $.addListener(elem, 'mouseup', function (ev) {
@@ -324,7 +356,7 @@
 
                 cache.boxs.push({ box: box, level: level, item: parent });
             },
-            buildMenuItem: function (dr, menuId, cfg, level, cache, autoWidth) {
+            buildMenuItem: function (dr, menuId, cfg, level, cache, autoWidth, menu) {
                 var elem = null;
                 if (dr === 'sep' || dr.sep || dr.type === 'sep') {
                     elem = $.createElement('div', '', function (elem) {
@@ -360,7 +392,7 @@
                                 $.cancelBubble();
                                 if (hasChild) {
                                     $.addClass(elem, 'cur');
-                                    Factory.buildSubMenu(elem, $.getEventPosition(ev), dr.items, false, cfg, cache, autoWidth);
+                                    Factory.buildSubMenu(elem, $.getEventPosition(ev), dr.items, false, cfg, cache, autoWidth, menu);
                                 } else {
                                     Factory.closeOpenedBox(cache, level);
                                 }
@@ -383,7 +415,7 @@
                             $.addListener(elem, 'mouseup', function (ev) {
                                 $.cancelBubble(ev);
                                 Factory.setChecked(menuId, par).hideContextMenu(ev, menuId, true);
-                                func(Factory.dealChecked(par, elem), this);
+                                func(Factory.dealChecked(par, elem), this, menu);
                             });
                         } else {
                             $.addListener(elem, 'mouseup', function (ev) {
@@ -494,13 +526,13 @@
 
                 return $.extend({}, opt.par, par);
             },
-            buildMenuItems: function (opt, cache, autoWidth) {
+            buildMenuItems: function (opt, cache, autoWidth, menu) {
                 var items = [];
 
                 for (var i = 0; i < opt.items.length; i++) {
                     var dr = opt.items[i];
                     if (dr) {
-                        var item = this.buildMenuItem(dr, opt.id, opt, 0, cache, autoWidth);
+                        var item = this.buildMenuItem(dr, opt.id, opt, 0, cache, autoWidth, menu);
                         if (item) {
                             items.push(item);
                         }
@@ -675,7 +707,7 @@
 
                         $.disableEvent(elem, 'contextmenu');
 
-                        var items = Factory.buildMenuItems(opt, cache, autoWidth);
+                        var items = Factory.buildMenuItems(opt, cache, autoWidth, menu);
                         if (autoWidth && !followSize) {
                             var w = Factory.getMaxWidth(items) + (opt.showIcon ? Config.IconWidth : 0);
                             elem.style.width = w + 'px';
@@ -801,7 +833,11 @@
             return that;
         },
         update: function (options, isInitial) {
-            Factory.updateCache(this, options);
+            Factory.updateCache(this.id, options);
+            return this;
+        },
+        updateItem: function(items, del) {
+            Factory.updateItem(this.id, items, del);
             return this;
         },
         show: function (ev) {
@@ -868,6 +904,9 @@
         },
         hideParentMenu: function () {
             return Factory.hideAllContextMenu();
+        },
+        updateItem: function (menuId, items, del) {
+            return Factory.updateItem(menuId, items, del);
         }
     });
 

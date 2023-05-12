@@ -4109,41 +4109,6 @@
             }
             return this;
         },
-        getImgSize = function (img_url, callback) {
-            var start_time = new Date().getTime();
-            var img = new Image(), load = false;
-
-            if (!$.isFunction(callback)) {
-                callback = function (par) {
-                    console.log('getImgSize: ', par);
-                };
-            }
-
-            img.src = img_url + '?' + start_time;
-
-            img.onerror = function (er) {
-                clearInterval(set);
-                callback({ width: 0, height: 0 });
-            };
-            img.onload = function (e) {
-                if (!load) {
-                    load = true;
-                    var duration = new Date().getTime() - start_time;
-                    callback({ actino: 'onload', duration: duration, width: img.width, height: img.height });
-                }
-            };
-            var check = function () {
-                if (img.width > 0 || img.height > 0 || load) {
-                    clearInterval(set);
-                    if (!load) {
-                        load = true;
-                        var duration = new Date().getTime() - start_time;
-                        callback({ actino: 'check', duration: duration, width: img.width, height: img.height });
-                    }
-                }
-            };
-            var set = setInterval(check, 5);
-        },
         getImgRealSize = function (img, callback) {
             var w = 0, h = 0;
             if (!$.isElement(img = $.toElement(img))) {
@@ -4160,17 +4125,42 @@
                 h = img.naturalHeight;
                 callback({ width: w, height: h });
             } else { // IE6/7/8
-                /*
-                var imgae = new Image();
-                image.src = img.src;
-                image.onload = function() {
-                    callback({width: image.width, height: image.height});
+                var start_time = new Date().getTime(), load = false;
+                img.onerror = function (er) {
+                    clearInterval(set);
+                    callback({ width: 0, height: 0 });
                 };
-                */
-
-                getImgSize(img.src, callback);
+                img.onload = function (e) {
+                    if (!load) {
+                        load = true;
+                        var duration = new Date().getTime() - start_time;
+                        callback({ actino: 'onload', duration: duration, width: img.width, height: img.height });
+                    }
+                };
+                var check = function () {
+                    if (img.width > 0 || img.height > 0 || load) {
+                        clearInterval(set);
+                        if (!load) {
+                            load = true;
+                            var duration = new Date().getTime() - start_time;
+                            callback({ actino: 'check', duration: duration, width: img.width, height: img.height });
+                        }
+                    }
+                };
+                var set = setInterval(check, 5);
             }
             return { width: w, height: h };
+        },
+        getImgSize = function (img_url, callback) {
+            if (!$.isFunction(callback)) {
+                callback = function (par) {
+                    console.log('getImgSize: ', par);
+                };
+            }
+             var img = new Image();
+            img.src = img_url;
+
+            return getImgRealSize(img, callback);
         },
         fillOption = function (elem, value, text) {
             if (!$.isElement(elem = $.toElement(elem)) || !elem.tagName === 'SELECT') {
@@ -4265,13 +4255,12 @@
             return html.join('');
         },
         fullScreen = function (elem) {
-            var rfs = elem.requestFullScreen || elem.webkitRequestFullScreen || elem.mozRequestFullScreen || elem.msRequestFullScreen,
-                wscript;
+            var rfs = elem.requestFullScreen || elem.webkitRequestFullScreen || elem.mozRequestFullScreen || elem.msRequestFullScreen;
             if (typeof rfs !== 'undefined' && rfs) {
                 return rfs.call(elem), this;
             }
             if (typeof window.ActiveXObject !== 'undefined') {
-                wscript = new ActiveXObject("WScript.Shell");
+                var wscript = new ActiveXObject("WScript.Shell");
                 if (wscript) {
                     wscript.SendKeys("{F11}");
                 }
@@ -4280,14 +4269,13 @@
         },
         exitFullScreen = function () {
             var elem = document,
-                cfs = elem.cancelFullScreen || elem.webkitCancelFullScreen || elem.mozCancelFullScreen || elem.exitFullScreen,
-                wscript;
+                cfs = elem.cancelFullScreen || elem.webkitCancelFullScreen || elem.mozCancelFullScreen || elem.exitFullScreen;
 
             if (typeof cfs !== 'undefined' && cfs) {
                 return cfs.call(elem), this;
             }
             if (typeof window.ActiveXObject !== 'undefined') {
-                wscript = new ActiveXObject("WScript.Shell");
+                var wscript = new ActiveXObject("WScript.Shell");
                 if (wscript != null) {
                     wscript.SendKeys("{F11}");
                 }
@@ -4493,8 +4481,9 @@
         setCookie: setCookie,
         getCookie: getCookie,
         delCookie: delCookie,
-        getImgSize: getImgSize,
         getImgRealSize: getImgRealSize,
+        getImgSize: getImgSize,
+        getPicSize: getImgSize,
         fillOption: fillOption,
         fillOptions: fillOptions,
         buildOption: buildOption,
