@@ -217,7 +217,7 @@
                         left: bs.left, top: bs.top
                     },
                     showScale: $.isBoolean(_.opt.showScale, true),
-                    showTitle: $.isBoolean(_.opt.showTitle, false)
+                    showTitle: $.isBoolean(_.opt.showTitle, true)
                 };
                 //console.log(_.cfg);
 
@@ -226,7 +226,7 @@
                 if(!update) {
                     _.select().control();
                 }                    
-                _.drag().wheelZoom().title().status().title();
+                _.drag().wheelZoom().status().title();
 
                 $.getFileSize(_.cfg.filePath, function(size) {
                     var fileSize = size >= 0 ? size : (opt.fileSize || 0);
@@ -246,6 +246,20 @@
         },
         control: function () {
             var _ = this;
+
+            var titlebar = document.createElement('DIV');
+            titlebar.className = 'oui-picbox-title oui-picbox-unselect';
+            $.addListener(titlebar, 'dblclick', function() {
+                $.cancelBubble();
+                _.scale(_.cfg.boxScale).center();
+            });
+            titlebar.oncontextmenu = function() {
+                _.scale(1).center();
+                return false;
+            };
+            _.titlebar = titlebar;
+            _.box.appendChild(titlebar);
+
             var statusbar = document.createElement('DIV');
             statusbar.className = 'oui-picbox-status oui-picbox-unselect';
             $.addListener(statusbar, 'dblclick', function() {
@@ -255,14 +269,12 @@
             _.statusbar = statusbar;
             _.box.appendChild(statusbar);
 
-            var titlebar = document.createElement('DIV');
-            titlebar.className = 'oui-picbox-title oui-picbox-unselect';
-            $.addListener(titlebar, 'dblclick', function() {
-                $.cancelBubble();
-                _.scale(_.cfg.boxScale).center();
-            });
-            _.titlebar = titlebar;
-            _.box.appendChild(titlebar);
+            if (!_.cfg.showTitle) {
+                statusbar.oncontextmenu = function() {
+                    _.scale(1).center();
+                    return false;
+                };
+            }
 
             return this;
         },
@@ -365,9 +377,9 @@
         },
         select: function () {
             var _ = this;
-            _.box.oncontextmenu = function() {
+            _.box.oncontextmenu = function(ev) {
                 //鼠标右键若有拖动动作，或者鼠标位置不在图片范围内，则不显示默认的右键菜单
-                if (_.cfg.selectdrag || !_.cfg.selectonpic) {
+                if (_.cfg.selectdrag || !_.cfg.selectonpic || ev.target.nodeName !== 'IMG') {
                     return false;
                 }
             };

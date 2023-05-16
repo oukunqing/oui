@@ -1636,3 +1636,19 @@ console.log(/^[#]?([0-9A-F]{3}|[0-9A-F]{6})[;]$/i.test(color));
 console.log(color.match(/[#]{0,}([0-9A-F]{6}|[0-9A-F]{3})[;]{0,}/i)[1] || '');
 
 console.log({size:5}.size);
+
+var url123 = 'http://zyrh.3g-vs_video.net:81/pic/20230515/001/20230515080000_02_001_000_01_thumb.jpg';
+
+function getUrlFileName(url) {
+    var fileName = url.substr(url.lastIndexOf('/') + 1);
+    return fileName.substr(0, fileName.indexOf('?'));
+}
+
+console.log(getUrlFileName(url123));
+
+console.log(url123.getFileName());
+
+console.log(/^(http:\/\/|https:\/\/)([A-Z0-9.:]+)\//i.test(url123));
+
+console.log(url123.match(/^(http:\/\/|https:\/\/)([A-Z0-9.:]+)\//i));
+console.log(url123.replace(/^(http:\/\/|https:\/\/)([A-Z0-9_\-\.:]+)(\/)/i, '$3'));
