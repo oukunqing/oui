@@ -516,16 +516,13 @@
             return this.status().move();
         },
         zoom: function (action, ev, zoomratio) {
-            var _ = this,
-                pos = $.getEventPosition(ev),
-                w = parseInt(_.img.style.width, 10),
-                h = parseInt(_.img.style.height, 10),
-                left = parseInt(_.img.style.left, 10),
-                top = parseInt(_.img.style.top, 10),
+            var that = this,
+                w = parseInt(that.img.style.width, 10),
+                h = parseInt(that.img.style.height, 10),
                 ratio = $.isNumber(zoomratio) ? zoomratio : 1.1,
-                scale = _.cfg.curScale;
+                scale = that.cfg.curScale;
 
-            if((!action && scale <= _.cfg.minScale) || (action && scale >= _.cfg.maxScale)) {
+            if((!action && scale <= that.cfg.minScale) || (action && scale >= that.cfg.maxScale)) {
                 return this;
             }
 
@@ -533,36 +530,39 @@
                 ratio = 1 / ratio;
             }
             //计算缩放后的比率         
-            scale = Factory.setRatio(w * ratio / _.cfg.width);
+            scale = Factory.setRatio(w * ratio / that.cfg.width);
 
-            if(scale < _.cfg.minScale) {
-                scale = _.cfg.minScale;
-            } else if(scale > _.cfg.maxScale) {
-                scale = _.cfg.maxScale;
+            if(scale < that.cfg.minScale) {
+                scale = that.cfg.minScale;
+            } else if(scale > that.cfg.maxScale) {
+                scale = that.cfg.maxScale;
             }
-
-            w = parseInt(_.cfg.width * scale, 10);
-            h = parseInt(_.cfg.height * scale, 10);
+            
+            w = parseInt(that.cfg.width * scale, 10);
+            h = parseInt(that.cfg.height * scale, 10);
 
             if (ev) {
                 var tar = ev.target, pos = $.getEventPos(ev);
                 if (tar.className.indexOf('oui-omap-map') >= 0) {
                     //计算中心点的偏移量
                     //鼠标当前位置要减去图片外框的偏移量
-                    _.cfg.x -= parseInt((ratio - 1) * (pos.x - _.cfg.x - _.cfg.offset.left), 10);
-                    _.cfg.y -= parseInt((ratio - 1) * (pos.y - _.cfg.y - _.cfg.offset.top), 10);
+                    /*
+                    //这个计算方式结果会有偏移误差
+                    that.cfg.x -= (ratio - 1) * (pos.x - that.cfg.x - that.cfg.offset.left);
+                    that.cfg.y -= (ratio - 1) * (pos.y - that.cfg.y - that.cfg.offset.top);
+                    */
+                    //采用这种计算方式没有偏移
+                    that.cfg.x -= (w - that.cfg.w) * (pos.x - that.cfg.x - that.cfg.offset.left) / that.cfg.w;
+                    that.cfg.y -= (h - that.cfg.h) * (pos.y - that.cfg.y - that.cfg.offset.top) / that.cfg.h;
                 }
             }
-            left = parseInt(_.cfg.x - w / 2, 10);
-            top = parseInt(_.cfg.y - h / 2, 10);
+            that.cfg.w = w;
+            that.cfg.h = h;
+            that.cfg.left = that.cfg.x - w / 2;
+            that.cfg.top = that.cfg.y - h / 2;
+            that.cfg.curScale = scale;
             
-            _.cfg.w = w;
-            _.cfg.h = h;
-            _.cfg.left = left;
-            _.cfg.top = top;
-            _.cfg.curScale = scale;
-            
-            Factory.setImgSize(_);
+            Factory.setImgSize(that);
 
             return this.status().move();
         },

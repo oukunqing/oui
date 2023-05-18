@@ -806,25 +806,25 @@
                 return curTime - buildTime > 500;
             },
             setClickDocClose: function (id, eventName) {
-                var _ = this;
+                var that = this;
                 if (Cache.docCloses[eventName].indexOf(id) < 0) {
                     Cache.docCloses[eventName].push(id);
                 }
-                if (_.isRepeat('doc' + eventName)) {
-                    return _;
+                if (that.isRepeat('doc' + eventName)) {
+                    return that;
                 }
                 $.addListener(document, eventName, function (e) {
                     var list = Cache.docCloses[eventName], ts = new Date().getTime();
                     for (var i = list.length - 1; i >= 0; i--) {
                         var p = Factory.getOptions(list[i]) || {}, d = p.dialog;
-                        if (d && !d.isClosed() && !d.isHide() && _.allowClose(ts, p.buildTime)) {
+                        if (d && !d.isClosed() && !d.isHide() && that.allowClose(ts, p.buildTime)) {
                             list.splice(i, 1);
                             d.close();
                             break;
                         }
                     }
                 });
-                return _;
+                return that;
             },
             setWindowResize: function () {
                 if (this.isRepeat('resize')) {
@@ -1001,25 +1001,25 @@
         },
         Util = {
             loads: {},
-            getParam: function (_) {
-                var p = Factory.getOptions(_.id);
+            getParam: function (that) {
+                var p = Factory.getOptions(that.id);
                 return p || {
                     none: true,
                     options: {}, controls: {}, status: {}, events: {}, buttons: {}, btns: {}
                 };
             },
-            setOptions: function (_, key, subKey, value) {
-                var id = $.isString(_, true) ? _ : _.id;
+            setOptions: function (that, key, subKey, value) {
+                var id = $.isString(that, true) ? that : that.id;
                 return Factory.setOptions(id, key, subKey, value), this;
             },
             isWap: function () {
                 return $.isWap;
             },
-            isSelf: function (_, dialog) {
+            isSelf: function (that, dialog) {
                 if (!dialog || !Factory.getDialog(dialog.id)) {
                     return false;
                 }
-                return dialog.getOptions().id === _.getOptions().id;
+                return dialog.getOptions().id === that.getOptions().id;
             },
             isIframe: function (opt) {
                 return Common.isInKeys(opt.type, ['url', 'iframe', 'load'], Config.DialogType);
@@ -1033,19 +1033,19 @@
             appendChild: function (elem, pNode) {
                 return $.appendChild(pNode, elem), this;
             },
-            getCache: function (_, key, defaultValue) {
-                return Factory.getOptions(_.id, key, defaultValue);
+            getCache: function (that, key, defaultValue) {
+                return Factory.getOptions(that.id, key, defaultValue);
             },
-            setStatus: function (_, key) {
+            setStatus: function (that, key) {
                 var obj = { key: key };
                 obj[key] = true;
-                var lastStatus = this.getCache(_, 'status').key;
-                return this.setOptions(_, 'lastStatus', lastStatus).setOptions(_, 'status', obj);
+                var lastStatus = this.getCache(that, 'status').key;
+                return this.setOptions(that, 'lastStatus', lastStatus).setOptions(that, 'status', obj);
             },
-            hideDocOverflow: function (_, isShow) {
+            hideDocOverflow: function (that, isShow) {
                 var overflow;
                 if (isShow) {
-                    overflow = Cache.docOverflow[_.id];
+                    overflow = Cache.docOverflow[that.id];
                     if (overflow !== 'hidden') {
                         document.body.style.overflow = overflow;
                     }
@@ -1053,7 +1053,7 @@
                     overflow = document.body.style.overflow;
                     if (overflow !== 'hidden') {
                         document.body.style.overflow = 'hidden';
-                        Cache.docOverflow[_.id] = overflow;
+                        Cache.docOverflow[that.id] = overflow;
                     }
                 }
                 return this;
@@ -1089,11 +1089,11 @@
 
                 return this;
             },
-            close: function (_) {
-                return _.close(), this;
+            close: function (that) {
+                return that.close(), this;
             },
-            build: function (_, options) {
-                var util = this, p = Util.getParam(_), opt = p.options, ctls = p.controls;
+            build: function (that, options) {
+                var util = this, p = Util.getParam(that), opt = p.options, ctls = p.controls;
                 var status = opt.status || Config.DialogStatus.normal, isWap = util.isWap();
 
                 opt.type = Common.checkType(opt.type, true);
@@ -1105,28 +1105,28 @@
                 if (opt.type === Config.DialogType.tooltip) {
                     //不需要遮罩层
                     opt.lock = false;
-                    return util.buildTooltip(_, options), util;
+                    return util.buildTooltip(that, options), util;
                 } else if (opt.lock) {
-                    util.hideDocOverflow(_)
-                        .buildShade(_)
-                        .buildContainer(_);
+                    util.hideDocOverflow(that)
+                        .buildShade(that)
+                        .buildContainer(that);
                 }
 
                 //设置创建时间，防止被document事件关闭
                 p.buildTime = new Date().getTime();
 
-                util.buildDialog(_)
-                    .buildMain(_, ctls.dialog)
-                    .buildHead(_, ctls.main, false)
-                    .buildBody(_, ctls.main)
-                    .buildFoot(_, ctls.main, false);
+                util.buildDialog(that)
+                    .buildMain(that, ctls.dialog)
+                    .buildHead(that, ctls.main, false)
+                    .buildBody(that, ctls.main)
+                    .buildFoot(that, ctls.main, false);
 
                 if (opt.fixed) {
                     ctls.dialog.style.position = 'fixed';
                 }
 
                 if (opt.dragSize) {
-                    util.setDragSwitch(_);
+                    util.setDragSwitch(that);
                 }
 
                 if (ctls.shade) {
@@ -1140,24 +1140,24 @@
                     p.parent.appendChild(ctls.dialog);
                 }
 
-                var cover = $I(_.getDialogId() + '-cover');
+                var cover = $I(that.getDialogId() + '-cover');
                 if (opt.coverOCX && cover !== null) {
                     ctls.cover = cover;
                 }
 
-                util.setSize(_, { type: opt.status, width: opt.width, height: opt.height });
+                util.setSize(that, { type: opt.status, width: opt.width, height: opt.height });
 
-                if (util.isAutoSize(_)) {
-                    util.setBodySize(_);
-                    $.extend(opt, util.getAutoSize(_, true));
-                    util.setSize(_, { type: opt.status, width: opt.width, height: opt.height });
+                if (util.isAutoSize(that)) {
+                    util.setBodySize(that);
+                    $.extend(opt, util.getAutoSize(that, true));
+                    util.setSize(that, { type: opt.status, width: opt.width, height: opt.height });
                 }
-                util.setPosition(_, { position: opt.position, x: opt.x, y: opt.y });
+                util.setPosition(that, { position: opt.position, x: opt.x, y: opt.y });
 
-                util.setCache(_)
-                    .dragPosition(_)
-                    .dragSize(_)
-                    .setClickBgClose(_);
+                util.setCache(that)
+                    .dragPosition(that)
+                    .dragSize(that)
+                    .setClickBgClose(that);
 
                 if (opt.escClose) {
                     Factory.setEscClose();
@@ -1167,7 +1167,7 @@
                 if (!opt.form && (!opt.showHead || ctls.iframe || Common.isPlainText(ctls.content))) {
                     $.addListener([ctls.body, ctls.dialog], isWap ? 'touchstart' : 'mousedown', function (ev) {
                         $.cancelBubble();
-                        _.topMost();
+                        that.topMost();
                         if (isWap) {
                             ev.preventDefault();
                         }
@@ -1211,21 +1211,21 @@
 
                 //初始最小化或最大化对话框
                 if ([Config.DialogStatus.min, Config.DialogStatus.max].indexOf(status) > -1) {
-                    _[status]();
+                    that[status]();
                 } else if ([Config.DialogStatus.hide, Config.DialogStatus.close].indexOf(status) > -1) {
                     //初始化即隐藏
-                    _.hide('initial-hide');
+                    that.hide('initial-hide');
                 }
 
-                util.buildCloseTiming(_), _.focus();
+                util.buildCloseTiming(that), that.focus();
 
                 if (opt.hide) {
-                    _.hide('initial-hide');
+                    that.hide('initial-hide');
                 }
                 return util;
             },
-            setClickBgClose: function (_) {
-                var p = this.getParam(_), opt = p.options, ctls = p.controls;
+            setClickBgClose: function (that) {
+                var p = this.getParam(that), opt = p.options, ctls = p.controls;
                 if (p.none) { return this; }
 
                 if (!opt.clickBgClose) {
@@ -1235,7 +1235,7 @@
                     $.addListener(ctls.container, opt.clickBgClose, function (ev) {
                         //判断鼠标点击位置是否在对话框范围，如果在范围内则不关闭
                         if (!$.isOnElement(ctls.dialog, ev)) {
-                            _.close();
+                            that.close();
                         }
                     });
                 } else {
@@ -1245,8 +1245,8 @@
                 }
                 return this;
             },
-            buildShade: function (_) {
-                var p = this.getParam(_), opt = p.options, ctls = p.controls;
+            buildShade: function (that) {
+                var p = this.getParam(that), opt = p.options, ctls = p.controls;
                 if (p.none || !opt.lock) { return this; }
                 ctls.shade = $.createElement('div');
                 ctls.shade.className = 'oui-dialog-shade';
@@ -1260,8 +1260,8 @@
                 }
                 return this;
             },
-            buildContainer: function (_) {
-                var p = this.getParam(_), opt = p.options, ctls = p.controls;
+            buildContainer: function (that) {
+                var p = this.getParam(that), opt = p.options, ctls = p.controls;
                 if (p.none || !opt.lock) { return this; }
                 ctls.container = $.createElement('div');
                 ctls.container.className = 'oui-dialog-container';
@@ -1269,15 +1269,15 @@
                 ctls.container.contentEditable = false;
                 return this;
             },
-            buildCover: function (_, obj) {
-                obj.innerHTML = '<iframe id="' + _.getDialogId() + '-cover" src="about:blank"'
+            buildCover: function (that, obj) {
+                obj.innerHTML = '<iframe id="' + that.getDialogId() + '-cover" src="about:blank"'
                     + ' style="position:absolute; visibility:inherit; top:-1px; left:-1px;'
                     + ' width:0px; height:0px; border:none; z-index:-1;'
                     + ' filter=\'progid:DXImageTransform.Microsoft.Alpha(style=0,opacity=0)\';"></iframe>';
                 return this;
             },
-            setCoverSize: function (_) {
-                var p = this.getParam(_), opt = p.options, ctls = p.controls;
+            setCoverSize: function (that) {
+                var p = this.getParam(that), opt = p.options, ctls = p.controls;
                 if (ctls.cover) {
                     var size = { w: ctls.dialog.offsetWidth, h: ctls.dialog.offsetHeight };
                     ctls.cover.style.width = size.w + 'px';
@@ -1285,8 +1285,8 @@
                 }
                 return this;
             },
-            buildDialog: function (_) {
-                var p = this.getParam(_), opt = p.options, ctls = p.controls;
+            buildDialog: function (that) {
+                var p = this.getParam(that), opt = p.options, ctls = p.controls;
                 if (p.none) { return this; }
                 var css, shadow = opt.shadow, className = 'oui-dialog';
                 if (opt.skin !== Config.DefaultSkin) {
@@ -1294,12 +1294,12 @@
                 }
                 ctls.dialog = $.createElement('div');
                 ctls.dialog.className = className;
-                ctls.dialog.id = _.getDialogId();
+                ctls.dialog.id = that.getDialogId();
 
                 ctls.dialog.contentEditable = false;
 
                 if (opt.coverOCX) {
-                    Util.buildCover(_, ctls.dialog);
+                    Util.buildCover(that, ctls.dialog);
                 }
 
                 if ((css = Common.toCssText(opt.styles.dialog, 'dialog'))) {
@@ -1333,9 +1333,9 @@
                 }
                 return this;
             },
-            buildMain: function (_, pNode) {
-                var p = this.getParam(_), opt = p.options, ctls = p.controls;
-                if (p.none || _.isClosed()) { return this; }
+            buildMain: function (that, pNode) {
+                var p = this.getParam(that), opt = p.options, ctls = p.controls;
+                if (p.none || that.isClosed()) { return this; }
                 var elem = $.createElement('div'), css;
                 elem.className = 'dialog-main' + (opt.copyAble ? '' : ' dialog-unselect');
                 elem.tabIndex = 1;
@@ -1345,9 +1345,9 @@
                 }
                 return this.appendChild((ctls.main = elem), pNode);
             },
-            buildHead: function (_, pNode, rebuild) {
-                var p = this.getParam(_), opt = p.options, ctls = p.controls;
-                if (p.none || _.isClosed() || !opt.showHead || (ctls.head && !rebuild)) {
+            buildHead: function (that, pNode, rebuild) {
+                var p = this.getParam(that), opt = p.options, ctls = p.controls;
+                if (p.none || that.isClosed() || !opt.showHead || (ctls.head && !rebuild)) {
                     return this;
                 }
                 var elem, css, btns = p.btns;
@@ -1369,13 +1369,13 @@
                     $.addListener(elem, 'dblclick', function () {
                         $.cancelBubble();
                         if (opt.maxAble) {
-                            _.max();
+                            that.max();
                         }
                     });
 
                     $.addListener(elem, ['mousedown', 'click'], function () {
                         $.cancelBubble();
-                        _.topMost();
+                        that.topMost();
                     });
                 }
 
@@ -1396,15 +1396,15 @@
                 }
                 elem.appendChild((ctls.title = div));
 
-                this.buildClose(_, elem, true);
+                this.buildClose(that, elem, true);
 
                 //设置标题栏鼠标样式
                 elem.style.cursor = opt.moveAble ? 'move' : 'default';
 
                 return !rebuild ? this.appendChild((ctls.head = elem), pNode) : null, this;
             },
-            buildCloseTiming: function (_) {
-                var p = this.getParam(_), opt = p.options, ctls = p.controls, timers = p.timers;
+            buildCloseTiming: function (that) {
+                var p = this.getParam(that), opt = p.options, ctls = p.controls, timers = p.timers;
                 if (p.none || !opt.autoClose || !opt.closeAble) {
                     return this;
                 }
@@ -1425,7 +1425,7 @@
                     }
                 }
                 return timers.closeTimer = window.setInterval(function () {
-                    Util.setAction(_, Config.CloseType.close).clearTimer(timers).close(_);
+                    Util.setAction(that, Config.CloseType.close).clearTimer(timers).close(that);
                 }, opt.closeTiming), this;
             },
             clearTimer: function (timers) {
@@ -1437,8 +1437,8 @@
                 }
                 return this;
             },
-            buildClose: function (_, pNode, isTop) {
-                var util = this, p = util.getParam(_), opt = p.options, ctls = p.controls, html = [];
+            buildClose: function (that, pNode, isTop) {
+                var util = this, p = util.getParam(that), opt = p.options, ctls = p.controls, html = [];
                 if (!ctls.dialog) {
                     return util;
                 }
@@ -1453,7 +1453,7 @@
                                 elem.style.margin = '4px 0 0 2px';
                                 $.setAttribute(elem, { title: reload, code: 'reload', key: 'reload' });
                                 pNode.insertBefore((ctls.reload = elem), ctls.title);
-                                util.setButtonEvent(_, [elem], 'click', true);
+                                util.setButtonEvent(that, [elem], 'click', true);
                             });
                         }
                     }
@@ -1497,29 +1497,29 @@
                             btnClose = obj;
                         }
                     }
-                    util.setButtonEvent(_, childs, 'click', false)
-                        .setShortcutKeyEvent(_, btnClose ? [btnClose] : []);
+                    util.setButtonEvent(that, childs, 'click', false)
+                        .setShortcutKeyEvent(that, btnClose ? [btnClose] : []);
                 }
                 return util;
             },
-            buildBody: function (_, pNode) {
-                var p = this.getParam(_), opt = p.options, ctls = p.controls;
-                if (p.none || _.isClosed()) { return this; }
+            buildBody: function (that, pNode) {
+                var p = this.getParam(that), opt = p.options, ctls = p.controls;
+                if (p.none || that.isClosed()) { return this; }
                 var elem = $.createElement('div'), css;
                 elem.className = 'dialog-body' + (opt.copyAble ? '' : ' dialog-unselect');
                 elem.contentEditable = false;
 
                 if (!opt.showHead) {
-                    this.buildClose(_, elem, false);
+                    this.buildClose(that, elem, false);
                 }
                 if ((css = Common.toCssText(opt.styles.body, 'body'))) {
                     elem.style.cssText = css;
                 }
-                return this.buildContent(_, elem).appendChild((ctls.body = elem), pNode);
+                return this.buildContent(that, elem).appendChild((ctls.body = elem), pNode);
             },
-            buildContent: function (_, pNode) {
-                var util = this, p = util.getParam(_), opt = p.options, ctls = p.controls;
-                if (p.none || _.isClosed()) { return util; }
+            buildContent: function (that, pNode) {
+                var util = this, p = util.getParam(that), opt = p.options, ctls = p.controls;
+                if (p.none || that.isClosed()) { return util; }
                 var elem = ctls.content, css, isUpdate = pNode === true;
                 if (!elem) {
                     elem = $.createElement('div');
@@ -1534,7 +1534,7 @@
                     if ($.isElement(opt.element) && opt.type === Config.DialogType.load) {
                         elem.innerHTML = opt.element.innerHTML || opt.element.value || '';
                     } else {
-                        elem.innerHTML = util.buildIframe(_, opt, opt.content);
+                        elem.innerHTML = util.buildIframe(that, opt, opt.content);
                         //隐藏dialog.body的滚动条（启用iframe滚动条，防止出现双滚动
                         if ($.isElement(pNode)) {
                             pNode.style.overflow = 'hidden';
@@ -1568,16 +1568,16 @@
                         elem.style.borderRadius = '0px';
                     }
                     //elem.innerHTML = opt.content;
-                    util.buildIconContent(_, true, elem);
+                    util.buildIconContent(that, true, elem);
                     if (!opt.showHead && ctls.btnPanel) {
                         elem.style.marginRight = ctls.btnPanel.offsetWidth + 'px';
                     }
                 }
                 return util.appendChild((ctls.content = elem), pNode || null);
             },
-            buildIconContent: function (_, isShow, elem) {
-                var util = this, p = util.getParam(_), opt = p.options, ctls = p.controls;
-                if (p.none || _.isClosed()) { return util; }
+            buildIconContent: function (that, isShow, elem) {
+                var util = this, p = util.getParam(that), opt = p.options, ctls = p.controls;
+                if (p.none || that.isClosed()) { return util; }
                 elem = elem || ctls.content;
 
                 if (isShow && Common.checkIcon(opt)) {
@@ -1590,10 +1590,10 @@
                 } else {
                     elem.innerHTML = opt.content;
                 }
-                return util.showIcon(_, elem);
+                return util.showIcon(that, elem);
             },
-            showIcon: function (_, elem) {
-                var util = this, p = util.getParam(_), opt = p.options, ctls = p.controls;
+            showIcon: function (that, elem) {
+                var util = this, p = util.getParam(that), opt = p.options, ctls = p.controls;
                 var isShow = Common.checkIcon(opt),
                     isMin = p.status.min;
 
@@ -1609,7 +1609,7 @@
                 }
                 return util;
             },
-            buildIframe: function (_, opt, url) {
+            buildIframe: function (that, opt, url) {
                 var height = '100%',
                     html = ['<iframe class="dialog-iframe" width="100%"',
                         ' id="{0}-iframe" height="{1}" src="{2}"',
@@ -1619,22 +1619,22 @@
                     ].join(''),
                     param = $.isObject(opt.parameter) ? $.toJsonString(opt.parameter) : opt.parameter;
 
-                return html.format(_.getDialogId(),
+                return html.format(that.getDialogId(),
                     height,
-                    url.setUrlParam('dialog_id', _.id).setUrlParam('dialog_param', param),
+                    url.setUrlParam('dialog_id', that.id).setUrlParam('dialog_param', param),
                     opt.iframeScroll || opt.iframeScrolling ? 'auto' : 'no',
                     opt.loading || Common.getDialogText('Loading', opt.lang));
             },
-            reload: function (_) {
-                var util = this, p = util.getParam(_), opt = p.options,
-                    iframe = $I(_.getDialogId() + '-iframe');
+            reload: function (that) {
+                var util = this, p = util.getParam(that), opt = p.options,
+                    iframe = $I(that.getDialogId() + '-iframe');
 
                 if (opt.reloadAble) {
                     if (util.isIframe(opt) && iframe !== null && iframe.src) {
                         iframe.src = iframe.src.setUrlParam();
                     }
                     if (opt.showReload && $.isFunction(opt.reloadCallback)) {
-                        opt.reloadCallback(_, opt.parameter);
+                        opt.reloadCallback(that, opt.parameter);
                     }
                 }
                 return util;
@@ -1651,9 +1651,9 @@
                 }
                 return this;
             },
-            buildFoot: function (_, pNode, rebuild) {
-                var p = this.getParam(_), opt = p.options, ctls = p.controls;
-                if (p.none || _.isClosed() || !opt.showFoot || (ctls.foot && !rebuild)) {
+            buildFoot: function (that, pNode, rebuild) {
+                var p = this.getParam(that), opt = p.options, ctls = p.controls;
+                if (p.none || that.isClosed() || !opt.showFoot || (ctls.foot && !rebuild)) {
                     return this;
                 }
                 var elem, css, buttons = p.buttons, util = this;
@@ -1672,7 +1672,7 @@
 
                 var panel = $.createElement('div');
                 panel.className = 'button-panel';
-                panel.innerHTML = util.buildButtons(_);
+                panel.innerHTML = util.buildButtons(that);
                 if (Common.isInKeys(opt.buttonPosition, ['Left', 'Center', 'Right'], Config.Position)) {
                     panel.style.cssText = 'text-align:{0};'.format(opt.buttonPosition);
                 }
@@ -1687,16 +1687,16 @@
                 }
                 $.addListener(elem, ['mousedown', 'dblclick', 'click'], function () {
                     $.cancelBubble();
-                    _.topMost();
+                    that.topMost();
                 });
 
-                util.setButtonEvent(_, panel.childNodes, 'click', true)
-                    .setShortcutKeyEvent(_, panel.childNodes);
+                util.setButtonEvent(that, panel.childNodes, 'click', true)
+                    .setShortcutKeyEvent(that, panel.childNodes);
 
                 return !rebuild ? util.appendChild((ctls.foot = elem), pNode) : null, util;
             },
-            buildButtons: function (_) {
-                var p = this.getParam(_), opt = p.options, ctls = p.controls;
+            buildButtons: function (that) {
+                var p = this.getParam(that), opt = p.options, ctls = p.controls;
                 if (p.none) { return this; }
 
                 var keys = [], codes = [], html = [], txts = {}, i = 0, tabindex = 1, isCustom = false;
@@ -1794,8 +1794,8 @@
                 }
                 return html.join('').format('javascript:void(0);');
             },
-            setDragSwitch: function (_, dir) {
-                var p = this.getParam(_), opt = p.options, ctls = p.controls;
+            setDragSwitch: function (that, dir) {
+                var p = this.getParam(that), opt = p.options, ctls = p.controls;
                 if (p.none || !ctls.dialog) { return this; }
                 var arr = [
                     Config.Direction.Top,
@@ -1812,16 +1812,16 @@
                 if (opt.sizeAble && opt.dragSize) {
                     var padding = Common.getCssAttrSize(opt.padding, { attr: 'padding', unit: 'px', isLimit: true });
                     for (var i in dir) {
-                        ctls.dialog.appendChild(this.buildDragSwitch(_, dir[i], padding));
+                        ctls.dialog.appendChild(this.buildDragSwitch(that, dir[i], padding));
                     }
-                    this.showDragSwitch(_);
+                    this.showDragSwitch(that);
                 } else {
-                    this.hideDragSwitch(_);
+                    this.hideDragSwitch(that);
                 }
                 return this;
             },
-            buildDragSwitch: function (_, dir, padding) {
-                var p = this.getParam(_), opt = p.options, ctls = p.controls;
+            buildDragSwitch: function (that, dir, padding) {
+                var p = this.getParam(that), opt = p.options, ctls = p.controls;
                 if (p.none) { return this; }
                 if ($.isUndefined(dir)) {
                     dir = Config.Direction.BottomRight;
@@ -1850,26 +1850,26 @@
                 }
                 return div;
             },
-            getElements: function (_, className) {
-                return $('#' + _.getDialogId() + ' ' + className);
+            getElements: function (that, className) {
+                return $('#' + that.getDialogId() + ' ' + className);
             },
-            getZoomSwicths: function (_) {
-                return this.getElements(_, '.drag-switch');
+            getZoomSwicths: function (that) {
+                return this.getElements(that, '.drag-switch');
             },
-            showDragSwitch: function (_) {
-                this.getZoomSwicths(_).each(function () {
+            showDragSwitch: function (that) {
+                this.getZoomSwicths(that).each(function () {
                     $(this).show();
                 });
                 return this;
             },
-            hideDragSwitch: function (_) {
-                this.getZoomSwicths(_).each(function (i, obj, args) {
+            hideDragSwitch: function (that) {
+                this.getZoomSwicths(that).each(function (i, obj, args) {
                     $(this).hide();
                 });
                 return this;
             },
-            setButtonEvent: function (_, elements, evName, keyEvent) {
-                var util = this, p = util.getParam(_), opt = p.options;
+            setButtonEvent: function (that, elements, evName, keyEvent) {
+                var util = this, p = util.getParam(that), opt = p.options;
                 if (p.none) { return this; }
                 var events = p.events, c = elements.length, isWap = util.isWap();
                 for (var i = 0; i < c; i++) {
@@ -1882,7 +1882,7 @@
                         if (isWap) {
                             e.preventDefault();
                         }
-                        util.setAction(_, this);
+                        util.setAction(that, this);
                     });
 
                     //设置dblclick并阻止冒泡，防止点击按钮时触发标题栏双击事件
@@ -1918,7 +1918,7 @@
                             //if(32 == keyCode || (shkey >= 3 && keyChar == cg.shortcutKey[2].toUpperCase())){FuncCancel();}
                             // 判断是否为空格键 或 是否按下快捷键
                             if (Config.KEY_CODE.Space === keyCode || keyChar === shortcutKey) {
-                                util.setAction(_, this);
+                                util.setAction(that, this);
                             } else if (Common.isInKeys(keyCode, [37, 39])) {
                                 next = keyCode === 37 ? this.previousSibling : this.nextSibling;
                                 if ($.isElement(next) && next.className.indexOf('dialog-btn') >= 0) {
@@ -1943,8 +1943,8 @@
                 }
                 return util[key] = ts, true;
             },
-            setShortcutKeyEvent: function (_, btns) {
-                var util = this, p = util.getParam(_);
+            setShortcutKeyEvent: function (that, btns) {
+                var util = this, p = util.getParam(that);
                 if (!p.dics) {
                     p.dics = {};
                 }
@@ -1970,9 +1970,9 @@
                     if (!last || last.id !== p.dialog.id || (btn === p.btns.close && !p.options.keyClose)) {
                         return false;
                     } else if ($.isElement(btn)) {
-                        util.setAction(_, btn);
+                        util.setAction(that, btn);
                     } else if (keyChar === 'F') {
-                        _.focus();
+                        that.focus();
                     }
 
                     //var act = document.activeElement.id;
@@ -1980,8 +1980,8 @@
 
                 return util;
             },
-            checkEventObj: function (_, obj) {
-                var p = this.getParam(_), ctls = p.controls;
+            checkEventObj: function (that, obj) {
+                var p = this.getParam(that), ctls = p.controls;
                 if (p.none) { return this; }
 
                 if (!$.isElement(obj)) {
@@ -1996,13 +1996,13 @@
                 }
                 return false;
             },
-            setAction: function (_, obj, param) {
-                var util = this, p = util.getParam(_), opt = p.options, code = '', key = '', click = false;
+            setAction: function (that, obj, param) {
+                var util = this, p = util.getParam(that), opt = p.options, code = '', key = '', click = false;
                 if (typeof obj === 'string') {
                     key = obj.toLowerCase();
                     obj = null;
                 } else {
-                    if (!util.checkEventObj(_, obj)) {
+                    if (!util.checkEventObj(that, obj)) {
                         return util;
                     }
                     click = true;
@@ -2010,33 +2010,33 @@
                     code = (obj.getAttribute('code') || '').toLowerCase();
                 }
                 if (key === Config.DialogStatus.reload) {
-                    var curTime = new Date().getTime(), lastTime = _.lastReloadTime || 0;
+                    var curTime = new Date().getTime(), lastTime = that.lastReloadTime || 0;
                     //限制连击间隔，防止连击狂刷新
                     if (!lastTime || curTime - lastTime > opt.reloadInterval) {
-                        _.lastReloadTime = curTime;
-                        _.reload();
+                        that.lastReloadTime = curTime;
+                        that.reload();
                     } else {
                         //防抖
-                        _.lastReloadTime = curTime;
-                        window.clearTimeout(_.lastReloadTimer);
-                        _.lastReloadTimer = window.setTimeout(function () {
-                            _.reload();
+                        that.lastReloadTime = curTime;
+                        window.clearTimeout(that.lastReloadTimer);
+                        that.lastReloadTimer = window.setTimeout(function () {
+                            that.reload();
                         }, 320);
                     }
                 } else if (key === Config.DialogStatus.min) {
-                    _.min();
+                    that.min();
                 } else if (key === Config.DialogStatus.max) {
-                    _.max();
+                    that.max();
                 } else {
                     var cfg = {
                         obj: obj, code: code, key: key, param: param
                     };
                     //如果采用了延迟关闭，并且启用防抖功能，则延迟调用关闭
                     if (click && p.options.delayClose && opt.debounce && opt.debounceDelay > 0) {
-                        util.delayClose(_, p, (code || key), opt.debounceDelay, cfg);
+                        util.delayClose(that, p, (code || key), opt.debounceDelay, cfg);
                     } else {
                         util.setActionParam(p, cfg);
-                        _.close();
+                        that.close();
                     }
                 }
                 return util;
@@ -2053,8 +2053,8 @@
                 }
                 return this;
             },
-            isFirstAction: function (_, key) {
-                var p = this.getParam(_), opt = p.options, ts = new Date().getTime();
+            isFirstAction: function (that, key) {
+                var p = this.getParam(that), opt = p.options, ts = new Date().getTime();
                 //上次点击若超过5秒钟，则不启用延时
                 if (!p.debounceActions[key] || (ts - p.debounceActions[key] > opt.debounceLimit)) {
                     return p.debounceActions[key] = ts, true;
@@ -2062,29 +2062,29 @@
                 return false;
             },
             //延时触发关闭，防止无意义的快速连续点击
-            delayClose: function (_, p, key, delay, cfg) {
+            delayClose: function (that, p, key, delay, cfg) {
                 var util = this;
-                if (!delay || util.isFirstAction(_, key)) {
+                if (!delay || util.isFirstAction(that, key)) {
                     util.setActionParam(p, cfg);
-                    return _.close(), util;
+                    return that.close(), util;
                 }
                 if (p.debounceTimers[key]) {
                     window.clearTimeout(p.debounceTimers[key]);
                 }
                 return p.debounceTimers[key] = window.setTimeout(function () {
                     util.setActionParam(p, cfg);
-                    _.close();
+                    that.close();
                 }, delay), util;
             },
-            getAction: function (_) {
-                var p = this.getParam(_);
+            getAction: function (that) {
+                var p = this.getParam(that);
                 if (p.options.codeCallback || p.options.alwaysCallback) {
                     return $.extend({}, Config.DefaultResult['close'], p.actions);
                 }
                 return $.extend({}, p.actions);
             },
-            delAction: function (_) {
-                var p = this.getParam(_);
+            delAction: function (that) {
+                var p = this.getParam(that);
                 return p.actions = null, this;
             },
             getBoundary: function (parent) {
@@ -2103,8 +2103,8 @@
                 }
                 return $.extend(boundary, $.getBodySize());
             },
-            setCache: function (_) {
-                var util = this, p = util.getParam(_), opt = p.options, ctls = p.controls;
+            setCache: function (that) {
+                var util = this, p = util.getParam(that), opt = p.options, ctls = p.controls;
                 if (p.none) { return util; }
 
                 var obj = ctls.dialog,
@@ -2126,10 +2126,10 @@
                         bottom: bs.height - (obj.offsetTop + obj.offsetHeight)
                     }, size);
 
-                return util.setOptions(_, 'lastSize', lastSize), this;
+                return util.setOptions(that, 'lastSize', lastSize), this;
             },
-            setSize: function (_, options, loop) {
-                var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls;
+            setSize: function (that, options, loop) {
+                var util = this, p = this.getParam(that), opt = p.options, ctls = p.controls;
                 if (p.none) { return this; }
 
                 var opt = p.options,
@@ -2144,7 +2144,7 @@
                             window.clearTimeout(util.timerLoopSize);
                         }
                         util.timerLoopSize = window.setTimeout(function () {
-                            util.setSize(_, options, true);
+                            util.setSize(that, options, true);
                         }, 300);
                     }
                     return this;
@@ -2158,12 +2158,12 @@
                     height: 0
                 }, options);
 
-                if (sp.type === '' || (sp.width.isNaN() && sp.height.isNaN()) || _.getStatus()[sp.type]) {
+                if (sp.type === '' || (sp.width.isNaN() && sp.height.isNaN()) || that.getStatus()[sp.type]) {
                     return util;
                 }
 
                 if (p.status.normal) {
-                    util.setCache(_);
+                    util.setCache(that);
                 }
 
                 if (p.status.max && sp.type !== Config.DialogStatus.max && ctls.container) {
@@ -2173,7 +2173,7 @@
                 }
 
                 if (sp.type !== Config.DialogStatus.max && !opt.lock) {
-                    util.hideDocOverflow(_, true);
+                    util.hideDocOverflow(that, true);
                 }
 
                 if (btns.max) {
@@ -2218,9 +2218,9 @@
                     if (p.status.min) {
                         $.removeClass(obj, 'oui-dialog-min');
                     }
-                    util.hideDocOverflow(_)
-                        .hideDragSwitch(_)
-                        .setStatus(_, Config.DialogStatus.max);
+                    util.hideDocOverflow(that)
+                        .hideDragSwitch(that)
+                        .setStatus(that, Config.DialogStatus.max);
 
                 } else if (sp.type === Config.DialogStatus.min) {
                     if (!opt.minAble) {
@@ -2238,14 +2238,14 @@
                     }
                     $.setStyle(obj, { width: minW, height: minH }, 'px');
 
-                    util.hideDragSwitch(_)
-                        .setStatus(_, Config.DialogStatus.min)
-                        .setPosition(_, { position: opt.position })
-                        .showIcon(_);
+                    util.hideDragSwitch(that)
+                        .setStatus(that, Config.DialogStatus.min)
+                        .setPosition(that, { position: opt.position })
+                        .showIcon(that);
 
                     var pSize = $.getPaddingSize(obj),
                         topWidth = minW - pSize.left - pSize.right;
-                    util.setTitleSize(_, topWidth);
+                    util.setTitleSize(that, topWidth);
                 } else {
                     isSetBodySize = true;
 
@@ -2256,13 +2256,13 @@
                     } else if (p.status.min) {
                         $.removeClass(obj, 'oui-dialog-min');
                     }
-                    util.showDragSwitch(_).setStatus(_, Config.DialogStatus.normal);
+                    util.showDragSwitch(that).setStatus(that, Config.DialogStatus.normal);
 
                     if (sp.type === 'resize' || sp.type === 'size') {
                         par = { width: sp.width, height: sp.height };
                     } else if (sp.type === 'scale') {
                         isSetBodySize = false;
-                        util.changeSize(_, options);
+                        util.changeSize(that, options);
                     } else {  //sp.type === 'normal'
                         if (!$.isUndefined(p.lastSize)) {
                             isSetPosition = bs.width !== p.lastSize.bs.width || bs.height !== p.lastSize.bs.height;
@@ -2295,19 +2295,19 @@
                     }
                 }
                 if (isSetBodySize) {
-                    util.setBodySize(_, { fullScreen: isFullScreen });
+                    util.setBodySize(that, { fullScreen: isFullScreen });
                 }
                 if (isSetPosition) {
-                    util.setPosition(_);
+                    util.setPosition(that);
                 }
 
-                return util.showIcon(_);
+                return util.showIcon(that);
             },
-            setTitleSize: function (_, width) {
-                var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls;
+            setTitleSize: function (that, width) {
+                var util = this, p = this.getParam(that), opt = p.options, ctls = p.controls;
                 if (p.none) { return this; }
 
-                if (_.isClosed() || !ctls.head) {
+                if (that.isClosed() || !ctls.head) {
                     return this;
                 }
                 var topWidth = width || ctls.head.clientWidth,
@@ -2340,9 +2340,9 @@
                 }
                 return obj.style.cssText = cssText.join(';'), this;
             },
-            checkPosition: function (_, key, pos) {
+            checkPosition: function (that, key, pos) {
                 if (!$.isNumber(pos)) {
-                    pos = _.getOptions().position;
+                    pos = that.getOptions().position;
                 }
                 var dic = {
                     top: [1, 2, 3], middle: [4, 5, 6], bottom: [7, 8, 9],
@@ -2358,7 +2358,7 @@
                 }
                 return false;
             },
-            convertPositionNumber: function (_, opt) {
+            convertPositionNumber: function (that, opt) {
                 var keys = {
                     custom: 0,
                     topleft: 1, lefttop: 1,
@@ -2382,8 +2382,8 @@
                 }
                 return this;
             },
-            setPosition: function (_, options, isDragTo) {
-                var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls, obj = ctls.dialog;
+            setPosition: function (that, options, isDragTo) {
+                var util = this, p = this.getParam(that), opt = p.options, ctls = p.controls, obj = ctls.dialog;
                 if (p.none || !obj) { return this; }
 
                 if ($.isString(options) || $.isNumber(options)) {
@@ -2468,7 +2468,7 @@
 
                 //par.position = par.position === 'custom' ? 10 : parseInt(par.position, 10);
                 //转换Position关键字为数字
-                util.convertPositionNumber(_, par);
+                util.convertPositionNumber(that, par);
                 par.x = Math.abs(par.x);
                 par.y = Math.abs(par.y);
 
@@ -2483,8 +2483,8 @@
                     fixed = opt.lock || opt.fixed,
                     cpTop = fixed ? bs.y : cp.top,
                     cpLeft = fixed ? bs.x : cp.left,
-                    isCenter = util.checkPosition(_, Config.Position.Center, par.position),
-                    isMiddle = util.checkPosition(_, Config.Position.Middle, par.position),
+                    isCenter = util.checkPosition(that, Config.Position.Center, par.position),
+                    isMiddle = util.checkPosition(that, Config.Position.Middle, par.position),
                     isBottom = false,
                     isRight = false;
 
@@ -2494,7 +2494,7 @@
                 } else if (isCenter) {
                     posLeft = (bs.width / 2 - w / 2) + cpLeft;
                 } else {
-                    isRight = util.checkPosition(_, Config.Position.Right, par.position);
+                    isRight = util.checkPosition(that, Config.Position.Right, par.position);
                     posLeft = isRight ? (bs.width - par.x - w + cpLeft - bs.x) : cpLeft + par.x;
                 }
                 if ($.isPercent(opt.height)) {
@@ -2503,7 +2503,7 @@
                 } else if (isMiddle) {
                     posTop = bs.height / 2 - h / 2 + cpTop;
                 } else {
-                    isBottom = util.checkPosition(_, Config.Position.Bottom, par.position);
+                    isBottom = util.checkPosition(that, Config.Position.Bottom, par.position);
                     posTop = isBottom ? (bs.height - par.y - h + cpTop - bs.y) : cpTop + par.y;
                 }
 
@@ -2511,12 +2511,12 @@
                 util.clearPositionStyle(obj);
 
                 if (opt.animate && !isDragTo) {
-                    return util.moveToPosition(_, { left: posLeft, top: posTop, right: posRight, bottom: posBottom });
+                    return util.moveToPosition(that, { left: posLeft, top: posTop, right: posRight, bottom: posBottom });
                 }
                 return $.setStyle(obj, { left: posLeft, top: posTop, right: posRight, bottom: posBottom }, 'px'), util;
             },
-            movePosition: function (_, options, isMoveTo) {
-                var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls, obj = ctls.dialog;
+            movePosition: function (that, options, isMoveTo) {
+                var util = this, p = this.getParam(that), opt = p.options, ctls = p.controls, obj = ctls.dialog;
                 if (p.none || !obj || !opt.moveAble) { return util; }
 
                 var par = $.extend({
@@ -2603,8 +2603,8 @@
                 obj.style[key] = v + 'px';
                 return this;
             },
-            moveToPosition: function (_, pos) {
-                var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls, obj = ctls.dialog;
+            moveToPosition: function (that, pos) {
+                var util = this, p = this.getParam(that), opt = p.options, ctls = p.controls, obj = ctls.dialog;
                 if (p.none || !obj) { return this; }
 
                 var cp = $.getScrollPosition(),
@@ -2623,7 +2623,7 @@
                     rate = (pos.left - bs.x) / (pos.top - bs.y);
 
                 //转换Position关键字为数字
-                util.convertPositionNumber(_, opt);
+                util.convertPositionNumber(that, opt);
 
                 if (dir === 'animate') {
                     //如果不是居中显示的，起始位置从本位置开始
@@ -2971,8 +2971,8 @@
 
                 return res;
             },
-            dragPosition: function (_) {
-                var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls;
+            dragPosition: function (that) {
+                var util = this, p = this.getParam(that), opt = p.options, ctls = p.controls;
                 if (p.none) { return this; }
 
                 var isWap = util.isWap(),
@@ -3015,12 +3015,12 @@
 
                         if (!isToNormal && p.status.max && (x > 2 || y > 2)) {
                             isToNormal = true;
-                            util.dragToNormal(_, e, bs, moveX, moveY);
+                            util.dragToNormal(that, e, bs, moveX, moveY);
                             top = obj.offsetTop;
                             left = obj.offsetLeft;
                             return false;
                         }
-                        util.movePosition(_, { x: x, y: y }, true);
+                        util.movePosition(that, { x: x, y: y }, true);
                     };
                     document[evNameUp] = function () {
                         if (!opt.moveAble || !opt.dragMove || !moveAble) {
@@ -3046,8 +3046,8 @@
 
                 return this;
             },
-            changeSize: function (_, options, isDrag, dp) {
-                var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls, obj = ctls.dialog;
+            changeSize: function (that, options, isDrag, dp) {
+                var util = this, p = this.getParam(that), opt = p.options, ctls = p.controls, obj = ctls.dialog;
                 if (p.none) { return this; }
 
                 if (!obj || !opt.sizeAble || (!opt.dragSize && isDrag)) {
@@ -3075,7 +3075,7 @@
 
                 //判断对话框当前状态是否被最小化，若最小化，需要先还原大小
                 if (isMin) {
-                    util.setSize(_, { type: Config.DialogStatus.normal });
+                    util.setSize(that, { type: Config.DialogStatus.normal });
                 }
 
                 if (!isDrag) {
@@ -3098,7 +3098,7 @@
                 if (par.resizeTo && !isDrag) {
                     w = par.x;
                     h = par.y;
-                    var ds = util.getSize(_, opt, ctls, obj);
+                    var ds = util.getSize(that, opt, ctls, obj);
                     if (par.isBody) {
                         if (w <= 0) { w = ds.width; }
                         if (h <= 0) { h = ds.height; }
@@ -3207,32 +3207,32 @@
                         $.setStyle(obj, { left: newLeft }, 'px');
                         break;
                 }
-                util.setBodySize(_, { fullScreen: false, drag: isDrag });
+                util.setBodySize(that, { fullScreen: false, drag: isDrag });
 
                 if (ctls.foot && ctls.dialog.offsetHeight < minHeight) {
                     ctls.foot.style.visibility = 'hidden';
-                    _.dragScaleHideBottom = true;
-                } else if (_.dragScaleHideBottom) {
+                    that.dragScaleHideBottom = true;
+                } else if (that.dragScaleHideBottom) {
                     ctls.foot.style.visibility = 'visible';
                 }
 
                 if (!isDrag && par.dir === Config.Direction.Center) {
-                    util.setPosition(_, par);
+                    util.setPosition(that, par);
                 }
 
                 //判断对话框当前状态是否被最小化，若最小化，设置完尺寸之后需要重新最小化
                 if (isMin) {
-                    util.setSize(_, { type: Config.DialogStatus.min });
+                    util.setSize(that, { type: Config.DialogStatus.min });
                 }
 
-                return util.showIcon(_);
+                return util.showIcon(that);
             },
-            isAutoSize: function (_, options) {
-                var util = this, p = this.getParam(_), opt = options || p.options, ctls = p.controls;
+            isAutoSize: function (that, options) {
+                var util = this, p = this.getParam(that), opt = options || p.options, ctls = p.controls;
                 if (p.none) { return false; }
 
                 var isAutoSize = false;
-                if (_.isClosed()) {
+                if (that.isClosed()) {
                     return false;
                 }
                 if (opt.width === 'auto') {
@@ -3255,8 +3255,8 @@
             isChange: function (newContent, oldContent) {
                 return newContent !== oldContent;
             },
-            getAutoSize: function (_, isLimit) {
-                var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls;
+            getAutoSize: function (that, isLimit) {
+                var util = this, p = this.getParam(that), opt = p.options, ctls = p.controls;
                 if (p.none) { return this; }
 
                 var ismsg = opt.type === 'message',
@@ -3301,8 +3301,8 @@
                 }
                 return s;
             },
-            setBodySize: function (_, options) {
-                var util = this, p = util.getParam(_), opt = p.options, ctls = p.controls;
+            setBodySize: function (that, options) {
+                var util = this, p = util.getParam(that), opt = p.options, ctls = p.controls;
                 if (p.none) { return util; }
 
                 var par = $.extend({
@@ -3335,7 +3335,7 @@
                 }
 
                 //在非拖动大小并且常态状态时，设置对话框百分比尺寸
-                if (!par.drag && _.isNormal() && Common.isPercentSize(opt.width, opt.height)) {
+                if (!par.drag && that.isNormal() && Common.isPercentSize(opt.width, opt.height)) {
                     if ($.isPercent(opt.width)) {
                         opt.margin = margin;
                         boxWidth = bs.width * parseInt(opt.width, 10) / 100 - margin.left - margin.right;
@@ -3349,7 +3349,7 @@
 
                 if (opt.height !== 'auto') {
                     /*
-                    if(boxHeight < opt.height && !_.events.dragingSize) {
+                    if(boxHeight < opt.height && !that.events.dragingSize) {
                         boxHeight = opt.height;
                         obj.style.height = boxHeight + 'px';
                     } else 
@@ -3451,27 +3451,27 @@
                     window.clearTimeout(p.timerCover);
                 }
                 p.timerCover = window.setTimeout(function () {
-                    util.setCoverSize(_);
+                    util.setCoverSize(that);
                 }, 100);
 
-                util.setTitleSize(_).showIcon(_);
+                util.setTitleSize(that).showIcon(that);
 
                 if ($.isFunction(opt.resize)) {
                     if (par.drag && opt.resizeDebounce) {
                         if (p.timerResize) { window.clearTimeout(p.timerResize); }
-                        p.timerResize = window.setTimeout(function () { util.resize(_); }, 30);
+                        p.timerResize = window.setTimeout(function () { util.resize(that); }, 30);
                     } else {
-                        util.resize(_);
+                        util.resize(that);
                     }
                 }
                 return util;
             },
-            dragToNormal: function (_, evt, bs, moveX, moveY) {
-                var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls, obj = ctls.dialog;
+            dragToNormal: function (that, evt, bs, moveX, moveY) {
+                var util = this, p = this.getParam(that), opt = p.options, ctls = p.controls, obj = ctls.dialog;
                 if (p.none) { return this; }
 
                 //对话框最大化时，拖动对话框，先切换到标准模式（尺寸、定位）
-                util.setSize(_, { type: Config.DialogStatus.normal });
+                util.setSize(that, { type: Config.DialogStatus.normal });
 
                 var offsetRateX = (evt.clientX / bs.width),
                     offsetX = evt.clientX,
@@ -3486,12 +3486,12 @@
                     offsetX = evt.clientX - moveX;
                 }
                 //移动对话框到当前鼠标位置
-                util.setPosition(_, { position: 'custom', event: 'drag', x: offsetX, y: offsetY }, true);
+                util.setPosition(that, { position: 'custom', event: 'drag', x: offsetX, y: offsetY }, true);
 
                 return this;
             },
-            dragSize: function (_) {
-                var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls;
+            dragSize: function (that) {
+                var util = this, p = this.getParam(that), opt = p.options, ctls = p.controls;
                 if (p.none || !opt.sizeAble || !opt.dragSize) { return this; }
 
                 var isWap = util.isWap(),
@@ -3537,7 +3537,7 @@
                             y = ((isWap ? e.touches[0].clientY : e.clientY) - moveY) * (dir.indexOf(Config.Direction.Top) >= 0 ? -1 : 1);
 
                         util.showIframeShade(ctls, true);
-                        util.changeSize(_, { dir: dir, x: x, y: y }, true, par);
+                        util.changeSize(that, { dir: dir, x: x, y: y }, true, par);
                     };
                     document[evNameUp] = function () {
                         if (!opt.sizeAble || !opt.dragSize || !moveAble) {
@@ -3551,19 +3551,19 @@
                     };
                 }
 
-                util.getZoomSwicths(_).each(function (i, obj) {
+                util.getZoomSwicths(that).each(function (i, obj) {
                     $.addListener(obj, evNameDown.substr(2), function (event) {
-                        _.topMost();
+                        that.topMost();
                         resizeDialog(event, obj.pos);
                     });
                 });
                 return this;
             },
-            showHeadFoot: function (_, isShow, type, rebuild, key) {
-                var util = this, p = this.getParam(_), opt = p.options, ctls = p.controls;
+            showHeadFoot: function (that, isShow, type, rebuild, key) {
+                var util = this, p = this.getParam(that), opt = p.options, ctls = p.controls;
                 if (p.none) { return this; }
 
-                if (_.isClosed()) {
+                if (that.isClosed()) {
                     return util;
                 }
                 if ($.isString(isShow, true)) {
@@ -3596,11 +3596,11 @@
                     if (obj && !rebuild) {
                         obj.style.display = '';
                     } else {
-                        util.setOptions(_, 'options', key === 'head' ? 'showHead' : 'showFoot', true);
+                        util.setOptions(that, 'options', key === 'head' ? 'showHead' : 'showFoot', true);
                         if (key === 'head') {
-                            util.buildHead(_, ctls.main, rebuild);
+                            util.buildHead(that, ctls.main, rebuild);
                         } else {
-                            util.buildFoot(_, ctls.main, rebuild);
+                            util.buildFoot(that, ctls.main, rebuild);
                         }
                     }
                 } else if (obj) {
@@ -3608,12 +3608,12 @@
                 }
 
                 if (h !== 0) {
-                    util.changeSize(_, { dir: dir, y: show ? h : -h });
+                    util.changeSize(that, { dir: dir, y: show ? h : -h });
                 }
-                return util.setBodySize(_), this;
+                return util.setBodySize(that), this;
             },
-            setZindex: function (_, zindex) {
-                var util = this, p = util.getParam(_), ctls = p.controls;
+            setZindex: function (that, zindex) {
+                var util = this, p = util.getParam(that), ctls = p.controls;
                 if (p.none || !ctls.dialog) { return util; }
 
                 if (typeof zindex !== 'number') {
@@ -3644,7 +3644,7 @@
 
                 return (ok || cancel) ? { callback: callback, ok: ok, cancel: cancel } : undefined;
             },
-            callback: function (_, p, actions) {
+            callback: function (that, p, actions) {
                 var util = this,
                     opt = p.options,
                     func = util.checkCallback(p, actions);
@@ -3671,13 +3671,13 @@
                 //根据按钮code 获取自定义的回调函数与参数
                 var custom = p.buttonCallback[code];
                 if (custom && $.isFunction(custom.func)) {
-                    custom.func(dr, _, custom.param || parameter);
+                    custom.func(dr, that, custom.param || parameter);
                 } else if (Common.isInKeys(result, ['ok', 'yes'], Config.DialogResult)) {
-                    func.ok && func.ok(dr, _, parameter);
+                    func.ok && func.ok(dr, that, parameter);
                 } else if (Common.isInKeys(result, ['cancel', 'ignore', 'no'], Config.DialogResult)) {
-                    func.cancel && func.cancel(dr, _, parameter);
+                    func.cancel && func.cancel(dr, that, parameter);
                 } else {
-                    func.callback && func.callback(dr, _, parameter);
+                    func.callback && func.callback(dr, that, parameter);
                 }
 
                 if ($.isElement(opt.focusTo)) {
@@ -3696,8 +3696,8 @@
                 }
                 return true;
             },
-            getSize: function (_, opt, ctls, obj) {
-                var util = this, p = util.getParam(_);
+            getSize: function (that, opt, ctls, obj) {
+                var util = this, p = util.getParam(that);
                 if (!opt) {
                     opt = p.options;
                     ctls = p.controls;
@@ -3721,22 +3721,22 @@
                     dialog: ds
                 };
             },
-            resize: function (_) {
-                var util = this, p = util.getParam(_), opt = p.options, ctls = p.controls;
+            resize: function (that) {
+                var util = this, p = util.getParam(that), opt = p.options, ctls = p.controls;
                 if (p.none || !ctls.dialog) { return util; }
                 var obj = ctls.body;
                 if ($.isFunction(opt.resize) && $.isElement(obj)) {
-                    var size = util.getSize(_, opt, ctls, obj);
+                    var size = util.getSize(that, opt, ctls, obj);
                     //判断尺寸是否改变，防止重复回调相同的尺寸
                     if (!util.compare(p.lastResize, size)) {
                         p.lastResize = size;
-                        opt.resize(size, _);
+                        opt.resize(size, that);
                     }
                 }
                 return util;
             },
-            dispose: function (_) {
-                var util = this, p = util.getParam(_);
+            dispose: function (that) {
+                var util = this, p = util.getParam(that);
                 for (var k in p.controls) {
                     p.controls[k] = null;
                 }
@@ -3756,8 +3756,8 @@
 
                 return this;
             },
-            remove: function (_) {
-                return Factory.remove(_.id), this;
+            remove: function (that) {
+                return Factory.remove(that.id), this;
             },
             redirect: function (url) {
                 if ($.isString(url, true)) {
@@ -3773,9 +3773,9 @@
                 return false;
             },
             //以下方法为 tooltip        
-            buildTooltip: function (_, options) {
-                var util = this, p = util.getParam(_), opt = p.options, ctls = p.controls;
-                if (p.none || _.isClosed()) { return util; }
+            buildTooltip: function (that, options) {
+                var util = this, p = util.getParam(that), opt = p.options, ctls = p.controls;
+                if (p.none || that.isClosed()) { return util; }
 
                 if (!$.isElement(opt.target)) {
                     return false;
@@ -3792,15 +3792,15 @@
 
                 if (tipId && d && ctls.content) {
                     p.controls = util.getParam(d).controls;
-                    util.updateTooltip(_, opt.content, opt.target, opt);
+                    util.updateTooltip(that, opt.content, opt.target, opt);
                 } else {
                     //对话框
                     ctls.dialog = $.createElement('div');
                     ctls.dialog.className = 'oui-tooltip';
                     ctls.dialog.style.zIndex = opt.zindex;
-                    ctls.dialog.id = _.getDialogId();
+                    ctls.dialog.id = that.getDialogId();
 
-                    ctls.body = util.buildBody(_, ctls.dialog);
+                    ctls.body = util.buildBody(that, ctls.dialog);
 
                     $.setAttribute(ctls.dialog, 'target', opt.target.id || '');
                     //设置for属性
@@ -3824,20 +3824,20 @@
 
                 Factory.setWindowResize();
 
-                util.buildCloseTiming(_);
+                util.buildCloseTiming(that);
 
-                return util.setTooltipPosition(_);
+                return util.setTooltipPosition(that);
             },
-            updateTooltip: function (_, options) {
-                var util = this, p = util.getParam(_), opt = p.options, ctls = p.controls;
-                if (p.none || _.isClosed()) { return util; }
+            updateTooltip: function (that, options) {
+                var util = this, p = util.getParam(that), opt = p.options, ctls = p.controls;
+                if (p.none || that.isClosed()) { return util; }
 
                 if (ctls.content) {
                     ctls.content.innerHTML = opt.content;
                 }
-                return util.setTooltipPosition(_);
+                return util.setTooltipPosition(that);
             },
-            setTooltipStyle: function (_, opt, keys) {
+            setTooltipStyle: function (that, opt, keys) {
                 var styles = {};
                 for (var i in keys) {
                     var k = keys[i];
@@ -3847,15 +3847,15 @@
                 }
                 return styles;
             },
-            setTooltipSize: function (_) {
-                var util = this, p = util.getParam(_), opt = p.options, ctls = p.controls;
-                var styles = util.setTooltipStyle(_, opt, [
+            setTooltipSize: function (that) {
+                var util = this, p = util.getParam(that), opt = p.options, ctls = p.controls;
+                var styles = util.setTooltipStyle(that, opt, [
                     'width', 'height', 'maxWidth', 'maxHeight', 'minWidth', 'minHeight'
                 ]);
                 $.setStyle(ctls.dialog, styles, 'px');
                 return util;
             },
-            buildTooltipStyle: function (_, par, p, isShow) {
+            buildTooltipStyle: function (that, par, p, isShow) {
                 var util = this,
                     opt = p.options,
                     obj = p.controls.dialog;
@@ -3869,14 +3869,14 @@
                 obj.style.cssText = cssText;
                 obj.style.zIndex = opt.zindex;
 
-                var res = util.setTooltipSize(_).setTargetPosition(par, obj), cssName = '';
+                var res = util.setTooltipSize(that).setTargetPosition(par, obj), cssName = '';
                 if (res.css || styles['border-color']) {
                     if (styles['border-color']) {
                         res.css += 'border-' + res.dir + '-color:' + styles['border-color'] + ';';
                     }
-                    cssName = 'tip-pos-' + _.id;
+                    cssName = 'tip-pos-' + that.id;
                     var cssCon = '.{0}:after,.{0}:before{{{1}}}'.format(cssName, res.css);
-                    $.createCssStyle(cssCon, 'tip-css-' + _.id, function (elem) {
+                    $.createCssStyle(cssCon, 'tip-css-' + that.id, function (elem) {
                         p.styleElement = elem;
                     });
                 }
@@ -3891,18 +3891,18 @@
                     func();
                 }
             },
-            loadImg: function (_, imgs, func) {
+            loadImg: function (that, imgs, func) {
                 var util = this, c = imgs.length;
-                util.loads[_.id] = { idx: 0 };
+                util.loads[that.id] = { idx: 0 };
 
                 for (var i = 0; i < c; i++) {
                     imgs[i].onload = function () {
-                        util.loads[_.id].idx += 1;
-                        util.loadComplete(c, util.loads[_.id].idx, func);
+                        util.loads[that.id].idx += 1;
+                        util.loadComplete(c, util.loads[that.id].idx, func);
                     };
                     imgs[i].onerror = function () {
-                        util.loads[_.id].idx += 1;
-                        util.loadComplete(c, util.loads[_.id].idx, func);
+                        util.loads[that.id].idx += 1;
+                        util.loadComplete(c, util.loads[that.id].idx, func);
                         //尝试加载默认的图片
                         var defaultSrc = this.getAttribute('default-src');
                         if (defaultSrc) {
@@ -3913,13 +3913,13 @@
                     };
                 }
             },
-            setTooltipPosition: function (_) {
+            setTooltipPosition: function (that) {
                 var util = this,
-                    p = util.getParam(_),
+                    p = util.getParam(that),
                     opt = p.options,
                     ctls = p.controls,
                     obj = p.controls.dialog;
-                if (p.none || _.isClosed()) { return util; }
+                if (p.none || that.isClosed()) { return util; }
 
                 var par = {
                     target: opt.target,
@@ -3934,11 +3934,11 @@
                 var imgs = ctls.content.getElementsByTagName('img');
                 if (imgs.length > 0) {
                     obj.style.display = 'none';
-                    util.loadImg(_, imgs, function () {
-                        util.buildTooltipStyle(_, par, p, true);
+                    util.loadImg(that, imgs, function () {
+                        util.buildTooltipStyle(that, par, p, true);
                     });
                 } else {
-                    util.buildTooltipStyle(_, par, p);
+                    util.buildTooltipStyle(that, par, p);
                 }
 
                 return util;
@@ -4077,7 +4077,7 @@
 
     Dialog.prototype = {
         initial: function (options) {
-            var _ = this, p = Util.getParam(_), opt = options || p.options, id = opt.id;
+            var that = this, p = Util.getParam(that), opt = options || p.options, id = opt.id;
 
             if ($.isElement(opt.parent) &&
                 ['DIV'].indexOf(opt.parent.tagName) >= 0) {
@@ -4102,28 +4102,28 @@
 
             var dialog = Factory.getDialog(id);
             if (!dialog) {
-                Factory.setDialog(id, _)
+                Factory.setDialog(id, that)
                     .setOptions(id, opt)
                     .setOptions(id, 'dialogId', Common.buildId(id, 'd-'));
             }
 
-            Util.setOptions(_, 'options', opt);
+            Util.setOptions(that, 'options', opt);
 
             if (!Config.IsDefaultSkin(opt.skin)) {
                 Factory.loadCss(opt.skin, function () {
-                    Util.build(_, opt);
+                    Util.build(that, opt);
                 });
             } else {
-                Util.build(_, opt);
+                Util.build(that, opt);
             }
 
             if ($.isFunction(opt.complete)) {
                 window.setTimeout(function () {
-                    opt.complete(_);
+                    opt.complete(that);
                 }, 50);
             }
 
-            return _;
+            return that;
         },
         getOptions: function (key) {
             var opt = $.extend({}, Factory.getOptions(this.id, 'options'));
@@ -4209,79 +4209,79 @@
             return this.getStatus().normal;
         },
         show: function (content, title) {
-            var _ = this, p = Util.getParam(_);
-            if (_.isClosed() || !p || !_.isHide()) {
-                return _;
+            var that = this, p = Util.getParam(that);
+            if (that.isClosed() || !p || !that.isHide()) {
+                return that;
             }
-            Util.setOptions(_, 'hide', false)
+            Util.setOptions(that, 'hide', false)
                 .showDialog(p.controls, true, content, title);
 
             if (p.options.lock) {
-                Util.hideDocOverflow(_, false);
+                Util.hideDocOverflow(that, false);
             }
 
             if (p.options.type !== 'tooltip') {
-                Util.setBodySize(_, { event: 'show', lastSize: p.hideSize });
+                Util.setBodySize(that, { event: 'show', lastSize: p.hideSize });
             }
 
             if (!p.options.lock) {
-                Util.setClickBgClose(_);
+                Util.setClickBgClose(that);
             }
 
             if ($.isBoolean(content, false) || !Util.isVisible(p.controls)) {
-                _.position();
+                that.position();
             }
 
-            return _;
+            return that;
         },
         hide: function (action, dialogResult) {
-            var _ = this, p = Util.getParam(_), opt = p.options;
-            if (_.isClosed() || _.isHide() || !p || !opt.closeAble) {
-                return _;
+            var that = this, p = Util.getParam(that), opt = p.options;
+            if (that.isClosed() || that.isHide() || !p || !opt.closeAble) {
+                return that;
             }
             if (action === 'initial-hide') {
-                console.log(action + ': ' + _.id);
+                console.log(action + ': ' + that.id);
             }
             var ctls = p.controls,
                 timers = p.timers,
                 url = opt.redirect || opt.targetUrl,
-                actions = Util.getAction(_);
+                actions = Util.getAction(that);
 
             if (!ctls.dialog) {
-                return _;
+                return that;
             }
 
             //记录隐藏之前的对话框尺寸大小，以便再次显示时，还原尺寸大小
-            Util.setOptions(_, 'hideSize', { width: ctls.dialog.offsetWidth, height: ctls.dialog.offsetHeight });
+            Util.setOptions(that, 'hideSize', { width: ctls.dialog.offsetWidth, height: ctls.dialog.offsetHeight });
 
             Util.showDialog(ctls, false)
-                .setOptions(_, 'hide', true)
-                .delAction(_)
+                .setOptions(that, 'hide', true)
+                .delAction(that)
                 .clearTimer(timers)
-                //.hideDocOverflow(_, true)
-                .callback(_, p, actions)
+                //.hideDocOverflow(that, true)
+                .callback(that, p, actions)
                 .redirect(url);
 
             if (p.options.lock) {
-                Util.hideDocOverflow(_, true);
+                Util.hideDocOverflow(that, true);
             }
 
-            return _;
+            return that;
         },
         close: function (force) {
-            var _ = this, util = Util, p = util.getParam(_), opt = p.options;
+            var that = this, util = Util, p = util.getParam(that), opt = p.options;
 
             //是否强制关闭对话框，参数类型必须是 boolean 类型
             //当前forceClose为true时，将忽略closeAble和closeType
             var forceClose = $.isBoolean(force, false);
 
-            if (_.isClosed() || !p || (!opt.closeAble && !forceClose)) {
-                return _;
+            if (that.isClosed() || !p || (!opt.closeAble && !forceClose)) {
+                return that;
             }
             var ctls = p.controls,
                 timers = p.timers,
                 url = opt.redirect || opt.targetUrl,
-                actions = util.getAction(_),
+                actions = util.getAction(that),
                 func = util.checkCallback(p, actions);
 
             // 点击确定按钮时，若延时关闭，则仅回调而不关闭
@@ -4290,24 +4290,24 @@
                 && (util.isIframe(opt) || util.isSure(actions.result))
                 && func
                 && (func.callback || func.ok)) {
-                return util.delAction(_).callback(_, p, actions), _;
+                return util.delAction(that).callback(that, p, actions), that;
             }
             if (!forceClose && opt.closeType === 'hide') {
-                return _.hide();
+                return that.hide();
             }
 
             $.removeChild(p.parent, [ctls.container || ctls.dialog, ctls.shade]);
 
-            util.setOptions(_, 'closed', true)
-                .delAction(_)
+            util.setOptions(that, 'closed', true)
+                .delAction(that)
                 .clearTimer(timers)
-                .hideDocOverflow(_, true)
-                .callback(_, p, actions)
-                .dispose(_)
-                .remove(_)
+                .hideDocOverflow(that, true)
+                .callback(that, p, actions)
+                .dispose(that)
+                .remove(that)
                 .redirect(url);
 
-            return _;
+            return that;
         },
         update: function (content, title, options) {
             if ($.isString(options)) {
@@ -4322,7 +4322,7 @@
                 }
             }
             var opt = Common.checkOptions(content, title, options, true);
-            var _ = this, p = Util.getParam(_), ctls = p.controls;
+            var that = this, p = Util.getParam(that), ctls = p.controls;
 
             //设置创建时间，防止被document事件关闭
             p.buildTime = new Date().getTime();
@@ -4344,12 +4344,12 @@
             var isChanged = Util.isChange(opt.content, p.options.content);
 
             if ($.extend(p.options, opt).type === Config.DialogType.tooltip) {
-                Util.updateTooltip(_, p.options);
-                return _;
+                Util.updateTooltip(that, p.options);
+                return that;
             }
 
-            function updateDialog(_) {
-                var isAutoSize = Util.isAutoSize(_),
+            function updateDialog(that) {
+                var isAutoSize = Util.isAutoSize(that),
                     isMin = p.status.min;
 
                 if (ctls.title && opt.title) {
@@ -4357,38 +4357,38 @@
                 }
 
                 if (isMin) {
-                    Util.setSize(_, { type: Config.DialogStatus.normal });
-                    Util.setPosition(_);
+                    Util.setSize(that, { type: Config.DialogStatus.normal });
+                    Util.setPosition(that);
                 }
-                Util.buildContent(_, true).setBodySize(_).setCache(_);
+                Util.buildContent(that, true).setBodySize(that).setCache(that);
 
                 if (isMin) {
-                    Util.setSize(_, { type: Config.DialogStatus.min });
+                    Util.setSize(that, { type: Config.DialogStatus.min });
                 }
 
                 if (isAutoSize && isChanged) {
-                    window.setTimeout(function () { Util.setPosition(_); }, 10);
+                    window.setTimeout(function () { Util.setPosition(that); }, 10);
                 }
 
                 if (!p.options.lock) {
-                    Util.setClickBgClose(_);
+                    Util.setClickBgClose(that);
                 }
 
-                if (_.isHide() && !_.isClosed()) {
-                    _.show();
+                if (that.isHide() && !that.isClosed()) {
+                    that.show();
                 }
             }
 
             if (ctls.content) {
-                updateDialog(_);
+                updateDialog(that);
             }
 
-            return _.skin(opt.skin);
+            return that.skin(opt.skin);
         },
         skin: function (skin) {
-            var _ = this, p = Util.getParam(_), ctls = p.controls;
+            var that = this, p = Util.getParam(that), ctls = p.controls;
             if (p.none || !ctls.content || Config.IsDefaultSkin(skin)) {
-                return _;
+                return that;
             }
             if ($.isString(skin, true)) {
                 Factory.loadCss(skin, function () {
@@ -4396,10 +4396,10 @@
                     ctls.dialog.className = 'oui-dialog oui-dialog-' + skin;
                 });
             }
-            return _;
+            return that;
         },
         append: function (content, title, options) {
-            var _ = this, p = Util.getParam(_), ctls = p.controls;
+            var that = this, p = Util.getParam(that), ctls = p.controls;
             if (p.none || !ctls.content) {
                 return this;
             }
@@ -4410,32 +4410,32 @@
             return this.update(html + content, title, options);
         },
         insert: function (content, title, options) {
-            var _ = this, p = Util.getParam(_), ctls = p.controls;
+            var that = this, p = Util.getParam(that), ctls = p.controls;
             if (p.none || !ctls.content) {
-                return _;
+                return that;
             }
             if (ctls.icon) {
                 $.removeChild(ctls.content, ctls.icon);
             }
             var html = ctls.content.innerHTML;
-            return _.update(content + html, title, options);
+            return that.update(content + html, title, options);
         },
         title: function (title) {
-            var _ = this, p = Util.getParam(_), ctls = p.controls;
+            var that = this, p = Util.getParam(that), ctls = p.controls;
             if (p.none || !ctls.title) {
-                return $.isUndefined(title) ? '' : _;
+                return $.isUndefined(title) ? '' : that;
             }
             if($.isUndefined(title)) {
                 return ctls.title.innerHTML;
             } else {
                 ctls.title.innerHTML = title;
             }
-            return _;
+            return that;
         },
         content: function (content, title) {
-            var _ = this, p = Util.getParam(_), ctls = p.controls;
+            var that = this, p = Util.getParam(that), ctls = p.controls;
             if (p.none || !ctls.content) {
-                return $.isUndefined(content)? '' : _;
+                return $.isUndefined(content)? '' : that;
             }
             if($.isUndefined(content)) {
                 return ctls.content.innerHTML;
@@ -4445,37 +4445,37 @@
                     ctls.title.innerHTML = title;
                 }
             }
-            return _;
+            return that;
         },
         focus: function (obj) {
-            var _ = this, p = Util.getParam(_), buttons = p.buttons;
+            var that = this, p = Util.getParam(that), buttons = p.buttons;
             if (Util.isWap()) {
-                return _;
+                return that;
             }
-            if (p.none || _.isClosed() || _.isHide()) {
-                return _;
+            if (p.none || that.isClosed() || that.isHide()) {
+                return that;
             }
 
             if (Common.isChildFocus(obj, p.controls.dialog)) {
-                return _;
+                return that;
             }
 
             var dbKey = p.options.defaultButton;
             if (dbKey && buttons[dbKey]) {
                 buttons[dbKey].focus();
-                return _;
+                return that;
             }
 
             var btn = null;
             for (var k in buttons) {
                 btn = buttons[k];
             }
-            return btn && btn.focus(), _;
+            return btn && btn.focus(), that;
         },
         min: function () {
             //return Util.setSize(this, { type: Config.DialogStatus.min });
-            var _ = this, p = Util.getParam(_);
-            if (p.none) { return _; }
+            var that = this, p = Util.getParam(that);
+            if (p.none) { return that; }
 
             var type = Config.DialogStatus.min, lastStatus = p.lastStatus;
             if (p.status.min && lastStatus === Config.DialogStatus.max) {
@@ -4483,25 +4483,25 @@
             } else if (p.status.min) {
                 type = Config.DialogStatus.normal;
             }
-            return Util.setSize(_, { type: type }), _;
+            return Util.setSize(that, { type: type }), that;
         },
         max: function () {
-            var _ = this, p = Util.getParam(_);
-            if (p.none) { return _; }
+            var that = this, p = Util.getParam(that);
+            if (p.none) { return that; }
 
             var type = Config.DialogStatus.max, lastStatus = p.lastStatus;
 
             if (p.status.max || (p.status.min && lastStatus === Config.DialogStatus.normal)) {
                 type = Config.DialogStatus.normal;
             }
-            return Util.setSize(_, { type: type }), _;
+            return Util.setSize(that, { type: type }), that;
         },
         reload: function () {
-            var _ = this, p = Util.getParam(_);
-            if (p.none || _.isClosed() || _.isHide() || _.isMin()) {
-                return _;
+            var that = this, p = Util.getParam(that);
+            if (p.none || that.isClosed() || that.isHide() || that.isMin()) {
+                return that;
             }
-            return Util.reload(_), _;
+            return Util.reload(that), that;
         },
         restore: function () {
             return Util.setSize(this, { type: Config.DialogStatus.normal }), this;
@@ -4521,9 +4521,9 @@
             return Util.changeSize(this, options), this;
         },
         position: function (options) {
-            var _ = this, p = Util.getParam(_);
-            if (_.isClosed() || p.none) { return this; }
-            return Util.setPosition(_, options), this;
+            var that = this, p = Util.getParam(that);
+            if (that.isClosed() || p.none) { return this; }
+            return Util.setPosition(that, options), this;
         },
         move: function (options) {
             return Util.movePosition(this, options, false), this;
@@ -4541,17 +4541,17 @@
             return Util.setZindex(this, zindex), this;
         },
         topMost: function () {
-            var _ = this, p = Util.getParam(_);
-            if (p.none || _.isClosed() || !p.options.topMost) {
+            var that = this, p = Util.getParam(that);
+            if (p.none || that.isClosed() || !p.options.topMost) {
                 return false;
             }
             var d = Factory.getTop();
-            if (d && !Util.isSelf(_, d)) {
+            if (d && !Util.isSelf(that, d)) {
                 var zindex = d.getOptions().zindex;
-                Util.setZindex(d, _.getOptions().zindex);
-                return Util.setZindex(_, zindex);
+                Util.setZindex(d, that.getOptions().zindex);
+                return Util.setZindex(that, zindex);
             }
-            return _;
+            return that;
         },
         showHead: function (isShow, type, rebuild) {
             return Util.showHeadFoot(this, isShow, type, rebuild, 'head'), this;

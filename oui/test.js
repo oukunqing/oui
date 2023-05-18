@@ -1652,3 +1652,6 @@ console.log(/^(http:\/\/|https:\/\/)([A-Z0-9.:]+)\//i.test(url123));
 
 console.log(url123.match(/^(http:\/\/|https:\/\/)([A-Z0-9.:]+)\//i));
 console.log(url123.replace(/^(http:\/\/|https:\/\/)([A-Z0-9_\-\.:]+)(\/)/i, '$3'));
+
+var width = 120;
+console.log(`${width}px`);
