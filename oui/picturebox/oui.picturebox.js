@@ -256,9 +256,14 @@
             });
 
             if (that.opt.fullScreen) {
+                //Full Screen
                 $.addKeyListener(document, 'keyup', 'F', function (e, n) {
                     $.fullScreen(that.box);
-                }, true);                
+                }, true);
+                //Quan Ping
+                $.addKeyListener(document, 'keyup', 'Q', function (e, n) {
+                    $.fullScreen(that.box);
+                }, true);
             }
 
             return this;
@@ -546,21 +551,10 @@
                 var tar = ev.target, pos = $.getEventPos(ev);
                 if (tar.className.indexOf('oui-picbox-img') >= 0) {
                     //计算中心点的偏移量
-                    //鼠标当前位置要减去图片外框的偏移量
-                    /*
-                    //这个计算方式结果会有偏移误差
-                    that.cfg.x -= (ratio - 1) * (pos.x - that.cfg.x - that.cfg.offset.left);
-                    that.cfg.y -= (ratio - 1) * (pos.y - that.cfg.y - that.cfg.offset.top);
-                    */
-                    //采用这种计算方式没有偏移
                     //算出百分比：当前宽度减去原来宽度，除以原来宽度，算出尺寸改变的百分比
-                    //算出偏移量：当前鼠标坐标减去原来鼠标坐标（再减去相对页面偏移量）
-                    //that.cfg.x -= (w - that.cfg.w) * (pos.x - that.cfg.x - that.cfg.offset.left) / that.cfg.w;
-                    //that.cfg.y -= (h - that.cfg.h) * (pos.y - that.cfg.y - that.cfg.offset.top) / that.cfg.h;
-
-
-                    that.cfg.x -= (w - that.cfg.w)  / that.cfg.w* (pos.x - that.cfg.x - that.cfg.offset.left);
-                    that.cfg.y -= (h - that.cfg.h)  / that.cfg.h* (pos.y - that.cfg.y - that.cfg.offset.top);
+                    //算出偏移量：当前鼠标坐标减去原来鼠标坐标（再减去图片外框的偏移量）
+                    that.cfg.x -= (w - that.cfg.w) * (pos.x - that.cfg.x - that.cfg.offset.left) / that.cfg.w;
+                    that.cfg.y -= (h - that.cfg.h) * (pos.y - that.cfg.y - that.cfg.offset.top) / that.cfg.h;
                 }
             }
             that.cfg.w = w;

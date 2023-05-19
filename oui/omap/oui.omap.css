@@ -3,6 +3,10 @@
     overflow: hidden;
     position: relative;
     display: block;
+    box-sizing: border-box;
+    margin: 0;
+    position: 0;
+    background: transparent;
 }
 .oui-omap-status {
     position: absolute;
