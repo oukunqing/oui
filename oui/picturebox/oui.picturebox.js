@@ -137,7 +137,14 @@
     PictureBox.prototype = {
         initial: function(options) {
             var that = this,
-                opt = options,
+                opt = $.extend({
+                    showBorder: true,
+                    showTitle: true,
+                    showScale: true,
+                    fill: false,
+                    margin: 0,
+                    fullScreen: true
+                }, options),
                 update = false;
 
             if(that.img) {
@@ -149,17 +156,20 @@
             }
 
             var box = $.toElement(that.opt.box || that.opt.obj);
-
-            if(that.opt.width) {
-                box.style.width = that.opt.width + 'px';
-            }
-            if(that.opt.height) {
-                box.style.height = that.opt.height + 'px';
-            }
-
             box.className += ' oui-picbox-box';
-            box.style.cssText += 'overflow:hidden;position:relative;';
+            box.style.cssText += 'overflow:hidden;position:relative;' + (!opt.showBorder ? 'border:none;' : '');
             that.box = box;
+
+            if (that.opt.fill) {
+                that.resize(null, that.opt.fill, that.opt.margin)
+            } else {
+                if(that.opt.width) {
+                    box.style.width = that.opt.width + 'px';
+                }
+                if(that.opt.height) {
+                    box.style.height = that.opt.height + 'px';
+                }
+            }
 
             var img = document.createElement('IMG'),
                 picurl = that.opt.img || that.opt.pic;
@@ -191,8 +201,8 @@
             }
 
             $.addListener(that.img, 'load', function(ev) {
-                var bs = Factory.getOffsetSize(that.box);
-                var size = Factory.getSize(bs.width, bs.height, img.naturalWidth, img.naturalHeight, defZoom, minZoom);
+                var bs = Factory.getOffsetSize(that.box),
+                    size = Factory.getSize(bs.width, bs.height, img.naturalWidth, img.naturalHeight, defZoom, minZoom);
                 console.log('size:', size);
                 that.cfg = {
                     filePath: that.img.src,
@@ -206,6 +216,8 @@
                     minZoom: minZoom,
                     defaultZoom: defZoom,
                     maxZoom: maxZoom,
+                    fill: that.opt.fill,
+                    margin: that.opt.margin,
                     w: size.width,
                     h: size.height,
                     left: size.left,
@@ -216,10 +228,9 @@
                         width: bs.width, height: bs.height,
                         left: bs.left, top: bs.top
                     },
-                    showScale: $.isBoolean(that.opt.showScale, true),
-                    showTitle: $.isBoolean(that.opt.showTitle, true)
+                    showScale: that.opt.showScale,
+                    showTitle: that.opt.showTitle
                 };
-                //console.log(that.cfg);
 
                 Factory.setImgSize(that);
 
@@ -227,7 +238,7 @@
                     that.select().control();
                 }                    
                 that.drag().wheelZoom().status().title();
-
+                
                 $.getFileSize(that.cfg.filePath, function(size) {
                     var fileSize = size >= 0 ? size : (opt.fileSize || 0);
                     fileSize = fileSize > 0 ? fileSize.toFileSize(2) : '';
@@ -238,6 +249,17 @@
                     that.opt.callback(that, that.cfg);
                 }
             });
+
+            $.addListener(window, 'resize', function() {
+                //console.log('pic resize:', that.opt.fill, that.opt.margin);
+                that.resize(null, that.opt.fill, that.opt.margin);
+            });
+
+            if (that.opt.fullScreen) {
+                $.addKeyListener(document, 'keyup', 'F', function (e, n) {
+                    $.fullScreen(that.box);
+                }, true);                
+            }
 
             return this;
         },
@@ -531,8 +553,14 @@
                     that.cfg.y -= (ratio - 1) * (pos.y - that.cfg.y - that.cfg.offset.top);
                     */
                     //采用这种计算方式没有偏移
-                    that.cfg.x -= (w - that.cfg.w) * (pos.x - that.cfg.x - that.cfg.offset.left) / that.cfg.w;
-                    that.cfg.y -= (h - that.cfg.h) * (pos.y - that.cfg.y - that.cfg.offset.top) / that.cfg.h;
+                    //算出百分比：当前宽度减去原来宽度，除以原来宽度，算出尺寸改变的百分比
+                    //算出偏移量：当前鼠标坐标减去原来鼠标坐标（再减去相对页面偏移量）
+                    //that.cfg.x -= (w - that.cfg.w) * (pos.x - that.cfg.x - that.cfg.offset.left) / that.cfg.w;
+                    //that.cfg.y -= (h - that.cfg.h) * (pos.y - that.cfg.y - that.cfg.offset.top) / that.cfg.h;
+
+
+                    that.cfg.x -= (w - that.cfg.w)  / that.cfg.w* (pos.x - that.cfg.x - that.cfg.offset.left);
+                    that.cfg.y -= (h - that.cfg.h)  / that.cfg.h* (pos.y - that.cfg.y - that.cfg.offset.top);
                 }
             }
             that.cfg.w = w;
@@ -608,13 +636,23 @@
             });
             return this;
         },
-        resize: function(size) {
-            var that = this;
-            that.box.style.width = size.width + 'px';
-            that.box.style.height = size.height + 'px';
-
+        resize: function(size, fill, margin) {
+            var that = this, bs, ms;
+            if (size && (size.width || size.height)) {
+                if (size.width) {
+                    that.box.style.width = size.width + 'px';
+                }
+                if (size.height) {
+                    that.box.style.height = size.height + 'px';
+                }
+            } else if (fill) {
+                bs = $.getBodySize();
+                ms = $.getMarginSize(margin);
+                that.box.style.width = bs.width - (ms ? ms.marginWidth : 0) + 'px';
+                that.box.style.height = bs.height - (ms ? ms.marginHeight : 0) + 'px';
+            }
             if(that.cfg) {
-                var bs = Factory.getOffsetSize(that.box);
+                bs = Factory.getOffsetSize(that.box);
                 that.cfg.offset = {
                     width: bs.width, height: bs.height,
                     left: bs.left, top: bs.top
@@ -624,7 +662,7 @@
                 that.cfg.boxScale = size.boxScale;
                 that.cfg.curScale = size.curScale;
                 that.cfg.minScale = size.minScale;
-            }
+            }            
             return this;
         },
         //判断鼠标位置是否在图片范围内（图片位置不是固定的）

@@ -1646,12 +1646,21 @@ function getUrlFileName(url) {
 
 console.log(getUrlFileName(url123));
 
-console.log(url123.getFileName());
+console.log('name:', url123.getFileName());
+console.log('path:', url123.getFilePath());
+console.log('host:', url123.getUrlHost(true));
 
 console.log(/^(http:\/\/|https:\/\/)([A-Z0-9.:]+)\//i.test(url123));
 
-console.log(url123.match(/^(http:\/\/|https:\/\/)([A-Z0-9.:]+)\//i));
+console.log(url123.match(/^(http:\/\/|https:\/\/)([A-Z0-9_\-\.:]+)(\/)/i)[0]);
 console.log(url123.replace(/^(http:\/\/|https:\/\/)([A-Z0-9_\-\.:]+)(\/)/i, '$3'));
 
 var width = 120;
 console.log(`${width}px`);
+
+
+var margin = '10px 5px 12px 6px';
+console.log($.getMarginSize(null));
+
+console.log($.getCssAttrSize(margin, {attr:'margin'}))
+console.log($.getCssAttrSize(margin, 'margin'));

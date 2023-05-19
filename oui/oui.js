@@ -584,11 +584,12 @@
             }
             return url;
         },
-        getUrlHost = function (url) {
+        getUrlHost = function (url, prefix) {
             var pos = url.indexOf('//'),
+                http = pos > 0 ? url.substr(0, pos + 2) : '',
                 str = pos > -1 ? url.substr(pos + 2) : url,
                 pos1 = str.indexOf('/');
-            return pos1 > -1 ? str.substr(0, pos1) : str;
+            return (prefix ? http : '') + (pos1 > -1 ? str.substr(0, pos1) : str);
         },
         getUrlPage = function(url) {
             var pos = url.indexOf('?'),
@@ -1741,11 +1742,14 @@
         setUrlParam: function (data, value, nocache) {
             return $.setQueryString(this, data, value, nocache);
         },
-        getUrlHost: function () {
-            return $.getUrlHost(this);
+        getUrlHost: function (prefix) {
+            return $.getUrlHost(this, prefix);
         },
         getUrlPage: function() {
             return $.getUrlPage(this);
+        },
+        getFilePath: function() {
+            return $.getFilePath(this);
         },
         getFileName: function (withoutExtension) {
             return $.getFileName(this, withoutExtension);
@@ -2729,6 +2733,9 @@
             return !('' + val).endsWith('%');
         },
         getLocationPath = function () {
+            if (typeof location === 'undefined') {
+                return '';
+            }
             return location.href.substring(0, location.href.lastIndexOf('/') + 1);
         },
         getScriptSelfPath = function (relativePath) {
@@ -2781,13 +2788,21 @@
         //获取远程文件大小(不能跨域)
         getFileSize = function (fileUrl, callback) {
             try {
-                if ($.isFunction(callback)) {
-                    callback(-1);
+                if (!fileUrl) {
+                    if ($.isFunction(callback)) {
+                        callback(-1);
+                    }
+                    return this;
                 }
-                return this;
+                var host = $.getUrlHost(location.href, true),
+                    url = fileUrl.trim();
+                //目前只能获取相同域的文件大小
+                if (url.toLowerCase().startWith('http') && !url.startWith(host)) {
+                    return -1;
+                }
                 var xhr = new XMLHttpRequest();
                 //异步方式
-                xhr.open('HEAD', fileUrl, true);
+                xhr.open('HEAD', url, true);
                 xhr.onreadystatechange = function () {
                     var size = -1;
                     if (xhr.readyState === 4) {
@@ -2798,7 +2813,7 @@
                             console.log('getFileSize: ', 'ERROR');
                         }
                     }
-                    console.log('getFileSize: ', fileUrl, size);
+                    console.log('getFileSize: ', url, size);
                     if ($.isFunction(callback)) {
                         callback(size);
                     }
@@ -2940,7 +2955,8 @@
             return $.isString(styleName, true) ? $.checkValue(style[styleName], defaultValue) : style;
         },
         getCssSizeVal = function (val) {
-            return Math.ceil(('' + val).replace(/[^\d\.\-]+/, ''));
+            var val = Math.ceil(('' + val).replace(/[^\d\.\-]+/, ''));
+            return isNaN(val) ? 0 : val;
         },
         getElementStyleSize = function (elem, styleName) {
             var attr = ('' + styleName).toLowerCase(),
@@ -2994,12 +3010,31 @@
             }
             return p;
         },
+        setCssAttrDefVal = function(attr) {
+            var val = { width: 0, height: 0, top: 0, right: 0, bottom: 0, left: 0 };
+            switch(attr) {
+            case 'margin':
+            case 'padding':
+            case 'border':
+            case 'radius':
+                val[attr + 'Width'] = 0;
+                val[attr + 'Height'] = 0;
+                break;
+            default:
+                val = { width: 0, height: 0 };
+                break;
+            }
+            return val;
+        },
         getCssAttrSize = function (val, options) {
             if ($.isString(val, true) && val.indexOf(':') < 0 && val.trim().indexOf(' ') < 0) {
                 val = $.toElement(val);
             }
+            if ($.isString(options, true)) {
+                options = { attr: options };
+            }
             if ($.isNullOrUndefined(val)) {
-                return { width: 0, height: 0 };
+                return setCssAttrDefVal($.isObject(options) ? options.attr : '');
             }
             var p = checkMinMax($.extend({
                 attr: '',      //margin, padding, border, radius
