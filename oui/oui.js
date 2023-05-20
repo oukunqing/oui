@@ -3716,10 +3716,8 @@
         //键盘按键事件监听  keyCode 可以设置为 keyCode (数字) 如：70, 也可以设置 key（字符）, 如 F
         //可以作为快捷键
         addKeyListener = function (elem, evName, keyCode, func, isShiftKey) {
-            if (!$.isDocument(elem)) {
-                if (!$.isElement(elem = $.toElement(elem))) {
-                    return false;
-                }
+            if (!$.isDocument(elem) && !$.isElement(elem = $.toElement(elem))) {
+                return false;
             }
             if (typeof keyCode === 'function') {
                 isShiftKey = func;
@@ -3727,8 +3725,9 @@
                 keyCode = undefined;
             }
             isShiftKey = $.isBoolean(isShiftKey, true);
+            var evKey = 'keyEvTimes' + keyCode;
             //设置一个变量以记录按键次数
-            elem.keyEventTimes = 0;
+            elem[evKey] = 0;
 
             var callback = function (ev) {
                 var e = ev || event, elem = this;
@@ -3738,23 +3737,21 @@
                 $.cancelBubble(ev);
 
                 if (typeof keyCode === 'undefined') {
-                    func(e, ++elem.keyEventTimes);
+                    func(e, ++elem[evKey]);
                 } else if (typeof keyCode === 'number' && e.keyCode === keyCode) {
                     console.log('KeyListener: ', e.keyCode);
-                    func(e, ++elem.keyEventTimes);
-                } else if (typeof keyCode === 'string' && e.key.toUpperCase() === keyCode.toUpperCase()) {
+                    func(e, ++elem[evKey], keyCode, e.key.toUpperCase());
+                } else if (typeof keyCode === 'string' && keyCode.toUpperCase().indexOf(e.key.toUpperCase()) > -1) {
                     console.log('KeyListener: ', e.keyCode, e.key, keyCode);
-                    func(e, ++elem.keyEventTimes);
+                    func(e, ++elem[evKey], keyCode, e.key.toUpperCase());
                 }
             };
             return $.addEventListener(elem, evName, callback), this;
         },
         //键盘或鼠标连击事件监听
         addHitListener = function (elem, evName, keyCode, func, timout, times, isShiftKey) {
-            if (!$.isDocument(elem)) {
-                if (!$.isElement(elem = $.toElement(elem))) {
-                    return false;
-                }
+            if (!$.isDocument(elem) && !$.isElement(elem = $.toElement(elem))) {
+                return false;
             }
             if (typeof keyCode === 'function') {
                 isShiftKey = times;
@@ -3789,7 +3786,7 @@
                     }
                     if (typeof keyCode === 'number' && e.keyCode === keyCode) {
                         pass = true;
-                    } else if (typeof keyCode === 'string' && e.key.toUpperCase() === keyCode.toUpperCase()) {
+                    } else if (typeof keyCode === 'string' && keyCode.toUpperCase().indexOf(e.key.toUpperCase()) > -1) {
                         pass = true;
                     }
                 } else if (type.startsWith('mouse') && e.target === elem) {
@@ -3808,7 +3805,7 @@
                 }
                 console.log('HitListener: ', evName + (keyCode ? ':' + keyCode : ''), e.keyCode || '', elem[keyCount]);
                 if (elem[keyCount] >= times) {
-                    try { func(e, elem[keyCount]); } catch (e) { }
+                    try { func(e, elem[keyCount], keyCode, e.key.toUpperCase()); } catch (e) { }
                     elem[keyCount] = 1;
                     elem[keyTimes] = 0;
                     return false;
@@ -4290,6 +4287,9 @@
             return html.join('');
         },
         fullScreen = function (elem) {
+            if (!$.isDocument(elem) && !$.isElement(elem = $.toElement(elem))) {
+                return this;
+            }
             var rfs = elem.requestFullScreen || elem.webkitRequestFullScreen || elem.mozRequestFullScreen || elem.msRequestFullScreen;
             if (typeof rfs !== 'undefined' && rfs) {
                 return rfs.call(elem), this;
