@@ -1664,3 +1664,39 @@ console.log($.getMarginSize(null));
 
 console.log($.getCssAttrSize(margin, {attr:'margin'}))
 console.log($.getCssAttrSize(margin, 'margin'));
+
+console.log('{0} {1}'.format('{1}', '{0}'));
+console.log('{0} {1}'.format(['{1}', '{0}']));
+console.log(String.format('{0} {1}','{1}', '{0}'));
+
+var obj = [123,234];
+var obj2  = ['abc', 'asd'];
+
+console.log(...obj, ...obj2);
+
+console.log('hello world'.includes('wor'));
+
+
+var person = {
+  firstName: "John",
+  lastName : "Doe",
+  get fullName() {
+    return this.firstName + " " + this.lastName;
+  },
+  get name () {
+    return 'my name';
+  }
+};
+
+console.log(person.fullName);
+console.log(person.name);
+
+var id  = '##txt#name,#txtid|#txtcode';
+var ids =  (id.indexOf('#') > -1 ? id.replace(/[#]+/g, '') : id).trim().split(/[,\|]/);
+console.log(ids);
+
+console.log(id.indexOf('#') > -1 ? id.replace(/[#]+/g, '') : id);
+
+console.log($.buildAjaxData('login', {name:'中文abc',pwd:'123',ts:200}, {id:123,type:'wx'}));
+console.log($.buildAjaxData('login', null, {id:123,type:'wx'}));
+console.log($.setUrlParam({name:'中文abc',pwd:'123',ts:200}));

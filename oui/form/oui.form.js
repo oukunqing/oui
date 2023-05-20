@@ -1165,39 +1165,45 @@
             if (arguments.length >= 3) {
                 options = {
                     url: arguments[0], data: arguments[1], callback: arguments[2],
-                    dataType: 'JSON', getJSON: true, param: null
+                    dataType: 'JSON', getJSON: true, param: arguments[3] || null
                 };
             }
-            var config = {
-                type: options.type || "POST", async: options.async !== false,
-                dataType: options.dataType || 'JSON',   //xml,html,script,json,jsonp,text
-                //contentType: "application/json",
-                url: options.url, data: options.data,
-                error: function (jqXHR, textStatus, errorThrown) {
-                    showAjaxError(jqXHR, textStatus, errorThrown);
-                },
-                success: function (data, textStatus, jqXHR) {
-                    if ($.isDebug()) {
-                        console.log('data: ', data);
-                    }
-                    var callback = options.callback || options.success;
-                    if ($.isFunction(callback)) {
-                        //callback(data, options.param);
-                        if (options.getJSON || options.getJson) {
-                            callback(data, textStatus, jqXHR);
-                        } else if (1 === data.result || 1 === data.Result) {
-                            callback(data, options.param);
-                        } else {
-                            showAjaxFail(data, textStatus, jqXHR);
+            var opt = $.extend({
+                type: 'POST', async: true,
+                url: '', data: null, callback: null,
+                dataType: 'JSON', getJSON: false, param: null,
+                //返回除异常信息外的所有数据（由调用者完全处理数据结果）
+                receiveAll: false
+            }, options),
+                config = {
+                    type: opt.type, async: opt.async !== false,
+                    dataType: opt.dataType,   //xml,html,script,json,jsonp,text
+                    //contentType: "application/json",
+                    url: opt.url, data: opt.data,
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        showAjaxError(jqXHR, textStatus, errorThrown);
+                    },
+                    success: function (data, textStatus, jqXHR) {
+                        if ($.isDebug()) {
+                            console.log('data: ', data);
                         }
+                        var callback = opt.callback || opt.success;
+                        if ($.isFunction(callback)) {
+                            if (opt.getJSON || opt.getJson) {
+                                callback(data, opt.param, textStatus, jqXHR);
+                            } else if (opt.receiveAll || 1 === data.result || 1 === data.Result) {
+                                callback(data, opt.param);
+                            } else {
+                                showAjaxFail(data, textStatus, jqXHR);
+                            }
+                        }
+                        if ($.isFunction(opt.finallyCallback)) { opt.finallyCallback(); }
+                    },
+                    complete: function (jqXHR, status) {
+                        jqXHR = null;
+                        if (typeof CollectGarbage !== 'undefined' && $.isFunction(CollectGarbage)) { CollectGarbage(); }
                     }
-                    if ($.isFunction(options.finallyCallback)) { options.finallyCallback(); }
-                },
-                complete: function (jqXHR, status) {
-                    jqXHR = null;
-                    if (typeof CollectGarbage !== 'undefined' && $.isFunction(CollectGarbage)) { CollectGarbage(); }
-                }
-            };
+                };
             if (config.datatype === 'jsonp') {
                 config.jsonp = 'callback';
                 config.jsonpCallback = cfg.jsonpCallback || 'flightHandler';

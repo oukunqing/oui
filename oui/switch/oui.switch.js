@@ -10,6 +10,7 @@
     'use strict';
 
     var Config = {
+        minKeepSize: 150,
         id: 0,
         caches: {},
         buildKey: function (opt) {
@@ -24,7 +25,8 @@
                 first: true,
                 shade_id: 'oui_switch_shade_body_001',
                 switch_shade_id: 'oui_switch_shade_switch_001',
-                direction: true,   //true表示水平方向，false表示垂直方向
+                direction: 'left',  //1-left,2-up,3-right,4-down
+                minKeepSize: Config.minKeepSize,
                 zindex: 99999999,
                 start: 0,
                 end: 0,
@@ -62,6 +64,34 @@
     };
 
     var Factory = {
+        direction: function(opt) {
+            var val, dir = opt.direction || opt.position;
+            switch(dir) {
+            case 1:
+            case 'left':
+                val = 'left';
+                break;
+            case 2:
+            case 'up':
+                val = 'up';
+                break;
+            case 3:
+            case 'right':
+                val = 'right';
+                break;
+            case 4:
+            case 'down':
+                val = 'down';
+                break;
+            default:
+                val = 'left';
+                break;
+            }
+            return val;
+        },
+        horizontal: function(dir) {
+            return dir === 'left' || dir === 'right';
+        },
         initial: function (options) {
             if ($.isNullOrUndefined(options)) {
                 return this;
@@ -77,11 +107,12 @@
             if ($.isNumber(cache.options.min)) {
                 cache.min = cache.options.min;
             }
-
-            //判断拉伸方向，1-水平方向，2-垂直方向
-            if ($.isNumber(cache.options.direction) || $.isString(cache.options.direction)) {
-                cache.direction = cache.direction === 1 || ('' + cache.direction).toLowerCase() === 'horizontal';
+            if ($.isNumber(cache.options.max)) {
+                cache.max = cache.options.max;
             }
+            cache.direction = this.direction(cache.options);
+            cache.horizontal = this.horizontal(cache.direction);
+            cache.minKeepSize = cache.options.minKeepSize || Config.minKeepSize;
 
             cache.value = $('#' + cache.options.panel).width();
 
@@ -129,7 +160,7 @@
                         + 'display:block;position:absolute;background:#dfe8f6;border:dotted 1px #99bbe8;color:#999;line-height:1em;'
                         + 'margin:0;padding:0;box-sizing:content-box;font-size:10px;font-family:Arial;word-break:break-all;'
                         + 'left:' + left + 'px;top:' + top + 'px;'
-                        + (cache.direction ? 'cursor:ew-resize;' : 'cursor:ns-resize;')
+                        + (cache.horizontal ? 'cursor:ew-resize;' : 'cursor:ns-resize;')
                         + 'overflow:hidden;opacity:0.5;z-index:' + cache.zindex + ';text-align:center;vertical-align:middle;'
                         + '-moz-user-select:none;-khtml-user-select:none;user-select:none;-ms-user-select:none;';
                 }, $I(cache.options.parent) || document.body);
@@ -138,7 +169,7 @@
                 bar.style.display = 'block';
                 bar.style.width = w + 'px';
                 bar.style.height = h + 'px';
-                if (cache.direction) {
+                if (cache.horizontal) {
                     bar.style.left = left + 'px';
                 } else {
                     bar.style.top = top + 'px';
@@ -167,7 +198,7 @@
             if (null !== bar) {
                 bar.innerHTML = [
                     '<div style="display:block;overflow:hidden;padding:0;margin:0;border:none;',
-                    cache.direction ? 'position:absolute;vertical-align:middle;display:table-cell;top:48%;' : 'margin:0 auto;',
+                    cache.horizontal ? 'position:absolute;vertical-align:middle;display:table-cell;top:48%;' : 'margin:0 auto;',
                     '">',
                     val,
                     '</div>'
@@ -196,7 +227,7 @@
                 cache.box = { w: size.width, h: size.height };
 
                 var ev = $.getEventPosition();
-                cache.start = cache.direction ? ev.x : ev.y;
+                cache.start = cache.horizontal ? ev.x : ev.y;
                 Factory.showValue(cache, cache.start);
 
                 if (cache.first) {
@@ -219,18 +250,26 @@
             if (!cache.dragAble) {
                 return false;
             }
-            var ev = $.getEventPosition();
-            if (cache.direction) {
-                if (ev.x > cache.min && ev.x < cache.bs.width - cache.min) {
-                    cache.end = ev.x;
-                    $('#' + cache.switch_shade_id).css('left', cache.end - parseInt(cache.box.w, 10) / 2);
-                }
+            var ev = $.getEventPosition(), pass = false, pos, border,wh;
+            if (cache.horizontal) {
+                pos = ev.x;
+                border = cache.bs.width;
+                wh = parseInt(cache.box.w, 10) / 2;
             } else {
-                if (ev.y > cache.min && ev.y < cache.bs.height - cache.min) {
-                    cache.end = ev.y;
-                    $('#' + cache.switch_shade_id).css('top', cache.end - parseInt(cache.box.h, 10) / 2);
-                }
+                pos = ev.y;
+                border = cache.bs.height;
+                wh = parseInt(cache.box.h, 10) / 2;
             }
+            if (cache.direction === 'left' || cache.direction === 'up') {
+                pass = (pos > cache.min) && (!cache.max || pos < cache.max) && (pos < border - cache.minKeepSize);
+            } else {
+                pass = (pos < border - cache.min) && (!cache.max || pos > border - cache.max) &&  (pos > cache.minKeepSize);
+            }
+            if (pass) {
+                cache.end = pos;
+                $('#' + cache.switch_shade_id).css(cache.horizontal ? 'left' : 'top', cache.end - wh);
+            }
+
             Factory.showValue(cache, cache.end);
             return this;
         },

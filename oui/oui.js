@@ -4617,6 +4617,7 @@
         });
 
         $.extendNative(window, {
+            /*
             $I: function (id, parent) {
                 if (typeof id === 'string') {
                     if (id.startsWith('#')) {
@@ -4624,6 +4625,26 @@
                     }
                 } else if ($.isElement(id)) {
                     return id;
+                }
+                return (parent || doc).getElementById(id);
+            },
+            */
+            $I: function (id, parent) {
+                if ($.isElement(id)) {
+                    return id;
+                } else if($.isString(id, true)) {
+                    var elem;
+                    id = (id.indexOf('#') > -1 ? id.replace(/[#]+/g, '') : id).trim();
+                    if ((elem = doc.getElementById(id)) !== null) {
+                        return elem;
+                    }
+                    var ids = id.split(/[,\|]/), elems = [], elem;
+                    for (var i = 0; i < ids.length; i++) {
+                        if (ids[i]) {
+                            elems.push(doc.getElementById(ids[i]));
+                        }
+                    }
+                    return elems.length <= 1 ? elems[0] || null : elems;
                 }
                 return (parent || doc).getElementById(id);
             },

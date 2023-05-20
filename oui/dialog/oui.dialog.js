@@ -1022,7 +1022,13 @@
                 return dialog.getOptions().id === that.getOptions().id;
             },
             isIframe: function (opt) {
-                return Common.isInKeys(opt.type, ['url', 'iframe', 'load'], Config.DialogType);
+                console.log('opt:', opt);
+                if (Common.isInKeys(opt.type, ['url', 'iframe', 'load'], Config.DialogType)) {
+                    return true;
+                } else if($.isString(opt.url, true) && opt.url === opt.content) {
+                    return true;
+                }
+                return false;
             },
             isSure: function (result) {
                 return [Config.DialogResult.ok, Config.DialogResult.yes].indexOf(result) >= 0;
