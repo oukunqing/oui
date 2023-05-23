@@ -555,31 +555,6 @@ var val = $.getValue(obj, 'other.voltage.voltage', 5);
 
 console.log(val);
 
-var numbers = '1,3,6-9,,12-16,99';
-
-console.log($.expandNumbers(numbers));
-
-var numbers = [1, 2, 3, 5, 6, 9, 21, 22, 23, 99];
-
-console.log($.collapseNumbers(numbers));
-
-
-
-
-var numbers = '1,2,3,5,6,9,21,22,23,99';
-
-console.log($.collapseNumbers(numbers));
-
-
-var numbers = ',1,,2,4,5,6,,7,8,9';
-
-console.log($.collapseNumbers(numbers));
-
-
-var str = ',342,260,342,343,344,345,346,347';
-
-console.log(str.insertItem('342'))
-console.log(str.insertItem('342').collapseNumbers())
 
 
 //https://kdocs.cn/l/spobuy32j
@@ -1591,7 +1566,7 @@ console.log(list);
 $.extend(list, [1111]);
 
 console.log(list);
-
+    
 function quickSort(arr) {
     if (arr.length <= 1) {
         return arr;
@@ -1700,3 +1675,55 @@ console.log(id.indexOf('#') > -1 ? id.replace(/[#]+/g, '') : id);
 console.log($.buildAjaxData('login', {name:'中文abc',pwd:'123',ts:200}, {id:123,type:'wx'}));
 console.log($.buildAjaxData('login', null, {id:123,type:'wx'}));
 console.log($.setUrlParam({name:'中文abc',pwd:'123',ts:200}));
+
+
+var numbers = '1,3,6-9,,12-16,99';
+
+console.log($.expandNumbers(numbers));
+
+var numbers = [1, 2, 3, 5, 6, 9, 21, 22, 23, 99];
+
+console.log($.collapseNumbers(numbers));
+
+
+
+
+var numbers = '1,2,3,5,6,9,21,22,23,99';
+
+console.log($.collapseNumbers(numbers));
+
+
+var numbers = ',1,,2,4,5,6,,7,8,9';
+
+console.log($.collapseNumbers(numbers));
+
+
+var str = ',342,260,342,343,344,345,346,347';
+
+console.log(str.insertItem('341'))
+console.log(str.insertItem('341').collapseNumbers(true))
+console.log('abcde'.insert('你好',2, -2));
+
+console.log('abcde,asd,abc;hello'.insertItem('你好', 1, '|'));
+
+
+console.log('abcde'.space('a ','        a').clean());
+
+console.log('abcdefghijk'.remove(3, 5));
+console.log('abcdefghijk'.insert('1234', 1, 5));
+
+console.log('abc,arr,acc.ab|a|b'.split(/[,\|]/g));
+
+
+console.log('abc,arr,acc.ab|a|b'.split(/[,\|]/g));
+
+console.log($.distinctList('abc,acc,asd,abc'));
+
+console.log($.distinctList(['abc','acc','asd','abc']));
+
+console.log($.distinctList([12, 123, 12, 14, 15]));
+
+
+console.log('abc,acc,asd,abc'.distinct(''));
+
+console.log('1,,2,4,5,6,,7,8,9'.toNumberList());

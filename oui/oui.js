@@ -298,7 +298,12 @@
             }
             return false;
         },
-        distinctList = function (arr) {
+        distinctList = function (arr, separator) {
+            var join = false;
+            if ($.isString(arr, true)) {
+                arr = arr.split(/[,\|;]/g);
+                join = true;
+            }
             var list = [], dic = {};
             for (var i = 0, c = arr.length; i < c; i++) {
                 var val = arr[i], key = 'K' + val;
@@ -308,7 +313,7 @@
                     list.push(val);
                 }
             }
-            return dic = null, list;
+            return dic = null, join ? list.join(separator || ',') : list;
         },
         collapseNumberList = function (numbers, distinct, separator, connector) {
             if (isString(distinct)) {
@@ -320,7 +325,7 @@
                 distinct = false;
             }
             if (!$.isArray(numbers)) {
-                numbers = ('' + numbers).split(/[\,\|]/g);
+                numbers = ('' + numbers).split(/[,\|;]/g);
             }
             numbers.sort(function (a, b) {
                 return a - b;
@@ -1480,19 +1485,22 @@
         },
         /*
             v: 要插入的内容
-            c: 要插入的数量
-            pos: 要插入的位置
+            c: 要插入的数量，如 v="abc", c=2, 则插入 "abcabc"
+            startIndex: 要插入的起始位置
         */
-        insert: function (v, c, pos) {
+        insert: function (v, c, startIndex) {
             var s0 = '',
                 s1 = this,
                 len = s1.length;
-            if ($.isNumber(pos)) {
-                if (len < pos) {
+            if (startIndex < 0) {
+                startIndex = len + startIndex;
+            }
+            if ($.isNumber(startIndex)) {
+                if (len < startIndex) {
                     return s1.append(v, c);
                 } else {
-                    s0 = s1.substr(0, pos);
-                    s1 = s1.substr(pos);
+                    s0 = s1.substr(0, startIndex);
+                    s1 = s1.substr(startIndex);
                 }
             }
             if ($.isNumber(c)) {
@@ -1501,17 +1509,35 @@
             }
             return s0 + v + s1;
         },
-        //插入字符串组元素，
+        remove: function (startIndex, count) {
+            var s = this, len = s.length;
+            if (startIndex < 0) {
+                startIndex = len + startIndex;
+            }
+            if (!$.isNumber(count) || count + startIndex > len) {
+                return s.substr(0, startIndex);
+            }
+            return s.substr(0, startIndex) + s.substr(startIndex + count);
+        },
+        //插入字符串组元素
+        /*
+            s: 要插入的字符串
+            index: 插入的(字符串组)起始位置
+            separator: 返回的字符串组的分隔符
+        */
         insertItem: function (s, index, separator) {
             var _s = this.trim();
-            var arr = _s.split(/[\,\|]/g), c = arr.length, list = [], n = 0;
+            var arr = _s.split(/[,\|;]/g), c = arr.length, list = [], n = 0;
             if (_s === '' || c <= 0) {
                 return s;
             }
             if (!$.isNumber(index)) {
                 index = 0;
             }
-            if (index <= 0) {
+            if (index < 0) {
+                index = c + index;
+            }
+            if (index === 0) {
                 list.push(s);
             }
             for (var i = 0; i < c; i++) {
@@ -1526,16 +1552,26 @@
             }
             return list.join(separator || ',');
         },
+        distinct: function(separator) {
+            var s = this;
+            return $.distinctList(s, separator);
+        },
+        distinctList: function(separator) {
+            var s = this;
+            return $.distinctList(s, separator);
+        },
         space: function (prefix, postfix) {
             var s = this,
                 s1 = $.isNumber(prefix) ? ''.append(' ', prefix) : (prefix || ' '),
                 s2 = $.isNumber(postfix) ? ''.append(' ', postfix) : (postfix || ' ');
             return s1 + s + s2;
         },
+        //清理字符串的指定字符或所有空格
         clean: function (s) {
             var reg = new RegExp('(' + (s || ' ') + ')', 'g');
             return this.replace(reg, '');
         },
+        //清除字符串的指定字符或所有空格和-
         clear: function (s) {
             //清除字符串的多余字符，默认清除 - 和 空格
             var reg = new RegExp('[' + (s || '- ') + ']', 'g');
@@ -1804,12 +1840,12 @@
         base64encode: function () {
             return $.base64.encode(this);
         },
-        collapseNumbers: function () {
+        collapseNumbers: function (distinct) {
             var arr = this.split(/[\,\|]/g);
-            return $.collapseNumberList(arr);
+            return $.collapseNumberList(arr, distinct);
         },
-        expandNumbers: function () {
-            return $.expandNumberList(this);
+        expandNumbers: function (distinct) {
+            return $.expandNumberList(this, distinct);
         },
         addNamePostfix: function (postfix) {
             return $.addNamePostfix(this, postfix);
