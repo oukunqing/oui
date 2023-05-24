@@ -878,7 +878,7 @@
     /*
         MD5算法摘取自网络
     */
-    function md5(string) {
+    function md5(string, shorter) {
         function md5_RotateLeft(lValue, iShiftBits) {
             return (lValue << iShiftBits) | (lValue >>> (32 - iShiftBits));
         }
@@ -1059,7 +1059,8 @@
             c = md5_AddUnsigned(c, CC);
             d = md5_AddUnsigned(d, DD);
         }
-        return (md5_WordToHex(a) + md5_WordToHex(b) + md5_WordToHex(c) + md5_WordToHex(d)).toLowerCase();
+        var code = (md5_WordToHex(a) + md5_WordToHex(b) + md5_WordToHex(c) + md5_WordToHex(d)).toLowerCase();
+        return shorter ? code.substr(8, 16) : code;
     }
 
     $.extend({
@@ -1084,6 +1085,12 @@
             }
         },
         md5: md5
+    });
+
+    $.extendNative(String.prototype, {
+        md5: function(shorter) {
+            return $.md5(this, shorter);
+        }
     });
 
     $.extend($.form, {

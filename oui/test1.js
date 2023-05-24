@@ -1102,3 +1102,21 @@ console.log('a: ', a2);
 var z = (x + y) * ( c / y) / 2;
 
 console.log(z)
+
+var path = 'HTTP://112.54.97.178:81/upfiles/datum/update-20230419.1000-76c638ade0081c2c9cb499675e32be20-33181822-V1.tar.gz?ts=1234';
+
+console.log('path:', path);
+console.log('getFilePath:', path.getFilePath(true));
+console.log('getUrlHost:', path.getUrlHost(true));
+
+console.log($.getUrlHost(path, true));
+console.log($.getFilePath(path, 'http://112.54.97.178:81/upfiles/datum/'));
+console.log($.getFileName(path, false));
+console.log($.getFileName(path, true));
+console.log($.getFullPath(path, true));
+console.log(path.getFullPath( true));
+console.log(path.getExtension( true));
+console.log(path.getFileDir( true));
+console.log('/upfiles/datum/update-20230419.rar'.getFileDir());
+console.log('/upfiles/datum/update-20230419.rar'.getFileDirName());
+

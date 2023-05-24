@@ -1784,14 +1784,23 @@
         getUrlPage: function() {
             return $.getUrlPage(this);
         },
-        getFilePath: function() {
-            return $.getFilePath(this);
+        getFilePath: function(currentPath) {
+            return $.getFilePath(this, currentPath);
         },
         getFileName: function (withoutExtension) {
             return $.getFileName(this, withoutExtension);
         },
         getExtension: function () {
             return $.getExtension(this);
+        },
+        getFullPath: function(hideHost) {
+        	return $.getFullPath(this, hideHost);
+        },
+        getFileDir: function(showName) {
+        	return $.getFileDir(this, showName);
+        },
+        getFileDirName: function() {
+			return $.getFileDirName(this);
         },
         getFileSize: function (callback) {
             return $.getFileSize(this, callback);
@@ -2774,14 +2783,12 @@
             }
             return location.href.substring(0, location.href.lastIndexOf('/') + 1);
         },
-        getScriptSelfPath = function (relativePath) {
-            var elements = doc.getElementsByTagName('script'), len = elements.length, elem = elements[len - 1];
-            return (relativePath ? elem.getAttribute('src') : elem.src) || '';
-        },
         getFilePath = function (fullPath, currentPath) {
-            var pos = fullPath.lastIndexOf('/'), prefix = currentPath || getLocationPath();
+            var pos = fullPath.lastIndexOf('/'),
+            	prefix = currentPath || getLocationPath();
             if (pos >= 0) {
                 var path = fullPath.substr(0, pos + 1);
+                //如果文件路径和当前页面处于同一目录层级，则不需要目录
                 if (prefix && path.indexOf(prefix) === 0) {
                     path = path.substr(prefix.length);
                 }
@@ -2806,6 +2813,27 @@
                 return pos >= 0 ? name.substr(0, pos) : name;
             }
             return name;
+        },
+        getFullPath = function(filePath, hideHost) {
+        	var path = filePath.split('?')[0];
+        	if (hideHost) {
+        		path = path.replace(/^(http|https)(:\/\/)/i, '');
+        		path = path.substr(path.indexOf('/'));
+        	}
+        	return path;
+        },
+        getFileDir = function (filePath, showName) {
+        	var path = filePath.split('?')[0];
+        	path = path.replace(/^(http|https)(:\/\/)/i, '');
+        	var pos0 = path.indexOf('/'),
+        		pos1 = path.lastIndexOf('/');
+        	if (pos0 >= 0 && pos1 >= 0) {
+        		return showName ? path.substr(pos0) : path.substr(pos0, pos1 - pos0 + 1);
+        	}
+        	return showName ? path : '';
+        },
+        getFileDirName = function (filePath) {
+        	return getFileDir(filePath, true);
         },
         getExtension = function (filePath) {
             var name = getFileName(filePath, false);
@@ -2960,6 +2988,10 @@
             //设置加载标记，表示iframe已经加载过
             iframe.loaded = true;
             return this;
+        },
+        getScriptSelfPath = function (relativePath) {
+            var elements = doc.getElementsByTagName('script'), len = elements.length, elem = elements[len - 1];
+            return (relativePath ? elem.getAttribute('src') : elem.src) || '';
         },
         createJsScript = function (data, id, func, parent) {
             if ($.isFunction(id)) {
@@ -4445,6 +4477,9 @@
         getFileName: getFileName,
         getFileSize: getFileSize,
         getExtension: getExtension,
+        getFullPath: getFullPath,
+        getFileDir: getFileDir,
+        getFileDirName: getFileDirName,
         addNamePostfix: addNamePostfix,
         checkFilePath: checkFilePath,
         isBody: isBody,
@@ -4566,7 +4601,6 @@
         isTopWindow: isTopWindow,
         setSelectValue: setSelectValue
     }, '$');
-
 }(OUI);
 
 // window extend
