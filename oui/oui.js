@@ -2095,11 +2095,7 @@
             unit = (space ? ' ' : '') + ('' + (unit || '')).trim();
             var m = parseInt(num / kn, 10);
             var n = (num % kn / kn).round(decimalLen);
-            if (force) {
-                return (m + n) > 0 ? (m + n) + unit : num;
-            } else {
-                return m > 0 ? (m + n) + unit : num;
-            }
+            return (force ? (m + n) : m) > 0 ? (m + n).round(decimalLen) + unit : num;
         },
         toFileSize: function (decimalLen, space) {
             var kb = 1024, mb = 1024 * 1024, gb = 1024 * 1024 * 1024, num = this;

@@ -1111,8 +1111,9 @@ console.log('getUrlHost:', path.getUrlHost(true));
 
 console.log($.getUrlHost(path, true));
 console.log($.getFilePath(path, 'http://112.54.97.178:81/upfiles/datum/'));
-console.log($.getFileName(path, false));
-console.log($.getFileName(path, true));
+console.log('getFileName:', $.getFileName(path, false));
+console.log('getFileName:', $.getFileName(path, true));
+console.log('getFileName:', path.getFileName(true));
 console.log($.getFullPath(path, true));
 console.log(path.getFullPath( true));
 console.log(path.getExtension( true));
@@ -1120,3 +1121,4 @@ console.log(path.getFileDir( true));
 console.log('/upfiles/datum/update-20230419.rar'.getFileDir());
 console.log('/upfiles/datum/update-20230419.rar'.getFileDirName());
 
+console.log((4780638).toFileSize());
