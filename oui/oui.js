@@ -5744,6 +5744,9 @@
         closeParentDialog: function (param) {
             return callParentFunc('closeParentDialog', param);
         },
+        closeParent: function (param) {
+            return callParentFunc('closeParent', param);
+        },
         //根据子窗口内容重置父空口对话框(oui.dialog)大小
         resizeParentDialog: function (param) {
             return callParentFunc('resizeParentDialog', param);

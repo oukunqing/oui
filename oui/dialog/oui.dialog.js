@@ -92,6 +92,7 @@
             alert: 'alert',
             confirm: 'confirm',
             form: 'form',
+            toolform: 'toolform',
             win: 'win',
             window: 'window',
             iframe: 'iframe',
@@ -918,6 +919,12 @@
                         opt.height = 'auto';
                         opt.delayClose = true;
                         opt.form = true;
+                        break;
+                    case Config.DialogType.toolform:
+                        opt.height = 'auto';
+                        opt.delayClose = true;
+                        opt.form = true;
+                        opt.minAble = opt.maxAble = opt.sizeAble = opt.dragSize = false;
                         break;
                     case Config.DialogType.url:
                     case Config.DialogType.load:
@@ -3645,8 +3652,8 @@
                     }
                 }
                 //检测是否设置了 ok | success 以及 cancel 这些指定的回调函数
-                var ok = $.isFunction(opt.ok) ? opt.ok : ($.isFunction(opt.success) ? opt.success : callback),
-                    cancel = $.isFunction(opt.cancel) ? opt.cancel : callback;
+                var ok = $.isFunction(opt.ok) ? opt.ok : $.isFunction(opt.yes) ? opt.yes : ($.isFunction(opt.success) ? opt.success : callback),
+                    cancel = $.isFunction(opt.cancel) ? opt.cancel : $.isFunction(opt.no) ? opt.no : callback;
 
                 return (ok || cancel) ? { callback: callback, ok: ok, cancel: cancel } : undefined;
             },
@@ -4638,6 +4645,9 @@
         form: function (content, title, options) {
             return Factory.show(content, title, options, Config.DialogType.form);
         },
+        toolform: function (content, title, options) {
+            return Factory.show(content, title, options, Config.DialogType.toolform);
+        },
         load: function (urlOrElement, title, options) {
             return Factory.show(urlOrElement, title, options, Config.DialogType.load);
         },
@@ -4709,6 +4719,9 @@
             return Factory.closeAll(type), $;
         },
         closeParent: function (id, param) {
+            return Factory.closeParent(id, param), $;
+        },
+        closeParentDialog: function (id, param) {
             return Factory.closeParent(id, param), $;
         },
         closeparent: function (id, param) {

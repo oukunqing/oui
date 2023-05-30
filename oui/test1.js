@@ -1122,3 +1122,8 @@ console.log('/upfiles/datum/update-20230419.rar'.getFileDir());
 console.log('/upfiles/datum/update-20230419.rar'.getFileDirName());
 
 console.log((4780638).toFileSize());
+
+
+var title='', userId = 0;
+
+console.log(title || (userId ? '编辑用户信息' : '新增用户信息'));
