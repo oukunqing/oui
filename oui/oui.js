@@ -172,6 +172,15 @@
             var bool = typeof b === 'boolean';
             return typeof dv === 'boolean' ? (bool ? b : dv) : bool;
         },
+        isDate = function (obj) {
+            return obj instanceof Date && !isNaN(obj.getFullYear());
+        },
+        isTrue = function (b) {
+            return typeof b === 'boolean' && b || b === 'true' || b === 1 || b === '1';
+        },
+        isFalse = function (b) {
+            return typeof b === 'boolean' && !b || b === 'false' || b === 0 || b === '0';
+        },
         isFunction = function (f) { return typeof f === 'function' && typeof f.nodeType !== 'number'; },
         isNumeric = function (o) { return /^[-+]?(\d+)([.][\d]{0,})?$/.test(o); },
         isDecimal = function (o) { return /^[-+]?(\d+)([.][\d]{0,})$/.test(o); },
@@ -181,6 +190,16 @@
         isRegexp = function (o) { return isObject(o) || isFunction(o) ? ('' + o).indexOf('/') == 0 : false; },
         isNull = function (o) { return o === null; },
         isNullOrUndefined = function (o) { return isUndefined(o) || isNull(o); },
+        isEmpty = function (o, strict) {
+            if (strict) {
+                return isString(o) && '' === trim(o);
+            }
+            if (isUndefined(o) || null === o) { return true; }
+            else if (isString(o)) { return '' === trim(o); }
+            else if (isArray(o)) { return 0 === o.length  || 1 === o.length && '' === o[0]; }
+            else if (isObject(o)) { for (var name in o) { return false; } return true; }
+            return false;
+        },
         isProperty = function (o, property) { return o.hasOwnProperty(property) && (property in o); },
         isPercent = function (val) {
             return (!isNaN(parseFloat(val, 10)) && ('' + val).endsWith('%'));
@@ -604,11 +623,22 @@
         },
         isDebug = function (key) {
             try {
-                var debug = getQueryString()[key || 'debug'];
-                return !isNullOrUndefined(debug) && debug === '1';
+                var debug = getQueryString(location.href)[key || 'debug'];
+                var result = !isNullOrUndefined(debug) && debug === '1';
+                if (!result && $.isSubWindow()) {
+                    try {
+                        debug = getQueryString(parent.location.href)[key || 'debug'];
+                        result = !isNullOrUndefined(debug) && debug === '1'
+                    } catch (e) {}
+                }
+                return result;
             } catch (e) {
                 return false;
             }
+        },
+        isLocalhost = function () {
+            var host = getUrlHost(location.href, false).toLowerCase();
+            return host.indexOf('localhost') === 0 || host.indexOf('127.0.0.1') === 0;
         },
         isTelephone = function (num) {
             return $.PATTERN.Telephone.test(num);
@@ -792,24 +822,14 @@
 
     $.extendNative($, {
         trim: trim, isUndefined: isUndefined, isUndef: isUndefined, isString: isString, isNumber: isNumber,
-        isFunction: isFunction, isFunc: isFunction,
-        isObject: isObject, isArray: isArray, isBoolean: isBoolean, isBool: isBoolean, isNull: isNull,
+        isFunction: isFunction, isFunc: isFunction, isObject: isObject, isArray: isArray, isDate: isDate,
+        isBoolean: isBoolean, isBool: isBoolean, isTrue: isTrue, isFalse: isFalse, isNull: isNull, isEmpty: isEmpty,
         isProperty: isProperty, isPercent: isPercent, isPercentSize: isPercent, version: version,
         isNumeric: isNumeric, isDecimal: isDecimal, isInteger: isInteger, isFloat: isDecimal, isInt: isInteger,
         isHexNumeric: isHexNumeric, isHexNumber: isHexNumber,
         isMobile: isMobile, isTelephone: isTelephone, isIdentity: isIdentity, isEmail: isEmail,
         isRegexp: isRegexp, isNullOrUndefined: isNullOrUndefined, isNullOrUndef: isNullOrUndefined,
-        isUndefinedOrNull: isNullOrUndefined, isUndefOrNull: isNullOrUndefined,
-        isEmpty: function (o, strict) {
-            if (strict) {
-                return isString(o) && '' === trim(o);
-            }
-            if (isUndefined(o) || null === o) { return true; }
-            else if (isString(o)) { return '' === trim(o); }
-            else if (isArray(o)) { return 0 === o.length; }
-            else if (isObject(o)) { for (var name in o) { return false; } return true; }
-            return false;
-        },
+        isUndefinedOrNull: isNullOrUndefined, isUndefOrNull: isNullOrUndefined,        
         padLeft: function (s, totalWidth, paddingChar) {
             return padLeft(s, totalWidth, paddingChar, false);
         },
@@ -822,13 +842,13 @@
         containsKey: containsKey, containsValue: containsValue, contains: contains, distinctList: distinctList,
         collapseNumberList: collapseNumberList, expandNumberList: expandNumberList,
         collapseNumbers: collapseNumberList, expandNumbers: expandNumberList,
-        toJsonString: toJsonString, toJson: toJson, toEncode: toEncode,
+        toJsonString: toJsonString, toJsonStr: toJsonString, toJson: toJson, toEncode: toEncode,
         toAscii: toAscii, toAsciiHex: toAsciiHex, asciiToChar: asciiToChar, asciiToStr: asciiToChar,
         getArguments: getArguments, getArgs: getArguments,
         toFunction: toFunction, toFunc: toFunction, callFunction: callFunction, callFunc: callFunction,
         param: buildParam, buildParam: buildParam, setUrlParam: setUrlParam, buildAjaxData: buildAjaxData,
         setQueryString: setQueryString, getQueryString: getQueryString, getUrlHost: getUrlHost, getUrlPage: getUrlPage,
-        isDebug: isDebug,
+        isDebug: isDebug, isLocalhost: isLocalhost,
         filterValue: filterValue, keywordOverload: keywordOverload, keyOverload: keywordOverload,
         setValue: setValue, getValue: getValue, isValue: isValue, getParam: getParam,
         getParamValue: getParamValue, getParVal: getParamValue, cleanSlash: cleanSlash,
@@ -2020,6 +2040,29 @@
                 pos += 2;
             }
             return hex.substr(0, pos);
+        },
+        removeEmptyLine: function () {
+            return $.removeEmptyLine(this);
+        },
+        filterHtml: function (_removeEmptyLine) {
+            return $.filterHtml(this, _removeEmptyLine);
+        },
+        splitStr: function (pattern, removeEmpty) {
+            return $.splitStr(this, pattern, removeEmpty);
+        },
+        encodeHtml: function () {
+            return $.encodeHtml(this);
+        },
+        decodeHtml: function () {
+            return $.decodeHtml(this);
+        },
+        isTrue: function (strict) {
+            var s = this;
+            return s === 'true' || !strict && s === '1';
+        },
+        isFalse: function (strict) {
+            var s = this;
+            return s === 'false' || !strict && s === '0';
         }
     }, 'String.prototype');
 
@@ -2213,7 +2256,7 @@
             }
             return list;
         },
-        isDate: function () {
+        isDate: function () {            
             if (isNaN(this.getFullYear())) {
                 return false;
             }
@@ -3946,12 +3989,6 @@
             var keyCode = $.isNumber(ev) ? ev : getKeyCode(ev);
             return String.fromCharCode(keyCode).toUpperCase();
         },
-        filterHtmlCode = function (str) {
-            str = str.replace(/<\/?[^>]*>/g, ''); //去除HTML tag
-            str = str.replace(/[ | ]*\n/g, '\n'); //去除行尾空白
-            //str = str.replace(/\n[\s| | ]*\r/g,'\n'); //去除多余空行
-            return str;
-        },
         getContentSize = function (txt, options) {
             if (!$.isObject(options)) {
                 options = {};
@@ -4089,7 +4126,10 @@
             if (!$.isBoolean(opt.show)) {
                 opt.show = elem.style.display === 'none';
             }
-            var w = parseInt('0' + $.getElementStyle(elem, 'width')),
+            var offset = $.getOffset(elem),
+                //w = parseInt('0' + $.getElementStyle(elem, 'width')) || offset.width,
+                //h = parseInt('0' + $.getElementStyle(elem, 'height')) || offset.height;
+                w = parseInt('0' + $.getElementStyle(elem, 'width')),
                 h = parseInt('0' + $.getElementStyle(elem, 'height'));
 
             if (opt.size) {
@@ -4159,6 +4199,38 @@
                 }
             }
             return this;
+        },
+        //禁用浏览器默认右键菜单
+        //enable 是否启用默认右键菜单（默认禁用右键菜单）
+        //imgDisable 是否禁用图片默认右键菜单（默认允许图片右键菜单，以方便图片下载）
+        setContextmenu = function (enable, imgDisable) {
+            if (!enable) {
+                $(document).contextmenu(function (ev) {
+                    if (imgDisable || ev.target.nodeName !== 'IMG') {
+                        return false;
+                    }
+                    return true;
+                });
+            }
+            return this;
+        },
+        myLoadCache = {},
+        //是否首次加载，防止重复调用
+        firstLoad = function (key, maxCount) {
+            var k = 'loaded-' + key;
+            if ($.isObject(key) || $.isArray(key)) {
+                k = 'loaded-' + $.crc.toCRC16($.toJsonStr(key));
+            }
+            if (typeof myLoadCache[k] === 'undefined') {
+                myLoadCache[k] = 1;
+                return true;
+            } else {
+                if ($.isNumber(maxCount)) {
+                    myLoadCache[k] += 1;
+                    return myLoadCache[k] <= maxCount;
+                }
+                return false;
+            }
         },
         findParentElement = function (obj, tagName) {
             var tag = tagName;
@@ -4411,6 +4483,99 @@
             }
             return this;
         },
+        removeEmptyLine = function (str) {
+            //return str.replace(/[\r\n](\r|\n)*(\s)*(\r|\n)*[\r\n]/g, '\n');
+            return str.replace(/[\r\n]+(\s)*[\r\n]+/g, '\n');
+        },
+        filterHtmlCode = function (str, _removeEmptyLine) {
+            str = str.replace(/<\/?[a-z][^>]*>/g, ''); //去除HTML tag
+            str = str.replace(/[\s]*\n/g, '\n'); //去除行尾空白
+            //去除多余空行
+            return _removeEmptyLine ? removeEmptyLine(str) : str;
+        },
+        // removeEmpty: 是否移除空项，false - 不移除空项，true| - 默认为移除
+        splitStr = function (str, pattern, removeEmpty) {
+            if (!$.isString(str, true)) {
+                return str;
+            }
+            var arr = str.split(pattern);
+            if ($.isBoolean(removeEmpty, true)) {
+                var len = arr.length, list = [];
+                for (var i = 0; i < len; i++) {
+                    if (arr[i]) {
+                        list.push(arr[i]);
+                    }
+                }
+                return list;
+            }
+            return arr;
+        },
+        encodeHtml = function (str, keys) {
+            if (!str || (!$.isString(str, true) && !$.isObject(str))) {
+                return str;
+            }
+            function _encode (s) {
+                //if (!s || !/[&<>\s'"]/g.test(s)) {
+                if (!s || !/[&<>]/g.test(s)) {
+                    return s;
+                }
+                s = s.replace(/&/g, '&amp;');
+                s = s.replace(/</g, '&lt;');
+                s = s.replace(/>/g, '&gt;');
+                //&#39;会导致asp.net出现dangerous Request.Form异常
+                //s = s.replace(/\'/g, '&#39;');
+                //s = s.replace(/\"/g, '&quot;');
+                //s = s.replace(/ /g, '&nbsp;');
+                return s;
+            }
+            if ($.isString(str)) {
+                return _encode(str);
+            } else if ($.isObject(str)) {
+                if (!$.isArray(keys)) {
+                    keys = (keys ? '' + keys : '').splitStr(/[,|]/g);
+                }
+                var hasKey = keys.length > 0 && keys[0];
+                for (var k in str) {
+                    if ((!hasKey || keys.indexOf(k) > -1) && $.isString(str[k], true)) {
+                        str[k] = _encode(str[k]);
+                    }
+                }
+                return str;
+            }
+            return str;
+        },
+        decodeHtml = function (str, keys) {
+            if (!str || (!$.isString(str, true) && !$.isObject(str))) {
+                return str;
+            }
+            function _decode (s) {
+                if (!s || !/[&;]/g.test(s)) {
+                    return s;
+                }
+                s = s.replace(/&amp;/g, '&');
+                s = s.replace(/&lt;/g, '<');
+                s = s.replace(/&gt;/g, '>');
+                s = s.replace(/&nbsp;/g, ' ');
+                s = s.replace(/&#39;/g, '\'');
+                s = s.replace(/&quot;/g, '\"');
+                return s;
+            }
+            if ($.isString(str)) {
+                return _decode(str);
+            } else if ($.isObject(str)) {
+                if (!$.isArray(keys)) {
+                    keys = (keys ? '' + keys : '').splitStr(/[,|]/g);
+                }
+                var hasKey = keys.length > 0 && keys[0];
+                for (var k in str) {
+                    if ((!hasKey || keys.indexOf(k) > -1) && $.isString(str[k], true)) {
+                        str[k] = _decode(str[k]);
+                    }
+                }
+                return str;
+            }
+            return str;
+        },
         setImgCenter = function (img) {
             if (!$.isElement(img = $.toElement(img))) {
                 return false;
@@ -4563,7 +4728,6 @@
         getScrollPos: getScrollPosition,
         getKeyCode: getKeyCode,
         getKeyChar: getKeyChar,
-        filterHtmlCode: filterHtmlCode,
         getContentSize: getContentSize,
         getInnerText: getInnerText,
         isOnElement: isOnElement,
@@ -4577,6 +4741,12 @@
         h: height,
         toggleDisplay: toggleDisplay,
         trigger: trigger,
+        setContextmenu: setContextmenu,
+        disableContextmenu: setContextmenu,
+        setcmenu: setContextmenu,
+        disablecmenu: setContextmenu,
+        firstLoad: firstLoad,
+        firstload: firstLoad,
         findParentElement: findParentElement,
         findRow: findRow,
         findCell: findCell,
@@ -4595,7 +4765,13 @@
         isFullScreen: isFullScreen,
         isSubWindow: isSubWindow,
         isTopWindow: isTopWindow,
-        setSelectValue: setSelectValue
+        setSelectValue: setSelectValue,
+        splitStr: splitStr,
+        removeEmptyLine: removeEmptyLine,
+        filterHtmlCode: filterHtmlCode,
+        filterHtml: filterHtmlCode,
+        encodeHtml: encodeHtml,
+        decodeHtml: decodeHtml
     }, '$');
 }(OUI);
 
@@ -4704,7 +4880,7 @@
                     if ((elem = doc.getElementById(id)) !== null) {
                         return elem;
                     }
-                    var ids = id.split(/[,\|]/), elems = [], elem;
+                    var ids = id.split(/[,|]/), elems = [], elem;
                     for (var i = 0; i < ids.length; i++) {
                         if (ids[i]) {
                             elems.push(doc.getElementById(ids[i]));

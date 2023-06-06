@@ -16,12 +16,14 @@
         buildKey: function (opt) {
             return 'sw_' + (opt.id || Config.id);
         },
-        initCache: function (opt) {
+        initCache: function (opt, panel) {
             if (!opt.id) {
                 Config.id += 1;
             }
             var key = Config.buildKey(opt);
             Config.caches[key] = {
+                panel: panel,
+                bar: null,
                 first: true,
                 shade_id: 'oui_switch_shade_body_001',
                 switch_shade_id: 'oui_switch_shade_switch_001',
@@ -93,10 +95,15 @@
             return dir === 'left' || dir === 'right';
         },
         initial: function (options) {
+            var that = this;
             if ($.isNullOrUndefined(options)) {
-                return this;
+                return that;
             }
-            Config.initCache(options);
+            that.elem = $I(options.panel);
+            if (that.elem === null) {
+                return that;
+            }
+            Config.initCache(options, that.elem);
             var cache = Config.getCache(options);
 
             if ($.isFunction(options.callback)) {
@@ -122,8 +129,8 @@
                 });
 
                 $('#' + cache.options.switchbar).click(function () {
-                    if ($.isFunction(cache.options.click)) {
-                        cache.options.click();
+                    if ($.isFunction(cache.options.click)) {                        
+                        cache.options.click(that.elem);
                     }
                 });
             }
@@ -207,10 +214,12 @@
             return this;
         },
         mouseDown: function (options) {
-            var cache = Config.getCache(options);
-            var id = options.switchbox || options.switch, obj = $I(id);
+            var that = this,
+                cache = Config.getCache(options),
+                id = options.switchbox || options.switch, 
+                obj = $I(id);
             if (null === obj) {
-                return this;
+                return that;
             }
             $('#' + id).mousedown(function () {
                 if (0 === cache.value || !$.isDisplay(options.panel)) {
@@ -223,11 +232,15 @@
 
                 Factory.showShade(cache);
 
-                var size = $.getOffset(cache.switch_shade_id, true);
-                cache.box = { w: size.width, h: size.height };
+                var size = $.getOffset(cache.switch_shade_id, true),
+                    offset = $.getOffset(cache.panel),
+                    dir = cache.direction,
+                    ev = $.getEventPosition();
 
-                var ev = $.getEventPosition();
+                cache.size = dir === 'left' || dir === 'right' ? offset.width : offset.height;
+                cache.box = { w: size.width, h: size.height };
                 cache.start = cache.horizontal ? ev.x : ev.y;
+                
                 Factory.showValue(cache, cache.start);
 
                 if (cache.first) {
@@ -250,7 +263,7 @@
             if (!cache.dragAble) {
                 return false;
             }
-            var ev = $.getEventPosition(), pass = false, pos, border,wh;
+            var ev = $.getEventPosition(), pass = false, pos, border, wh, dir = cache.direction;
             if (cache.horizontal) {
                 pos = ev.x;
                 border = cache.bs.width;
@@ -260,7 +273,7 @@
                 border = cache.bs.height;
                 wh = parseInt(cache.box.h, 10) / 2;
             }
-            if (cache.direction === 'left' || cache.direction === 'up') {
+            if (dir === 'left' || dir === 'up') {
                 pass = (pos > cache.min) && (!cache.max || pos < cache.max) && (pos < border - cache.minKeepSize);
             } else {
                 pass = (pos < border - cache.min) && (!cache.max || pos > border - cache.max) &&  (pos > cache.minKeepSize);
@@ -287,8 +300,16 @@
             $.removeEventListener(document, 'mousemove', Factory.mouseMove);
             $.removeEventListener(document, 'mouseup', Factory.mouseUp);
 
+            var start = cache.start,
+                end = cache.end,
+                value = cache.end - cache.start,
+                dir = cache.direction,
+                size = dir === 'left' || dir === 'up' ? cache.size + value : cache.size - value;
+
             if ($.isFunction(cache.options.callback)) {
-                cache.callback({ start: cache.start, end: cache.end, value: cache.end - cache.start });
+                cache.callback({ 
+                    panel: cache.panel, size: size, start: start, end: end, value: value
+                });
             }
             return this;
         }

@@ -193,6 +193,7 @@
     /*这里顶部增加2个像素的留白*/
     padding: 2px 0 0;
     display: block;
+    background: #fff;
     box-sizing: border-box;
 }
 

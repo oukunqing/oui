@@ -1142,6 +1142,9 @@
                 });
             }
             return that;
+        },
+        size: function(size, isContent, opt) {
+            return this.setContentSize(size, isContent, opt);
         }
     };
 

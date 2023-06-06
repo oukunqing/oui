@@ -12,14 +12,17 @@
     'use strict';
 
     var customAttrs = {
-        DATE_FORMAT: "date-format,dateformat",
-        DATA_FORMAT: "data-format,dataformat,value-format,valueformat",
-        OLD_VALUE: "old-value,oldvalue",
-        DATA_TYPE: "data-type,datatype,value-type,valuetype",
-        DATA_SHOW: "data-show,data-auto",
-        MIN_VALUE: "min-value,minvalue,minValue,min-val",
-        MAX_VALUE: "max-value,maxvalue,maxValue,max-val",
-        DEFAULT_VALUE: "default-value,defaultvalue,def-val,defval,dval,dv"
+        DATE_FORMAT: 'date-format,dateformat',
+        DATA_FORMAT: 'data-format,dataformat,value-format,valueformat',
+        OLD_VALUE: 'old-value,oldvalue',
+        DATA_TYPE: 'data-type,datatype,value-type,valuetype',
+        ENCODE: 'encode,encodeHtml,encodeHTML', 
+        DECODE: 'decode,decodeHtml,decodeHTML',
+        FILTER: 'filter,filterHtml,filterHTML',
+        DATA_SHOW: 'data-show,data-auto',
+        MIN_VALUE: 'min-value,minvalue,minValue,min-val',
+        MAX_VALUE: 'max-value,maxvalue,maxValue,max-val',
+        DEFAULT_VALUE: 'default-value,defaultvalue,def-val,defval,dval,dv'
     };
     var isElement = function (element) {
         return element !== null && typeof element === 'object' && typeof element.nodeType === 'number';
@@ -30,18 +33,21 @@
                 throw new Error('element 参数错误');
             }
             var id = formElement.id || '',
-                opt = $.extend({}, options),
-                messages = {
-                    required: '请输入{0}',
-                    select: '请选择{0}',
-                    minLength: '{0}请勿小于{1}个字符',
-                    maxLength: '{0}请勿超过{1}个字符',
-                    minValue: '请输入大于或等于{0}的{1}',
-                    maxValue: '请输入小于或等于{0}的{1}',
-                    minMax: '请输入{0} - {1}之间的{2}',
-                    number: '请输入{0}',
-                    pattern: '请输入正确的{0}'
-                },
+                opt = $.extend({}, options);
+
+            opt.tagPattern = opt.tagPattern || opt.tagAppend || opt.tagNames || opt.tagName;
+
+            var messages = {
+                required: '请输入{0}',
+                select: '请选择{0}',
+                minLength: '{0}请勿小于{1}个字符',
+                maxLength: '{0}请勿超过{1}个字符',
+                minValue: '请输入大于或等于{0}的{1}',
+                maxValue: '请输入小于或等于{0}的{1}',
+                minMax: '请输入{0} - {1}之间的{2}',
+                number: '请输入{0}',
+                pattern: '请输入正确的{0}'
+            },
                 highLight = {
                     styleId: 'form-validate-css-' + id,
                     className: 'form-validate-css-' + id,
@@ -342,12 +348,12 @@
                                 if (!$.isNumber(time) || time < -1) {
                                     time = configs.tooltipTime;
                                 }
-                                var options = { time: $.isNumber(time) ? time : 0, tipsMore: true, for: forname };
-                                var position = (element.field || {}).position || configs.position;
-                                var tooltipStyle = configs.tooltipStyle ||
-                                    (configs.styles || configs.style || {}).tooltip ||
-                                    op.configs.tooltipStyle ||
-                                    (op.configs.styles || op.configs.style || {}).tooltip;
+                                var options = { time: $.isNumber(time) ? time : 0, tipsMore: true, for: forname },
+                                    position = (element.field || {}).position || configs.position,
+                                    tooltipStyle = configs.tooltipStyle ||
+                                        (configs.styles || configs.style || {}).tooltip ||
+                                        op.configs.tooltipStyle ||
+                                        (op.configs.styles || op.configs.style || {}).tooltip;
 
                                 if ($.isString(position, true) || $.isNumber(position)) {
                                     options.position = position;
@@ -390,6 +396,16 @@
                                     var elemDataType = $.getAttribute(elem, customAttrs.DATA_TYPE, '');
                                     field.dataType = elemDataType || arr[0];
                                 }
+                                if (!$.isTrue(field.encode)) {
+                                    field.encode = $.getAttribute(elem, customAttrs.ENCODE, '').isTrue();
+                                }
+                                if (!$.isTrue(field.decode)) {
+                                    field.decode = $.getAttribute(elem, customAttrs.DECODE, '').isTrue();
+                                }
+                                if (!$.isTrue(field.filter)) {
+                                    field.filter = $.getAttribute(elem, customAttrs.FILTER, '').isTrue();
+                                }
+
                                 //默认值字段设置
                                 if (field.value === '') {
                                     field.value = isValue(field.val) ? field.val : isValue(field.defaultValue) ? field.defaultValue : field.value;
@@ -401,8 +417,8 @@
                                         field.value = defVal;
                                     }
                                 }
-                                if (field.required === null) {
-                                    field.required = $.getAttribute(elem, 'required', '') === 'required' || false;
+                                if (!$.isTrue(field.required) && !$.isFalse(field.required)) {
+                                    field.required = $.getAttribute(elem, 'required', '').in(['required', 'true']) || false;
                                 }
                                 return field;
                             },
@@ -431,12 +447,16 @@
                             defaultValue: '',           //默认值 (val, value, defaultValue)
                             value: '',                  //获取到的字段内容
                             attribute: '',              //获取指定的属性值作为value
-                            minValue: '', maxValue: '',   //最小值、最大值（用于验证输入的数字大小）
-                            required: null,            //是否必填项
+                            minValue: '', maxValue: '', //最小值、最大值（用于验证输入的数字大小）
+                            required: null,             //是否必填项
                             empty: false,               //是否允许空值
                             strict: false,              //是否严格模式（检测输入内容的类型）
                             md5: false,                 //是否MD5加密
-                            minLength: '', maxLength: '', //字符长度
+                            encode: false,              //是否进行html标记编码
+                            decode: false,              //是否进行html标记解码
+                            filter: false,              //是否过滤html标记
+                            minLength: '',              //字节最小长度
+                            maxLength: '',              //字符最大长度
                             pattern: '',                //正则表达式（内部验证）
                             //提示信息回调 function(status, message, element){}
                             //status 验证状态：true-表示通过，false-表示失败
@@ -520,13 +540,35 @@
                         //记录是否被创建事件，防止重复创建
                         element.isSetEvent = 1;
                     },
+                    encodeHtml: function(val, encode) {
+                        if ($.isString(val, true) && encode) {
+                            return val.encodeHtml();
+                        }
+                        return val;
+                    },
+                    decodeHtml: function(val, decode) {
+                        if ($.isString(val, true) && decode) {
+                            return val.decodeHtml();
+                        }
+                        return val;
+                    },
+                    filterHtml: function (val, filter) {
+                        if ($.isString(val, true) && filter) {
+                            return val.filterHtml();
+                        }
+                        return val;
+                    },
                     setValue: function (element, value, fieldConfig, isArray) {
-                        var attr = fieldConfig.field.attribute || fieldConfig.field.attr;
-                        var val = isArray ? value.join(',') : value;
+                        var fc = fieldConfig.field || {},
+                            attr = fc.attribute || fc.attr,
+                            val = isArray ? value.join(',') : value;
+
                         if (!isArray && ('' + val).trim() !== '') {
                             var dtfmt = $.getAttribute(element, customAttrs.DATE_FORMAT);
-                            if (dtfmt && val.toDate(true).isDate()) {
-                                val = val.toDateString(dtfmt);
+                            if (dtfmt && $.isDate(val)) {
+                                val = val.format(dtfmt === 'true' ? '' : dtfmt);
+                            } else if (dtfmt && val.toDate(true).isDate()) {
+                                val = val.toDateString(dtfmt === 'true' ? '' : dtfmt);
                             } else {
                                 var fmt = $.getAttribute(element, customAttrs.DATA_FORMAT);
                                 if (fmt) {
@@ -536,12 +578,12 @@
                         }
                         if (!op.isLegalName(attr)) {
                             if (typeof element.value === 'undefined') {
-                                element.innerHTML = val;
+                                element.innerHTML = op.encodeHtml(val, fc.encode);
                             } else {
-                                element.value = val;
+                                element.value = op.decodeHtml(val, fc.decode);
                             }
                         } else {
-                            element.setAttribute(attr, val);
+                            element.setAttribute(attr, op.encodeHtml(val, fc.encode));
                         }
                         return true;
                     },
@@ -632,10 +674,10 @@
             formElem = $.toElement(formElem);
             var data = {}, configs = op.configs, len = arr.length;
             for (var i = 0; i < len; i++) {
-                var obj = arr[i], tag = obj.tagName, type = obj.type, key = '';
+                var obj = arr[i], tag = obj.tagName, type = obj.type, key = '', val = '';
                 if (op.tagPattern.test(tag) && op.typePattern.test(type)) {
                     //获取字段参数配置
-                    var fc = op.getFieldConfig(obj, op.fields), result = {};
+                    var fc = op.getFieldConfig(obj, op.fields), fcf = fc.field || {}, result = {};
                     //console.log('obj: ', obj, ', tag: ', tag, ', type: ', type, ', nc: ', fc);
                     obj.configs = configs;
 
@@ -650,6 +692,8 @@
                     }
                     op.showTooltip(result, obj, true, formElem.id);
 
+                    val = result.value;
+
                     if (!result.pass) {
                         warns.push({ element: obj, message: result.message });
                         op.setControlEvent(obj, configs, fc, formElem);
@@ -661,10 +705,12 @@
                         }
                     } else if (obj.isSingle) {
                         if (fc.key) {
-                            if (fc.field.md5 && $.isString(result.value, true)) {
-                                data[fc.dataKey || fc.key] = $.md5(result.value);
+                            key = fc.dataKey || fc.key;
+                            if (fcf.md5 && $.isString(val, true)) {
+                                data[key] = $.md5(val);
                             } else {
-                                data[fc.dataKey || fc.key] = result.value;
+                                val = op.filterHtml(val, fcf.filter);
+                                data[key] = op.encodeHtml(val, fcf.encode);
                             }
                         }
                     } else {
@@ -674,8 +720,9 @@
                             }
                             if (!$.isArray(data[key])) {
                                 $.console.warn('The name is repeated with the id.', obj);
-                            } else if ('' !== $.trim(result.value)) {
-                                data[key].push(result.value);
+                            } else if ('' !== $.trim(val)) {
+                                val = op.filterHtml(val, fcf.filter);
+                                data[key].push(op.encodeHtml(val, fcf.encode));
                             }
                         }
                     }

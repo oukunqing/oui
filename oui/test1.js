@@ -1127,3 +1127,136 @@ console.log((4780638).toFileSize());
 var title='', userId = 0;
 
 console.log(title || (userId ? '编辑用户信息' : '新增用户信息'));
+
+
+var config = {
+            language:{
+                name   : "cn",
+                month  : ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"],
+                weeks  : [ "日", "一", "二", "三", "四", "五", "六" ],
+                times  : ["小时","分钟","秒数"],
+                timetxt: ["时间选择","开始时间","结束时间"],
+                backtxt:"返回日期",
+                clear  : "清空",
+                today  : "现在",
+                yes    : "确定"
+            },
+            format:"YYYY-MM-DD hh:mm:ss",               //日期格式
+            minDate:"1900-01-01 00:00:00",              //最小日期
+            maxDate:"2099-12-31 23:59:59",              //最大日期
+            isShow:true,                                //是否显示为固定日历，为false的时候固定显示
+            multiPane:true,                             //是否为双面板，为false是展示双面板
+            onClose:true,                               //是否为选中日期后关闭弹层，为false时选中日期后关闭弹层
+            range:false,                                //如果不为空且不为false，则会进行区域选择，例如 " 至 "，" ~ "，" To "
+            trigger:"click",                            //是否为内部触发事件，默认为内部触发事件
+            position:[],                                //自定义日期弹层的偏移位置，长度为0，弹层自动查找位置
+            valiDate:[],                                //有效日期与非有效日期，例如 ["0[4-7]$,1[1-5]$,2[58]$",true]
+            isinitVal:false,                            //是否初始化时间，默认不初始化时间
+            initDate:{},                                //初始化时间，加减 天 时 分
+            isTime:true,                                //是否开启时间选择
+            isClear:true,                               //是否显示清空按钮
+            isToday:true,                               //是否显示今天或本月按钮
+            isYes:true,                                 //是否显示确定按钮
+            festival:false,                             //是否显示农历节日
+            fixed:true,                                 //是否静止定位，为true时定位在输入框，为false时居中定位
+            zIndex:9999,                                //弹出层的层级高度
+            method:{},                                 //自定义方法                
+            theme:{},                                   //自定义主题色
+            shortcut:[],                                //日期选择的快捷方式
+            donefun:null,                                //选中日期完成的回调
+            before:null,                                //在界面加载之前执行
+            succeed:null,                                //在界面加载之后执行  
+            clickCallback: false,                        //是否点击后立即回调
+            callback: null,                               //自定义的回调函数
+            parent: null                                  //容器
+        };
+
+var options = {
+language: {yes:'OKOK'},
+};
+$.extend(config.language, options.language || {});
+delete options.language;
+
+var cfg = $.extend(config, options||{});
+
+
+console.log(cfg);
+
+var dir = 'top';
+console.log(dir === 'left' || dir === 'right' ? 100 : 50);
+
+function loadtest() {
+    if(!$.firstLoad([12,13])) {
+        return false;
+    }
+    console.log('loadtest');
+}
+console.log($.firstLoad(''));
+console.log($.firstLoad('a'));
+console.log($.firstLoad(''));
+console.log($.firstLoad({id:3}));
+
+loadtest();
+loadtest();
+loadtest();
+loadtest();
+
+console.log(new Date('Wed Feb 14 2001 08:00:00 GMT+0800 (中国标准时间) '))
+
+console.log(new Date())
+
+
+
+function toDateFormat(dt) {
+    var year = dt.getFullYear(),
+        month = dt.getMonth() + 1,
+        date = dt.getDate();
+
+    var val = year + '-' + month + '-' + date;
+
+    return val;
+}
+
+console.log(toDateFormat(new Date()))
+
+console.log(new Date().format());
+console.log(new Date().format('yyyy-MM-dd'));
+var ts = parseInt(new Date().getTime()/1000, 10);
+console.log(ts);
+console.log(new Date((ts + 30)*1000).format());
+
+var title = 'abc<br/>123';
+console.log(title.encodeHtml())
+console.log(title)
+
+
+var fd = { title: 'abc<br />1&2"3', id: 123, content: '你好abc', desc: '<a>aa</a>' };
+console.log($.encodeHtml(fd, ['title', 'desc']));
+console.log(fd);
+console.log($.decodeHtml(fd, 'title,desc'));
+
+console.log('ab|ac,123||4t,aa'.splitStr(/[,|]/g))
+
+console.log('{0}'.format(123));
+
+var val = '0', val2 = '';
+
+console.log(val||val2);
+
+console.log('AAAAAA');
+console.log('abc\n\n\nasd\n\n123'.removeEmptyLine())
+console.log('BBBBBB');
+console.log('abc\r\n\r\n\nasd\r\n    \r\n  \r\n12\r5\r4\n3'.removeEmptyLine())
+console.log('CCCCCC');
+console.log('abc\r\rasd\r\r123'.removeEmptyLine())
+
+
+console.log('test<<<<<script 123 >>>>《你好》 2<3 b>a c<d <script>alert(123);</script><a>'.filterHtml());
+
+console.log('a‘b"\id=1'.toDate());
+
+var obj = 'abc';
+
+console.log(new Date() instanceof Date);
+
+console.log(isNaN('1'));
