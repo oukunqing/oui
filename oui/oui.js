@@ -135,7 +135,10 @@
         PATTERN: {
             Email: /^[A-Z0-9\u4e00-\u9fa5]+@[A-Z0-9_-]+(\.[A-Z0-9_-]+)+$/i,
             //手机号码
-            Mobile: /^1([38][0-9]|4[579]|5[0-3,5-9]|6[6]|7[0135678]|9[89])\d{8}$/,
+            //Mobile: /^1([38][0-9]|4[579]|5[0-3,5-9]|6[6]|7[013,5-8]|9[89])\d{8}$/,
+            Mobile: /^1([38][0-9]|4[57]|[59][0-3,5-9]|6[6]|7[0-3,5-8])\d{8}$/,
+            //物联网卡号码，11位或13位
+            IOTMobile: /^(1([4][014689])\d{8}|1([4][014689])\d{10})$/,
             //身份证规则
             //前2位为省份区划编码 11 - 82, 50为重庆市编码
             //7-8位为出生年份开头2个数字  19或20
@@ -143,11 +146,11 @@
             //固定电话号码
             Telephone: /^(\(\d{3,4}\)|\d{3,4}-|\s)?\d{7,8}$/,
             //日期格式
-            Date: /^(19|20)[\d]{2}[\-\/](0[1-9]|1[0-2])[\-\/](0[1-9]|[12][0-9]|3[0-1])$/,
+            Date: /^(19|20|21)[\d]{2}[\-\/](0?[1-9]|1[0-2])[\-\/](0?[1-9]|[12][0-9]|3[0-1])$/,
             //时间格式，可以省略“:秒”
-            Time: /^(20|21|22|23|[0-1]\d):[0-5]\d(:[0-5]\d)?$/,
-            //日期时间格式
-            DateTime: /^(19|20)[\d]{2}[\-\/](0[1-9]|1[0-2])[\-\/](0[1-9]|[12][0-9]|3[0-1])\s+(20|21|22|23|[0-1]\d):[0-5]\d(:[0-5]\d)?$/,
+            Time: /^(20|21|22|23|[0-1]?\d):[0-5]?\d(:[0-5]?\d)?$/,
+            //日期时间格式（可以不包含时间，时间可以省略“:秒”）
+            DateTime: /^(19|20|21)[\d]{2}[\-\/](0?[1-9]|1[0-2])[\-\/](0?[1-9]|[12][0-9]|3[0-1])(\s+(20|21|22|23|[0-1]?\d):[0-5]?\d(:[0-5]?\d)?)?$/,
             //IPV4
             Ip: /^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$/
         }
@@ -168,12 +171,24 @@
         },
         isObject = function (o) { return o !== null && typeof o === 'object'; },
         isArray = Array.isArray || function (a) { return Object.prototype.toString.call(a) === '[object Array]'; },
+        /*
+            判断变量是否为boolean
+            b: 变量
+            dv: 默认值，若dv为boolean，且b不为boolean，则返回dv；若dv不为boolean,则返回b === boolean
+        */
         isBoolean = function (b, dv) {
             var bool = typeof b === 'boolean';
             return typeof dv === 'boolean' ? (bool ? b : dv) : bool;
         },
         isDate = function (obj) {
             return obj instanceof Date && !isNaN(obj.getFullYear());
+        },
+        isDateString = function (str) {
+            var pattern = /[\d]/;
+
+            pattern = /^[0-9]{10, 13}$/;
+
+            return false;
         },
         isTrue = function (b) {
             return typeof b === 'boolean' && b || b === 'true' || b === 1 || b === '1';
@@ -563,8 +578,8 @@
             }
             return buildParam(param, null, false);
         },
-        setUrlParam = function (a, v, strict) {
-            return buildParam(a, v, strict);
+        setUrlParam = function (a, v, strict, url) {
+            return buildParam(a, v, strict, url);
         },
         getTime = function () {
             return ('' + new Date().getTime());//.substr(0, 10);
@@ -581,6 +596,12 @@
                 }
             }
             if (!isNullOrUndefined(name)) {
+                if ($.isString(name, true) && /[,|]/g.test(name)) {
+                    name = name.splitStr(/[,|]/g);
+                    if (name.length <= 1) {
+                        name = name[0];
+                    }
+                }
                 if ($.isArray(name)) {
                     for (var j = 0; j < name.length; j++) {
                         var v = obj[name[j]];
@@ -621,17 +642,27 @@
                 pos1 = str.lastIndexOf('/');
             return pos1 > -1 ? str.substr(pos1 + 1) : str;
         },
+        OUIDebugActionFlag = false,
+        setDebug = function (debug) {
+            return OUIDebugActionFlag = $.isBoolean(debug, !OUIDebugActionFlag), this;
+        },
+        isDebugAction = function () {
+            return OUIDebugActionFlag;
+        },
         isDebug = function (key) {
+            if (isBoolean(key, false)) {
+                return isDebugAction();
+            }
             try {
-                var debug = getQueryString(location.href)[key || 'debug'];
-                var result = !isNullOrUndefined(debug) && debug === '1';
+                var debug = getQueryString(location.href)[key || 'debug'],
+                    result = !isNullOrUndefined(debug) && debug === '1';
                 if (!result && $.isSubWindow()) {
                     try {
                         debug = getQueryString(parent.location.href)[key || 'debug'];
                         result = !isNullOrUndefined(debug) && debug === '1'
                     } catch (e) {}
                 }
-                return result;
+                return result || isDebugAction();
             } catch (e) {
                 return false;
             }
@@ -822,7 +853,8 @@
 
     $.extendNative($, {
         trim: trim, isUndefined: isUndefined, isUndef: isUndefined, isString: isString, isNumber: isNumber,
-        isFunction: isFunction, isFunc: isFunction, isObject: isObject, isArray: isArray, isDate: isDate,
+        isFunction: isFunction, isFunc: isFunction, isObject: isObject, isArray: isArray, isDate: isDate, 
+        isDateString: isDateString, isDateStr: isDateString,
         isBoolean: isBoolean, isBool: isBoolean, isTrue: isTrue, isFalse: isFalse, isNull: isNull, isEmpty: isEmpty,
         isProperty: isProperty, isPercent: isPercent, isPercentSize: isPercent, version: version,
         isNumeric: isNumeric, isDecimal: isDecimal, isInteger: isInteger, isFloat: isDecimal, isInt: isInteger,
@@ -848,7 +880,7 @@
         toFunction: toFunction, toFunc: toFunction, callFunction: callFunction, callFunc: callFunction,
         param: buildParam, buildParam: buildParam, setUrlParam: setUrlParam, buildAjaxData: buildAjaxData,
         setQueryString: setQueryString, getQueryString: getQueryString, getUrlHost: getUrlHost, getUrlPage: getUrlPage,
-        isDebug: isDebug, isLocalhost: isLocalhost,
+        setDebug: setDebug, isDebugAction: isDebugAction, isDebug: isDebug, isLocalhost: isLocalhost,
         filterValue: filterValue, keywordOverload: keywordOverload, keyOverload: keywordOverload,
         setValue: setValue, getValue: getValue, isValue: isValue, getParam: getParam,
         getParamValue: getParamValue, getParVal: getParamValue, cleanSlash: cleanSlash,

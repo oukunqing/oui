@@ -1259,4 +1259,57 @@ var obj = 'abc';
 
 console.log(new Date() instanceof Date);
 
-console.log(isNaN('1'));
+console.log(Date.parse('2023-06-07'));
+console.log(new Date(Date.parse('2299-06-07 09:20:10')).getTime());
+console.log(new Date(Date.parse('1970-01-01 00:00:00')).getTime() + 8*3600*1000);
+
+console.log(new Date(0));
+console.log(new Date('2023-06-07'));
+console.log(new Date('a‘b"\id=1'));
+console.log(new Date(Date.parse('a‘b"\id=1')));
+console.log(new Date(0000000000000));
+
+
+var isDateString2 = function (str) {
+    var pattern = /^(19|20|21)[\d]{2}[-\/](1[012]|0?[\d])$/;
+
+    //只考虑当前有效的时间戳格式
+    return /^[0-9]{10,13}$/.test(str);
+};
+
+
+console.log(isDateString2('1686096000000'));
+
+console.log($.PATTERN.Date.test('2023-6-7'));
+console.log($.PATTERN.DateTime.test('2023-6-7 9:22:25'));
+console.log($.PATTERN.DateTime.test('2023-06-07'));
+
+console.log($.PATTERN.IOTMobile.test('14112345678'));
+
+console.log('/module.aspx'.setQueryString({module:'10001', menuCode:'10001'}, false));
+
+
+
+function getQKey(obj, name) {
+
+            if (!$.isNullOrUndefined(name)) {
+                if ($.isString(name, true) && /[,|]/g.test(name)) {
+                    name = name.split(/[,|]/g);
+                    if (name.length <= 1) {
+                        name = name[0];
+                    }
+                }
+                if ($.isArray(name)) {
+                    for (var j = 0; j < name.length; j++) {
+                        var v = obj[name[j]];
+                        if (!$.isUndefined(v)) {
+                            return v;
+                        }
+                    }
+                }
+                return obj[name] || '';
+            }
+            return '';
+}
+
+console.log(getQKey({id:123,code:'abc',name:'asd',debug3:1}, 'debug,debug2'));

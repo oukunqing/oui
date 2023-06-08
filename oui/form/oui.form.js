@@ -567,7 +567,7 @@
                             var dtfmt = $.getAttribute(element, customAttrs.DATE_FORMAT);
                             if (dtfmt && $.isDate(val)) {
                                 val = val.format(dtfmt === 'true' ? '' : dtfmt);
-                            } else if (dtfmt && val.toDate(true).isDate()) {
+                            } else if (dtfmt && $.isDate(val.toDate(true))) {
                                 val = val.toDateString(dtfmt === 'true' ? '' : dtfmt);
                             } else {
                                 var fmt = $.getAttribute(element, customAttrs.DATA_FORMAT);
