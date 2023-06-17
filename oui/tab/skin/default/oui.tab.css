@@ -248,13 +248,13 @@
 }
 
 .oui-tabs-context-menu .cmenu-item {
-    height: 24px;
-    line-height: 2em;
+    height: 28px;
+    line-height: 28px;
     display: block;
     text-align: left;
     margin: 0;
     padding: 0 20px;
-    font-size: 12px;
+    font-size: 14px;
     background: #fff;
     color: #555;
     text-decoration: none;
@@ -266,7 +266,7 @@
 .oui-tabs-context-menu .cmenu-item .skey {
     float: right;
     font-style: normal;
-    font-size: 12px;
+    font-size: 14px;
     margin: 0;
     padding: 0;
     border: none 0;

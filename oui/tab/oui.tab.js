@@ -27,6 +27,7 @@
         GetLang: function() {
             return Config.FilePath.getQueryString(['lang']) || 'chinese';
         },
+        CMenuItemHeight: 28,    //右键菜单项高度，单位：像素
         LongPressTime: 512,      //长按最小时长，单位：毫秒
         LongPressInterval: 40,   //长按滚动间隔，单位：毫秒
         LongPressMinInterval: 10,   //长按滚动间隔，单位：毫秒
@@ -479,7 +480,7 @@
             var width = 256, height = 0;
             for(var i = 0; i<html.length; i++) {
                 if(html[i].indexOf('<a') === 0) {
-                    height += 24;
+                    height += Config.CMenuItemHeight;
                 } else {
                     height += 9;
                 }

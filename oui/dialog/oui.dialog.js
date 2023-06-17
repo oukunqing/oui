@@ -972,6 +972,12 @@
                     opt.title = Common.getDialogText('About', opt.lang) || '';
                 }
 
+                if (opt.type === Config.DialogType.message || opt.type === Config.DialogType.msg) {
+                    if ($.isNullOrUndefined(par.padding)) {
+                        opt.padding = 0;
+                    }
+                }
+
                 var p = this.getOptions($.extend(opt, par).id);
                 if (!p && (opt.target || opt.type === Config.DialogType.tooltip)) {
                     var attrName = opt.type === Config.DialogType.tooltip ? Config.TooltipAttributeName : Config.TargetAttributeName;
@@ -1029,7 +1035,6 @@
                 return dialog.getOptions().id === that.getOptions().id;
             },
             isIframe: function (opt) {
-                console.log('opt:', opt);
                 if (Common.isInKeys(opt.type, ['url', 'iframe', 'load'], Config.DialogType)) {
                     return true;
                 } else if($.isString(opt.url, true) && opt.url === opt.content) {

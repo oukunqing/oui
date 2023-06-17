@@ -1476,7 +1476,7 @@
         }
     };
 
-    $.extend({
+    $.extend($, {
         debounce: function(options, callback) {
             return Factory.buildDebounce(options, callback);
         }

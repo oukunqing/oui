@@ -1313,3 +1313,14 @@ function getQKey(obj, name) {
 }
 
 console.log(getQKey({id:123,code:'abc',name:'asd',debug3:1}, 'debug,debug2'));
+
+console.log(Math.pow(5, 2));
+console.log(Math.pow(5, 3));
+console.log(Math.pow(5, 1));
+console.log(Math.pow(5, 0));
+console.log(Math.pow(5, -1));
+console.log(Math.pow(-5, 3));
+console.log(Math.pow(-5, -1));
+
+
+console.log((1335832 / 1000 / 1000 * 4.423 + 0.034));

@@ -494,10 +494,14 @@ function buttons() {
 function escClose() {
 	$.dialog.msg('图片信息复制成功，可Ctrl+V粘贴至微信！', {
 		title: 'Esc',
+		skin: 'blue',
+		//padding: 5,
+		//closeAble: false,
+		//showClose: false,
 		escClose: true,
 		width: 'auto',
 		height: 'auto',
-		timing: 100000,
+		timing: 100 * 1000,
 		//showHead: false
 	});
 }

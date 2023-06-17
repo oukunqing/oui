@@ -32,6 +32,7 @@
         //x: 0,
         par: { code: 'dx01', id: 32, name: '设备01'},
         width: 'auto',
+        showIcon: true,      //图标大小为20px*20px
         //height: 'auto',
         callback: function(par, obj) {
             console.log('par122: ', par, obj);
@@ -41,7 +42,7 @@
             { key: 'dic1', name: '字典配置1', checkbox: {checked: false}, par: { id: 12, code: 'abc' } },
 			{ sep: 1 }, 
             { key:'dic', name: '字典配置', disabled: true },
-            { key: 'sys', name: '系统配置', items: [
+            { key: 'sys', name: '系统配置123456', icon: 'imgs/helmet-on.png', items: [
                 { key: 'map', name: '地图配置', node: true },
                 { key: 'private-map', name: '私有地图配置', url: 'dialog.html', target: '_blank'},
                 { key: 'pic', name: '图片配置', items: [
@@ -57,8 +58,8 @@
         ]
     });
     
-    menu.add({key: 'dic2', name: '字典配置2', radio: {single:true, name: 'dic2'}})
-		.add({key: 'dic3', name: '字典配置3', radio: {single:true, name: 'dic2'}})
+    menu.add({key: 'dic2', name: '自动（定时开启/关闭电源）', radio: {single:true, name: 'dic2'}})
+		.add({key: 'dic3', name: '字典配置3', icon: 'imgs/helmet-on.png', radio: {single:true, name: 'dic2'}})
 		.add({key: 'dic4', name: '字典配置4', radio: {single:true, name: 'dic2'}})
 		.add({key: 'dic5', name: '字典配置5', radio: {single:true, name: 'dic2'}}).sep('dic2')
         .insert({ key: 'person', pkey: 'map',  name: '人员配置', node: true, items: [
@@ -72,9 +73,9 @@
             {pkey: 'partner', name: '一级经销商'},
             {pkey: 'partner', name: '二级经销商'}
         ])
-        .add([
-            {pkey: 'map', name: '腾讯地图配置123456', disabled: true},
-            {pkey: 'map', name: '高德地图配置2'}
+        .add([,
+            {pkey: 'map', name: '高德地图配置2'},
+            {pkey: 'map', name: '腾讯地图配置123456', disabled: true}
         ])
         //.show()
         ;
@@ -88,11 +89,11 @@
 		showIcon: true		//图标大小为20px*20px
 	})
 	//img 表示以 img src 显示图标，图片可能会被拉伸
-	.add({ menuId: 'menu2', key: 'tts', name: '语音播报', img: 'helmet-on.png' })
+	.add({ menuId: 'menu2', key: 'tts', name: '语音播报', img: 'imgs/helmet-on.png' })
 	//icon 表示以 div background 显示图标
-	.add({ menuId: 'menu2', key: 'tts', name: '语音播报2', icon: 'helmet-on.png' })
+	.add({ menuId: 'menu2', key: 'tts', name: '语音播报2', icon: 'imgs/helmet-on.png' })
 	//无img和icon，表示直接以cssText显示图片
-	.add({ menuId: 'menu2', key: 'track', name: '轨迹回放', iconStyle: 'background:url(\'helmet-off.png\') no-repeat center;' });
+	.add({ menuId: 'menu2', key: 'track', name: '轨迹回放', iconStyle: 'background:url(\'imgs/helmet-off.png\') no-repeat center;' });
 
 	function show2(ev, obj) {
 		var menu3 = $.cmenu({
@@ -100,20 +101,20 @@
 			obj: obj, 
 			showIcon: true
 		})
-		.add({ key: '001', name: '右键菜单01', icon: 'helmet-on.png' })
-		.add({ key: '002', name: '右键菜单02', icon: 'helmet-off.png' })
-		.add({ key: '003', name: '右键菜单03', icon: 'helmet-on.png' })
+		.add({ key: '001', name: '右键菜单01', icon: 'imgs/helmet-on.png' })
+		.add({ key: '002', name: '右键菜单02', icon: 'imgs/helmet-off.png' })
+		.add({ key: '003', name: '右键菜单03', icon: 'imgs/helmet-on.png' })
 		//插入一个分隔线到 004（项） 之前
 		.sep('004')
-		.add({ key: '004', name: '右键菜单04', icon: 'helmet-on.png' })
-		.add({ key: '005', name: '右键菜单05', icon: 'helmet-off.png' })
+		.add({ key: '004', name: '右键菜单04', icon: 'imgs/helmet-on.png' })
+		.add({ key: '005', name: '右键菜单05', icon: 'imgs/helmet-off.png' })
 		//增加一个分隔线
 		.add({ sep: 1 })
 		.add({ key: 'other', name: '右键菜单other' });
 
 		//追加菜单项
-		menu3.add({ key: '006', pkey: '003', name: '右键菜单06', icon: 'helmet-on.png' })
-			.add({ key: '007', pkey: '003', name: '右键菜单07', icon: 'helmet-off.png' })
+		menu3.add({ key: '006', pkey: '003', name: '右键菜单06', icon: 'imgs/helmet-on.png' })
+			.add({ key: '007', pkey: '003', name: '右键菜单07', icon: 'imgs/helmet-off.png' })
 			.show(ev);
     }
 

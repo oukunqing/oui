@@ -18,8 +18,10 @@
         //菜单项边距边框尺寸
         ItemMBPWidth: 22,
         ItemMinWidth: 80,
-        ItemArrowWidth: 35,
-        IconWidth: 25
+        ItemArrowWidth: 25,
+        ItemHeight: 28,    //右键菜单项高度，单位：像素
+        IconWidth: 20,      //Icon图标最大尺寸
+        IconBoxWidth: 25
     },
         Cache = {
             menus: {},
@@ -154,6 +156,9 @@
                 }
                 return this;
             },
+            buildMenuId: function (menuId) {
+                return 'oui-context-menu-' + menuId;
+            },
             buildItemId: function (menuId) {
                 return 'cmenu-' + menuId + '-' + (Cache.itemId++);
             },
@@ -168,7 +173,6 @@
                 return Cache.menus[key] || null;
             },
             buildMenu: function (options, isUpdate) {
-
                 options.showIcon = $.getParam(options, ['showIcon', 'icon']);
 
                 var opt = $.extend({
@@ -234,7 +238,6 @@
                 return this;
             },
             checkCondition: function (condition) {
-                console.log('checkCondition: ', condition, typeof condition);
                 if ($.isFunction(condition)) {
                     return condition();
                 }
@@ -252,7 +255,7 @@
                     width: cfg.width,
                     height: cfg.height,
                     x: offset.width - 5,
-                    y: -24 - 3
+                    y: -Config.ItemHeight - 3
                 },
                     bs = $.getBodySize(),
                     ss = $.getScrollPosition(),
@@ -261,7 +264,7 @@
                     level = parent.level + 1;
 
                 if (autoWidth) {
-                    opt.width = Factory.getMaxWidth(items) + (cfg.showIcon ? Config.IconWidth : 0);
+                    opt.width = Factory.getMaxWidth(items) + (cfg.showIcon ? Config.IconBoxWidth : 0);
                 }
 
                 if (obj) {
@@ -293,6 +296,7 @@
                         } else if (Factory.checkCondition(dr.condition)) {
                             var itemId = Factory.buildItemId(box.menuId),
                                 chbId = Factory.buildChbId(box.menuId, dr.key),
+                                checkbox = Factory.buildCheckBox(dr, '', menu.id, chbId),
                                 txt = dr.name || dr.txt || dr.text,
                                 hasChild = $.isArray(dr.items),
                                 disabled = $.isBoolean(dr.disabled || dr.disable, false);
@@ -318,7 +322,7 @@
                                     });
                                 }
 
-                                txt += Factory.buildMenuIcon(cfg, dr);
+                                txt += Factory.buildMenuIcon(cfg, dr, box.menuId, checkbox, level, menu);
 
                                 if (param.hasChild) {
                                     txt += '<i class="cmenu-arrow"></i>';
@@ -343,10 +347,11 @@
                                         $.cancelBubble(ev);
                                     });
                                 }
-                                elem.innerHTML = Factory.buildMenuText(txt, dr, disabled, box.menuId, chbId);
+                                elem.innerHTML = Factory.buildMenuText(txt, dr, disabled);
                             }, box, { items: dr.items, hasChild: hasChild, data: dr });
                         }
                     }
+                    Factory.setMenuIconWidth(menu);
                 }, parent);
 
                 var boxSize = $.elemSize(box);
@@ -373,7 +378,8 @@
                         chbId = Factory.buildChbId(menuId, dr.key),
                         func = Factory.buildMenuCallback(dr, cfg),
                         par = Factory.buildMenuPar(dr, cfg, chbId),
-                        w = autoWidth ? Factory.getContentWidth(dr) : 0,
+                        checkbox = Factory.buildCheckBox(dr, '', menuId, chbId),
+                        w = autoWidth ? Factory.getContentWidth(dr) + (checkbox ? Config.IconWidth : 0) : 0,
                         disabled = $.isBoolean(dr.disabled || dr.disable, false);
 
                     if (!txt) {
@@ -399,7 +405,7 @@
                             });
                         }
 
-                        txt += Factory.buildMenuIcon(cfg, dr);
+                        txt += Factory.buildMenuIcon(cfg, dr, menuId, checkbox, level, menu);
 
                         if (hasChild) {
                             txt += '<i class="cmenu-arrow"></i>';
@@ -422,9 +428,9 @@
                                 $.cancelBubble(ev);
                             });
                         }
-                        elem.innerHTML = Factory.buildMenuText(txt, dr, disabled, menuId, chbId);
+                        elem.innerHTML = Factory.buildMenuText(txt, dr, disabled);
                     });
-                    return { type: 'menu', elem: elem, height: 24, width: w };
+                    return { type: 'menu', elem: elem, height: Config.ItemHeight, width: w };
                 }
             },
             dealChecked: function (par, elem) {
@@ -450,24 +456,56 @@
                 }
                 return this;
             },
-            buildMenuIcon: function (opt, dr) {
+            buildMenuIcon: function (opt, dr, menuId, checkbox, level, menu) {
+                if (!menu.icons) {
+                    menu.icons = [];
+                    menu.iconidx = 0;
+                }
+                var iconid = menuId + '-menu-icon' + menu.iconidx++;
+
+                if (!menu.icons[level]) {
+                    menu.icons[level] = { ids: [iconid], level: level, con: 0 };
+                } else {
+                    menu.icons[level].ids.push(iconid);
+                }     
+
+                var className = 'menu-icon menu-icon-' + level;
                 if (opt.showIcon) {
-                    var icon = dr.icon || '', img = dr.img || '', cssText = dr.iconCss || dr.iconStyle;
+                    var icon = dr.icon || '', img = dr.img || '', cssText = dr.iconCss || dr.iconStyle || '',
+                        id = menuId + '-menu-icon',
+                        bg = 'background:url(\'' + icon + '\') no-repeat center;',
+                        html = '', con = 1;
                     if (img) {
-                        return '<img src="' + img + '" class="menu-icon" style="' + cssText + '" />';
+                        html = '<img id="' + iconid + '" src="' + img + '" class="' + className + '" style="' + cssText + '" />' + checkbox;
                     } else if (icon) {
-                        return '<div class="menu-icon" style="background:url(\'' + icon + '\') no-repeat center;' + cssText + '"></div>';
+                        html = '<div id="' + iconid + '" class="' + className + '" style="' + bg + cssText + '"></div>' + checkbox;
                     } else {
-                        return '<div class="menu-icon" style="' + cssText + '"></div>';
+                        html = '<div id="' + iconid + '" class="' + className + '" style="' + cssText + '">' + checkbox + '</div>';
+                        con = 0;
+                    }
+                    menu.icons[level].con += con + (!checkbox ? 0 : 1);
+                    return html;
+                }
+                return checkbox;
+            },
+            setMenuIconWidth: function (menu) {
+                if (!menu.icons || !menu.icons.length) {
+                    return this;
+                }
+                for (var i = 0; i < menu.icons.length; i++) {
+                    var dr = menu.icons[i];
+                    if (!dr.con) {
+                        for (var j = 0; j < dr.ids.length; j++) {
+                            var icon = document.getElementById(dr.ids[j]);
+                            if (icon !== null && icon.className.indexOf('menu-icon-' + dr.level) > -1) {
+                                icon.style.width = (Config.IconWidth / 2 - 1) + 'px'
+                            }
+                        }
                     }
                 }
-                return '';
+                return this;
             },
-            buildMenuText: function (txt, dr, disabled, menuId, chbId) {
-                if (!disabled && dr && dr.url) {
-                    var target = dr.target ? 'target="' + dr.target + '"' : '';
-                    return '<a class="cmenu-link" href="{url}" {1} onmouseup="$.cancelBubble();">{2}</a>'.format(dr, target, txt);
-                }
+            buildCheckBox: function (dr, txt, menuId, chbId) {
                 var checkbox = dr.checkbox || dr.radio;
                 if (!$.isUndefined(checkbox)) {
                     var chbName = 'rb' + checkbox.name,
@@ -504,6 +542,13 @@
                 }
                 return txt;
             },
+            buildMenuText: function (txt, dr, disabled) {
+                if (!disabled && dr && dr.url) {
+                    var target = dr.target ? 'target="' + dr.target + '"' : '';
+                    return '<a class="cmenu-link" href="{url}" {1} onmouseup="$.cancelBubble();">{2}</a>'.format(dr, target, txt);
+                }
+                return txt;
+            },
             buildMenuCallback: function (dr, opt) {
                 return dr.callback || dr.func || opt.callback || opt.func;
             },
@@ -537,8 +582,7 @@
                             items.push(item);
                         }
                     }
-                }
-
+                }                
                 return items;
             },
             fillMenuItem: function (box, items, opt, isAppend) {
@@ -605,8 +649,8 @@
                 return this;
             },
             getContentWidth: function (dr) {
-                var txt = dr.name || dr.text || dr.txt;
-                var w = $.getContentSize(txt).width + Config.ItemMBPWidth;
+                var txt = dr.name || dr.text || dr.txt,
+                    w = $.getContentSize(txt).width + Config.ItemMBPWidth;
                 if ($.isArray(dr.items) && dr.items.length > 0) {
                     w += Config.ItemArrowWidth;
                 }
@@ -675,7 +719,7 @@
                         width: 240,
                         height: 'auto'
                     }, cache.options, pos),
-                    id = 'oui-context-menu-' + menu.id,
+                    id = Factory.buildMenuId(menu.id),
                     box = $I(id),
                     autoWidth = ('' + opt.width).toLowerCase() === 'auto',
                     followSize = isAnchor && op.target.tagName === 'INPUT';
@@ -709,7 +753,7 @@
 
                         var items = Factory.buildMenuItems(opt, cache, autoWidth, menu);
                         if (autoWidth && !followSize) {
-                            var w = Factory.getMaxWidth(items) + (opt.showIcon ? Config.IconWidth : 0);
+                            var w = Factory.getMaxWidth(items) + (opt.showIcon ? Config.IconBoxWidth : 0);
                             elem.style.width = w + 'px';
                             opt.width = w;
 
@@ -737,6 +781,8 @@
                         box.style.top = (bs.height + ss.top - xs.outerHeight - 2) + 'px';
                     }
                 }
+                Factory.setMenuIconWidth(menu);
+
                 return box;
             },
             hideContextMenu: function (ev, id, hide) {
