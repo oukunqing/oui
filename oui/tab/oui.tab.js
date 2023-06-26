@@ -153,6 +153,12 @@
                 t.show(itemId);
                 return this;
             }
+
+            if (opt.element) {
+                opt.element = $.toElement(opt.element);
+            }
+            var isElem = $.isElement(opt.element) && opt.element.parentNode === t.conContainer;
+
             var tab = $.createElement('li', '', function(elem) {
                 elem.className = 'tab-item';
                 elem.id = Util.buildItemId(objId, itemId);
@@ -172,7 +178,7 @@
                     txtStyle += ';line-height:' + (height - ($.isFirefox ? 3 : 0)) + 'px;';
                 }
                 var con = '<a class="tab-txt" href="javascript:void(0);" style="{1}">{name}</a>';
-                if(opt.closeAble) {
+                if(opt.closeAble && !isElem) {
                     con += '<i class="tab-close" title="" style="{2}">×</i>';
                 }
                 elem.innerHTML = con.format(opt, txtStyle, closeStyle);
@@ -216,7 +222,7 @@
             */
 
             var childs = tab.childNodes;
-            for(var i=0; i<childs.length; i++) {
+            for(var i = 0; i < childs.length; i++) {
                 if(childs[i].className.endsWith('close')) {
                     childs[i]['onclick'] = function() {
                         t.close(itemId);
@@ -236,7 +242,18 @@
                     return false;
                 };
             }
-            var panelId = Util.buildPanelId(objId, itemId), isIframe = false, iframeId = '', loadingId = '';
+
+            if (isElem) {
+                opt.element.className += ' tab-panel';
+                Factory.setCache(t.id, opt, tab, opt.element, undefined);
+                return this;
+            }
+
+            var panelId = Util.buildPanelId(objId, itemId),
+                isIframe = false,
+                iframeId = '',
+                loadingId = '';
+
             var div = $.createElement('div', panelId, function(elem) {
                 elem.className = 'tab-panel';
                 if(cfg.style.panel) {
@@ -270,8 +287,6 @@
 
                 Factory.setCache(t.id, opt, tab, elem, iframe);
             }, t.conContainer);
-
-            //Factory.setCache(t.id, opt, tab, div, iframe);
 
             return this;
         },
@@ -926,9 +941,8 @@
             cssCon = ' oui-tabs-' + opt.skin + '-contents';
             Factory.loadCss(opt.skin);
         }
-
-        that.tabContainer.className = 'oui-tabs' + cssTab;
-        that.conContainer.className = 'oui-tabs-contents' + cssCon;
+        $.addClass(that.tabContainer, 'oui-tabs' + cssTab);
+        $.addClass(that.conContainer, 'oui-tabs-contents' + cssCon);
 
         that.initial(opt);
     }
@@ -1179,10 +1193,13 @@
             var tabs = that.tabContainer.querySelectorAll('a'),
                 cons = that.conContainer.querySelectorAll('div');
 
+            console.log('tabs:', tabs, ', cons:', cons);
+
             that.tabs = tabs;
             that.cons = cons;
 
             for(var i = 0; i < tabs.length; i++) {
+                $.addClass(tabs[i], 'tab-item');
                 $.addListener(tabs[i], opt.event, function() {
                     var key = $.getAttribute(this, 'tab|key|rel');
                     that.show(key);
@@ -1198,13 +1215,19 @@
         },
         show: function(key) {
             var that = this;
+            function getTabElem(elem) {
+                if (elem && elem.tagName) {
+                    return elem.tagName === 'A' && elem.parentNode && elem.parentNode.tagName === 'LI' ? elem.parentNode : elem
+                }
+                return null;
+            }
             for(var i = 0; i < that.cons.length; i++) {
-                $.removeClass(that.tabs[i].parentNode, 'cur');
+                $.removeClass(getTabElem(that.tabs[i]), 'cur');
                 that.cons[i].style.display = 'none';
             }
             if($.isUndefined(key)) {
                 if(that.tabs.length > 0) {
-                    $.addClass(that.tabs[0].parentNode, 'cur');
+                    $.addClass(getTabElem(that.tabs[0]), 'cur');
                 }
                 if(that.cons.length > 0) {
                     that.cons[0].style.display = '';
@@ -1213,7 +1236,7 @@
                 //设置当前TAB项样式
                 for(var i = 0; i < that.tabs.length; i++) {
                     if(key === $.getAttribute(that.tabs[i], 'tab|key|rel')) {
-                        $.addClass(that.tabs[i].parentNode, 'cur');
+                        $.addClass(getTabElem(that.tabs[i]), 'cur');
                         break;
                     }
                 }

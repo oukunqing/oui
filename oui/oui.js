@@ -441,6 +441,15 @@
         },
         toJsonString = function (o) { return JSON.stringify(o); },
         toJson = function (s) { return JSON.parse(s); },
+        tryToJson = function(s) {
+            var result = {};
+            try {
+                result = { result: 1, status: 1, json: JSON.parse(s) };
+            } catch(e) {
+                result = { result: 0, status: 0, json: null };
+            }
+            return result;
+        },
         toEncode = function (s) { return encodeURIComponent(s); },
         toFunction = function (funcName) {
             if ($.isFunction(funcName)) {
@@ -822,6 +831,70 @@
                 return urlpath;
             }
             return urlpath.replace(/[\/]{2,}/g, '/').replace(/(http:\/|https:\/)/ig, '$1/');
+        },
+        iniToJson = function (cfg) {
+            var arr = cfg.split(/\r\n|\n/), len = arr.length;
+            var json = {}, obj = json, dir, key, val;
+
+            for (var i = 0; i < len; i++) {
+                var s = arr[i].trim();
+                //过滤空行和注释
+                if ('' === s || s.startsWith(';') || s.startsWith('#')) {
+                    continue;
+                }
+                //目录节点
+                if (s.startsWith('[') && s.endsWith(']')) {
+                    dir = s.substr(1, s.length - 2);
+                    obj = json[dir] = {};
+                } else {
+                    var pos = s.indexOf('=');
+                    if (pos > 0) {
+                        key = s.substr(0, pos);
+                        val = s.substr(pos + 1);
+
+                        obj[key] = val;
+                    }
+                }
+            }
+            return json;
+        },
+        toIniJson = function (json) {
+            var obj = {}, c = 0;
+            for (var k in json) {
+                var item = json[k],
+                    tmp = k.split(/[\.\:#]/),
+                    pid = tmp[0],
+                    id = tmp[1];
+
+                if(pid && id) {
+                    if (typeof obj[pid] === 'undefined') {
+                        obj[pid] = {};
+                    }
+                    obj[pid][id] = item;
+                    c++;
+                }
+            }
+            return c > 0 ? obj : json;
+        },
+        jsonToIni = function (json, ini, i) {
+            if (typeof ini === 'undefined') {
+                ini = [];
+                i = 0;
+            }
+            for (var k in json) {
+                var d = json[k];
+                if (typeof d === 'object') {
+                    if (i > 0) {
+                        ini.push('');
+                    }
+                    ini.push('[' + k + ']');
+                    jsonToIni(d, ini, ++i);
+                } else {
+                    ini.push(k + '=' + json[k]);
+                    i++;
+                }
+            }
+            return ini.join('\r\n');
         };
 
     var counter = 1, debug = isBoolean(isDebug(), true);
@@ -870,11 +943,11 @@
         },
         toDecimal: toDecimal, toFloat: toDecimal, checkNumber: checkNumber, setNumber: setNumber,
         toInteger: toInteger, toInt: toInteger, toNumber: toNumber, toNumberList: toNumberList,
-        toBoolean: toBoolean, toBool: toBoolean,
+        toBoolean: toBoolean, toBool: toBoolean, iniToJson: iniToJson, jsonToIni: jsonToIni, toIniJson: toIniJson,
         containsKey: containsKey, containsValue: containsValue, contains: contains, distinctList: distinctList,
         collapseNumberList: collapseNumberList, expandNumberList: expandNumberList,
         collapseNumbers: collapseNumberList, expandNumbers: expandNumberList,
-        toJsonString: toJsonString, toJsonStr: toJsonString, toJson: toJson, toEncode: toEncode,
+        toJsonString: toJsonString, toJsonStr: toJsonString, toJson: toJson, tryToJson: tryToJson, toEncode: toEncode,
         toAscii: toAscii, toAsciiHex: toAsciiHex, asciiToChar: asciiToChar, asciiToStr: asciiToChar,
         getArguments: getArguments, getArgs: getArguments,
         toFunction: toFunction, toFunc: toFunction, callFunction: callFunction, callFunc: callFunction,
@@ -2095,6 +2168,16 @@
         isFalse: function (strict) {
             var s = this;
             return s === 'false' || !strict && s === '0';
+        },
+        iniToJson: function() {
+            return $.iniToJson(this);
+        },
+        jsonToIni: function() {
+            var rst = $.tryToJson(this);
+            if (rst.status) {
+                return $.jsonToIni(rst.json || rst.data);
+            }
+            return '';
         }
     }, 'String.prototype');
 

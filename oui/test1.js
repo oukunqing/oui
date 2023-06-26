@@ -1323,4 +1323,26 @@ console.log(Math.pow(-5, 3));
 console.log(Math.pow(-5, -1));
 
 
-console.log((1335832 / 1000 / 1000 * 4.423 + 0.034));
+console.log('2023-06-21 15:55:01'.toDate().format('ts'));
+
+console.log((1687305181).toDate().format());
+console.log((1687333981).toDate().format());
+
+
+console.log('b1b29264'.hexToTime());
+console.log('21ac9264'.hexToTime());
+
+console.log($.jsonToIni({id:123}));
+
+console.log('{"id":123}'.jsonToIni());
+
+var obj = {id: 1234, name: 'abc'};
+
+
+console.log(obj);
+console.log($.toJsonStr(obj).jsonToIni());
+
+var body = {server__http_port:123, "server.version": 'abc'};
+console.log(body);
+console.log($.toIniJson(body));
+console.log($.jsonToIni($.toIniJson(body)));

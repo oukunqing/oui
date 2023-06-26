@@ -815,6 +815,9 @@
                         value = data[fc.nameKey];
                     }
                     if ($.isUndefined(value)) {
+                        value = data[obj.id];
+                    }
+                    if ($.isUndefined(value)) {
                         continue;
                     }
                     if (op.isCheckBox(obj, type)) {

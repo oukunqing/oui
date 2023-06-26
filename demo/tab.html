@@ -7,6 +7,14 @@
 	<script>
     var WEB_LANG = 'English';
 	</script>
+	<style type="text/css">
+	.tab-content {
+		border:solid 1px #ddd;
+		border-top:none;
+		overflow:hidden;
+	}
+	#nav5 .tab2 {padding: 0 15px;}
+	</style>
     <!--<script type="text/javascript" src="../oui/tab/oui.tab.js?12&skin=orange&lang=english"></script>-->
     <script type="text/javascript" src="../oui/tab/oui.tab.js?12&skin="></script>
 </head>
@@ -20,17 +28,42 @@
     <input type="button" value="关闭全部2" onclick="closeAll(true);" />
     <input type="button" value="关闭" onclick="close2();" />
     <input type="button" value="关闭2" onclick="close2(true);" />
-    <div style="margin:10px 0 150px;">
+    <div style="margin:10px 0 20px;">
         <div id="nav" style="width:700px;"></div>
-        <div id="content" style="width:700px;border:solid 1px #ddd;overflow:hidden;"></div>
+        <div id="content" style="width:700px;" class="tab-content"></div>
     </div>
     <div style="float:right;">
         <div id="nav2" style="width:400px;"></div>
-        <div id="content2" style="width:400px;height:100px;border:solid 1px #ddd;overflow:hidden;"></div>
+        <div id="content2" style="width:400px;height:100px;" class="tab-content"></div>
     </div>
-    <div style="float:left;margin-top:100px;">
+    <div style="float:left;margin-top:50px;">
         <div id="nav3" style="width:400px;"></div>
-        <div id="content3" style="width:400px;height:100px;border:solid 1px #ddd;overflow:hidden;"></div>
+        <div id="content3" style="width:400px;height:100px;" class="tab-content"></div>
+    </div>
+    <div style="float:left;margin:100px 0 0 50px;">
+        <div id="nav4" style="width:400px;"></div>
+        <div id="content4" style="width:400px;height:100px;" class="tab-content">
+			<div id="con4_1">111<br />内容是现有的，Tab项是动态生成的</div>
+			<div id="con4_2">222</div>
+			<div id="con4_3">333</div>
+			<div id="con4_4">444</div>
+        </div>
+    </div>
+    <div style="float:left;margin:200px 0 0 50px;">
+        <div id="nav5" style="width:400px;">
+			<div class="tab-box" >
+				<a key="con5_1" class="tab2">11</a>
+				<a key="con5_2" class="tab2">22</a>
+				<a key="con5_3" class="tab2">33</a>
+				<a key="con5_4" class="tab2">44</a>
+			</div>
+        </div>
+        <div id="content5" style="width:400px;height:100px;" class="tab-content">
+			<div key="con5_1">111<br />将现在的HTML生成TAB样式</div>
+			<div key="con5_2">222</div>
+			<div key="con5_3">333</div>
+			<div key="con5_4">444</div>
+        </div>
     </div>
 </body>
 </html>
@@ -108,6 +141,26 @@
 
     tab3.setContentSize({width:400, height: 220});
 
+
+	$.tab($I('nav4'), $I('content4'), {
+        id: 'tab4',
+        skin: 'bluegray',
+        tabHeight: 30,
+        conHeight: 240,
+		items: [
+			{id: 'con4_1', name: '1', element: 'con4_1', show: true },
+			{id: 'con4_2', name: '2', element: 'con4_2' },
+			{id: 'con4_3', name: '3', element: 'con4_3' },
+			{id: 'con4_4', name: '4', element: 'con4_4' }
+		]
+    });
+	
+	$.tabs($I('nav5'), $I('content5'), {
+        id: 'tab5',
+        skin: 'bluegray',
+        tabHeight: 30,
+        conHeight: 240
+    }).show('con5_1');
 
 	function closeAll(isFunc) {
         if(isFunc) {
