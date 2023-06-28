@@ -858,11 +858,11 @@
             }
             return json;
         },
-        toIniJson = function (json) {
+        toIniJson = function (json, separator) {
             var obj = {}, c = 0;
             for (var k in json) {
                 var item = json[k],
-                    tmp = k.split(/[\.\:#]/),
+                    tmp = k.split(separator || '__'),
                     pid = tmp[0],
                     id = tmp[1];
 
@@ -4096,6 +4096,22 @@
             }
             return scrollPos;
         },
+        scrollTo = function (elem) {
+            if ($.isString(elem, true)) {
+                elem = $.toElement(elem);
+            }
+            if (!$.isElement(elem)) {
+                return $;
+            }
+            var parent = elem.parentNode,
+                offset = $.getOffset(elem),
+                offsetP = $.getOffset(parent),
+                posH = offset.top - offsetP.top;
+
+            parent.scrollTop += posH;
+
+            return $;
+        },
         getKeyCode = function (ev) {
             var e = ev || window.event;
             return e.keyCode || e.which || e.charCode;
@@ -4841,6 +4857,7 @@
         getEventPos: getEventPosition,
         getScrollPosition: getScrollPosition,
         getScrollPos: getScrollPosition,
+        scrollTo: scrollTo,
         getKeyCode: getKeyCode,
         getKeyChar: getKeyChar,
         getContentSize: getContentSize,

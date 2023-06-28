@@ -8,6 +8,7 @@
     position: relative;
     box-sizing: border-box;
     border-bottom: solid 1px #dee1e6;
+    overflow: visible;
 }
 
 .oui-tabs .tab-box {  

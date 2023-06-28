@@ -1342,7 +1342,10 @@ var obj = {id: 1234, name: 'abc'};
 console.log(obj);
 console.log($.toJsonStr(obj).jsonToIni());
 
-var body = {server__http_port:123, "server.version": 'abc'};
+var body = {server__http_port:123, "server__version": 'abc'};
 console.log(body);
-console.log($.toIniJson(body));
+console.log($.toIniJson(body, '__'));
 console.log($.jsonToIni($.toIniJson(body)));
+
+
+console.log(new Date().format('ts', 10));

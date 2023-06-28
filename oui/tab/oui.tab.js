@@ -142,7 +142,7 @@
 
             return this;
         },
-        buildTab: function(t, opt, cfg, insertIndex) {
+        buildTab: function(t, opt, cfg, insertIndex, tabType) {
             var cache = Factory.getCache(t.id),
                 objId = cfg.id,
                 itemId = opt.id || opt.itemId;
@@ -259,7 +259,8 @@
                 if(cfg.style.panel) {
                     elem.style.cssText = cfg.style.panel;
                 }
-                var html = '<a class="pos-mark" name="' + itemId + '"></a>';
+                //var html = '<a class="pos-mark" name="' + itemId + '"></a>';
+                var html = '';
                 if($.isString(opt.url, true)) {
                     isIframe = true;
                     iframeId = Util.buildIframeId(objId, itemId);
@@ -273,7 +274,10 @@
                     html += opt.html || '';
                 }
                 elem.innerHTML = html;
-                elem.style.display = 'none';
+
+                if (tabType !== 'scroll') {
+                    elem.style.display = 'none';
+                }
 
                 var iframe = isIframe ? $I(iframeId) : undefined;
                 if(iframe) {
@@ -912,9 +916,10 @@
 
         var opt = $.extend({
             id: 'oui-tabs-' + new Date().getMilliseconds(),
-            skin: Config.DefaultSkin,        //样式: default, blue
-            //lang: 'chinese',        //chinese, english
+            skin: Config.DefaultSkin,       //样式: default, blue
+            //lang: 'chinese',              //chinese, english
             lang: Config.GetLang(),         //语言 Chinese,English
+            type: 'switch',     //switch, scroll
             event: 'click',     //click, mouseover
             dblclickScroll: false,
             showContextMenu: true,
@@ -943,6 +948,10 @@
         }
         $.addClass(that.tabContainer, 'oui-tabs' + cssTab);
         $.addClass(that.conContainer, 'oui-tabs-contents' + cssCon);
+        //滚动模式
+        if (opt.type === 'scroll') {
+            that.conContainer.style.overflow = 'auto';
+        }
 
         that.initial(opt);
     }
@@ -1011,7 +1020,7 @@
                 }
                 return that;
             }
-            Util.buildTab(that, opt, that.getOptions(), insertIndex)
+            Util.buildTab(that, opt, that.getOptions(), insertIndex, opt.type)
                 .setSize(that, function() {
                     if(isShow) {
                         that.show(opt.id);
@@ -1041,7 +1050,9 @@
             }
             for(var k in cache.items) {
                 $.removeClass(cache.items[k].tab, 'cur');
-                $(cache.items[k].con).hide();
+                if (cfg.type !== 'scroll') {
+                    $(cache.items[k].con).hide();
+                }
             }
             var cur = cache.items[itemId]  
                 || Factory.getCur(that, cache)
@@ -1049,7 +1060,11 @@
 
             if(cur) {
                 $.addClass(cur.tab, 'cur');
-                $(cur.con).show();
+                if (cfg.type !== 'scroll') {
+                    $(cur.con).show();
+                } else {
+                    $.scrollTo(cur.con);
+                }
 
                 if(cur.iframe && !cur.iframe.loaded) {
                     Util.loadPage(that, cur.iframe, cur.opt.url);
@@ -1171,29 +1186,29 @@
         options.event = $.getParam(options, ['event','eventName','evtName']);
 
         var opt = $.extend({
-            type: 'switch',         //switch, scroll
+            type: 'switch',     //switch, scroll
             event: 'click',     //click, mouseover
             skin: 'default'
         }, options);
 
+        that.options = opt;
         that.initial(opt);
     }
 
     Tabs.prototype = {
         initial: function(opt) {
-            var that = this;
+            var that = this, isScroll = opt.type === 'scroll';
             if(opt.skin !== 'default') {
                 Factory.loadCss(opt.skin);
 
                 var cssTab = 'oui-tabs-' + opt.skin,
                     cssCon = 'oui-tabs-' + opt.skin + '-contents';
+
                 $.addClass(that.tabContainer, cssTab).addClass(that.conContainer, cssCon);
             }
             //var tabs = that.tabContainer.childNodes, cons = that.conContainer.childNodes;
             var tabs = that.tabContainer.querySelectorAll('a'),
                 cons = that.conContainer.querySelectorAll('div');
-
-            console.log('tabs:', tabs, ', cons:', cons);
 
             that.tabs = tabs;
             that.cons = cons;
@@ -1205,16 +1220,17 @@
                     that.show(key);
                 });
             }
-
-            if(opt.type === 'switch') {
+            if(!isScroll) {
                 for(var i = 0; i < cons.length; i++) {
                     cons[i].style.display = 'none';
                 }
+            } else {
+                that.conContainer.style.overflow = 'auto';
             }
             console.log('tabs:', tabs, ', cons: ', cons);
         },
         show: function(key) {
-            var that = this;
+            var that = this, opt = that.options, isScroll = opt.type === 'scroll';
             function getTabElem(elem) {
                 if (elem && elem.tagName) {
                     return elem.tagName === 'A' && elem.parentNode && elem.parentNode.tagName === 'LI' ? elem.parentNode : elem
@@ -1223,14 +1239,18 @@
             }
             for(var i = 0; i < that.cons.length; i++) {
                 $.removeClass(getTabElem(that.tabs[i]), 'cur');
-                that.cons[i].style.display = 'none';
+                if (!isScroll) {
+                    that.cons[i].style.display = 'none';
+                }
             }
             if($.isUndefined(key)) {
                 if(that.tabs.length > 0) {
                     $.addClass(getTabElem(that.tabs[0]), 'cur');
                 }
-                if(that.cons.length > 0) {
-                    that.cons[0].style.display = '';
+                if (!isScroll) {
+                    if(that.cons.length > 0) {
+                        that.cons[0].style.display = '';
+                    }
                 }
             } else {
                 //设置当前TAB项样式
@@ -1243,7 +1263,11 @@
                 //显示当前TAB项内容
                 for(var i = 0; i < that.cons.length; i++) {
                     if(key === $.getAttribute(that.cons[i], 'tab|key|rel')) {
-                        that.cons[i].style.display = '';
+                        if (isScroll) {
+                            $.scrollTo(that.cons[i]);
+                        } else {
+                            that.cons[i].style.display = '';
+                        }
                         break;
                     }
                 }
@@ -1253,7 +1277,6 @@
 
         }
     };
-
 
     $.extend({
         tab: function(tabContainer, conContainer, options) {

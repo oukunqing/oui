@@ -13,6 +13,9 @@
 		border-top:none;
 		overflow:hidden;
 	}
+    .tab-con {
+        border-bottom: solid 1px #eee;
+    }
 	#nav5 .tab2 {padding: 0 15px;}
 	</style>
     <!--<script type="text/javascript" src="../oui/tab/oui.tab.js?12&skin=orange&lang=english"></script>-->
@@ -42,27 +45,27 @@
     </div>
     <div style="float:left;margin:100px 0 0 50px;">
         <div id="nav4" style="width:400px;"></div>
-        <div id="content4" style="width:400px;height:100px;" class="tab-content">
-			<div id="con4_1">111<br />内容是现有的，Tab项是动态生成的</div>
-			<div id="con4_2">222</div>
-			<div id="con4_3">333</div>
-			<div id="con4_4">444</div>
+        <div id="content4" style="width:400px;height:210px;" class="tab-content">
+			<div id="con4_1" class="tab-con" style="height:200px;">111<br />内容是现有的，Tab项是动态生成的</div>
+			<div id="con4_2" class="tab-con" style="height:200px;">222</div>
+			<div id="con4_3" class="tab-con" style="height:200px;">333</div>
+			<div id="con4_4" class="tab-con" style="height:200px;">444</div>
         </div>
     </div>
-    <div style="float:left;margin:200px 0 0 50px;">
+    <div style="float:left;margin:200px 0 50px 50px;">
         <div id="nav5" style="width:400px;">
-			<div class="tab-box" >
+			<div class="tab-box">
 				<a key="con5_1" class="tab2">11</a>
 				<a key="con5_2" class="tab2">22</a>
 				<a key="con5_3" class="tab2">33</a>
 				<a key="con5_4" class="tab2">44</a>
 			</div>
         </div>
-        <div id="content5" style="width:400px;height:100px;" class="tab-content">
-			<div key="con5_1">111<br />将现在的HTML生成TAB样式</div>
-			<div key="con5_2">222</div>
-			<div key="con5_3">333</div>
-			<div key="con5_4">444</div>
+        <div id="content5" style="width:400px;height:300px;" class="tab-content">
+			<div key="con5_1" class="tab-con" style="height:200px;">111<br />将现在的HTML生成TAB样式</div>
+			<div key="con5_2" class="tab-con" style="height:200px;">222</div>
+			<div key="con5_3" class="tab-con" style="height:200px;">333</div>
+			<div key="con5_4" class="tab-con" style="height:200px;">444</div>
         </div>
     </div>
 </body>
@@ -145,6 +148,7 @@
 	$.tab($I('nav4'), $I('content4'), {
         id: 'tab4',
         skin: 'bluegray',
+        type: 'scroll',
         tabHeight: 30,
         conHeight: 240,
 		items: [
@@ -152,12 +156,20 @@
 			{id: 'con4_2', name: '2', element: 'con4_2' },
 			{id: 'con4_3', name: '3', element: 'con4_3' },
 			{id: 'con4_4', name: '4', element: 'con4_4' }
-		]
+		],
+        style: {                
+            box: 'margin: 0 10px;',
+            tab: 'margin: 0 5px 0 0;',
+            txt: 'font-size:14px;padding: 0 20px;',
+            //panel: 'overflow: hidden;'
+        }
     });
 	
 	$.tabs($I('nav5'), $I('content5'), {
         id: 'tab5',
-        skin: 'bluegray',
+        skin: 'green',
+        type: 'scroll',
+        event: 'mouseover',
         tabHeight: 30,
         conHeight: 240
     }).show('con5_1');

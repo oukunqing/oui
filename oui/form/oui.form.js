@@ -234,6 +234,7 @@
                             var pattern = field.pattern || op.valuePattern[field.type], validate = field.validate || configs.validate;
                             var minLen = field.minLength || field.minLen,
                                 maxLen = field.maxLength || field.maxLen;
+
                             if ($.isFunction(validate)) {    // 外部验证函数（优先）
                                 if (!validate(value, element)) { return result(false); }
                             } else if ($.isInteger(minLen) && len < minLen) {
@@ -276,6 +277,7 @@
                             if (isNaN(value)) {
                                 var dv = $.isNumeric(field.value) ? field.value :
                                     ($.isNumeric(configs.defaultValue) ? configs.defaultValuel : (element.type === 'hidden' ? 0 : ''));
+
                                 if ($.isNumeric(dv)) {
                                     value = dv;
                                 } else if (configs.checkNumber) {
@@ -377,9 +379,12 @@
                     loadCssCode: function (code) {
                         var head = document.getElementsByTagName('head')[0];
                         if (document.getElementById(highLight.styleId) != null || !head) { return false; }
+                        
                         var css = '.' + highLight.className + '{' + (code || highLight.cssText || '') + '}',
                             style = document.createElement('style');
+
                         style.id = highLight.styleId; style.type = 'text/css'; style.rel = 'stylesheet';
+
                         if (style.appendChild) {
                             style.appendChild(document.createTextNode(css));    //for Chrome Firefox Opera Safari
                         } else {
