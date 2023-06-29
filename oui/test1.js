@@ -1349,3 +1349,6 @@ console.log($.jsonToIni($.toIniJson(body)));
 
 
 console.log(new Date().format('ts', 10));
+
+var cache = {};
+console.log($.toJsonString(cache).length);

@@ -294,6 +294,12 @@
 
             return this;
         },
+        getTabElem: function(elem) {
+            if (elem && elem.tagName) {
+                return elem.tagName === 'A' && elem.parentNode && elem.parentNode.tagName === 'LI' ? elem.parentNode : elem
+            }
+            return null;
+        },
         buildPageUrl: function(url, itemId) {
             return url.setUrlParam('tab_item_id', itemId).setUrlParam();
         },
@@ -948,10 +954,6 @@
         }
         $.addClass(that.tabContainer, 'oui-tabs' + cssTab);
         $.addClass(that.conContainer, 'oui-tabs-contents' + cssCon);
-        //滚动模式
-        if (opt.type === 'scroll') {
-            that.conContainer.style.overflow = 'auto';
-        }
 
         that.initial(opt);
     }
@@ -988,6 +990,34 @@
                     that.show(showId);
                 }
             }
+
+            //滚动模式
+            if (options.type === 'scroll') {
+                that.conContainer.style.overflow = 'auto';
+
+                var cache = Factory.getCache(that.id);
+                that.scrollTimer = null;
+                $.addListener(that.conContainer, 'scroll', function(ev, par) {
+                    var box = that.conContainer;
+                    if (that.scrollTimer) {
+                        window.clearTimeout(that.scrollTimer);
+                    }
+                    that.scrollTimer = window.setTimeout(function() {
+                        var bs = $.getOffset(box);
+                        for(var k in cache.items) {
+                            var cs = $.getOffset(cache.items[k].con);
+                            if ((cs.top <= bs.top && (cs.top + cs.height > bs.top + bs.height)) ||
+                                (cs.top >= bs.top && cs.top < bs.top + bs.height)) {
+                                if (cache.items[k].tab.className.indexOf('cur') < 0) {
+                                    that.scrollSwitch(cache.items[k].tab);
+                                }
+                                break;
+                            }
+                        }
+                    }, 100);
+                });
+            }
+
             return that;
         },
         getOptions: function() {
@@ -1082,9 +1112,7 @@
             }
 
             if(itemId) {
-                window.setTimeout(function() {
-                    that.show();
-                }, 20);
+                window.setTimeout(function() { that.show(); }, 20);
             }
 
             return that;
@@ -1175,6 +1203,19 @@
         },
         size: function(size, isContent, opt) {
             return this.setContentSize(size, isContent, opt);
+        },
+        scrollSwitch: function (tab) {
+            var that = this,
+                cache = Factory.getCache(that.id);
+            if(null === cache) {
+                return that;
+            }
+            for(var k in cache.items) {
+                $.removeClass(cache.items[k].tab, 'cur');
+            }
+            $.addClass(tab, 'cur');
+
+            return that;
         }
     };
 
@@ -1220,61 +1261,103 @@
                     that.show(key);
                 });
             }
-            if(!isScroll) {
-                for(var i = 0; i < cons.length; i++) {
+            if(isScroll) {
+                that.conContainer.style.overflow = 'auto';
+
+                that.scrollTimer = null;
+                $.addListener(that.conContainer, 'scroll', function(ev, par) {
+                    var box = that.conContainer;
+                    if (that.scrollTimer) {
+                        window.clearTimeout(that.scrollTimer);
+                    }
+                    that.scrollTimer = window.setTimeout(function() {
+                        var bs = $.getOffset(box);
+                        for (var i = 0; i < cons.length; i++) {
+                            var cs = $.getOffset(cons[i]);
+                            if ((cs.top <= bs.top && (cs.top + cs.height > bs.top + bs.height)) ||
+                                (cs.top >= bs.top && cs.top < bs.top + bs.height)) {
+                                if (tabs[i].className.indexOf('cur') < 0) {
+                                    that.scrollSwitch(i);
+                                }
+                                break;
+                            }
+                        }
+                    }, 100);
+                });
+            }
+
+            for(var i = 0; i < cons.length; i++) {
+                if(!isScroll) {
                     cons[i].style.display = 'none';
                 }
-            } else {
-                that.conContainer.style.overflow = 'auto';
+                $.addClass(cons[i], 'tab-panel');
             }
             console.log('tabs:', tabs, ', cons: ', cons);
+            return that;
         },
         show: function(key) {
-            var that = this, opt = that.options, isScroll = opt.type === 'scroll';
-            function getTabElem(elem) {
-                if (elem && elem.tagName) {
-                    return elem.tagName === 'A' && elem.parentNode && elem.parentNode.tagName === 'LI' ? elem.parentNode : elem
-                }
-                return null;
-            }
-            for(var i = 0; i < that.cons.length; i++) {
-                $.removeClass(getTabElem(that.tabs[i]), 'cur');
+            var that = this, 
+                opt = that.options, 
+                isScroll = opt.type === 'scroll',
+                isIndex = $.isNumber(key);
+
+            var tabs = that.tabs,
+                cons = that.cons;
+
+            for(var i = 0; i < cons.length; i++) {
+                $.removeClass(Util.getTabElem(tabs[i]), 'cur');
                 if (!isScroll) {
-                    that.cons[i].style.display = 'none';
+                    cons[i].style.display = 'none';
                 }
             }
             if($.isUndefined(key)) {
-                if(that.tabs.length > 0) {
-                    $.addClass(getTabElem(that.tabs[0]), 'cur');
+                if(tabs.length > 0) {
+                    $.addClass(Util.getTabElem(tabs[0]), 'cur');
                 }
                 if (!isScroll) {
-                    if(that.cons.length > 0) {
-                        that.cons[0].style.display = '';
+                    if(cons.length > 0) {
+                        cons[0].style.display = '';
                     }
                 }
             } else {
                 //设置当前TAB项样式
-                for(var i = 0; i < that.tabs.length; i++) {
-                    if(key === $.getAttribute(that.tabs[i], 'tab|key|rel')) {
-                        $.addClass(getTabElem(that.tabs[i]), 'cur');
+                for(var i = 0; i < tabs.length; i++) {
+                    var k = $.getAttribute(tabs[i], 'tab|key|rel');
+                    if((isIndex && i === key) || key === k) {
+                        $.addClass(Util.getTabElem(tabs[i]), 'cur');
                         break;
                     }
                 }
                 //显示当前TAB项内容
-                for(var i = 0; i < that.cons.length; i++) {
-                    if(key === $.getAttribute(that.cons[i], 'tab|key|rel')) {
+                for(var i = 0; i < cons.length; i++) {
+                    var k = $.getAttribute(tabs[i], 'tab|key|rel');
+                    if((isIndex && i === key) || key === k) {
                         if (isScroll) {
-                            $.scrollTo(that.cons[i]);
+                            $.scrollTo(cons[i]);
                         } else {
-                            that.cons[i].style.display = '';
+                            cons[i].style.display = '';
                         }
                         break;
                     }
                 }
             }
+            return that;
         },
-        scroll: function(key) {
+        scrollSwitch: function (key) {
+            var that = this, 
+                isIndex = $.isNumber(key),
+                tabs = that.tabs,
+                cons = that.cons;
 
+            for(var i = 0; i < tabs.length; i++) {
+                var k = $.getAttribute(tabs[i], 'tab|key|rel');
+                if((isIndex && i === key) || key === k) {
+                    $.addClass(Util.getTabElem(tabs[i]), 'cur');
+                } else {
+                    $.removeClass(Util.getTabElem(tabs[i]), 'cur');
+                }
+            }
+            return that;
         }
     };
 
