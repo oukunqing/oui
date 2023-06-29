@@ -1,141 +1,57 @@
 .oui-tabs-bluegray {
-    height: 30px;
-    padding: 0;
-    border: none 0;
-    font-size: 14px;
-    line-height: 28px;
-    position: relative;
-    box-sizing: border-box;
     border-bottom: solid 1px #99bbe8;
 }
 
-.oui-tabs-bluegray .tab-box {  
-    height: 28px;
-    padding: 0;
-    border: none 0;
-    margin: 0 2px ;
-    left: 17px;
-    bottom: -1px;
-    overflow: hidden;
-    position: absolute;
-}
+.oui-tabs-bluegray .tab-box {}
 
 .oui-tabs-bluegray .tab-switch {
-    width: 16px;
-    height: 28px;
-    display: block;
-    float: left;
-    padding: 0;
-    margin: 0;
-    border: none 0;
-    position: absolute;
-    bottom: 0;
-    text-align: center;
-    cursor: pointer;
-    font-family: Arial;
-    font-size: 18px;
     background: #d6e3f3;
-    box-sizing: border-box;
 }
 
 .oui-tabs-bluegray .tab-switch-left {
-    left: 0;
     border-top: solid 1px #99bbe8;
     border-bottom: solid 1px #99bbe8;
     border-right: solid 1px #99bbe8;
-    border-top-right-radius: 4px;
-    /*border-left: solid 1px #99bbe8;
-    border-top-left-radius: 4px;*/
-    bottom: -1px;
 }
 
 .oui-tabs-bluegray .tab-switch-right {
-    right: 0;
     border-top: solid 1px #99bbe8;
     border-bottom: solid 1px #99bbe8;
     border-left: solid 1px #99bbe8;
-    border-top-left-radius: 4px;
-    /*border-right: solid 1px #99bbe8;
-    border-top-right-radius: 4px;*/
-    bottom: -1px;
 }
 
-.oui-tabs-bluegray .tab-switch .arrow {
-    width: 0;
-    height: 0;
-    margin: 50% 0;
-    padding: 0;
-    font-size: 12px;
-    border: 6px solid transparent;
-    position: absolute;
-    content: '';
-}
+.oui-tabs-bluegray .tab-switch .arrow {}
 
 .oui-tabs-bluegray .tab-switch .arrow-left {
     border-right-color: #999;
-    left: -2px;
 }
 
 .oui-tabs-bluegray .tab-switch .arrow-right{
     border-left-color: #999;
-    left: 5px;
 }
 
-.oui-tabs-bluegray .tab-switch .arrow-left:hover {
+.oui-tabs-bluegray .tab-switch:hover .arrow-left {
     border-right-color: #333;
 }
 
-.oui-tabs-bluegray .tab-switch .arrow-right:hover {
+.oui-tabs-bluegray .tab-switch:hover .arrow-right {
     border-left-color: #333;
 }
 
-.oui-tabs-bluegray .tab-container {
-    border: none 0;
-    display: block;
-    float: left;
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    position: absolute;
-    bottom: 0;
-    white-space: nowrap;
-    overflow: hidden;
-}
+.oui-tabs-bluegray .tab-container {}
 
-.oui-tabs-bluegray ul, .oui-tabs-bluegray li {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
+.oui-tabs-bluegray ul, .oui-tabs-bluegray li {}
 
 .oui-tabs-bluegray .tab-item {
     background: #d6e3f3;
     border: solid 1px #99bbe8;
-    border-radius: 4px;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-	border-bottom: solid 1px #99bbe8;
-    /*border-bottom: none 0;*/
-    float: left;
-    display: block;
-    margin: 0 2px 0 0;
-    padding: 0;
-    width: auto;
-    height: 28px;
-    overflow: hidden;
-    box-sizing: border-box;
-
-    -moz-user-select: none;
-    -khtml-user-select: none;
-    user-select: none;
-    -ms-user-select: none; /*IE10*/
+    border-bottom: solid 1px #99bbe8;
 }
 
 .oui-tabs-bluegray .cur,.oui-tabs-bluegray .tab-item:hover {
     background: #fff;
     border: solid 1px #99bbe8;
     border-bottom: solid 1px #fff;
-    /*margin-bottom: -1px;*/
 }
 
 .oui-tabs-bluegray .cur {
@@ -143,29 +59,13 @@
     border-bottom: solid 1px #fff;
 }
 
-.oui-tabs-bluegray .last {
-    margin: 0;
-}
+.oui-tabs-bluegray .last {}
 
 .oui-tabs-bluegray .tab-item .tab-txt {
-    cursor: pointer;
-    text-decoration: none;
-    display: block;
-    float: left;
-    padding: 0 10px;
-    margin: 0;
-    border: none 0;
     color: #333;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
 }
 
-.oui-tabs-bluegray .cur .tab-txt {
-    font-weight: bold;
-}
+.oui-tabs-bluegray .cur .tab-txt {}
 
 .oui-tabs-bluegray .tab-item .tab-close {
 	color: #333;
@@ -173,24 +73,10 @@
 
 .oui-tabs-bluegray .tab-item:hover .tab-txt,.oui-tabs-bluegray .cur .tab-txt,
 .oui-tabs-bluegray .cur .tab-close,.oui-tabs-bluegray .tab-item:hover .tab-close {
-    color: #555;
+    color: #333;
 }
 
 .oui-tabs-bluegray .tab-item .tab-close:hover{
-    border-radius: 10px;
     background: #d6e3f3;
 	color: #333;
-}
-
-.oui-tab-contents {
-
-}
-
-.oui-tab-contents .tab-panel {
-    height: 100px;
-    display: block;
-}
-
-.oui-tab-contents .pos-mark {
-    display: none;
 }

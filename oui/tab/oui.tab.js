@@ -116,7 +116,9 @@
                     if(elem.childNodes[0].childNodes.length > 0) {
                         return false;
                     }
-                    Util.buildContextMenu(t, ev, null);
+                    if (opt.type !== 'scroll') {
+                        Util.buildContextMenu(t, ev, null);
+                    }
                     return false;
                 };
                 if(opt.style.box) {
@@ -235,7 +237,7 @@
                 t.show(itemId);
             };
 
-            if(cfg.showContextMenu) {
+            if(cfg.showContextMenu && cfg.type !== 'scroll') {
                 tab['oncontextmenu'] = function(ev) {
                     $.cancelBubble();
                     Util.buildContextMenu(t, ev, this.itemId);
@@ -1238,15 +1240,16 @@
 
     Tabs.prototype = {
         initial: function(opt) {
-            var that = this, isScroll = opt.type === 'scroll';
-            if(opt.skin !== 'default') {
+            var that = this, isScroll = opt.type === 'scroll', cssTab = '', cssCon = '';
+
+            if (opt.skin !== Config.DefaultSkin) {
+                cssTab = ' oui-tabs-' + opt.skin;
+                cssCon = ' oui-tabs-' + opt.skin + '-contents';
                 Factory.loadCss(opt.skin);
-
-                var cssTab = 'oui-tabs-' + opt.skin,
-                    cssCon = 'oui-tabs-' + opt.skin + '-contents';
-
-                $.addClass(that.tabContainer, cssTab).addClass(that.conContainer, cssCon);
             }
+            $.addClass(that.tabContainer, 'oui-tabs' + cssTab);
+            $.addClass(that.conContainer, 'oui-tabs-contents' + cssCon);
+
             //var tabs = that.tabContainer.childNodes, cons = that.conContainer.childNodes;
             var tabs = that.tabContainer.querySelectorAll('a'),
                 cons = that.conContainer.querySelectorAll('div');
@@ -1254,6 +1257,26 @@
             that.tabs = tabs;
             that.cons = cons;
 
+            if (tabs.length > 0) {
+                var parent = tabs[0].parentNode;
+                if (parent.className.indexOf('oui-tabs') > -1) {
+                    $.createElement('DIV', '', function(elem) {
+                        elem.className = 'tab-box';
+                        for (var i = 0; i < tabs.length; i++) {
+                            elem.appendChild(tabs[i]);
+                        }
+                        elem.oncontextmenu = function(ev) {
+                            return false;
+                        };                
+                        that.tabContainer.appendChild(elem);
+                    });
+                } else {
+                    $.addClass(parent, 'tab-box');
+                    parent.oncontextmenu = function(ev) {
+                        return false;
+                    }; 
+                }
+            }
             for(var i = 0; i < tabs.length; i++) {
                 $.addClass(tabs[i], 'tab-item');
                 $.addListener(tabs[i], opt.event, function() {

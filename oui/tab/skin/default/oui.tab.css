@@ -7,16 +7,17 @@
     line-height: 28px;
     position: relative;
     box-sizing: border-box;
-    border-bottom: solid 1px #dee1e6;
     overflow: visible;
+    border-bottom: solid 1px #dee1e6;
 }
 
 .oui-tabs .tab-box {  
     height: 28px;
     padding: 0;
     border: none 0;
-    margin: 0 2px;
-    left: 17px;
+    margin: 0 3px;
+    /*left: 17px;*/
+    left: 0px;
     bottom: -1px;
     overflow: hidden;
     position: absolute;
@@ -36,8 +37,8 @@
     cursor: pointer;
     font-family: Arial;
     font-size: 18px;
-    background: #dee1e6;
     box-sizing: border-box;
+    background: #dee1e6;
 }
 
 .oui-tabs .tab-switch-left {
@@ -81,6 +82,14 @@
     left: 5px;
 }
 
+.oui-tabs .tab-switch:hover .arrow-left {
+    border-right-color: #333;
+}
+
+.oui-tabs .tab-switch:hover .arrow-right {
+    border-left-color: #333;
+}
+
 .oui-tabs .tab-container {
     border: none 0;
     display: block;
@@ -110,7 +119,7 @@
     border-bottom: none 0;
     float: left;
     display: block;
-    margin: 0 2px 0 0;
+    margin: 0 3px 0 0;
     padding: 0;
     width: auto;
     height: 28px;
@@ -149,7 +158,7 @@
     margin: 0;
     border: none 0;
     box-sizing: border-box;
-    color: #555;
+    color: #333;
     font-family: 宋体,微软雅黑,Arial;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -159,7 +168,9 @@
 }
 
 .oui-tabs .cur .tab-txt {
+    color: #333;
     font-weight: bold;
+    font-weight: normal;
 }
 
 .oui-tabs .tab-item .tab-close {
@@ -181,7 +192,7 @@
 
 .oui-tabs .tab-item:hover .tab-txt,.oui-tabs .cur .tab-txt,
 .oui-tabs .cur .tab-close,.oui-tabs .tab-item:hover .tab-close {
-    color: #555;
+    color: #333;
 }
 
 .oui-tabs .tab-item .tab-close:hover {
@@ -191,8 +202,8 @@
 
 .oui-tabs-contents {
     margin: 0;
-    /*这里顶部增加2个像素的留白*/
-    padding: 2px 0 0;
+    /*这里顶部增加3个像素的留白*/
+    padding: 3px 0 0;
     display: block;
     background: #fff;
     box-sizing: border-box;
