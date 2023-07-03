@@ -961,14 +961,14 @@
     }
 
     Tab.prototype = {
-        initial: function(options) {
+        initial: function(opt) {
             var that = this;
             if(that.box) {
                 return this;
             }
-            Factory.initCache(that.id, options, that);
+            Factory.initCache(that.id, opt, that);
 
-            Util.initialTab(that, options);
+            Util.initialTab(that, opt);
             
             $.addListener(window, 'resize', function() {
                 Util.setSize(that);
@@ -977,10 +977,10 @@
                 Util.hideContextMenu(ev, that);
             });
 
-            if($.isArray(options.items) && options.items.length > 0) {
+            if($.isArray(opt.items) && opt.items.length > 0) {
                 var showId = '';
-                for(var i = 0; i < options.items.length; i++) {
-                    var dr = options.items[i];
+                for(var i = 0; i < opt.items.length; i++) {
+                    var dr = opt.items[i];
                     if(dr) {
                         if(dr.show && !showId) {
                             showId = dr.id;
@@ -993,8 +993,14 @@
                 }
             }
 
+            //如果content没有设置高度，则设置一个默认的高度
+            //content高度可以通过setContentSize()修改
+            if (opt.conHeight && isNaN(parseInt(that.conContainer.style.height))) {
+                that.conContainer.style.height = opt.conHeight + 'px';
+            }
+
             //滚动模式
-            if (options.type === 'scroll') {
+            if (opt.type === 'scroll') {
                 that.conContainer.style.overflow = 'auto';
 
                 var cache = Factory.getCache(that.id);

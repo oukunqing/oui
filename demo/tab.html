@@ -23,6 +23,7 @@
     <script type="text/javascript" src="../oui/tab/oui.tab.js?12&skin="></script>
 </head>
 <body>
+    <div style="clear:both;">
 	<input type="button" value="添加" onclick="addTab();" />
     <input type="text" id="txtObjId" value="tab1" />
     <input type="text" id="txtId" />
@@ -32,19 +33,20 @@
     <input type="button" value="关闭全部2" onclick="closeAll(true);" />
     <input type="button" value="关闭" onclick="close2();" />
     <input type="button" value="关闭2" onclick="close2(true);" />
-    <div style="margin:10px 0 20px;">
+</div>
+    <div style="float:left;margin:10px 10px 10px 0;">
         <div id="nav" style="width:700px;"></div>
         <div id="content" style="width:700px;" class="tab-content"></div>
     </div>
-    <div style="float:right;">
+    <div style="float:left;margin:10px 10px 10px 0;">
         <div id="nav2" style="width:400px;"></div>
         <div id="content2" style="width:400px;height:100px;" class="tab-content"></div>
     </div>
-    <div style="float:left;margin-top:50px;">
+    <div style="float:left;margin:10px 10px 10px 0;">
         <div id="nav3" style="width:400px;"></div>
         <div id="content3" style="width:400px;height:100px;" class="tab-content"></div>
     </div>
-    <div style="float:left;margin:100px 0 0 50px;">
+    <div style="float:left;margin:10px 10px 10px 0;">
         <div id="nav4" style="width:400px;"></div>
         <div id="content4" style="width:400px;height:210px;" class="tab-content">
 			<div id="con4_1" class="tab-con" style="height:200px;">111<br />内容是现有的，Tab项是动态生成的</div>
@@ -53,7 +55,7 @@
 			<div id="con4_4" class="tab-con" style="height:200px;">444</div>
         </div>
     </div>
-    <div style="float:left;margin:200px 0 50px 50px;">
+    <div style="float:left;margin:10px 10px 10px 0;">
         <div id="nav5" style="width:400px;">
 			<div>
 				<a tab="con5_1" class="tab2">11</a>
@@ -70,7 +72,7 @@
         </div>
     </div>
 
-    <div style="float:left;margin:20px 0 50px 50px;">
+    <div style="float:left;margin:10px 10px 10px 0;">
         <div id="nav6" style="width:400px;">
             <a tab="con6_1" class="tab2">11</a>
             <a tab="con6_2" class="tab2">22</a>
@@ -96,7 +98,7 @@
         //dblclickScroll: true,
         //center: false,
         tabHeight: 30,
-        conHeight: 240,
+        conHeight: 340,
         style: {
             //box: 'margin: 0 5px;',
             //tab: 'margin: 0 5px 0 0;',
