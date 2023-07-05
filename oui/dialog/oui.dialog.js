@@ -3973,7 +3973,7 @@
     function Dialog(content, title, options) {
         var ds = Common.getDefaultSize(),
             par = Common.checkOptions(content, title, options),
-            opt = $.extend({
+            cfg = {
                 id: null,                       //id
                 skin: Config.DefaultSkin,       //样式: default, blue
                 //lang: Config.Lang.Chinese,      //语言 Chinese,English
@@ -4088,7 +4088,12 @@
                 footStyle: '',          //底部样式
                 tooltipStyle: '',       //Tooltip样式
                 coverOCX: false         //是否覆盖在OCX控件之上
-            }, par);
+            };
+
+        $.extend(cfg.styles, par.styles);
+        delete par.styles;
+
+        var opt = $.extend(cfg, par);
 
         return this.id = opt.id, this.initial(opt);
     }

@@ -25,8 +25,8 @@
 <body>
     <div style="clear:both;">
 	<input type="button" value="添加" onclick="addTab();" />
-    <input type="text" id="txtObjId" value="tab1" />
-    <input type="text" id="txtId" />
+    <input type="text" id="txtTabId" value="tab1" />
+    <input type="text" id="txtItemId" />
     <input type="button" value="显示" onclick="show();" />
     <input type="button" value="显示2" onclick="show(true);" />
     <input type="button" value="关闭全部" onclick="closeAll();" />
@@ -34,7 +34,7 @@
     <input type="button" value="关闭" onclick="close2();" />
     <input type="button" value="关闭2" onclick="close2(true);" />
 </div>
-    <div style="float:left;margin:10px 10px 10px 0;">
+    <div style="float:left;margin:10px 10px 10px 0;overflow: hidden;">
         <div id="nav" style="width:700px;"></div>
         <div id="content" style="width:700px;" class="tab-content"></div>
     </div>
@@ -99,15 +99,16 @@
         //center: false,
         tabHeight: 30,
         conHeight: 340,
+        //hideTab: true,
         style: {
             //box: 'margin: 0 5px;',
-            //tab: 'margin: 0 5px 0 0;',
+            //tab: 'margin: 0 5px 0 5px;',
             //txt: 'font-size:14px;'
         },
 		items: [
 			{id: 'emap', name: '电子地图百度地图私有地图谷歌地图222333333333333333333', url: 'dialog.html', closeAble: true, show: false, load: false},
-			{tabId: 'tab1', id: 'omap', name: '私有地图', html: '私有地图', closeAble: true, show: true},
-			{id: 'data1', name: '实时数据1', html: '实时数据1', closeAble: true }
+			{tabId: 'tab1', id: 'omap', name: '私有地图', html: 'omap:私有地图', closeAble: true, show: true},
+			{id: 'data1', name: '实时数据1', html: 'data1:实时数据1', closeAble: true }
 		]
     });
 
@@ -117,13 +118,13 @@
         
     
     //tab.add({id: 'data1', name: '实时数据1', html: '实时数据1', closeAble: true });
-    tab.add({id: 'data2', name: '实时数据2', html: '实时数据2'});
+    tab.add({id: 'data2', name: '实时数据2', html: 'data2:实时数据2'});
     
-    tab.insert({id: 'data3', name: '实时数据3', html: '实时数据3'}, 'data', true);
-    tab.add({id: 'data4', name: '实时数据4', html: '实时数据4'});
-    tab.add({id: 'data5', name: '实时数据5', html: '实时数据5'});
-    tab.add({id: 'data6', name: '实时数据6', html: '实时数据6'});
-    tab.add({id: 'data7', name: '实时数据7', html: '实时数据7'});
+    tab.insert({id: 'data3', name: '实时数据3', html: 'data3:实时数据3'}, 'data', true);
+    tab.add({id: 'data4', name: '实时数据4', html: 'data4:实时数据4'});
+    tab.add({id: 'data5', name: '实时数据5', html: 'data5:实时数据5'});
+    tab.add({id: 'data6', name: '实时数据6', html: 'data6:实时数据6'});
+    tab.add({id: 'data7', name: '实时数据7', html: 'data7:实时数据7'});
     
     //tab.show('omap');
 
@@ -131,7 +132,7 @@
     var tab2 = $.tab($I('nav2'), $I('content2'), {
         id: 'tab2',
 		event: 'mouseover',
-        skin: 'orange',
+        //skin: 'orange',
         //skin: 'black',
     });
 
@@ -216,28 +217,29 @@
 
 	function addTab() {
 		idx += 1;
-        var objId = document.getElementById('txtObjId').value || 'tab1';
+        var objId = document.getElementById('txtTabId').value || 'tab1';
 		$.tab.add({objId: objId, id: 'data' + idx, name: '实时数据' + idx, html: '实时数据' + idx, func: function(par) {
             console.log('par: ', par);
         }}, true);
 	}
 
     function show(isFunc){
-        var id = $('#txtId').val();
+        var tabId = $('#txtTabId').val();
+        var itemId = $('#txtItemId').val();
         if(isFunc) {
-            $.tab.show(id);
+            $.tab.show(tabId, itemId);
         } else {
-            tab.show(id);
+            tab.show(itemId);
         }
     }
 
     function close2(isFunc){
-        var id = $('#txtId').val();
-        console.log('close: ', id, isFunc)
+        var itemId = $('#txtItemId').val();
+        console.log('close: ', itemId, isFunc)
         if(isFunc) {
-            $.tab.close(tabId, id);
+            $.tab.close(tabId, itemId);
         } else {
-            tab.close(id);
+            tab.close(itemId);
         }
     }
 

@@ -61,16 +61,17 @@
             return prefix + '-' + objId + '-' + itemId;
         },
         buildItemId: function(objId, itemId) {
-            return objId + '-' + itemId;
+            //return objId + '-' + itemId;
+            return Util.buildId(objId, itemId, 'oui-tab');
         },
         buildPanelId: function(objId, itemId) {
-            return Util.buildId(objId, itemId, 'oui-tabs-panel');
+            return Util.buildId(objId, itemId, 'oui-tab-panel');
         },
         buildIframeId: function(objId, itemId) {
-            return Util.buildId(objId, itemId, 'oui-tabs-iframe');
+            return Util.buildId(objId, itemId, 'oui-tab-iframe');
         },
         buildLoadingId: function(objId, itemId) {
-            return Util.buildId(objId, itemId, 'oui-tabs-loading');
+            return Util.buildId(objId, itemId, 'oui-tab-loading');
         },
         buildSwitch: function(t, opt, dir) {
             var div = $.createElement('div', '', function(elem) {
@@ -97,7 +98,7 @@
                 opt.skin = Config.GetSkin();
             }
             //event参数名重载
-            opt.event = $.getParam(opt, ['event','eventName','evtName']);
+            opt.event = $.getParam(opt, ['event','eventName','evtName']);            
 
             return opt;
         },
@@ -211,18 +212,6 @@
                 }
             });
 
-            /*
-            //这段代码已经移到上面了
-            if($.isNumber(insertIndex)) {
-                t.container.insertBefore(tab, t.container.childNodes[insertIndex]);
-            } else if($.isString(insertIndex, true)) {
-                var existingItem = document.getElementById(objId + '-' + insertIndex);
-                t.container.insertBefore(tab, existingItem);
-            } else {
-                t.container.appendChild(tab);
-            }
-            */
-
             var childs = tab.childNodes;
             for(var i = 0; i < childs.length; i++) {
                 if(childs[i].className.endsWith('close')) {
@@ -289,7 +278,7 @@
                     }
                 }
 
-                t.setContentSize(itemId, false, opt);
+                t.setContentSize(itemId, false, cfg);
 
                 Factory.setCache(t.id, opt, tab, elem, iframe);
             }, t.conContainer);
@@ -889,7 +878,7 @@
                 cache = this.getCache(opt.objId);
             return cache ? cache.obj.insert(options, insertIndex, show) : null;
         },
-        show: function(objId, itemId) {
+        show: function(objId, itemId, func) {
             var opt = this.getObjIds(objId, itemId),
                 cache = this.getCache(opt.objId);
             return cache ? cache.obj.show(opt.itemId, func) : null;
@@ -922,7 +911,7 @@
         that.tabContainer = tabContainer;
         that.conContainer = conContainer;
 
-        var opt = $.extend({
+        var cfg = {
             id: 'oui-tabs-' + new Date().getMilliseconds(),
             skin: Config.DefaultSkin,       //样式: default, blue
             //lang: 'chinese',              //chinese, english
@@ -938,14 +927,22 @@
             // Tab高度
             tabHeight: 30,
             conHeight: 400,
-            style: {                
+            //是否隐藏选项卡
+            hideTab: false,
+            style: {
                 //box: 'margin: 0 5px;',
-                //tab: 'margin: 0 5px 0 0;',
+                //tab: 'margin: 0 1px 0 1px;',
                 //txt: 'font-size:14px;',
                 //panel: 'overflow: hidden;'
             },
             items: []
-        }, Util.checkOptions(options));
+        };
+        options = Util.checkOptions(options);
+        $.extend(cfg.style, options.style);
+        //再删除参数中的style，防止参数覆盖
+        delete options.style;
+
+        var opt = $.extend(cfg, options);
 
         that.id = opt.id || '';
 
@@ -967,6 +964,10 @@
                 return this;
             }
             Factory.initCache(that.id, opt, that);
+
+            if (opt.hideTab) {
+                that.showTab(false);
+            }
 
             Util.initialTab(that, opt);
             
@@ -994,7 +995,7 @@
             }
 
             //如果content没有设置高度，则设置一个默认的高度
-            //content高度可以通过setContentSize()修改
+            //content高度可以通过setContentSize()
             if (opt.conHeight && isNaN(parseInt(that.conContainer.style.height))) {
                 that.conContainer.style.height = opt.conHeight + 'px';
             }
@@ -1125,6 +1126,11 @@
 
             return that;
         },
+        showTab: function (show) {
+            var that = this;
+            that.tabContainer.style.display = show ? 'block' : 'none';
+            return that;
+        },
         close: function(itemId) {
             var that = this,
                 cache = Factory.getCache(that.id),
@@ -1169,42 +1175,48 @@
             var that = this, tabHeight = 0, itemId = '',
                 cfg = that.getOptions(),
                 parent = that.conContainer.parentNode;
+
+            opt = $.extend(cfg, opt);
+
+            //若是纯内容框高度，则选项卡高度不参与计算
+            tabHeight = isContent ? 0 : $.getOuterSize(that.tabContainer).height;
+
             if($.isObject(size)) {
-                //这里顶部增加2个像素的留白
-                that.conContainer.style.height = (size.height - 0) + 'px';
-                tabHeight = isContent ? 0 : $.getOuterSize(that.tabContainer).height;
+                that.conContainer.style.height = (size.height - tabHeight) + 'px';
             } else {
                 if($.isString(size)) {
                     itemId = size;
                 }
-                //size = { width: that.conContainer.clientWidth, height: that.conContainer.clientHeight || opt.conHeight };
+                size = { width: that.conContainer.clientWidth, height: that.conContainer.clientHeight || opt.conHeight };
+                size.height += tabHeight;
             }
             //获取父级容器的内宽和内高
-            size = { width: parent.clientWidth, height: parent.clientHeight - 2 };
-
-            if(tabHeight <= 0) {
-                tabHeight = opt.tabHeight || cfg.tabHeight;
+            var psize = { width: parent.clientWidth, height: parent.clientHeight - 2 };
+            if (size.height <= opt.tabHeight) {
+                size.height = psize.height;
             }
+
+            //减去选项卡高度
+            size.height -= tabHeight;
 
             if(itemId) {
                 var panel = $I(Util.buildPanelId(that.id, itemId)),
                     iframe = $I(Util.buildIframeId(that.id, itemId));
                     if(panel) {
                         var es = $.elemSize(panel);
-                        panel.style.height = (size.height - tabHeight - es.padding.height - es.margin.height - es.border.height) + 'px';
+                        panel.style.height = (size.height - es.padding.height - es.margin.height - es.border.height) + 'px';
                     }
                     if(iframe) {
-                        //console.log('iframe: ', size, tabHeight);
-                        iframe.style.height = (size.height - tabHeight) + 'px';
+                        iframe.style.height = size.height + 'px';
                     }
             } else {
                 $('#' + that.conContainer.id + ' .tab-panel').each(function(i, obj) {
                     var es = $.elemSize(obj);
-                    obj.style.height = (size.height - tabHeight - es.padding.height - es.margin.height - es.border.height) + 'px';
+                    obj.style.height = (size.height - es.padding.height - es.margin.height - es.border.height) + 'px';
                 });
 
                 $('#' + that.conContainer.id + ' .tab-iframe').each(function(i, obj) {
-                    obj.style.height = (size.height - tabHeight) + 'px';
+                    obj.style.height = size.height + 'px';
                 });
             }
             return that;
@@ -1232,16 +1244,24 @@
         that.tabContainer = $.toElement(tabContainer);
         that.conContainer = $.toElement(conContainer);
 
-        options.event = $.getParam(options, ['event','eventName','evtName']);
-
-        var opt = $.extend({
+        var cfg = {
             type: 'switch',     //switch, scroll
             event: 'click',     //click, mouseover
-            skin: 'default'
-        }, options);
+            skin: 'default',
+            style: {                
+                //box: 'margin: 0 5px;',
+                //tab: 'margin: 0 1px;',
+                //txt: 'font-size:14px;',
+                //panel: 'overflow: hidden;'
+            }
+        }, opt = Util.checkOptions(options);
 
-        that.options = opt;
-        that.initial(opt);
+        $.extend(cfg.style, opt.style);
+        //再删除参数中的style，防止参数覆盖
+        delete opt.style;
+
+        that.options = $.extend(cfg, opt);
+        that.initial(that.options);
     }
 
     Tabs.prototype = {
@@ -1268,6 +1288,9 @@
                 if (parent.className.indexOf('oui-tabs') > -1) {
                     $.createElement('DIV', '', function(elem) {
                         elem.className = 'tab-box';
+                        if (opt.style.box) {
+                            elem.style.cssText = opt.style.box;
+                        }
                         for (var i = 0; i < tabs.length; i++) {
                             elem.appendChild(tabs[i]);
                         }
@@ -1278,6 +1301,9 @@
                     });
                 } else {
                     $.addClass(parent, 'tab-box');
+                    if (opt.style.box) {
+                        parent.style.cssText = opt.style.box;
+                    }
                     parent.oncontextmenu = function(ev) {
                         return false;
                     }; 
@@ -1285,6 +1311,9 @@
             }
             for(var i = 0; i < tabs.length; i++) {
                 $.addClass(tabs[i], 'tab-item');
+                if (opt.style.tab) {
+                    tabs[i].style.cssText = opt.style.tab;
+                }
                 $.addListener(tabs[i], opt.event, function() {
                     var key = $.getAttribute(this, 'tab|key|rel');
                     that.show(key);

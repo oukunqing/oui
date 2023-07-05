@@ -1,0 +1,34 @@
+.oui-leftmenu-bluegray {
+    background: #d6e3f3;
+    border-right: solid 1px #99bbe8;
+}
+
+.oui-leftmenu-bluegray .item {
+    background: transparent;
+    border: solid 1px #99bbe8;
+    border-right: solid 1px #99bbe8;
+}
+.oui-leftmenu-bluegray .cur, .oui-leftmenu-bluegray .item:hover {
+    background: #fff;
+    border: solid 1px #99bbe8;
+    border-right: solid 1px #f5f5f5;
+}
+.oui-leftmenu-bluegray .item a {
+    color: #000;
+}
+
+.oui-rightmenu-bluegray {
+    border: none;
+    border-left: solid 1px #99bbe8;
+}
+
+.oui-rightmenu-bluegray .item {
+    border: solid 1px #99bbe8;
+    border-left: solid 1px #99bbe8;
+}
+
+.oui-rightmenu-bluegray .cur, .oui-rightmenu-bluegray .item:hover {
+    background: #fff;
+    border: solid 1px #99bbe8;
+    border-left: solid 1px #f5f5f5;
+}
