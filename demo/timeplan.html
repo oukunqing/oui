@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>时间计划表 - $.timeplan</title>
+    <script type="text/javascript" src="../oui/oui.js?"></script>
+	<script>
+    var WEB_LANG = 'English';
+	</script>
+	<style type="text/css">
+     .con {border:solid 1px #99bbe8;box-sizing: border-box;min-width:100px;float:left; }   
+    </style>
+    <!--<script type="text/javascript" src="../oui/tab/oui.tab.js?12&skin=orange&lang=english"></script>-->
+    <script type="text/javascript" src="../oui/timeplan/oui.timeplan.js?12&skin="></script>
+</head>
+<body>
+    <div id="time1" style="border:solid 1px #f00;margin:10px;"></div>
+    <div id="time2" style="border:solid 1px #00f;margin:10px;"></div>
+    
+    <input type="button" value="获取时间计划" onclick="getValue();" />
+</body>
+</html>
+<script type="text/javascript">
+    var plan1 = $.timeplan($I('time1'), {
+        id: 'plan1',
+        //skin: 'bluegray',
+        style: {
+            //box: 'margin: 0 5px;',
+            //tab: 'margin: 0 5px 0 0;',
+            txt: 'font-size:14px;'
+        },
+        maxCount: 8,
+        curCount: 4,
+        intervalAble: true,
+        name: '抓拍',
+        callback: function(par) {
+            $('#content').html($.toJsonString(par));
+        }
+    });
+
+    window.setTimeout(function(){
+        plan1.add(2);
+    }, 5*1000);
+
+    window.setTimeout(function(){
+        plan1.status(2);
+        plan1.set({interval: 30, start: 120, end: 825});
+    }, 6*1000);
+
+    window.setTimeout(function() {
+        plan1.clear(2);
+    }, 7*1000);
+
+    function getValue() {
+        var list = plan1.get();
+        console.log('getValue:', list);
+    }
+
+    $.timeplan($I('time2'), {
+        id: 'plan2',
+        skin: 'bluegray',
+        type: 'right',
+        width: 35,
+        height: 450,
+        maxHeight: 150,
+        maxCount: 8,
+        curCount: 4,
+        callback: function(par) {
+            $('#content2').html($.toJsonString(par));
+        }
+    });
+
+
+</script>

@@ -1,0 +1,98 @@
+.oui-timeplan {
+	display: block;
+	overflow: hidden;
+	font-size: 14px;
+
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    user-select: none;
+    -ms-user-select: none;
+}
+.oui-timeplan ul, .oui-timeplan li {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	float:left;
+	display: block;
+	overflow: hidden;
+}
+
+.oui-timeplan li {
+	margin:5px 20px 5px 0;
+	color: #333;
+}
+
+.oui-timeplan input, .oui-timeplan select {
+	float: left;
+	font-size: 14px;
+	height: 28px;
+	border: solid 1px #ccc;
+	box-sizing: border-box;
+	border-radius: 4px;
+	text-align: center;
+	outline: unset;
+}
+
+.oui-timeplan input:focus, .oui-timeplan select:focus {
+	border: solid 1px #66afe9;
+}
+
+.oui-timeplan .chb-label {
+	float: left;
+
+}
+.oui-timeplan .chb {
+	height: 14px;
+	float: left;
+	margin: 7px 3px 0 0;
+	padding: 0;
+}
+
+.oui-timeplan li span {
+	float:left;
+	font-style: normal;
+	line-height:28px;
+	margin: 0;
+	padding: 0;
+	color: #333;
+}
+
+.oui-timeplan .chb-label span {
+	margin-right: 5px;
+	color: #333;
+}
+
+.oui-timeplan li.disabled {
+	color: #999;
+}
+
+.oui-timeplan li.disabled span {
+	color: #999;
+}
+
+.oui-timeplan i {
+	float:left;
+	font-style: normal;
+	line-height:28px;
+	margin: 0 3px;
+	padding: 0;
+	font-family: Arial;
+}
+
+.oui-timeplan .vs {
+	float: left;
+	margin: 0 3px;
+	padding: 0 5px;
+}
+
+.oui-timeplan .ts {
+	width: 50px;
+	padding: 0 5px;
+}
+
+.oui-timeplan .sep {
+	margin: 0 8px;
+}
+.oui-timeplan .interval {
+	width: 50px;
+}

@@ -27,6 +27,7 @@
         }
     },
     Util = {
+        clickTimer: null,
         checkOptions: function(options) {
             var opt = $.extend({}, options);
 
@@ -71,30 +72,37 @@
 
             return li;
         },
-        showItem: function(container, item, func) {
+        showItem: function(container, item, func, reload) {
+            console.log('item:', item, ', reload: ', reload);
             var obj = item.childNodes[0],
                 key = $.getAttribute(obj, 'key'),
                 url = $.getAttribute(obj, 'url');
 
             if ($.isFunction(func)) {
-                func({key: key, url: url});
+                func({key: key, url: url, reload: reload});
             }
             $.removeClass(container.querySelectorAll('li.cur'), 'cur');
             $.addClass(item, 'cur');
             return this;
         },
         setEvent: function(container, item, opt, curFunc) {
-            var obj = item.childNodes[0];
+            var obj = item.childNodes[0],
+                func = curFunc || opt.callback;
             $.addListener(obj, opt.event || 'click', function() {
-                var func = curFunc || opt.callback;
-                Util.showItem(container, item, func);
+                Util.showItem(container, item, func, false);
             });
+            if (opt.dblclickReload) {
+                $.addListener(obj, 'dblclick', function() {
+                    Util.showItem(container, item, func, true);
+                });
+            }
             return this;
         }
     },
     Cache = {
         menus: {},
-        count: 0
+        count: 0,
+        index: 0
     },
     Factory = {
         initCache: function(objId, options, obj) {
@@ -138,19 +146,18 @@
             return Cache.menus[key] || null;
         },
         buildMenu: function(container, options) {
-            var tab = $.toElement(container),
-                opt = $.extend({
-                    id: 'oui-leftmenu-' + new Date().getMilliseconds(),
-                }, options);
-
-            if(!$.isElement(tab)) {
+            var box = $.toElement(container);
+            if(!$.isElement(box)) {
                 console.log('oui.leftmenu: ', '参数输入错误');
                 return null;
             }
+            var par = $.extend({}, options),
+                id = 'oui-leftmenu-' + (par.id || box.id || Cache.index++),
+                opt = $.extend({}, options, {id: id}),
+                cache = Factory.getCache(opt.id);
 
-            var cache = Factory.getCache(opt.id);
             if(!cache) {
-                return new LeftMenu(tab, opt);
+                return new LeftMenu(box, opt);
             }
             return cache.obj;
         },          
@@ -180,10 +187,13 @@
 
     function LeftMenu (container, options) {
         var that = this;
-        that.container = container;
+        that.container = $.toElement(container);
+        if(!$.isElement(that.container)) {
+            return false;
+        }
 
         var cfg = {
-            id: 'oui-leftmenu-' + new Date().getMilliseconds(),
+            id: 'oui-leftmenu',
             skin: Config.DefaultSkin,       //样式: default, blue
             //lang: 'chinese',              //chinese, english
             //lang: Config.GetLang(),         //语言 Chinese,English
@@ -194,6 +204,8 @@
             height: 0,          //高度
             index: 0,           //默认设置的当前项的索引
             maxHeight: 240,
+            dblclickReload: false,  //双击重载
+            showContextMenu: true,  //右键菜单（功能未完成）
             style: {                
                 //box: 'margin: 0 5px;',
                 //tab: 'margin: 0 5px 0 0;',
@@ -220,6 +232,9 @@
     LeftMenu.prototype = {
         initial: function(opt) {
             var that = this, cssTab = '';
+
+            Factory.initCache(that.id, opt, that);
+
             if (opt.skin !== Config.DefaultSkin) {
                 cssTab = ' oui-leftmenu-' + opt.skin;
                 if (opt.type  === 'right') {
@@ -276,7 +291,7 @@
                 dr = that.items[key];
 
             if (dr) {
-                Util.showItem(that.container, dr.item, dr.callback || that.options.callback);
+                Util.showItem(that.container, dr.item, dr.callback || that.options.callback, false);
             }
             return that;
         }

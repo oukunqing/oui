@@ -674,7 +674,8 @@
     },
     Cache = {
         tabs: {},
-        count: 0
+        count: 0,
+        index: 0
     },
     Factory = {
         initCache: function(objId, options, obj) {
@@ -844,17 +845,17 @@
         },
         buildTab: function(tabContainer, conContainer, options) {
             var tab = $.toElement(tabContainer),
-                con = $.toElement(conContainer),
-                opt = $.extend({
-                    id: 'oui-tabs-' + new Date().getMilliseconds(),
-                }, options);
+                con = $.toElement(conContainer);
 
             if(!$.isElement(tab) || !$.isElement(con)) {
                 console.log('oui.tab: ', '参数输入错误');
                 return null;
             }
+            var par = $.extend({}, options),
+                id = 'oui-tabs-' + (par.id || tab.id || Cache.index++),
+                opt = $.extend({}, options, {id: id}),
+                cache = Factory.getCache(opt.id);
 
-            var cache = Factory.getCache(opt.id);
             if(!cache) {
                 return new Tab(tab, con, opt);
             }
@@ -878,10 +879,10 @@
                 cache = this.getCache(opt.objId);
             return cache ? cache.obj.insert(options, insertIndex, show) : null;
         },
-        show: function(objId, itemId, func) {
+        show: function(objId, itemId, func, reload) {
             var opt = this.getObjIds(objId, itemId),
                 cache = this.getCache(opt.objId);
-            return cache ? cache.obj.show(opt.itemId, func) : null;
+            return cache ? cache.obj.show(opt.itemId, func, reload) : null;
         },
         remove: function(objId, itemId) {
             var opt = this.getObjIds(objId, itemId),
@@ -892,6 +893,11 @@
             var opt = this.getObjIds(objId, itemId),
                 cache = this.getCache(opt.objId);
             return cache ? cache.obj.closeAll(exceptItemId) : null;
+        },
+        reload: function(objId, itemId, isAll) {
+            var opt = this.getObjIds(objId, itemId),
+                cache = this.getCache(opt.objId);
+            return cache ? (isAll ? cache.objId.reloadAll() : cache.obj.reload(opt.itemId)) : null;
         },
         hideParentTabMenu: function() {
             Util.hideAllContextMenu();
@@ -908,11 +914,14 @@
 
     function Tab(tabContainer, conContainer, options) {
         var that = this, cssTab = '', cssCon = '';
-        that.tabContainer = tabContainer;
-        that.conContainer = conContainer;
+        that.tabContainer = $.toElement(tabContainer);
+        that.conContainer = $.toElement(conContainer);
+        if(!$.isElement(that.tabContainer) || !$.isElement(that.conContainer)) {
+            return false;
+        }
 
         var cfg = {
-            id: 'oui-tabs-' + new Date().getMilliseconds(),
+            id: 'oui-tabs',
             skin: Config.DefaultSkin,       //样式: default, blue
             //lang: 'chinese',              //chinese, english
             lang: Config.GetLang(),         //语言 Chinese,English
@@ -1080,12 +1089,16 @@
 
             return that;
         },
-        show: function(itemId, func) {
+        show: function(itemId, func, reload) {
             var that = this,
                 cfg = that.getOptions(),
                 cache = Factory.getCache(that.id);
             if(null === cache) {
                 return that;
+            }
+            if ($.isBoolean(func) && $.isUndefined(reload)) {
+                reload = func;
+                func = null;
             }
             for(var k in cache.items) {
                 $.removeClass(cache.items[k].tab, 'cur');
@@ -1104,9 +1117,13 @@
                 } else {
                     $.scrollTo(cur.con);
                 }
-
+                /*
                 if(cur.iframe && !cur.iframe.loaded) {
                     Util.loadPage(that, cur.iframe, cur.opt.url);
+                }
+                */
+                if(cur.iframe) {
+                    Util.loadPage(that, cur.iframe, cur.opt.url, reload);
                 }
                 Factory.setCur(that, cur, true);
                 Util.setTabPosition(that, cur.tab);
@@ -1140,7 +1157,7 @@
                 newId = '';
 
             if(!item || !item.closeAble) {
-                return this;
+                return that;
             }
 
             Factory.delItem(that, itemId);
@@ -1169,6 +1186,28 @@
             Util.setSize(that, function() {
                 that.show();
             });
+            return that;
+        },
+        reload: function(itemId) {
+            var that = this,
+                cache = Factory.getCache(that.id),
+                item = Factory.getItem(cache, itemId);
+
+            if(item && item.iframe) {
+                Util.loadPage(that, item.iframe, item.opt.url, true);
+            }
+            return that;
+        },
+        reloadAll: function() {
+            var that = this,
+                cache = Factory.getCache(that.id);
+
+            for(var k in cache.items) {
+                var dr = cache.items[k];
+                if(dr.iframe) {
+                    this.loadPage(that, dr.iframe, dr.opt.url, true);
+                }
+            }
             return that;
         },
         setContentSize: function(size, isContent, opt) {
@@ -1435,8 +1474,8 @@
         insert: function(options, insertIndex, show) {
             return Factory.insert(options, insertIndex, show);
         },
-        show: function(objId, itemId, func) {
-            return Factory.show(objId, itemId, func);
+        show: function(objId, itemId, func, reload) {
+            return Factory.show(objId, itemId, func, reload);
         },
         remove: function(objId, itemId) {
             return Factory.remove(objId, itemId);
@@ -1446,6 +1485,12 @@
         },
         closeAll: function(objId, exceptItemId) {
             return Factory.removeAll(objId, exceptItemId);
+        },
+        reload: function(objId, itemId) {
+            return Factory.reload(objId, itemId, false);
+        },
+        reloadAll: function(objId, itemId) {
+            return Factory.reload(objId, itemId, true);
         },
         hideParentTabMenu: function() {
             return Factory.hideParentTabMenu();
