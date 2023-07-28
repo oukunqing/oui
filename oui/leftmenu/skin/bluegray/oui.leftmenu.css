@@ -1,10 +1,10 @@
 .oui-leftmenu-bluegray {
-    background: #d6e3f3;
+    background: transparent;
     border-right: solid 1px #99bbe8;
 }
 
 .oui-leftmenu-bluegray .item {
-    background: transparent;
+    background: #d6e3f3;
     border: solid 1px #99bbe8;
     border-right: solid 1px #99bbe8;
 }

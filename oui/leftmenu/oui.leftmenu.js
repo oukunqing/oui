@@ -82,7 +82,16 @@
                 func({key: key, url: url, reload: reload});
             }
             $.removeClass(container.querySelectorAll('li.cur'), 'cur');
-            $.addClass(item, 'cur');
+            if (item) {
+                $.addClass(item, 'cur');
+            }
+            return this;
+        },
+        setCur: function(container, item) {
+            $.removeClass(container.querySelectorAll('li.cur'), 'cur');
+            if (item) {
+                $.addClass(item, 'cur');
+            }
             return this;
         },
         setEvent: function(container, item, opt, curFunc) {
@@ -247,7 +256,7 @@
             that.size({width: opt.width, height: opt.height});
 
             that.box = $.createElement('UL', '', function(elem) {
-                var items = [], frm = new   DocumentFragment();
+                var items = [], frm = new DocumentFragment();
                 for (var i = 0; i < opt.items.length; i++) {
                     var dr = opt.items[i], key = dr.id || dr.key,
                         item = Util.createItem(dr, opt, opt.index === i);
@@ -258,6 +267,13 @@
                     that.items[key] = {key: key, item: item, func: dr.callback};
                 }
                 elem.appendChild(frm);
+                
+                for (var j = 0; j < items.length; j++) {
+                    var li = items[j];                    
+                    if (li.childNodes[0].offsetHeight > opt.maxHeight) {
+                        li.title = opt.items[j].name;
+                    }
+                }
             }, that.container);
 
             return this;
@@ -276,13 +292,18 @@
         },
         add: function(cfg) {
             var that = this,
+                opt = that.options,
                 key = cfg.id || cfg.key,
-                item = Util.createItem(cfg, that.options);
+                item = Util.createItem(cfg, opt);
 
             that.box.appendChild(item);
-            Util.setEvent(that.container, item, that.options, cfg.callback);
+            Util.setEvent(that.container, item, opt, cfg.callback);
 
             that.items[key] = {key: key, item: item, func: cfg.callback};
+
+            if (item.childNodes[0].offsetHeight > opt.maxHeight) {
+                item.title = cfg.name;
+            }
 
             return that;
         },
@@ -293,6 +314,13 @@
             if (dr) {
                 Util.showItem(that.container, dr.item, dr.callback || that.options.callback, false);
             }
+            return that;
+        },
+        cur: function(key) {
+            var that = this,
+                dr = key ? that.items[key] : null;
+
+            Util.setCur(that.container, dr ? dr.item : null);
             return that;
         }
     };

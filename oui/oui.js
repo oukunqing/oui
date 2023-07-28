@@ -152,7 +152,9 @@
             //日期时间格式（可以不包含时间，时间可以省略“:秒”）
             DateTime: /^(19|20|21)[\d]{2}[\-\/](0?[1-9]|1[0-2])[\-\/](0?[1-9]|[12][0-9]|3[0-1])(\s+(20|21|22|23|[0-1]?\d):[0-5]?\d(:[0-5]?\d)?)?$/,
             //IPV4
-            Ip: /^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$/
+            Ip: /^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$/,
+            //带参数的URL格式字符串
+            UrlParam: /^(\/|http:\/\/|https:\/\/)(.*)(.(as[hp][x]?|jsp|[s]?htm[l]?|php|do)|\/)\?[&]?(.*)=(.*)([&]{1,}(.*)=(.*)){0,}/gi
         }
     });
 
@@ -2754,7 +2756,9 @@
                 mc = matchs.length,
                 //若没有传递参数，则取window对象作为参数(对象)
                 obj = len === 0 ? window : $.isObject(vals[0]) ? vals[0] : {},
-                isObject = $.isObject(obj);
+                isObject = $.isObject(obj),
+                isUrl = $.PATTERN.UrlParam.test(s),
+                urlParamSymbolPattern = /[&#]/g;
 
             for (var i = 0; i < mc; i++) {
                 var m = matchs[i], mv = m.replace(pattern, ''), p = s.indexOf(m), idx = parseInt(mv, 10);
@@ -2770,6 +2774,11 @@
                     if ($.isBoolean(v) && !v) {
                         return false;
                     }
+                    if (isUrl && urlParamSymbolPattern.test(v)) {
+                        console.log('value: ', v);
+                        v = encodeURIComponent(v);
+                        console.log('value encode: ', v);
+                    }
                     if (/^-\d$/g.test(mv) && odd) { throwError(err[0], s, vals); }
                     else if (idx >= len) { throwError(err[1], s, vals); }
                     else if ($.isNullOrUndefined(v)) { throwError(err[2], s, vals); }
@@ -2781,6 +2790,11 @@
                             throwError(err[0], s, vals);
                         }
                         v = distillObjVal(mv, obj, err[0], s, vals);
+                        if (isUrl && urlParamSymbolPattern.test(v)) {
+                            console.log('value: ', v);
+                            v = encodeURIComponent(v);
+                            console.log('value encode: ', v);
+                        }
                         rst.push(s.substr(0, p) + (c > 1 || d > 1 ? (c % 2 !== 0 || d % 2 !== 0 ? m2.replace('{' + idx + '}', v) : m2) : v));
                     } else {
                         var mcs = m2.match(/({[\w\.>\-,;\|\d]+})/g);
@@ -5215,6 +5229,23 @@
                 }
                 return $QA(selector);
             }
+        },
+        isAllChecked: function (selector) {
+            var arr = [];
+            if (isName(selector)) {
+                arr = $N(selector);
+            } else {
+                arr = $QA(selector);
+            }
+            if (arr.length <= 0) {
+                return false;
+            }
+            for (var i = 0; i < arr.length; i++) {
+                if (!arr[i].checked) {
+                    return false;
+                }
+            }
+            return true;
         },
         getCheckedValues: function (selector, options) {
             if (!$.isObject(options)) {

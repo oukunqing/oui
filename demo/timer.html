@@ -5,7 +5,9 @@
     <title>定时器 - $.timer</title>
     <script type="text/javascript" src="../oui/oui.js?"></script>
     <script type="text/javascript" src="../oui/timer/oui.timer.js?12"></script>
-    
+    <style type="text/css">
+    	body{font-size:14px;}
+    </style>
 </head>
 <body>
 	<label>
@@ -18,7 +20,7 @@
 	<button onclick="pause(true);">暂停</button>
 	<button onclick="pause(false);">取消暂停</button>
 	<button onclick="run(false, true);">重置</button>
-	<button onclick="interval(45);">间隔</button>
+	<button onclick="interval(45);">间隔(45秒)</button>
 </body>
 </html>
 <script type="text/javascript">
@@ -31,14 +33,20 @@
 		var action = isReset ? 'reset' : 'start';
 		var timer = $.timer({
 			id: 'timer1',
-			interval: 30
+			interval: 30,
+			element: 'ts01',
+			callback: function () {
+				console.log('reload:');
+			}
 		})[action](function(num, paused) {
 			console.log('start:', num, paused);
+			/*
 			if(paused) {
 				$('#ts01').html('暂停刷新');
 				return false;
 			}
 			$('#ts01').html(num + '秒后刷新');
+			*/
 		});
 	}
 
@@ -49,11 +57,13 @@
 	function pause(action) {
 		$.timer.pause('timer1', action, function(num, paused) {
 			console.log('pause:', num, paused);
+			/*
 			if(paused) {
 				$('#ts01').html('暂停刷新');
 				return false;
 			}
-			$('#ts01').html(num + '秒后刷新');			
+			$('#ts01').html(num + '秒后刷新');
+			*/	
 		});
 	}
 

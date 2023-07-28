@@ -70,15 +70,52 @@
                 number = interval;
             }
             return number;
+        },
+        buildInfo: function(opt, num, paused, func) {
+            var html = [], 
+                elem = $.toElement(opt.element),
+                name = $.isString(opt.name, true) ? opt.name : '';
+
+            if (!$.isFunction(func)) {
+                func = opt.callback;
+            }
+            if ($.isElement(elem)) {
+                if (paused) {
+                    html = opt.texts.pause;
+                } else if (num <= 0) {
+                    html = opt.texts.doing;                    
+                } else {
+                    html = opt.texts.delay.format(num);
+                }
+                elem.innerHTML = html.join('');
+            }
+
+            if ($.isFunction(func)) {
+                func(num, paused);
+            }
+
+            return this;
         }
     };
 
     function Timer(options) {
-        var opt = $.extend({
+        var cfg = {            
             id: 'oui-timer',
             interval: 60,
+            element: null,
+            texts: {
+                pause: '<span style="color:#f00;">已暂停刷新</span>',
+                doing: '正在刷新...',
+                delay: '<span style="color:#f00;margin-right:2px;">{0}</span>秒后刷新'
+            },
             callback: null
-        }, options);
+        };
+        options = $.extend({}, options);
+        $.extend(cfg.texts, options.texts);
+        delete options.texts;
+
+        var opt = $.extend(cfg, options),
+            elem = $.toElement(opt.element);
 
         if (opt.interval <= 0) {
             opt.interval = 60;
@@ -111,37 +148,39 @@
             return this;
         },
         start: function (func) {
-            var _ = this;
-            _.cache.enable = true;
-            _.cache.paused = false;
+            var _ = this, cfg = _.cache;
+            cfg.enable = true;
+            cfg.paused = false;
 
-            if (_.cache.timer !== null) {
-                window.clearInterval(_.cache.timer);
+            if (cfg.timer !== null) {
+                window.clearInterval(cfg.timer);
             }
             var pause_times = 0, interval_ms = 1000;
 
-            _.cache.timer = window.setInterval(function () {
-                if (!_.cache.enable) {
+            cfg.timer = window.setInterval(function () {
+                if (!cfg.enable) {
                     return false;
                 }
                 if (!_.cache.paused) {
-                    _.cache.number = Factory.checkNumber(_.cache.number, _.cache.options.interval + 1);
-                    _.cache.number = (_.cache.number - 1 * interval_ms / 1000).round(3);
-                    if(_.cache.number < 0) {
-                        _.cache.number = 0;
+                    cfg.number = Factory.checkNumber(cfg.number, cfg.options.interval + 1);
+                    cfg.number = (cfg.number - 1 * interval_ms / 1000).round(3);
+                    if(cfg.number < 0) {
+                        cfg.number = 0;
                     }
                     pause_times = 0;
                 } else {
                     pause_times++;
                 }
                 if (pause_times < 2 && $.isFunction(func)) {
-                    func(parseInt(_.cache.number, 10), _.cache.paused);
+                    //func(parseInt(cfg.number, 10), cfg.paused);
+                    Factory.buildInfo(cfg.options, parseInt(cfg.number, 10), cfg.paused, func);
                 }
             }, interval_ms);
 
             if ($.isFunction(func)) {
-                _.cache.number = Factory.checkNumber(_.cache.number, _.cache.options.interval);
-                func(parseInt(_.cache.number, 10), _.cache.paused);
+                cfg.number = Factory.checkNumber(cfg.number, cfg.options.interval);
+                //func(parseInt(cfg.number, 10), cfg.paused);
+                Factory.buildInfo(cfg.options, parseInt(cfg.number, 10), cfg.paused, func);
             }
             return _;
         },
@@ -158,10 +197,11 @@
             return _;
         },
         pause: function (func, action) {
-            var _ = this;
-            _.cache.paused = action ? true : false;
+            var _ = this, cfg = _.cache;
+            cfg.paused = action ? true : false;
             if ($.isFunction(func)) {
-                func(parseInt(_.cache.number, 10), _.cache.paused);
+                //func(parseInt(cfg.number, 10), cfg.paused);
+                Factory.buildInfo(cfg.options, parseInt(cfg.number, 10), cfg.paused, func);
             }
             return _;
         },

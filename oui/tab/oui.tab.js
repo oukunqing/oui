@@ -1184,7 +1184,7 @@
             var that = this;
             Factory.delItem(that, true, exceptItemId).setCur(that, null);
             Util.setSize(that, function() {
-                that.show();
+                that.show('');
             });
             return that;
         },

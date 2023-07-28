@@ -1,10 +1,10 @@
 .oui-leftmenu-green {
-    background: #6ebd4d;
+    background: transparent;
     border-right: solid 1px #008000;
 }
 
 .oui-leftmenu-green .item {
-    background: transparent;
+    background: #6ebd4d;
     border: solid 1px #008000;
     border-right: solid 1px #008000;
 }

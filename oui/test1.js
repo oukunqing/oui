@@ -1352,3 +1352,42 @@ console.log(new Date().format('ts', 10));
 
 var cache = {};
 console.log($.toJsonString(cache).length);
+
+
+var a1 = 0, b1 = 0;
+
+console.log(a1 || b1 ? '123' : 'abs');
+
+var url = '/modules/picturePlay/show/test.ashx?&device={0}&path={1}&idx={2}&name=abc#你好{3}&history={4}';
+
+var device = 'dx01',
+    path = '/pic/20230710/305283/20230710080143_01_305283_001_01.jpg',
+    idx = 1,
+    deviceName = '35 JiDian 11X 72#/JiDian 12X 61#(SP001)', 
+    history = 0;
+
+console.log(url.format(device, path, idx, deviceName, history));
+
+var pattern = /^(\/|http:\/\/|https:\/\/)(.*)(.(as[hp][x]?|jsp|[s]?htm[l]?|php|do)|\/)\?[&]?(.*)=(.*)([&]{1,}(.*)=(.*)){0,}/gi;
+console.log('a', pattern.test('/modules/show/?device={0}&path={1}&idx={2}&name={3}&history={4}'));
+console.log('b', $.PATTERN.UrlParam.test('/modules/show/?device={0}&path={1}&idx={2}&name={3}&history={4}'));
+//cq15871462362
+/*
+1.自动推送
+2.审核推送->未审核->延时推送
+3.审核推送->未审核->取消推送（不推送）
+4.审核推送->已审核->立即推送
+5.审核推送->已审核->延时推送
+6.审核推送->已审核->取消推送（不推送）
+*/
+
+console.log($.getUrlHost('/abc/1.aspx'));
+console.log('c', $.PATTERN.UrlParam.test('/modules/show/?device=123'));
+
+var pattern22 = /^(\/|http:\/\/|https:\/\/)(.*)(.(as[hp][x]?|jsp|[s]?htm[l]?|php|do)|\/)(\?[&]?(.*)=(.*)([&]{1,}(.*)=(.*)){0,})?/gi;
+console.log('c', pattern.test('http://112.54.97.178:81/?a=b&id=1'));
+
+
+console.log((0).toTimeStr());
+
+console.log((150)|15<<8);

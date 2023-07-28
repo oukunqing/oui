@@ -585,6 +585,10 @@
                     options.markText = { dataCount: args[6] };
                 }
             }
+            //若指定pageSize为0，则表示不分页（仅显示数据条数）
+            if (options.pageSize === 0) {
+                options.paging = false;
+            }
             return options;
         },
         show: function(options, dataCount) {
@@ -606,6 +610,7 @@
         var that = this;
         that.options = setOptions({
             element: null,              //分页显示HTML控件（或ID）
+            paging: true,               //是否分页，默认分页；有时不需要分页，只是显示数据条数
             pageSize: 10,               //每页显示条数，默认为10
             pageStart: 0,               //起始页，0 或 1，与 pageIndex 起始值对应
             pageIndex: 0,               //起始页码，默认与 pageStart 相同
@@ -671,6 +676,18 @@
                 minuend: Math.abs(that.options.pageStart - 1)
             });
 
+            if (!op.paging) {
+                var c = op.dataCount >= 0 ? op.dataCount : 0;
+                op.element.innerHTML = [
+                    '<div class="oui-pagination">',
+                    '<span class="label">',
+                    op.markText['dataCount'].format(c),
+                    '</span>',
+                    '</div>'
+                ].join('');
+                return this;
+            }
+
             //检测pageIndex是否在pageCount范围内
             checkPageIndex(that);
 
@@ -696,7 +713,7 @@
 
             buildDataCount(op.showStatText && op.showDataCount, that, html, op.markText['dataCount'], op.dataCount);
             buildDataStat(op.showStatText && op.showDataStatLeft, that, html, op.markText['dataStat']);
-            buildDataStat(op.showStatText && op.showPageStatLeft, that, html, op.markText['pageStat']);
+            buildPageStat(op.showStatText && op.showPageStatLeft, that, html, op.markText['pageStat']);
 
             buildPageSize(op.showPageSize, that, html, op.minuend);
 
