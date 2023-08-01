@@ -1282,6 +1282,9 @@
         var that = this, cssTab = '', cssCon = '';
         that.tabContainer = $.toElement(tabContainer);
         that.conContainer = $.toElement(conContainer);
+        if (!$.isElement(that.tabContainer) || !$.isElement(that.conContainer)) {
+            return false;
+        }
 
         var cfg = {
             type: 'switch',     //switch, scroll

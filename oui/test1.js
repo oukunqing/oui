@@ -1391,3 +1391,11 @@ console.log('c', pattern.test('http://112.54.97.178:81/?a=b&id=1'));
 console.log((0).toTimeStr());
 
 console.log((150)|15<<8);
+
+
+
+var str = '#comment\n';
+
+console.log(/^\s*#[\s\S]*?\n/.test(str));
+
+console.log(str.replace(/^\s*#[\s\S]*?\n/, ""));

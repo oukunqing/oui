@@ -5196,6 +5196,10 @@
                     values = values.split(/[|,]/);
                 }
                 if ($.isArray(values)) {
+                    if (values.length <= 1 && !values[0]) {
+                        values = ['no-values-were-selected-' + new Date().getTime() % 1000];
+                    }
+                console.log('setChecked: [1] ', values);
                     arr = $.matchCondition(arr, { values: values });
                 }
                 for (var i = 0, c = arr.length; i < c; i++) {
