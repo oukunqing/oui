@@ -55,6 +55,23 @@
             ];
             return html.join('');
         },
+        getCurIndex: function(items) {
+            var index = -1, closeAble = true;
+            for (var i = 0; i < items.length; i++) {
+                var dr = items[i];
+                if (!dr.closeAble) {
+                    closeAble = false;
+                }
+                if (dr.show || dr.load) {
+                    index = i;
+                    break;
+                }
+            }
+            if(!closeAble && index < 0) {
+                index = 0;
+            }
+            return index;
+        },
         createItem: function(dr, opt, isCur) {
             var txtstyle = '';
             if(opt.style.txt) {
@@ -241,6 +258,10 @@
     LeftMenu.prototype = {
         initial: function(opt) {
             var that = this, cssTab = '';
+
+            if(!opt.index) {
+                opt.index = Util.getCurIndex(opt.items);
+            }
 
             Factory.initCache(that.id, opt, that);
 
