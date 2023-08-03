@@ -226,7 +226,7 @@
             type: 'switch',     //switch, scroll
             event: 'click',     //click, mouseover
             type: '',           //right 表示右栏菜单，默认为空
-            width: 39,          //宽度
+            width: 33,          //宽度
             height: 0,          //高度
             index: 0,           //默认设置的当前项的索引
             maxHeight: 240,

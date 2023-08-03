@@ -1303,13 +1303,12 @@
             //var mt = ch > 24 ? 'margin-top:' + (ch / 2 - 12 / 2) + 'px;' : '';
             var mt = cs.padding.top > 0 ? 'margin-top:' + (cs.padding.top / 2 + 1) + 'px;' : '';
             var f = '<a id="' + buildId(id, 'FOCUS', that.Table) + '" class="table-tree-focuser" href="#" /></a>';
-            var a = '<a id="{0}" tid="{1}" expand="{2}" class="{3}" style="cursor:pointer;margin-left:{4}px !important;{5}"></a>'.format(
+            var a = '<a id="{0}" tid="{1}" expand="{2}" class="table-tree-switch {3}" style="cursor:pointer;margin-left:{4}px !important;"></a>'.format(
                 buildId(id, 'SWITCH', that.Table), 
                 id, 
                 isExpand ? 1 : 0, 
                 isExpand ? op.className.expand : op.className.collapse, 
-                buildSpace(level, op.spaceWidth),
-                mt
+                buildSpace(level, op.spaceWidth)
             );
             return f + a;
         },
@@ -1318,7 +1317,7 @@
                 return false;
             }
             obj.setAttribute('expand', collapse ? 0 : 1);
-            obj.className = that.options.className[collapse ? 'collapse' : 'expand'];
+            obj.className = 'table-tree-switch ' + that.options.className[collapse ? 'collapse' : 'expand'];
         },
         showChildCount = function(that, id) {
             var btnSwitch = $I(buildId(id, 'SWITCH', that.Table));

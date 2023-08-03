@@ -1399,3 +1399,5 @@ var str = '#comment\n';
 console.log(/^\s*#[\s\S]*?\n/.test(str));
 
 console.log(str.replace(/^\s*#[\s\S]*?\n/, ""));
+
+console.log('data:image/jpg;base64,'.isImageFile());

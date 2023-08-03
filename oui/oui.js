@@ -1919,6 +1919,14 @@
         },
         getExtension: function () {
             return $.getExtension(this);
+        },        
+        isImageFile: function () {
+            var s = this,
+                regExt = /^[.](jpg|jpeg|png|gif|bmp)$/i,
+                //base64字节长度规则应该是4的倍数，从FileReader获取的readAsDataURL数据没有填充=，
+                //所以这里不具体判断数据长度
+                regCon = /^data:image\/(jpg|jpeg|png|gif|bmp)+;base64,([0-9A-Z\+\-=\/]{32,})/i;
+            return !s.trim() ? false : regCon.test(s) || regExt.test($.getExtension(s));
         },
         getFullPath: function(hideHost) {
         	return $.getFullPath(this, hideHost);
@@ -2255,9 +2263,14 @@
             unit = (space ? ' ' : '') + ('' + (unit || '')).trim();
             var m = parseInt(num / kn, 10);
             var n = (num % kn / kn).round(decimalLen);
-            return (force ? (m + n) : m) > 0 ? (m + n).round(decimalLen) + unit : num;
+            return (force ? (m + n) : m) > 0 ? (m + n).round(decimalLen) + unit : num + (unit === 'KB' ? 'bytes' : '');
         },
-        toFileSize: function (decimalLen, space) {
+        toFileSize: function (decimalLen, space, force) {
+            if (typeof decimalLen === 'boolean') {
+                force = space;
+                space = decimalLen;
+                decimalLen = 2;
+            }
             var kb = 1024, mb = 1024 * 1024, gb = 1024 * 1024 * 1024, num = this;
             if (num >= gb) {
                 return num.toNumberUnit(num, gb, 'GB', decimalLen, false, space);
@@ -2266,7 +2279,7 @@
             } else if (num >= kb) {
                 return num.toNumberUnit(num, kb, 'KB', decimalLen, false, space);
             } else if (num < kb) {
-                return num.toNumberUnit(num, kb, 'KB', decimalLen, true, space);
+                return num.toNumberUnit(num, kb, 'KB', decimalLen, $.isBoolean(force, true), space);
             }
             return '';
         },
@@ -3040,6 +3053,7 @@
                     if (xhr.readyState === 4) {
                         if (xhr.status === 200) {
                             size = xhr.getResponseHeader('Content-Length');
+                            size = parseInt(size, 10);
                         } else {
                             //获取文件信息失败
                             console.log('getFileSize: ', 'ERROR');
@@ -4447,7 +4461,7 @@
                     if (!load) {
                         load = true;
                         var duration = new Date().getTime() - start_time;
-                        callback({ actino: 'onload', duration: duration, width: img.width, height: img.height });
+                        callback({ action: 'onload', duration: duration, width: img.width, height: img.height });
                     }
                 };
                 var check = function () {
@@ -4456,7 +4470,7 @@
                         if (!load) {
                             load = true;
                             var duration = new Date().getTime() - start_time;
-                            callback({ actino: 'check', duration: duration, width: img.width, height: img.height });
+                            callback({ action: 'check', duration: duration, width: img.width, height: img.height });
                         }
                     }
                 };
@@ -5196,10 +5210,13 @@
                     values = values.split(/[|,]/);
                 }
                 if ($.isArray(values)) {
-                    if (values.length <= 1 && !values[0]) {
-                        values = ['no-values-were-selected-' + new Date().getTime() % 1000];
+                    if (values.length <= 1) {
+                        if (!values[0]) {
+                            values = ['no-values-were-set-' + new Date().getTime() % 1000];
+                        } else if (values[0] === 'ALL') {
+                            values = [];
+                        }
                     }
-                console.log('setChecked: [1] ', values);
                     arr = $.matchCondition(arr, { values: values });
                 }
                 for (var i = 0, c = arr.length; i < c; i++) {
