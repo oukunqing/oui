@@ -330,7 +330,11 @@
                 trigger = that.options.trigger;
 
             for (var i = 0; i < cols; i++) {
-                var dr = cellData[i], cell = row.insertCell(startIndex + cellIndex);
+                var dr = cellData[i];
+                if (dr === null || dr === undefined) {
+                    continue;
+                }
+                var cell = row.insertCell(startIndex + cellIndex);
                 if (isRow && i === 0) {
                     insertCellProperty(row, rowData);
                 }
