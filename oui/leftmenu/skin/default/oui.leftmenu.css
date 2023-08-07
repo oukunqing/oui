@@ -35,8 +35,8 @@
     min-height: 30px;
     line-height: 18px;
     border-radius: 5px;
-    border-top-right-radius: unset;
-    border-bottom-right-radius: unset;
+    border-top-right-radius: 0px;
+    border-bottom-right-radius: 0px;
     background: #dee1e6;
     border: solid 1px #ccc;
     border-right: solid 1px #ccc;
@@ -80,13 +80,13 @@
 
 .oui-rightmenu ul {
     left: -1px;
-    right: unset;
+    right: 0;
 }
 
 .oui-rightmenu .item {
     border-radius: 5px;
-    border-top-left-radius: unset;
-    border-bottom-left-radius: unset;
+    border-top-left-radius: 0px;
+    border-bottom-left-radius: 0px;
     border: solid 1px #ccc;
     border-left: solid 1px #ccc;
     margin: 2px 2px 2px 0;

@@ -1401,3 +1401,30 @@ console.log(/^\s*#[\s\S]*?\n/.test(str));
 console.log(str.replace(/^\s*#[\s\S]*?\n/, ""));
 
 console.log('data:image/jpg;base64,'.isImageFile());
+
+
+var arr = '1,2,3,4,5,6,7,8,9,10,12,15,16,17,18,24,31,34'.split(',');
+console.log(arr);
+
+var ids = [
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "9",
+    "10",
+    "8",
+    "12",
+    "24",
+    "31",
+    "1",
+    "15",
+    "16",
+    "34",
+    "17",
+    "18"
+];
+
+console.log(ids.sort((a,b) => a-b).join(','));

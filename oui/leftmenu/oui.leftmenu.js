@@ -8,7 +8,6 @@
     $.leftmenu 左栏菜单插件
 */
 
-
 !function($) {
     'use strict';
 
@@ -225,7 +224,7 @@
             //lang: Config.GetLang(),         //语言 Chinese,English
             type: 'switch',     //switch, scroll
             event: 'click',     //click, mouseover
-            type: '',           //right 表示右栏菜单，默认为空
+            position: '',           //right 表示右栏菜单，默认为空
             width: 33,          //宽度
             height: 0,          //高度
             index: 0,           //默认设置的当前项的索引
@@ -267,28 +266,31 @@
 
             if (opt.skin !== Config.DefaultSkin) {
                 cssTab = ' oui-leftmenu-' + opt.skin;
-                if (opt.type  === 'right') {
+                if (opt.position  === 'right') {
                     cssTab += ' oui-rightmenu-' + opt.skin;
                 }
                 Factory.loadCss(opt.skin);
             }
-            $.addClass(that.container, 'oui-leftmenu' + (opt.type  === 'right' ? ' oui-rightmenu' : '') + cssTab);
+            $.addClass(that.container, 'oui-leftmenu' + (opt.position  === 'right' ? ' oui-rightmenu' : '') + cssTab);
 
             that.size({width: opt.width, height: opt.height});
 
             that.box = $.createElement('UL', '', function(elem) {
-                var items = [], frm = new DocumentFragment();
+                var items = [], 
+                    isFrm = typeof DocumentFragment === 'function',
+                    frm = isFrm ? new DocumentFragment() : null;
                 for (var i = 0; i < opt.items.length; i++) {
                     var dr = opt.items[i], key = dr.id || dr.key,
                         item = Util.createItem(dr, opt, opt.index === i);
                     items.push(item);
-                    frm.appendChild(item);
+                    isFrm ? frm.appendChild(item) : elem.appendChild(item);
                     Util.setEvent(that.container, item, opt, dr.callback);
 
                     that.items[key] = {key: key, item: item, func: dr.callback};
                 }
-                elem.appendChild(frm);
-                
+                if (isFrm) {
+                    elem.appendChild(frm);
+                }
                 for (var j = 0; j < items.length; j++) {
                     var li = items[j];                    
                     if (li.childNodes[0].offsetHeight > opt.maxHeight) {

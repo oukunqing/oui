@@ -4914,6 +4914,7 @@
         getCookie: getCookie,
         delCookie: delCookie,
         getImgRealSize: getImgRealSize,
+        getImageSize: getImgSize,
         getImgSize: getImgSize,
         getPicSize: getImgSize,
         fillOption: fillOption,
