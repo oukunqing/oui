@@ -1059,12 +1059,15 @@
 
         return {
             toCRC16: function (s, isReverse, isHex) {
+                s = ('' + s).toString();
                 return toHex(CRC16(isHex ? strToHexByte(s) : strToByte(s), isReverse), 4);
             },
             toModbusCRC16: function (s, isReverse) {
+                s = ('' + s).toString();
                 return toHex(CRC16(strToHexByte(s), isReverse), 4);
             },
             toHexCRC16: function (s, isReverse) {
+                s = ('' + s).toString();
                 return toHex(CRC16(strToHexByte(s), isReverse), 4);
             }
         };
@@ -2286,7 +2289,7 @@
         join: function () {
             return this.toString();
         },
-        toTimeData: function (secondDecimalLen) {
+        toTimeData: function (secondDecimalLen, hideDays) {
             if (!$.isNumber(secondDecimalLen) || secondDecimalLen <= 0) {
                 secondDecimalLen = 0;
             }
@@ -2295,6 +2298,10 @@
                 h = parseInt((seconds - d * 86400) / 3600, 10),
                 m = parseInt((seconds - d * 86400 - h * 3600) / 60, 10),
                 s = (seconds % 60).round(secondDecimalLen);
+            if (hideDays) {
+                h += d * 24;
+                d = 0;
+            }
             return { days: d, hours: h, minutes: m, seconds: s, d: d, h: h, m: m, s: s };
         },
         toTimeStr: function (secondDecimalLen, daysUnit) {
@@ -2306,6 +2313,28 @@
                     data.s.padLeft(2)
                 ];
             return (data.d ? data.d + (daysUnit || 'days') + ' ' : '') + time.join(':');
+        },
+        toDurationStr: function(hideDays, units) {
+            if ($.isUndefined(hideDays)) {
+                hideDays = true;
+            }
+            var seconds = this,
+                data = seconds.toTimeData(0, hideDays),
+                time = [
+                    data.d,
+                    data.h,
+                    data.m,
+                    data.s
+                ],
+                html = [],
+                unit = units || ['天', '小时', '分钟', '秒'];
+
+            for(var i = 0; i < time.length; i++) {
+                if (time[i]) {
+                    html.push(time[i] + unit[i]);
+                }
+            }
+            return html.join('');
         },
         formatTo: function (fmt) {
             fmt = (!$.isString(fmt, true) ? '{0}' : fmt).trim();
@@ -2353,7 +2382,7 @@
                 H = t.getHours(), h = H > 12 ? H - 12 : H === 0 ? 12 : H,
                 m = t.getMinutes(), s = t.getSeconds(), f = t.getMilliseconds(),
                 d = {
-                    yyyy: y, M: M, d: d, H: H, h: h, m: m, s: s, MM: M.padLeft(2), dd: d.padLeft(2),
+                    yyyy: y, yy: y % 100, M: M, d: d, H: H, h: h, m: m, s: s, MM: M.padLeft(2), dd: d.padLeft(2),
                     HH: H.padLeft(2), mm: m.padLeft(2), ss: s.padLeft(2), hh: h.padLeft(2), fff: f.padLeft(3),
                 };
             //return (formatString || 'yyyy-MM-dd HH:mm:ss').replace(p, '{$1}').format(d);
@@ -4501,7 +4530,8 @@
                 return this;
             }
             if ($.isNumber(list)) {
-                valUnit = stepVal;
+                valUnit = curVal;
+                curVal = stepVal;
                 stepVal = maxVal;
                 maxVal = minVal;
                 minVal = list;
@@ -5207,6 +5237,9 @@
             }
             var arr = isName(selector) ? $N(selector) : $QA(selector);
             if (arr) {
+                if ($.isNumber(values)) {
+                    values = values.toString();
+                }
                 if ($.isString(values)) {
                     values = values.split(/[|,]/);
                 }

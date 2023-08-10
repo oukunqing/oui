@@ -1428,3 +1428,8 @@ var ids = [
 ];
 
 console.log(ids.sort((a,b) => a-b).join(','));
+
+console.log(new Date().format(''));
+console.log(new Date().addSeconds(10).format(''));
+
+console.log((100/1000).round(3));
