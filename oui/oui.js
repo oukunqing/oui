@@ -2312,12 +2312,9 @@
                     data.m.padLeft(2),
                     data.s.padLeft(2)
                 ];
-            return (data.d ? data.d + (daysUnit || 'days') + ' ' : '') + time.join(':');
+            return (data.d ? data.d + (daysUnit || '天') + ' ' : '') + time.join(':');
         },
         toDurationStr: function(hideDays, units) {
-            if ($.isUndefined(hideDays)) {
-                hideDays = true;
-            }
             var seconds = this,
                 data = seconds.toTimeData(0, hideDays),
                 time = [

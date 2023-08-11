@@ -1432,4 +1432,18 @@ console.log(ids.sort((a,b) => a-b).join(','));
 console.log(new Date().format(''));
 console.log(new Date().addSeconds(10).format(''));
 
-console.log((100/1000).round(3));
+console.log((86400).toTimeStr());
+
+console.log((86400).toDurationStr());
+
+console.log(parseInt(250/100).padLeft(2) + ':' + 1250%60);
+
+
+function filter(dr){
+
+    delete dr.id;
+}
+
+var dr = {id:123,name:'abc',code:'acc'};
+filter(dr);
+console.log(dr);
