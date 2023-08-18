@@ -1447,3 +1447,17 @@ function filter(dr){
 var dr = {id:123,name:'abc',code:'acc'};
 filter(dr);
 console.log(dr);
+
+
+console.log('2023-06-21 15:55:01'.toDate().format('ts', 10));
+console.log('2023-06-21 00:00:01'.toDate().format('ts', 10));
+console.log('2023-06-22 00:00:01'.toDate().format('ts', 10));
+
+var ts = '2023-06-21 3:55:01'.toDate().format('ts', 10);
+ts = parseInt(ts, 10) + 28800;
+var ms = ts / 60;
+console.log('ms:', ms);
+ms %= 1440;
+console.log('ms:', ms);
+console.log('ms:', parseInt(ms/60,10), ms %60);
+console.log();
