@@ -1235,7 +1235,9 @@
                 url: '', data: null, callback: null,
                 dataType: 'JSON', getJSON: false, param: null,
                 //返回除异常信息外的所有数据（由调用者完全处理数据结果）
-                receiveAll: false
+                receiveAll: false,
+                //指定的表示状态的字段，默认字段是：result
+                resultField: 'result'
             }, options),
                 config = {
                     type: opt.type, async: opt.async !== false,
@@ -1247,13 +1249,13 @@
                     },
                     success: function (data, textStatus, jqXHR) {
                         if ($.isDebug()) {
-                            console.log('data: ', data);
+                            console.log('req: ', opt.data, ', rsp: ', data);
                         }
                         var callback = opt.callback || opt.success;
                         if ($.isFunction(callback)) {
                             if (opt.getJSON || opt.getJson) {
                                 callback(data, opt.param, textStatus, jqXHR);
-                            } else if (opt.receiveAll || 1 === data.result || 1 === data.Result) {
+                            } else if (opt.receiveAll || (opt.resultField && 1 === data[opt.resultField])) {
                                 callback(data, opt.param);
                             } else {
                                 showAjaxFail(data, textStatus, jqXHR);
