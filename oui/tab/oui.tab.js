@@ -102,6 +102,12 @@
 
             return opt;
         },
+        checkOptionItem: function(dr) {
+            if (dr === null || $.isUndefinedOrNull(dr.id) || $.isUndefinedOrNull(dr.name)) {
+                return false;
+            }
+            return true;
+        },
         initialTab: function(t, opt) {
             t.left = Util.buildSwitch(t, opt, 'left');
             Util.scrollAction(t, t.left, 'left');
@@ -1056,6 +1062,10 @@
                     show: false
                 }, options),
                 isShow = $.isBoolean(show, false);
+
+            if (!Util.checkOptionItem(opt)) {
+                return this;
+            }
 
             opt.closeAble = $.keywordOverload(opt, ['closeAble', 'close']);
 

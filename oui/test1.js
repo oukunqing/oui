@@ -1461,3 +1461,8 @@ ms %= 1440;
 console.log('ms:', ms);
 console.log('ms:', parseInt(ms/60,10), ms %60);
 console.log();
+
+
+var obj2 = {};
+
+console.log('obj2:', obj2, obj2.length);
