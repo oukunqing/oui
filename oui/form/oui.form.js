@@ -12,13 +12,13 @@
     'use strict';
 
     var customAttrs = {
-        DATE_FORMAT: 'date-format,dateformat',
+        DATE_FORMAT: 'data-time,data-timeformat,date-format,dateformat',
         DATA_FORMAT: 'data-format,dataformat,value-format,valueformat',
         OLD_VALUE: 'old-value,oldvalue',
         DATA_TYPE: 'data-type,datatype,value-type,valuetype',
-        ENCODE: 'encode,encodeHtml,encodeHTML', 
-        DECODE: 'decode,decodeHtml,decodeHTML',
-        FILTER: 'filter,filterHtml,filterHTML',
+        ENCODE: 'data-encode,encode,encode-html,encodeHtml,encodeHTML', 
+        DECODE: 'data-decode,decode,decode-html,decodeHtml,decodeHTML',
+        FILTER: 'data-filter,filter,filter-html,filterHtml,filterHTML',
         DATA_SHOW: 'data-show,data-auto',
         MIN_VALUE: 'min-value,minvalue,minValue,min-val',
         MAX_VALUE: 'max-value,maxvalue,maxValue,max-val',
@@ -143,6 +143,9 @@
                         return labels;
                     },
                     getKey: function (key, configs) {
+                        if (!$.isString(key)) {
+                            key = '';
+                        }
                         if (!$.isObject(configs)) {
                             configs = op.configs;
                         }
@@ -459,7 +462,8 @@
                             md5: false,                 //是否MD5加密
                             encode: false,              //是否进行html标记编码
                             decode: false,              //是否进行html标记解码
-                            filter: false,              //是否过滤html标记
+                            //为加强数据安全，默认过滤HTML标记
+                            filter: true,              //是否过滤html标记
                             minLength: '',              //字节最小长度
                             maxLength: '',              //字符最大长度
                             pattern: '',                //正则表达式（内部验证）
@@ -571,9 +575,9 @@
                         if (!isArray && ('' + val).trim() !== '') {
                             var dtfmt = $.getAttribute(element, customAttrs.DATE_FORMAT);
                             if (dtfmt && $.isDate(val)) {
-                                val = val.format(dtfmt === 'true' ? '' : dtfmt);
+                                val = val.format($.isTrue(dtfmt) ? '' : dtfmt || '');
                             } else if (dtfmt && $.isDate(val.toDate(true))) {
-                                val = val.toDateString(dtfmt === 'true' ? '' : dtfmt);
+                                val = val.toDateString($.isTrue(dtfmt) ? '' : dtfmt || '');
                             } else {
                                 var fmt = $.getAttribute(element, customAttrs.DATA_FORMAT);
                                 if (fmt) {
@@ -833,7 +837,7 @@
                         if (fc.isSingle || isTable) {
                             op.setValue(obj, value, fc, isArray);
                         } else {
-                            var tmp = document.getElementsByName(fc.name), vals = isArray ? value : value.split(',');
+                            var tmp = document.getElementsByName(fc.name), vals = isArray ? value : value.toString().split(',');
                             for (var j = 0, c = arr.length; j < c; j++) {
                                 if (!$.isUndefined(vals[j])) {
                                     op.setValue(arr[j], vals[j], fc, false);

@@ -1163,6 +1163,9 @@
     $.extend($, {
         base64: {
             encode: function (s) {
+                if (hex) {
+                    s = s.toHex();
+                }
                 var out = '', i = 0, len = s.length;
                 var c1, c2, c3;
                 while (i < len) {
