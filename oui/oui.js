@@ -1163,9 +1163,6 @@
     $.extend($, {
         base64: {
             encode: function (s) {
-                if (hex) {
-                    s = s.toHex();
-                }
                 var out = '', i = 0, len = s.length;
                 var c1, c2, c3;
                 while (i < len) {
@@ -5214,6 +5211,8 @@
                     case 1: checked = true; break;
                     //Reverse
                     case 2: checked = !obj.checked; break;
+                    //Restore
+                    case 3: checked = $.getAttribute(obj, 'dc') === '1'; break;
                     //Default
                     default: checked = true; break;
                 }
@@ -5222,17 +5221,23 @@
         };
 
     $.extendNative($, {
-        setChecked: function (selector, action, values) {
+        setChecked: function (selector, action, values, initial) {
             if ($.isArrayLike(selector)) {
                 selector = $.makeArray(selector);
             }
             if ($.isArray(selector)) {
                 for (var i = 0, c = selector.length; i < c; i++) {
                     selector[i].checked = _checked(action, selector[i]);
+                    if (initial) {
+                        selector[i].setAttribute('dc', selector[i].checked ? 1 : 0);
+                    }
                 }
                 return this;
             } else if ($.isElement(selector)) {
                 selector.checked = _checked(action, selector);
+                if (initial) {
+                    selector.setAttribute('dc', selector.checked ? 1 : 0);
+                }
                 return this;
             }
             var arr = isName(selector) ? $N(selector) : $QA(selector);
@@ -5256,6 +5261,9 @@
                 for (var i = 0, c = arr.length; i < c; i++) {
                     var obj = arr[i];
                     obj.checked = _checked(action, obj);
+                    if (initial) {
+                        obj.setAttribute('dc', obj.checked ? 1 : 0);
+                    }
                 }
             }
             return this;
