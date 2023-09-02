@@ -371,7 +371,7 @@
                     that.indexs[chb.id] = i;
                 }
 
-                var btns = document.querySelectorAll('#' + Config.IdPrefix + opt.id + ' .oui-ddl-btn-group button');
+                var btns = document.querySelectorAll('#' + Config.IdPrefix + opt.id + ' .oui-ddl-oper button');
                 for (var i = 0; i < btns.length; i++) {
                     btns[i].onclick = function() {
                         var ac = $.getAttribute(this, 'ac');
