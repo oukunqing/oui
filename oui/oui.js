@@ -3743,11 +3743,11 @@
             return false;
         },
         setClassValue = function (cur, css, action) {
-            if ('add' === action) {
+            if ('add' === action || action === true || action === 1) {
                 if (cur.indexOf(css.space()) < 0) {
                     cur += css + ' ';
                 }
-            } else if ('remove' === action) {
+            } else if ('remove' === action || action === false || action === 0) {
                 while (cur.indexOf(css.space()) > -1) {
                     cur = cur.replace(css.space(), ' ');
                 }

@@ -1,0 +1,175 @@
+.oui-ddl {
+	
+}
+.oui-ddl-edge {
+
+}
+.oui-ddl-txt {
+	cursor: default;
+	margin: 0;
+	border-right: none 0;
+	box-sizing: border-box;
+	background:#fff url('ddl_arrow_down.png?1') no-repeat right center;
+}
+.oui-ddl-txt-cur {
+	border-color: #66afe9;
+    box-shadow: 4px 4px 4px 4px rgba(102,175,233,.32);
+}
+.oui-ddl-panel {
+	position:absolute;
+	z-index:999999;
+	display:block;
+	overflow:auto;
+	border:solid 1px #ccc;
+    box-shadow: 0 2px 3px 0 rgba(0,0,0,.32);
+	box-sizing: border-box;
+	padding: 0;
+	margin: 0;
+	min-width: 120px;
+	max-width:500px;
+	min-height: 30px;
+	background:#fff;
+	border-bottom-left-radius: 4px;
+	border-bottom-right-radius: 4px;
+}
+li.oui-ddl-item {
+	display: block;
+	margin: 1px 1px 0;
+	padding: 0;
+	overflow: hidden;
+	height: 29px;
+	border: none 0;
+}
+li.oui-ddl-sep {
+	border: none;
+	padding: 0;
+	margin: 5px 1px;
+	background: #e5e5e5;
+	height: 1px;
+	line-height: 1px;
+	overflow: hidden;
+}
+li.oui-ddl-head {
+	color: #777;
+	padding: 0 10px;
+	font-size: 12px;
+	height: 24px;
+    line-height: 24px;
+    white-space: nowrap;
+}
+label.oui-ddl-label {
+    font-size: 14px;
+    height: 29px;;
+    line-height: 29px;
+    padding: 0 9px;
+    margin: 0;
+    display: block;
+    box-sizing: border-box;
+    border: none 0;
+    font-weight: normal;
+}
+label.oui-ddl-label span {
+	margin: 0 0 0 4px;
+}
+
+label.oui-ddl-label span.del {
+    text-decoration:line-through;
+}
+
+label.oui-ddl-label-border {	
+    border: solid 1px #ddd;
+    border-radius: 5px;
+    padding: 0 5px;
+    margin: 0 0 5px 0;
+    line-height: 27px;
+}
+label.oui-ddl-cur {
+	background: #99bbe8;
+	/*Chrome*/
+	background: #1967d2;
+	color: #fff;
+}
+/*Edge*/
+.oui-ddl-edge label.oui-ddl-cur {
+	background: #767676;
+}
+label.oui-ddl-label:hover {
+	background: #d6e3f3;
+	color: #000;
+}
+input.oui-ddl-chb {
+	float: left;
+	display: inline-block;
+    border: solid 1px #ddd;
+    width: 13px;
+    height: 13px;
+    margin: 8px 0 0 0;
+}
+label.oui-ddl-label-border input.oui-ddl-chb {
+    margin: 7px 0 0 0;
+}
+ul.oui-ddl-box {
+	display: block;
+	overflow: hidden;
+	clear: both;
+}
+ul.oui-ddl-flow,ul.oui-ddl-grid {
+	margin: 3px;
+}
+ul.oui-ddl-flow li.oui-ddl-item, ul.oui-ddl-grid li.oui-ddl-item {
+	float:left;
+	margin: 3px;
+	border: none 0;	
+}
+ul.oui-ddl-flow label.oui-ddl-label,ul.oui-ddl-grid label.oui-ddl-label {
+	padding: 0 5px;
+}
+ul.oui-ddl-flow label.oui-ddl-cur,ul.oui-ddl-grid label.oui-ddl-cur {
+	color: #f00;
+	background: none;
+}
+
+.oui-ddl-panel .oui-ddl-oper {
+	border: none;
+	border-top: solid 1px #eee;
+	box-sizing: border-box;
+	margin: 1px 1px 0;
+	padding: 5px ;
+	clear: both;
+	display: block;
+	overflow: hidden;
+	text-align: center;
+}
+.oui-ddl-panel .oui-ddl-oper .btn-group {
+	padding:0;
+	border: none 0;
+}
+.oui-ddl-panel button.btn {
+	border:solid 1px #ccc;
+	box-sizing: border-box;
+	height: 26px;
+	line-height: 18px;
+	padding: 3px 4px;
+	margin: 0;
+	font-size: 14px;
+	font-family: Arial,宋体;
+}
+.oui-ddl-panel button.btn:hover {
+	background: #e6e6e6;
+	border: solid 1px #adadad;
+}
+
+.oui-ddl-panel .btn-group .btn-primary {
+	border: solid 1px #2e6da4;
+	background: #337ab7;
+	border-radius: 4px;
+	box-sizing: border-box;
+}
+
+.oui-ddl-panel .btn-group .btn-primary:hover {
+	background: #286090;
+	border: solid 1px #204d74;
+}
+.oui-ddl-panel button.btn-ok {
+	padding: 0 10px;
+}

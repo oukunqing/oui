@@ -1,4 +1,5 @@
 require('./oui');
+require('./form/oui.form');
 
 //  118.25.125.18   debian 9
 
@@ -1467,3 +1468,5 @@ var list = [123,2345];
 
 list = list.concat([666,777]);
 console.log(list);
+
+console.log($.md5('Nbsdsdk123!'));

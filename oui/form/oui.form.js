@@ -16,7 +16,7 @@
         DATA_FORMAT: 'data-format,dataformat,value-format,valueformat',
         OLD_VALUE: 'old-value,oldvalue',
         DATA_TYPE: 'data-type,datatype,value-type,valuetype',
-        ENCODE: 'data-encode,encode,encode-html,encodeHtml,encodeHTML', 
+        ENCODE: 'data-encode,encode,encode-html,encodeHtml,encodeHTML',
         DECODE: 'data-decode,decode,decode-html,decodeHtml,decodeHTML',
         FILTER: 'data-filter,filter,filter-html,filterHtml,filterHTML',
         DATA_SHOW: 'data-show,data-auto',
@@ -382,7 +382,7 @@
                     loadCssCode: function (code) {
                         var head = document.getElementsByTagName('head')[0];
                         if (document.getElementById(highLight.styleId) != null || !head) { return false; }
-                        
+
                         var css = '.' + highLight.className + '{' + (code || highLight.cssText || '') + '}',
                             style = document.createElement('style');
 
@@ -549,13 +549,13 @@
                         //记录是否被创建事件，防止重复创建
                         element.isSetEvent = 1;
                     },
-                    encodeHtml: function(val, encode) {
+                    encodeHtml: function (val, encode) {
                         if ($.isString(val, true) && encode) {
                             return val.encodeHtml();
                         }
                         return val;
                     },
-                    decodeHtml: function(val, decode) {
+                    decodeHtml: function (val, decode) {
                         if ($.isString(val, true) && decode) {
                             return val.decodeHtml();
                         }
@@ -933,7 +933,259 @@
             return null;
         };
 
+    $.extend({
+        form: {
+            isElement: isElement,
+            setFormVerify: setFormVerify,
+            getFormData: getFormData,
+            getFormParam: getFormParam,
+            setFormData: setFormData,
+            getTableData: getTableData,
+            setTableData: setTableData,
+            filterData: filterData,
+            findElement: findElement,
+            validate: function (element) {
+                var elems = $.isArray(element) ? element : [element];
+                for (var i = 0; i < elems.length; i++) {
+                    var elem = $.toElement(element);
+                    if ($.isElement(elem) && $.isFunction(elem.validate)) {
+                        elem.validate();
+                    }
+                }
+            },
+            //还原输入框原始值，原始值保存在输入框 自定义属性 old-value 中
+            restoreValue: function (elements) {
+                var elems = $.isArray(elements) ? elements : [elements];
+                for (var i = 0; i < elems.length; i++) {
+                    var elem = $.toElement(elems[i]);
+                    if ($.isElement(elem)) {
+                        elem.value = $.isValue($.getAttribute(elem, customAttrs.OLD_VALUE), '');
+                    }
+                }
+                return this;
+            },
+            //把数组中的数据分别赋值给（ID)输入框和（Name）输入框
+            //数组格式：[{"Id":1,"Name":"名称1"},{"Id":2,"Name":"名称2"}]
+            setIdAndName: function (datas, idElem, nameElem) {
+                idElem = $.toElement(idElem);
+                nameElem = $.toElement(nameElem);
+                var ids = [], names = [];
+                for (var i = 0; i < datas.length; i++) {
+                    var dr = datas[i];
+                    ids.push($.getValue(dr, ['Id', 'id']));
+                    names.push($.getValue(dr, ['Name', 'name']));
+                }
+                idElem.value = ids.join(',');
+                nameElem.value = names.join(',');
+                $.setAttribute(idElem, 'old-value', idElem.value);
+                $.setAttribute(nameElem, 'old-value', nameElem.value);
+                return this;
+            }
+        }
+    });
 
+    var showAjaxError = function (jqXHR, textStatus, errorThrown) {
+        if (0 === jqXHR.status) { return false; }
+        //jquery ajax 中出现的12031错误状态码的原因没有查到，如果有出现，暂时先屏蔽
+        if (12031 === jqXHR.status || jqXHR.status > 12000) {
+            console.log(jqXHR.status, textStatus, errorThrown);
+            return false;
+        }
+
+        var html = [
+            '应用程序服务端异常，详细信息如下：',
+            'status: ' + jqXHR.status,
+            'textStatus: ' + textStatus,
+            'errorThrown: ' + errorThrown
+        ];
+        //指定对话框ID appServerError，防止重复出现多个对话框
+        $.alert(html.join('<br />'), '服务异常', { id: 'appServerError', icon: 'error', copyAble: true });
+    },
+        showAjaxFail = function (data, textStatus, jqXHR) {
+            var msg = data.msg || data.Msg || data.message || data.Message || '',
+                error = data.error || data.Error || '';
+
+            //定制功能，如果页面上有定制了window.showAjaxFailAlert函数，并且错误信息是noauth（未登录）
+            //则不直接弹出提示信息，而且跳转到定制函数中处理
+            if (error.toLowerCase() === 'noauth' && $.isFunction(window.showAjaxFailAlert)) {
+                window.showAjaxFailAlert(data, msg, error);
+                return false;
+            }
+
+            var html = [msg];
+            if (error) {
+                html.push('可能的原因：');
+                html.push(error);
+            }
+            var dialogId = data.dialogId || data.dialog || '';
+            var callback = null;
+            if ($.isFunction(window.showAjaxFail)) {
+                callback = function () {
+                    window.showAjaxFail(data);
+                };
+            }
+            $.alert(html.join('<br />'), '提示信息', { icon: 'warning', copyAble: true, id: dialogId, callback: callback });
+        };
+
+    $.extend($, {
+        ajaxRequest: function (options) {
+            if (arguments.length >= 3) {
+                options = {
+                    url: arguments[0], data: arguments[1], callback: arguments[2],
+                    dataType: 'JSON', getJSON: true, param: arguments[3] || null
+                };
+            }
+            var opt = $.extend({
+                type: 'POST', async: true,
+                url: '', data: null, callback: null,
+                dataType: 'JSON', getJSON: false, param: null,
+                //返回除异常信息外的所有数据（由调用者完全处理数据结果）
+                receiveAll: false,
+                //指定的表示状态的字段，默认字段是：result
+                resultField: 'result'
+            }, options),
+                config = {
+                    type: opt.type, async: opt.async !== false,
+                    dataType: opt.dataType,   //xml,html,script,json,jsonp,text
+                    //contentType: "application/json",
+                    url: opt.url, data: opt.data,
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        showAjaxError(jqXHR, textStatus, errorThrown);
+                    },
+                    success: function (data, textStatus, jqXHR) {
+                        if ($.isDebug()) {
+                            console.log('req: ', opt.data, ', rsp: ', data);
+                        }
+                        var callback = opt.callback || opt.success;
+                        if ($.isFunction(callback)) {
+                            if (opt.getJSON || opt.getJson) {
+                                callback(data, opt.param, textStatus, jqXHR);
+                            } else if (opt.receiveAll || (opt.resultField && 1 === data[opt.resultField])) {
+                                callback(data, opt.param);
+                            } else {
+                                showAjaxFail(data, textStatus, jqXHR);
+                            }
+                        }
+                        if ($.isFunction(opt.finallyCallback)) { opt.finallyCallback(); }
+                    },
+                    complete: function (jqXHR, status) {
+                        jqXHR = null;
+                        if (typeof CollectGarbage !== 'undefined' && $.isFunction(CollectGarbage)) { CollectGarbage(); }
+                    }
+                };
+            if (config.datatype === 'jsonp') {
+                config.jsonp = 'callback';
+                config.jsonpCallback = cfg.jsonpCallback || 'flightHandler';
+            }
+            $.ajax(config);
+        }
+    });
+
+    $.extend($, {
+        formValidate: function (controls, options) {
+            var $f = $.form, element = $f.findElement(controls), len = $(this).length;
+
+            if (!$.isObject(options) || !$f.isElement(element)) {
+                $.alert('表单验证参数错误');
+                return $(this);
+            }
+
+            var id = element.id || '',
+                table = $f.findElement(controls, 'TABLE'),
+                handler = $f.findElement(controls, 'INPUT:submit|BUTTON:submit|INPUT:button|BUTTON'),
+                callback = options.submitHandler || options.submit,
+                //debounce = options.debounce || false,       //是否防抖节流，默认不启用
+                debounce = $.isBoolean(options.debounce, true),       //是否防抖节流，默认启用
+                delay = options.delay || 320,               //延时时长，默认320毫秒
+                timeLimit = options.timeLimit || 5000,      //防抖时限，默认5000毫秒
+                isForm = element.tagName === 'FORM',
+                isTable = $f.isElement(table) && table.tagName === 'TABLE',
+                formData = $f.filterData(options),
+                tableDatas = options.tableDatas,
+                elements = [], tableElements = [],
+                complete = options.complete;
+
+            //1. 赋值（不验证规则）
+            if ($.isObject(formData)) {
+                elements = $f.setFormData(element, options, formData);
+            }
+            if ($.isObject(tableDatas)) {
+                tableElements = $f.setTableData(table, options, tableDatas);
+            }
+            //2.设置验证规则
+            elements = $f.setFormVerify(element, options, elements);
+
+            //设置定时器，防抖
+            var timer = null, lastSubmit = undefined,
+                isFirst = function () {
+                    var ts = new Date().getTime();
+                    //上次点击若超过5秒钟，则不启用延时
+                    if (!lastSubmit || (ts - lastSubmit > timeLimit)) {
+                        return lastSubmit = ts, true;
+                    }
+                    return false;
+                },
+                delayCallback = function (func, formData, tableData) {
+                    if (isFirst()) {
+                        return func(formData, tableData), false;
+                    }
+                    if (timer) {
+                        window.clearTimeout(timer);
+                    }
+                    return timer = window.setTimeout(function () {
+                        func(formData, tableData);
+                    }, delay), false;
+                };
+
+            //3.创建取值事件
+            if ($.isFunction(callback)) {
+                if (isForm) {
+                    if (typeof $.OUI === 'boolean') {
+                        element.onsubmit = function () {
+                            var formData = $f.getFormData(element, options, elements);
+                            return debounce ? delayCallback(callback, formData) : callback(formData), false;
+                        };
+                    } else {
+                        $(this).submit(function () {
+                            var formData = $f.getFormData(element, options, elements);
+                            return debounce ? delayCallback(callback, formData) : callback(formData), false;
+                        });
+                    }
+                } else if (handler) {
+                    $(handler).click(function () {
+                        var formData = $f.getFormData(element, options, elements);
+                        if (isTable) {
+                            var tableData = !formData ? [] : $f.getTableData(table, options);
+                            return debounce ? delayCallback(callback, formData, tableData) : callback(formData, tableData), false;
+                        } else {
+                            return debounce ? delayCallback(callback, formData) : callback(formData), false;
+                        }
+                    });
+                }
+            }
+
+            //4.设置完成，返回控件列表
+            if ($.isFunction(complete)) {
+                complete(elements, tableElements);
+            }
+            return $;
+        }
+    });
+
+    // formValidate
+    $.extend($.fn, {
+        formValidate: function (options) {
+            $.formValidate($(this), options);
+            return $(this);
+        }
+    });
+
+}(OUI);
+
+/*
+$.md5
+*/
+!function ($) {
     /*
         MD5算法摘取自网络
     */
@@ -1123,265 +1375,19 @@
     }
 
     $.extend({
-        form: {
-            isElement: isElement,
-            setFormVerify: setFormVerify,
-            getFormData: getFormData,
-            getFormParam: getFormParam,
-            setFormData: setFormData,
-            getTableData: getTableData,
-            setTableData: setTableData,
-            filterData: filterData,
-            findElement: findElement,
-            validate: function (element) {
-                var elems = $.isArray(element) ? element : [element];
-                for (var i = 0; i < elems.length; i++) {
-                    var elem = $.toElement(element);
-                    if ($.isElement(elem) && $.isFunction(elem.validate)) {
-                        elem.validate();
-                    }
-                }
-            }
-        },
         md5: md5
     });
 
     $.extendNative(String.prototype, {
-        md5: function(shorter) {
+        md5: function (shorter) {
             return $.md5(this, shorter);
         }
     });
-
-    $.extend($.form, {
-        //还原输入框原始值，原始值保存在输入框 自定义属性 old-value 中
-        restoreValue: function (elements) {
-            var elems = $.isArray(elements) ? elements : [elements];
-            for (var i = 0; i < elems.length; i++) {
-                var elem = $.toElement(elems[i]);
-                if ($.isElement(elem)) {
-                    elem.value = $.isValue($.getAttribute(elem, customAttrs.OLD_VALUE), '');
-                }
-            }
-            return this;
-        },
-        //把数组中的数据分别赋值给（ID)输入框和（Name）输入框
-        //数组格式：[{"Id":1,"Name":"名称1"},{"Id":2,"Name":"名称2"}]
-        setIdAndName: function (datas, idElem, nameElem) {
-            idElem = $.toElement(idElem);
-            nameElem = $.toElement(nameElem);
-            var ids = [], names = [];
-            for (var i = 0; i < datas.length; i++) {
-                var dr = datas[i];
-                ids.push($.getValue(dr, ['Id', 'id']));
-                names.push($.getValue(dr, ['Name', 'name']));
-            }
-            idElem.value = ids.join(',');
-            nameElem.value = names.join(',');
-            $.setAttribute(idElem, 'old-value', idElem.value);
-            $.setAttribute(nameElem, 'old-value', nameElem.value);
-            return this;
-        }
-    });
-
-    var showAjaxError = function (jqXHR, textStatus, errorThrown) {
-        if (0 === jqXHR.status) { return false; }
-        //jquery ajax 中出现的12031错误状态码的原因没有查到，如果有出现，暂时先屏蔽
-        if (12031 === jqXHR.status || jqXHR.status > 12000) {
-            console.log(jqXHR.status, textStatus, errorThrown);
-            return false;
-        }
-
-        var html = [
-            '应用程序服务端异常，详细信息如下：',
-            'status: ' + jqXHR.status,
-            'textStatus: ' + textStatus,
-            'errorThrown: ' + errorThrown
-        ];
-        //指定对话框ID appServerError，防止重复出现多个对话框
-        $.alert(html.join('<br />'), '服务异常', { id: 'appServerError', icon: 'error', copyAble: true });
-    },
-        showAjaxFail = function (data, textStatus, jqXHR) {
-            var msg = data.msg || data.Msg || data.message || data.Message || '',
-                error = data.error || data.Error || '';
-
-            //定制功能，如果页面上有定制了window.showAjaxFailAlert函数，并且错误信息是noauth（未登录）
-            //则不直接弹出提示信息，而且跳转到定制函数中处理
-            if (error.toLowerCase() === 'noauth' && $.isFunction(window.showAjaxFailAlert)) {
-                window.showAjaxFailAlert(data, msg, error);
-                return false;
-            }
-
-            var html = [msg];
-            if (error) {
-                html.push('可能的原因：');
-                html.push(error);
-            }
-            var dialogId = data.dialogId || data.dialog || '';
-            var callback = null;
-            if ($.isFunction(window.showAjaxFail)) {
-                callback = function () {
-                    window.showAjaxFail(data);
-                };
-            }
-            $.alert(html.join('<br />'), '提示信息', { icon: 'warning', copyAble: true, id: dialogId, callback: callback });
-        };
-
-    $.extend($, {
-        ajaxRequest: function (options) {
-            if (arguments.length >= 3) {
-                options = {
-                    url: arguments[0], data: arguments[1], callback: arguments[2],
-                    dataType: 'JSON', getJSON: true, param: arguments[3] || null
-                };
-            }
-            var opt = $.extend({
-                type: 'POST', async: true,
-                url: '', data: null, callback: null,
-                dataType: 'JSON', getJSON: false, param: null,
-                //返回除异常信息外的所有数据（由调用者完全处理数据结果）
-                receiveAll: false,
-                //指定的表示状态的字段，默认字段是：result
-                resultField: 'result'
-            }, options),
-                config = {
-                    type: opt.type, async: opt.async !== false,
-                    dataType: opt.dataType,   //xml,html,script,json,jsonp,text
-                    //contentType: "application/json",
-                    url: opt.url, data: opt.data,
-                    error: function (jqXHR, textStatus, errorThrown) {
-                        showAjaxError(jqXHR, textStatus, errorThrown);
-                    },
-                    success: function (data, textStatus, jqXHR) {
-                        if ($.isDebug()) {
-                            console.log('req: ', opt.data, ', rsp: ', data);
-                        }
-                        var callback = opt.callback || opt.success;
-                        if ($.isFunction(callback)) {
-                            if (opt.getJSON || opt.getJson) {
-                                callback(data, opt.param, textStatus, jqXHR);
-                            } else if (opt.receiveAll || (opt.resultField && 1 === data[opt.resultField])) {
-                                callback(data, opt.param);
-                            } else {
-                                showAjaxFail(data, textStatus, jqXHR);
-                            }
-                        }
-                        if ($.isFunction(opt.finallyCallback)) { opt.finallyCallback(); }
-                    },
-                    complete: function (jqXHR, status) {
-                        jqXHR = null;
-                        if (typeof CollectGarbage !== 'undefined' && $.isFunction(CollectGarbage)) { CollectGarbage(); }
-                    }
-                };
-            if (config.datatype === 'jsonp') {
-                config.jsonp = 'callback';
-                config.jsonpCallback = cfg.jsonpCallback || 'flightHandler';
-            }
-            $.ajax(config);
-        }
-    });
-
-
-    $.extend($, {
-        formValidate: function (controls, options) {
-            var $f = $.form, element = $f.findElement(controls), len = $(this).length;
-
-            if (!$.isObject(options) || !$f.isElement(element)) {
-                $.alert('表单验证参数错误');
-                return $(this);
-            }
-
-            var id = element.id || '',
-                table = $f.findElement(controls, 'TABLE'),
-                handler = $f.findElement(controls, 'INPUT:submit|BUTTON:submit|INPUT:button|BUTTON'),
-                callback = options.submitHandler || options.submit,
-                //debounce = options.debounce || false,       //是否防抖节流，默认不启用
-                debounce = $.isBoolean(options.debounce, true),       //是否防抖节流，默认启用
-                delay = options.delay || 320,               //延时时长，默认320毫秒
-                timeLimit = options.timeLimit || 5000,      //防抖时限，默认5000毫秒
-                isForm = element.tagName === 'FORM',
-                isTable = $f.isElement(table) && table.tagName === 'TABLE',
-                formData = $f.filterData(options),
-                tableDatas = options.tableDatas,
-                elements = [], tableElements = [],
-                complete = options.complete;
-
-            //1. 赋值（不验证规则）
-            if ($.isObject(formData)) {
-                elements = $f.setFormData(element, options, formData);
-            }
-            if ($.isObject(tableDatas)) {
-                tableElements = $f.setTableData(table, options, tableDatas);
-            }
-            //2.设置验证规则
-            elements = $f.setFormVerify(element, options, elements);
-
-            //设置定时器，防抖
-            var timer = null, lastSubmit = undefined,
-                isFirst = function () {
-                    var ts = new Date().getTime();
-                    //上次点击若超过5秒钟，则不启用延时
-                    if (!lastSubmit || (ts - lastSubmit > timeLimit)) {
-                        return lastSubmit = ts, true;
-                    }
-                    return false;
-                },
-                delayCallback = function (func, formData, tableData) {
-                    if (isFirst()) {
-                        return func(formData, tableData), false;
-                    }
-                    if (timer) {
-                        window.clearTimeout(timer);
-                    }
-                    return timer = window.setTimeout(function () {
-                        func(formData, tableData);
-                    }, delay), false;
-                };
-
-            //3.创建取值事件
-            if ($.isFunction(callback)) {
-                if (isForm) {
-                    if (typeof $.OUI === 'boolean') {
-                        element.onsubmit = function () {
-                            var formData = $f.getFormData(element, options, elements);
-                            return debounce ? delayCallback(callback, formData) : callback(formData), false;
-                        };
-                    } else {
-                        $(this).submit(function () {
-                            var formData = $f.getFormData(element, options, elements);
-                            return debounce ? delayCallback(callback, formData) : callback(formData), false;
-                        });
-                    }
-                } else if (handler) {
-                    $(handler).click(function () {
-                        var formData = $f.getFormData(element, options, elements);
-                        if (isTable) {
-                            var tableData = !formData ? [] : $f.getTableData(table, options);
-                            return debounce ? delayCallback(callback, formData, tableData) : callback(formData, tableData), false;
-                        } else {
-                            return debounce ? delayCallback(callback, formData) : callback(formData), false;
-                        }
-                    });
-                }
-            }
-
-            //4.设置完成，返回控件列表
-            if ($.isFunction(complete)) {
-                complete(elements, tableElements);
-            }
-            return $;
-        }
-    });
-
-    // formValidate
-    $.extend($.fn, {
-        formValidate: function (options) {
-            $.formValidate($(this), options);
-            return $(this);
-        }
-    });
-
 }(OUI);
 
+/*
+$.debounce
+*/
 !function ($) {
     'use strict';
 
@@ -1390,7 +1396,7 @@
     };
 
     var Factory = {
-        buildDebounce: function(options, callback) {
+        buildDebounce: function (options, callback) {
             if ($.isFunction(options)) {
                 callback = options;
                 options = {};
@@ -1425,7 +1431,7 @@
             return Cache.debounces[key] || null;
         },
         isFirst: function (debounce, timeout) {
-             var ts = new Date().getTime();
+            var ts = new Date().getTime();
             //上次点击若超过5秒钟，则不启用延时
             if (!debounce.lastTime || (ts - debounce.lastTime > timeout)) {
                 return debounce.lastTime = ts, true;
@@ -1434,7 +1440,7 @@
         }
     };
 
-    function Debounce (options) {
+    function Debounce(options) {
         var opt = $.extend({
             id: 'debounce',
             enable: true,
@@ -1460,7 +1466,7 @@
 
             return this.callback(opt);
         },
-        callback: function(opt) {
+        callback: function (opt) {
             if (!opt.enable || !opt.delay) {
                 if ($.isFunction(opt.callback)) {
                     opt.callback();
@@ -1470,7 +1476,7 @@
             }
             return this;
         },
-        delayCallback: function(opt) {
+        delayCallback: function (opt) {
             var _ = this;
             var func = opt.callback;
             if (!$.isFunction(func)) {
@@ -1482,7 +1488,7 @@
             if (_.timer) {
                 window.clearTimeout(_.timer);
             }
-            _.timer = window.setTimeout(function() {
+            _.timer = window.setTimeout(function () {
                 func();
             }, opt.delay);
 
@@ -1491,7 +1497,7 @@
     };
 
     $.extend($, {
-        debounce: function(options, callback) {
+        debounce: function (options, callback) {
             return Factory.buildDebounce(options, callback);
         }
     });
