@@ -134,15 +134,26 @@ ul.oui-ddl-flow label.oui-ddl-cur,ul.oui-ddl-grid label.oui-ddl-cur {
 	border-top: solid 1px #eee;
 	box-sizing: border-box;
 	margin: 1px 1px 0;
-	padding: 5px ;
+	padding: 6px 5px;
 	clear: both;
 	display: block;
 	overflow: hidden;
 	text-align: center;
 }
 .oui-ddl-panel .oui-ddl-oper .btn-group {
-	padding:0;
+	padding: 0 4px;
 	border: none 0;
+}
+.oui-ddl-panel .oui-ddl-oper-flow .btn-group {
+	padding: 0;
+}
+.oui-ddl-panel .oui-ddl-oper-grid .btn-group {
+	padding: 0;
+}
+.oui-ddl-panel .oui-ddl-oper .btn-group-block {
+	width: 100%;
+	padding: 0 4px;
+	display: block;
 }
 .oui-ddl-panel button.btn {
 	border:solid 1px #ccc;
@@ -170,6 +181,12 @@ ul.oui-ddl-flow label.oui-ddl-cur,ul.oui-ddl-grid label.oui-ddl-cur {
 	background: #286090;
 	border: solid 1px #204d74;
 }
-.oui-ddl-panel button.btn-ok {
+.oui-ddl-panel button.btn-no {
 	padding: 0 10px;
+}
+.oui-ddl-panel button.btn-ok {
+	padding: 0 15px;
+}
+.oui-ddl-panel .btn-group-block button.btn-ok {
+	width: 100%;
 }

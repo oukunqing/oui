@@ -37,95 +37,95 @@
             Initial: 999,
         }
     },
-        Factory = {
-            loadCss: function (skin, func) {
-                var path = Config.FilePath,
-                    name = $.getFileName(path, true),
-                    dir = $.getFilePath(path);
+    Factory = {
+        loadCss: function (skin, func) {
+            var path = Config.FilePath,
+            name = $.getFileName(path, true),
+            dir = $.getFilePath(path);
 
-                if ($.isString(skin, true)) {
-                    dir += 'skin/' + skin + '/';
+            if ($.isString(skin, true)) {
+                dir += 'skin/' + skin + '/';
+            }
+            $.loadLinkStyle(dir + name.replace('.min', '') + '.css', function () {
+                if ($.isFunction(func)) {
+                    func();
                 }
-                $.loadLinkStyle(dir + name.replace('.min', '') + '.css', function () {
-                    if ($.isFunction(func)) {
-                        func();
+            });
+            return this;
+        },
+        caches: {},
+        getCache: function (id) {
+            var key = 'oui_ddl_' + id,
+            obj = Factory.caches[key];
+            return obj || null;
+        },
+        setCache: function (opt) {
+            var ddl = new DropDownList(opt),
+            key = 'oui_ddl_' + opt.id,
+            cache = {
+                elem: opt.element,
+                opt: opt,
+                ddl: ddl
+            };
+            return Factory.caches[key] = cache, cache;
+        },
+        closeOther: function(ddl) {
+            for (var k in Factory.caches) {
+                if (k !== 'oui_ddl_' + ddl.id) {
+                    var obj = Factory.caches[k];
+                    if (obj.ddl.box && obj.ddl.box.show) {
+                        obj.ddl.hide();
                     }
-                });
-                return this;
-            },
-            caches: {},
-            getCache: function (id) {
-                var key = 'oui_ddl_' + id,
-                    obj = Factory.caches[key];
-                return obj || null;
-            },
-            setCache: function (opt) {
-                var ddl = new DropDownList(opt),
-                    key = 'oui_ddl_' + opt.id,
-                    cache = {
-                        elem: opt.element,
-                        opt: opt,
-                        ddl: ddl
-                    };
-                return Factory.caches[key] = cache, cache;
-            },
-            closeOther: function(ddl) {
-                for (var k in Factory.caches) {
-                    if (k !== 'oui_ddl_' + ddl.id) {
-                        var obj = Factory.caches[k];
-                        if (obj.ddl.box && obj.ddl.box.show) {
-                            obj.ddl.hide();
-                        }
-                    }
                 }
-                return this;
-            },
-            checkOptions: function(options) {
-                var opt = $.extend({}, options);
+            }
+            return this;
+        },
+        checkOptions: function(options) {
+            var opt = $.extend({}, options);
 
-                opt.itemBorder = opt.itemBorder || opt.border;
-                opt.element = $.toElement(opt.element || opt.elem);
+            opt.itemBorder = opt.itemBorder || opt.border;
+            opt.element = $.toElement(opt.element || opt.elem);
 
-                if (opt.single) {
-                    opt.multi = false;
-                }
-                if (!$.isNumber(opt.submit)) {
-                    opt.submit = Config.Submit.Return;
-                }
+            if (opt.single) {
+                opt.multi = false;
+            }
+            if (!$.isNumber(opt.submit)) {
+                opt.submit = Config.Submit.Return;
+            }
 
                 //是否显示选框,默认情况下：单选框不显示，复选框显示
                 //若指定display为true或false，则按指定规则显示
-                if (!$.isBoolean(opt.display)) {
-                    opt.display = opt.multi;
-                }
-
-                opt.boxWidth = opt.boxWidth || opt.width;
-
-                return opt;
-            },
-            buildList: function (options) {
-                var opt = $.extend({
-                    id: '',
-                    element: ''
-                }, options);
-
-                opt.id = opt.id || opt.element.id;
-
-                var cache = Factory.getCache(opt.id);
-                if (cache) {
-                    return cache.ddl;
-                }
-                return Factory.setCache(opt).ddl;
-            },
-            getStyleSize: function(size) {
-                if ($.isNumber(size)) {
-                    return (size < 0 ? 0 : size) + 'px';
-                } else if ($.isString(size)) {
-                    return size.endWith('%') ? size : parseInt('0' + size, 10) + 'px';
-                }
-                return '0';
+            if (!$.isBoolean(opt.display)) {
+                opt.display = opt.multi;
             }
-        };
+
+            opt.boxWidth = opt.boxWidth || opt.width;
+
+            return opt;
+        },
+        buildList: function (options) {
+            var opt = $.extend({
+                id: '',
+                element: ''
+            }, options);
+
+            opt.id = opt.id || opt.element.id;
+
+            var cache = Factory.getCache(opt.id);
+            if (cache) {
+                return cache.ddl;
+            }
+            return Factory.setCache(opt).ddl;
+        },
+        getStyleSize: function(size) {
+            if ($.isNumber(size)) {
+                return (size < 0 ? 0 : size) + 'px';
+            } else if ($.isString(size)) {
+                return size.endWith('%') ? size : parseInt('0' + size, 10) + 'px';
+            }
+            return '0';
+        }
+    };
 
     //先加载样式文件
     Factory.loadCss();
@@ -181,20 +181,26 @@
             name: '',
             title: '',
             element: '',
-            //停靠位置：left-左下，right-右下
-            position: 'left',
-            //按钮位置：left-左，center-中，right-右
-            buttonPosition: 'center',
-            minWidth: 120,
-            maxWidth: 500,
             //列表框宽度，默认不指定
             boxWidth: '',
+            //box最小宽度
+            minWidth: 120,
+            //box最大宽度
+            maxWidth: 500,
+            //box最小高度
+            minHeight: 30,
+            //box最大高度，默认不指定
+            maxHeight: '',
             //布局： list-下拉列表，flow-流布局，grid-网格
             layout: 'list', //list, flow, grid
             //输入框宽度，默认跟随下拉框宽度
             textWidth: '',
             //网格布局时选项宽度
             itemWidth: 120,
+            //停靠位置：left-左下，right-右下
+            position: 'left',
+            //按钮位置：left-左，center-中，right-右
+            buttonPosition: 'center',
             //非列表布局时，是否显示选项边框
             itemBorder: false,
             //是否单选，条件等级优先于multi
@@ -219,8 +225,8 @@
     DropDownList.prototype = {
         initial: function () {
             var that = this,
-                opt = that.options,
-                elem = opt.element;
+            opt = that.options,
+            elem = opt.element;
 
             if (opt.element.tagName === 'SELECT') {
                 var offset = $.getOffset(opt.element);
@@ -262,11 +268,11 @@
         },
         build: function () {
             var that = this,
-                opt = that.options;
+            opt = that.options;
 
             $.createElement('DIV', function (box) {
                 var offset = $.getOffset(that.text),
-                    edge = navigator.userAgent.indexOf('Edg/') > 0;
+                edge = navigator.userAgent.indexOf('Edg/') > 0;
 
                 box.className = 'oui-ddl oui-ddl-panel' + (edge ? ' oui-ddl-edge' : '');
                 box.id = Config.IdPrefix + opt.id;
@@ -274,26 +280,29 @@
                     'display:none;top:',offset.top + offset.height - 1, 'px;left:', offset.left, 'px;',
                     'min-width:', (opt.minWidth || (offset.width + 1)), 'px;',
                     'max-width:', (opt.maxWidth), 'px;',
-                    opt.boxWidth ? 'width:' + Factory.getStyleSize(opt.boxWidth) + ';' : ''
-                ].join('');
+                    opt.boxWidth ? 'width:' + Factory.getStyleSize(opt.boxWidth) + ';' : '',
+                    'min-height:', Factory.getStyleSize(opt.minHeight), ';',
+                    opt.maxHeight ? 'max-height:' + Factory.getStyleSize(opt.maxHeight) + ';' : '',
+                    ].join('');
 
-                var btn = [], len = opt.items.length;
+                var btn = [], len = opt.items.length, selects = '', oneBtn = true;
                 if (opt.multi) {
-                    btn.push('<div class="oui-ddl-oper" style="text-align:' + (opt.buttonPosition || 'center') + ';">');
-                    btn.push('<div class="btn-group btn-group-xs"');
-                    btn.push('>');
                     if ((opt.layout !== Config.Layout.List && len > 3) || len > 5) {
-                        btn.push([
+                        selects = [
                             '<button class="btn btn-default" ac="1">全选</button>',
                             '<button class="btn btn-default" ac="2">反选</button>',
                             '<button class="btn btn-default" ac="0">取消</button>',
                             '<button class="btn btn-default" ac="3" title="默认选项">默认</button>',
-                        ].join(''));
+                        ].join('');
+                        oneBtn = false;
                     }
+                    btn.push('<div class="oui-ddl-oper oui-ddl-oper-' + opt.layout + '" style="text-align:' + (opt.buttonPosition || 'center') + ';">');
+                    btn.push('<div class="btn-group btn-group-xs' + (oneBtn ? ' btn-group-block' : '') + '">');
+                    btn.push(selects.join(''));
                     if (!opt.submit) {
-                        btn.push('<button class="btn btn-primary btn-ok" ac="no">关闭</button>');
+                        btn.push('<button class="btn btn-primary btn-no" ac="no">关闭</button>');
                     } else {
-                        btn.push('<button class="btn btn-primary btn-ok" ac="ok">确定</button>');
+                        btn.push('<button class="btn btn-primary btn-ok' + (oneBtn ? ' btn-block' : '') + '" ac="ok">确定</button>');                                                                                                                                     
                     }
                     btn.push('</div>');
                     btn.push('</div>');
@@ -301,7 +310,7 @@
 
                 var html = [
                     '<ul class="oui-ddl-box oui-ddl-', opt.layout,'">'
-                ];
+                    ];
                 for (var i = 0; i < len; i++) {
                     var dr = opt.items[i];
                     if (dr === 'sep' || dr.sep || dr.type === 'sep') {
@@ -310,12 +319,12 @@
                         html.push(['<li class="oui-ddl-item oui-ddl-head">', dr.name || dr.head, '</li>'].join(''));
                     } else {
                         var key = Config.ItemPrefix + that.id,
-                            id = typeof dr.code !== 'undefined' ? dr.code : dr.id,
-                            name = dr.name + (dr.desc ? ' - ' + dr.desc : ''),
-                            chbId = key + dr.id,
-                            checked = dr.checked || dr.dc ? ' checked="checked" dc="1"' : '',
-                            use = dr.enabled || dr.use,
-                            disabled = dr.disabled ? ' disabled="disabled"' : '';
+                        id = typeof dr.code !== 'undefined' ? dr.code : dr.id,
+                        name = dr.name + (dr.desc ? ' - ' + dr.desc : ''),
+                        chbId = key + dr.id,
+                        checked = dr.checked || dr.dc ? ' checked="checked" dc="1"' : '',
+                        use = dr.enabled || dr.use,
+                        disabled = dr.disabled ? ' disabled="disabled"' : '';
                         html.push([
                             '<li class="oui-ddl-item" style="', 
                             opt.layout !== Config.Layout.List ? 'float:left;' : '',
@@ -333,7 +342,7 @@
                             '<span', (use || typeof use === 'undefined') ? '' : ' class="del"', '>', name, '</span>',
                             '</label>',
                             '</li>'
-                        ].join(''));
+                            ].join(''));
                     }
                 }
                 html.push('</ul>');
@@ -388,162 +397,162 @@
                 }
                 that.callback(Config.Submit.Initial);
             }, document.body);
-            return that;
-        },
-        action: function(node) {
-            var that = this,
-                opt = that.options,
-                nodes = that.nodes,
-                multi = opt.multi;
+return that;
+},
+action: function(node) {
+    var that = this,
+    opt = that.options,
+    nodes = that.nodes,
+    multi = opt.multi;
 
-            if (multi) {
-                node.set(!node.checked, true);
-            } else {
-                for (var i = 0; i < nodes.length; i++) {
-                    nodes[i].set(nodes[i].id === node.id, true);
-                }
-                that.hide();
-            }
-            return that.callback();
-        },
-        set: function (val, ac) {
-            var that = this, 
-                opt = that.options,
-                nodes = that.nodes;
+    if (multi) {
+        node.set(!node.checked, true);
+    } else {
+        for (var i = 0; i < nodes.length; i++) {
+            nodes[i].set(nodes[i].id === node.id, true);
+        }
+        that.hide();
+    }
+    return that.callback();
+},
+set: function (val, ac) {
+    var that = this, 
+    opt = that.options,
+    nodes = that.nodes;
 
-            if ($.isNumber(ac)) {
-                switch(ac) {
-                case 0:
-                case 1:
-                    for (var i = 0; i < nodes.length; i++) { nodes[i].set(ac); }
-                    break;
-                case 2:
-                    for (var i = 0; i < nodes.length; i++) { nodes[i].set(!nodes[i].checked); }
-                    break;
-                case 3:
-                    for (var i = 0; i < nodes.length; i++) { nodes[i].set(nodes[i].dc); }
-                    break;
-                }
-            } else {
-                var vals = !$.isArray(val) ? val.split(/[,\|]/) : val;
-                if (opt.multi) {
-                    for (var i = 0; i < nodes.length; i++) {
-                        nodes[i].set(vals.indexOf(nodes[i].value) > - 1);
-                    }
-                } else {
-                    for (var i = 0; i < nodes.length; i++) {
-                        nodes[i].set(nodes[i].value === vals[0]);
-                    }
-                }
-            }
-            return that;
-        },
-        get: function () {
-            var that = this,
-                opt = this.options,
-                nodes = that.nodes,
-                vals = [],
-                txts = [];
-
+    if ($.isNumber(ac)) {
+        switch(ac) {
+        case 0:
+        case 1:
+            for (var i = 0; i < nodes.length; i++) { nodes[i].set(ac); }
+                break;
+        case 2:
+            for (var i = 0; i < nodes.length; i++) { nodes[i].set(!nodes[i].checked); }
+                break;
+        case 3:
+            for (var i = 0; i < nodes.length; i++) { nodes[i].set(nodes[i].dc); }
+                break;
+        }
+    } else {
+        var vals = !$.isArray(val) ? val.split(/[,\|]/) : val;
+        if (opt.multi) {
             for (var i = 0; i < nodes.length; i++) {
-                if (nodes[i].checked) {
-                    vals.push(nodes[i].value.trim());
-                    txts.push(nodes[i].text.trim());
-                }
+                nodes[i].set(vals.indexOf(nodes[i].value) > - 1);
             }
+        } else {
+            for (var i = 0; i < nodes.length; i++) {
+                nodes[i].set(nodes[i].value === vals[0]);
+            }
+        }
+    }
+    return that;
+},
+get: function () {
+    var that = this,
+    opt = this.options,
+    nodes = that.nodes,
+    vals = [],
+    txts = [];
+
+    for (var i = 0; i < nodes.length; i++) {
+        if (nodes[i].checked) {
+            vals.push(nodes[i].value.trim());
+            txts.push(nodes[i].text.trim());
+        }
+    }
             //显示文字
-            that.text.value = txts.join(',') || opt.title || '';
-            that.text.title = vals.length > 0 ? (opt.name ? opt.name + ': ' : '') + that.text.value : '';
+    that.text.value = txts.join(',') || opt.title || '';
+    that.text.title = vals.length > 0 ? (opt.name ? opt.name + ': ' : '') + that.text.value : '';
             //设置值
-            that.elem.options.length = 0;
-            that.elem.options.add(new Option(txts.join(','), vals.join(',')));
+    that.elem.options.length = 0;
+    that.elem.options.add(new Option(txts.join(','), vals.join(',')));
 
-            return vals.join(',');
-        },
-        callback: function(submitLevel) {
-            var that = this, 
-                opt = that.options,
-                vals = that.get(),
-                submit = submitLevel || 0;
+    return vals.join(',');
+},
+callback: function(submitLevel) {
+    var that = this, 
+    opt = that.options,
+    vals = that.get(),
+    submit = submitLevel || 0;
 
-            if (submit === Config.Submit.Initial) {
-                if (vals === '') {
-                    return that;
-                }
-            } else if (opt.multi) {
-                if (submit < opt.submit) {
-                    return that;
-                }
-            }
-            if ($.isFunction(opt.callback)) {
-                opt.callback(vals, submit === Config.Submit.Initial, that);
-            }
+    if (submit === Config.Submit.Initial) {
+        if (vals === '') {
             return that;
-        },
-        show: function (elem) {
-            var that = this, 
-                opt = that.options,
-                show = true,
-                box = that.box,
-                offset = $.getOffset(that.text);
-            
-            if(elem) {
-                show = !box.show;
-            }
+        }
+    } else if (opt.multi) {
+        if (submit < opt.submit) {
+            return that;
+        }
+    }
+    if ($.isFunction(opt.callback)) {
+        opt.callback(vals, submit === Config.Submit.Initial, that);
+    }
+    return that;
+},
+show: function (elem) {
+    var that = this, 
+    opt = that.options,
+    show = true,
+    box = that.box,
+    offset = $.getOffset(that.text);
 
-            if ($.isElement(box)) {
-                box.style.height = 'auto';
+    if(elem) {
+        show = !box.show;
+    }
+
+    if ($.isElement(box)) {
+        box.style.height = 'auto';
 
                 //先显示
-                box.style.display = show ? '' : 'none';
-                box.show = show;
-                $.setClass(that.text, 'oui-ddl-txt-cur', show);
+        box.style.display = show ? '' : 'none';
+        box.show = show;
+        $.setClass(that.text, 'oui-ddl-txt-cur', show);
                 //再获取尺寸
-                var bs = $.getBodySize(),
-                    size = $.getOffset(box),
-                    left = offset.left,
-                    top = offset.top + offset.height - 1;
+        var bs = $.getBodySize(),
+        size = $.getOffset(box),
+        left = offset.left,
+        top = offset.top + offset.height - 1;
 
-                if (opt.position === Config.Position.Right) {
-                    left = offset.left + offset.width - size.width + 1;
-                    if (left <= 0) {
-                        left = 0;
-                    }
-                } else if (left + size.width > bs.width) {
-                    left -= (left + size.width - bs.width);
-                }
-                if (top + size.height > bs.height) {
-                    top -= (top + size.height) - bs.height;
-                    if (top < 0) {
-                        top = 0;
-                    }
-                }
-                box.style.left = left + 'px';
-                box.style.top = top + 'px';
-
-                if (top + size.height > bs.height) {
-                    box.style.height = (bs.height - top - 2) + 'px';
-                }
+        if (opt.position === Config.Position.Right) {
+            left = offset.left + offset.width - size.width + 1;
+            if (left <= 0) {
+                left = 0;
             }
-            return that;
-        },
-        hide: function () {
-            var that = this;
-            if ($.isElement(that.box)) {
-                that.box.style.display = 'none';
-                that.box.show = false;
-                $.removeClass(that.text, 'oui-ddl-txt-cur');
+        } else if (left + size.width > bs.width) {
+            left -= (left + size.width - bs.width);
+        }
+        if (top + size.height > bs.height) {
+            top -= (top + size.height) - bs.height;
+            if (top < 0) {
+                top = 0;
             }
-            return that;
         }
-    };
+        box.style.left = left + 'px';
+        box.style.top = top + 'px';
 
-    $.extend({
-        dropdownlist: function (options) {
-            return Factory.buildList(options);
-        },
-        ddlist: function (options) {
-            return Factory.buildList(options);
+        if (top + size.height > bs.height) {
+            box.style.height = (bs.height - top - 2) + 'px';
         }
-    });
+    }
+    return that;
+},
+hide: function () {
+    var that = this;
+    if ($.isElement(that.box)) {
+        that.box.style.display = 'none';
+        that.box.show = false;
+        $.removeClass(that.text, 'oui-ddl-txt-cur');
+    }
+    return that;
+}
+};
+
+$.extend({
+    dropdownlist: function (options) {
+        return Factory.buildList(options);
+    },
+    ddlist: function (options) {
+        return Factory.buildList(options);
+    }
+});
 }(OUI);
