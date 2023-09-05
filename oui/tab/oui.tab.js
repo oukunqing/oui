@@ -343,7 +343,7 @@
                     ars = $.getOuterSize(t.right).width,
                     w = ts.width- s.margin.width - s.padding.width - s.border.width,
                     bw = Util.checkSize(w - als - ars),
-                    debug = $.isDebug() || true;
+                    debug = $.isDebug();
 
                 if (debug) {
                     $.console.log('setSize:', t.id, ', tw: ', tw, ', als: ', als, ', ars: ', ars, ', w: ', w, ', bw: ', bw);
@@ -357,9 +357,6 @@
                     t.right.style.display = '';
                     //获取HTML元素宽度有时会出错，不知道是什么原因
                     //发现获取到的宽度尺寸可能出错的情况下，触发window.resize事件
-                    if(tw >= bw * 2) {
-                        $.trigger(window, 'resize');
-                    }
                 }
 
                 var als2 = $.getOuterSize(t.left).width,
@@ -379,7 +376,7 @@
                 if($.isFunction(func)) {
                     func(par);
                 }
-            }, 5);
+            }, 20);
             return this;
         },
         getItemSize: function(t) {
