@@ -3503,7 +3503,7 @@
             var ps = getPaddingSize(elem),
                 ms = getMarginSize(elem),
                 bs = getBorderSize(elem),
-                os = getOffsetSize(elem),
+                os = getOffsetSize(elem, basic),
                 cs = getClientSize(elem),
                 is = getInnerSize(elem),
                 us = getOuterSize(elem),

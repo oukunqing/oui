@@ -75,8 +75,8 @@
         buildLoadingId: function(objId, itemId) {
             return Util.buildId(objId, itemId, 'oui-tab-loading');
         },
-        buildSwitch: function(t, opt, dir) {
-            var div = $.createElement('div', '', function(elem) {
+        buildSwitch: function(t, opt, dir, func) {
+            var span = $.createElement('SPAN', '', function(elem) {
                 elem.className = 'tab-switch tab-switch-' + dir;
                 var style = '';
                 if(opt.tabHeight) {
@@ -86,8 +86,12 @@
                 }
                 elem.innerHTML = '<a class="arrow arrow-' + dir + '" style="' + style + '"></a>';
                 $.disableEvent(elem, 'contextmenu');
+
+                if ($.isFunction(func)) {
+                    func(elem);
+                }
             }, t.tabContainer);
-            return div;
+            return this;
         },
         checkOptions: function(opt) {
             if (!$.isObject(opt)) {
@@ -111,8 +115,10 @@
             return true;
         },
         initialTab: function(t, opt) {
-            t.left = Util.buildSwitch(t, opt, 'left');
-            Util.scrollAction(t, t.left, 'left');
+            Util.buildSwitch(t, opt, 'left', function(elem) {
+                t.left = elem;
+                Util.scrollAction(t, t.left, 'left');
+            });
 
             if(t.box) {
                 return this;
@@ -148,8 +154,10 @@
             }, div);
             t.container = ul;
 
-            t.right = Util.buildSwitch(t, opt, 'right');
-            Util.scrollAction(t, t.right, 'right');
+            Util.buildSwitch(t, opt, 'right', function(elem) {
+                t.right = elem;
+                Util.scrollAction(t, t.right, 'right');
+            });
 
             return this;
         },
@@ -335,18 +343,23 @@
                     ars = $.getOuterSize(t.right).width,
                     w = ts.width- s.margin.width - s.padding.width - s.border.width,
                     bw = Util.checkSize(w - als - ars),
-                    debug = $.isDebug();
+                    debug = $.isDebug() || true;
 
                 if (debug) {
                     $.console.log('setSize:', t.id, ', tw: ', tw, ', als: ', als, ', ars: ', ars, ', w: ', w, ', bw: ', bw);
                 }
-                
+
                 if(tw <= bw) {
                     t.left.style.display = 'none';
                     t.right.style.display = 'none';
                 } else {
                     t.left.style.display = '';
                     t.right.style.display = '';
+                    //获取HTML元素宽度有时会出错，不知道是什么原因
+                    //发现获取到的宽度尺寸可能出错的情况下，触发window.resize事件
+                    if(tw >= bw * 2) {
+                        $.trigger(window, 'resize');
+                    }
                 }
 
                 var als2 = $.getOuterSize(t.left).width,

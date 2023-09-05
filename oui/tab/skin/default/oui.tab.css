@@ -26,7 +26,7 @@
 .oui-tabs .tab-switch {
     width: 16px;
     height: 28px;
-    display: block;
+    display: inline-block;
     float: left;
     padding: 0;
     margin: 0;
@@ -118,11 +118,12 @@
 	border-bottom: solid 1px #dee1e6;
     border-bottom: none 0;
     float: left;
-    display: block;
+    display: inline-block;
     margin: 0 3px 0 0;
     padding: 0;
-    width: auto;
     height: 28px;
+    /*width: auto;*/
+    max-width: 240px;
     overflow: hidden;
     box-sizing: border-box;
 
