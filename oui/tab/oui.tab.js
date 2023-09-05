@@ -28,6 +28,7 @@
             return Config.FilePath.getQueryString(['lang']) || 'chinese';
         },
         CMenuItemHeight: 28,    //右键菜单项高度，单位：像素
+        CMenuSwitchWidth: 16,   //左右切换按钮宽度，单位：像素
         LongPressTime: 512,      //长按最小时长，单位：毫秒
         LongPressInterval: 40,   //长按滚动间隔，单位：毫秒
         LongPressMinInterval: 10,   //长按滚动间隔，单位：毫秒
@@ -46,7 +47,8 @@
             reloadall: {chinese: '全部重新加载', english: 'Reload all'},
             reopen: {chinese: '重新打开关闭的标签页', english: 'Reopen closed tab'},
             reopenall: {chinese: '重新打开关闭的全部标签页', english: 'Reopen all closed tab'}
-        }
+        },
+        IdPrefix: 'oui-tabs-'
     },
     Util = {
         getLangText: function(key, lang) {
@@ -320,6 +322,9 @@
             }
             return this;
         },
+        checkSize: function(size) {
+            return size < 0 ? Math.abs(size) : size;
+        },
         setSize: function(t, func, par) {
             window.clearTimeout(t.sizeTimer);
             t.sizeTimer = window.setTimeout(function() {
@@ -329,9 +334,14 @@
                     als = $.getOuterSize(t.left).width,
                     ars = $.getOuterSize(t.right).width,
                     w = ts.width- s.margin.width - s.padding.width - s.border.width,
-                    bw = w - als - ars;
+                    bw = Util.checkSize(w - als - ars),
+                    debug = $.isDebug();
 
-                if(tw < bw) {
+                if (debug) {
+                    $.console.log('setSize:', t.id, ', tw: ', tw, ', als: ', als, ', ars: ', ars, ', w: ', w, ', bw: ', bw);
+                }
+                
+                if(tw <= bw) {
                     t.left.style.display = 'none';
                     t.right.style.display = 'none';
                 } else {
@@ -341,17 +351,17 @@
 
                 var als2 = $.getOuterSize(t.left).width,
                     ars2 = $.getOuterSize(t.right).width,
-                    bw2 = w - als2 - ars2;
+                    bw2 = Util.checkSize(w - als2 - ars2);
 
-                if(tw < bw2) {
-                    tw = bw2;
+                if (debug) {
+                    $.console.log('setSize:', t.id, ', tw: ', tw, ', als2: ', als2, ', ars2: ', ars2, ', bw: ', bw2);
                 }
 
                 //设置 tab box 宽度
                 t.box.style.width = bw2 + 'px';
                 t.box.style.left = als2 + 'px';
                 //设置 tab 项实际总宽度
-                t.container.style.width = tw + 'px';
+                t.container.style.width = (tw < bw2 ? bw2 : tw) + 'px';
 
                 if($.isFunction(func)) {
                     func(par);
@@ -858,7 +868,7 @@
                 return null;
             }
             var par = $.extend({}, options),
-                id = 'oui-tabs-' + (par.id || tab.id || Cache.index++),
+                id = Config.IdPrefix + (par.id || tab.id || Cache.index++),
                 opt = $.extend({}, options, {id: id}),
                 cache = Factory.getCache(opt.id);
 
@@ -882,27 +892,29 @@
         },
         insert: function(options, insertIndex, show) {
             var opt = this.getObjIds(options),
-                cache = this.getCache(opt.objId);
+                //这里要加上前缀 oui-tabs-
+                cache = this.getCache(Config.IdPrefix + opt.objId);
             return cache ? cache.obj.insert(options, insertIndex, show) : null;
         },
         show: function(objId, itemId, func, reload) {
             var opt = this.getObjIds(objId, itemId),
-                cache = this.getCache(opt.objId);
+                cache = this.getCache(Config.IdPrefix +opt.objId);
             return cache ? cache.obj.show(opt.itemId, func, reload) : null;
         },
         remove: function(objId, itemId) {
             var opt = this.getObjIds(objId, itemId),
-                cache = this.getCache(opt.objId);
+                cache = this.getCache(Config.IdPrefix +opt.objId);
             return cache ? cache.obj.close(itemId) : null;
         },
         removeAll: function(objId, exceptItemId) {
-            var opt = this.getObjIds(objId, itemId),
-                cache = this.getCache(opt.objId);
+            var opt = this.getObjIds(objId, exceptItemId),
+                //这里要加上前缀 oui-tabs-
+                cache = this.getCache(Config.IdPrefix + opt.objId);
             return cache ? cache.obj.closeAll(exceptItemId) : null;
         },
         reload: function(objId, itemId, isAll) {
             var opt = this.getObjIds(objId, itemId),
-                cache = this.getCache(opt.objId);
+                cache = this.getCache(Config.IdPrefix +opt.objId);
             return cache ? (isAll ? cache.objId.reloadAll() : cache.obj.reload(opt.itemId)) : null;
         },
         hideParentTabMenu: function() {
@@ -935,6 +947,8 @@
             event: 'click',     //click, mouseover
             dblclickScroll: false,
             showContextMenu: true,
+            //切换按钮宽度
+            tabSwitchWidth: Config.CMenuSwitchWidth,
             // Tab最大数量
             maxCount: 30,
             // Tab标签最大宽度
@@ -1402,7 +1416,6 @@
                 }
                 $.addClass(cons[i], 'tab-panel');
             }
-            console.log('tabs:', tabs, ', cons: ', cons);
             return that;
         },
         show: function(key) {

@@ -25,8 +25,8 @@
 <body>
     <div style="clear:both;">
 	<input type="button" value="添加" onclick="addTab();" />
-    <input type="text" id="txtTabId" value="tab1" />
-    <input type="text" id="txtItemId" />
+    <input type="text" id="txtTabId" value="tab1" placeholder="tab id" />
+    <input type="text" id="txtItemId" placeholder="item id" />
     <input type="button" value="显示" onclick="show();" />
     <input type="button" value="显示2" onclick="show(true);" />
     <input type="button" value="关闭全部" onclick="closeAll();" />
@@ -218,7 +218,7 @@
 	function addTab() {
 		idx += 1;
         var objId = document.getElementById('txtTabId').value || 'tab1';
-		$.tab.add({objId: objId, id: 'data' + idx, name: '实时数据' + idx, html: '实时数据' + idx, func: function(par) {
+		$.tab.add({objId: objId, id: 'data' + idx, name: '实时数据' + idx, html: 'data' + idx + '<br />实时数据' + idx, func: function(par) {
             console.log('par: ', par);
         }}, true);
 	}

@@ -1470,3 +1470,4 @@ list = list.concat([666,777]);
 console.log(list);
 
 console.log($.md5('Nbsdsdk123!'));
+console.log(44+44+24*6+44+44+20+34);

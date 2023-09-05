@@ -4544,21 +4544,21 @@
                 for (var i = minVal; i <= maxVal; i += stepVal) {
                     elem.options.add(new Option(i + (valUnit || ''), i));
                 }
-                return this;
-            }
-            for (var i = 0; i < list.length; i++) {
-                var dr = list[i], val = '', txt = '';
-                if ($.isArray(dr)) {
-                    val = dr[0];
-                    txt = $.isNullOrUndefined(dr[1]) ? dr[0] + valUnit : dr[1];
-                } else if ($.isObject(dr)) {
-                    val = dr.value || dr.val;
-                    txt = dr.text || dr.txt;
-                } else {
-                    val = dr;
-                    txt = dr + valUnit;
+            } else {
+                for (var i = 0; i < list.length; i++) {
+                    var dr = list[i], val = '', txt = '';
+                    if ($.isArray(dr)) {
+                        val = dr[0];
+                        txt = $.isNullOrUndefined(dr[1]) ? dr[0] + valUnit : dr[1];
+                    } else if ($.isObject(dr)) {
+                        val = dr.value || dr.val;
+                        txt = dr.text || dr.txt;
+                    } else {
+                        val = dr;
+                        txt = dr + valUnit;
+                    }
+                    elem.options.add(new Option(txt, val));
                 }
-                elem.options.add(new Option(txt, val));
             }
             if (!$.isNullOrUndefined(curVal)) {
                 elem.value = curVal;
