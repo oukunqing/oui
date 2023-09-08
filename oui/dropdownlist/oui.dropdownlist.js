@@ -285,11 +285,11 @@
                     opt.maxHeight ? 'max-height:' + Factory.getStyleSize(opt.maxHeight) + ';' : '',
                     ].join('');
 
-                var btn = [], len = opt.items.length, selects = '', oneBtn = true;
+                var btn = [], len = opt.items.length, selects = '', oneBtn = true, ac = opt.submit ? 'ok' : 'no';
                 if (opt.multi) {
                     if ((opt.layout !== Config.Layout.List && len > 3) || len > 5) {
                         selects = [
-                            '<button class="btn btn-default" ac="1">全选</button>',
+                            '<button class="btn btn-default btn-first" ac="1">全选</button>',
                             '<button class="btn btn-default" ac="2">反选</button>',
                             '<button class="btn btn-default" ac="0">取消</button>',
                             '<button class="btn btn-default" ac="3" title="默认选项">默认</button>',
@@ -299,11 +299,7 @@
                     btn.push('<div class="oui-ddl-oper oui-ddl-oper-' + opt.layout + '" style="text-align:' + (opt.buttonPosition || 'center') + ';">');
                     btn.push('<div class="btn-group btn-group-xs' + (oneBtn ? ' btn-group-block' : '') + '">');
                     btn.push(selects.join(''));
-                    if (!opt.submit) {
-                        btn.push('<button class="btn btn-primary btn-no" ac="no">关闭</button>');
-                    } else {
-                        btn.push('<button class="btn btn-primary btn-ok' + (oneBtn ? ' btn-block' : '') + '" ac="ok">确定</button>');                                                                                                                                     
-                    }
+                    btn.push('<button class="btn btn-primary btn-' + ac + (oneBtn ? ' btn-block' : '') + '" ac="' + ac + '">确定</button>'); 
                     btn.push('</div>');
                     btn.push('</div>');
                 }

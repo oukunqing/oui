@@ -1252,14 +1252,22 @@
                 if (opt.lock && ctls.container) {
                     $.addListener(ctls.container, opt.clickBgClose, function (ev) {
                         //判断鼠标点击位置是否在对话框范围，如果在范围内则不关闭
-                        if (!$.isOnElement(ctls.dialog, ev)) {
+                        if (!$.isInElement(ctls.dialog, ev)) {
                             that.close();
                         }
                     });
                 } else {
+                    /*
                     window.setTimeout(function () {
                         Factory.setClickDocClose(opt.id, opt.clickBgClose);
                     }, 100);
+                    */
+                    $.addListener(document.body, 'mousedown', function (ev) {
+                        //判断鼠标点击位置是否在对话框范围，如果在范围内则不关闭
+                        if (!$.isInElement(ctls.dialog, ev)) {
+                            that.close();
+                        }
+                    });
                 }
                 return this;
             },
@@ -4230,6 +4238,22 @@
         },
         isNormal: function () {
             return this.getStatus().normal;
+        },
+        isOnDialog: function (ev) {
+            var that = this, p = Util.getParam(that), opt = p.options;
+            if (that.isClosed() || that.isHide() || !p) {
+                return false;
+            }
+            var ctls = p.controls;
+            return $.isOnElement(ctls.dialog, ev);
+        },
+        isInDialog: function (ev) {
+            var that = this, p = Util.getParam(that), opt = p.options;
+            if (that.isClosed() || that.isHide() || !p) {
+                return false;
+            }
+            var ctls = p.controls;
+            return $.isInElement(ctls.dialog, ev);
         },
         show: function (content, title) {
             var that = this, p = Util.getParam(that);

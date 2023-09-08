@@ -735,8 +735,9 @@
                 opt.complete(that);
             }
 
-            console.log('frozen:', that.id, opt.rows, opt.cols, opt.foot, opt.right, new Date().format('tms'));
-
+            if ($.isDebug()) {
+                $.console.log('frozen:', that.id, opt.rows, opt.cols, opt.foot, opt.right, new Date().format('tms'));
+            }
             return that;
         },
         rebuild: function(force, action) {

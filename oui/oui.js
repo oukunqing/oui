@@ -3970,7 +3970,7 @@
             return this;
         },
         addEventListener = function (elem, evName, func, useCapture, isRemove) {
-            var elems = $.isArray(elem) ? elem : [elem],
+            var elems = $.isArray(elem) ? elem : [$.toElement(elem)],
                 events = $.isArray(evName) ? evName : [evName],
                 name = isRemove ? 'removeEventListener' : 'addEventListener',
                 other = isRemove ? 'detachEvent' : 'attachEvent',
@@ -3981,7 +3981,7 @@
                     continue;
                 }
                 for (var j in elems) {
-                    var o = elems[j];
+                    var o = $.toElement(elems[j]);
                     if (($.isElement(o) || $.isDocument(o) || $.isWindow(o)) && $.isFunction(func)) {
                         normal ? o[name](evn, func, useCapture || false) : o[other]('on' + evn, func);
                     }
@@ -4215,16 +4215,15 @@
             return false;
         },
         isOnElement = function (elem, ev) {
-            if (!isElement(elem = toElement(elem))) {
+            //$.console.log('isOnElement: ', elem);
+            if (!isElement(elem = toElement(elem)) || !ev) {
                 return false;
             }
-            var pos = ev.fromElement ? getEventPosition(ev) : ev,
-                isOn = isOnElem(elem, pos);
-
-            if (isOn) {
+            var pos = ev.fromElement || typeof ev.x === 'undefined' ? getEventPosition(ev) : ev;
+            if (isOnElem(elem, pos)) {
                 return true;
             }
-
+            /*
             var childs = elem.childNodes;
             for (var i = 0; i < childs.length; i++) {
                 var sub = childs[i];
@@ -4232,6 +4231,75 @@
                     return isOnElement(sub, pos);
                 } else if (isOnElem(sub, pos)) {
                     return true;
+                }
+            }
+            */
+            //不再采用递归
+            var childs = elem.querySelectorAll('*'),
+                c = childs.length, k, i, j, m, n;
+
+            if (c >= 8) {
+                k = parseInt(c / 4, 10) + (c % 4 !== 0 ? 1 : 0);
+                for (i = 0; i < k; i++) {
+                    j = k * 4 - 1 - i;
+                    j = j >= c ? c - 1 : j;
+                    m = k * 2 + i,
+                    n = k * 2 - 1 - i;
+                    if (isOnElem(childs[i], pos) || isOnElem(childs[j], pos) || isOnElem(childs[m], pos) || isOnElem(childs[n], pos)) {
+                        //$.console.log('isOnElement find: ', i, '/', c, childs[i]);
+                        return true;
+                    }
+                }
+            } else {
+                k = parseInt(c / 2, 10) + (c % 2 !== 0 ? 1 : 0);
+                for (i = 0; i < k; i++) {
+                    j = k * 2 - 1 - i;
+                    j = j >= c ? c - 1 : j;
+                    //console.log('inelem:', i, j);
+                    if (isOnElem(childs[i], pos) || isOnElem(childs[j], pos)) {
+                        //$.console.log('isOnElement find: ', i, '/', c, childs[i]);
+                        return true;
+                    }
+                }
+            }
+            return false;
+        },
+        isInElement = function (elem, ev) {
+            //$.console.log('isInElement: ', elem);
+            if (!isElement(elem = toElement(elem)) || !ev) {
+                return false;
+            }
+            var t = ev.target;
+            if (!$.isElement(t)) {
+                return false;
+            } else if (elem === t) {
+                return true;
+            }
+            var childs = elem.querySelectorAll('*'),
+                c = childs.length, k, i, j, m, n;
+
+            if (c >= 8) {
+                k = parseInt(c / 4, 10) + (c % 4 !== 0 ? 1 : 0);
+                for (i = 0; i < k; i++) {
+                    j = k * 4 - 1 - i;
+                    j = j >= c ? c - 1 : j;
+                    m = k * 2 + i,
+                    n = k * 2 - 1 - i;
+                    if (childs[i] === t || childs[j] === t || childs[m] === t || childs[n] === t) {
+                        //$.console.log('isInElement find: ', i, '/', c, childs[i]);
+                        return true;
+                    }
+                }
+            } else {
+                k = parseInt(c / 2, 10) + (c % 2 !== 0 ? 1 : 0);
+                for (i = 0; i < k; i++) {
+                    j = k * 2 - 1 - i;
+                    j = j >= c ? c - 1 : j;
+                    //console.log('inelem:', i, j);
+                    if (childs[i] === t || childs[j] === t) {
+                        //$.console.log('isInElement find: ', i, '/', c, childs[i]);
+                        return true;
+                    }
                 }
             }
             return false;
@@ -4918,6 +4986,7 @@
         getContentSize: getContentSize,
         getInnerText: getInnerText,
         isOnElement: isOnElement,
+        isInElement: isInElement,
         changeLink: changeLink,
         gotoLink: gotoLink,
         gotoUrl: gotoLink,

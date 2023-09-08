@@ -22,7 +22,7 @@
         },
         minPageSize = 1,                //pageSize最小值
         //默认的每页显示条数选项
-        defaultPageSizeItems = [1, 5, 10, 20, 30, 50, 100, 200],
+        defaultPageSizeItems = [1, 2, 3, 5, 10, 15, 20, 30, 50, 100, 200],
         defaultInputWidth = 35,         //输入框默认宽度，单位：px
         defaultInputHeight = 22,        //按钮、输入框默认高度，单位：px
         defaultDebounceTime = 50,       //防抖最小时长，单位：毫秒
@@ -644,7 +644,9 @@
             },
             callbackParam: null,                    //回调参数
             complete: function(par, that) {
-                console.log('pagination complete: ', par, that);
+                if ($.isDebug()) {
+                    console.log('pagination complete: ', par, that);
+                }
             },
             showReload: false,                      //是否显示刷新按钮
             url: '',                                //URL模式，必须包含关键字 {0} 或 {pageIndex}，若url可用，则url优先于callback
