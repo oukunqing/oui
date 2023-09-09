@@ -427,11 +427,17 @@
                 opt.type = this.checkType(opt.type, false);
 
                 if (!$.isElement(opt.target) && $.isString(opt.target, true)) {
-                    opt.target = document.getElementById(opt.target);
+                    opt.target = $.toElement(opt.target);
+                }
+                if ($.isElement(opt.target) && $.isUndefined(opt.trigger)) {
+                    opt.trigger = opt.target;
+                }
+                if (!$.isElement(opt.trigger) && $.isString(opt.trigger, true)) {
+                    opt.trigger = $.toElement(opt.trigger);
                 }
 
                 if (!$.isElement(opt.parent) && $.isString(opt.parent, true)) {
-                    opt.parent = document.getElementById(opt.parent);
+                    opt.parent = $.toElement(opt.parent);
                 }
 
                 opt.forname = (opt.forname || opt.forName) || (opt.forid || opt.forId) || opt.for;
@@ -716,7 +722,7 @@
             getLast: function () {
                 for (var i = Cache.ids.length - 1; i >= 0; i--) {
                     var d = Factory.getDialog(Cache.ids[i].id);
-                    if (d && !d.isClosed()) {
+                    if (d && !d.isClosed() && !d.isHide()) {
                         return d;
                     }
                 }
@@ -793,9 +799,17 @@
                 }
                 $.addListener(document, 'keyup', function (e) {
                     if (Config.KEY_CODE.Esc === $.getKeyCode(e)) {
+                        /*
                         var d = Factory.getLast();
                         if (d && !d.isClosed() && d.getOptions().escClose) {
                             d.close();
+                        }
+                        */
+                        for (var i = Cache.ids.length - 1; i >= 0; i--) {
+                            var d = Factory.getDialog(Cache.ids[i].id);
+                            if (d && !d.isClosed() && !d.isHide() && d.getOptions().escClose) {
+                                d.close();
+                            }
                         }
                     }
                 });
@@ -1264,7 +1278,7 @@
                     */
                     $.addListener(document.body, 'mousedown', function (ev) {
                         //判断鼠标点击位置是否在对话框范围，如果在范围内则不关闭
-                        if (!$.isInElement(ctls.dialog, ev)) {
+                        if (!$.isInElement(ctls.dialog, ev) && !$.isInElement(opt.trigger, ev)) {
                             that.close();
                         }
                     });
@@ -3998,6 +4012,7 @@
                 noScroll: false,        //对话框主体没有滚动条，固定宽高
                 x: 0,                   //x轴(left)偏移量，单位：px
                 y: 0,                   //y轴(top)偏移量，单位：px
+                trigger: null,          //Element 启动按钮
                 target: null,           //Element 要跟随位置的html控件 target || anchor
                 forname: '',            //对话框DIV属性for值内容
                 direction: 'auto',      //跟随位置的方向 auto | fixed

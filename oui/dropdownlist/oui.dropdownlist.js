@@ -41,6 +41,7 @@
             ids: [],
             lists: {},
             events: {},
+            caches: {}
         },
         Factory = {
             loadCss: function (skin, func) {
@@ -71,10 +72,7 @@
                 Cache.lists[key] = {
                     elem: opt.element,
                     opt: opt,
-                    ddl: ddl,
-                    activity: false,
-                    nodes: [],
-                    indexs: []
+                    ddl: ddl
                 };
                 Cache.ids.push({ key: key, id: opt.id });
 
@@ -88,9 +86,9 @@
             },
             closeOther: function (ddl) {
                 for (var k in Cache.lists) {
-                    if (k !== 'oui_ddl_' + ddl.id) {
+                    if (k !== Factory.buildKey(ddl.id)) {
                         var obj = Cache.lists[k];
-                        if (obj.ddl.box && obj.ddl.box.show) {
+                        if (obj && obj.ddl && obj.ddl.box && obj.ddl.box.show) {
                             obj.ddl.hide();
                         }
                     }
@@ -136,9 +134,8 @@
                 if (cache) {
                     return cache.ddl;
                 }
-                cache = Factory.setCache(opt);
                 var ddl = new DropDownList(opt);
-                return cache.ddl = ddl, ddl;
+                return Factory.setCache(opt, ddl), ddl;
             },
             getStyleSize: function (size) {
                 if ($.isNumber(size)) {
@@ -259,11 +256,17 @@
             display: null,
             //回调等级：0-选项实时回调，1-全选/反选等按钮事件回调，2-确定按钮事件回调
             submit: 1,
+            //是否防抖，多选模式下，点击选项时有效
+            debounce: false,
             callback: null
         }, options));
 
         this.id = opt.id;
         this.options = opt;
+        this.nodes = [];
+        this.indexs = {};
+        this.activity = false;
+
         this.initial();
     }
 
@@ -311,7 +314,6 @@
 
             that.elem.style.display = 'none';
             $.addListener(that.text, 'mousedown', function () {
-                $.cancelBubble();
                 that.show(this);
                 Factory.closeOther(that);
             });
@@ -320,8 +322,7 @@
         },
         build: function () {
             var that = this,
-                opt = that.options,
-                cache = Factory.getCache(that.id);
+                opt = that.options;
 
             $.createElement('DIV', function (box) {
                 var offset = $.getOffset(that.text),
@@ -427,12 +428,10 @@
                 box.show = false;
                 that.box = box;
 
-                $.addListener(box, 'mousedown', function () {
-                    $.cancelBubble();
-                });
-
-                $.addListener(document.body, 'mousedown', function () {
-                    that.hide();
+                $.addListener(document.body, 'mousedown', function (ev) {
+                    if (!$.isInElement(that.box, ev) && !$.isInElement(that.text, ev)) {
+                        that.hide();
+                    }
                 });
                 $.addListener(document, 'keyup', function (e) {
                     if (27 === $.getKeyCode(e)) {   // Esc键值为27
@@ -443,7 +442,7 @@
                 var arr = $N(Config.ItemPrefix + that.id);
                 for (i = 0; i < arr.length; i++) {
                     var chb = arr[i];
-                    cache.nodes.push(new Node({
+                    that.nodes.push(new Node({
                         id: chb.value,
                         label: chb.parentNode,
                         input: chb,
@@ -452,7 +451,7 @@
                             that.action(node);
                         }
                     }));
-                    cache.indexs[chb.id] = i;
+                    that.indexs[chb.id] = i;
                 }
 
                 var btns = document.querySelectorAll('#' + Config.IdPrefix + opt.id + ' .oui-ddl-oper button');
@@ -480,8 +479,7 @@
         action: function (node) {
             var that = this,
                 opt = that.options,
-                cache = Factory.getCache(that.id),
-                nodes = cache.nodes,
+                nodes = that.nodes,
                 multi = opt.multi;
 
             if (multi) {
@@ -492,13 +490,20 @@
                 }
                 that.hide();
             }
-            return that.callback();
+            if (multi && nodes.length > 1 && opt.debounce) {
+                $.debounce({
+                    delay: 500
+                }, function() {
+                    that.callback();
+                });
+            } else {
+                return that.callback();
+            }
         },
         set: function (val, ac) {
             var that = this,
                 opt = that.options,
-                cache = Factory.getCache(that.id),
-                nodes = cache.nodes;
+                nodes = that.nodes;
 
             if ($.isNumber(ac)) {
                 switch (ac) {
@@ -529,9 +534,8 @@
         },
         get: function () {
             var that = this,
-                opt = this.options,
-                cache = Factory.getCache(that.id),
-                nodes = cache.nodes,
+                opt = that.options,
+                nodes = that.nodes,
                 vals = [],
                 txts = [],
                 single = !opt.multi;
@@ -574,7 +578,6 @@
         },
         show: function (elem) {
             var that = this,
-                cache = Factory.getCache(that.id),
                 opt = that.options,
                 show = true,
                 box = that.box;
@@ -593,16 +596,15 @@
                 //下拉列表位置停靠
                 that.size().position();
             }
-            return cache.activity = true, that;
+            return that.activity = true, that;
         },
         hide: function () {
-            var that = this,
-                cache = Factory.getCache(that.id);
+            var that = this;
 
             if ($.isElement(that.box)) {
                 that.box.style.display = 'none';
                 that.box.show = false;
-                cache.activity = false;
+                that.activity = false;
                 $.removeClass(that.text, 'oui-ddl-txt-cur');
             }
             return that;
@@ -673,9 +675,8 @@
             return that;
         },
         isClosed: function () {
-            var that = this,
-                cache = Factory.getCache(that.id);
-            return !cache.activity;
+            var that = this;
+            return !that.activity;
         }
     };
 
