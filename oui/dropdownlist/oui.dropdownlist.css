@@ -9,7 +9,7 @@
 	line-height: 24px;
 	cursor: default;
 	margin: 0;
-	border-right: none 0;
+	/*border-right: none 0;*/
 	box-sizing: border-box;
 	background:#fff url('ddl_arrow_down.png?1') no-repeat right center;
 }
@@ -118,7 +118,7 @@ ul.oui-ddl-box {
 	clear: both;
 }
 ul.oui-ddl-flow,ul.oui-ddl-grid {
-	margin: 3px;
+	margin: 5px 3px;
 }
 ul.oui-ddl-flow li.oui-ddl-item, ul.oui-ddl-grid li.oui-ddl-item {
 	float:left;

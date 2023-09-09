@@ -37,100 +37,140 @@
             Initial: 999,
         }
     },
-    Factory = {
-        loadCss: function (skin, func) {
-            var path = Config.FilePath,
-            name = $.getFileName(path, true),
-            dir = $.getFilePath(path);
+        Cache = {
+            ids: [],
+            lists: {},
+            events: {},
+        },
+        Factory = {
+            loadCss: function (skin, func) {
+                var path = Config.FilePath,
+                    name = $.getFileName(path, true),
+                    dir = $.getFilePath(path);
 
-            if ($.isString(skin, true)) {
-                dir += 'skin/' + skin + '/';
-            }
-            $.loadLinkStyle(dir + name.replace('.min', '') + '.css', function () {
-                if ($.isFunction(func)) {
-                    func();
+                if ($.isString(skin, true)) {
+                    dir += 'skin/' + skin + '/';
                 }
-            });
-            return this;
-        },
-        caches: {},
-        getCache: function (id) {
-            var key = 'oui_ddl_' + id,
-            obj = Factory.caches[key];
-            return obj || null;
-        },
-        setCache: function (opt) {
-            var ddl = new DropDownList(opt),
-            key = 'oui_ddl_' + opt.id,
-            cache = {
-                elem: opt.element,
-                opt: opt,
-                ddl: ddl
-            };
-            return Factory.caches[key] = cache, cache;
-        },
-        closeOther: function(ddl) {
-            for (var k in Factory.caches) {
-                if (k !== 'oui_ddl_' + ddl.id) {
-                    var obj = Factory.caches[k];
-                    if (obj.ddl.box && obj.ddl.box.show) {
-                        obj.ddl.hide();
+                $.loadLinkStyle(dir + name.replace('.min', '') + '.css', function () {
+                    if ($.isFunction(func)) {
+                        func();
+                    }
+                });
+                return this;
+            },
+            buildKey: function (id) {
+                return 'oui_ddl_' + id;
+            },
+            getCache: function (id) {
+                var key = this.buildKey(id),
+                    obj = Cache.lists[key];
+                return obj || null;
+            },
+            setCache: function (opt, ddl) {
+                var key = this.buildKey(opt.id);
+                Cache.lists[key] = {
+                    elem: opt.element,
+                    opt: opt,
+                    ddl: ddl,
+                    activity: false,
+                    nodes: [],
+                    indexs: []
+                };
+                Cache.ids.push({ key: key, id: opt.id });
+
+                return Cache.lists[key];
+            },
+            getList: function (key) {
+                if (typeof Cache.lists[key] !== 'undefined') {
+                    return Cache.lists[key]['ddl'];
+                }
+                return null;
+            },
+            closeOther: function (ddl) {
+                for (var k in Cache.lists) {
+                    if (k !== 'oui_ddl_' + ddl.id) {
+                        var obj = Cache.lists[k];
+                        if (obj.ddl.box && obj.ddl.box.show) {
+                            obj.ddl.hide();
+                        }
                     }
                 }
-            }
-            return this;
-        },
-        checkOptions: function(options) {
-            var opt = $.extend({}, options);
+                return this;
+            },
+            checkOptions: function (options) {
+                var opt = $.extend({}, options);
 
-            opt.itemBorder = opt.itemBorder || opt.border;
-            opt.element = $.toElement(opt.element || opt.elem);
+                opt.itemBorder = opt.itemBorder || opt.border;
+                opt.element = $.toElement(opt.element || opt.elem);
 
-            if (opt.single) {
-                opt.multi = false;
-            }
-            if (!$.isNumber(opt.submit)) {
-                opt.submit = Config.Submit.Return;
-            }
+                if (opt.single) {
+                    opt.multi = false;
+                }
+                if (!$.isNumber(opt.submit)) {
+                    opt.submit = Config.Submit.Return;
+                }
 
                 //是否显示选框,默认情况下：单选框不显示，复选框显示
                 //若指定display为true或false，则按指定规则显示
-            if (!$.isBoolean(opt.display)) {
-                opt.display = opt.multi;
+                if (!$.isBoolean(opt.display)) {
+                    opt.display = opt.multi;
+                }
+
+                opt.allowEmpty = opt.allowEmpty || opt.empty;
+
+                opt.boxWidth = opt.boxWidth || opt.width;
+                opt.className = opt.className || opt.className;
+                opt.style = opt.style || opt.css;
+
+                return opt;
+            },
+            buildList: function (options) {
+                var opt = $.extend({
+                    id: '',
+                    element: ''
+                }, options);
+
+                opt.id = opt.id || opt.element.id;
+
+                var cache = Factory.getCache(opt.id);
+                if (cache) {
+                    return cache.ddl;
+                }
+                cache = Factory.setCache(opt);
+                var ddl = new DropDownList(opt);
+                return cache.ddl = ddl, ddl;
+            },
+            getStyleSize: function (size) {
+                if ($.isNumber(size)) {
+                    return (size < 0 ? 0 : size) + 'px';
+                } else if ($.isString(size)) {
+                    return size.endWith('%') ? size : parseInt('0' + size, 10) + 'px';
+                }
+                return '0';
+            },
+            isRepeat: function (name) {
+                return Cache.events[name] ? true : (Cache.events[name] = true, false);
+            },
+            setWindowResize: function () {
+                if (this.isRepeat('resize')) {
+                    return this;
+                }
+                $.addListener(window, 'resize', function (e) {
+                    for (var i = 0; i < Cache.ids.length; i++) {
+                        var d = Factory.getList(Cache.ids[i].key);
+                        if (d && !d.isClosed()) {
+                            d.size().position();
+                        }
+                    }
+                });
+                return this;
             }
-
-            opt.boxWidth = opt.boxWidth || opt.width;
-
-            return opt;
-        },
-        buildList: function (options) {
-            var opt = $.extend({
-                id: '',
-                element: ''
-            }, options);
-
-            opt.id = opt.id || opt.element.id;
-
-            var cache = Factory.getCache(opt.id);
-            if (cache) {
-                return cache.ddl;
-            }
-            return Factory.setCache(opt).ddl;
-        },
-        getStyleSize: function(size) {
-            if ($.isNumber(size)) {
-                return (size < 0 ? 0 : size) + 'px';
-            } else if ($.isString(size)) {
-                return size.endWith('%') ? size : parseInt('0' + size, 10) + 'px';
-            }
-            return '0';
-        }
-    };
+        };
 
     //先加载样式文件
     Factory.loadCss();
 
-    function Node (par) {
+    function Node(par) {
         this.initial(par);
     }
 
@@ -143,12 +183,13 @@
             that.input = par.input;
             that.value = par.value || par.input.value;
             that.text = par.text || $.getAttribute(par.input, 'text');
+            that.desc = par.desc || $.getAttribute(par.input, 'desc');
             that.checked = par.checked || par.input.checked;
             that.dc = $.getAttribute(par.input, 'dc') === '1';
             that.callback = par.callback;
             that.childs = [];
 
-            that.label.onmousedown = function() {
+            that.label.onmousedown = function () {
                 $.cancelBubble();
                 if ($.isFunction(that.callback)) {
                     that.callback(that);
@@ -176,11 +217,15 @@
     };
 
     function DropDownList(options) {
-        var opt = Factory.checkOptions($.extend({            
+        var opt = Factory.checkOptions($.extend({
             id: '',
             name: '',
             title: '',
             element: '',
+            //自定义样式名
+            className: '',
+            //自定义样式
+            style: '',
             //列表框宽度，默认不指定
             boxWidth: '',
             //box最小宽度
@@ -207,6 +252,8 @@
             single: false,
             //是否多选
             multi: true,
+            //是否允许空值（单选模式）
+            allowEmpty: '',
             //是否显示选框,默认情况下：单选框不显示，复选框显示
             //若指定display为true或false，则按指定规则显示
             display: null,
@@ -217,23 +264,25 @@
 
         this.id = opt.id;
         this.options = opt;
-        this.indexs = {};
-        this.nodes = [];
         this.initial();
     }
 
     DropDownList.prototype = {
         initial: function () {
             var that = this,
-            opt = that.options,
-            elem = opt.element;
+                opt = that.options,
+                elem = opt.element;
 
             if (opt.element.tagName === 'SELECT') {
                 var offset = $.getOffset(opt.element);
                 elem = document.createElement('INPUT');
-                elem.className = 'form-control oui-ddl-txt';
+                elem.className = 'form-control oui-ddl-txt' + (opt.className ? ' ' + opt.className : '');
                 $.setAttribute(elem, 'readonly', 'readonly');
-                elem.style.cssText = 'background-color:#fff;padding: 0 20px 0 9px;width:' + (opt.textWidth || offset.width) + 'px;';
+                elem.style.cssText = [
+                    'background-color:#fff;padding: 0 20px 0 9px;',
+                    opt.textWidth === 'auto' ? '' : 'width:' + (opt.textWidth || offset.width) + 'px;',
+                    opt.style ? opt.style + ';' : ''
+                ].join('');
                 opt.element.parentNode.insertBefore(elem, opt.element);
                 that.text = elem;
                 that.elem = opt.element;
@@ -242,9 +291,12 @@
 
             } else {
                 that.text = opt.element;
-                that.text.className += ' oui-ddl-txt';
+                that.text.className += ' oui-ddl-txt' + (opt.className ? ' ' + opt.className : '');
                 $.setAttribute(that.text, 'readonly', 'readonly');
-                that.text.style.cssText = 'background-color:#fff;padding: 0 20px 0 9px;';
+                that.text.style.cssText = (that.text.style.cssText || '') + [
+                    'background-color:#fff;padding: 0 20px 0 9px;',
+                    opt.style ? opt.style + ';' : ''
+                ].join('');
                 elem = document.createElement('SELECT');
                 opt.element.parentNode.insertBefore(elem, opt.element);
                 that.elem = elem;
@@ -252,7 +304,7 @@
                 opt.title = opt.title || that.text.value || '-请选择-';
             }
             that.text.value = opt.title || '';
-            
+
             if (!opt.name) {
                 opt.name = opt.title.replace('-请选择-', '').replace('请选择', '');
             }
@@ -268,26 +320,34 @@
         },
         build: function () {
             var that = this,
-            opt = that.options;
+                opt = that.options,
+                cache = Factory.getCache(that.id);
 
             $.createElement('DIV', function (box) {
                 var offset = $.getOffset(that.text),
-                edge = navigator.userAgent.indexOf('Edg/') > 0;
+                    ua = navigator.userAgent,
+                    edge = ua.indexOf('Edg/') > 0 || ua.indexOf('Edge') > 0,
+                    boxWidth = opt.boxWidth === 'follow' ? offset.width : opt.boxWidth,
+                    width = parseInt(boxWidth, 10);
+
+                if (!isNaN(width) && width > opt.maxWidth) {
+                    opt.maxWidth = width;
+                }
 
                 box.className = 'oui-ddl oui-ddl-panel' + (edge ? ' oui-ddl-edge' : '');
                 box.id = Config.IdPrefix + opt.id;
                 box.style.cssText = [
-                    'display:none;top:',offset.top + offset.height - 1, 'px;left:', offset.left, 'px;',
+                    'display:none;top:', offset.top + offset.height - 1, 'px;left:', offset.left, 'px;',
                     'min-width:', (opt.minWidth || (offset.width + 1)), 'px;',
                     'max-width:', (opt.maxWidth), 'px;',
-                    opt.boxWidth ? 'width:' + Factory.getStyleSize(opt.boxWidth) + ';' : '',
+                    boxWidth ? 'width:' + Factory.getStyleSize(boxWidth) + ';' : '',
                     'min-height:', Factory.getStyleSize(opt.minHeight), ';',
                     opt.maxHeight ? 'max-height:' + Factory.getStyleSize(opt.maxHeight) + ';' : '',
-                    ].join('');
+                ].join('');
 
                 var btn = [], len = opt.items.length, selects = '', oneBtn = true, ac = opt.submit ? 'ok' : 'no';
                 if (opt.multi) {
-                    if ((opt.layout !== Config.Layout.List && len > 3) || len > 5) {
+                    if (opt.layout !== Config.Layout.List && len > 3 || len > 5) {
                         selects = [
                             '<button class="btn btn-default btn-first" ac="1">全选</button>',
                             '<button class="btn btn-default" ac="2">反选</button>',
@@ -299,30 +359,48 @@
                     btn.push('<div class="oui-ddl-oper oui-ddl-oper-' + opt.layout + '" style="text-align:' + (opt.buttonPosition || 'center') + ';">');
                     btn.push('<div class="btn-group btn-group-xs' + (oneBtn ? ' btn-group-block' : '') + '">');
                     btn.push(selects.join(''));
-                    btn.push('<button class="btn btn-primary btn-' + ac + (oneBtn ? ' btn-block' : '') + '" ac="' + ac + '">确定</button>'); 
+                    btn.push('<button class="btn btn-primary btn-' + ac + (oneBtn ? ' btn-block' : '') + '" ac="' + ac + '">确定</button>');
                     btn.push('</div>');
                     btn.push('</div>');
                 }
 
                 var html = [
-                    '<ul class="oui-ddl-box oui-ddl-', opt.layout,'">'
-                    ];
-                for (var i = 0; i < len; i++) {
+                    '<ul class="oui-ddl-box oui-ddl-', opt.layout, '">'
+                ], i, key = Config.ItemPrefix + that.id;
+
+                if (!opt.multi && opt.allowEmpty) {
+                    html.push([
+                        '<li class="oui-ddl-item" style="',
+                        '">',
+                        '<label  class="oui-ddl-label', opt.layout !== Config.Layout.List && opt.itemBorder ? ' oui-ddl-label-border' : '', '">',
+                        '<input class="oui-ddl-chb"', checked,
+                        ' type="', opt.multi ? 'checkbox' : 'radio', '"',
+                        ' id="', '"',
+                        ' name="', key, '"',
+                        ' value="', '"',
+                        ' text="', opt.allowEmpty, '"',
+                        ' style="display:' + (opt.display ? '' : 'none') + ';"',
+                        ' />',
+                        '<span>', opt.allowEmpty, '</span>',
+                        '</label>',
+                        '</li>'
+                    ].join(''));
+                }
+                for (i = 0; i < len; i++) {
                     var dr = opt.items[i];
                     if (dr === 'sep' || dr.sep || dr.type === 'sep') {
                         html.push(['<li class="oui-ddl-item oui-ddl-sep"></li>'].join(''));
                     } else if (dr.head) {
                         html.push(['<li class="oui-ddl-item oui-ddl-head">', dr.name || dr.head, '</li>'].join(''));
                     } else {
-                        var key = Config.ItemPrefix + that.id,
-                        id = typeof dr.code !== 'undefined' ? dr.code : dr.id,
-                        name = dr.name + (dr.desc ? ' - ' + dr.desc : ''),
-                        chbId = key + dr.id,
-                        checked = dr.checked || dr.dc ? ' checked="checked" dc="1"' : '',
-                        use = dr.enabled || dr.use,
-                        disabled = dr.disabled ? ' disabled="disabled"' : '';
+                        var id = typeof dr.code !== 'undefined' ? dr.code : dr.id,
+                            name = dr.name + (dr.desc && dr.name !== dr.desc ? ' - ' + dr.desc : ''),
+                            chbId = key + dr.id,
+                            checked = dr.checked || dr.dc ? ' checked="checked" dc="1"' : '',
+                            use = dr.enabled || dr.use,
+                            disabled = dr.disabled ? ' disabled="disabled"' : '';
                         html.push([
-                            '<li class="oui-ddl-item" style="', 
+                            '<li class="oui-ddl-item" style="',
                             opt.layout !== Config.Layout.List ? 'float:left;' : '',
                             opt.layout === Config.Layout.Grid ? 'min-width:' + Factory.getStyleSize(opt.itemWidth) + ';' : '',
                             '">',
@@ -332,13 +410,14 @@
                             ' id="', chbId, '"',
                             ' name="', key, '"',
                             ' value="', id, '"',
-                            ' text="', dr.name.replace(/[\"]/, "\\\""), '"', 
+                            ' text="', (dr.name || '').filterHtml(true).replace(/[\"]/, "\\\""), '"',
+                            ' desc="', (dr.desc || '').filterHtml(true).replace(/[\"]/, "\\\""), '"',
                             ' style="display:' + (opt.display ? '' : 'none') + ';"',
                             ' />',
                             '<span', (use || typeof use === 'undefined') ? '' : ' class="del"', '>', name, '</span>',
                             '</label>',
                             '</li>'
-                            ].join(''));
+                        ].join(''));
                     }
                 }
                 html.push('</ul>');
@@ -348,7 +427,7 @@
                 box.show = false;
                 that.box = box;
 
-                $.addListener(box, 'mousedown', function(){
+                $.addListener(box, 'mousedown', function () {
                     $.cancelBubble();
                 });
 
@@ -362,23 +441,23 @@
                 });
 
                 var arr = $N(Config.ItemPrefix + that.id);
-                for (var i = 0; i < arr.length; i++) {
+                for (i = 0; i < arr.length; i++) {
                     var chb = arr[i];
-                    that.nodes.push(new Node({
+                    cache.nodes.push(new Node({
                         id: chb.value,
                         label: chb.parentNode,
                         input: chb,
                         multi: opt.multi,
-                        callback: function(node) {
+                        callback: function (node) {
                             that.action(node);
                         }
                     }));
-                    that.indexs[chb.id] = i;
+                    cache.indexs[chb.id] = i;
                 }
 
                 var btns = document.querySelectorAll('#' + Config.IdPrefix + opt.id + ' .oui-ddl-oper button');
-                for (var i = 0; i < btns.length; i++) {
-                    btns[i].onclick = function() {
+                for (i = 0; i < btns.length; i++) {
+                    btns[i].onclick = function () {
                         var ac = $.getAttribute(this, 'ac');
                         if (ac === 'no') {
                             that.hide();
@@ -393,162 +472,219 @@
                 }
                 that.callback(Config.Submit.Initial);
             }, document.body);
-return that;
-},
-action: function(node) {
-    var that = this,
-    opt = that.options,
-    nodes = that.nodes,
-    multi = opt.multi;
 
-    if (multi) {
-        node.set(!node.checked, true);
-    } else {
-        for (var i = 0; i < nodes.length; i++) {
-            nodes[i].set(nodes[i].id === node.id, true);
-        }
-        that.hide();
-    }
-    return that.callback();
-},
-set: function (val, ac) {
-    var that = this, 
-    opt = that.options,
-    nodes = that.nodes;
+            Factory.setWindowResize();
 
-    if ($.isNumber(ac)) {
-        switch(ac) {
-        case 0:
-        case 1:
-            for (var i = 0; i < nodes.length; i++) { nodes[i].set(ac); }
-                break;
-        case 2:
-            for (var i = 0; i < nodes.length; i++) { nodes[i].set(!nodes[i].checked); }
-                break;
-        case 3:
-            for (var i = 0; i < nodes.length; i++) { nodes[i].set(nodes[i].dc); }
-                break;
-        }
-    } else {
-        var vals = !$.isArray(val) ? val.split(/[,\|]/) : val;
-        if (opt.multi) {
-            for (var i = 0; i < nodes.length; i++) {
-                nodes[i].set(vals.indexOf(nodes[i].value) > - 1);
+            return that;
+        },
+        action: function (node) {
+            var that = this,
+                opt = that.options,
+                cache = Factory.getCache(that.id),
+                nodes = cache.nodes,
+                multi = opt.multi;
+
+            if (multi) {
+                node.set(!node.checked, true);
+            } else {
+                for (var i = 0; i < nodes.length; i++) {
+                    nodes[i].set(nodes[i].id === node.id, true);
+                }
+                that.hide();
             }
-        } else {
-            for (var i = 0; i < nodes.length; i++) {
-                nodes[i].set(nodes[i].value === vals[0]);
-            }
-        }
-    }
-    return that;
-},
-get: function () {
-    var that = this,
-    opt = this.options,
-    nodes = that.nodes,
-    vals = [],
-    txts = [];
+            return that.callback();
+        },
+        set: function (val, ac) {
+            var that = this,
+                opt = that.options,
+                cache = Factory.getCache(that.id),
+                nodes = cache.nodes;
 
-    for (var i = 0; i < nodes.length; i++) {
-        if (nodes[i].checked) {
-            vals.push(nodes[i].value.trim());
-            txts.push(nodes[i].text.trim());
-        }
-    }
+            if ($.isNumber(ac)) {
+                switch (ac) {
+                    case 0:
+                    case 1:
+                        for (var i = 0; i < nodes.length; i++) { nodes[i].set(ac); }
+                        break;
+                    case 2:
+                        for (var i = 0; i < nodes.length; i++) { nodes[i].set(!nodes[i].checked); }
+                        break;
+                    case 3:
+                        for (var i = 0; i < nodes.length; i++) { nodes[i].set(nodes[i].dc); }
+                        break;
+                }
+            } else {
+                var vals = !$.isArray(val) ? val.split(/[,\|]/) : val;
+                if (opt.multi) {
+                    for (var i = 0; i < nodes.length; i++) {
+                        nodes[i].set(vals.indexOf(nodes[i].value) > - 1);
+                    }
+                } else {
+                    for (var i = 0; i < nodes.length; i++) {
+                        nodes[i].set(nodes[i].value === vals[0]);
+                    }
+                }
+            }
+            return that;
+        },
+        get: function () {
+            var that = this,
+                opt = this.options,
+                cache = Factory.getCache(that.id),
+                nodes = cache.nodes,
+                vals = [],
+                txts = [],
+                single = !opt.multi;
+
+            for (var i = 0; i < nodes.length; i++) {
+                var n = nodes[i];
+                if (n.checked) {
+                    vals.push(n.value.trim());
+                    txts.push(n.text.trim() + (single && n.desc && n.text !== n.desc ? ' - ' + n.desc : ''));
+                }
+            }
             //显示文字
-    that.text.value = txts.join(',') || opt.title || '';
-    that.text.title = vals.length > 0 ? (opt.name ? opt.name + ': ' : '') + that.text.value : '';
+            that.text.value = txts.join(',') || opt.title || '';
+            that.text.title = vals.length > 0 ? (opt.name ? opt.name + ': ' : '') + that.text.value : '';
             //设置值
-    that.elem.options.length = 0;
-    that.elem.options.add(new Option(txts.join(','), vals.join(',')));
+            that.elem.options.length = 0;
+            that.elem.options.add(new Option(txts.join(','), vals.join(',')));
 
-    return vals.join(',');
-},
-callback: function(submitLevel) {
-    var that = this, 
-    opt = that.options,
-    vals = that.get(),
-    submit = submitLevel || 0;
+            return vals.join(',');
+        },
+        callback: function (submitLevel) {
+            var that = this,
+                opt = that.options,
+                vals = that.get(),
+                submit = submitLevel || 0;
 
-    if (submit === Config.Submit.Initial) {
-        if (vals === '') {
-            return that;
-        }
-    } else if (opt.multi) {
-        if (submit < opt.submit) {
-            return that;
-        }
-    }
-    if ($.isFunction(opt.callback)) {
-        opt.callback(vals, submit === Config.Submit.Initial, that);
-    }
-    return that;
-},
-show: function (elem) {
-    var that = this, 
-    opt = that.options,
-    show = true,
-    box = that.box,
-    offset = $.getOffset(that.text);
-
-    if(elem) {
-        show = !box.show;
-    }
-
-    if ($.isElement(box)) {
-        box.style.height = 'auto';
-
-                //先显示
-        box.style.display = show ? '' : 'none';
-        box.show = show;
-        $.setClass(that.text, 'oui-ddl-txt-cur', show);
-                //再获取尺寸
-        var bs = $.getBodySize(),
-        size = $.getOffset(box),
-        left = offset.left,
-        top = offset.top + offset.height - 1;
-
-        if (opt.position === Config.Position.Right) {
-            left = offset.left + offset.width - size.width + 1;
-            if (left <= 0) {
-                left = 0;
+            if (submit === Config.Submit.Initial) {
+                if (vals === '') {
+                    return that;
+                }
+            } else if (opt.multi) {
+                if (submit < opt.submit) {
+                    return that;
+                }
             }
-        } else if (left + size.width > bs.width) {
-            left -= (left + size.width - bs.width);
-        }
-        if (top + size.height > bs.height) {
-            top -= (top + size.height) - bs.height;
-            if (top < 0) {
-                top = 0;
+            if ($.isFunction(opt.callback)) {
+                opt.callback(vals, submit === Config.Submit.Initial, that);
             }
-        }
-        box.style.left = left + 'px';
-        box.style.top = top + 'px';
+            return that;
+        },
+        show: function (elem) {
+            var that = this,
+                cache = Factory.getCache(that.id),
+                opt = that.options,
+                show = true,
+                box = that.box;
 
-        if (top + size.height > bs.height) {
-            box.style.height = (bs.height - top - 2) + 'px';
-        }
-    }
-    return that;
-},
-hide: function () {
-    var that = this;
-    if ($.isElement(that.box)) {
-        that.box.style.display = 'none';
-        that.box.show = false;
-        $.removeClass(that.text, 'oui-ddl-txt-cur');
-    }
-    return that;
-}
-};
+            if (elem) {
+                show = !box.show;
+            }
 
-$.extend({
-    dropdownlist: function (options) {
-        return Factory.buildList(options);
-    },
-    ddlist: function (options) {
-        return Factory.buildList(options);
-    }
-});
+            if ($.isElement(box)) {
+                //先取消高度设置
+                box.style.height = 'auto';
+                //再显示下拉列表
+                box.style.display = show ? '' : 'none';
+                box.show = show;
+                $.setClass(that.text, 'oui-ddl-txt-cur', show);
+                //下拉列表位置停靠
+                that.size().position();
+            }
+            return cache.activity = true, that;
+        },
+        hide: function () {
+            var that = this,
+                cache = Factory.getCache(that.id);
+
+            if ($.isElement(that.box)) {
+                that.box.style.display = 'none';
+                that.box.show = false;
+                cache.activity = false;
+                $.removeClass(that.text, 'oui-ddl-txt-cur');
+            }
+            return that;
+        },
+        size: function (size) {
+            var that = this,
+                opt = that.options,
+                box = that.box,
+                offset = $.getOffset(that.text),
+                width = 0,
+                minWidth = opt.minWidth,
+                maxWidth = opt.maxWidth;
+
+            if ($.isObject(size) || $.isNumber(size)) {
+                width = size.width || size;
+                if (width > maxWidth) {
+                    maxWidth = width;
+                }
+                box.style.width = width + 'px';
+                box.style.maxWidth = maxWidth + 'px';
+            } else if (opt.boxWidth === 'follow') {
+                var width = offset.width;
+                if (width > maxWidth) {
+                    maxWidth = width;
+                }
+                if (width < minWidth) {
+                    minWidth = width;
+                }
+                box.style.width = width + 'px';
+                box.style.minWidth = minWidth + 'px';
+                box.style.maxWidth = maxWidth + 'px';
+            }
+            return that;
+        },
+        position: function () {
+            var that = this, opt = that.options, elem = opt.element;
+            var bs = $.getBodySize(),
+                box = that.box,
+                size = $.getOffset(box),
+                offset = $.getOffset(that.text),
+                left = offset.left - 1,
+                top = offset.top + offset.height - 1;
+
+            if (opt.position === Config.Position.Right) {
+                left = offset.left + offset.width - size.width - 1;
+                if (left <= 0) {
+                    left = 0;
+                }
+            } else if (left + size.width > bs.width) {
+                left -= (left + size.width - bs.width);
+            }
+            if (top + size.height > bs.height) {
+                top -= (top + size.height) - bs.height;
+                if (top < 0) {
+                    top = 0;
+                }
+            }
+            box.style.left = left + 'px';
+            box.style.top = top + 'px';
+
+            if (top + size.height > bs.height) {
+                var h = bs.height - top - 2;
+                if (opt.maxHeight && h > opt.maxHeight) {
+                    h = opt.maxHeight;
+                }
+                box.style.height = h + 'px';
+            }
+            return that;
+        },
+        isClosed: function () {
+            var that = this,
+                cache = Factory.getCache(that.id);
+            return !cache.activity;
+        }
+    };
+
+    $.extend({
+        dropdownlist: function (options) {
+            return Factory.buildList(options);
+        },
+        ddlist: function (options) {
+            return Factory.buildList(options);
+        }
+    });
 }(OUI);
