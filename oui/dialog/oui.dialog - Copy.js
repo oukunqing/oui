@@ -1352,7 +1352,7 @@
                     ctls.dialog.style.boxShadow = 'none';
                 }
                 ctls.dialog.style.padding = Common.getCssAttrSize(opt.padding, {
-                    attr: 'padding', unit: 'px', isArray: true, isLimit: true, max: 10, val: 0
+                    attr: 'padding', unit: 'px', isArray: true, isLimit: true, max: 10, val: 4
                 }).join(' ');
 
                 //增加了边框和圆角参数定制，主要是为了实现空白面板
@@ -1870,8 +1870,6 @@
                 if (document.getElementById(id) !== null) {
                     return false;
                 }
-                var size = Config.Padding;
-                //padding = ['4px', '4px', '4px', '4px'];
                 var div = $.createElement('div');
                 div.className = 'drag-switch';
                 div.pos = dir;
@@ -1882,14 +1880,12 @@
                     case 'top':
                     case 'bottom':
                         //div.style.height = opt.padding + 'px';
-                        //div.style.height = padding[dir];
-                        div.style.height = size + 'px';
+                        div.style.height = padding[dir];
                         break;
                     case 'left':
                     case 'right':
                         //div.style.width = opt.padding + 'px';
-                        //div.style.width = padding[dir];
-                        div.style.width = size + 'px';
+                        div.style.width = padding[dir];
                         break;
                 }
                 return div;
@@ -4024,8 +4020,8 @@
                 //width: follow|inherit 并且设置了target，则width跟随target控件的宽度
                 height: ds.height + 'px',   //初始高度      px, auto, %
                 margin: 0,              //当宽度或高度设置为 % 百分比时，启用 margin，margin格式参考css [上右下左] 设置，单位为px
-                padding: 0,             //内边距（拖动边框）宽度，格式参考css设置，单位为px
-                radius: 5,              //对话框圆角半径，单位为px，默认为5px
+                padding: 4,             //内边距（拖动边框）宽度，格式参考css设置，单位为px
+                radius: 4,              //对话框圆角半径，单位为px，默认为4px
                 border: null,           //对话框边框宽度，如：'solid 1px #ccc', 0 或 none 表示不要边框，1-表示边框宽度为1px, null表示不处理
                 parent: null,           //Element parentNode DIV
                 limitRange: true,       //窗体范围(位置、大小)限制 true,false

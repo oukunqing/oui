@@ -491,9 +491,7 @@
                 that.hide();
             }
             if (multi && nodes.length > 1 && opt.debounce) {
-                $.debounce({
-                    delay: 500
-                }, function() {
+                $.debounce({}, function() {
                     that.callback();
                 });
             } else {

@@ -1,5 +1,6 @@
 .oui-picbox-box {
     border: solid 1px #ddd;
+    border: none 0;
     overflow: hidden;
     position: relative;
     display: block;
