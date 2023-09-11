@@ -1490,7 +1490,7 @@
                         } else {
                             $.createElement('a', function (elem) {
                                 elem.className = 'dialog-btn btn-reload left-reload';
-                                elem.style.margin = '4px 0 0 2px';
+                                elem.style.margin = '3px 0 0 2px';
                                 $.setAttribute(elem, { title: reload, code: 'reload', key: 'reload' });
                                 pNode.insertBefore((ctls.reload = elem), ctls.title);
                                 util.setButtonEvent(that, [elem], 'click', true);

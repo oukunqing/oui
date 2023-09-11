@@ -1449,25 +1449,10 @@ var dr = {id:123,name:'abc',code:'acc'};
 filter(dr);
 console.log(dr);
 
+var units = ['时','分','秒'];
+var ts = ['08','23','15'];
 
-console.log('2023-06-21 15:55:01'.toDate().format('ts', 10));
-console.log('2023-06-21 00:00:01'.toDate().format('ts', 10));
-console.log('2023-06-22 00:00:01'.toDate().format('ts', 10));
-
-var ts = '2023-06-21 3:55:01'.toDate().format('ts', 10);
-ts = parseInt(ts, 10) + 28800;
-var ms = ts / 60;
-console.log('ms:', ms);
-ms %= 1440;
-console.log('ms:', ms);
-console.log('ms:', parseInt(ms/60,10), ms %60);
-console.log();
+console.log(ts.join(units));
 
 
-var list = [123,2345];
 
-list = list.concat([666,777]);
-console.log(list);
-
-console.log($.md5('Nbsdsdk123!'));
-console.log(44+44+24*6+44+44+20+34);

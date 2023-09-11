@@ -55,7 +55,7 @@
     min-height: 35px; 
     overflow: hidden;
     box-sizing: border-box;
-    border-radius: 4px;
+    border-radius: 5px;
 }
 
 .oui-dialog .dialog-main {
@@ -114,15 +114,15 @@
     margin: 0; 
     padding: 0;
     width: auto;
-    height: 30px;
+    height: 29px;
+    line-height: 27px;
+    text-indent: 6px;
     /*font-weight: bold;*/
     float: left;
     color: #333;
     box-sizing: border-box;
     font-size: 14px;
     text-align: left;
-    text-indent: 6px;
-    line-height: 28px;
     text-overflow: ellipsis;
     overflow: hidden;
 	
@@ -152,11 +152,11 @@
     padding: 0;
     float: left;
     width: auto;
-    height: 30px;
+    height: 29px;
+    line-height: 27px;
     font-size: 14px;
     text-align: left;
     text-indent: 6px;
-    line-height: 28px;
 }
 
 .oui-dialog .dialog-head .dialog-logo {
@@ -168,7 +168,7 @@
     border-radius: 3px;
     box-sizing: content-box;
     float: left;
-    background:transparent url('imgs/icon.png') no-repeat 0 0;
+    background:transparent url('imgs/icon.png?202309111') no-repeat 0 0;
 }
 
 .oui-dialog .dialog-head .dialog-logo:hover {
@@ -224,28 +224,28 @@
 }
 
 .oui-dialog .dialog-head .btn-min {
-    background:transparent url('imgs/icon.png?202301291') no-repeat -20px 0;
+    background:transparent url('imgs/icon.png?202309111') no-repeat -20px 0;
 }
 
 .oui-dialog .dialog-head .btn-max {
-    background:transparent url('imgs/icon.png?202301291') no-repeat -40px 0;
+    background:transparent url('imgs/icon.png?202309111') no-repeat -40px 0;
 }
 
 .oui-dialog .dialog-head .btn-normal {
-    background:transparent url('imgs/icon.png?202301291') no-repeat -60px 0;
+    background:transparent url('imgs/icon.png?202309111') no-repeat -60px 0;
 }
 
 .oui-dialog .dialog-head .btn-close {
-    background:transparent url('imgs/icon.png?202301291') no-repeat -80px 0;
+    background:transparent url('imgs/icon.png?202309111') no-repeat -80px 0;
 }
 
 .oui-dialog .dialog-head .btn-reload {
-    background:transparent url('imgs/icon.png?202301291') no-repeat -320px 0;
+    background:transparent url('imgs/icon.png?202309111') no-repeat -320px 0;
 }
 
 .oui-dialog .dialog-head .left-reload {
 	float: left; 
-	margin: 4px 0 0 0;
+	margin: 3px 0 0 0;
 }
 
 .oui-dialog .dialog-body, .oui-dialog-max .dialog-body {
@@ -286,28 +286,28 @@
     margin: 3px 2px 0 5px; padding: 0;
     box-sizing: content-box;
 
-    background:transparent url('imgs/icon.png?202301291') no-repeat -80px 0;
+    background:transparent url('imgs/icon.png?202309111') no-repeat -80px 0;
 }
 
 
 .oui-dialog .dialog-body .close0 {
     border: none 0;
-    background:transparent url('imgs/icon.png?202301291') no-repeat -80px 0;
+    background:transparent url('imgs/icon.png?202309111') no-repeat -80px 0;
 }
 
 .oui-dialog .dialog-body .close1 {
     border: none 0;
-    background:transparent url('imgs/icon.png?202301291') no-repeat -100px 0;
+    background:transparent url('imgs/icon.png?202309111') no-repeat -100px 0;
 }
 
 .oui-dialog .dialog-body .close2 {
     border: none 0;
-    background:transparent url('imgs/icon.png?202301291') no-repeat -120px 0;
+    background:transparent url('imgs/icon.png?202309111') no-repeat -120px 0;
 }
 
 .oui-dialog .dialog-body .close3 {
     border: none 0;
-    background:transparent url('imgs/icon.png?202301291') no-repeat -140px 0;
+    background:transparent url('imgs/icon.png?202309111') no-repeat -140px 0;
 }
 
 .oui-dialog .dialog-body .dialog-content {

@@ -61,15 +61,15 @@
     margin: 0; 
     padding: 0;
     width: auto;
-    height: 30px;
+    height: 29px;
+    text-indent: 6px;
+    line-height: 27px;
     /*font-weight: bold;*/
     float: left;
     color: #f5f5f5;
     box-sizing: border-box;
     font-size: 14px;
     text-align: left;
-    text-indent: 6px;
-    line-height: 28px;
     text-overflow: ellipsis;
     overflow: hidden;
 }

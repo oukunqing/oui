@@ -2304,15 +2304,20 @@
             }
             return { days: d, hours: h, minutes: m, seconds: s, d: d, h: h, m: m, s: s };
         },
-        toTimeStr: function (secondDecimalLen, daysUnit) {
+        toTimeStr: function (secondDecimalLen, daysUnit, timeUnits) {
+            if ($.isBoolean(daysUnit, false)) {
+                timeUnits = daysUnit;
+                daysUnit = '';
+            }
             var seconds = this,
                 data = seconds.toTimeData(secondDecimalLen),
+                units = $.isArray(timeUnits) ? timeUnits : $.isBoolean(timeUnits, true) ? ['时', '分', '秒'] : [],
                 time = [
-                    data.h.padLeft(2),
-                    data.m.padLeft(2),
-                    data.s.padLeft(2)
+                    data.h.padLeft(2) + (units[0] || ''),
+                    data.m.padLeft(2) + (units[1] || ''),
+                    data.s.padLeft(2) + (units[2] || '')
                 ];
-            return (data.d ? data.d + (daysUnit || '天') + ' ' : '') + time.join(':');
+            return (data.d ? data.d + (daysUnit || '天') : '') + time.join(units.length > 0 ? '' : ':');
         },
         toDurationStr: function(hideDays, units) {
             var seconds = this,
