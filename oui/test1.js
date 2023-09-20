@@ -1454,5 +1454,60 @@ var ts = ['08','23','15'];
 
 console.log(ts.join(units));
 
+121.123456
 
+console.log(1/111000);
+console.log(360/(6378137*2*3.1415926));
+
+console.log(3.1415926*6378137/180);
+console.log(3.1415926*6378137/180*360/3.1415926/2);
+
+var EARTH_CIRCUMFERENCE = 3.1415926*6378137*2;
+
+console.log('EARTH_CIRCUMFERENCE:', EARTH_CIRCUMFERENCE);
+var lat_len = 3.1415926*6378137/180;
+var lng_len = lat_len * Math.cos(38);
+console.log(EARTH_CIRCUMFERENCE, lat_len, lng_len);
+
+console.log(EARTH_CIRCUMFERENCE/lat_len);
+
+
+function GetEarthCircumference(latitude) {
+    return EARTH_CIRCUMFERENCE * Math.cos(latitude);
+}
+
+console.log(GetEarthCircumference(29.12345));
+
+console.log(Math.abs(EARTH_CIRCUMFERENCE * Math.cos(29)/360), Math.cos(0));
+
+console.log(360/Math.abs(EARTH_CIRCUMFERENCE * Math.cos(29)), Math.cos(0));
+
+
+
+var measurePoint = function ( x, y, d) {
+    this.x = x;
+    this.y = y;
+    this.d = d;
+};
+Math.atan(10);
+console.log(measurePoint(1,2,3));
+console.log(new measurePoint(1,2,3));
+
+console.log(Math.PI);
+
+console.log(Math.pow(2.12345, 2));
+console.log(2.12345*2.12345);
+
+$.console.debug('1234');
+console.debug('1234');
+
+
+
+var py2 = 35.28577076250284;
+var py1 = 29.001458388511015;
+var px3 = 316.5047887447397;
+var py3 = 35.28577076250284;
+var px2 = 316.5047887447397;
+        var b = ((py2 - py1) * px3 * px3 - (py3 - py1) * px2 * px2) / (px2 * px3 * px3 - px3 * px2 * px2);
+        $.console.debug('b:', b);
 

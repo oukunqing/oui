@@ -976,8 +976,14 @@
         quickSort: function (arr, key) {
             if (0 === arr.length) { return []; }
             var left = [], right = [], pivot = arr[0], c = arr.length;
-            for (var i = 1; i < c; i++) {
-                arr[i][key] < pivot[key] ? left.push(arr[i]) : right.push(arr[i]);
+            if (key) {
+                for (var i = 1; i < c; i++) {
+                    arr[i][key] < pivot[key] ? left.push(arr[i]) : right.push(arr[i]);
+                }
+            } else {
+                for (var i = 1; i < c; i++) {
+                    arr[i] < pivot ? left.push(arr[i]) : right.push(arr[i]);
+                }
             }
             return this.quickSort(left, key).concat(pivot, this.quickSort(right, key));
         },
@@ -1605,11 +1611,20 @@
         replaceAll: function (pattern, v) {
             return this.replace($.isRegexp(pattern) ? pattern : new RegExp(pattern, 'gm'), v);
         },
+        /*
+            v: 要追加的内容
+            c: 要插入的数量或间隔符号
+        */
         append: function (v, c) {
             var s = this;
+            if (v === undefined || v === null) {
+                return s;
+            }
             if ($.isNumber(c)) {
                 for (var i = 0; i < c; i++) { s += v; }
                 return s;
+            } else if ($.isString(c, true)) {
+                return s + c + v;
             }
             return s + v;
         },
@@ -4084,9 +4099,9 @@
                     elem[keyTimes] = ts;
                     tc = ts - elem[keyTimes];
                 }
-                console.log('HitListener: ', evName + (keyCode ? ':' + keyCode : ''), e.keyCode || '', elem[keyCount]);
+                $.console.log('HitListener: ', evName.append(keyCode, ':'), e.keyCode || '', elem[keyCount]);
                 if (elem[keyCount] >= times) {
-                    try { func(e, elem[keyCount], keyCode, e.key.toUpperCase()); } catch (e) { }
+                    try { func(e, elem[keyCount], keyCode || '', (e.key || '').toUpperCase()); } catch (ex) { }
                     elem[keyCount] = 1;
                     elem[keyTimes] = 0;
                     return false;
@@ -4849,27 +4864,28 @@
 
     var browser = {
         ua: function () { try { return navigator.userAgent; } catch (e) { return ''; } },
-        isFirefox: function (ua) { return (ua || browser.ua()).indexOf('Firefox') > -1; },
-        isEdge: function (ua) { return (ua || browser.ua()).indexOf('Edge') > -1; },
-        isOpera: function (ua) { ua = ua || browser.ua(); return ua.indexOf('Opera') > -1 || ua.indexOf('OPR') > -1; },
-        isSafari: function (ua) { ua = ua || browser.ua(); return ua.indexOf('Safari') > -1 && ua.indexOf('Chrome') < 0; },
-        isIE: function (ua) { ua = ua || browser.ua(); return ua.indexOf('Trident') > -1 || (ua.indexOf('MSIE') > -1 && ua.indexOf('compatible') > -1); },
-        isChrome: function (ua) { ua = ua || browser.ua(); return ua.indexOf('Chrome') > -1 && !browser.isOpera(ua) && !browser.isEdge(ua) && !browser.isSafari(ua); },
-        isWap: function (ua) { ua = ua || browser.ua(); return /Android|webOS|iPhone|iPod|iPad|BlackBerry/i.test(ua); },
-        isWechar: function (ua) { ua = ua || browser.ua(); return /MicroMessenger/i.test(ua); },
+        getua: function (ua) { return (ua || browser.ua()).toLowerCase(); },
+        isFirefox: function (ua) { ua = browser.getua(ua); return ua.indexOf('firefox/') > -1; },
+        isEdge: function (ua) { ua = browser.getua(ua); return ua.indexOf('edge/') > -1 || ua.indexOf('edg/') > -1; },
+        isOpera: function (ua) { ua = browser.getua(ua); return ua.indexOf('opera/') > -1 || ua.indexOf('opr/') > -1; },
+        isSafari: function (ua) { ua = browser.getua(ua); return ua.indexOf('safari/') > -1 && ua.indexOf('chrome/') < 0; },
+        isIE: function (ua) { ua = browser.getua(ua); return ua.indexOf('trident/') > -1 || (ua.indexOf('msie') > -1 && ua.indexOf('compatible') > -1); },
+        isChrome: function (ua) { ua = browser.getua(ua); return ua.indexOf('chrome/') > -1 && !browser.isOpera(ua) && !browser.isEdge(ua) && !browser.isSafari(ua); },
+        isWap: function (ua) { ua = browser.getua(ua); return /android|webos|iphone|ipod|ipad|blackberry/i.test(ua); },
+        isWechar: function (ua) { ua = browser.getua(ua); return /micromessenger/i.test(ua); },
         isMobile: function (ua) { return browser.isWap(ua); }
     };
-    var ua = function () { try { return navigator.userAgent; } catch (e) { return ''; } }(),
+    var ua = function () { try { return navigator.userAgent.toLowerCase(); } catch (e) { return ''; } }(),
         //mc = ua.match(/([A-Z]+)\/([\d\.]+)/ig) || [], ut = mc.join('_').replace(/\//g,''),
-        isFirefox = ua.indexOf('Firefox') > -1,
-        isEdge = ua.indexOf('Edge') > -1,
-        isOpera = ua.indexOf('Opera') > -1 || ua.indexOf('OPR') > -1,
-        isSafari = ua.indexOf('Safari') > -1 && ua.indexOf('Chrome') < 0,
-        isChrome = !isOpera && !isEdge && !isSafari && ua.indexOf('Chrome') > -1,
-        isIE = ua.indexOf('Trident') > -1 || (ua.indexOf('MSIE') > -1 && ua.indexOf('compatible') > -1),
-        isWap = /Android|webOS|iPhone|iPod|iPad|BlackBerry/i.test(ua),
-        isWechar = /MicroMessenger/i.test(ua),
-        ieVersion = isIE ? parseFloat('0' + (ua.match(/(MSIE\s|rv:)([\d\.]+)[;]?/) || [])[2], 10) : 0;
+        isFirefox = ua.indexOf('firefox/') > -1,
+        isEdge = ua.indexOf('edge/') > -1 || ua.indexOf('edg/') > -1,
+        isOpera = ua.indexOf('opera/') > -1 || ua.indexOf('opr/') > -1,
+        isSafari = ua.indexOf('safari/') > -1 && ua.indexOf('chrome/') < 0,
+        isChrome = !isOpera && !isEdge && !isSafari && ua.indexOf('chrome/') > -1,
+        isIE = ua.indexOf('trident/') > -1 || (ua.indexOf('msie') > -1 && ua.indexOf('compatible') > -1),
+        isWap = /android|webos|iphone|ipod|ipad|blackberry/i.test(ua),
+        isWechar = /micromessenger/i.test(ua),
+        ieVersion = isIE ? parseFloat('0' + (ua.match(/(msi\s|rv:)([\d\.]+)[;]?/) || [])[2], 10) : 0;
     $.extendNative($, {
         isChrome: isChrome,
         isFirefox: isFirefox,
@@ -6145,16 +6161,13 @@
     var getArguments = function (args, prefix) {
         var par = typeof prefix !== 'undefined' ? { 0: prefix, length: 1 } : { length: 0 },
             len = par.length;
-
         for (var i = 0; i < args.length; i++) {
             par[len++] = args[i];
         }
-
         return par.length += len - 1, par;
     }, log = function (type, formatstring) {
-        var str = '[' + new Date().format(formatstring || _tf) + ']' + (type ? '[' + type + ']' : '');
-        return str;
-    }, _tf = 'log';
+        return '[' + new Date().format(formatstring || _tf) + ']' + (type ? '[' + type + ']' : '');
+    }, _tf = 'log', isie = $.browser.isIE();
 
     $.extendNative($, {
         console: {
@@ -6165,22 +6178,22 @@
                 return this.timeformat(formatstring);
             },
             log: function () {
-                return console.log.apply(this, getArguments(arguments, log(null))), this;
+                return !isie ? console.log.apply(this, getArguments(arguments, log(null))) : console.log(log(null), arguments), this;
             },
             info: function () {
-                return console.info.apply(this, getArguments(arguments, log('i'))), this;
+                return !isie ? console.info.apply(this, getArguments(arguments, log('i'))) : console.info(log('i'), arguments), this;
             },
             warn: function () {
-                return console.warn.apply(this, getArguments(arguments, log('w'))), this;
+                return !isie ? console.warn.apply(this, getArguments(arguments, log('w'))) : console.warn(log('w'), arguments), this;
             },
             debug: function () {
-                return console.debug.apply(this, getArguments(arguments, log('d'))), this;
+                return !isie ? console.log.apply(this, getArguments(arguments, log('d'))) : console.log(log('d'), arguments), this;
             },
             error: function () {
-                return console.error.apply(this, getArguments(arguments, log('e'))), this;
+                return !isie ? console.error.apply(this, getArguments(arguments, log('e'))) : console.error(log('e'), arguments), this;
             },
             trace: function () {
-                return console.trace.apply(this, getArguments(arguments, log('t'))), this;
+                return !isie ? console.trace.apply(this, getArguments(arguments, log('t'))) : console.trace(log('t'), arguments), this;
             }
         }
     });
