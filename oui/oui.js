@@ -2393,6 +2393,10 @@
                 formatString = 'yyyyMMddHHmmss.fff';
             } else if (['utc', 'UTC'].indexOf(formatString) >= 0) {
                 formatString = 'yyyy-MM-ddTHH:mm:ss.fffZ';
+            } else if (['date'].indexOf(formatString) >= 0) {
+                formatString = 'yyyy-MM-dd';
+            } else if (['dt'].indexOf(formatString) >= 0) {
+                formatString = 'yyyyMMdd';
             }
             var p = /([y]+|[M]+|[d]+|[H]+|[s]+|[f]+)/gi,
                 y = year + (year < 1900 ? 1900 : 0), M = t.getMonth() + 1, d = t.getDate(),

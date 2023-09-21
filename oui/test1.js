@@ -1511,3 +1511,12 @@ var px2 = 316.5047887447397;
         var b = ((py2 - py1) * px3 * px3 - (py3 - py1) * px2 * px2) / (px2 * px3 * px3 - px3 * px2 * px2);
         $.console.debug('b:', b);
 
+
+var obj = {};
+
+console.log(obj.length);
+
+var names = ['系统配置','服务配置','图片配置','地图配置','功能定制','设备接入','配置管理','增加配置'];
+for(var i =0; i<names.length;i++){
+    console.log(names[i].toUnicode());
+}

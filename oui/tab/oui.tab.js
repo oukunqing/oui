@@ -35,18 +35,18 @@
         LongPressScrollDistance: 10,     //长按时一次滚动的距离，单位：px
         LongPressScrollMaxDistance: 50,     //长按时一次滚动的距离，单位：px
         LangText: {
-            loading: {chinese: '正在努力加载，请稍候...', english: 'Loading, please wait a moment!'},
-            overrun: {chinese: '标签页数量已超出限制', english: 'Tab page count exceeded limit.'},
-
-            close: {chinese: '关闭当前标签页', english: 'Close tab'},
-            closeall: {chinese: '关闭全部标签页', english: 'Close all tabs'},
-            closeother: {chinese: '关闭其他标签页', english: 'Close other tabs'},
-            closeleft: {chinese: '关闭左侧标签页', english: 'Close tab to the left'},
-            closeright: {chinese: '关闭右侧标签页', english: 'Close tab to the right'},
-            reload: {chinese: '重新加载', english: 'Reload'},
-            reloadall: {chinese: '全部重新加载', english: 'Reload all'},
-            reopen: {chinese: '重新打开关闭的标签页', english: 'Reopen closed tab'},
-            reopenall: {chinese: '重新打开关闭的全部标签页', english: 'Reopen all closed tab'}
+            loading: { chinese: '正在努力加载，请稍候...', english: 'Loading, please wait a moment!' },
+            overrun: { chinese: '标签页数量已超出限制', english: 'Tab page count exceeded limit.' },
+            closetab: { chinese: '关闭', english: 'Close tab' },
+            close: { chinese: '关闭当前标签页', english: 'Close tab' },
+            closeall: { chinese: '关闭全部标签页', english: 'Close all tabs' },
+            closeother: { chinese: '关闭其他标签页', english: 'Close other tabs' },
+            closeleft: { chinese: '关闭左侧标签页', english: 'Close tab to the left' },
+            closeright: { chinese: '关闭右侧标签页', english: 'Close tab to the right' },
+            reload: { chinese: '重新加载', english: 'Reload' },
+            reloadall: { chinese: '全部重新加载', english: 'Reload all' },
+            reopen: { chinese: '重新打开关闭的标签页', english: 'Reopen closed tab' },
+            reopenall: { chinese: '重新打开关闭的全部标签页', english: 'Reopen all closed tab' }
         },
         IdPrefix: 'oui-tabs-'
     },
@@ -186,7 +186,7 @@
                 if(cfg.style.tab) {
                     elem.style.cssText = cfg.style.tab;
                 }
-                var txtStyle = '', closeStyle = '';
+                var txtStyle = '', closeTitle = '', closeStyle = '';
                 if(cfg.style.txt) {
                     txtStyle = cfg.style.txt;
                 }
@@ -198,9 +198,10 @@
                 }
                 var con = '<a class="tab-txt" href="javascript:void(0);" style="{1}">{name}</a>';
                 if(opt.closeAble && !isElem) {
-                    con += '<i class="tab-close" title="" style="{2}">×</i>';
+                    con += '<i class="tab-close" title="{2}" style="{3}">×</i>';
                 }
-                elem.innerHTML = con.format(opt, txtStyle, closeStyle);
+                closeTitle = Util.getLangText('closetab', opt.lang);
+                elem.innerHTML = con.format(opt, txtStyle, closeTitle, closeStyle);
                 
                 if($.isNumber(insertIndex)) {
                     t.container.insertBefore(elem, t.container.childNodes[insertIndex]);
@@ -346,7 +347,7 @@
                     debug = $.isDebug();
 
                 if (debug) {
-                    $.console.log('setSize:', t.id, ', tw: ', tw, ', als: ', als, ', ars: ', ars, ', w: ', w, ', bw: ', bw);
+                    console.log('setSize:', t.id, ', tw: ', tw, ', als: ', als, ', ars: ', ars, ', w: ', w, ', bw: ', bw);
                 }
 
                 if(tw <= bw) {
@@ -364,7 +365,7 @@
                     bw2 = Util.checkSize(w - als2 - ars2);
 
                 if (debug) {
-                    $.console.log('setSize:', t.id, ', tw: ', tw, ', als2: ', als2, ', ars2: ', ars2, ', bw: ', bw2);
+                    console.log('setSize:', t.id, ', tw: ', tw, ', als2: ', als2, ', ars2: ', ars2, ', bw: ', bw2);
                 }
 
                 //设置 tab box 宽度
