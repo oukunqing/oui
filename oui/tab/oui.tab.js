@@ -31,6 +31,7 @@
         CMenuSwitchWidth: 16,   //左右切换按钮宽度，单位：像素
         CMenuItemPaddingHeight: 4,  //菜单项间距，单位：像素
         CMenuBorderHeight: 2,       //菜单边框高度，单位：像素
+        ItemCloseHeight: 17,        //选项卡关闭按钮高度，单位：像素
         LongPressTime: 512,      //长按最小时长，单位：毫秒
         LongPressInterval: 40,   //长按滚动间隔，单位：毫秒
         LongPressMinInterval: 10,   //长按滚动间隔，单位：毫秒
@@ -193,10 +194,12 @@
                     txtStyle = cfg.style.txt;
                 }
                 if(cfg.tabHeight) {
-                    var height = cfg.tabHeight - Config.CMenuBorderHeight;
+                    var height = cfg.tabHeight - Config.CMenuBorderHeight,
+                        //行高要低于选项高度，因为选项卡位置下调
+                        lineHeight = height - ($.isFirefox ? 3 : 2);
                     elem.style.height = height + 'px';
-                    closeStyle = 'margin-top:' + parseInt((height - 17) / 2, 10) + 'px;';
-                    txtStyle += ';line-height:' + (height - ($.isFirefox ? 3 : 0)) + 'px;';
+                    closeStyle = 'margin-top:' + parseInt((lineHeight - Config.ItemCloseHeight) / 2, 10) + 'px;';
+                    txtStyle += ';line-height:' + lineHeight + 'px;';
                 }
                 var con = '<a class="tab-txt" href="javascript:void(0);" style="{1}">{name}</a>';
                 if(opt.closeAble && !isElem) {
