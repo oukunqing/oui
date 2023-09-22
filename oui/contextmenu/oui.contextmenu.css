@@ -8,7 +8,7 @@
     background: #fff;
     font-family: Arial,'Courier New',宋体,微软雅黑;
     margin: 0;
-    padding: 3px 0;
+    padding: 0;
     /*box-shadow: 5px 5px 2px 0 rgba(0,0,0,.32);*/
     box-shadow: 4px 4px 4px -4px #ccc;
     border: solid 1px #dadce0;
@@ -20,7 +20,7 @@
     line-height: 28px;
     display: block;
     text-align: left;
-    margin: 0 3px;
+    margin: 4px 4px;
     padding: 0 15px 0 15px;
     font-size: 14px;
     font-family: Arial,'Courier New',宋体,微软雅黑;

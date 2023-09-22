@@ -21,7 +21,9 @@
         ItemArrowWidth: 25,
         ItemHeight: 28,    //右键菜单项高度，单位：像素
         IconWidth: 20,      //Icon图标最大尺寸
-        IconBoxWidth: 25
+        IconBoxWidth: 25,
+        ItemPaddingHeight: 4,
+        MenuBorderHeight: 2
     },
         Cache = {
             menus: {},
@@ -255,7 +257,7 @@
                     width: cfg.width,
                     height: cfg.height,
                     x: offset.width - 5,
-                    y: -Config.ItemHeight - 3
+                    y: -Config.ItemHeight - Config.ItemPaddingHeight
                 },
                     bs = $.getBodySize(),
                     ss = $.getScrollPosition(),
@@ -356,7 +358,7 @@
 
                 var boxSize = $.elemSize(box);
                 if (boxSize.top + boxSize.outerHeight > bs.height + ss.top) {
-                    box.style.marginTop = (bs.height + ss.top) - (boxSize.top + boxSize.outerHeight) - 3 + 'px';
+                    box.style.marginTop = (bs.height + ss.top) - (boxSize.top + boxSize.outerHeight) - Config.ItemPaddingHeight + 'px';
                 }
 
                 cache.boxs.push({ box: box, level: level, item: parent });
@@ -367,7 +369,7 @@
                     elem = $.createElement('div', '', function (elem) {
                         elem.className = 'cmenu-sep';
                     });
-                    return { type: 'sep', elem: elem, height: 9 };
+                    return { type: 'sep', elem: elem, height: Config.ItemPaddingHeight * 2 + 1 };
                 } else {
                     if (!Factory.checkCondition(dr.condition)) {
                         return null;
@@ -430,7 +432,7 @@
                         }
                         elem.innerHTML = Factory.buildMenuText(txt, dr, disabled);
                     });
-                    return { type: 'menu', elem: elem, height: Config.ItemHeight, width: w };
+                    return { type: 'menu', elem: elem, height: Config.ItemHeight + Config.ItemPaddingHeight, width: w };
                 }
             },
             dealChecked: function (par, elem) {
@@ -593,7 +595,9 @@
                 }
                 if (!isAppend) {
                     //height + padding + border
-                    height += 8;
+                    //height += 8 + 2;
+                    //height += Config.ItemPaddingHeight * 2 + 2;
+                    height -= Config.MenuBorderHeight;
                     if (!opt.height || opt.height === 'auto' || height > opt.height) {
                         box.style.height = height + 'px';
                     }

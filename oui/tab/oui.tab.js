@@ -29,6 +29,8 @@
         },
         CMenuItemHeight: 28,    //右键菜单项高度，单位：像素
         CMenuSwitchWidth: 16,   //左右切换按钮宽度，单位：像素
+        CMenuItemPaddingHeight: 4,  //菜单项间距，单位：像素
+        CMenuBorderHeight: 2,       //菜单边框高度，单位：像素
         LongPressTime: 512,      //长按最小时长，单位：毫秒
         LongPressInterval: 40,   //长按滚动间隔，单位：毫秒
         LongPressMinInterval: 10,   //长按滚动间隔，单位：毫秒
@@ -80,7 +82,7 @@
                 elem.className = 'tab-switch tab-switch-' + dir;
                 var style = '';
                 if(opt.tabHeight) {
-                    var height = opt.tabHeight - 2;
+                    var height = opt.tabHeight - Config.CMenuBorderHeight;
                     elem.style.cssText = 'height:' + height + 'px;display:none;';
                     style = 'margin-top:' + (height - 12) / 2 + 'px;';
                 }
@@ -140,7 +142,7 @@
                     elem.style.cssText = opt.style.box;
                 }
                 if(opt.tabHeight) {
-                    elem.style.height = (opt.tabHeight - 2) + 'px';
+                    elem.style.height = (opt.tabHeight - Config.CMenuBorderHeight) + 'px';
                 }
             }, t.tabContainer);
             t.box = div;
@@ -191,7 +193,7 @@
                     txtStyle = cfg.style.txt;
                 }
                 if(cfg.tabHeight) {
-                    var height = cfg.tabHeight - 2;
+                    var height = cfg.tabHeight - Config.CMenuBorderHeight;
                     elem.style.height = height + 'px';
                     closeStyle = 'margin-top:' + parseInt((height - 17) / 2, 10) + 'px;';
                     txtStyle += ';line-height:' + (height - ($.isFirefox ? 3 : 0)) + 'px;';
@@ -523,13 +525,13 @@
             var width = 256, height = 0;
             for(var i = 0; i<html.length; i++) {
                 if(html[i].indexOf('<a') === 0) {
-                    height += Config.CMenuItemHeight;
+                    height += Config.CMenuItemHeight + Config.CMenuItemPaddingHeight;
                 } else {
-                    height += 9;
+                    height += Config.CMenuItemPaddingHeight + 1;
                 }
             }
             //height + padding + border
-            return { text: html.join(''), width: width, height: height + 6 + 2 };
+            return { text: html.join(''), width: width, height: height + Config.CMenuItemPaddingHeight + Config.CMenuBorderHeight };
         },
         setContextMenuPos: function(pos, size) {
             var bs = $.getBodySize(),
