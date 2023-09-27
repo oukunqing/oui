@@ -58,3 +58,104 @@ var ini = $.jsonToIni(data);
 console.log(ini);
 
 console.log($.iniToJson(ini));
+
+
+var isArray = Array.isArray || function (a) { return Object.prototype.toString.call(a) === '[object Array]'; };
+var isObject = function(data) {
+    return typeof data === 'object';
+};
+
+    String.prototype.splitFieldKey = function () {
+        var s = this, list = [], c, n, t = [];
+        if (s.indexOf('_') >= 0) {
+            var arr = s.split('_');
+            for (var i = 0; i < arr.length; i++) {
+                var t = arr[i];
+                if (t !== '') {
+                    list.push(t);
+                }
+            }
+            return list;
+        }
+        for (var j = 0; j < s.length; j++) {
+            n = s[j].charCodeAt(0);
+            if (j > 0 && n >= 65 && n <= 90) {
+                list.push(t.join(''));
+                t = [s[j]];
+            } else {
+                t.push(s[j]);
+            }            
+        }
+        if (t.length > 0) {
+            list.push(t.join(''));
+        }
+        return list;
+    };
+    String.prototype.toCamelCase = function (strict, isPascal) {
+        var s = this, arr = [], list = [], a, b, c = 0;
+        if (s.indexOf('_') >= 0 || strict) {
+            arr = s.splitFieldKey();
+            for (var i = 0; i < arr.length; i++) {
+                a = arr[i].substr(0, 1);
+                b = (arr[i].substr(1) || '').toLowerCase();
+                list.push((c++ > 0 || isPascal ? a.toUpperCase() : a.toLowerCase()) + b);
+            }
+            return list.join('');
+        }
+        return (isPascal ? s.substr(0, 1).toUpperCase() : s.substr(0, 1).toLowerCase()) + (s.substr(1) || '');
+    };
+    String.prototype.toPascalCase =  function (strict) {
+        return this.toCamelCase(strict, true);
+    };
+    String.prototype.toUnderlineCase =  function () {
+        var s = this, arr = s.splitFieldKey(), list = [];
+        for (var i = 0; i < arr.length; i++) {
+            list.push(arr[i].toLowerCase());
+        }
+        return list.join('_');
+    };
+
+var setFieldCase = function (formData, caseType) {
+    var data = {};
+    for (var k in formData) {
+        var dr = formData[k],
+            key = caseType === 1 ? k.toPascalCase(true) : caseType === 2 ? k.toUnderlineCase(true) : k.toCamelCase(true);
+        if (dr === null) {
+            data[key] = dr;
+        } else if (isArray(dr)) {
+            data[key] = [];
+            for (var i = 0; i < dr.length; i++) {
+                if (isObject(dr[i])) {
+                    data[key].push(setFieldCase(dr[i], caseType));
+                } else {
+                    data[key].push(dr[i]);
+                }
+            }
+        } else if (isObject(dr)) {
+            data[key] = setFieldCase(dr, caseType);
+        } else {
+            data[key] = dr;
+        }
+    }
+    return data;
+};
+
+var data = {
+    DeviceId: 617,
+    Name: 'abc',
+    TypeId: 12,
+    Camera: {
+        Id: 2,
+        ChannelNo: 1,
+        Name: null,
+        Type: undefined
+    },
+    Types: [1,2,3],
+    Channels: [
+        {Id:1, Number:2, Name:'通道2'},
+        {Id:2, Number:3, Name:'通道3'}
+    ],
+    Server_line: 3
+};
+
+console.log(setFieldCase(data, 2));

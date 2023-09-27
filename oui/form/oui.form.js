@@ -395,7 +395,7 @@
                         }
                         head.appendChild(style);
                     },
-                    getFieldConfig: function (element, fields) {
+                    getFieldConfig: function (element, fields, ignoreCase) {
                         var isValue = function (s) { return !$.isUndefined(s) && !$.isObject(s); },
                             checkField = function (field, elem) {
                                 var arr = ['string', 'int', 'float', 'decimal'];
@@ -436,6 +436,8 @@
                             isAppointId = fields[op.getKey(id)] || false,
                             isSingle = isAppointId || document.getElementsByName(name || '').length <= 1,
                             dataType = '';
+
+
 
                         if ($.isString(keyField, true)) {
                             dataType = keyField;
@@ -679,7 +681,7 @@
             }
             return list;
         },
-        getElementsData = function (warns, arr, op, formElem) {
+        getElementsData = function (warns, arr, op, formElem, camelCase) {
             formElem = $.toElement(formElem);
             var data = {}, configs = op.configs, len = arr.length;
             for (var i = 0; i < len; i++) {
@@ -715,6 +717,9 @@
                     } else if (obj.isSingle) {
                         if (fc.key) {
                             key = fc.dataKey || fc.key;
+                            if (camelCase) {
+                                key = key.substr(0, 1).toLowerCase() + key.substr(1);
+                            }
                             if (fcf.md5 && $.isString(val, true)) {
                                 data[key] = $.md5(val);
                             } else {
@@ -724,6 +729,9 @@
                         }
                     } else {
                         if ((key = fc.dataKey || fc.nameKey || fc.key) !== '') {
+                            if (camelCase) {
+                                key = key.substr(0, 1).toLowerCase() + key.substr(1);
+                            }
                             if ($.isUndefined(data[key])) {
                                 data[key] = [];
                             }
@@ -758,7 +766,7 @@
                 return data;
             }
         },
-        getFormData = function (formElement, options, elements) {
+        getFormData = function (formElement, options, elements, camelCase) {
             //获取表单参数配置
             var warns = [], arr = [], op = initFormConfig(formElement, options), configs = op.configs;
             if ($.isObject(elements) && elements.length > 0 && !configs.dynamic) {
@@ -766,7 +774,7 @@
             } else {
                 arr = op.formElement.getElementsByTagName(configs.tagName || "*");
             }
-            var data = getElementsData(warns, arr, op, formElement);
+            var data = getElementsData(warns, arr, op, formElement, camelCase);
             if ($.isDebug()) {
                 console.log('data: ', data, ', warns: ', warns);
             }
@@ -804,7 +812,7 @@
             }
             return formData;
         },
-        setElementsData = function (data, arr, op, isTable) {
+        setElementsData = function (data, arr, op, isTable, ignoreCase) {
             if (!$.isObject(data)) {
                 data = {};
             }
@@ -819,7 +827,10 @@
                 }
                 var pass = true;
                 if (pass || !obj.isValueSet) {
-                    var fc = op.getFieldConfig(obj, op.fields), value = data[fc.key], isArray = $.isArray(value);
+                    var fc = op.getFieldConfig(obj, op.fields, ignoreCase),
+                        keyCase = ignoreCase ? fc.key.substr(0, 1).toLowerCase() + fc.key.substr(1) : fc.key,
+                        value = data[fc.key] || data[keyCase],
+                        isArray = $.isArray(value);
                     if ($.isUndefined(value)) {
                         value = data[fc.nameKey];
                     }
@@ -851,12 +862,12 @@
             }
             return list;
         },
-        setFormData = function (formElement, options, formData) {
+        setFormData = function (formElement, options, formData, ignoreCase) {
             var data = filterData(options, formData), list = [];
             if (!$.isEmpty(data)) {
                 var op = initFormConfig(formElement, options), configs = op.configs,
                     arr = op.formElement.getElementsByTagName(configs.tagName || "*");
-                list = setElementsData(data, arr, op);
+                list = setElementsData(data, arr, op, false, ignoreCase);
             }
             return list;
         },
@@ -1103,11 +1114,13 @@
                 formData = $f.filterData(options),
                 tableDatas = options.tableDatas,
                 elements = [], tableElements = [],
-                complete = options.complete;
+                complete = options.complete,
+                camelCase = options.camelCase,
+                ignoreCase = options.ignoreCase;
 
             //1. 赋值（不验证规则）
             if ($.isObject(formData)) {
-                elements = $f.setFormData(element, options, formData);
+                elements = $f.setFormData(element, options, formData, ignoreCase);
             }
             if ($.isObject(tableDatas)) {
                 tableElements = $f.setTableData(table, options, tableDatas);
@@ -1142,18 +1155,18 @@
                 if (isForm) {
                     if (typeof $.OUI === 'boolean') {
                         element.onsubmit = function () {
-                            var formData = $f.getFormData(element, options, elements);
+                            var formData = $f.getFormData(element, options, elements, camelCase);
                             return debounce ? delayCallback(callback, formData) : callback(formData), false;
                         };
                     } else {
                         $(this).submit(function () {
-                            var formData = $f.getFormData(element, options, elements);
+                            var formData = $f.getFormData(element, options, elements, camelCase);
                             return debounce ? delayCallback(callback, formData) : callback(formData), false;
                         });
                     }
                 } else if (handler) {
                     $(handler).click(function () {
-                        var formData = $f.getFormData(element, options, elements);
+                        var formData = $f.getFormData(element, options, elements, camelCase);
                         if (isTable) {
                             var tableData = !formData ? [] : $f.getTableData(table, options);
                             return debounce ? delayCallback(callback, formData, tableData) : callback(formData, tableData), false;

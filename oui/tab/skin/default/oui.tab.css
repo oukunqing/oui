@@ -190,6 +190,7 @@
     border: none 0;
     box-sizing: border-box;
     overflow: hidden;
+    cursor: default;
 }
 
 .oui-tabs .tab-item:hover .tab-txt,.oui-tabs .cur .tab-txt,
@@ -201,6 +202,7 @@
     border-radius: 10px;
     background: #dee1e6;
     font-family: 宋体;
+    cursor: default;
 }
 
 .oui-tabs-contents {

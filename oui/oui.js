@@ -155,6 +155,11 @@
             Ip: /^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$/,
             //带参数的URL格式字符串
             UrlParam: /^(\/|http:\/\/|https:\/\/)(.*)(.(as[hp][x]?|jsp|[s]?htm[l]?|php|do)|\/)\?[&]?(.*)=(.*)([&]{1,}(.*)=(.*)){0,}/gi
+        },
+        CaseType: {
+            Camel: 0,
+            Pascal: 1,
+            Underline: 2
         }
     });
 
@@ -581,7 +586,40 @@
             var ps = s.join('&');
             return isUrl ? url + (ps ? getUrlSymbol(url) : '') + ps : ps;
         },
-        buildAjaxData = function (action, formData, param) {
+        setFieldCase = function (formData, caseType) {
+            var data = {};
+            for (var k in formData) {
+                var dr = formData[k],
+                    key = caseType === $.CaseType.Pascal ? k.toPascalCase(true) : 
+                        caseType === $.CaseType.Underline ? k.toUnderlineCase(true) : 
+                        k.toCamelCase(true);
+                if (dr === null) {
+                    data[key] = dr;
+                } else if ($.isArray(dr)) {
+                    data[key] = [];
+                    for (var i = 0; i < dr.length; i++) {
+                        if ($.isObject(dr[i])) {
+                            data[key].push(setFieldCase(dr[i], caseType));
+                        } else {
+                            data[key].push(dr[i]);
+                        }
+                    }
+                } else if ($.isObject(dr)) {
+                    data[key] = setFieldCase(dr, caseType);
+                } else {
+                    data[key] = dr;
+                }
+            }
+            return data;
+        },
+        buildAjaxData = function (action, formData, param, caseType) {
+            if ($.isNumber(param) && !$.isNumber(caseType)) {
+                caseType = param;
+                param = null;
+            }
+            if ($.isNumber(caseType) && caseType >= 0) {
+                formData = $.setFieldCase(formData, caseType);
+            }
             var data = { action: action, data: formData };
             var str = buildParam(data);
             if ($.isString(str, true)) {
@@ -951,7 +989,7 @@
         collapseNumbers: collapseNumberList, expandNumbers: expandNumberList,
         toJsonString: toJsonString, toJsonStr: toJsonString, toJson: toJson, tryToJson: tryToJson, toEncode: toEncode,
         toAscii: toAscii, toAsciiHex: toAsciiHex, asciiToChar: asciiToChar, asciiToStr: asciiToChar,
-        getArguments: getArguments, getArgs: getArguments,
+        getArguments: getArguments, getArgs: getArguments, setFieldCase: setFieldCase,
         toFunction: toFunction, toFunc: toFunction, callFunction: callFunction, callFunc: callFunction,
         param: buildParam, buildParam: buildParam, setUrlParam: setUrlParam, buildAjaxData: buildAjaxData,
         setQueryString: setQueryString, getQueryString: getQueryString, getUrlHost: getUrlHost, getUrlPage: getUrlPage,
@@ -1697,11 +1735,60 @@
             }
             return list.join(separator || ',');
         },
-        distinct: function(separator) {
+        splitFieldKey: function () {
+            var s = this, list = [], c, n, t = [];
+            if (s.indexOf('_') >= 0) {
+                var arr = s.split('_');
+                for (var i = 0; i < arr.length; i++) {
+                    var t = arr[i];
+                    if (t !== '') {
+                        list.push(t);
+                    }
+                }
+                return list;
+            }
+            for (var j = 0; j < s.length; j++) {
+                n = s[j].charCodeAt(0);
+                if (j > 0 && n >= 65 && n <= 90) {
+                    list.push(t.join(''));
+                    t = [s[j]];
+                } else {
+                    t.push(s[j]);
+                }            
+            }
+            if (t.length > 0) {
+                list.push(t.join(''));
+            }
+            return list;
+        },
+        toCamelCase: function (strict, isPascal) {
+            var s = this, arr = [], list = [], a, b, c = 0;
+            if (s.indexOf('_') >= 0 || strict) {
+                arr = s.splitFieldKey();
+                for (var i = 0; i < arr.length; i++) {
+                    a = arr[i].substr(0, 1);
+                    b = (arr[i].substr(1) || '').toLowerCase();
+                    list.push((c++ > 0 || isPascal ? a.toUpperCase() : a.toLowerCase()) + b);
+                }
+                return list.join('');
+            }
+            return (isPascal ? s.substr(0, 1).toUpperCase() : s.substr(0, 1).toLowerCase()) + (s.substr(1) || '');
+        },
+        toPascalCase: function(strict) {
+            return this.toCamelCase(strict, true);
+        },
+        toUnderlineCase: function () {
+            var s = this, arr = s.splitFieldKey(), list = [];
+            for (var i = 0; i < arr.length; i++) {
+                list.push(arr[i].toLowerCase());
+            }
+            return list.join('_');
+        },
+        distinct: function (separator) {
             var s = this;
             return $.distinctList(s, separator);
         },
-        distinctList: function(separator) {
+        distinctList: function (separator) {
             var s = this;
             return $.distinctList(s, separator);
         },

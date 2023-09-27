@@ -1520,3 +1520,24 @@ var names = ['系统配置','服务配置','图片配置','地图配置','功能
 for(var i =0; i<names.length;i++){
     console.log(names[i].toUnicode());
 }
+
+
+var data = {
+    DeviceId: 617,
+    Name: 'abc',
+    TypeId: 12,
+    Camera: {
+        Id: 2,
+        ChannelNo: 1,
+        Name: null,
+        Type: undefined
+    },
+    Types: [1,2,3],
+    Channels: [
+        {Id:1, Number:2, Name:'通道2'},
+        {Id:2, Number:3, Name:'通道3'}
+    ],
+    Server_line: 3
+};
+
+console.log($.setFieldCase(data, $.CaseType.Underline));
