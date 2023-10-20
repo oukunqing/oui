@@ -50,9 +50,9 @@
 
 .oui-dialog-min {
     width: auto; 
-    height: 35px; 
+    height: 32px; 
     min-width: 200px; 
-    min-height: 35px; 
+    min-height: 32px; 
     overflow: hidden;
     box-sizing: border-box;
     border-radius: 5px;

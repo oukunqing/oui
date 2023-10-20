@@ -159,3 +159,7 @@ var data = {
 };
 
 console.log(setFieldCase(data, 2));
+
+var ss2 = 65200;
+
+console.log(ss2.toTimeStr());

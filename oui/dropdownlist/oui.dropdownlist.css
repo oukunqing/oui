@@ -21,7 +21,7 @@
 	position:absolute;
 	z-index:999999;
 	display:block;
-	overflow:auto;
+	overflow:hidden;
 	border:solid 1px #ccc;
     box-shadow: 0 2px 3px 0 rgba(0,0,0,.32);
 	box-sizing: border-box;
@@ -114,11 +114,11 @@ ul.oui-ddl-box {
 	display: block;
 	margin: 0;
 	padding: 0;
-	overflow: hidden;
+	overflow: auto;
 	clear: both;
 }
 ul.oui-ddl-flow,ul.oui-ddl-grid {
-	margin: 5px 3px;
+	padding: 5px 3px;
 }
 ul.oui-ddl-flow li.oui-ddl-item, ul.oui-ddl-grid li.oui-ddl-item {
 	float:left;

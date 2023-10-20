@@ -35,7 +35,9 @@
             Return: 2,
             //初始化
             Initial: 999,
-        }
+        },
+        // 当高度超过浏览器窗口大小时，保留边距
+        bodyPadding: 10
     },
         Cache = {
             ids: [],
@@ -427,6 +429,8 @@
                 box.innerHTML = html.join('');
                 box.show = false;
                 that.box = box;
+                that.con = box.childNodes[0];
+                that.bar = box.childNodes[1];
 
                 $.addListener(document.body, 'mousedown', function (ev) {
                     if (!$.isInElement(that.box, ev) && !$.isInElement(that.text, ev)) {
@@ -641,9 +645,11 @@
             var that = this, opt = that.options, elem = opt.element;
             var bs = $.getBodySize(),
                 box = that.box,
+                con = that.con,
                 size = $.getOffset(box),
                 offset = $.getOffset(that.text),
-                left = offset.left - 1,
+                //left = offset.left - 1,
+                left = offset.left,
                 top = offset.top + offset.height - 1;
 
             if (opt.position === Config.Position.Right) {
@@ -664,11 +670,13 @@
             box.style.top = top + 'px';
 
             if (top + size.height > bs.height) {
-                var h = bs.height - top - 2;
+                var h = bs.height - top - 2 - Config.bodyPadding;
                 if (opt.maxHeight && h > opt.maxHeight) {
                     h = opt.maxHeight;
                 }
                 box.style.height = h + 'px';
+
+                con.style.height = (h - that.bar.offsetHeight) + 'px';
             }
             return that;
         },

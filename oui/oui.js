@@ -2407,19 +2407,31 @@
             return { days: d, hours: h, minutes: m, seconds: s, d: d, h: h, m: m, s: s };
         },
         toTimeStr: function (secondDecimalLen, daysUnit, timeUnits) {
+            var seconds = this, us = timeUnits;
             if ($.isBoolean(daysUnit, false)) {
-                timeUnits = daysUnit;
+                us = daysUnit;
                 daysUnit = '';
             }
-            var seconds = this,
-                data = seconds.toTimeData(secondDecimalLen),
-                units = $.isArray(timeUnits) ? timeUnits : $.isBoolean(timeUnits, true) ? ['时', '分', '秒'] : [],
-                time = [
-                    data.h.padLeft(2) + (units[0] || ''),
-                    data.m.padLeft(2) + (units[1] || ''),
-                    data.s.padLeft(2) + (units[2] || '')
-                ];
-            return (data.d ? data.d + (daysUnit || '天') : '') + time.join(units.length > 0 ? '' : ':');
+            //当daysUnit===100时，显示完整的时间格式
+            var complete = daysUnit === 100,
+                dt = seconds.toTimeData(secondDecimalLen),
+                units = $.isArray(us) ? [us[0] || '时', us[1] || '分', us[2] || '秒'] : $.isBoolean(us, true) ? ['时', '分', '秒'] : [],
+                len = units.length;
+            //当daysUnit===200时，以小时代替天数
+            if (daysUnit === 200) {
+                daysUnit = '';
+                dt.h += dt.d * 24;
+                dt.d = 0;
+            }
+            var time = [
+                len ? (complete ? dt.h.padLeft(2) + units[0] : dt.h ? dt.h + units[0] : '') : dt.h.padLeft(2),
+                len ? (complete ? dt.m.padLeft(2) + units[1] : dt.m ? dt.m + units[1] : '') : dt.m.padLeft(2),
+                len ? (complete ? dt.s.padLeft(2) + units[2] : dt.s ? dt.s + units[2] : '') : dt.s.padLeft(2),
+            ];
+            if (complete) {
+                daysUnit = '';
+            }
+            return (dt.d ? dt.d + (daysUnit || '天') : '') + time.join(len > 0 ? '' : ':');
         },
         toDurationStr: function(hideDays, units) {
             var seconds = this,

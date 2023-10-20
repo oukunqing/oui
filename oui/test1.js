@@ -1541,3 +1541,26 @@ var data = {
 };
 
 console.log($.setFieldCase(data, $.CaseType.Underline));
+
+
+console.log(new Date().format(''));
+
+console.log(new Date().format('ts'));
+
+console.log((1695894070+28800)/60%1440);
+
+
+console.log(256>>8);
+console.log(65536>>16);
+console.log(16777216>>24);
+console.log(1>>8);
+
+
+
+console.log((1697705281).toDate().format());
+
+
+var ss2 = 172800;
+
+console.log(ss2.toTimeStr(0, true, true));
+console.log(ss2.toTimeStr(0));

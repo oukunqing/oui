@@ -41,6 +41,8 @@
         TooltipAttributeName: 'tooltip-id',
         TitleHeight: 30,        //标题栏高度，单位：px
         BottomHeight: 40,       //底部栏高度，单位：px
+        DialogMinWidth: 180,    //对话框最小宽度，单位：px
+        DialogMinHeight: 32,    //对话框最小高度，单位：px
         Padding: 4,             //拖动边框宽度，单位：px
         MinPadding: 0,          //拖动边框最小宽度，单位：px
         MaxPadding: 10,         //拖动边框最大宽度，单位：px
@@ -538,13 +540,11 @@
                 return $.isPercent(width) || (typeof height !== 'undefined' && $.isPercent(height));
             },
             toCssText: function (styles, type) {
-                //TODO:
                 switch (type) {
                     case 'shade':
                         break;
                     case 'dialog':
                         break;
-
                 }
                 return $.toCssText(styles);
             },
@@ -1871,7 +1871,6 @@
                     return false;
                 }
                 var size = Config.Padding;
-                //padding = ['4px', '4px', '4px', '4px'];
                 var div = $.createElement('div');
                 div.className = 'drag-switch';
                 div.pos = dir;
@@ -1881,14 +1880,10 @@
                 switch (dir) {
                     case 'top':
                     case 'bottom':
-                        //div.style.height = opt.padding + 'px';
-                        //div.style.height = padding[dir];
                         div.style.height = size + 'px';
                         break;
                     case 'left':
                     case 'right':
-                        //div.style.width = opt.padding + 'px';
-                        //div.style.width = padding[dir];
                         div.style.width = size + 'px';
                         break;
                 }
@@ -2018,10 +2013,7 @@
                     } else if (keyChar === 'F') {
                         that.focus();
                     }
-
-                    //var act = document.activeElement.id;
                 });
-
                 return util;
             },
             checkEventObj: function (that, obj) {
@@ -2270,8 +2262,8 @@
                     if (!opt.minAble) {
                         return this;
                     }
-                    var minW = parseInt(opt.minWidth, 10), minH = 36;
-                    if (isNaN(minW)) { minW = 180; }
+                    var minW = parseInt(opt.minWidth, 10), minH = Config.DialogMinHeight;
+                    if (isNaN(minW)) { minW = Config.DialogMinWidth; }
 
                     par = { width: minW, height: minH };
                     $.addClass(ctls.foot, 'display-none')
