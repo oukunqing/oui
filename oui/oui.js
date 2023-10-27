@@ -2417,6 +2417,7 @@
                 dt = seconds.toTimeData(secondDecimalLen),
                 units = $.isArray(us) ? [us[0] || '时', us[1] || '分', us[2] || '秒'] : $.isBoolean(us, true) ? ['时', '分', '秒'] : [],
                 len = units.length;
+                
             //当daysUnit===200时，以小时代替天数
             if (daysUnit === 200) {
                 daysUnit = '';
@@ -4302,7 +4303,7 @@
                 options = {};
             }
             var id = options.id || 'div-get-content-size-001',
-                css = ';position:absolute;top:-3000px;left:-5000px;',
+                css = ';position:absolute;top:-3000px;left:-5000px;font-size:14px;font-family:Arial,宋体,微软雅黑;',
                 div = document.getElementById(id);
             if (!div) {
                 div = document.createElement('div');

@@ -15,6 +15,10 @@
     <label id="lbl1">帮助信息右键菜单</label>
 	<br />
 	<div id="btn1" style="width:200px;height:50px;border:solid 1px #ddd;display:inline-block;margin-left:300px;font-size:12px;padding:10px;" oncontextmenu="show2(event,this);return false;">右键菜单示例2（带图标）</div>
+    <br />
+    <div id="div22" style="border: solid 1px #ccc;padding:10px;width:200px;margin:50px 0 0 200px;">
+        右键菜单22
+    </div>
 </body>
 </html>
 <script type="text/javascript">
@@ -117,5 +121,27 @@
 			.add({ key: '007', pkey: '003', name: '右键菜单07', icon: 'imgs/helmet-off.png' })
 			.show(ev);
     }
+
+
+
+        $.cmenu({
+            id: 'div222',
+            obj: 'div22',
+            target: 'div22',
+            //event: 'click',
+            width: 'auto',
+            position: 9,
+            callback: function (par) {
+                console.log('par:', par);
+            },
+            items: [
+                { name: '长期有效', key:'longtime' },
+                { name: '一年有效', key: 'year', val: 1 },
+                { name: '两年有效', key: 'year', val: 2 },
+                { name: '半年有效', key: 'month', val: 6 },
+                { name: '一个月有效', key: 'month', val: 1 },
+                { name: '一星期有效', key: 'day', val: 7 }
+            ]
+        });
 
 </script>

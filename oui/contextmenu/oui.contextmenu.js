@@ -17,7 +17,7 @@
         FileDir: $.getFilePath(SelfPath),
         //菜单项边距边框尺寸
         ItemMBPWidth: 22,
-        ItemMinWidth: 80,
+        ItemMinWidth: 100,
         ItemArrowWidth: 25,
         ItemHeight: 28,    //右键菜单项高度，单位：像素
         IconWidth: 20,      //Icon图标最大尺寸
@@ -588,7 +588,7 @@
                 return items;
             },
             fillMenuItem: function (box, items, opt, isAppend) {
-                var height = 0;
+                var height = 8;
                 for (var i in items) {
                     box.appendChild(items[i].elem);
                     height += items[i].height;
@@ -599,10 +599,10 @@
                     //height += Config.ItemPaddingHeight * 2 + 2;
                     height -= Config.MenuBorderHeight;
                     if (!opt.height || opt.height === 'auto' || height > opt.height) {
-                        box.style.height = height + 'px';
+                        box.style.height = (parseInt(box.style.height, 10) + height) + 'px';
                     }
                 } else {
-                    box.style.height = parseInt(box.style.height, 10) + height;
+                    box.style.height = (parseInt(box.style.height, 10) + height) + 'px';
                 }
 
                 return this;
@@ -658,11 +658,13 @@
                 if ($.isArray(dr.items) && dr.items.length > 0) {
                     w += Config.ItemArrowWidth;
                 }
-                //字母或数字的文字宽度相对窄一些，需要加上15像素
+                //字母或数字的文字宽度相对窄一些，需要加上5像素
                 if (txt && /[a-z0-9]/ig.test(txt)) {
                     w += 5;
                     //每个大写字母宽度加1
                     w += txt.uppercaseLen();
+                } else {
+                    w += 10;
                 }
                 //宽度加上10像素
                 //额外增加2像素
