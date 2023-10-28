@@ -1539,3 +1539,9 @@ var data = {
     ],
     Server_line: 3
 };
+
+
+
+//https://graph.qq.com/oauth2.0/show?which=Login&display=pc&client_id=100270989&response_type=code&redirect_uri=https://passport.csdn.net/account/login?pcAuthType=qq&newAuth=true&state=test
+
+console.log(55/(1.58*1.58));

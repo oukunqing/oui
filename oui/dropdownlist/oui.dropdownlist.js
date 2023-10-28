@@ -147,6 +147,28 @@
                 }
                 return '0';
             },
+            getItemConWidth: function (items, itemWidth, columns, display) {
+                var width = 0;
+                if (itemWidth === 'auto') {
+                    return width;
+                } else if (itemWidth === 'cell') {
+                    if (columns > 0) {
+                        width = parseInt(100 / columns - 2, 10) + '%';
+                    } else {
+                        for (var i = 0; i < items.length; i++) {
+                            var dr = items[i], w = $.getContentSize(dr.name).width;
+                            if (w > width) {
+                                width = w;
+                            }
+                        }
+                        //加上padding和checkbox宽度
+                        width += 12 + (display ? 20 : 0);
+                    }
+                } else {
+                    width = itemWidth;
+                }
+                return width;
+            },
             isRepeat: function (name) {
                 return Cache.events[name] ? true : (Cache.events[name] = true, false);
             },
@@ -212,6 +234,15 @@
             }
 
             return that;
+        },
+        setVal: function (dc) {
+            var node = this;
+            node.set(true);
+            if (dc) {
+                node.dc = true;
+                $.setAttribute(node.input, 'dc', 1);
+            }
+            return node;
         }
     };
 
@@ -240,7 +271,7 @@
             //输入框宽度，默认跟随下拉框宽度
             textWidth: '',
             //网格布局时选项宽度
-            itemWidth: 120,
+            itemWidth: '',
             //停靠位置：left-左下，right-右下
             position: 'left',
             //按钮位置：left-左，center-中，right-右
@@ -320,6 +351,10 @@
                 Factory.closeOther(that);
             });
 
+            if (opt.layout === Config.Layout.Grid && opt.itemWidth === '') {
+                opt.itemWidth = 'auto';
+            }
+
             return that.build();
         },
         build: function () {
@@ -355,7 +390,7 @@
                             '<button class="btn btn-default btn-first" ac="1">全选</button>',
                             '<button class="btn btn-default" ac="2">反选</button>',
                             '<button class="btn btn-default" ac="0">取消</button>',
-                            '<button class="btn btn-default" ac="3" title="默认选项">默认</button>',
+                            '<button class="btn btn-default" ac="3">', opt.restore ? '还原' : '默认', '</button>',
                         ].join('');
                         oneBtn = false;
                     }
@@ -389,6 +424,8 @@
                         '</li>'
                     ].join(''));
                 }
+                var columns = opt.columns || opt.cells || 0,
+                    minWidth = opt.layout === Config.Layout.Grid ? Factory.getItemConWidth(opt.items, opt.itemWidth, columns, opt.display) : 0;
                 for (i = 0; i < len; i++) {
                     var dr = opt.items[i];
                     if (dr === 'sep' || dr.sep || dr.type === 'sep') {
@@ -405,7 +442,7 @@
                         html.push([
                             '<li class="oui-ddl-item" style="',
                             opt.layout !== Config.Layout.List ? 'float:left;' : '',
-                            opt.layout === Config.Layout.Grid ? 'min-width:' + Factory.getStyleSize(opt.itemWidth) + ';' : '',
+                            opt.layout === Config.Layout.Grid ? 'min-width:' + Factory.getStyleSize(minWidth || opt.itemWidth) + ';' : '',
                             '">',
                             '<label  class="oui-ddl-label', opt.layout !== Config.Layout.List && opt.itemBorder ? ' oui-ddl-label-border' : '', '">',
                             '<input class="oui-ddl-chb"', checked,
@@ -503,6 +540,7 @@
             }
         },
         set: function (val, ac) {
+            console.log('set:', val, ac);
             var that = this,
                 opt = that.options,
                 nodes = that.nodes;
@@ -521,17 +559,24 @@
                         break;
                 }
             } else {
-                var vals = !$.isArray(val) ? val.split(/[,\|]/) : val;
+                var vals = !$.isArray(val) ? val.split(/[,\|]/) : val.join(',').split(','),
+                    dc = $.isBoolean(ac, false);
                 if (opt.multi) {
                     for (var i = 0; i < nodes.length; i++) {
-                        nodes[i].set(vals.indexOf(nodes[i].value) > - 1);
+                        if (vals.indexOf(nodes[i].value) > - 1) {
+                            nodes[i].setVal(dc);
+                        }
                     }
                 } else {
                     for (var i = 0; i < nodes.length; i++) {
-                        nodes[i].set(nodes[i].value === vals[0]);
+                        if (nodes[i].value === vals[0]) {
+                            nodes[i].setVal(dc);
+                        }
                     }
                 }
             }
+            that.get();
+
             return that;
         },
         get: function () {
@@ -692,6 +737,32 @@
         },
         ddlist: function (options) {
             return Factory.buildList(options);
+        }
+    });
+
+    $.extend($.dropdownlist, {
+        get: function(id) {
+            var cache = Factory.getCache(id);
+            if (cache) {
+                return cache.ddl.get();
+            }
+            return '';
+        },
+        set: function(id, values, action) {
+            var cache = Factory.getCache(id);
+            if (cache) {
+                cache.ddl.set(values, action);
+            }
+            return this;
+        }
+    });
+
+    $.extend($.ddlist, {
+        get: function(id) {
+            return $.dropdownlist.get(id);
+        },
+        set: function(id, values, action) {
+            return $.dropdownlist.set(id, values, action);
         }
     });
 }(OUI);
