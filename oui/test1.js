@@ -1516,7 +1516,7 @@ var obj = {};
 
 console.log(obj.length);
 
-var names = ['取消','全选','反选', '还原' ,'默认', '确定'];
+var names = ['最多只能选择','个','反选', '还原' ,'默认', '确定'];
 for(var i =0; i<names.length;i++){
     console.log(names[i], names[i].toUnicode());
 }

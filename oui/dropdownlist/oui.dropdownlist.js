@@ -39,7 +39,7 @@
         // 当高度超过浏览器窗口大小时，保留边距
         bodyPadding: 10,
         // 隐藏但是需要占位
-        CssHidden: ';visibility:hidden;width:0px;height:0px;border:none;margin:0;padding:0;font-size:1px;line-height:0px;'
+        CssHidden: ';visibility:hidden;width:0px;height:0px;border:none;margin:0;padding:0;font-size:1px;line-height:0px;float:left;'
     },
         Cache = {
             ids: [],
@@ -123,6 +123,13 @@
                 opt.boxWidth = opt.boxWidth || opt.width;
                 opt.className = opt.className || opt.className;
                 opt.style = opt.style || opt.css;
+
+                if (!$.isNumber(opt.maxLimit)) {
+                    opt.maxLimit = 0;
+                }
+                if (!$.isString(opt.maxLimitMsg)) {
+                    opt.maxLimitMsg = '';
+                }
 
                 return opt;
             },
@@ -236,9 +243,9 @@
 
             return that;
         },
-        setVal: function (dc) {
+        setVal: function (ac, dc) {
             var node = this;
-            node.set(true);
+            node.set(ac);
             if (dc) {
                 node.dc = true;
                 $.setAttribute(node.input, 'dc', 1);
@@ -285,6 +292,10 @@
             multi: true,
             //是否允许空值（单选模式）
             allowEmpty: '',
+            //多选最大数量限制
+            maxLimit: 0,
+            //多选数量限制提示
+            maxLimitMsg: '',
             //是否显示选框,默认情况下：单选框不显示，复选框显示
             //若指定display为true或false，则按指定规则显示
             display: null,
@@ -292,7 +303,9 @@
             submit: 1,
             //是否防抖，多选模式下，点击选项时有效
             debounce: false,
-            callback: null
+            callback: null,
+            //Function:选项切换时触发
+            beforeChange: null
         }, options));
 
         this.id = opt.id;
@@ -507,7 +520,14 @@
                         input: chb,
                         multi: opt.multi,
                         callback: function (node) {
-                            that.action(node);
+                            var txt = node.text + (node.desc ? ' - ' + node.desc : '');
+                            if ($.isFunction(opt.beforeChange)) {
+                                opt.beforeChange(txt, function() {
+                                    that.action(node);
+                                });
+                            } else {
+                                that.action(node);
+                            }                       
                         }
                     }));
                     that.indexs[chb.id] = i;
@@ -542,6 +562,10 @@
                 multi = opt.multi;
 
             if (multi) {
+                //检测多选项的数量限制
+                if (!node.checked && opt.maxLimit && that.list(true).length >= opt.maxLimit) {
+                    return that.msg();
+                }
                 node.set(!node.checked, true);
             } else {
                 for (var i = 0; i < nodes.length; i++) {
@@ -557,10 +581,20 @@
                 return that.callback();
             }
         },
-        set: function (val, ac) {
+        msg: function() {
+            var that = this, opt = that.options;
+            //$.alert(opt.maxLimitMsg || ((opt.name || '') + '最多只能选择' + opt.maxLimit + '个'));
+            $.alert(opt.maxLimitMsg || ((opt.name || '') + '\u6700\u591a\u53ea\u80fd\u9009\u62e9' + opt.maxLimit + '\u4e2a'));
+            return that;
+        },
+        set: function (val, ac, dc) {
             var that = this,
                 opt = that.options,
                 nodes = that.nodes;
+
+            if (ac && opt.maxLimit && that.list(true).length >= opt.maxLimit) {
+                return that.msg();
+            }
 
             if ($.isNumber(ac)) {
                 switch (ac) {
@@ -576,25 +610,51 @@
                         break;
                 }
             } else {
-                var vals = !$.isArray(val) ? val.split(/[,\|]/) : val.join(',').split(','),
-                    dc = $.isBoolean(ac, false);
+                ac = $.isBoolean(ac, true);
+                dc = $.isBoolean(dc, false);
+
+                var vals = !$.isArray(val) ? val.split(/[,\|]/) : val.join(',').split(',');
                 if (opt.multi) {
                     for (var i = 0; i < nodes.length; i++) {
                         if (vals.indexOf(nodes[i].value) > - 1) {
-                            nodes[i].setVal(dc);
+                            nodes[i].setVal(ac, dc);
                         }
                     }
                 } else {
                     for (var i = 0; i < nodes.length; i++) {
                         if (nodes[i].value === vals[0]) {
-                            nodes[i].setVal(dc);
+                            nodes[i].setVal(ac, dc);
                         }
                     }
                 }
             }
+            if (opt.maxLimit) {
+                var list = that.list(true), len = list.length, vals = [];
+                if (len > opt.maxLimit) {
+                    that.msg();
+                    for (var i = opt.maxLimit; i < len; i++) {
+                        vals.push(list[i]);
+                    }
+                    that.set(vals, false, false);
+                }
+            }
+
             that.get();
 
             return that;
+        },
+        list: function (selected) {
+            var that = this, nodes = that.nodes, list = [];
+            for (var i = 0; i < nodes.length; i++) {
+                if (selected) {
+                    if (nodes[i].checked) {
+                        list.push(nodes[i].id);
+                    }
+                } else {
+                    list.push(nodes[i].id);
+                }
+            }
+            return list;
         },
         get: function () {
             var that = this,
@@ -602,13 +662,15 @@
                 nodes = that.nodes,
                 vals = [],
                 txts = [],
-                single = !opt.multi;
+                single = !opt.multi,
+                c = 0;
 
             for (var i = 0; i < nodes.length; i++) {
                 var n = nodes[i];
                 if (n.checked) {
                     vals.push(n.value.trim());
                     txts.push(n.text.trim() + (single && n.desc && n.text !== n.desc ? ' - ' + n.desc : ''));
+                    c++;
                 }
             }
             //显示文字
@@ -765,10 +827,10 @@
             }
             return '';
         },
-        set: function(id, values, action) {
+        set: function(id, values, action, defaultChecked) {
             var cache = Factory.getCache(id);
             if (cache) {
-                cache.ddl.set(values, action);
+                cache.ddl.set(values, action, defaultChecked);
             }
             return this;
         }
@@ -778,8 +840,8 @@
         get: function(id) {
             return $.dropdownlist.get(id);
         },
-        set: function(id, values, action) {
-            return $.dropdownlist.set(id, values, action);
+        set: function(id, values, action, defaultChecked) {
+            return $.dropdownlist.set(id, values, action, defaultChecked);
         }
     });
 }(OUI);
