@@ -612,6 +612,7 @@
     width: 10px; height: 10px;
     border-radius: 3px;
     background: transparent;
+    opacity: 0.05;
     margin: 0; padding: 0;
 }
 

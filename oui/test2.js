@@ -158,8 +158,29 @@ var data = {
     Server_line: 3
 };
 
-console.log(setFieldCase(data, 2));
+var js = {
+    toJsonFormat: function (json, sb) {
+        sb = sb || [];
+        if (isArray(json)) {
+            for (var i = 0; i < json.length; i++) {
+                if (isArray(json[i])) {
+                    toJsonFormat(json[i]);
+                } else if (isObject(json[i])) {
+                    toJsonFormat(json[i]);
+                } else {
 
-var ss2 = 65200;
+                }
+            }
+        } else {
+            for (var k in json) {
 
-console.log(ss2.toTimeStr());
+            }
+        }
+
+        return sb.json('\n');
+    }
+};
+
+
+var o = {"type":"request","command":"setworkmode","sequence":12345,"device":"12345678901234009","body":{"mode":1,"time":1639996782,"duration":0,"expire":1639996782,"action":0,"update_time":1639996782}};
+console.log(JSON.stringify(o, null, 4));

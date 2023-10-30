@@ -1545,3 +1545,8 @@ var data = {
 //https://graph.qq.com/oauth2.0/show?which=Login&display=pc&client_id=100270989&response_type=code&redirect_uri=https://passport.csdn.net/account/login?pcAuthType=qq&newAuth=true&state=test
 
 console.log(55/(1.58*1.58));
+
+
+var o = {"type":"request","command":"setworkmode","sequence":12345,"device":"12345678901234009","body":{"mode":1,"time":1639996782,"duration":0,"expire":1639996782,"action":0,"update_time":1639996782}};
+console.log(JSON.stringify(data, null, 4));
+console.log($.toJsonString(data, 4));

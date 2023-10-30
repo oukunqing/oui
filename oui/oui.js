@@ -446,7 +446,7 @@
 
             return list;
         },
-        toJsonString = function (o) { return JSON.stringify(o); },
+        toJsonString = function (o, space) { return JSON.stringify(o, null, space || 0); },
         toJson = function (s) { return JSON.parse(s); },
         tryToJson = function(s) {
             var result = {};
@@ -1037,7 +1037,10 @@
                 }
             }
             return undefined;
-        }
+        }/*,
+        toJsonFormat: function (json) {
+
+        }*/
     }, '$');
 }(OUI);
 
