@@ -11,7 +11,7 @@
 	margin: 0;
 	/*border-right: none 0;*/
 	box-sizing: border-box;
-	background:#fff url('ddl_arrow_down.png?1') no-repeat right center;
+	background:#fff url('ddl_arrow_down.png?12') no-repeat right center;
 }
 .oui-ddl-txt-cur {
 	border-color: #66afe9;

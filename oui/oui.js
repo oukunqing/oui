@@ -974,7 +974,7 @@
         isHexNumeric: isHexNumeric, isHexNumber: isHexNumber,
         isMobile: isMobile, isTelephone: isTelephone, isIdentity: isIdentity, isEmail: isEmail,
         isRegexp: isRegexp, isNullOrUndefined: isNullOrUndefined, isNullOrUndef: isNullOrUndefined,
-        isUndefinedOrNull: isNullOrUndefined, isUndefOrNull: isNullOrUndefined,        
+        isUndefinedOrNull: isNullOrUndefined, isUndefOrNull: isNullOrUndefined,
         padLeft: function (s, totalWidth, paddingChar) {
             return padLeft(s, totalWidth, paddingChar, false);
         },
@@ -1333,7 +1333,7 @@
                         //当值为0时,舍弃单位，当值为0并且为金额小数时，舍弃值和单位
                         //当整数部分 值为1，并且单位为“十”时，舍弃值
                         //纯数字（非金额）模式，则小数部分没有单位
-                        //str.push(num === 0 ? (!isDecimal ? chars[num] : '') : (num === 1 && pos === 1 && !isDecimal) ? unit : (chars[num] + unit));                        
+                        //str.push(num === 0 ? (!isDecimal ? chars[num] : '') : (num === 1 && pos === 1 && !isDecimal) ? unit : (chars[num] + unit));
                         if (num === 0) {
                             str.push(isMoney && isDecimal ? '' : chars[num]);
                         } else if (num === 1 && pos === 1 && !isDecimal) {
@@ -2550,7 +2550,7 @@
             }
             return list;
         },
-        isDate: function () {            
+        isDate: function () {
             if (isNaN(this.getFullYear())) {
                 return false;
             }
@@ -2736,7 +2736,7 @@
             case '%':   //百分比
                 v = v.mul(100).round(n) + '%';
                 break;
-            case 'R':   //TODO:            
+            case 'R':   //TODO:
                 break;
             case 'B':   //二进制
             case 'O':   //八进制
@@ -3192,7 +3192,7 @@
             if (pattern.test(name)) {
                 return name.match(pattern)[0];
             }
-            return name.substr(pos);            
+            return name.substr(pos);
         },
         //获取远程文件大小(不能跨域)
         getFileSize = function (fileUrl, callback) {
@@ -4976,8 +4976,6 @@
             var ps = $.getElementSize(parent);
 
             //TODO:
-            //TODO:            
-
         };
 
     var browser = {
