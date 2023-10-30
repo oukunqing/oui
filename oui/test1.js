@@ -1516,9 +1516,9 @@ var obj = {};
 
 console.log(obj.length);
 
-var names = ['系统配置','服务配置','图片配置','地图配置','功能定制','设备接入','配置管理','增加配置'];
+var names = ['取消','全选','反选', '还原' ,'默认', '确定'];
 for(var i =0; i<names.length;i++){
-    console.log(names[i].toUnicode());
+    console.log(names[i], names[i].toUnicode());
 }
 
 

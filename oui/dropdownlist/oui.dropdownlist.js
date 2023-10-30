@@ -37,7 +37,9 @@
             Initial: 999,
         },
         // 当高度超过浏览器窗口大小时，保留边距
-        bodyPadding: 10
+        bodyPadding: 10,
+        // 隐藏但是需要占位
+        CssHidden: ';visibility:hidden;width:0px;height:0px;border:none;margin:0;padding:0;font-size:1px;line-height:0px;'
     },
         Cache = {
             ids: [],
@@ -148,26 +150,25 @@
                 return '0';
             },
             getItemConWidth: function (items, itemWidth, columns, display) {
-                var width = 0;
-                if (itemWidth === 'auto') {
-                    return width;
-                } else if (itemWidth === 'cell') {
+                if (itemWidth === 'cell') {
+                    var width = 0;
                     if (columns > 0) {
                         width = parseInt(100 / columns - 2, 10) + '%';
                     } else {
                         for (var i = 0; i < items.length; i++) {
-                            var dr = items[i], w = $.getContentSize(dr.name).width;
+                            var dr = items[i],
+                                con = dr.name + (dr.desc ? ' - ' + dr.desc : ''),
+                                w = $.getContentSize(con).width;
                             if (w > width) {
                                 width = w;
                             }
                         }
                         //加上padding和checkbox宽度
-                        width += 12 + (display ? 20 : 0);
+                        width += 7 * 2 + (display ? 20 : 0);
                     }
-                } else {
-                    width = itemWidth;
+                    return width;
                 }
-                return width;
+                return itemWidth === 'auto' ? 0 : itemWidth;
             },
             isRepeat: function (name) {
                 return Cache.events[name] ? true : (Cache.events[name] = true, false);
@@ -307,7 +308,9 @@
         initial: function () {
             var that = this,
                 opt = that.options,
-                elem = opt.element;
+                elem = opt.element,
+                //texts = ['-请选择-', '请选择'],
+                texts = ['\u002d\u8bf7\u9009\u62e9\u002d', '\u8bf7\u9009\u62e9'];
 
             if (opt.element.tagName === 'SELECT') {
                 var offset = $.getOffset(opt.element);
@@ -316,14 +319,14 @@
                 $.setAttribute(elem, 'readonly', 'readonly');
                 elem.style.cssText = [
                     'background-color:#fff;padding: 0 20px 0 9px;',
-                    opt.textWidth === 'auto' ? '' : 'width:' + (opt.textWidth || offset.width) + 'px;',
+                    opt.textWidth === 'auto' ? '' : 'width:' + Factory.getStyleSize(opt.textWidth || offset.width) + ';',
                     opt.style ? opt.style + ';' : ''
                 ].join('');
                 opt.element.parentNode.insertBefore(elem, opt.element);
                 that.text = elem;
                 that.elem = opt.element;
 
-                opt.title = opt.title || (that.elem.options.length > 0 ? that.elem.options[0].text : '') || '-请选择-';
+                opt.title = opt.title || (that.elem.options.length > 0 ? that.elem.options[0].text : '') || texts[0];
 
             } else {
                 that.text = opt.element;
@@ -337,15 +340,19 @@
                 opt.element.parentNode.insertBefore(elem, opt.element);
                 that.elem = elem;
 
-                opt.title = opt.title || that.text.value || '-请选择-';
+                opt.title = opt.title || that.text.value || texts[0];
             }
             that.text.value = opt.title || '';
 
             if (!opt.name) {
-                opt.name = opt.title.replace('-请选择-', '').replace('请选择', '');
+                opt.name = opt.title.replace(texts[0], '').replace(texts[1], '');
             }
 
-            that.elem.style.display = 'none';
+            if (opt.form || opt.anchor) {
+                that.elem.style.cssText = (that.elem.style.cssText || '') + Config.CssHidden;
+            } else {
+                that.elem.style.display = 'none';
+            }
             $.addListener(that.text, 'mousedown', function () {
                 that.show(this);
                 Factory.closeOther(that);
@@ -383,21 +390,28 @@
                     opt.maxHeight ? 'max-height:' + Factory.getStyleSize(opt.maxHeight) + ';' : '',
                 ].join('');
 
-                var btn = [], len = opt.items.length, selects = '', oneBtn = true, ac = opt.submit ? 'ok' : 'no';
+                var btn = [],
+                    len = opt.items.length,
+                    selects = '',
+                    oneBtn = true,
+                    ac = opt.submit ? 'ok' : 'no',
+                    //texts = ['取消', '全选', '反选', opt.restore ? '还原' : '默认', '确定'],
+                    texts = ['\u53d6\u6d88', '\u5168\u9009', '\u53cd\u9009', opt.restore ? '\u8fd8\u539f' : '\u9ed8\u8ba4', '\u786e\u5b9a'];
+
                 if (opt.multi) {
                     if (opt.layout !== Config.Layout.List && len > 3 || len > 5) {
                         selects = [
-                            '<button class="btn btn-default btn-first" ac="1">全选</button>',
-                            '<button class="btn btn-default" ac="2">反选</button>',
-                            '<button class="btn btn-default" ac="0">取消</button>',
-                            '<button class="btn btn-default" ac="3">', opt.restore ? '还原' : '默认', '</button>',
+                            '<button class="btn btn-default btn-first" ac="1">', texts[1], '</button>',
+                            '<button class="btn btn-default" ac="2">', texts[2], '</button>',
+                            '<button class="btn btn-default" ac="0">', texts[0], '</button>',
+                            '<button class="btn btn-default" ac="3">', texts[3], '</button>',
                         ].join('');
                         oneBtn = false;
                     }
                     btn.push('<div class="oui-ddl-oper oui-ddl-oper-' + opt.layout + '" style="text-align:' + (opt.buttonPosition || 'center') + ';">');
                     btn.push('<div class="btn-group btn-group-xs' + (oneBtn ? ' btn-group-block' : '') + '">');
                     btn.push(selects.join(''));
-                    btn.push('<button class="btn btn-primary btn-' + ac + (oneBtn ? ' btn-block' : '') + '" ac="' + ac + '">确定</button>');
+                    btn.push('<button class="btn btn-primary btn-' + ac + (oneBtn ? ' btn-block' : '') + '" ac="' + ac + '">', texts[4], '</button>');
                     btn.push('</div>');
                     btn.push('</div>');
                 }
@@ -406,9 +420,15 @@
                     '<ul class="oui-ddl-box oui-ddl-', opt.layout, '">'
                 ], i, key = Config.ItemPrefix + that.id;
 
+                var columns = opt.columns || opt.cells || 0,
+                    conWidth = Factory.getItemConWidth(opt.items, opt.itemWidth, columns, opt.display),
+                    minWidth = opt.layout === Config.Layout.Grid ? conWidth : 0;
+
                 if (!opt.multi && opt.allowEmpty) {
                     html.push([
                         '<li class="oui-ddl-item" style="',
+                        opt.layout !== Config.Layout.List ? 'float:left;' : '',
+                        opt.layout === Config.Layout.Grid ? 'min-width:' + Factory.getStyleSize(minWidth || opt.itemWidth) + ';' : '',
                         '">',
                         '<label  class="oui-ddl-label', opt.layout !== Config.Layout.List && opt.itemBorder ? ' oui-ddl-label-border' : '', '">',
                         '<input class="oui-ddl-chb"', checked,
@@ -424,8 +444,6 @@
                         '</li>'
                     ].join(''));
                 }
-                var columns = opt.columns || opt.cells || 0,
-                    minWidth = opt.layout === Config.Layout.Grid ? Factory.getItemConWidth(opt.items, opt.itemWidth, columns, opt.display) : 0;
                 for (i = 0; i < len; i++) {
                     var dr = opt.items[i];
                     if (dr === 'sep' || dr.sep || dr.type === 'sep') {
@@ -540,7 +558,6 @@
             }
         },
         set: function (val, ac) {
-            console.log('set:', val, ac);
             var that = this,
                 opt = that.options,
                 nodes = that.nodes;

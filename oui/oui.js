@@ -2415,7 +2415,7 @@
             //当daysUnit===100时，显示完整的时间格式
             var complete = daysUnit === 100,
                 dt = seconds.toTimeData(secondDecimalLen),
-                units = $.isArray(us) ? [us[0] || '时', us[1] || '分', us[2] || '秒'] : $.isBoolean(us, true) ? ['时', '分', '秒'] : [],
+                units = $.isArray(us) ? [us[0] || '时', us[1] || '分', us[2] || '秒'] : $.isBoolean(us, false) ? ['时', '分', '秒'] : [],
                 len = units.length;
                 
             //当daysUnit===200时，以小时代替天数
@@ -2433,6 +2433,17 @@
                 daysUnit = '';
             }
             return (dt.d ? dt.d + (daysUnit || '天') : '') + time.join(len > 0 ? '' : ':');
+        },
+        toTimeArr: function (secondDecimalLen, daysUnit) {
+            var seconds = this,
+                data = seconds.toTimeData(secondDecimalLen),
+                time = [
+                    data.h.padLeft(2),
+                    data.m.padLeft(2),
+                    data.s.padLeft(2)
+                ];
+
+            return (data.d ? data.d + (daysUnit || '天') : '') + time.join(':');
         },
         toDurationStr: function(hideDays, units) {
             var seconds = this,
