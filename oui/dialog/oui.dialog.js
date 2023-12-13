@@ -1,10 +1,10 @@
 /*
     @Title: OUI
-    @Description：JS通用代码库
+    @Description：JS Common Code Library
     @Author: oukunqing
     @License：MIT
 
-    $.dialog 对话框插件
+    $.dialog plugin
 */
 
 !function ($) {
@@ -974,6 +974,11 @@
                         //opt.width = opt.minWidth = 'auto';
                         opt.height = opt.minHeight = 'auto';
                         opt.minAble = opt.maxAble = opt.lock = false;
+                        //tooltip要允许关闭，因为tooltip用于表单验证提示时，需要自动关闭
+                        if (Config.DialogType.tooltip !== opt.type) {
+                            opt.closeAble = $.isBoolean(opt.closeAble, false);
+                        }
+                        opt.showClose = $.isBoolean(opt.showClose, false);
                         break;
                 }
                 //设置 tooltip 默认位置为 right

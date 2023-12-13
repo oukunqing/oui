@@ -39,7 +39,8 @@
 <div style="background:#666;overflow:hidden;display:block;padding:5px;">
 <div id="p13"></div>
 </div>
-
+<br />
+<div id="p14"></div>
 </body>
 </html>
 <script type="text/javascript">
@@ -289,6 +290,25 @@
             console.log('p13-callback: ', pageIndex);
 
             p13.paging(pageIndex);
+        }
+    });
+
+   var p14 = $.pagination({
+        element: 'p14',
+        dataCount: 689,
+        pageIndex: 0,
+        pageStart: 0,
+        showList: false,
+        showDataStat: false,
+        showPageInput: false,
+        showEllipsis: false,
+        showFirstLast: true,
+        showPageSize: false,
+        markType: 'chinese',
+        callback: function(pageIndex){
+            console.log('p14-callback: ', pageIndex);
+
+            p14.paging(pageIndex);
         }
     });
 </script>

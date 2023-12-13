@@ -1324,7 +1324,7 @@ console.log(Math.pow(-5, 3));
 console.log(Math.pow(-5, -1));
 
 
-console.log('2023-06-21 15:55:01'.toDate().format('ts'));
+console.log('2099-12-31 23:59:59'.toDate().format('ts'));
 
 console.log((1687305181).toDate().format());
 console.log((1687333981).toDate().format());
@@ -1516,9 +1516,16 @@ var obj = {};
 
 console.log(obj.length);
 
-var names = ['最多只能选择','个','反选', '还原' ,'默认', '确定'];
+var names =  [
+                '通用代码库', 
+                '内容不能重复',
+                '小数',
+                '端口',
+                '端口数值应介于',
+                '之间'
+            ];;
 for(var i =0; i<names.length;i++){
-    console.log(names[i], names[i].toUnicode());
+    console.log('//', names[i], names[i].toUnicode());
 }
 
 
@@ -1547,6 +1554,20 @@ var data = {
 console.log(55/(1.58*1.58));
 
 
-var o = {"type":"request","command":"setworkmode","sequence":12345,"device":"12345678901234009","body":{"mode":1,"time":1639996782,"duration":0,"expire":1639996782,"action":0,"update_time":1639996782}};
-console.log(JSON.stringify(data, null, 4));
-console.log($.toJsonString(data, 4));
+//var o = {"type":"request","command":"setworkmode","sequence":12345,"device":"12345678901234009","body":{"mode":1,"time":1639996782,"duration":0,"expire":1639996782,"action":0,"update_time":1639996782}};
+
+console.log('2099-12-31 23:59:59'.toDate().format('ts'));
+
+console.log((1700803715).toDateFormat());
+
+console.log($.buildAjaxData({"name":"abc",status:1,id:123}, {id:3,type:'unit'}));
+console.log($.buildUrlData({"name":"abc",status:1,id:123}, {id:3,type:'unit'}));
+
+
+console.log($.setQueryString('1.html', 'name', 'abc'));
+
+
+console.log($.buildUrlParam({"name":"acc", id: 123}));
+console.log($.setUrlParam({"name":"acc", id: 123}, 'abc', '1.html'));
+
+console.log($.isBoolean(false, true));

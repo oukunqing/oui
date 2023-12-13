@@ -1,7 +1,7 @@
 
 /*
  @Title: OUI
- @Description：JS通用代码库
+ @Description：JS Common Code Library
  @Author: oukunqing
  @License：MIT
 */
@@ -167,14 +167,19 @@
         trim = function (s) { return s.replace(/(^[\s]*)|([\s]*$)/g, ''); },
         isUndefined = function (o) { return typeof o === 'undefined'; },
         isString = function (s, nonempty) { return typeof s === 'string' && (nonempty ? trim(s) !== '' : true); },
-        isNumber = function (n) { return typeof n === 'number'; },
+        isNumber = function (n, min, max) { 
+            if (typeof n !== 'number') { return false; }
+            var isMin = typeof min === 'number', isMax = typeof max === 'number';
+            return isMin && isMax ? n >= min && n <= max : (isMin ? n >= min : isMax ? n <= max : true);
+        },
         checkNumber = function (n, min, max) {
-            var isNum = isNumber(n), isMin = isNumber(min), isMax = isNumber(max);
-            return isNum ? (isMin && isMax ? n >= min && n <= max : (isMin ? n >= min : isMax ? n <= max : true)) : false;
+            return isNumber(n, min, max);
         },
         setNumber = function(n, min, max) {
-            var isNum = isNumber(n), isMin = isNumber(min), isMax = isNumber(max);
-            return isNum ? (isMin && isMax ? (n < min ? min : (n > max ? max : n)) : (isMin ? (n < min ? min : n) : isMax ? (n > max ? max : n) : n)) : n;
+            if (typeof n !== 'number') { return n; }
+            var isMin = isNumber(min), isMax = isNumber(max);
+            if (isMin && isMax) { return n < min ? min : (n > max ? max : n); }
+            return isMin ? (n < min ? min : n) : isMax ? (n > max ? max : n) : n;
         },
         isObject = function (o) { return o !== null && typeof o === 'object'; },
         isArray = Array.isArray || function (a) { return Object.prototype.toString.call(a) === '[object Array]'; },
@@ -546,7 +551,8 @@
         },
         _buildParam = function (url, s, key, val, oldVal) {
             if (!isNullOrUndefined(val)) {
-                var ps = key + '=' + toEncode(isObject(val) ? toJsonString(val) : val);
+                val = isObject(val) ? toJsonString(val) : val;
+                var ps = key + '=' + (typeof window !== 'undefined' ? toEncode(val) : val);
                 if (oldVal !== '') {
                     url = url.replace(key + '=' + oldVal, ps);
                 } else {
@@ -556,6 +562,10 @@
             return url;
         },
         buildParam = function (a, v, strict, url) {
+            if ($.isString(strict) && !$.isString(url, true)) {
+                url = strict;
+                strict = true;
+            }
             var isUrl = $.isString(url, true),
                 isObj = isObject(a),
                 isStrict = isBoolean(strict, true);
@@ -586,6 +596,7 @@
             var ps = s.join('&');
             return isUrl ? url + (ps ? getUrlSymbol(url) : '') + ps : ps;
         },
+        //转换字段命名格式
         setFieldCase = function (formData, caseType) {
             var data = {};
             for (var k in formData) {
@@ -613,19 +624,25 @@
             return data;
         },
         buildAjaxData = function (action, formData, param, caseType) {
+            if ($.isObject(action)) {
+                caseType = param;
+                param = formData;
+                formData = action;
+                action = null;
+            }
             if ($.isNumber(param) && !$.isNumber(caseType)) {
                 caseType = param;
                 param = null;
             }
-            if ($.isNumber(caseType) && caseType >= 0) {
+            if ($.isNumber(caseType, 0)) {
                 formData = $.setFieldCase(formData, caseType);
             }
-            var data = { action: action, data: formData };
-            var str = buildParam(data);
-            if ($.isString(str, true)) {
-                return str + '&' + buildParam(param, null, false);
-            }
-            return buildParam(param, null, false);
+            var a = buildParam({ action: action, data: formData }),
+                b = buildParam($.extend({}, param), null, false);
+            return ($.isString(a, true) ? a + '&' : '') + b;
+        },
+        buildUrlParam = function (param, strict, url) {
+            return buildParam($.extend({}, param), null, strict, url);
         },
         setUrlParam = function (a, v, strict, url) {
             return buildParam(a, v, strict, url);
@@ -991,7 +1008,8 @@
         toAscii: toAscii, toAsciiHex: toAsciiHex, asciiToChar: asciiToChar, asciiToStr: asciiToChar,
         getArguments: getArguments, getArgs: getArguments, setFieldCase: setFieldCase,
         toFunction: toFunction, toFunc: toFunction, callFunction: callFunction, callFunc: callFunction,
-        param: buildParam, buildParam: buildParam, setUrlParam: setUrlParam, buildAjaxData: buildAjaxData,
+        param: buildParam, buildParam: buildParam, setUrlParam: setUrlParam, 
+        buildAjaxData: buildAjaxData, buildUrlData: buildAjaxData, buildUrlParam: buildUrlParam,
         setQueryString: setQueryString, getQueryString: getQueryString, getUrlHost: getUrlHost, getUrlPage: getUrlPage,
         setDebug: setDebug, isDebugAction: isDebugAction, isDebug: isDebug, isLocalhost: isLocalhost,
         filterValue: filterValue, keywordOverload: keywordOverload, keyOverload: keywordOverload,
@@ -1546,6 +1564,26 @@
             }
             return null;
         },
+        getYearStart: function(year) {
+            var ds = $.getDateOptions(year);
+            if (ds !== null) {
+                return '{0}-01-01 00:00:00'.format(ds.year);
+            } else {
+                var dt = new Date();
+                year = year || dt.getFullYear();
+                return '{0}-01-01 00:00:00'.format(year);
+            }
+        },
+        getYearEnd: function(year) {
+            var ds = $.getDateOptions(year);
+            if (ds !== null) {
+                return '{0}-12-31 23:59:59'.format(ds.year);
+            } else {
+                var dt = new Date();
+                year = year || dt.getFullYear();
+                return '{0}-12-31 23:59:59'.format(year);
+            }
+        },
         getMonthStart: function (month, year) {
             var ds = $.getDateOptions(month);
             if (ds !== null) {
@@ -1593,6 +1631,31 @@
                 date = date || dt.getDate();
                 return '{0}-{1:D2}-{2:D2} 23:59:59'.format(year, month, date);
             }
+        },
+        getDateRange: function (num, type, days) {
+            num = Math.abs(num);
+            days = days || 0;
+            var dt, start = 0;
+            if ('month' === type) {
+                dt = new Date().addMonths(-num);
+                return { start: dt.getMonthStart(), end: dt.addMonths(days).getMonthEnd() };
+            } else if ('year' === type) {
+                dt = new Date().addYears(-num);
+                return { start: dt.getYearStart(), end: dt.addYears(days).getYearEnd() };
+            }
+            switch (type) {
+                case 'day':
+                case 'days':
+                    start = num;
+                    break;
+                case 'week':
+                    start = (new Date().getDay() || 7) + num * 7 - 1;
+                    days = 7 - 1 + days * 7;
+                    break;
+            }
+            dt = new Date().addDays(-start);
+
+            return { start: dt.getDayStart(), end: dt.addDays(days).getDayEnd() };
         }
     });
 
@@ -2570,6 +2633,8 @@
             }
             return age;
         },
+        getYearStart: function () { return $.getYearStart(this); },
+        getYearEnd: function () { return $.getYearEnd(this); },
         getMonthStart: function () { return $.getMonthStart(this); },
         getMonthEnd: function () { return $.getMonthEnd(this); },
         getDayStart: function () { return $.getDayStart(this); },
@@ -4322,7 +4387,7 @@
             if (!div) {
                 div = document.createElement('div');
                 div.id = id;
-                div.style.cssText = css + 'margin:0;padding:0;font-size:14px;';
+                div.style.cssText = 'font-size:14px;' + css + ';margin:0;padding:0;';
                 document.body.appendChild(div);
             }
             if ($.isString(options.className, true)) {
@@ -6419,6 +6484,13 @@ $.debounce
                 return debounce.lastTime = ts, true;
             }
             return false;
+        },
+        isChange: function(debounce, key) {
+            if (key !== debounce.lastKey) {
+                debounce.lastKey = key;
+                return true;
+            }
+            return false;
         }
     };
 
@@ -6430,6 +6502,8 @@ $.debounce
             delay: 300,
             //防抖时限，默认5000毫秒
             timeout: 5000,
+            //用于判断接口参数是否有更改
+            key: '',
             callback: function () {
                 console.log('debounce: ');
             }
@@ -6438,6 +6512,7 @@ $.debounce
         this.id = opt.id;
         this.timer = null;
         this.lastTime = 0;
+        this.lastKey = '';
 
         this.initial(opt);
     }
@@ -6464,7 +6539,7 @@ $.debounce
             if (!$.isFunction(func)) {
                 return _;
             }
-            if (Factory.isFirst(_, opt.timeout)) {
+            if (Factory.isChange(_, opt.key) || Factory.isFirst(_, opt.timeout)) {
                 return func(), _;
             }
             if (_.timer) {

@@ -5,7 +5,7 @@
     @Author: oukunqing
     @License：MIT
 
-    $.form 表单验证插件
+    $.form plugin
 */
 
 !function ($) {
@@ -30,7 +30,8 @@
         initFormConfig = function (formElement, options, elements) {
             if ($.isString(formElement)) { formElement = document.getElementById(formElement.replace(/^[#]+/, '')); }
             if (!$.isElement(formElement) || !formElement.getElementsByTagName) {
-                throw new Error('element 参数错误');
+                //throw new Error('element 参数错误');
+                throw new Error('element \u53c2\u6570\u9519\u8bef');
             }
             var id = formElement.id || '',
                 opt = $.extend({}, options);
@@ -38,15 +39,20 @@
             opt.tagPattern = opt.tagPattern || opt.tagAppend || opt.tagNames || opt.tagName;
 
             var messages = {
-                required: '请输入{0}',
-                select: '请选择{0}',
-                minLength: '{0}请勿小于{1}个字符',
-                maxLength: '{0}请勿超过{1}个字符',
-                minValue: '请输入大于或等于{0}的{1}',
-                maxValue: '请输入小于或等于{0}的{1}',
-                minMax: '请输入{0} - {1}之间的{2}',
-                number: '请输入{0}',
-                pattern: '请输入正确的{0}'
+                required: '\u8bf7\u8f93\u5165{0}',//请输入
+                select: '\u8bf7\u9009\u62e9{0}',//请选择
+                minLength: '{0}\u8bf7\u52ff\u5c0f\u4e8e{1}\u4e2a\u5b57\u7b26',
+                maxLength: '{0}\u8bf7\u52ff\u8d85\u8fc7{1}\u4e2a\u5b57\u7b26',
+                //请输入 u5165大于或等于 的
+                minValue: '\u8bf7\u8f93\u5165\u5927\u4e8e\u6216\u7b49\u4e8e{0}\u7684{1}',
+                //请输入 小于或等于 的
+                maxValue: '\u8bf7\u8f93\u5165\u5c0f\u4e8e\u6216\u7b49\u4e8e{0}\u7684{1}',
+                //请输入  之间的
+                minMax: '\u8bf7\u8f93\u5165{0} - {1}\u4e4b\u95f4\u7684{2}',
+                //请输入
+                number: '\u8bf7\u8f93\u5165{0}',
+                //请输入正确的
+                pattern: '\u8bf7\u8f93\u5165\u6b63\u786e\u7684{0}'
             },
                 highLight = {
                     styleId: 'form-validate-css-' + id,
@@ -112,7 +118,7 @@
                     },
                     checkElement: function (element) {
                         if ($.isString(element)) { element = document.getElementById(element); }
-                        if (!$.isObject(element) || !element.getElementsByTagName) { throw new Error('element 参数输入错误'); }
+                        if (!$.isObject(element) || !element.getElementsByTagName) { throw new Error('element \u53c2\u6570\u8f93\u5165\u9519\u8bef'); } //参数输入错误
                         return element;
                     },
                     isCheckBox: function (element, type) { return /^checkbox|radio$/.test(type); },
@@ -223,7 +229,7 @@
                                 if (!pass && arguments.length <= 2) { message = value; value = ''; }
                                 return { pass: pass, value: value, message: message || '' };
                             },
-                            title = getTitle(field, '');
+                            title = getTitle(field, '').replace(/\s/g, '');
 
                         if (field.required && !field.empty && '' === value) {   // 空值验证
                             if (field.tag === 'SELECT' || op.isLegalName(field.attribute)) {
@@ -249,7 +255,8 @@
                             }
                         } else {
                             // 验证数字输入，大小值范围限定，其中 type="hidden" 默认值至少为0
-                            var val = value, numType = '数字', strict = field.strict || configs.strict;
+                            //数字
+                            var val = value, numType = '\u6570\u5b57', strict = field.strict || configs.strict;
                             //不是必填项的数字，如果没有填写，则取默认值或0
                             if (value === '' && !field.required) {
                                 value = field.value || 0;
@@ -262,19 +269,19 @@
                             switch (field.dataType) {
                                 case 'int':
                                     value = parseInt(value, 10);
-                                    numType = '整数';
+                                    numType = '\u6574\u6570';//整数
                                     break;
                                 case 'float':
                                 case 'decimal':
                                     value = parseFloat(value, 10);
-                                    numType = '小数';
+                                    numType = '\u5c0f\u6570';//小数
                                     break;
                                 case 'port':
                                     value = parseInt(value, 10);
                                     if (!isNaN(value) && (value < 0 || value > 65535)) {
-                                        return result(false, '端口数值应介于0 - 65535之间');
+                                        return result(false, '\u7aef\u53e3\u6570\u503c\u5e94\u4ecb\u4e8e0 - 65535\u4e4b\u95f4'); //端口数值应介于 之间
                                     }
-                                    numType = '端口';
+                                    numType = '\u7aef\u53e3';//端口
                                     break;
                             }
                             if (isNaN(value)) {
@@ -322,14 +329,14 @@
                         if ($.isObject(field.same) && field.same.id) {
                             var target = document.getElementById(field.same.id);
                             if (target && target.value !== value) {
-                                return result(false, field.same.message || field.same.msg || '两次输入的内容不一样');
+                                return result(false, field.same.message || field.same.msg || '\u4e24\u6b21\u8f93\u5165\u7684\u5185\u5bb9\u4e0d\u4e00\u6837'); //两次输入的内容不一样
                             }
                         }
                         //内容去重检测
                         if ($.isObject(field.distinct) && field.distinct.id) {
                             var target = document.getElementById(field.distinct.id);
                             if (target && target.value === value) {
-                                return result(false, field.distinct.message || field.distinct.msg || '内容不能重复');
+                                return result(false, field.distinct.message || field.distinct.msg || '\u5185\u5bb9\u4e0d\u80fd\u91cd\u590d');//内容不能重复
                             }
                         }
                         //检测内容是否存在
@@ -436,8 +443,6 @@
                             isAppointId = fields[op.getKey(id)] || false,
                             isSingle = isAppointId || document.getElementsByName(name || '').length <= 1,
                             dataType = '';
-
-
 
                         if ($.isString(keyField, true)) {
                             dataType = keyField;
@@ -867,7 +872,7 @@
             if (!$.isEmpty(data)) {
                 var op = initFormConfig(formElement, options), configs = op.configs,
                     arr = op.formElement.getElementsByTagName(configs.tagName || "*");
-                list = setElementsData(data, arr, op, false, ignoreCase);
+                list = setElementsData(data, arr, op, false, $.isBoolean(ignoreCase, true));
             }
             return list;
         },
@@ -1004,13 +1009,15 @@
         }
 
         var html = [
-            '应用程序服务端异常，详细信息如下：',
+            //应用程序服务端异常，详细信息如下：
+            '\u5e94\u7528\u7a0b\u5e8f\u670d\u52a1\u7aef\u5f02\u5e38\uff0c\u8be6\u7ec6\u4fe1\u606f\u5982\u4e0b\uff1a',
             'status: ' + jqXHR.status,
             'textStatus: ' + textStatus,
             'errorThrown: ' + errorThrown
         ];
         //指定对话框ID appServerError，防止重复出现多个对话框
-        $.alert(html.join('<br />'), '服务异常', { id: 'appServerError', icon: 'error', copyAble: true });
+        //服务异常
+        $.alert(html.join('<br />'), '\u670d\u52a1\u5f02\u5e38', { id: 'appServerError', icon: 'error', copyAble: true });
     },
         showAjaxFail = function (data, textStatus, jqXHR) {
             var msg = data.msg || data.Msg || data.message || data.Message || '',
@@ -1025,7 +1032,8 @@
 
             var html = [msg];
             if (error) {
-                html.push('可能的原因：');
+                //可能的原因：
+                html.push('\u53ef\u80fd\u7684\u539f\u56e0\uff1a');
                 html.push(error);
             }
             var dialogId = data.dialogId || data.dialog || '';
@@ -1035,7 +1043,8 @@
                     window.showAjaxFail(data);
                 };
             }
-            $.alert(html.join('<br />'), '提示信息', { icon: 'warning', copyAble: true, id: dialogId, callback: callback });
+            //提示信息
+            $.alert(html.join('<br />'), '\u63d0\u793a\u4fe1\u606f', { icon: 'warning', copyAble: true, id: dialogId, callback: callback });
         };
 
     $.extend($, {
@@ -1097,7 +1106,7 @@
             var $f = $.form, element = $f.findElement(controls), len = $(this).length;
 
             if (!$.isObject(options) || !$f.isElement(element)) {
-                $.alert('表单验证参数错误');
+                $.alert('\u8868\u5355\u9a8c\u8bc1\u53c2\u6570\u9519\u8bef');//表单验证参数错误
                 return $(this);
             }
 

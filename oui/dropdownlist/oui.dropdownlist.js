@@ -26,7 +26,7 @@
             Left: 'left',
             Right: 'right'
         },
-        Submit: {
+        CallbackLevel: {
             //选项
             Normal: 0,
             //全选按钮
@@ -102,15 +102,18 @@
             checkOptions: function (options) {
                 var opt = $.extend({}, options);
 
-                opt.itemBorder = opt.itemBorder || opt.border;
+                opt.itemBorder = $.getParam(opt, 'itemBorder,border');
                 opt.element = $.toElement(opt.element || opt.elem);
 
                 if (opt.single) {
                     opt.multi = false;
                 }
-                if (!$.isNumber(opt.submit)) {
-                    opt.submit = Config.Submit.Return;
+                opt.callbackLevel = $.getParam(opt, 'submit,callbackLevel');
+                if (!$.isNumber(opt.callbackLevel)) {
+                    opt.callbackLevel = Config.CallbackLevel.Return;
                 }
+
+                opt.callbackDebounce = $.getParam(opt, 'callbackDebounce,debounce');
 
                 //是否显示选框,默认情况下：单选框不显示，复选框显示
                 //若指定display为true或false，则按指定规则显示
@@ -118,11 +121,9 @@
                     opt.display = opt.multi;
                 }
 
-                opt.allowEmpty = opt.allowEmpty || opt.empty;
-
-                opt.boxWidth = opt.boxWidth || opt.width;
-                opt.className = opt.className || opt.className;
-                opt.style = opt.style || opt.css;
+                opt.allowEmpty = $.getParamValue(opt.allowEmpty, opt.empty);
+                opt.boxWidth = $.getParamValue(opt.boxWidth, opt.width);
+                opt.style = $.getParamValue(opt.style, opt.css);
 
                 if (!$.isNumber(opt.maxLimit)) {
                     opt.maxLimit = 0;
@@ -284,6 +285,8 @@
             position: 'left',
             //按钮位置：left-左，center-中，right-右
             buttonPosition: 'center',
+            //当没有“全选/反选”按钮时是否显示“确定”按钮
+            showButton: false,
             //非列表布局时，是否显示选项边框
             itemBorder: false,
             //是否单选，条件等级优先于multi
@@ -300,9 +303,10 @@
             //若指定display为true或false，则按指定规则显示
             display: null,
             //回调等级：0-选项实时回调，1-全选/反选等按钮事件回调，2-确定按钮事件回调
-            submit: 1,
+            callbackLevel: 1,
             //是否防抖，多选模式下，点击选项时有效
-            debounce: false,
+            callbackDebounce: false,
+            //回调函数
             callback: null,
             //Function:选项切换时触发
             beforeChange: null
@@ -407,7 +411,7 @@
                     len = opt.items.length,
                     selects = '',
                     oneBtn = true,
-                    ac = opt.submit ? 'ok' : 'no',
+                    ac = opt.callbackLevel ? 'ok' : 'no',
                     //texts = ['取消', '全选', '反选', opt.restore ? '还原' : '默认', '确定'],
                     texts = ['\u53d6\u6d88', '\u5168\u9009', '\u53cd\u9009', opt.restore ? '\u8fd8\u539f' : '\u9ed8\u8ba4', '\u786e\u5b9a'];
 
@@ -421,12 +425,14 @@
                         ].join('');
                         oneBtn = false;
                     }
-                    btn.push('<div class="oui-ddl-oper oui-ddl-oper-' + opt.layout + '" style="text-align:' + (opt.buttonPosition || 'center') + ';">');
-                    btn.push('<div class="btn-group btn-group-xs' + (oneBtn ? ' btn-group-block' : '') + '">');
-                    btn.push(selects.join(''));
-                    btn.push('<button class="btn btn-primary btn-' + ac + (oneBtn ? ' btn-block' : '') + '" ac="' + ac + '">', texts[4], '</button>');
-                    btn.push('</div>');
-                    btn.push('</div>');
+                    if (!oneBtn || opt.callbackLevel > 0 || opt.showButton) {
+                        btn.push('<div class="oui-ddl-oper oui-ddl-oper-' + opt.layout + '" style="text-align:' + (opt.buttonPosition || 'center') + ';">');
+                        btn.push('<div class="btn-group btn-group-xs' + (oneBtn ? ' btn-group-block' : '') + '">');
+                        btn.push(selects.join(''));
+                        btn.push('<button class="btn btn-primary btn-' + ac + (oneBtn ? ' btn-block' : '') + '" ac="' + ac + '">', texts[4], '</button>');
+                        btn.push('</div>');
+                        btn.push('</div>');
+                    }
                 }
 
                 var html = [
@@ -540,15 +546,15 @@
                         if (ac === 'no') {
                             that.hide();
                         } else if (ac === 'ok') {
-                            that.callback(Config.Submit.Return);
+                            that.callback(Config.CallbackLevel.Return);
                             that.hide();
                         } else {
                             that.set('', parseInt(ac, 10));
-                            that.callback(Config.Submit.Select);
+                            that.callback(Config.CallbackLevel.Select);
                         }
                     };
                 }
-                that.callback(Config.Submit.Initial);
+                that.callback(Config.CallbackLevel.Initial);
             }, document.body);
 
             Factory.setWindowResize();
@@ -573,7 +579,7 @@
                 }
                 that.hide();
             }
-            if (multi && nodes.length > 1 && opt.debounce) {
+            if (multi && nodes.length > 1 && opt.callbackDebounce) {
                 $.debounce({}, function() {
                     that.callback();
                 });
@@ -682,23 +688,23 @@
 
             return vals.join(',');
         },
-        callback: function (submitLevel) {
+        callback: function (callbackLevel) {
             var that = this,
                 opt = that.options,
                 vals = that.get(),
-                submit = submitLevel || 0;
+                level = callbackLevel || 0;
 
-            if (submit === Config.Submit.Initial) {
+            if (level === Config.CallbackLevel.Initial) {
                 if (vals === '') {
                     return that;
                 }
             } else if (opt.multi) {
-                if (submit < opt.submit) {
+                if (level < opt.callbackLevel) {
                     return that;
                 }
             }
             if ($.isFunction(opt.callback)) {
-                opt.callback(vals, submit === Config.Submit.Initial, that);
+                opt.callback(vals, level === Config.CallbackLevel.Initial, that);
             }
             return that;
         },
