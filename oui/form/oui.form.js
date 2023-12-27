@@ -22,7 +22,11 @@
         DATA_SHOW: 'data-show,data-auto',
         MIN_VALUE: 'min-value,minvalue,minValue,min-val',
         MAX_VALUE: 'max-value,maxvalue,maxValue,max-val',
-        DEFAULT_VALUE: 'default-value,defaultvalue,def-val,defval,dval,dv'
+        VAL_LENGTH: 'value-length,val-length,val-len',
+        MIN_LENGTH: 'min-length,min-len',
+        MAX_LENGTH: 'max-length,max-len',
+        DEFAULT_VALUE: 'default-value,defaultvalue,def-val,defval,dval,dv',
+        OPPTION_VALUE: 'option-value,values,options,opt-val'
     };
     var isElement = function (element) {
         return element !== null && typeof element === 'object' && typeof element.nodeType === 'number';
@@ -43,6 +47,8 @@
                 select: '\u8bf7\u9009\u62e9{0}',//请选择
                 minLength: '{0}\u8bf7\u52ff\u5c0f\u4e8e{1}\u4e2a\u5b57\u7b26',
                 maxLength: '{0}\u8bf7\u52ff\u8d85\u8fc7{1}\u4e2a\u5b57\u7b26',
+                //{0}长度为{1}个字符
+                valLength: '{0}\u957f\u5ea6\u4e3a{1}\u4e2a\u5b57\u7b26',
                 //请输入 u5165大于或等于 的
                 minValue: '\u8bf7\u8f93\u5165\u5927\u4e8e\u6216\u7b49\u4e8e{0}\u7684{1}',
                 //请输入 小于或等于 的
@@ -52,7 +58,9 @@
                 //请输入
                 number: '\u8bf7\u8f93\u5165{0}',
                 //请输入正确的
-                pattern: '\u8bf7\u8f93\u5165\u6b63\u786e\u7684{0}'
+                pattern: '\u8bf7\u8f93\u5165\u6b63\u786e\u7684{0}',
+                //输入错误
+                optionValue: '{0}\u8f93\u5165\u9519\u8bef'
             },
                 highLight = {
                     styleId: 'form-validate-css-' + id,
@@ -79,7 +87,9 @@
                         maxValue: '',
                         minLength: '',
                         maxLength: '',
-                        tagName: '*',   //指定要获取的HTML标签类型
+                        valLength: '',
+                        optionValue: '',    //选项值
+                        tagName: '*',       //指定要获取的HTML标签类型
                         prefix: '',
                         removePrefix: true,
                         checkNumber: true,
@@ -238,25 +248,60 @@
                                 return result(false, (messages.required || configs.messages.required).format(title));
                             }
                         }
+
                         if (field.dataType === 'string') {
-                            if ('' === value) { return result(true, value); }
                             var pattern = field.pattern || op.valuePattern[field.type], validate = field.validate || configs.validate;
                             var minLen = field.minLength || field.minLen,
-                                maxLen = field.maxLength || field.maxLen;
+                                maxLen = field.maxLength || field.maxLen,
+                                valLen = field.valLength || field.valLen,
+                                optionValue = field.optionValue;
+
+                            if (!$.isInteger(minLen)) {
+                                minLen = parseInt($.getAttribute(element, customAttrs.MIN_LENGTH, ''), 10);
+                            }
+                            if (!$.isInteger(maxLen)) {
+                                maxLen = parseInt($.getAttribute(element, customAttrs.MAX_LENGTH, ''), 10);
+                            }
+                            if (!$.isInteger(valLen)) {
+                                valLen = parseInt($.getAttribute(element, customAttrs.VAL_LENGTH, ''), 10);
+                            }
 
                             if ($.isFunction(validate)) {    // 外部验证函数（优先）
                                 if (!validate(value, element)) { return result(false); }
-                            } else if ($.isInteger(minLen) && len < minLen) {
+                            } else if ($.isInteger(valLen) && valLen > 0 && len !== valLen) {
+                                if (len <= 0) {
+                                    return result(false, (messages.required || configs.messages.required).format(title));
+                                }
+                                return result(false, (messages.valLength || configs.messages.valLength).format(title, valLen));
+                            } else if ($.isInteger(minLen) && len < minLen) {      //验证内容长度
+                                if (len <= 0) {
+                                    return result(false, (messages.required || configs.messages.required).format(title));
+                                }
                                 return result(false, (messages.minLength || configs.messages.minLength).format(title, minLen));
                             } else if ($.isInteger(maxLen) && len > maxLen) {
                                 return result(false, (messages.maxLength || configs.messages.maxLength).format(title, maxLen));
+                            } else if ('' === value) { 
+                                return result(true, value); 
                             } else if (pattern && !pattern.test(value)) {   // 正则表达式验证
                                 return result(false, (messages.pattern || configs.messages.pattern).format(title));
+                            }
+
+                            if ($.isUndefined(optionValue)) {
+                                optionValue = $.getAttribute(element, customAttrs.OPPTION_VALUE, '');
+                            }
+                            optionValue = optionValue.length > 0 ? optionValue.split(/[,;\|]/) : [];
+                            if (optionValue.length > 0) {
+                                for (var i = 0; i < optionValue.length; i++) {
+                                    if (optionValue[i] === value) {
+                                        return result(true, value);
+                                    }
+                                }
+                                return result(false, (messages.optionValue || configs.messages.optionValue).format(title) + '<br />可选项：' + optionValue);
                             }
                         } else {
                             // 验证数字输入，大小值范围限定，其中 type="hidden" 默认值至少为0
                             //数字
-                            var val = value, numType = '\u6570\u5b57', strict = field.strict || configs.strict;
+                            var val = value.trim(), numType = '\u6570\u5b57', strict = field.strict || configs.strict;
                             //不是必填项的数字，如果没有填写，则取默认值或0
                             if (value === '' && !field.required) {
                                 value = field.value || 0;
@@ -283,7 +328,7 @@
                                     }
                                     numType = '\u7aef\u53e3';//端口
                                     break;
-                            }
+                            }  
                             if (isNaN(value)) {
                                 var dv = $.isNumeric(field.value) ? field.value :
                                     ($.isNumeric(configs.defaultValue) ? configs.defaultValuel : (element.type === 'hidden' ? 0 : ''));
@@ -322,6 +367,24 @@
                                 }
                                 if (($.isNumeric(min) && value < min) || ($.isNumeric(max) && value > max)) {
                                     return result(false, msg);
+                                }
+
+                                var optionValue = field.optionValue;
+                                if ($.isUndefined(optionValue)) {
+                                    optionValue = $.getAttribute(element, customAttrs.OPPTION_VALUE, '');
+                                }
+                                optionValue = optionValue.length > 0 ? optionValue.split(/[,;\|]/) : [];
+                                if (optionValue.length > 0) {
+                                    if (val.length <= 0) {
+                                        return result(false, (messages.required || configs.messages.required).format(title));
+                                    }
+                                    for (var i = 0; i < optionValue.length; i++) {
+                                        var pv = field.dataType === 'float' ? parseFloat(optionValue[i], 10) : parseInt(optionValue[i], 10);
+                                        if (pv === value && optionValue[i] === val) {
+                                            return result(true, value);
+                                        }
+                                    }
+                                    return result(false, (messages.optionValue || configs.messages.optionValue).format(title) + '<br />可选项：' + optionValue.join(', '));
                                 }
                             }
                         }

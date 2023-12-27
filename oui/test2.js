@@ -184,3 +184,11 @@ var js = {
 
 var o = {"type":"request","command":"setworkmode","sequence":12345,"device":"12345678901234009","body":{"mode":1,"time":1639996782,"duration":0,"expire":1639996782,"action":0,"update_time":1639996782}};
 console.log(JSON.stringify(o, null, 4));
+
+var num = 123.12345;
+
+console.log(num);
+console.log(Math.round(num, 4));
+
+var num2 = 28;
+console.log('hex', num2.toHex());

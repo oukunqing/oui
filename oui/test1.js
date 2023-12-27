@@ -1517,7 +1517,7 @@ var obj = {};
 console.log(obj.length);
 
 var names =  [
-                '通用代码库', 
+                '为', 
                 '内容不能重复',
                 '小数',
                 '端口',
@@ -1571,3 +1571,12 @@ console.log($.buildUrlParam({"name":"acc", id: 123}));
 console.log($.setUrlParam({"name":"acc", id: 123}, 'abc', '1.html'));
 
 console.log($.isBoolean(false, true));
+
+
+
+
+var num2 = 28;
+
+console.log('hex', num2.toHex(4, true));
+
+console.log('{0:S2}'.format('19810309'))

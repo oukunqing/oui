@@ -2,20 +2,41 @@
 <html>
 <head>
     <title>表单验证示例</title>
+<style type="text/css">
+input {width: 360px; height: 24px;}
+select{height:26px;}
+button {width:120px;height:28px;}
+</style>
 </head>
 <body>
     <div id="form1" method="post" action="">
         <table cellpadding="5" cellspacing="0">
             <tr>
                 <td><label for="txtId">ID</label></td>
-                <td><input type="text" id="txtId" minvalue="12" max-value="100" data-show="0" /></td>
-            </tr>
+                <!--data-show="0" 表示当没有填写任何数值时，取值时还是按0值获取，但是输入框不显示0（数字的默认值）-->
+                <td><input type="text" id="txtId" minvalue="12" max-value="100" data-show="0" /></td> </tr>
             <tr>
-                <td><label for="txtName">Name</label></td>
+                <td><label for="txtName">姓名</label></td>
                 <td><input type="text" id="txtName" /></td>
             </tr>
             <tr>
-                <td><label for="ddlAge">Age</label></td>
+                <td><label for="txtSex">性别</label></td>
+                <td><input type="text" id="txtSex" options="1,2" data-type="int" data-show="0" placeholder="性别：只能输入1或2" /></td>
+            </tr>
+            <tr>
+                <td><label for="txtNumber">编号</label></td>
+                <td><input type="text" id="txtNumber" placeholder="数字类型的值" min-value="1" max-value="100" data-show="0" /></td>
+            </tr>
+            <tr>
+                <td><label for="txtCode">编码</label></td>
+                <td><input type="text" id="txtCode" options="A101,A102,A103" placeholder="可选项：A101,A102,A103" min-length="4" /></td>
+            </tr>
+            <tr>
+                <td><label for="txtMobile">手机号码</label></td>
+                <td><input type="text" id="txtMobile" placeholder="11位数字(正则验证)" val-length="11" /></td>
+            </tr>
+            <tr>
+                <td><label for="ddlAge">年龄</label></td>
                 <td>
                     <select id="ddlAge" onchange="console.log(123,this.value);">
                         <option value="">请选择Age</option>
@@ -27,8 +48,12 @@
                 </td>
             </tr>
             <tr>
-                <td><label for="txtScore">Score</label></td>
-                <td><input type="text" id="txtScore" valuetype="int" /></td>
+                <td><label for="txtType">科目编号</label></td>
+                <td><input type="text" id="txtType" options="1,2,3" placeholder="可选项：1,2,3" data-type="int" data-show="0" /></td>
+            </tr>
+            <tr>
+                <td><label for="txtScore">分数</label></td>
+                <td><input type="text" id="txtScore" valuetype="int" data-show="0" min-value="0" max-value="100" placeholder="分数只能输入0 - 100，不输入表示0" /></td>
             </tr>
             <tr>
                 <td></td>
@@ -40,11 +65,11 @@
 </html>
 <script type="text/javascript" src="../oui/oui.js?"></script>
 <script type="text/javascript" src="../oui/dialog/oui.dialog.js?12"></script>
-<script type="text/javascript" src="../oui/form/oui.form.min.js?12"></script>
+<script type="text/javascript" src="../oui/form/oui.form.js?12"></script>
 <script type="text/javascript">
     //没有引用jquery.js
     window.onload = function() {
-		console.log($.getAttribute('txtScore', 'valuetype'), typeof $.getAttribute('txtScore', 'valuetype'));
+		//console.log($.getAttribute('txtScore', 'valuetype'), typeof $.getAttribute('txtScore', 'valuetype'));
         $.formValidate(['form1','btnOK'], {
 			configs: {
 				//是否单步验证
@@ -54,6 +79,9 @@
 			},
             rules: {
                 Id: { dataType: 'int' },
+                Number: { dataType: 'int' },
+                //Code: { minLength: 3, maxLength: 12 },
+                    Mobile: { pattern:/^1([38][0-9]|4[57]|[59][0-3,5-9]|6[6]|7[0-3,5-8])\d{8}$/, messages: {valLength:'{0}长度为{1}位数字'} },
                 Name: { required: true },
                 Age: { dataType: 'int', required: true },
 				Score: {},
