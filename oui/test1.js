@@ -1230,7 +1230,6 @@ var title = 'abc<br/>123';
 console.log(title.encodeHtml())
 console.log(title)
 
-
 var fd = { title: 'abc<br />1&2"3', id: 123, content: '你好abc', desc: '<a>aa</a>' };
 console.log($.encodeHtml(fd, ['title', 'desc']));
 console.log(fd);
@@ -1251,7 +1250,6 @@ console.log('abc\r\n\r\n\nasd\r\n    \r\n  \r\n12\r5\r4\n3'.removeEmptyLine())
 console.log('CCCCCC');
 console.log('abc\r\rasd\r\r123'.removeEmptyLine())
 
-
 console.log('test<<<<<script 123 >>>>《你好》 2<3 b>a c<d <script>alert(123);</script><a>'.filterHtml());
 
 console.log('a‘b"\id=1'.toDate());
@@ -1270,14 +1268,12 @@ console.log(new Date('a‘b"\id=1'));
 console.log(new Date(Date.parse('a‘b"\id=1')));
 console.log(new Date(0000000000000));
 
-
 var isDateString2 = function (str) {
     var pattern = /^(19|20|21)[\d]{2}[-\/](1[012]|0?[\d])$/;
 
     //只考虑当前有效的时间戳格式
     return /^[0-9]{10,13}$/.test(str);
 };
-
 
 console.log(isDateString2('1686096000000'));
 
@@ -1288,8 +1284,6 @@ console.log($.PATTERN.DateTime.test('2023-06-07'));
 console.log($.PATTERN.IOTMobile.test('14112345678'));
 
 console.log('/module.aspx'.setQueryString({module:'10001', menuCode:'10001'}, false));
-
-
 
 function getQKey(obj, name) {
 
@@ -1323,12 +1317,10 @@ console.log(Math.pow(5, -1));
 console.log(Math.pow(-5, 3));
 console.log(Math.pow(-5, -1));
 
-
 console.log('2099-12-31 23:59:59'.toDate().format('ts'));
 
 console.log((1687305181).toDate().format());
 console.log((1687333981).toDate().format());
-
 
 console.log('b1b29264'.hexToTime());
 console.log('21ac9264'.hexToTime());
@@ -1339,7 +1331,6 @@ console.log('{"id":123}'.jsonToIni());
 
 var obj = {id: 1234, name: 'abc'};
 
-
 console.log(obj);
 console.log($.toJsonStr(obj).jsonToIni());
 
@@ -1348,12 +1339,10 @@ console.log(body);
 console.log($.toIniJson(body, '__'));
 console.log($.jsonToIni($.toIniJson(body)));
 
-
 console.log(new Date().format('ts', 10));
 
 var cache = {};
 console.log($.toJsonString(cache).length);
-
 
 var a1 = 0, b1 = 0;
 
@@ -1388,12 +1377,9 @@ console.log('c', $.PATTERN.UrlParam.test('/modules/show/?device=123'));
 var pattern22 = /^(\/|http:\/\/|https:\/\/)(.*)(.(as[hp][x]?|jsp|[s]?htm[l]?|php|do)|\/)(\?[&]?(.*)=(.*)([&]{1,}(.*)=(.*)){0,})?/gi;
 console.log('c', pattern.test('http://112.54.97.178:81/?a=b&id=1'));
 
-
 console.log((0).toTimeStr());
 
 console.log((150)|15<<8);
-
-
 
 var str = '#comment\n';
 
@@ -1439,7 +1425,6 @@ console.log((86400).toDurationStr());
 
 console.log(parseInt(250/100).padLeft(2) + ':' + 1250%60);
 
-
 function filter(dr){
 
     delete dr.id;
@@ -1471,7 +1456,6 @@ console.log(EARTH_CIRCUMFERENCE, lat_len, lng_len);
 
 console.log(EARTH_CIRCUMFERENCE/lat_len);
 
-
 function GetEarthCircumference(latitude) {
     return EARTH_CIRCUMFERENCE * Math.cos(latitude);
 }
@@ -1481,8 +1465,6 @@ console.log(GetEarthCircumference(29.12345));
 console.log(Math.abs(EARTH_CIRCUMFERENCE * Math.cos(29)/360), Math.cos(0));
 
 console.log(360/Math.abs(EARTH_CIRCUMFERENCE * Math.cos(29)), Math.cos(0));
-
-
 
 var measurePoint = function ( x, y, d) {
     this.x = x;
@@ -1501,8 +1483,6 @@ console.log(2.12345*2.12345);
 $.console.debug('1234');
 console.debug('1234');
 
-
-
 var py2 = 35.28577076250284;
 var py1 = 29.001458388511015;
 var px3 = 316.5047887447397;
@@ -1511,23 +1491,21 @@ var px2 = 316.5047887447397;
         var b = ((py2 - py1) * px3 * px3 - (py3 - py1) * px2 * px2) / (px2 * px3 * px3 - px3 * px2 * px2);
         $.console.debug('b:', b);
 
-
 var obj = {};
 
 console.log(obj.length);
 
 var names =  [
-                '为', 
-                '内容不能重复',
-                '小数',
-                '端口',
+                '输入有误', 
+                '输入错误',
+                '可选项：',
+                '内容格式错误',
                 '端口数值应介于',
                 '之间'
             ];;
 for(var i =0; i<names.length;i++){
     console.log('//', names[i], names[i].toUnicode());
 }
-
 
 var data = {
     DeviceId: 617,
@@ -1547,12 +1525,9 @@ var data = {
     Server_line: 3
 };
 
-
-
 //https://graph.qq.com/oauth2.0/show?which=Login&display=pc&client_id=100270989&response_type=code&redirect_uri=https://passport.csdn.net/account/login?pcAuthType=qq&newAuth=true&state=test
 
 console.log(55/(1.58*1.58));
-
 
 //var o = {"type":"request","command":"setworkmode","sequence":12345,"device":"12345678901234009","body":{"mode":1,"time":1639996782,"duration":0,"expire":1639996782,"action":0,"update_time":1639996782}};
 
@@ -1563,20 +1538,36 @@ console.log((1700803715).toDateFormat());
 console.log($.buildAjaxData({"name":"abc",status:1,id:123}, {id:3,type:'unit'}));
 console.log($.buildUrlData({"name":"abc",status:1,id:123}, {id:3,type:'unit'}));
 
-
 console.log($.setQueryString('1.html', 'name', 'abc'));
-
 
 console.log($.buildUrlParam({"name":"acc", id: 123}));
 console.log($.setUrlParam({"name":"acc", id: 123}, 'abc', '1.html'));
 
 console.log($.isBoolean(false, true));
 
-
-
-
 var num2 = 28;
 
 console.log('hex', num2.toHex(4, true));
 
-console.log('{0:S2}'.format('19810309'))
+console.log('{0:S2}'.format('19810309'));
+
+console.log(/^([01]?|true|false)$/.test('1'));
+
+console.log(/^[\w-]{0,}$/i.test('ABCabc123_-'));
+
+function _getVal(keyCode) {
+    if ((keyCode >= 48 && keyCode <= 57) || (keyCode >= 96 && keyCode <= 105) || (keyCode >= 65 && keyCode <= 90)) {
+        return String.fromCharCode(keyCode);
+    } else if (keyCode === 109 || keyCode === 189) {
+        return '-';
+    } else if (keyCode === 110 || keyCode === 190) {
+        return '.';
+    }
+    return '';
+}
+
+console.log(parseInt('0123abc'));
+
+console.log(['abc','acc','asd'].indexOf('acc'));
+
+console.log(/^([1-6][0-5]([0-5][0-3][0-5]|[0-4][0-9]{2})|[1-9]([\d]{1,3})?|[0])$/.test('65499'));

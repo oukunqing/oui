@@ -153,8 +153,19 @@
             DateTime: /^(19|20|21)[\d]{2}[\-\/](0?[1-9]|1[0-2])[\-\/](0?[1-9]|[12][0-9]|3[0-1])(\s+(20|21|22|23|[0-1]?\d):[0-5]?\d(:[0-5]?\d)?)?$/,
             //IPV4
             Ip: /^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$/,
+            //Port  0 - 65535
+            Port: /^([1-6][0-5]([0-5][0-3][0-5]|[0-4][0-9]{2})|[1-9]([\d]{1,3})?|[0])$/,
             //带参数的URL格式字符串
-            UrlParam: /^(\/|http:\/\/|https:\/\/)(.*)(.(as[hp][x]?|jsp|[s]?htm[l]?|php|do)|\/)\?[&]?(.*)=(.*)([&]{1,}(.*)=(.*)){0,}/gi
+            UrlParam: /^(\/|http:\/\/|https:\/\/)(.*)(.(as[hp][x]?|jsp|[s]?htm[l]?|php|do)|\/)\?[&]?(.*)=(.*)([&]{1,}(.*)=(.*)){0,}/gi,
+            //整数
+            Int: /^(-?[1-9][\d]{0,10})$/,
+            //长整数
+            Long: /^(-?[1-9][\d]{0,19})$/,
+            //浮点数
+            Float: /^(-?[1-9][\d]{0,15}[.]?[\d]{0,10}|-?[0]([.][\d]{0,})?)$/,
+            //双精度浮点数
+            Double: /^(-?[1-9][\d]{0,23}[.]?[\d]{0,10}|-?[0]([.][\d]{0,})?)$/
+
         },
         CaseType: {
             Camel: 0,
@@ -5689,48 +5700,138 @@
             }
             return '';
         },
-        checkInputKey: function (ev, codes, excepts, shift) {
+        checkInputKey: function (ev, codes, excepts, opt) {
             var e = ev || window.event,
                 keyCode = $.getKeyCode(e);
 
-            //console.log('checkInputKey: ',keyCode, codes, shift);
-
             //不允许shift键的情况下，只允许 shift + tab 组合键
-            if (!shift && e.shiftKey && keyCode !== 9) {
+            if (!opt.shift && e.shiftKey && keyCode !== 9) {
                 return false;
             } else {
                 return (codes || []).indexOf(keyCode) >= 0 && (excepts || []).indexOf(keyCode) < 0;
             }
         },
+        checkInputVal: function(val, types, opt) {
+            opt = $.extend({}, opt);
+            types = $.extend([], types);
+            if (opt.pattern) {
+                if(!opt.pattern.test(val)) {
+                    return false;
+                } else if (!$.checkInputLen(val, opt)) {
+                    return false;
+                }
+                return true
+            }
+            for (var i = 0; i < types.length; i++) {
+                if ('char' === types[i]) {  //英文字母
+                    if (!/^[A-Z]{0,}$/i.test(val)) {
+                        return false;
+                    }
+                } else if ('word' === types[i]) {   //英文字母、数字、下划线
+                    if (!/^[\w]{0,}$/i.test(val)) {
+                        return false;
+                    }
+                } else if ('name' === types[i]) {   //英文字母、数字、下划线、连接符
+                    if (!/^[\w-]{0,}$/i.test(val)) {
+                        return false;
+                    }
+                } else if ('number' === types[i]) { //数字
+                    if (!/^[\d]{0,}$/.test(val)) {
+                        return false;
+                    }
+                } else if ('bool' === types[i]) {   //boolean值 0 或 1
+                    if (!/^([01]?)$/.test(val)) {                    
+                        return false;
+                    }
+                } else if ('int' === types[i]) {
+                    //if (!/^(-?[1-9][\d]{0,10}|[0]?|[-])$/.test(val)) {
+                    if (!$.PATTERN.Int.test(val) && !/^([0]?|[-])$/.test(val)) {
+                        return false;
+                    }
+                } else if ('long' === types[i]) {
+                    //if (!/^(-?[1-9][\d]{0,19}|[0]?|[-])$/.test(val)) {
+                    if (!$.PATTERN.Long.test(val) && !/^([0]?|[-])$/.test(val)) {
+                        return false;
+                    } 
+                } else if ('float' === types[i]) {
+                    //if (!/^(-?[1-9][\d]{0,15}[.]?[\d]{0,10}|-?[0]([.][\d]{0,})?|[0]?|[-]|[.])$/.test(val)) {
+                    if (!$.PATTERN.Float.test(val) && !/^([0]?|[-]|[.])$/.test(val)) {
+                        return false;
+                    }
+                } else if ('double' === types[i]) {
+                    //if (!/^(-?[1-9][\d]{0,23}[.]?[\d]{0,10}|-?[0]([.][\d]{0,})?|[0]?|[-]|[.])$/.test(val)) {
+                    if (!$.PATTERN.Double.test(val) && !/^([0]?|[-]|[.])$/.test(val)) {
+                        return false;
+                    }
+                } else if ('port' === types[i]) {
+                    if (!$.PATTERN.Port.test(val) && !/^[0]?$/.test(val)) {
+                        return false;
+                    }
+                }
+            }
+            if (!$.checkInputLen(val, opt)) {
+                return false;
+            }
+            return true;
+        },
+        checkInputLen: function(val, opt, paste) {
+            opt = $.extend({}, opt);
+            if (val.length > 0) {
+                if (paste) {
+                    if ((opt.maxLen && val.length >= opt.maxLen) || (opt.len && val.length >= opt.len)) {
+                        return false;
+                    }
+                    if (opt.maxVal && parseFloat('0' + val, 10) >= opt.maxVal) {
+                        return false;
+                    }
+                } else {                        
+                    if ((opt.maxLen && val.length > opt.maxLen) || (opt.len && val.length > opt.len)) {
+                        return false;
+                    }
+                    if (opt.maxVal && parseFloat('0' + val, 10) > opt.maxVal) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        },
         // 设置输入框内容格式
         // 需要设置输入格式的文本框，默认情况下是不允许空格和特殊字符的
         setInputFormat: function (elements, options) {
-            var elems = [], elem, keyTypes = ['char', 'number', 'control', 'symbol'];
+            var elems = [], elem, keyTypes = [
+                'char', 'word', 'number', 'int', 'long', 'float', 'double', 'bool', 'control', 'symbol', 'option', 'ipv4', 'port'
+            ];
             if ($.isArrayLike(elements) || $.isArray(elements)) {
                 elems = elements;
             } else if ($.isElement(elements)) {
                 elems = [elements];
             } else if ($.isString(elements, true)) {
-                elems = [$.toElement(elements)];
+                if (elements.split(/[,;\|]/).length > 1) {
+                    elems = elements.split(/[,;\|]/);
+                } else {
+                    elems = [elements];
+                }
             }
+
             if (!$.isArrayLike(elems) && !$.isArray(elems)) {
                 return this;
             }
-
             var opt = $.extend({
                 shift: true,    //是否允许shift键
                 space: false,   //是否允许空格
-                paste: false,   //是否允许粘贴
+                paste: true,   //是否允许粘贴
                 minus: false,   //是否允许减号（负号）
                 dot: false,     //是否允许小数点号
                 types: keyTypes,
+                pattern: null,  //正则表达式，用于验证数据值
                 codes: [],
-                excepts: []
+                excepts: [],
+                options: []     //内容选项
             }, options), i, j;
 
             var types = $.isArray(opt.types) && opt.types.length > 0 ? opt.types : keyTypes,
                 excepts = $.isArray(opt.excepts) && opt.excepts.length > 0 ? opt.excepts : [],
-                keys = [
+                ctls = [
                     8,      // backspace
                     9,      // tab
                     13,     // enter
@@ -5740,55 +5841,183 @@
                     39,     // right arrow
                     40,     // down arrow
                     46,     // delete
-                ].concat(opt.codes || []);
+                ],
+                // F1-F12功能键
+                funs = [112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123],
+                keys = ctls.concat(opt.codes || []).concat(funs),
+                patterns = [],
+                isNum = false,
+                isOpt = false,
+                isVal = false,
+                limit = 0;
 
             keys = opt.space ? keys.concat([32]) : keys;
             keys = !opt.minus ? keys : keys.concat([109, 189]); //109是小键盘中的减号-
             keys = !opt.dot ? keys : keys.concat([110, 190]); //110是小键盘中的点号.
-
-            // F1-F12功能键
-            keys = keys.concat([112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123]);
-
-            //console.log('setInputFormat: ', opt, ', all: ', all, ', keys: ', keys);
-
+            
             for (i = 0; i < types.length; i++) {
                 var type = (types[i] || '').toLowerCase();
-                if (type === 'char') {
-                    // A-Z 键
-                    for (j = 65; j <= 90; j++) {
-                        keys.push(j);
-                    }
-                } else if (type === 'number') {
+                if (keyTypes.indexOf(type) > -1) {
+                    limit++;
+                }
+                if (type === 'option') {
+                    isOpt = true;
+                    break;
+                }
+                if (type === 'number' || type === 'int' || type === 'float' || type === 'word' || type === 'ipv4' || type === 'port') {
                     // 0-9键
                     keys = keys.concat([48, 49, 50, 51, 52, 53, 54, 55, 56, 57]);
                     // 0-9键（小键盘）
                     keys = keys.concat([96, 97, 98, 99, 100, 101, 102, 103, 104, 105]);
+                    opt.shift = false;
+                    isNum = true;
+                }
+                if (type === 'char' || type === 'word') {
+                    // A-Z 键
+                    for (j = 65; j <= 90; j++) {
+                        keys.push(j);
+                    }
+                } else if (type === 'bool') {   // 0, 1
+                    keys = keys.concat([48, 49]);
                 } else if (type === 'control') {
                     // ;: =+ ,< -_ .> /? `~
                     keys = keys.concat([opt.space ? 32 : 0, 186, 187, 188, 189, 190, 191, 192]);
                     // [{ \| ]} '"
                     keys = keys.concat([219, 220, 221, 222]);
                 } else if (type === 'symbol') {
-                    // * + - . / (小键盘)  * + - . /
+                    // * + - . / (小键盘)  * + - . / (主键盘)
                     keys = keys.concat([106, 107, 109, 110, 111, 56, 187, 189, 190, 191]);
+                } else if (type === 'int') {
+                    // - (小键盘) - (主键盘)
+                    //keys = keys.concat([109, 189]);
+                } else if (type === 'float') {
+                    // - . (小键盘) - . (主键盘)
+                    //keys = keys.concat([109, 110, 189, 190]);
+                    // . (小键盘) . (主键盘)
+                    keys = keys.concat([110, 190]);
+                } else if (type === 'ipv4') {
+                    keys = keys.concat([110, 190]);
+                    isVal = true;
+                    patterns = [$.PATTERN.Ip, /^[0]?$/];
+                    opt.maxLen = 15;
+                } else if (type === 'port') {
+                    isVal = true;
+                    patterns = [$.PATTERN.Port, /^[0]?$/];
+                    opt.maxLen = 5;
                 }
+                if (type === 'word') {
+                    keys = keys.concat([189]);
+                    opt.shift = true;
+                }
+            }
+
+            function _checkValue(val, options, isPattern) {
+                var v = elem.value.trim(), vs = $.extend([], options);
+                if ('' === v || vs.length <= 0) {
+                    if (elem.oldColor) {
+                        elem.style.color = elem.oldColor;
+                    }
+                    return true;
+                }
+                for (var i = 0; i < vs.length; i++) {
+                    if (isPattern ? vs[i].test(val) : vs[i].trim() === v) {
+                        elem.style.color = elem.oldColor;
+                        return true;
+                    }
+                }
+                if (!elem.oldColor) {
+                    elem.oldColor  = $.getElementStyle(elem, 'color');
+                }
+                elem.style.color = '#f00';
+                return false;
             }
 
             for (i = 0; i < elems.length; i++) {
-                if (!$.isElement(elem = elems[i])) {
+                if (!$.isElement(elem = $.toElement(elems[i])) || !limit) {
                     continue;
                 }
-                elem.onkeydown = function(ev) {
-                    return $.checkInputKey(ev, keys, excepts, opt.shift);
-                };
-                if (!opt.paste) {
-                    elem.onpaste = function() {
+                if (isOpt) {
+                    var str = opt.options.join(',');
+                    if (str.length > 0 && elem.placeholder.indexOf(str) < 0) {
+                        elem.placeholder += '\u53ef\u9009\u9879\uff1a' + str;   //可选项：
+                    }                    
+                    elem.onkeydown = function(ev) {
+                        if ($.checkInputKey(ev, ctls, excepts, opt) || $.checkInputKey(ev, funs, excepts, opt)) {
+                            return true;
+                        }
+                        if (!$.checkInputLen(this.value.trim(), opt, true)) {
+                            return false;
+                        }
+                    };
+                    //内容指定，当输入的内容与选项不匹配时，输入框锁定焦点
+                    elem.onkeyup = function() {
+                        if(!_checkValue(elem.value.trim(), $.extend([], opt.options))) {
+                            elem.focus();
+                        }
+                    };                    
+                    elem.onblur = function() {
+                        if(!_checkValue(elem.value.trim(), $.extend([], opt.options))) {
+                            elem.focus();
+                        }
+                    };
+                } else {
+                    //控制输入，当输入值不匹配时，输入框禁止输入
+                    elem.onkeydown = function(ev) {
+                        var kc = ev.keyCode;
+                        if ($.checkInputKey(ev, ctls, excepts, opt) || $.checkInputKey(ev, funs, excepts, opt)) {
+                            return true;
+                        }
+                        if ((ev.ctrlKey && (kc === 65 || kc === 67)) || (opt.paste && ev.ctrlKey && (kc === 86))) {
+                            return true;
+                        }
+                        if ($.checkInputKey(ev, keys, excepts, opt)) {
+                            var pos = $.getTextCursorPosition(elem),
+                                val = elem.value.trim(),
+                                tmp = ev.key;
+                            if (!isVal && !$.checkInputVal((val = pos <= 0 ? tmp + val : val.substr(0, pos) + tmp + val.substr(pos)), types, opt)) {
+                                return false;
+                            }
+                            if (isVal && !$.checkInputLen(this.value.trim(), opt, true)) {
+                                return false;
+                            }
+                            return true;
+                        }
                         return false;
                     };
+                    elem.onblur = function() {
+                        var v = elem.value.trim(), len = v.length;
+                        if (isNum && (v.endsWith('-') || v.endsWith('.'))) {
+                            elem.focus();
+                        } else if (!$.checkInputVal(v, types, opt)) {
+                            elem.focus();
+                        } else if (isVal && !_checkValue(v, patterns, true)) {
+                            $.console.log('\u5185\u5bb9\u683c\u5f0f\u9519\u8bef', v);   //内容格式错误
+                            elem.focus();
+                        }
+                        if (len > 0 && opt.minVal && parseFloat('0' + v, 10) < opt.minVal) {
+                            elem.focus();
+                        }
+                    };
+                    if (isVal) {
+                        elem.onkeyup = function() {
+                            if(!_checkValue(elem.value.trim(), patterns, true)) {
+                                elem.focus();
+                            }
+                        };
+                    }
+                    if (!opt.paste) {
+                        elem.onpaste = function() {
+                            return false;
+                        };
+                    } else {
+                        elem.onpaste = function() {
+                            if (!$.checkInputLen(this.value.trim(), opt, true)) {
+                                return false;
+                            }
+                        };
+                    }
                 }
             }
-            console.log('setInputFormat: ');
-
             return this;
         },
         getElementValue: function (elements, defaultValue, attributeName, func) {

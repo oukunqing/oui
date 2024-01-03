@@ -1707,6 +1707,7 @@ console.log('abcde'.insert('你好',2, -2));
 console.log('abcde,asd,abc;hello'.insertItem('你好', 1, '|'));
 
 
+console.log('abcde'.space('a ','        a'));
 console.log('abcde'.space('a ','        a').clean());
 
 console.log('abcdefghijk'.remove(3, 5));
@@ -1727,3 +1728,4 @@ console.log($.distinctList([12, 123, 12, 14, 15]));
 console.log('abc,acc,asd,abc'.distinct(''));
 
 console.log('1,,2,4,5,6,,7,8,9'.toNumberList());
+

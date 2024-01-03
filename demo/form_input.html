@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>表单输入内容限制示例</title>
+<style type="text/css">
+body {font-size:14px;}
+input {width: 500px; height: 28px; font-size:14px; border:solid 1px #000; margin:0; padding: 0 5px; border-radius:3px; outline: none;}
+input:focus{border:solid 1px #00f;}
+select{width: 512px; height:30px;border:solid 1px #000;margin:0; padding: 0 5px;border-radius:3px;}
+select:focus{border:solid 1px #00f;}
+button {width:120px;height:28px;}
+</style>
+</head>
+<body>
+    <div style="margin:20px 0 0;">
+        <table cellpadding="5">
+            <tr>
+                <td></td>
+                <td><input type="text" id="fmt_num_15" placeholder="只能输入数字（长度15个字节）" /></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><input type="text" id="fmt_num_max_15" placeholder="只能输入数字（最大长度15个字节）" /></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><input type="text" id="fmt_int" placeholder="只能输入整数（可以负数）" /></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><input type="text" id="fmt_float" placeholder="只能输入小数（或整数）可以负数" /></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><input type="text" id="fmt_float1" placeholder="只能输入小数（或整数）" /></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><input type="text" id="fmt_word" placeholder="只能输入英文字母、数字、下划线" /></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><input type="text" id="fmt_word2" placeholder="只能输入英文字母、数字、下划线以及连接符，最大30个字符" /></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><input type="text" id="fmt_char" placeholder="只能输入英文字母" /></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><input type="text" id="fmt_char_num" placeholder="只能输入英文字母和数字" /></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><input type="text" id="fmt_bool" placeholder="只能输入布尔值 0 或 1" /></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><input type="text" id="fmt_ipv4" placeholder="只能输入IPV4地址" /></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><input type="text" id="fmt_port" placeholder="只能输入端口号" /></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><input type="text" id="fmt_option" /></td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>
+<script type="text/javascript" src="../oui/oui.js?"></script>
+<script type="text/javascript" src="../oui/dialog/oui.dialog.js?12"></script>
+<script type="text/javascript">
+    //没有引用jquery.js
+    window.onload = function() {
+		$.addKeyListener(document, 'keyup',  function(e, n) {
+			console.log('e:', e, n);
+		}, false);
+
+        $.setInputFormat('txtMobile', {
+            types: ['number'],
+            minus: false,
+            //shift: false
+        });
+
+
+        $.setInputFormat('txtPort', {
+            types: ['number'],
+            minVal: 80,
+            maxVal: 65535
+        });
+
+        $.setInputFormat('fmt_num_15', {
+            types: ['number'],
+            len: 15
+        });
+
+        $.setInputFormat('fmt_num_max_15', {
+            types: ['number'],
+            maxLen: 15
+        });
+
+        $.setInputFormat('fmt_int', {
+            types: ['int'],
+            minus: true
+        });
+
+        $.setInputFormat('fmt_float', {
+            types: ['float'],
+            minus: true
+        });
+        $.setInputFormat('fmt_float1', {
+            types: ['float']
+        });
+        $.setInputFormat('fmt_word', {
+            types: ['word'],
+            shift: true
+        });
+        $.setInputFormat('fmt_word2', {
+            types: ['word'],
+            shift: true,
+            pattern: /^[\w-]{0,}$/i,
+            maxLen: 30
+        });
+        $.setInputFormat('fmt_char', {
+            types: ['char'],
+        });
+        $.setInputFormat('fmt_char_num', {
+            types: ['char', 'number'],
+            pattern: /^[A-Z0-9]{0,}$/i
+        });
+        $.setInputFormat('fmt_bool', {
+            types: ['bool']
+        });
+        $.setInputFormat('fmt_ipv4', {
+            types: ['ipv4']
+        });
+        $.setInputFormat('fmt_port', {
+            types: ['port']
+        });
+        $.setInputFormat('fmt_option', {
+            types: ['option'],
+            options: ['abc', 'acc', 'asd'],
+            maxLen: 3
+        });
+    };
+
+    /*
+    //引用jquery.js
+    $(document).ready(function(){
+        $('#form1,#btnOK').formValidate({
+            rules: {
+                Id: { dataType: 'int' },
+                Name: { required: true },
+                Age: { dataType: 'int', required: true }
+            }, submit: function (formData) {
+                if (formData) {
+                    console.log('formData: ', formData);
+                    
+                }
+                return false;
+            }
+        });
+    });
+    */
+
+</script>

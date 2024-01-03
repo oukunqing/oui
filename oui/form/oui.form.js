@@ -59,8 +59,8 @@
                 number: '\u8bf7\u8f93\u5165{0}',
                 //请输入正确的
                 pattern: '\u8bf7\u8f93\u5165\u6b63\u786e\u7684{0}',
-                //输入错误
-                optionValue: '{0}\u8f93\u5165\u9519\u8bef'
+                //输入有误
+                optionValue: '{0}\u8f93\u5165\u6709\u8bef'
             },
                 highLight = {
                     styleId: 'form-validate-css-' + id,
@@ -197,8 +197,8 @@
                         } else {
                             if (element.checked && field.dataType !== 'string' && $.isNumeric(value)) {
                                 switch (field.dataType) {
-                                    case 'int': value = parseInt(value, 10); break;
-                                    case 'float': case 'decimal': value = parseFloat(value, 10); break;
+                                    case 'int': case 'long': value = parseInt(value, 10); break;
+                                    case 'float': case 'double': case 'decimal': value = parseFloat(value, 10); break;
                                 }
                             } else if (!element.checked) {
                                 value = isSingle && $.isNumeric(value) ? 0 : '';
@@ -313,10 +313,12 @@
                             }
                             switch (field.dataType) {
                                 case 'int':
+                                case 'long':
                                     value = parseInt(value, 10);
                                     numType = '\u6574\u6570';//整数
                                     break;
                                 case 'float':
+                                case 'double':
                                 case 'decimal':
                                     value = parseFloat(value, 10);
                                     numType = '\u5c0f\u6570';//小数
@@ -327,6 +329,19 @@
                                         return result(false, '\u7aef\u53e3\u6570\u503c\u5e94\u4ecb\u4e8e0 - 65535\u4e4b\u95f4'); //端口数值应介于 之间
                                     }
                                     numType = '\u7aef\u53e3';//端口
+                                    break;
+                                case 'bool':
+                                    if (!/^([01]|true|false)$/i.test(value)) {
+                                        return result(false, '\u8bf7\u8f93\u5165\u5e03\u5c14\u503c0\u62161');  //请输入布尔值0或1
+                                    }
+                                    if (/^(true|false)$/i.test(value)) {
+                                        //value = ('' + value).replace(/true/i, 1).replace(/false/i, 0);
+                                        value = /^true$/i.test(value) ? 1 : 0;
+                                        element.value = value;
+                                    }
+                                    value = parseInt(value, 10);
+                                    //重新赋值
+                                    val = value.toString();
                                     break;
                             }  
                             if (isNaN(value)) {
@@ -380,11 +395,15 @@
                                     }
                                     for (var i = 0; i < optionValue.length; i++) {
                                         var pv = field.dataType === 'float' ? parseFloat(optionValue[i], 10) : parseInt(optionValue[i], 10);
+                                        //parseInt parseFloat 自带容错，比如 0123abc parseInt()之后的结果是数字 123
+                                        //虽然结果是数字，但是严格来说，输入是错误的，真正的输入内容应该是 只有123才对
+                                        //所以为了严谨起见，不但要比较数值还要比较输入内容
                                         if (pv === value && optionValue[i] === val) {
                                             return result(true, value);
                                         }
                                     }
-                                    return result(false, (messages.optionValue || configs.messages.optionValue).format(title) + '<br />可选项：' + optionValue.join(', '));
+                                    return result(false, (messages.optionValue || configs.messages.optionValue).format(title) + 
+                                        '<br />\u53ef\u9009\u9879\uff1a' + optionValue.join(', '));     //可选项
                                 }
                             }
                         }
@@ -392,7 +411,8 @@
                         if ($.isObject(field.same) && field.same.id) {
                             var target = document.getElementById(field.same.id);
                             if (target && target.value !== value) {
-                                return result(false, field.same.message || field.same.msg || '\u4e24\u6b21\u8f93\u5165\u7684\u5185\u5bb9\u4e0d\u4e00\u6837'); //两次输入的内容不一样
+                                //两次输入的内容不一样
+                                return result(false, field.same.message || field.same.msg || '\u4e24\u6b21\u8f93\u5165\u7684\u5185\u5bb9\u4e0d\u4e00\u6837');
                             }
                         }
                         //内容去重检测

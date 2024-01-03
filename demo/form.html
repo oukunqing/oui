@@ -3,13 +3,16 @@
 <head>
     <title>表单验证示例</title>
 <style type="text/css">
-input {width: 360px; height: 24px;}
-select{height:26px;}
-button {width:120px;height:28px;}
+body {font-size:14px;}
+input:focus{border:solid 1px #00f; background: #f8f8f8;}
+input {width: 500px; height: 28px; border:solid 1px #000; margin:0; padding: 0 5px; border-radius:3px; outline: none;}
+select{width: 512px; height:30px;border:solid 1px #000;margin:0; padding: 0 5px;border-radius:3px;}
+select:focus{border:solid 1px #00f;}
+button {width:120px;height:30px;}
 </style>
 </head>
 <body>
-    <div id="form1" method="post" action="">
+    <div id="form1" method="post" action="" style="margin:20px 0 0 10px;">
         <table cellpadding="5" cellspacing="0">
             <tr>
                 <td><label for="txtId">ID</label></td>
@@ -33,7 +36,7 @@ button {width:120px;height:28px;}
             </tr>
             <tr>
                 <td><label for="txtMobile">手机号码</label></td>
-                <td><input type="text" id="txtMobile" placeholder="11位数字(正则验证)" val-length="11" /></td>
+                <td><input type="text" id="txtMobile" placeholder="只能输入11位纯数字(正则验证号码格式)" val-length="11" /></td>
             </tr>
             <tr>
                 <td><label for="ddlAge">年龄</label></td>
@@ -54,6 +57,21 @@ button {width:120px;height:28px;}
             <tr>
                 <td><label for="txtScore">分数</label></td>
                 <td><input type="text" id="txtScore" valuetype="int" data-show="0" min-value="0" max-value="100" placeholder="分数只能输入0 - 100，不输入表示0" /></td>
+            </tr>
+            <!-- data-show 表示是否显示默认值，比如默认值为0，如果data-show的话，则输入框没有输入内容时自动会被填充为0，如果设置了data-show="0"，则不会自动填充为0 -->
+            <tr>
+                <td><label for="txtPort">端口</label></td>
+                <td><input type="text" id="txtPort" valuetype="int" data-show="0" min-value="80" max-value="65535" placeholder="只能输入80 - 65535之间的数字" /></td>
+            </tr>
+            <!-- 布尔值输入 -->
+            <tr>
+                <td><label for="txtAble">是否</label></td>
+                <td><input type="text" id="txtAble" valuetype="bool" data-show="0" placeholder="只能输入布尔值: 0 或 1 或 true 或 false" /></td>
+            </tr>
+            <!-- 指定输入内容 -->
+            <tr>
+                <td><label for="txtAble2">启用</label></td>
+                <td><input type="text" id="txtAble2" options="0,1,true,false" data-show="0" placeholder="选项模式，只能输入：0,1,true,false" /></td>
             </tr>
             <tr>
                 <td></td>
