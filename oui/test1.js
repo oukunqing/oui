@@ -1570,4 +1570,7 @@ console.log(parseInt('0123abc'));
 
 console.log(['abc','acc','asd'].indexOf('acc'));
 
-console.log(/^([1-6][0-5]([0-5][0-3][0-5]|[0-4][0-9]{2})|[1-9]([\d]{1,3})?|[0])$/.test('65499'));
+console.log(/^([1-6][0-5]([0-5][0-3][0-5]|[0-4][0-9]{2})|[1-5]([\d]{1,4})?|[1-9]([\d]{1,3})?|[0])$/.test('55555'));
+
+var hostpattern = /^((?!-)([A-Z0-9\-]{1,63}.){1,3}[A-Z]{1,8})$/i;
+console.log(hostpattern.test('yd.3gvs-web3gvs-web.comaaaabcaa'));

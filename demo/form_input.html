@@ -4,9 +4,9 @@
     <title>表单输入内容限制示例</title>
 <style type="text/css">
 body {font-size:14px;}
-input {width: 500px; height: 28px; font-size:14px; border:solid 1px #000; margin:0; padding: 0 5px; border-radius:3px; outline: none;}
+input {width: 600px; height: 28px; font-size:14px; border:solid 1px #000; margin:0; padding: 0 5px; border-radius:3px; outline: none;}
 input:focus{border:solid 1px #00f;}
-select{width: 512px; height:30px;border:solid 1px #000;margin:0; padding: 0 5px;border-radius:3px;}
+select{width: 612px; height:30px;border:solid 1px #000;margin:0; padding: 0 5px;border-radius:3px;}
 select:focus{border:solid 1px #00f;}
 button {width:120px;height:28px;}
 </style>
@@ -14,6 +14,10 @@ button {width:120px;height:28px;}
 <body>
     <div style="margin:20px 0 0;">
         <table cellpadding="5">
+            <tr>
+                <td></td>
+                <td><input type="text" id="fmt_test" placeholder="不限制" /></td>
+            </tr>
             <tr>
                 <td></td>
                 <td><input type="text" id="fmt_num_15" placeholder="只能输入数字（长度15个字节）" /></td>
@@ -76,16 +80,14 @@ button {width:120px;height:28px;}
     //没有引用jquery.js
     window.onload = function() {
 		$.addKeyListener(document, 'keyup',  function(e, n) {
-			console.log('e:', e, n);
+			console.log('e:', e.keyCode, n, e);
 		}, false);
-
+        
         $.setInputFormat('txtMobile', {
             types: ['number'],
             minus: false,
             //shift: false
         });
-
-
         $.setInputFormat('txtPort', {
             types: ['number'],
             minVal: 80,
@@ -94,7 +96,8 @@ button {width:120px;height:28px;}
 
         $.setInputFormat('fmt_num_15', {
             types: ['number'],
-            len: 15
+            //内容长度固定为15个字节
+            valLen: 15
         });
 
         $.setInputFormat('fmt_num_max_15', {
@@ -129,7 +132,7 @@ button {width:120px;height:28px;}
         });
         $.setInputFormat('fmt_char_num', {
             types: ['char', 'number'],
-            pattern: /^[A-Z0-9]{0,}$/i
+            patterns: [/^[A-Z0-9]{0,}$/i]
         });
         $.setInputFormat('fmt_bool', {
             types: ['bool']
@@ -139,7 +142,7 @@ button {width:120px;height:28px;}
         });
         $.setInputFormat('fmt_port', {
             types: ['port']
-        });
+        });        
         $.setInputFormat('fmt_option', {
             types: ['option'],
             options: ['abc', 'acc', 'asd'],

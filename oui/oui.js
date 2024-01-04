@@ -154,7 +154,7 @@
             //IPV4
             Ip: /^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$/,
             //Port  0 - 65535
-            Port: /^([1-6][0-5]([0-5][0-3][0-5]|[0-4][0-9]{2})|[1-9]([\d]{1,3})?|[0])$/,
+            Port: /^([1-6][0-5]([0-5][0-3][0-5]|[0-4][0-9]{2})|[1-5]([\d]{1,4})?|[1-9]([\d]{1,3})?|[0])$/,
             //带参数的URL格式字符串
             UrlParam: /^(\/|http:\/\/|https:\/\/)(.*)(.(as[hp][x]?|jsp|[s]?htm[l]?|php|do)|\/)\?[&]?(.*)=(.*)([&]{1,}(.*)=(.*)){0,}/gi,
             //整数
@@ -5692,7 +5692,7 @@
             if (!$.isElement(elem = $.toElement(elem))) {
                 return '';
             }
-            if (elem.selectionStart || elem.selectionStart === '0') {
+            if (elem.selectionStart || elem.selectionStart === 0) {
                 return elem.value.substring(elem.selectionStart, elem.selectionEnd);
             } else if (document.selection) {
                 obj.focus();
@@ -5714,78 +5714,56 @@
         checkInputVal: function(val, types, opt) {
             opt = $.extend({}, opt);
             types = $.extend([], types);
-            if (opt.pattern) {
-                if(!opt.pattern.test(val)) {
-                    return false;
-                } else if (!$.checkInputLen(val, opt)) {
-                    return false;
+            var patterns = $.extend([], opt.patterns), pass = false;
+            if (patterns && patterns.length > 0) {
+                for (var i = 0; i < patterns.length; i++) {
+                    if (patterns[i].test(val)) {
+                        pass = true;
+                        break;
+                    }
                 }
-                return true
+                return !pass ? false : $.checkInputLen(val, opt);
             }
+
+            var pc = {
+                char: [/^[A-Z]{0,}$/i],
+                word: [/^[\w]{0,}$/i],
+                name: [/^[\w-]{0,}$/i],
+                bool: [/^([01]?)$/],
+                int: [$.PATTERN.Int, /^([0]?|[-])$/],
+                long: [$.PATTERN.Long, /^([0]?|[-])$/],
+                float: [$.PATTERN.Float, /^([0]?|[-]|[.])$/],
+                double: [$.PATTERN.Double, /^([0]?|[-]|[.])$/],
+                port: [$.PATTERN.Port, /^[0]?$/]
+            };
+
             for (var i = 0; i < types.length; i++) {
-                if ('char' === types[i]) {  //英文字母
-                    if (!/^[A-Z]{0,}$/i.test(val)) {
-                        return false;
+                var ps = pc[types[i]] || [], c = ps.length, nc = 0;
+                if (c > 0) {
+                    for (var j = 0; j < ps.length; j++) {
+                        if (!ps[j].test(val)) {
+                            nc++;
+                        }
                     }
-                } else if ('word' === types[i]) {   //英文字母、数字、下划线
-                    if (!/^[\w]{0,}$/i.test(val)) {
-                        return false;
-                    }
-                } else if ('name' === types[i]) {   //英文字母、数字、下划线、连接符
-                    if (!/^[\w-]{0,}$/i.test(val)) {
-                        return false;
-                    }
-                } else if ('number' === types[i]) { //数字
-                    if (!/^[\d]{0,}$/.test(val)) {
-                        return false;
-                    }
-                } else if ('bool' === types[i]) {   //boolean值 0 或 1
-                    if (!/^([01]?)$/.test(val)) {                    
-                        return false;
-                    }
-                } else if ('int' === types[i]) {
-                    //if (!/^(-?[1-9][\d]{0,10}|[0]?|[-])$/.test(val)) {
-                    if (!$.PATTERN.Int.test(val) && !/^([0]?|[-])$/.test(val)) {
-                        return false;
-                    }
-                } else if ('long' === types[i]) {
-                    //if (!/^(-?[1-9][\d]{0,19}|[0]?|[-])$/.test(val)) {
-                    if (!$.PATTERN.Long.test(val) && !/^([0]?|[-])$/.test(val)) {
-                        return false;
-                    } 
-                } else if ('float' === types[i]) {
-                    //if (!/^(-?[1-9][\d]{0,15}[.]?[\d]{0,10}|-?[0]([.][\d]{0,})?|[0]?|[-]|[.])$/.test(val)) {
-                    if (!$.PATTERN.Float.test(val) && !/^([0]?|[-]|[.])$/.test(val)) {
-                        return false;
-                    }
-                } else if ('double' === types[i]) {
-                    //if (!/^(-?[1-9][\d]{0,23}[.]?[\d]{0,10}|-?[0]([.][\d]{0,})?|[0]?|[-]|[.])$/.test(val)) {
-                    if (!$.PATTERN.Double.test(val) && !/^([0]?|[-]|[.])$/.test(val)) {
-                        return false;
-                    }
-                } else if ('port' === types[i]) {
-                    if (!$.PATTERN.Port.test(val) && !/^[0]?$/.test(val)) {
+                    if (c === nc) {
                         return false;
                     }
                 }
             }
-            if (!$.checkInputLen(val, opt)) {
-                return false;
-            }
-            return true;
+            return $.checkInputLen(val, opt);
         },
         checkInputLen: function(val, opt, paste) {
             opt = $.extend({}, opt);
             if (val.length > 0) {
                 if (paste) {
-                    if ((opt.maxLen && val.length >= opt.maxLen) || (opt.len && val.length >= opt.len)) {
+                    if ((opt.maxLen && opt.maxLen > 0 && val.length >= opt.maxLen) || (opt.valLen && opt.valLen > 0 && val.length >= opt.valLen)) {
                         return false;
                     }
                     if (opt.maxVal && parseFloat('0' + val, 10) >= opt.maxVal) {
                         return false;
                     }
                 } else {                        
-                    if ((opt.maxLen && val.length > opt.maxLen) || (opt.len && val.length > opt.len)) {
+                    if ((opt.maxLen && opt.maxLen > 0 && val.length > opt.maxLen) || (opt.valLen && opt.valLen > 0 && val.length > opt.valLen)) {
                         return false;
                     }
                     if (opt.maxVal && parseFloat('0' + val, 10) > opt.maxVal) {
@@ -5799,18 +5777,15 @@
         // 需要设置输入格式的文本框，默认情况下是不允许空格和特殊字符的
         setInputFormat: function (elements, options) {
             var elems = [], elem, keyTypes = [
-                'char', 'word', 'number', 'int', 'long', 'float', 'double', 'bool', 'control', 'symbol', 'option', 'ipv4', 'port'
+                'char', 'word', 'number', 'int', 'long', 'float', 'double', 'bool', 'control', 'symbol', 
+                'option', 'ipv4', 'port' 
             ];
             if ($.isArrayLike(elements) || $.isArray(elements)) {
                 elems = elements;
             } else if ($.isElement(elements)) {
                 elems = [elements];
             } else if ($.isString(elements, true)) {
-                if (elements.split(/[,;\|]/).length > 1) {
-                    elems = elements.split(/[,;\|]/);
-                } else {
-                    elems = [elements];
-                }
+                elems = elements.split(/[,;\|]/).length > 1 ? elements.split(/[,;\|]/) : [elements];
             }
 
             if (!$.isArrayLike(elems) && !$.isArray(elems)) {
@@ -5822,12 +5797,19 @@
                 paste: true,   //是否允许粘贴
                 minus: false,   //是否允许减号（负号）
                 dot: false,     //是否允许小数点号
+                maxLen: -1,     //内容最大长度，-1表示不限制
+                valLen: -1,     //内容固定长度，-1表示不限制
+                maxVal: null,   //最大数值（整数、小数）
                 types: keyTypes,
-                pattern: null,  //正则表达式，用于验证数据值
+                patterns: [],  //正则表达式，用于验证数据值
                 codes: [],
                 excepts: [],
                 options: []     //内容选项
             }, options), i, j;
+
+            if ((!opt.patterns || opt.patterns.length <= 0) && $.isRegexp(opt.pattern)) {
+                opt.patterns = [opt.pattern];
+            }
 
             var types = $.isArray(opt.types) && opt.types.length > 0 ? opt.types : keyTypes,
                 excepts = $.isArray(opt.excepts) && opt.excepts.length > 0 ? opt.excepts : [],
@@ -5845,7 +5827,7 @@
                 // F1-F12功能键
                 funs = [112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123],
                 keys = ctls.concat(opt.codes || []).concat(funs),
-                patterns = [],
+                patterns = $.extend([], opt.patterns),
                 isNum = false,
                 isOpt = false,
                 isVal = false,
@@ -5864,7 +5846,7 @@
                     isOpt = true;
                     break;
                 }
-                if (type === 'number' || type === 'int' || type === 'float' || type === 'word' || type === 'ipv4' || type === 'port') {
+                if (['number', 'int', 'float', 'word', 'ipv4', 'port'].indexOf(type) > -1) {
                     // 0-9键
                     keys = keys.concat([48, 49, 50, 51, 52, 53, 54, 55, 56, 57]);
                     // 0-9键（小键盘）
@@ -5872,7 +5854,7 @@
                     opt.shift = false;
                     isNum = true;
                 }
-                if (type === 'char' || type === 'word') {
+                if (['char', 'word'].indexOf(type) > -1) {
                     // A-Z 键
                     for (j = 65; j <= 90; j++) {
                         keys.push(j);
@@ -5895,15 +5877,16 @@
                     //keys = keys.concat([109, 110, 189, 190]);
                     // . (小键盘) . (主键盘)
                     keys = keys.concat([110, 190]);
-                } else if (type === 'ipv4') {
-                    keys = keys.concat([110, 190]);
-                    isVal = true;
-                    patterns = [$.PATTERN.Ip, /^[0]?$/];
-                    opt.maxLen = 15;
                 } else if (type === 'port') {
                     isVal = true;
-                    patterns = [$.PATTERN.Port, /^[0]?$/];
+                    patterns = patterns.concat([$.PATTERN.Port, /^[0]?$/]);
                     opt.maxLen = 5;
+                }
+                if (type === 'ipv4') {
+                    keys = keys.concat([110, 190]);
+                    isVal = true;
+                    patterns = patterns.concat([$.PATTERN.Ip, /^[0]?$/]);
+                    opt.maxLen = 15;
                 }
                 if (type === 'word') {
                     keys = keys.concat([189]);
@@ -5911,25 +5894,32 @@
                 }
             }
 
+            function _setColor(elem, pass, focus) {
+                if (!pass) {
+                    if (!elem.oldColor) {
+                        elem.oldColor  = $.getElementStyle(elem, 'color');
+                    }
+                    if (focus) {
+                        elem.focus();
+                    }
+                    elem.style.color = '#f00';
+                } else if (elem.oldColor) {
+                    elem.style.color = elem.oldColor;
+                }
+                return pass;
+            }
+            
             function _checkValue(val, options, isPattern) {
                 var v = elem.value.trim(), vs = $.extend([], options);
                 if ('' === v || vs.length <= 0) {
-                    if (elem.oldColor) {
-                        elem.style.color = elem.oldColor;
-                    }
-                    return true;
+                    return _setColor(elem, true);
                 }
                 for (var i = 0; i < vs.length; i++) {
                     if (isPattern ? vs[i].test(val) : vs[i].trim() === v) {
-                        elem.style.color = elem.oldColor;
-                        return true;
+                        return _setColor(elem, true);
                     }
                 }
-                if (!elem.oldColor) {
-                    elem.oldColor  = $.getElementStyle(elem, 'color');
-                }
-                elem.style.color = '#f00';
-                return false;
+                return _setColor(elem, false);
             }
 
             for (i = 0; i < elems.length; i++) {
@@ -5945,7 +5935,8 @@
                         if ($.checkInputKey(ev, ctls, excepts, opt) || $.checkInputKey(ev, funs, excepts, opt)) {
                             return true;
                         }
-                        if (!$.checkInputLen(this.value.trim(), opt, true)) {
+                        var selected = $.getSelectedText(elem) ? true : false;
+                        if (!selected && !$.checkInputLen(this.value.trim(), opt, true)) {
                             return false;
                         }
                     };
@@ -5961,9 +5952,9 @@
                         }
                     };
                 } else {
-                    //控制输入，当输入值不匹配时，输入框禁止输入
+                    //控制输入，当输入值不匹配时，输入框禁止输入                    
                     elem.onkeydown = function(ev) {
-                        var kc = ev.keyCode;
+                        var kc = $.getKeyCode(ev);
                         if ($.checkInputKey(ev, ctls, excepts, opt) || $.checkInputKey(ev, funs, excepts, opt)) {
                             return true;
                         }
@@ -5971,40 +5962,50 @@
                             return true;
                         }
                         if ($.checkInputKey(ev, keys, excepts, opt)) {
-                            var pos = $.getTextCursorPosition(elem),
+                            var selected = $.getSelectedText(elem) ? true : false,
+                                pos = $.getTextCursorPosition(elem),
                                 val = elem.value.trim(),
                                 tmp = ev.key;
-                            if (!isVal && !$.checkInputVal((val = pos <= 0 ? tmp + val : val.substr(0, pos) + tmp + val.substr(pos)), types, opt)) {
+
+                            val = pos <= 0 ? tmp + val : val.substr(0, pos) + tmp + val.substr(pos);
+
+                            if (!isVal && !selected && !$.checkInputVal(val, types, opt)) {
                                 return false;
-                            }
-                            if (isVal && !$.checkInputLen(this.value.trim(), opt, true)) {
+                            } else if (isVal && !selected && !$.checkInputLen(val, opt, false)) {
                                 return false;
                             }
                             return true;
                         }
                         return false;
                     };
+                    elem.onkeyup = function() {
+                        var val = elem.value.trim();
+                        if (isVal) {
+                            if(!_checkValue(val, patterns, true)) {
+                                return _setColor(elem, false, true);
+                            }
+                        } else {
+                            if ((!isVal && !$.checkInputVal(val, types, opt)) || !$.checkInputLen(val, opt, false)) {
+                                return _setColor(elem, false);
+                            }
+                        }
+                        return _setColor(elem, true);
+                    };
                     elem.onblur = function() {
                         var v = elem.value.trim(), len = v.length;
                         if (isNum && (v.endsWith('-') || v.endsWith('.'))) {
-                            elem.focus();
+                            return _setColor(elem, false, true);
                         } else if (!$.checkInputVal(v, types, opt)) {
-                            elem.focus();
+                            return _setColor(elem, false, true);
                         } else if (isVal && !_checkValue(v, patterns, true)) {
                             $.console.log('\u5185\u5bb9\u683c\u5f0f\u9519\u8bef', v);   //内容格式错误
-                            elem.focus();
+                            return _setColor(elem, false, true);
                         }
                         if (len > 0 && opt.minVal && parseFloat('0' + v, 10) < opt.minVal) {
-                            elem.focus();
+                            return _setColor(elem, false, true);
                         }
+                        return _setColor(elem, true);
                     };
-                    if (isVal) {
-                        elem.onkeyup = function() {
-                            if(!_checkValue(elem.value.trim(), patterns, true)) {
-                                elem.focus();
-                            }
-                        };
-                    }
                     if (!opt.paste) {
                         elem.onpaste = function() {
                             return false;
@@ -6012,7 +6013,7 @@
                     } else {
                         elem.onpaste = function() {
                             if (!$.checkInputLen(this.value.trim(), opt, true)) {
-                                return false;
+                                return _setColor(elem, false);
                             }
                         };
                     }
