@@ -58,6 +58,10 @@ button {width:120px;height:30px;}
                 <td><label for="txtScore">分数</label></td>
                 <td><input type="text" id="txtScore" valuetype="int" data-show="0" min-value="0" max-value="100" placeholder="分数只能输入0 - 100，不输入表示0" /></td>
             </tr>
+            <tr>
+                <td><label for="txtIp">IP地址</label></td>
+                <td><input type="text" id="txtIp" valuetype="ipv4" placeholder="只能输入IPV4地址" /></td>
+            </tr>
             <!-- data-show 表示是否显示默认值，比如默认值为0，如果data-show的话，则输入框没有输入内容时自动会被填充为0，如果设置了data-show="0"，则不会自动填充为0 -->
             <tr>
                 <td><label for="txtPort">端口</label></td>
@@ -101,7 +105,9 @@ button {width:120px;height:30px;}
                 //Code: { minLength: 3, maxLength: 12 },
                     Mobile: { pattern:/^1([38][0-9]|4[57]|[59][0-3,5-9]|6[6]|7[0-3,5-8])\d{8}$/, messages: {valLength:'{0}长度为{1}位数字'} },
                 Name: { required: true },
+                //Ip: { required: true },
                 Age: { dataType: 'int', required: true },
+                //Type: { required: true },
 				Score: {},
             }, submit: function (formData) {
                 if (formData) {

@@ -5831,6 +5831,8 @@
                 isNum = false,
                 isOpt = false,
                 isVal = false,
+                isBool = false,
+                //是否要限制内容输入，如果配置的限制类型不匹配，则不限制内容输入
                 limit = 0;
 
             keys = opt.space ? keys.concat([32]) : keys;
@@ -5847,10 +5849,8 @@
                     break;
                 }
                 if (['number', 'int', 'float', 'word', 'ipv4', 'port'].indexOf(type) > -1) {
-                    // 0-9键
-                    keys = keys.concat([48, 49, 50, 51, 52, 53, 54, 55, 56, 57]);
-                    // 0-9键（小键盘）
-                    keys = keys.concat([96, 97, 98, 99, 100, 101, 102, 103, 104, 105]);
+                    keys = keys.concat([48, 49, 50, 51, 52, 53, 54, 55, 56, 57]);       // 0-9键
+                    keys = keys.concat([96, 97, 98, 99, 100, 101, 102, 103, 104, 105]); // 0-9键（小键盘）
                     opt.shift = false;
                     isNum = true;
                 }
@@ -5861,6 +5861,7 @@
                     }
                 } else if (type === 'bool') {   // 0, 1
                     keys = keys.concat([48, 49]);
+                    isBool = true;
                 } else if (type === 'control') {
                     // ;: =+ ,< -_ .> /? `~
                     keys = keys.concat([opt.space ? 32 : 0, 186, 187, 188, 189, 190, 191, 192]);
@@ -5908,7 +5909,7 @@
                 }
                 return pass;
             }
-            
+
             function _checkValue(val, options, isPattern) {
                 var v = elem.value.trim(), vs = $.extend([], options);
                 if ('' === v || vs.length <= 0) {
@@ -5945,16 +5946,16 @@
                         if(!_checkValue(elem.value.trim(), $.extend([], opt.options))) {
                             elem.focus();
                         }
-                    };                    
+                    };
                     elem.onblur = function() {
                         if(!_checkValue(elem.value.trim(), $.extend([], opt.options))) {
                             elem.focus();
                         }
                     };
                 } else {
-                    //控制输入，当输入值不匹配时，输入框禁止输入                    
+                    //控制输入，当输入值不匹配时，输入框禁止输入
                     elem.onkeydown = function(ev) {
-                        var kc = $.getKeyCode(ev);
+                        var kc = $.getKeyCode(ev), selected = $.getSelectedText(elem) ? true : false;
                         if ($.checkInputKey(ev, ctls, excepts, opt) || $.checkInputKey(ev, funs, excepts, opt)) {
                             return true;
                         }
@@ -5962,19 +5963,18 @@
                             return true;
                         }
                         if ($.checkInputKey(ev, keys, excepts, opt)) {
-                            var selected = $.getSelectedText(elem) ? true : false,
-                                pos = $.getTextCursorPosition(elem),
-                                val = elem.value.trim(),
-                                tmp = ev.key;
+                            if ($.getSelectedText(elem)) {
+                                return true;
+                            }
+                            var pos = $.getTextCursorPosition(elem),
+                                key = ev.key,
+                                txt = elem.value.trim(),
+                                val = pos <= 0 ? key + txt : txt.substr(0, pos) + key + txt.substr(pos);
 
-                            val = pos <= 0 ? tmp + val : val.substr(0, pos) + tmp + val.substr(pos);
-
-                            if (!isVal && !selected && !$.checkInputVal(val, types, opt)) {
-                                return false;
-                            } else if (isVal && !selected && !$.checkInputLen(val, opt, false)) {
+                            if (!isVal && !$.checkInputVal(val, types, opt)) {
                                 return false;
                             }
-                            return true;
+                            return !isVal || $.checkInputLen(val, opt, false);
                         }
                         return false;
                     };
@@ -6012,6 +6012,7 @@
                         };
                     } else {
                         elem.onpaste = function() {
+                            //如果输入框的内容已经超出长度限制，则不能再粘贴内容
                             if (!$.checkInputLen(this.value.trim(), opt, true)) {
                                 return _setColor(elem, false);
                             }

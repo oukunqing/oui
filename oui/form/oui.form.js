@@ -211,7 +211,11 @@
                         return { pass: true, value: value, message: '' };
                     },
                     checkValue: function (element, value, field, configs) {
-                        var isEvent = typeof configs === 'undefined';
+                        var isEvent = typeof configs === 'undefined', keyCode = 0;
+                        if (isEvent && value) {
+                            keyCode = $.getKeyCode(value);
+                            value = null;
+                        }
                         value = value || op.getValue(element);
                         field = field || element.field;
                         configs = configs || element.configs;
@@ -268,35 +272,43 @@
 
                             if ($.isFunction(validate)) {    // 外部验证函数（优先）
                                 if (!validate(value, element)) { return result(false); }
-                            } else if ($.isInteger(valLen) && valLen > 0 && len !== valLen) {
-                                if (len <= 0) {
-                                    return result(false, (messages.required || configs.messages.required).format(title));
+                            } else if (field.required && ('' === value || len <= 0)) {
+                                return result(false, (messages.required || configs.messages.required).format(title));
+                            } else if (len > 0) {
+                                if ($.isInteger(valLen) && valLen > 0 && len !== valLen) {
+                                    return result(false, (messages.valLength || configs.messages.valLength).format(title, valLen));
+                                } else if ($.isInteger(minLen) && len < minLen) {      //验证内容长度
+                                    return result(false, (messages.minLength || configs.messages.minLength).format(title, minLen));
+                                } else if ($.isInteger(maxLen) && len > maxLen) {
+                                    return result(false, (messages.maxLength || configs.messages.maxLength).format(title, maxLen));
+                                } else if (pattern && !pattern.test(value)) {   // 正则表达式验证
+                                    return result(false, (messages.pattern || configs.messages.pattern).format(title));
                                 }
-                                return result(false, (messages.valLength || configs.messages.valLength).format(title, valLen));
-                            } else if ($.isInteger(minLen) && len < minLen) {      //验证内容长度
-                                if (len <= 0) {
-                                    return result(false, (messages.required || configs.messages.required).format(title));
-                                }
-                                return result(false, (messages.minLength || configs.messages.minLength).format(title, minLen));
-                            } else if ($.isInteger(maxLen) && len > maxLen) {
-                                return result(false, (messages.maxLength || configs.messages.maxLength).format(title, maxLen));
-                            } else if ('' === value) { 
-                                return result(true, value); 
-                            } else if (pattern && !pattern.test(value)) {   // 正则表达式验证
-                                return result(false, (messages.pattern || configs.messages.pattern).format(title));
-                            }
 
-                            if ($.isUndefined(optionValue)) {
-                                optionValue = $.getAttribute(element, customAttrs.OPPTION_VALUE, '');
-                            }
-                            optionValue = optionValue.length > 0 ? optionValue.split(/[,;\|]/) : [];
-                            if (optionValue.length > 0) {
-                                for (var i = 0; i < optionValue.length; i++) {
-                                    if (optionValue[i] === value) {
-                                        return result(true, value);
-                                    }
+                                if ($.isUndefined(optionValue)) {
+                                    optionValue = $.getAttribute(element, customAttrs.OPPTION_VALUE, '');
                                 }
-                                return result(false, (messages.optionValue || configs.messages.optionValue).format(title) + '<br />可选项：' + optionValue);
+                                optionValue = optionValue.length > 0 ? optionValue.split(/[,;\|]/) : [];
+                                if (optionValue.length > 0) {
+                                    for (var i = 0; i < optionValue.length; i++) {
+                                        if (optionValue[i] === value) {
+                                            return result(true, value);
+                                        }
+                                    }
+                                    return result(false, (messages.optionValue || configs.messages.optionValue).format(title) + '<br />可选项：' + optionValue);
+                                }
+                            }
+                        } else if (['ip','ipv4'].indexOf(field.dataType) > -1) {
+                            //限制内容长度为15个字节
+                            element.maxLength = 15;
+
+                            var KEY_CODE_BACKSPACE = 8, KEY_CODE_DELETE = 46;
+                            if ([KEY_CODE_BACKSPACE, KEY_CODE_DELETE].indexOf(keyCode) < 0 && /^(local|route|127.|192.|255.|::1)$/i.test(value)) {
+                                element.value = (value = value.replace(/^(local|127.|::1)$/i, '127.0.0.1')
+                                    .replace(/^(route|192.)$/i, '192.168.1.1')
+                                    .replace(/^255.$/, '255.255.255.0'));
+                            } else if (!$.PATTERN.Ip.test(value) && $.isString(value, true)) {
+                                return result(false, ('{0}\u683c\u5f0f\u8f93\u5165\u9519\u8bef').format(title));    //格式输入错误
                             }
                         } else {
                             // 验证数字输入，大小值范围限定，其中 type="hidden" 默认值至少为0
@@ -330,13 +342,13 @@
                                     }
                                     numType = '\u7aef\u53e3';//端口
                                     break;
-                                case 'bool':
-                                    if (!/^([01]|true|false)$/i.test(value)) {
+                                case 'bool':    //布尔值只有2种状态 0 或 1
+                                    if (!/^([01\s]+|true|false|yes|no)$/i.test(value)) {
                                         return result(false, '\u8bf7\u8f93\u5165\u5e03\u5c14\u503c0\u62161');  //请输入布尔值0或1
                                     }
-                                    if (/^(true|false)$/i.test(value)) {
-                                        //value = ('' + value).replace(/true/i, 1).replace(/false/i, 0);
-                                        value = /^true$/i.test(value) ? 1 : 0;
+                                    if (/^([01][01\s]+|true|false|yes|no)$/i.test(value)) {
+                                        value = ('' + value).replace(/^(true|[1][01\s]+|yes)$/i, 1).replace(/^(false|[0][01\s]+|no)$/i, 0);
+                                        //value = /^true$/i.test(value) ? 1 : 0;
                                         element.value = value;
                                     }
                                     value = parseInt(value, 10);
@@ -391,7 +403,7 @@
                                 optionValue = optionValue.length > 0 ? optionValue.split(/[,;\|]/) : [];
                                 if (optionValue.length > 0) {
                                     if (val.length <= 0) {
-                                        return result(false, (messages.required || configs.messages.required).format(title));
+                                        return !field.required ? result(true, value) : result(false, (messages.required || configs.messages.required).format(title));
                                     }
                                     for (var i = 0; i < optionValue.length; i++) {
                                         var pv = field.dataType === 'float' ? parseFloat(optionValue[i], 10) : parseInt(optionValue[i], 10);
@@ -601,7 +613,7 @@
                                 blur: function () { op.showTooltip(op.checkValue(this), this, false, fid); },
                                 change: function () { op.showTooltip(op.checkValue(this), this, false, fid); },
                                 click: function () { op.showTooltip(op.getCheckValue(this), this, false, fid); },
-                                keyup: function () { op.showTooltip(op.checkValue(this), this, false, fid); }
+                                keyup: function (ev) { op.showTooltip(op.checkValue(this, ev), this, false, fid); }
                             };
 
                             if (typeof $.OUI === 'boolean') {
