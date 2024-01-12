@@ -6,7 +6,7 @@
 }
 .oui-ddl-txt {
 	border: solid 1px #ddd;
-	line-height: 24px;
+	line-height: 28px;
 	cursor: default;
 	margin: 0;
 	/*border-right: none 0;*/
@@ -156,7 +156,6 @@ ul.oui-ddl-flow label.oui-ddl-cur,ul.oui-ddl-grid label.oui-ddl-cur {
 	padding: 0;
 }
 .oui-ddl-panel .oui-ddl-oper .btn-group-block {
-	width: 100%;
 	padding: 0 4px;
 	display: block;
 }
@@ -178,7 +177,7 @@ ul.oui-ddl-flow label.oui-ddl-cur,ul.oui-ddl-grid label.oui-ddl-cur {
 .oui-ddl-panel .btn-group .btn-primary {
 	border: solid 1px #2e6da4;
 	background: #337ab7;
-	border-radius: 4px;
+	/*border-radius: 4px;*/
 	box-sizing: border-box;
 }
 
@@ -197,6 +196,7 @@ ul.oui-ddl-flow label.oui-ddl-cur,ul.oui-ddl-grid label.oui-ddl-cur {
 .oui-ddl-panel .btn-group button.btn-first {
 	margin-left: 2px;
 }
-.oui-ddl-panel .btn-group-block button.btn-ok {
+.oui-ddl-panel .btn-group-block button.btn-ok,.oui-ddl-panel .btn-group-block button.btn-block {
 	width: 100%;
+	border-radius: 4px;
 }

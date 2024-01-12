@@ -3,12 +3,17 @@
 <head>
 	<meta charset="utf-8">
 	<title>下拉菜单（多选）</title>
-	<style type="text/css"></style>
+	<style type="text/css">
+		select {height:30px;}
+	</style>
 	<script type="text/javascript" src="../oui/oui.js"></script>
 	<script type="text/javascript" src="../oui/dropdownlist/oui.dropdownlist.js"></script>
 </head>
-<body>
-<select id="DeviceType" style="height:26px;width:300px;border:solid 1px #ccc;"></select>
+<body style="background: #eee;">
+<select id="DeviceType" style="height:32px;width:300px;border:solid 1px #ccc;"></select>
+<br />
+<br />
+<input type="text" id="ServerType" style="height:30px;width:300px;border:solid 1px #ccc;" />
 </body>
 </html>
 <script type="text/javascript">
@@ -16,7 +21,8 @@ window.onload = function() {
 	var types = [
 		{ id: 1, name: '视频设备', desc: '400万高清摄像机' },
 		{ id: 2, name: 'DTU设备', desc: '' },
-		{ id: 3, name: 'LED设备', desc: 'LED显示屏' }
+		{ id: 3, name: 'LED设备', desc: 'LED显示屏' },
+		{ id: 4, name: '传感器设备', desc: '传感器设备' }
 	];
 
 	var k = 'DeviceType';
@@ -25,12 +31,48 @@ window.onload = function() {
 		element: k,
 		items: types,
 		layout: 'list',
-		textWidth: 120,
+		boxWidth: 'follow',
+		//textWidth: 200,
 		itemWidth: '48%',
 		itemBorder: true,
 		//回调等级：0-选项实时回调，1-全选/反选等按钮事件回调，2-确定按钮事件回调
-		submit: 0,
+		//submit: 0,
+        callbackLevel: 0,
+        callbackDebounce: true,
 		title: '选择设备类型',
+		//强制显示“确定”按钮
+		showButton: true,
+		//按钮位置： left,center,right
+		buttonPosition: 'right',
+		callback: function (values, initial, ddl) {
+			$.console.log('initial:', initial, ddl);
+			getDeviceList();
+		}
+	});
+
+	$.dropdownlist({
+		id: 'ServerType',
+		element: 'ServerType',
+		items: [
+			{ id: 1, name: 'WEB服务', desc: '' },
+			{ id: 2, name: '设备服务', desc: '' },
+			{ id: 3, name: '图片推送服务', desc: '' },
+			{ id: 4, name: '视频服务', desc: '' },
+			{ id: 5, name: '图片采集服务', desc: '' },
+			{ id: 6, name: '平台级联服务', desc: '' },
+		],
+		layout: 'list',
+		boxWidth: 'follow',
+		//textWidth: 200,
+		itemWidth: '48%',
+		itemBorder: true,
+		//回调等级：0-选项实时回调，1-全选/反选等按钮事件回调，2-确定按钮事件回调
+		//submit: 0,
+        //callbackLevel: 0,
+        callbackDebounce: true,
+        //是否单选，默认多选
+        //single: true,
+		title: '选择服务类型',
 		//按钮位置： left,center,right
 		buttonPosition: 'right',
 		callback: function (values, initial, ddl) {

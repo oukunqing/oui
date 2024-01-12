@@ -266,6 +266,7 @@
             //自定义样式
             style: '',
             //列表框宽度，默认不指定
+            //follow - 表示跟随源控件宽度
             boxWidth: '',
             //box最小宽度
             minWidth: 120,
@@ -506,7 +507,7 @@
                 that.con = box.childNodes[0];
                 that.bar = box.childNodes[1];
 
-                $.addListener(document.body, 'mousedown', function (ev) {
+                $.addListener(document, 'mousedown', function (ev) {
                     if (!$.isInElement(that.box, ev) && !$.isInElement(that.text, ev)) {
                         that.hide();
                     }

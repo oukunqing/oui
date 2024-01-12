@@ -40,6 +40,7 @@
     <button onclick="form2();">Form</button>
     <button onclick="buttons();">Button</button>
     <button onclick="escClose();">EscClose</button>
+    <button onclick="clickClose();">ClickClose</button>
     <button onclick="showDialog();">变色框</button>
     <br />
     <button onclick="iframe();">Iframe</button>
@@ -512,6 +513,24 @@ function escClose() {
 		//showHead: false,
         //lock: true
 	});
+}
+
+function clickClose() {
+    $.dialog.win('图片信息复制成功，可Ctrl+V粘贴至微信！', {
+        title: 'Esc',
+        skin: 'blue',
+        //padding: 5,
+        escClose: true,
+        clickClose: true,
+        //clickClose: 'dblclick' - 双击关闭， 'click' - 单击关闭， true - 等同于'click'
+        //clickBgClose: 等同于 clickClose
+        lock: false,
+        width: 'auto',
+        height: 'auto',
+        timing: 5 * 1000,
+        //showHead: false,
+        //lock: true
+    });
 }
 
 function win(){

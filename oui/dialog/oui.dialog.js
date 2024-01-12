@@ -461,13 +461,15 @@
                     opt.parameter = opt.param;
                 }
 
-                if ($.isBoolean(opt.clickBgClose)) {
-                    if (opt.clickBgClose) {
-                        opt.clickBgClose = 'click';
+                opt.clickClose = $.getParam(opt, 'clickClose,clickBgClose');
+
+                if ($.isBoolean(opt.clickClose)) {
+                    if (opt.clickClose) {
+                        opt.clickClose = 'click';
                     }
                 } else {
-                    if (!('' + opt.clickBgClose).toLowerCase().in(['dblclick', 'click'])) {
-                        opt.clickBgClose = false;
+                    if (!('' + opt.clickClose).toLowerCase().in(['dblclick', 'click'])) {
+                        opt.clickClose = false;
                     }
                 }
 
@@ -908,13 +910,13 @@
                     case Config.DialogType.alert:
                         opt.buttons = Config.DialogButtons.OK;
                         opt.showMin = opt.showMax = opt.maxAble = false;
-                        opt.keyClose = opt.escClose = opt.clickBgClose = false;
+                        opt.keyClose = opt.escClose = opt.clickClose = false;
                         opt.buttonPosition = 'right';
                         break;
                     case Config.DialogType.confirm:
                         opt.buttons = Config.DialogButtons.OKCancel;
                         opt.showMin = opt.showMax = opt.maxAble = false;
-                        opt.keyClose = opt.escClose = opt.clickBgClose = false;
+                        opt.keyClose = opt.escClose = opt.clickClose = false;
                         opt.buttonPosition = 'right';
                         if ($.isBoolean(okButton, false) || $.isUndefined(okButton)) {
                             opt.defaultButton = 'OK';
@@ -945,7 +947,7 @@
                     case Config.DialogType.iframe:
                         opt.showFoot = $.isBoolean(par.showFoot, false);
                         opt.codeCallback = true;
-                        opt.keyClose = opt.escClose = opt.clickBgClose = false;
+                        opt.keyClose = opt.escClose = opt.clickClose = false;
                         break;
                     case Config.DialogType.about:
                     case Config.DialogType.toolwindow:
@@ -1265,11 +1267,11 @@
                 var p = this.getParam(that), opt = p.options, ctls = p.controls;
                 if (p.none) { return this; }
 
-                if (!opt.clickBgClose) {
+                if (!opt.clickClose) {
                     return this;
                 }
                 if (opt.lock && ctls.container) {
-                    $.addListener(ctls.container, opt.clickBgClose, function (ev) {
+                    $.addListener(ctls.container, opt.clickClose, function (ev) {
                         //判断鼠标点击位置是否在对话框范围，如果在范围内则不关闭
                         if (!$.isInElement(ctls.dialog, ev)) {
                             that.close();
@@ -1278,10 +1280,10 @@
                 } else {
                     /*
                     window.setTimeout(function () {
-                        Factory.setClickDocClose(opt.id, opt.clickBgClose);
+                        Factory.setClickDocClose(opt.id, opt.clickClose);
                     }, 100);
                     */
-                    $.addListener(document.body, 'mousedown', function (ev) {
+                    $.addListener(document, 'mousedown', function (ev) {
                         //判断鼠标点击位置是否在对话框范围，如果在范围内则不关闭
                         if (!$.isInElement(ctls.dialog, ev) && !$.isInElement(opt.trigger, ev)) {
                             that.close();
@@ -4046,7 +4048,7 @@
                 closeAble: true,        //是否允许关闭
                 closeIcon: '',          //Close关闭按钮图标，close0, close1, close2, close3, 默认为空
                 closeType: 'close',     //关闭方式， close | hide
-                clickBgClose: false,    //'dblclick', // dblclick | click
+                clickClose: false,      //鼠标点击(dblclick | click)document(非对话框范围)关闭对话框
                 escClose: false,        //是否允许按Esc关闭
                 keyClose: true,         //是否允许快捷键关闭
                 autoClose: false,       //是否自动关闭
@@ -4139,7 +4141,7 @@
                 $.isBoolean(opt.closeAble, true) &&
                 opt.type !== Config.DialogType.tooltip) {
                 opt.escClose = true;
-                //opt.clickBgClose = opt.clickBgClose || 'click';
+                //opt.clickClose = opt.clickClose || 'click';
                 //没有标题没有底部的消息框，设置内容边距为1px
                 opt.contentStyle = $.extend({ 'padding': '1px' }, opt.contentStyle);
             }
