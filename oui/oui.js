@@ -242,6 +242,31 @@
         isPercent = function (val) {
             return (!isNaN(parseFloat(val, 10)) && ('' + val).endsWith('%'));
         },
+        isIPv4 = function (ip) {
+            return $.PATTERN.Ip.test(ip);
+        },
+        isIPv6 = function (ip) {
+            if(/^((::)|(::[0-9A-F]{1,4})|([0-9A-F]{1,4}::)|[0-9A-F]{1,4}(:[0-9A-F]{1,4}){7})$/i.test(ip)) {
+                return true;
+            }
+            var mc;
+            if (!/^[0-9A-F:]{2,39}$/i.test(ip) || !(mc = ip.match(/(::)/g)) || mc.length > 1) {
+                return false;
+            }
+            var arr = ip.split(':'), len = arr.length, c = 0;
+            if (len < 3 || len > 8) {
+                return false;
+            }
+            for (var i = 0; i < len; i++) {
+                if ((c += arr[i] === '' ? 1 : 0) > 2) {
+                    return false;
+                }
+            }
+            return true;
+        },
+        isIP = function (ip) {
+            return isIPv4(ip) || isIPv6(ip);
+        },
         toBoolean = function (key, val) {
             if (isBoolean(val)) {
                 return val;
@@ -1002,7 +1027,8 @@
         isHexNumeric: isHexNumeric, isHexNumber: isHexNumber,
         isMobile: isMobile, isTelephone: isTelephone, isIdentity: isIdentity, isEmail: isEmail,
         isRegexp: isRegexp, isNullOrUndefined: isNullOrUndefined, isNullOrUndef: isNullOrUndefined,
-        isUndefinedOrNull: isNullOrUndefined, isUndefOrNull: isNullOrUndefined,
+        isUndefinedOrNull: isNullOrUndefined, isUndefOrNull: isNullOrUndefined,        
+        isIPv4: isIPv4, isIPv6: isIPv6, isIP: isIP, isIp: isIP,
         padLeft: function (s, totalWidth, paddingChar) {
             return padLeft(s, totalWidth, paddingChar, false);
         },
@@ -5711,7 +5737,7 @@
                 return (codes || []).indexOf(keyCode) >= 0 && (excepts || []).indexOf(keyCode) < 0;
             }
         },
-        checkInputVal: function(val, types, opt) {
+        checkInputVal: function(val, types, opt, keydown, elem) {
             opt = $.extend({}, opt);
             types = $.extend([], types);
             var patterns = $.extend([], opt.patterns), pass = false;
@@ -5722,7 +5748,7 @@
                         break;
                     }
                 }
-                return !pass ? false : $.checkInputLen(val, opt);
+                return !pass ? false : $.checkInputValLen(val, opt, false, keydown, elem);
             }
 
             var pc = {
@@ -5734,11 +5760,14 @@
                 long: [$.PATTERN.Long, /^([0]?|[-])$/],
                 float: [$.PATTERN.Float, /^([0]?|[-]|[.])$/],
                 double: [$.PATTERN.Double, /^([0]?|[-]|[.])$/],
-                port: [$.PATTERN.Port, /^[0]?$/]
+                port: [$.PATTERN.Port, /^[0]?$/],
+                angle: [/360|^([1-3][0-5][0-9]|[1-2][0-9]+|[0-9]{1,2})([.][\d]{0,8})?$/, /^[0]?$/],
+                hex: [/^[A-F0-9]{1,}$/i, /^[0]{0}$/],
+                md5: [/^[A-F0-9]{32}$/i, /^[0]{0}$/]
             };
 
             for (var i = 0; i < types.length; i++) {
-                var ps = pc[types[i]] || [], c = ps.length, nc = 0;
+                var t = types[i], ps = pc[t] || [], c = ps.length, nc = 0;
                 if (c > 0) {
                     for (var j = 0; j < ps.length; j++) {
                         if (!ps[j].test(val)) {
@@ -5750,9 +5779,23 @@
                     }
                 }
             }
-            return $.checkInputLen(val, opt);
+            return $.checkInputValLen(val, opt, false, keydown, elem);
         },
-        checkInputLen: function(val, opt, paste) {
+        setInputWarnColor: function (elem, pass, focus) {
+            if (!pass) {
+                if (!elem.oldColor) {
+                    elem.oldColor  = $.getElementStyle(elem, 'color');
+                }
+                if (focus) {
+                    elem.focus();
+                }
+                elem.style.color = '#f00';
+            } else if (elem.oldColor) {
+                elem.style.color = elem.oldColor;
+            }
+            return pass;
+        },
+        checkInputValLen: function (val, opt, paste, keydown, elem) {
             opt = $.extend({}, opt);
             if (val.length > 0) {
                 if (paste) {
@@ -5762,6 +5805,9 @@
                     if (opt.maxVal && parseFloat('0' + val, 10) >= opt.maxVal) {
                         return false;
                     }
+                    if (opt.minVal && parseFloat('0' + val, 10) < opt.minVal) {
+                        return false;
+                    }
                 } else {                        
                     if ((opt.maxLen && opt.maxLen > 0 && val.length > opt.maxLen) || (opt.valLen && opt.valLen > 0 && val.length > opt.valLen)) {
                         return false;
@@ -5769,6 +5815,15 @@
                     if (opt.maxVal && parseFloat('0' + val, 10) > opt.maxVal) {
                         return false;
                     }
+                    if (!keydown && opt.minVal && parseFloat('0' + val, 10) < opt.minVal) {
+                        return false;
+                    }
+                }
+
+                if (opt.valLen && opt.valLen > 0 && val.length !== opt.valLen) {
+                    $.setInputWarnColor(elem, false, true);
+                } else if(opt.minLen && opt.minLen > 0 && val.length < opt.minLen) {
+                    $.setInputWarnColor(elem, false, true);
                 }
             }
             return true;
@@ -5778,7 +5833,7 @@
         setInputFormat: function (elements, options) {
             var elems = [], elem, keyTypes = [
                 'char', 'word', 'number', 'int', 'long', 'float', 'double', 'bool', 'control', 'symbol', 
-                'option', 'ipv4', 'port' 
+                'option', 'ipv4', 'port', 'hex', 'md5', 'angle'
             ];
             if ($.isArrayLike(elements) || $.isArray(elements)) {
                 elems = elements;
@@ -5795,20 +5850,37 @@
                 shift: true,    //是否允许shift键
                 space: false,   //是否允许空格
                 paste: true,   //是否允许粘贴
-                minus: false,   //是否允许减号（负号）
-                dot: false,     //是否允许小数点号
-                maxLen: -1,     //内容最大长度，-1表示不限制
-                valLen: -1,     //内容固定长度，-1表示不限制
+                minus: null,   //是否允许减号（负号）
+                dot: null,     //是否允许小数点号
+                minLen: null,     //内容最小长度，-1表示不限制
+                maxLen: null,     //内容最大长度，-1表示不限制
+                valLen: null,     //内容固定长度，-1表示不限制
+                minVal: null,   //最小数值（整数、小数）
                 maxVal: null,   //最大数值（整数、小数）
-                types: keyTypes,
+                types: null,
                 patterns: [],  //正则表达式，用于验证数据值
                 codes: [],
                 excepts: [],
                 options: []     //内容选项
             }, options), i, j;
 
+            opt.minLen = $.getParam(opt, 'minLength,minLen');
+            opt.maxLen = $.getParam(opt, 'maxLength,maxLen');
+            opt.valLen = $.getParam(opt, 'valueLength,valueLen,valLen');
+            opt.minVal = $.getParam(opt, 'minValue,minVal');
+            opt.maxVal = $.getParam(opt, 'maxValue,maxVal');
+
             if ((!opt.patterns || opt.patterns.length <= 0) && $.isRegexp(opt.pattern)) {
                 opt.patterns = [opt.pattern];
+            } else if ($.isRegexp(opt.patterns)) {
+                opt.patterns = [opt.patterns];
+            }
+
+            if ($.isString(opt.types, true)) {
+                opt.types = opt.types.split(/[,\|]/);
+            }
+            if ((!$.isArray(opt.types) || opt.types.length <= 0) && $.isString(opt.type, true)) {
+                opt.types = opt.type.split(/[,\|]/);
             }
 
             var types = $.isArray(opt.types) && opt.types.length > 0 ? opt.types : keyTypes,
@@ -5833,7 +5905,8 @@
                 isVal = false,
                 isBool = false,
                 //是否要限制内容输入，如果配置的限制类型不匹配，则不限制内容输入
-                limit = 0;
+                limit = 0,
+                decimalLen = $.isNumber(opt.decimalLen) ? opt.decimalLen : 8;
 
             keys = opt.space ? keys.concat([32]) : keys;
             keys = !opt.minus ? keys : keys.concat([109, 189]); //109是小键盘中的减号-
@@ -5844,21 +5917,20 @@
                 if (keyTypes.indexOf(type) > -1) {
                     limit++;
                 }
-                if (type === 'option') {
+                if (type === 'option' || type === 'options') {
                     isOpt = true;
-                    break;
+                    continue;
                 }
-                if (['number', 'int', 'float', 'word', 'ipv4', 'port'].indexOf(type) > -1) {
+                if (['number', 'int', 'float', 'word', 'ipv4', 'port', 'hex', 'md5', 'angle'].indexOf(type) > -1) {
                     keys = keys.concat([48, 49, 50, 51, 52, 53, 54, 55, 56, 57]);       // 0-9键
                     keys = keys.concat([96, 97, 98, 99, 100, 101, 102, 103, 104, 105]); // 0-9键（小键盘）
                     opt.shift = false;
                     isNum = true;
                 }
                 if (['char', 'word'].indexOf(type) > -1) {
-                    // A-Z 键
-                    for (j = 65; j <= 90; j++) {
-                        keys.push(j);
-                    }
+                    for (j = 65; j <= 90; j++) { keys.push(j); } // A-Z 键
+                } else if (['hex', 'md5'].indexOf(type) > -1) {
+                    for (j = 65; j <= 70; j++) { keys.push(j); } // A-F 键
                 } else if (type === 'bool') {   // 0, 1
                     keys = keys.concat([48, 49]);
                     isBool = true;
@@ -5878,6 +5950,19 @@
                     //keys = keys.concat([109, 110, 189, 190]);
                     // . (小键盘) . (主键盘)
                     keys = keys.concat([110, 190]);
+                    patterns = patterns.concat([
+                        new RegExp('^(-?[1-9][0-9]{0,23}[.]?[0-9]{0,' + decimalLen + '}|-?[0]([.][0-9]{0,' + decimalLen + '})?)$'), 
+                        /^[0]?$/
+                    ]);
+                } else if (type === 'angle') {
+                    if (opt.dot === null || opt.dot) {
+                        keys = keys.concat([110, 190]);
+                    }
+                    opt.maxVal = opt.maxVal || 360;
+                    patterns = patterns.concat([
+                        new RegExp('360|^([1-3][0-5][0-9]|[1-2][0-9]+|[0-9]{1,2})([.][0-9]{0,' + decimalLen + '})?$'), 
+                        /^[0]?$/
+                    ]);
                 } else if (type === 'port') {
                     isVal = true;
                     patterns = patterns.concat([$.PATTERN.Port, /^[0]?$/]);
@@ -5886,41 +5971,31 @@
                 if (type === 'ipv4') {
                     keys = keys.concat([110, 190]);
                     isVal = true;
-                    patterns = patterns.concat([$.PATTERN.Ip, /^[0]?$/]);
+                    patterns = patterns.concat([$.PATTERN.Ip, /^[0]{0}$/]);
                     opt.maxLen = 15;
                 }
                 if (type === 'word') {
                     keys = keys.concat([189]);
                     opt.shift = true;
                 }
+                if (type==='md5' && !opt.valLen) {
+                    opt.valLen = 32;
+                }
             }
 
-            function _setColor(elem, pass, focus) {
-                if (!pass) {
-                    if (!elem.oldColor) {
-                        elem.oldColor  = $.getElementStyle(elem, 'color');
-                    }
-                    if (focus) {
-                        elem.focus();
-                    }
-                    elem.style.color = '#f00';
-                } else if (elem.oldColor) {
-                    elem.style.color = elem.oldColor;
-                }
-                return pass;
-            }
+            opt.patterns = patterns;
 
             function _checkValue(val, options, isPattern) {
                 var v = elem.value.trim(), vs = $.extend([], options);
                 if ('' === v || vs.length <= 0) {
-                    return _setColor(elem, true);
+                    return $.setInputWarnColor(elem, true);
                 }
                 for (var i = 0; i < vs.length; i++) {
-                    if (isPattern ? vs[i].test(val) : vs[i].trim() === v) {
-                        return _setColor(elem, true);
+                    if (isPattern ? vs[i].test(val) : vs[i].toString().trim() === v) {
+                        return $.setInputWarnColor(elem, true);
                     }
                 }
-                return _setColor(elem, false);
+                return $.setInputWarnColor(elem, false);
             }
 
             for (i = 0; i < elems.length; i++) {
@@ -5931,27 +6006,41 @@
                     var str = opt.options.join(',');
                     if (str.length > 0 && elem.placeholder.indexOf(str) < 0) {
                         elem.placeholder += '\u53ef\u9009\u9879\uff1a' + str;   //可选项：
-                    }                    
+                    }
+                    //这里为什么不用$.addListener？
+                    //因为这里需要阻止非法输入，而$.addListener不是独占式的             
                     elem.onkeydown = function(ev) {
                         if ($.checkInputKey(ev, ctls, excepts, opt) || $.checkInputKey(ev, funs, excepts, opt)) {
                             return true;
                         }
-                        var selected = $.getSelectedText(elem) ? true : false;
-                        if (!selected && !$.checkInputLen(this.value.trim(), opt, true)) {
-                            return false;
+                        //若只指定选项，而没有指定其他输入类型，则不限制输入键
+                        if ($.checkInputKey(ev, keys, excepts, opt) || types.length <= 1) {
+                            if ($.getSelectedText(elem)) {
+                                return true;
+                            }
+                            var pos = $.getTextCursorPosition(elem),
+                                key = ev.key,
+                                txt = elem.value.trim(),
+                                val = pos <= 0 ? key + txt : txt.substr(0, pos) + key + txt.substr(pos);
+
+                            if (!isVal && !$.checkInputVal(val, types, opt, true, elem)) {
+                                return false;
+                            }
+                            return !isVal || $.checkInputValLen(val, opt, false, true, elem);
                         }
+                        return false;
                     };
                     //内容指定，当输入的内容与选项不匹配时，输入框锁定焦点
-                    elem.onkeyup = function() {
+                    $.addListener(elem, 'keyup', function() {
                         if(!_checkValue(elem.value.trim(), $.extend([], opt.options))) {
                             elem.focus();
                         }
-                    };
-                    elem.onblur = function() {
+                    });
+                    $.addListener(elem, 'blur', function() {
                         if(!_checkValue(elem.value.trim(), $.extend([], opt.options))) {
                             elem.focus();
                         }
-                    };
+                    });
                 } else {
                     //控制输入，当输入值不匹配时，输入框禁止输入
                     elem.onkeydown = function(ev) {
@@ -5971,41 +6060,47 @@
                                 txt = elem.value.trim(),
                                 val = pos <= 0 ? key + txt : txt.substr(0, pos) + key + txt.substr(pos);
 
-                            if (!isVal && !$.checkInputVal(val, types, opt)) {
+                            if (!isVal && !$.checkInputVal(val, types, opt, true, elem)) {
                                 return false;
                             }
-                            return !isVal || $.checkInputLen(val, opt, false);
+                            return !isVal || $.checkInputValLen(val, opt, false, true, elem);
                         }
                         return false;
                     };
-                    elem.onkeyup = function() {
+                    $.addListener(elem, 'keyup', function() {
                         var val = elem.value.trim();
                         if (isVal) {
                             if(!_checkValue(val, patterns, true)) {
-                                return _setColor(elem, false, true);
+                                return $.setInputWarnColor(elem, false, true);
+                            }
+                        } else if (isBool) {                            
+                            if (/^([0]{2,}|[1]{2,}|true|false)$/i.test(val)) {
+                                val = ('' + val).replace(/^(true|[1]{2,})$/i, 1).replace(/^(false|[0]{2,})$/i, 0);
+                                //value = /^true$/i.test(value) ? 1 : 0;
+                                element.val = val;
                             }
                         } else {
-                            if ((!isVal && !$.checkInputVal(val, types, opt)) || !$.checkInputLen(val, opt, false)) {
-                                return _setColor(elem, false);
+                            if ((!isVal && !$.checkInputVal(val, types, opt, false, elem)) || !$.checkInputValLen(val, opt, false, false, elem)) {
+                                return $.setInputWarnColor(elem, false);
                             }
                         }
-                        return _setColor(elem, true);
-                    };
-                    elem.onblur = function() {
+                        return $.setInputWarnColor(elem, true);
+                    });
+                    $.addListener(elem, 'blur', function() {
                         var v = elem.value.trim(), len = v.length;
                         if (isNum && (v.endsWith('-') || v.endsWith('.'))) {
-                            return _setColor(elem, false, true);
-                        } else if (!$.checkInputVal(v, types, opt)) {
-                            return _setColor(elem, false, true);
+                            return $.setInputWarnColor(elem, false, true);
+                        } else if (!$.checkInputVal(v, types, opt, false, elem)) {
+                            return $.setInputWarnColor(elem, false, true);
                         } else if (isVal && !_checkValue(v, patterns, true)) {
                             $.console.log('\u5185\u5bb9\u683c\u5f0f\u9519\u8bef', v);   //内容格式错误
-                            return _setColor(elem, false, true);
+                            return $.setInputWarnColor(elem, false, true);
                         }
                         if (len > 0 && opt.minVal && parseFloat('0' + v, 10) < opt.minVal) {
-                            return _setColor(elem, false, true);
+                            return $.setInputWarnColor(elem, false, true);
                         }
-                        return _setColor(elem, true);
-                    };
+                        return $.setInputWarnColor(elem, true);
+                    });
                     if (!opt.paste) {
                         elem.onpaste = function() {
                             return false;
@@ -6013,8 +6108,8 @@
                     } else {
                         elem.onpaste = function() {
                             //如果输入框的内容已经超出长度限制，则不能再粘贴内容
-                            if (!$.checkInputLen(this.value.trim(), opt, true)) {
-                                return _setColor(elem, false);
+                            if (!$.checkInputLen(this.value.trim(), opt, true, false, elem)) {
+                                return $.setInputWarnColor(elem, false);
                             }
                         };
                     }

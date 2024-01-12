@@ -270,6 +270,12 @@
                                 valLen = parseInt($.getAttribute(element, customAttrs.VAL_LENGTH, ''), 10);
                             }
 
+                            /*
+                                字符串输入验证规则
+                                1.外部验证
+                                2.若为必填项，无输入，则验证不通过
+                                3.若为有输入，不管是否必填，都需要验证字符长度和输入格式
+                            */
                             if ($.isFunction(validate)) {    // 外部验证函数（优先）
                                 if (!validate(value, element)) { return result(false); }
                             } else if (field.required && ('' === value || len <= 0)) {
@@ -284,11 +290,12 @@
                                 } else if (pattern && !pattern.test(value)) {   // 正则表达式验证
                                     return result(false, (messages.pattern || configs.messages.pattern).format(title));
                                 }
-
+                                //字符选项模式
                                 if ($.isUndefined(optionValue)) {
                                     optionValue = $.getAttribute(element, customAttrs.OPPTION_VALUE, '');
                                 }
                                 optionValue = optionValue.length > 0 ? optionValue.split(/[,;\|]/) : [];
+                                //验证输入内容是否在选项中
                                 if (optionValue.length > 0) {
                                     for (var i = 0; i < optionValue.length; i++) {
                                         if (optionValue[i] === value) {

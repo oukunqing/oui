@@ -1576,18 +1576,57 @@ var hostpattern = /^((?!-)([A-Z0-9\-]{1,63}.){1,3}[A-Z]{1,8})$/i;
 console.log(hostpattern.test('yd.3gvs-web3gvs-web.comaaaabcaa'));
 
 //var ippattern = /^((::)|[0-9A-F]{1,4}(:[0-9A-F]{1,4}){7}| (([0-9A-F]{1,4}:){0,3})?((:[0-9A-F]{1,4}){0,3})?)$/i;
-var ippattern = /^((::)|[0-9A-F]{1,4}(:[0-9A-F]{1,4}){7}|(([0-9A-F]{1,4})?:){1,4}(([0-9A-F]{1,4})?:){1,4})$/i;
+var ippattern = /^((::)|[0-9A-F]{1,4}(:[0-9A-F]{1,4}){7})$/i;
+//var ippattern2 = /^((([0-9A-F]{1,4})?:){1,4}(([0-9A-F]{1,4})?:){1,4})$/i;
+var ippattern2 = /^(([0-9A-F]{1,4})?(:([0-9A-F]{1,4})?){0,7})$/i;
 
 var ipv6 = [
     'FC00:0000:130F:0000:0000:09C0:876A:130B',
     'FC00:0:130F:0:0:9C0:876A:130B',
-    'FC00:0:130F::9C0:130B',
-    '0:0:0:0:0:0:0:0',
+    'FC00:0:130F::9C0:130B:0:0',
+    'FC00:0:130F::9C0::130B',
+    '::0:130F:9C0:130B',
+    ':0:0:0:0:0::',
+    '0::',
+    '::0',
+    'ASD:0::',
     '::',
+    ':',
     ''
 ];
 for(var i=0; i<ipv6.length;i++) {
-    console.log(ipv6[i], ippattern.test(ipv6[i]));
+    //console.log(ipv6[i], ippattern.test(ipv6[i]), ippattern2.test(ipv6[i]));
+
+    console.log('isIPv6(ipv6[i]):', ipv6[i], isIPv6(ipv6[i]));
 }
 
-console.log((7.5+2.5)*2-2.5);
+
+function isIPv6(ip) {
+    if(/^((::)|(::[0-9A-F]{1,4})|([0-9A-F]{1,4}::)|[0-9A-F]{1,4}(:[0-9A-F]{1,4}){7})$/i.test(ip)) {
+        return true;
+    }
+    var mc;
+    if (!/^[0-9A-F:]{2,39}$/i.test(ip) || !(mc = ip.match(/(::)/g)) || mc.length > 1) {
+        return false;
+    }
+    var arr = ip.split(':'), len = arr.length, c = 0;
+    if (len < 3 || len > 8) {
+        return false;
+    }
+    for (var i = 0; i < len; i++) {
+        if ((c += arr[i] === '' ? 1 : 0) > 2) {
+            return false;
+        }
+    }
+    return true;
+}
+
+
+var p22 = /360|^([1-3][0-5][0-9]|[1-2][0-9]+|[0-9]{1,2})(.[\d]{1,8})?$/;
+console.log(p22.test('124.123413242'));
+
+console.log(/^[\s]{0}$/.test(' '));
+var pss  = [/^360$/, /^([1-3][0-5][0-9]|[1-2][0-9]+|[0-9]{1,2})(.[\d]{1,8})?$/, /^[0]?$/];
+for(var i=0; i<pss.length;i++) {
+    console.log(pss[i].test('123.12345'));
+}

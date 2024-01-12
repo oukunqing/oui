@@ -28,6 +28,22 @@ button {width:120px;height:28px;}
             </tr>
             <tr>
                 <td></td>
+                <td><input type="text" id="fmt_num_max" placeholder="只能输入整数(100-240)" /></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><input type="text" id="fmt_num_float_max" placeholder="只能输入小数或整数(5-360)" /></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><input type="text" id="fmt_num_hex" placeholder="只能输入十六进制字符" /></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><input type="text" id="fmt_num_angle" placeholder="只能输入角度值（小数或整数，0-360）" /></td>
+            </tr>
+            <tr>
+                <td></td>
                 <td><input type="text" id="fmt_int" placeholder="只能输入整数（可以负数）" /></td>
             </tr>
             <tr>
@@ -36,7 +52,7 @@ button {width:120px;height:28px;}
             </tr>
             <tr>
                 <td></td>
-                <td><input type="text" id="fmt_float1" placeholder="只能输入小数（或整数）" /></td>
+                <td><input type="text" id="fmt_float1" placeholder="只能输入小数(保留2位小数)（或整数）" /></td>
             </tr>
             <tr>
                 <td></td>
@@ -70,6 +86,10 @@ button {width:120px;height:28px;}
                 <td></td>
                 <td><input type="text" id="fmt_option" /></td>
             </tr>
+            <tr>
+                <td></td>
+                <td><input type="text" id="fmt_option2" placeholder="只能输入A-Z字母" /></td>
+            </tr>
         </table>
     </div>
 </body>
@@ -80,7 +100,7 @@ button {width:120px;height:28px;}
     //没有引用jquery.js
     window.onload = function() {
 		$.addKeyListener(document, 'keyup',  function(e, n) {
-			console.log('e:', e.keyCode, n, e);
+			//console.log('e:', e.keyCode, n, e);
 		}, false);
         
         $.setInputFormat('txtMobile', {
@@ -100,6 +120,31 @@ button {width:120px;height:28px;}
             valLen: 15
         });
 
+        $.setInputFormat('fmt_num_max', {
+            types: ['int'],
+            minVal: 100,
+            maxVal: 240
+        });
+
+        $.setInputFormat('fmt_num_float_max', {
+            types: ['float'],
+            minVal: 5,
+            maxVal: 360
+        });
+
+        $.setInputFormat('fmt_num_hex', {
+            types: ['hex', 'option'],
+            options: ['a55a', '5aa5']
+            //type: 'hex'
+        });
+
+        $.setInputFormat('fmt_num_angle', {
+            types: ['angle'],
+            maxVal: 360,
+            //dot: false
+            decimalLen: 2
+        });
+
         $.setInputFormat('fmt_num_max_15', {
             types: ['number'],
             maxLen: 15
@@ -115,7 +160,8 @@ button {width:120px;height:28px;}
             minus: true
         });
         $.setInputFormat('fmt_float1', {
-            types: ['float']
+            types: ['float'],
+            decimalLen: 2
         });
         $.setInputFormat('fmt_word', {
             types: ['word'],
@@ -145,6 +191,11 @@ button {width:120px;height:28px;}
         });        
         $.setInputFormat('fmt_option', {
             types: ['option'],
+            options: ['abc', 'acc', 'asd'],
+            maxLen: 3
+        }); 
+        $.setInputFormat('fmt_option2', {
+            types: ['option', 'char'],
             options: ['abc', 'acc', 'asd'],
             maxLen: 3
         });
