@@ -263,8 +263,10 @@
             element: '',
             //自定义样式名
             className: '',
-            //自定义样式
+            //输入框自定义样式
             style: '',
+            //列表框自定义样式
+            boxStyle: '',
             //列表框宽度，默认不指定
             //follow - 表示跟随源控件宽度
             boxWidth: '',
@@ -406,6 +408,7 @@
                     boxWidth ? 'width:' + Factory.getStyleSize(boxWidth) + ';' : '',
                     'min-height:', Factory.getStyleSize(opt.minHeight), ';',
                     opt.maxHeight ? 'max-height:' + Factory.getStyleSize(opt.maxHeight) + ';' : '',
+                    opt.boxStyle || ''
                 ].join('');
 
                 var btn = [],

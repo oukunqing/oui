@@ -3771,7 +3771,7 @@
             if (isOffset) {
                 return { width: doc.offsetWidth, height: doc.offsetHeight };
             }
-            return { width: doc.clientWidth, height: doc.clientHeight };
+            return { width: doc.clientWidth, height: doc.clientHeight, scrollTop: doc.scrollTop, scrollHeight: doc.scrollHeight };
         },
         getDocumentSize = function (isOffset) {
             return getBodySize(isOffset);
@@ -3786,6 +3786,45 @@
             };
 
             return size;
+        },
+        setPanelPosition = function (elem, panel, topPriority) {
+            var bs = $.getBodySize(),
+                es = $.getOffset(elem);
+
+            //清除选项框高度
+            panel.style.height = 'auto';
+            //先显示在目标控件的下方
+            panel.style.top = (es.top + es.height) + 'px';
+
+            //再获取选项框尺寸位置
+            var ds = $.getOffset(panel), top = ds.top;
+            //如果选项框高度大于窗口高度，则限制选项框高度
+            if (ds.height > bs.height) {
+                ds.height = bs.height - 6;
+                panel.style.height = ds.height + 'px';
+            }
+            
+            var offset = ds.top + ds.height - (bs.height + bs.scrollTop);
+            //如果选项框位置高度超过窗口高度，则显示在目标控件的上方
+            if (offset > 0) {
+                top = es.top - ds.height;
+                panel.style.top = top + 'px';
+
+                //如果选项框位置窗口小于滚动高度，需要设置选项框位置和位置偏移
+                if (top < bs.scrollTop) {
+                    //保留4个像素的留白位置
+                    var whiteSpace = 4;
+
+                    if (topPriority) {
+                        //设置了顶部优先，则显示在目标控件的上方
+                        panel.style.top = (bs.scrollTop + whiteSpace) + 'px';
+                    } else {
+                        //默认显示在目标控件下方，并向上偏移，偏移量即之前超出窗口高度的值
+                        panel.style.top = (es.top + es.height - offset - whiteSpace) + 'px';
+                    }
+                }
+            }
+            return this;
         },
         isArrayLike = function (obj) {
             if ($.isString(obj)) {
@@ -4455,7 +4494,6 @@
             return false;
         },
         isOnElement = function (elem, ev) {
-            //$.console.log('isOnElement: ', elem);
             if (!isElement(elem = toElement(elem)) || !ev) {
                 return false;
             }
@@ -4478,6 +4516,8 @@
             var childs = elem.querySelectorAll('*'),
                 c = childs.length, k, i, j, m, n;
 
+            //若子元素数量超过8个，则每次同时比较4个元素
+            //比较方向：开始向右，结束向左，中间向左，中间向右
             if (c >= 8) {
                 k = parseInt(c / 4, 10) + (c % 4 !== 0 ? 1 : 0);
                 for (i = 0; i < k; i++) {
@@ -4486,18 +4526,16 @@
                     m = k * 2 + i,
                     n = k * 2 - 1 - i;
                     if (isOnElem(childs[i], pos) || isOnElem(childs[j], pos) || isOnElem(childs[m], pos) || isOnElem(childs[n], pos)) {
-                        //$.console.log('isOnElement find: ', i, '/', c, childs[i]);
                         return true;
                     }
                 }
             } else {
+                //每次同时比较2个元素
                 k = parseInt(c / 2, 10) + (c % 2 !== 0 ? 1 : 0);
                 for (i = 0; i < k; i++) {
                     j = k * 2 - 1 - i;
                     j = j >= c ? c - 1 : j;
-                    //console.log('inelem:', i, j);
                     if (isOnElem(childs[i], pos) || isOnElem(childs[j], pos)) {
-                        //$.console.log('isOnElement find: ', i, '/', c, childs[i]);
                         return true;
                     }
                 }
@@ -4505,7 +4543,6 @@
             return false;
         },
         isInElement = function (elem, ev) {
-            //$.console.log('isInElement: ', elem);
             if (!isElement(elem = toElement(elem)) || !ev) {
                 return false;
             }
@@ -4526,7 +4563,6 @@
                     m = k * 2 + i,
                     n = k * 2 - 1 - i;
                     if (childs[i] === t || childs[j] === t || childs[m] === t || childs[n] === t) {
-                        //$.console.log('isInElement find: ', i, '/', c, childs[i]);
                         return true;
                     }
                 }
@@ -4535,9 +4571,7 @@
                 for (i = 0; i < k; i++) {
                     j = k * 2 - 1 - i;
                     j = j >= c ? c - 1 : j;
-                    //console.log('inelem:', i, j);
                     if (childs[i] === t || childs[j] === t) {
-                        //$.console.log('isInElement find: ', i, '/', c, childs[i]);
                         return true;
                     }
                 }
@@ -5176,6 +5210,7 @@
         getElementSize: getElementSize,
         elemSize: getElementSize,
         offset: getOffsetSize,
+        setPanelPosition: setPanelPosition,
         isArrayLike: isArrayLike,
         merge: merge,
         makeArray: makeArray,

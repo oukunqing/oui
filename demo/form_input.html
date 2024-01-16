@@ -88,20 +88,25 @@ button {width:120px;height:28px;}
             </tr>
             <tr>
                 <td></td>
-                <td><input type="text" id="fmt_option2" placeholder="只能输入A-Z字母" /></td>
+                <td><input type="text" id="fmt_option2" placeholder="只能输入指定的选项" value="hello" /></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><select></select></td>
             </tr>
         </table>
     </div>
+    <div style="margin:200px 0;">&nbsp; </div>
 </body>
 </html>
-<script type="text/javascript" src="../oui/oui.js?"></script>
-<script type="text/javascript" src="../oui/form/oui.form.js?"></script>
+<script type="text/javascript" src="../oui/oui.min.js?"></script>
+<script type="text/javascript" src="../oui/form/oui.form.min.js?"></script>
 <script type="text/javascript" src="../oui/dialog/oui.dialog.js?12"></script>
 <script type="text/javascript">
     //没有引用jquery.js
     window.onload = function() {
 		$.addKeyListener(document, 'keyup',  function(e, n) {
-			//console.log('e:', e.keyCode, n, e);
+			console.log('e:', e.keyCode, n, e);
 		}, false);
         
         $.setInputFormat('txtMobile', {
@@ -182,7 +187,9 @@ button {width:120px;height:28px;}
             patterns: [/^[A-Z0-9]{0,}$/i]
         });
         $.setInputFormat('fmt_bool', {
-            types: ['bool']
+            types: ['bool'],
+            options: [{val:1, txt:'启用'},{val:0, txt:'禁用'}],
+            config: { readonly: true, showValue: true }
         });
         $.setInputFormat('fmt_ipv4', {
             types: ['ipv4']
@@ -192,12 +199,20 @@ button {width:120px;height:28px;}
         });        
         $.setInputFormat('fmt_option', {
             types: ['option'],
-            options: ['abc', 'acc', 'asd'],
+            options: ['abc', 'acc', 'asd', '123', '456'],
+            //showOption: false,
             maxLen: 3
         }); 
         $.setInputFormat('fmt_option2', {
-            types: ['option', 'char'],
-            options: ['abc', 'acc', 'asd'],
+            types: ['option', 'word'],
+            options: ['abc', 'acc', 'asd', '123', {val:456,txt:'456456'}, '输入选项ABC123', 'hello', 'world', 'abcdefg', 'helloworld'],
+            //showValue: 同时显示值value和文本text，如果value===text则只显示text
+            config: { 
+                showNumber: true, 
+                showValue: true,
+                //选项框最大显示高度，默认为360px
+                //maxHeight: 400
+            },
             maxLen: 3
         });
     };
