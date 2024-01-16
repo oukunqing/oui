@@ -1329,9 +1329,10 @@
                 }
                 return !pass ? false : $.checkInputValLen(val, opt, false, keydown, elem);
             }
-
             var pc = {
-                char: [/^[A-Z]{0,}$/i],
+                number: [/^[\-]?[0-9]{0,}$/i],
+                char: [/^[A-Z\-]{0,}$/i],
+                char_number: [/^[A-Z0-9\-]{0,}$/i],
                 word: [/^[\w]{0,}$/i],
                 name: [/^[\w-]{0,}$/i],
                 bool: [/^([01]?)$/],
@@ -1343,20 +1344,23 @@
                 angle: [/360|^([1-3][0-5][0-9]|[1-2][0-9]+|[0-9]{1,2})([.][\d]{0,8})?$/, /^[0]?$/],
                 hex: [/^[A-F0-9]{1,}$/i, /^[0]{0}$/],
                 md5: [/^[A-F0-9]{32}$/i, /^[0]{0}$/]
-            };
+            }, ps = [], nc = 0;
 
             for (var i = 0; i < types.length; i++) {
-                var t = types[i], ps = pc[t] || [], c = ps.length, nc = 0;
-                if (c > 0) {
-                    for (var j = 0; j < ps.length; j++) {
-                        if (!ps[j].test(val)) {
-                            nc++;
-                        }
-                    }
-                    if (c === nc) {
-                        return false;
-                    }
+                var t = types[i], p = pc[t] || null;
+                if (p) {
+                    ps = ps.concat(p);
                 }
+            }
+
+            for (var j = 0; j < ps.length; j++) {
+                if (!ps[j].test(val)) {
+                    nc++;
+                }
+            }
+
+            if (nc === ps.length) {
+                return false;
             }
             return $.checkInputValLen(val, opt, false, keydown, elem);
         },
@@ -1364,6 +1368,22 @@
             var values = [];
             for (var i = 0; i < opt.length; i++) {
                 values.push($.isObject(opt[i]) ? $.getParam(opt[i], 'value,val,v') : $.isArray(opt[i]) ? opt[i][0] : opt[i]);
+            }
+            return values;
+        },
+        setOptionValues: function (opt) {
+            var values = [], val, txt;
+            for (var i = 0; i < opt.length; i++) {
+                if ($.isObject(opt[i])) {
+                    val = $.getParam(opt[i], 'value,val,v,text,txt,t');
+                    txt = $.getParam(opt[i], 'text,txt,t');
+                } else if ($.isArray(opt[i])) {
+                    val = opt[i][0];
+                    txt = opt[i][1] || opt[i][0];
+                } else {
+                    val = txt = opt[i];
+                }
+                values.push({ val: val, txt: txt });
             }
             return values;
         },
@@ -1406,6 +1426,7 @@
             return pass;
         },
         checkInputValLen: function (val, opt, paste, keydown, elem) {
+            $.console.log(elem.id, val);
             opt = $.extend({}, opt);
             if (val.length > 0) {
                 if (paste) {
@@ -1444,7 +1465,11 @@
 
             for (var i = 0; i < arr.length; i++) {
                 var v = $.getAttribute(arr[i], 'data-value');
-                arr[i].className = val === v ? 'cur' : '';
+                if (val === v) {
+                    $.addClass(arr[i], 'cur');
+                } else {
+                    $.removeClass(arr[i], 'cur');
+                }
             }
             return this;
         },
@@ -1474,7 +1499,8 @@
                 elemVal = elem.value.trim(),
                 html = [
                     '<ul class="input-option-ul">'
-                ];
+                ],
+                isSelect = elem.tagName === 'SELECT';
 
             if (document.getElementById('input_option_panel_style_001') === null) {
                 var css = document.createElement('div');
@@ -1491,11 +1517,13 @@
                     '.input-option-ul li.cur{background:#eee;color:#000;}',
                     '.input-option-ul li:hover i,.input-option-ul li.cur:hover i{color:#f50;}',
                     '.input-option-ul li.cur i{color:#f00;}',
+                    '.input-option-ul li span{margin:0;padding:0;font-size:14px;}',
                     '</style>'
                 ].join('');
                 document.body.appendChild(css);
             }
 
+            div.target = elem.tagName;
             div.className = 'input-option-panel-box';
             div.id = 'input-option-panel-' + (elem.id || new Date().getTime());
 
@@ -1507,26 +1535,20 @@
             ].join(';');
 
             for (var i = 0; i < len; i++) {
-                var val, txt;
-                if ($.isObject(opt[i])) {
-                    val = $.getParam(opt[i], 'value,val,v,text,txt,t');
-                    txt = $.getParam(opt[i], 'text,txt,t');
-                } else if ($.isArray(opt[i])) {
-                    val = opt[i][0];
-                    txt = opt[i][1] || opt[i][0];
-                } else {
-                    val = txt = opt[i];
-                }
+                var val = opt[i].val, 
+                    txt = opt[i].txt;
+
                 if ($.isString(txt, true) || $.isNumber(txt) || $.isString(val, true) || $.isNumber(val)) {
                     idx++;
-                    if (cfg.showValue && val.toString() !== txt.toString()) {
+                    if (cfg.showValue && val.toString() !== '' && val.toString() !== txt.toString()) {
                         txt = val + ' - ' + txt;
                     }
                     html.push([
-                        '<li class="', (elemVal === val.toString() ? 'cur' : ''), '"',
+                        '<li class="input-option-panel-item', (elemVal === val.toString() ? ' cur' : ''), '"',
                         ' style="padding:', (cfg.showNumber ? '0 5px 0 0' : '0 5px'), ';"',
                         ' data-value="', val.toString().replace(/["]/g, '&quot;'), '">', 
-                        cfg.showNumber ? ('<i style="width:' + (n * 12) + 'px;">' + idx + '</i>' + txt) : txt, 
+                        cfg.showNumber ? ('<i style="width:' + (n * 12) + 'px;">' + idx + '</i>') : '',
+                        '<span>', txt, '</span>', 
                         '</li>'
                     ].join(''));
                 }
@@ -1539,19 +1561,44 @@
             $.setPanelPosition(elem, elem.optbox, config.topPriority);
             $.setCurrentOption(elem, elem.optbox);
 
-            $.addListener(document, 'click', function(ev) {
-                if (div.style.display !== 'none') {
-                    div.style.display = 'none';
-                }
-                return false;
-            });
+            window.inputFormatTimers = {};
+
+            if (!window.inputOptionDocEventListener) {
+                window.inputOptionDocEventListener = 1;
+                $.addListener(document, 'mousedown', function(ev) {
+                    if ((ev.target.tagName === 'LI' && ev.target.className.indexOf('input-option-panel-item') > -1) || 
+                        (ev.target.tagName === 'SELECT' && ev.target.className.indexOf('input-option-panel-select') > -1)) {
+                        return false;
+                    }
+                    var arr = document.querySelectorAll('.input-option-panel-box');
+                    //每次只显示当前选项框，隐藏其他的选项框
+                    for (var i = 0; i < arr.length; i++) {
+                        if (arr[i].style.display !== 'none') {
+                            arr[i].style.display = 'none';
+                        }
+                    }
+                });
+            }
+
             var arr = div.querySelectorAll('li');
             for (var i = 0; i < arr.length; i++) {
-                $.addListener(arr[i], 'click', function() {
-                    $.cancelBubble();
+                $.addListener(arr[i], 'mousedown', function(ev) {
+                    $.cancelBubble(ev);
+                    return false;
+                });
+                $.addListener(arr[i], 'mouseup', function(ev) {
+                    $.cancelBubble(ev);
                     var val = $.getAttribute(this, 'data-value');
-                    elem.value = val;
-                    $.setAttribute(elem, 'data-value', val);
+                    if (elem.tagName === 'SELECT') {
+                        elem.options.length = 0;
+                        var node = this.querySelector('span');
+                        if (node) {
+                            elem.options.add(new Option(node.innerText || node.innerHTML, val));
+                        }
+                        $.trigger(elem, 'change');
+                    } else {
+                        elem.value = val;
+                    }
                     div.style.display = 'none';
                     $.trigger(elem, 'blur');
                 });
@@ -1562,7 +1609,7 @@
         // 需要设置输入格式的文本框，默认情况下是不允许空格和特殊字符的
         setInputFormat: function (elements, options) {
             var elems = [], elem, keyTypes = [
-                'char', 'word', 'number', 'int', 'long', 'float', 'double', 'bool', 'control', 'symbol', 
+                'char', 'number', 'char_number', 'word', 'int', 'long', 'float', 'double', 'bool', 'control', 'symbol', 
                 'option', 'ipv4', 'port', 'hex', 'md5', 'angle'
             ];
             if ($.isArrayLike(elements) || $.isArray(elements)) {
@@ -1592,6 +1639,7 @@
                     codes: [],
                     excepts: [],
                     options: [],            //内容选项
+                    value: null,              //默认值
                     config: {}              //配置项
                 }, options),
                 config = $.extend({
@@ -1644,6 +1692,7 @@
                 isOpt = false,
                 isVal = false,
                 isBool = false,
+                isSelect = false,   //是否select控件元素
                 //是否要限制内容输入，如果配置的限制类型不匹配，则不限制内容输入
                 limit = 0,
                 decimalLen = $.isNumber(opt.decimalLen) ? opt.decimalLen : 8;
@@ -1661,13 +1710,13 @@
                     isOpt = true;
                     continue;
                 }
-                if (['number', 'int', 'float', 'word', 'ipv4', 'port', 'hex', 'md5', 'angle'].indexOf(type) > -1) {
+                if (['number', 'char_number', 'int', 'float', 'word', 'ipv4', 'port', 'hex', 'md5', 'angle'].indexOf(type) > -1) {
                     keys = keys.concat([48, 49, 50, 51, 52, 53, 54, 55, 56, 57]);       // 0-9键
                     keys = keys.concat([96, 97, 98, 99, 100, 101, 102, 103, 104, 105]); // 0-9键（小键盘）
                     opt.shift = false;
                     isNum = true;
                 }
-                if (['char', 'word'].indexOf(type) > -1) {
+                if (['char', 'char_number', 'word'].indexOf(type) > -1) {
                     for (j = 65; j <= 90; j++) { keys.push(j); } // A-Z 键
                 } else if (['hex', 'md5'].indexOf(type) > -1) {
                     for (j = 65; j <= 70; j++) { keys.push(j); } // A-F 键
@@ -1731,66 +1780,91 @@
                 if (!$.isElement(elem = $.toElement(elems[i])) || !limit) {
                     continue;
                 }
+                isSelect = elem.tagName === 'SELECT';
+
                 if (isOpt || isBool) {
-                    var str = $.getOptionValues(opt.options).join(',');
-                    if (str.length > 0 && elem.placeholder.indexOf(str) < 0) {
-                        elem.placeholder += '\u53ef\u9009\u9879\uff1a' + str;   //可选项：
-                    }
-                    if (opt.config.readonly) {
-                        $.setAttribute(elem, 'readonly', 'readonly');
-                        elem.style.cursor = 'default';
-                    }
-                    //这里为什么不用$.addListener？
-                    //因为这里需要阻止非法输入，而$.addListener不是独占式的             
-                    elem.onkeydown = function(ev) {
-                        if ($.checkInputKey(ev, ctls, excepts, opt) || $.checkInputKey(ev, funs, excepts, opt)) {
-                            return true;
+                    opt.options = $.setOptionValues(opt.options);
+
+                    if (!isSelect) {
+                        if (opt.config.readonly) {
+                            $.setAttribute(elem, 'readonly', 'readonly');
+                            elem.style.cursor = 'default';
+                        } else {                            
+                            var str = $.getOptionValues(opt.options).join(',');
+                            if (str.length > 0 && elem.placeholder.indexOf(str) < 0) {
+                                elem.placeholder += '\u53ef\u9009\u9879\uff1a' + str;   //可选项：
+                            }
                         }
-                        //若只指定选项，而没有指定其他输入类型，则不限制输入键
-                        if ($.checkInputKey(ev, keys, excepts, opt) || types.length <= 1) {
-                            if ($.getSelectedText(elem)) {
+                        //这里为什么不用$.addListener？
+                        //因为这里需要阻止非法输入，而$.addListener不是独占式的             
+                        elem.onkeydown = function(ev) {
+                            if ($.checkInputKey(ev, ctls, excepts, opt) || $.checkInputKey(ev, funs, excepts, opt)) {
                                 return true;
                             }
-                            var pos = $.getTextCursorPosition(elem),
-                                key = ev.key,
-                                txt = elem.value.trim(),
-                                val = pos <= 0 ? key + txt : txt.substr(0, pos) + key + txt.substr(pos);
+                            //若只指定选项，而没有指定其他输入类型，则不限制输入键
+                            if ($.checkInputKey(ev, keys, excepts, opt) || types.length <= 1) {
+                                if ($.getSelectedText(elem)) {
+                                    return true;
+                                }
+                                var pos = $.getTextCursorPosition(elem),
+                                    key = ev.key,
+                                    txt = elem.value.trim(),
+                                    val = pos <= 0 ? key + txt : txt.substr(0, pos) + key + txt.substr(pos);
 
-                            if (!isVal && !$.checkInputVal(val, types, opt, true, elem)) {
-                                return false;
+                                if (!isVal && !$.checkInputVal(val, types, opt, true, elem)) {
+                                    return false;
+                                }
+                                return !isVal || $.checkInputValLen(val, opt, false, true, elem);
                             }
-                            return !isVal || $.checkInputValLen(val, opt, false, true, elem);
+                            return false;
+                        };
+                        //内容指定，当输入的内容与选项不匹配时，输入框锁定焦点
+                        $.addListener(elem, 'keyup,blur', function() {
+                            if(!$.checkInputFormat(elem, $.extend([], opt.options))) {
+                                elem.focus();
+                            }
+                        });
+                        if (!$.isUndefinedOrNull(opt.value)) {
+                            elem.value = opt.value;
                         }
-                        return false;
-                    };
-                    //选项模式，默认显示选项框，若不想显示选项，需设置 showOption:false
-                    if ($.isBoolean(opt.showOption, true)) {
-                        $.addListener(elem, 'click', function(ev) {
-                            $.cancelBubble();
-                            var arr = document.querySelectorAll('.input-option-panel-box');
-                            //每次只显示当前选项框，隐藏其他的选项框
-                            for (var i = 0; i < arr.length; i++) {
-                                if (arr[i] !== elem.optbox && arr[i].style.display !== 'none') {
-                                    arr[i].style.display = 'none';
+                    } else {
+                        elem.className += ' input-option-panel-select';
+                        elem.options.length = 0;
+                        if (opt.options.length > 0) {
+                            var p = opt.options[0];
+                            if (!$.isUndefinedOrNull(opt.value)) {
+                                for (var j = 0; j < opt.options.length; j++) {
+                                    if (opt.options[j].val === opt.value) {
+                                        p = opt.options[j];
+                                        break;
+                                    }
                                 }
                             }
-                            //判断是否获取到焦点
-                            $.setInputOption(elem, opt.options, opt.config);
-                        });
+                            var txt = opt.config.showValue && p.val !== p.txt ? p.val + ' - ' + p.txt : p.txt;
+                            elem.options.add(new Option(txt, p.val));
+                        }
                     }
 
-                    //内容指定，当输入的内容与选项不匹配时，输入框锁定焦点
-                    $.addListener(elem, 'keyup', function() {
-                        if(!$.checkInputFormat(elem, $.extend([], opt.options))) {
-                            elem.focus();
+                    function _showInputOption(ev, elem, opt) {
+                        $.cancelBubble(ev);
+                        var arr = document.querySelectorAll('.input-option-panel-box');
+                        //每次只显示当前选项框，隐藏其他的选项框
+                        for (var i = 0; i < arr.length; i++) {
+                            if (arr[i] !== elem.optbox && arr[i].style.display !== 'none') {
+                                arr[i].style.display = 'none';
+                            }
                         }
-                    });
-                    $.addListener(elem, 'blur', function() {
-                        if(!$.checkInputFormat(elem, $.extend([], opt.options))) {
-                            elem.focus();
-                        }
-                    });
-                } else {
+                        $.setInputOption(elem, opt.options, opt.config);
+                    }
+                    
+                    //选项模式，默认显示选项框，若不想显示选项，需设置 showOption:false
+                    if ($.isBoolean(opt.showOption, true)) {
+                        $.addListener(elem, 'mousedown', function(ev) {
+                            _showInputOption(ev, elem, opt);
+                            return true;
+                        });
+                    }
+                } else if (!isSelect) {
                     //控制输入，当输入值不匹配时，输入框禁止输入
                     elem.onkeydown = function(ev) {
                         var kc = $.getKeyCode(ev), selected = $.getSelectedText(elem) ? true : false;

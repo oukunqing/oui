@@ -3803,7 +3803,7 @@
                 ds.height = bs.height - 6;
                 panel.style.height = ds.height + 'px';
             }
-            
+
             var offset = ds.top + ds.height - (bs.height + bs.scrollTop);
             //如果选项框位置高度超过窗口高度，则显示在目标控件的上方
             if (offset > 0) {
@@ -4250,7 +4250,7 @@
         },
         addEventListener = function (elem, evName, func, useCapture, isRemove) {
             var elems = $.isArray(elem) ? elem : [$.toElement(elem)],
-                events = $.isArray(evName) ? evName : [evName],
+                events = $.isArray(evName) ? evName : evName.toString().split(','),
                 name = isRemove ? 'removeEventListener' : 'addEventListener',
                 other = isRemove ? 'detachEvent' : 'attachEvent',
                 normal = typeof doc.addEventListener !== 'undefined';

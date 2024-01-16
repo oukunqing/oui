@@ -88,11 +88,11 @@ button {width:120px;height:28px;}
             </tr>
             <tr>
                 <td></td>
-                <td><input type="text" id="fmt_option2" placeholder="只能输入指定的选项" value="hello" /></td>
+                <td><input type="text" id="fmt_option2" placeholder="只能选择不能输入" /></td>
             </tr>
             <tr>
                 <td></td>
-                <td><select></select></td>
+                <td><select id="select1" onchange="console.log('select change:', this.value);"></select></td>
             </tr>
         </table>
     </div>
@@ -183,12 +183,14 @@ button {width:120px;height:28px;}
             types: ['char'],
         });
         $.setInputFormat('fmt_char_num', {
-            types: ['char', 'number'],
-            patterns: [/^[A-Z0-9]{0,}$/i]
+            types: ['char_number'],
+            minus: false 
+            //patterns: [/^[A-Z0-9]{0,}$/i]
         });
         $.setInputFormat('fmt_bool', {
             types: ['bool'],
             options: [{val:1, txt:'启用'},{val:0, txt:'禁用'}],
+            value: 0,
             config: { readonly: true, showValue: true }
         });
         $.setInputFormat('fmt_ipv4', {
@@ -210,11 +212,26 @@ button {width:120px;height:28px;}
             config: { 
                 showNumber: true, 
                 showValue: true,
+                readonly: true,
                 //选项框最大显示高度，默认为360px
                 //maxHeight: 400
             },
             maxLen: 3
         });
+
+        $.setInputFormat('select1', {
+            types: ['option', 'word'],
+            options: [{val:'',txt:'请选择'},'abc', 'acc', 'asd', '123', {val:456,txt:'456456'}, {val:'ABC123',txt:'输入选项ABC123'}, 'hello', 'world', 'abcdefg', 'helloworld'],
+            value: 456,
+            //showValue: 同时显示值value和文本text，如果value===text则只显示text
+            config: { 
+                showNumber: true, 
+                showValue: true,
+                //选项框最大显示高度，默认为360px
+                //maxHeight: 400
+            }
+        });
+
     };
 
     /*
