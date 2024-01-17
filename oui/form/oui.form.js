@@ -1426,7 +1426,6 @@
             return pass;
         },
         checkInputValLen: function (val, opt, paste, keydown, elem) {
-            $.console.log(elem.id, val);
             opt = $.extend({}, opt);
             if (val.length > 0) {
                 if (paste) {
@@ -1480,17 +1479,19 @@
                     [] : $.isString(options, true) ? 
                     options.split(/[,;\|]/) : [options];
 
+            cfg.relative = $.getParam(cfg, 'relativePosition,relative,follow', false);
+
             if (!$.isElement(elem = $.toElement(elem)) || opt.length <= 0) {
                 return this;
             }
             if (elem.optbox) {
                 elem.optbox.style.display = elem.optbox.style.display === 'none' ? '' : 'none';
-                $.setPanelPosition(elem, elem.optbox, config.topPriority);
+                $.setPanelPosition(elem, elem.optbox, cfg);
                 $.setCurrentOption(elem, elem.optbox);
                 return this;
             }
 
-            var es = $.getOffset(elem),
+            var es = $.getOffset(elem, cfg.relative),
                 div = document.createElement('div'),
                 len = opt.length,
                 top = es.top + es.height + 1,
@@ -1508,7 +1509,8 @@
                 css.style.cssText = 'position:absolute;left:-3000px;top:-3000px;display:none;';
                 css.innerHTML = [
                     '<style style="text/css">',
-                    '.input-option-panel-box{position:absolute;border:solid 1px #ddd;background:#fff;border-radius:4px;opacity:0.99;overflow:auto;box-shadow: 0 2px 3px 0 rgba(0,0,0,.32);}',
+                    '.input-option-panel-box{position:absolute;border:solid 1px #ddd;background:#fff;border-radius:4px;opacity:0.99;',
+                    ' overflow:auto;box-shadow: 0 2px 3px 0 rgba(0,0,0,.32);}',
                     '.input-option-ul {margin:0;padding:1px 0;}',
                     '.input-option-ul i{font-style:normal;color:#ccc;display:inline-block;text-align:right;',
                     ' border:none;margin:0 7px 0 0;padding:0;font-size:14px;}',
@@ -1531,7 +1533,8 @@
                 'max-height:' + (parseInt('0' + cfg.maxHeight, 10) || 360) + 'px;',
                 'top:' + top + 'px;',
                 'left:' + (es.left) + 'px;',
-                'width:' + (es.width - 2) + 'px;'
+                'width:' + (es.width - 2) + 'px;',
+                cfg.relative ? '' : 'z-index:' + (cfg.zIndex || cfg.zindex || 99999999) + ';'
             ].join(';');
 
             for (var i = 0; i < len; i++) {
@@ -1556,9 +1559,13 @@
             html.push('</ul>');
 
             div.innerHTML = html.join('');
-            document.body.appendChild((elem.optbox = div));
-
-            $.setPanelPosition(elem, elem.optbox, config.topPriority);
+            if (cfg.relative) {
+                //elem.parentNode.insertBefore((elem.optbox = div), elem);
+                elem.parentNode.appendChild((elem.optbox = div));
+            } else {
+                document.body.appendChild((elem.optbox = div));
+            }
+            $.setPanelPosition(elem, elem.optbox, cfg);
             $.setCurrentOption(elem, elem.optbox);
 
             window.inputFormatTimers = {};
@@ -1586,7 +1593,7 @@
                     $.cancelBubble(ev);
                     return false;
                 });
-                $.addListener(arr[i], 'mouseup', function(ev) {
+                $.addListener(arr[i], 'click', function(ev) {
                     $.cancelBubble(ev);
                     var val = $.getAttribute(this, 'data-value');
                     if (elem.tagName === 'SELECT') {
@@ -1647,7 +1654,9 @@
                     showValue: false,       //是否显示值(默认只显示text不显示value)
                     showNumber: false,      //是否显示序号(行号)
                     topPriority: false,     //是否优先显示在顶部
-                    maxHeight: 360          //选项框最大显示高度
+                    maxHeight: 360,         //选项框最大显示高度
+                    relative: false,        //相对位置(用于弹出层中的表单)，默认是绝对位置
+                    zIndex: 0
                 }, options.config), i, j;
 
             opt.config = config;
@@ -1789,7 +1798,7 @@
                         if (opt.config.readonly) {
                             $.setAttribute(elem, 'readonly', 'readonly');
                             elem.style.cursor = 'default';
-                        } else {                            
+                        } else {
                             var str = $.getOptionValues(opt.options).join(',');
                             if (str.length > 0 && elem.placeholder.indexOf(str) < 0) {
                                 elem.placeholder += '\u53ef\u9009\u9879\uff1a' + str;   //可选项：

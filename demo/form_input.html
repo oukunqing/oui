@@ -12,7 +12,7 @@ button {width:120px;height:28px;}
 </style>
 </head>
 <body>
-    <div style="margin:20px 0 0;">
+    <div style="margin:0px 0 0;float:left;">
         <table cellpadding="5">
             <tr>
                 <td></td>
@@ -96,11 +96,14 @@ button {width:120px;height:28px;}
             </tr>
         </table>
     </div>
-    <div style="margin:200px 0;">&nbsp; </div>
+    <div style="float:right;text-align:left;">
+        <button onclick="showForm();">弹出层表单</button>
+    </div>
+    <div style="margin:300px 0;clear:both;display: block;float:left;">&nbsp; </div>
 </body>
 </html>
-<script type="text/javascript" src="../oui/oui.min.js?"></script>
-<script type="text/javascript" src="../oui/form/oui.form.min.js?"></script>
+<script type="text/javascript" src="../oui/oui.js?"></script>
+<script type="text/javascript" src="../oui/form/oui.form.js?"></script>
 <script type="text/javascript" src="../oui/dialog/oui.dialog.js?12"></script>
 <script type="text/javascript">
     //没有引用jquery.js
@@ -233,6 +236,55 @@ button {width:120px;height:28px;}
         });
 
     };
+
+    function showForm() {
+        if (window.dialogForm123) {
+            window.dialogForm123.show();
+            return false;
+        }
+        var html = [
+            '<div>',
+            '文本框选项：<input type="text" id="txtDialogOpt1" style="width:360px;" />',
+            '<br /><br />',
+            '下拉框选项：<select id="ddlDialogOpt2" style="width:360px;"></select>',
+            '</div>'
+        ];
+        window.dialogForm123 = $.dialog.win(html.join(''), '相对位置演示', {
+            lock: false,
+            height: 300,
+            closeType: 'hide'
+        });
+
+
+        $.setInputFormat('txtDialogOpt1', {
+            types: ['option', 'word'],
+            options: ['abc', 'acc', 'asd', '123', {val:456,txt:'456456'}, '输入选项ABC123', 'hello', 'world', 'abcdefg', 'helloworld'],
+            //showValue: 同时显示值value和文本text，如果value===text则只显示text
+            config: { 
+                showNumber: true, 
+                showValue: true,
+                readonly: true,
+                relative: true,
+                //选项框最大显示高度，默认为360px
+                maxHeight: 240
+            },
+            maxLen: 3
+        });
+
+        $.setInputFormat('ddlDialogOpt2', {
+            types: ['option', 'word'],
+            options: [{val:'',txt:'请选择'},'abc', 'acc', 'asd', '123', {val:456,txt:'456456'}, {val:'ABC123',txt:'输入选项ABC123'}, 'hello', 'world', 'abcdefg', 'helloworld'],
+            value: 456,
+            //showValue: 同时显示值value和文本text，如果value===text则只显示text
+            config: { 
+                showNumber: true, 
+                showValue: true,
+                relativePosition: true,
+                //选项框最大显示高度，默认为360px
+                maxHeight: 200
+            }
+        });
+    }
 
     /*
     //引用jquery.js

@@ -1632,3 +1632,11 @@ for(var i=0; i<pss.length;i++) {
 }
 
 console.log(/^[A-Z0-9]{0,}$/i.test('a'));
+
+
+function isBoolean2 (b, dv) {
+            var bool = typeof b === 'boolean';
+            return typeof dv === 'boolean' ? (bool ? b : dv) : bool;
+        }
+
+        console.log(isBoolean2(undefined, false));

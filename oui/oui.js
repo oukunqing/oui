@@ -3787,9 +3787,15 @@
 
             return size;
         },
-        setPanelPosition = function (elem, panel, topPriority) {
-            var bs = $.getBodySize(),
-                es = $.getOffset(elem);
+        //topPriority:
+        //relativePosition: 相对位置(弹出层中的表单)
+        setPanelPosition = function (elem, panel, config) {
+            var cfg = $.extend({
+                    topPriority: false,
+                    relativePosition: null
+                }, config),
+                bs = $.getBodySize(),
+                es = $.getOffset(elem, $.getParam(cfg, 'relativePosition,relative', false));
 
             //清除选项框高度
             panel.style.height = 'auto';
@@ -3815,7 +3821,7 @@
                     //保留4个像素的留白位置
                     var whiteSpace = 4;
 
-                    if (topPriority) {
+                    if (cfg.topPriority) {
                         //设置了顶部优先，则显示在目标控件的上方
                         panel.style.top = (bs.scrollTop + whiteSpace) + 'px';
                     } else {
