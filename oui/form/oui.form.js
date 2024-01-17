@@ -1322,6 +1322,7 @@
             var patterns = $.extend([], opt.patterns), pass = false;
             if (patterns && patterns.length > 0) {
                 for (var i = 0; i < patterns.length; i++) {
+                    //TODO:
                     if ($.isRegexp(patterns[i]) && patterns[i].test(val)) {
                         pass = true;
                         break;
@@ -1341,7 +1342,7 @@
                 float: [$.PATTERN.Float, /^([0]?|[-]|[.])$/],
                 double: [$.PATTERN.Double, /^([0]?|[-]|[.])$/],
                 port: [$.PATTERN.Port, /^[0]?$/],
-                angle: [/360|^([1-3][0-5][0-9]|[1-2][0-9]+|[0-9]{1,2})([.][\d]{0,8})?$/, /^[0]?$/],
+                angle: [/^360(\.[0]{0,8})?$|^([1-3][0-5][0-9]|[1-2][0-9]+|[0-9]{1,2})([.][\d]{0,8})?$/, /^[0]?$/],
                 hex: [/^[A-F0-9]{1,}$/i, /^[0]{0}$/],
                 md5: [/^[A-F0-9]{32}$/i, /^[0]{0}$/]
             }, ps = [], nc = 0;
@@ -1363,6 +1364,22 @@
                 return false;
             }
             return $.checkInputValLen(val, opt, false, keydown, elem);
+        },
+        checkInputExcept: function (val, opt) {
+            var exceptions = $.extend([], opt.exceptions), pass = false;
+            for (var i = 0; i < exceptions.length; i++) {
+                var p = exceptions[i];
+                if ($.isRegexp(p)) {
+                    if (p.test(val)) {
+                        return true;
+                    }
+                } else if ($.isString(p) || $.isNumber(p)) {
+                    if (p.toString() === val) {
+                        return true;
+                    }
+                }
+            }
+            return false;
         },
         getOptionValues: function (opt) {
             var values = [];
@@ -1403,7 +1420,7 @@
                         return $.setInputWarnColor(elem, true);
                     }
                 } else {
-                    var val = $.isObject(vs[i]) ? $.getParam(vs[i], 'value,val') : $.isArray(vs[i]) ? vs[i][0] : vs[i];
+                    var val = $.isObject(vs[i]) ? $.getParam(vs[i], 'value,val,v') : $.isArray(vs[i]) ? vs[i][0] : vs[i];
                     if (val.toString().trim() === v) {
                         return $.setInputWarnColor(elem, true);
                     }
@@ -1498,9 +1515,7 @@
                 idx = 0,
                 n = len.toString().length,
                 elemVal = elem.value.trim(),
-                html = [
-                    '<ul class="input-option-ul">'
-                ],
+                html = [ '<ul class="input-option-ul">' ],
                 isSelect = elem.tagName === 'SELECT';
 
             if (document.getElementById('input_option_panel_style_001') === null) {
@@ -1642,7 +1657,8 @@
                     minVal: null,           //最小数值（整数、小数）
                     maxVal: null,           //最大数值（整数、小数）
                     types: null,
-                    patterns: [],           //正则表达式，用于验证数据值
+                    patterns: [],           //正则表达式，用于验证数据值是否正确
+                    exceptions: [],         //例外的正则表达式，用于验证数据输入是否异常
                     codes: [],
                     excepts: [],
                     options: [],            //内容选项
@@ -1672,6 +1688,11 @@
             } else if ($.isRegexp(opt.patterns)) {
                 opt.patterns = [opt.patterns];
             }
+            if ((!opt.exceptions || opt.exceptions.length <= 0) && $.isRegexp(opt.exception)) {
+                opt.exceptions = [opt.exception];
+            } else if ($.isRegexp(opt.exceptions)) {
+                opt.exceptions = [opt.exceptions];
+            }
 
             if ($.isString(opt.types, true)) {
                 opt.types = opt.types.split(/[,\|]/);
@@ -1697,6 +1718,7 @@
                 funs = [112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123],
                 keys = ctls.concat(opt.codes || []).concat(funs),
                 patterns = $.extend([], opt.patterns),
+                exceptions = $.extend([], opt.exceptions),
                 isNum = false,
                 isOpt = false,
                 isVal = false,
@@ -1761,11 +1783,10 @@
                     }
                     opt.maxVal = opt.maxVal || 360;
                     patterns = patterns.concat([
-                        new RegExp('360|^([1-3][0-5][0-9]|[1-2][0-9]+|[0-9]{1,2})([.][0-9]{0,' + decimalLen + '})?$'), 
+                        new RegExp('^360(\.[0]{0,' + decimalLen + '})?$|^([1-3][0-5][0-9]|[1-2][0-9]+|[0-9]{1,2})([.][0-9]{0,' + decimalLen + '})?$'), 
                         /^[0]?$/
                     ]);
                 } else if (type === 'port') {
-                    isVal = true;
                     patterns = patterns.concat([$.PATTERN.Port, /^[0]?$/]);
                     opt.maxLen = 5;
                 }
@@ -1773,6 +1794,8 @@
                     keys = keys.concat([110, 190]);
                     isVal = true;
                     patterns = patterns.concat([$.PATTERN.Ip, /^[0]{0}$/]);
+                    //错误的IPv4输入格式
+                    exceptions = exceptions.concat([/(\.\.)+|([\d]{1,3}\.){4,}|([\d]{4,})|(25[6-9]|(0|[3-9])[\d]{2})/]);
                     opt.maxLen = 15;
                 }
                 if (type === 'word') {
@@ -1784,6 +1807,7 @@
                 }
             }
             opt.patterns = patterns;
+            opt.exceptions = exceptions;
 
             for (i = 0; i < elems.length; i++) {
                 if (!$.isElement(elem = $.toElement(elems[i])) || !limit) {
@@ -1820,8 +1844,14 @@
                                     txt = elem.value.trim(),
                                     val = pos <= 0 ? key + txt : txt.substr(0, pos) + key + txt.substr(pos);
 
-                                if (!isVal && !$.checkInputVal(val, types, opt, true, elem)) {
-                                    return false;
+                                if (!isVal) {
+                                    if (!$.checkInputVal(val, types, opt, true, elem)) {
+                                        return false;
+                                    }
+                                } else if (exceptions.length > 0) {
+                                    if ($.checkInputExcept(val, opt)) {
+                                        return false;
+                                    }
                                 }
                                 return !isVal || $.checkInputValLen(val, opt, false, true, elem);
                             }
@@ -1880,6 +1910,7 @@
                         if ($.checkInputKey(ev, ctls, excepts, opt) || $.checkInputKey(ev, funs, excepts, opt)) {
                             return true;
                         }
+                        //Ctrl + A / C, Ctrl + V
                         if ((ev.ctrlKey && (kc === 65 || kc === 67)) || (opt.paste && ev.ctrlKey && (kc === 86))) {
                             return true;
                         }
@@ -1892,8 +1923,14 @@
                                 txt = elem.value.trim(),
                                 val = pos <= 0 ? key + txt : txt.substr(0, pos) + key + txt.substr(pos);
 
-                            if (!isVal && !$.checkInputVal(val, types, opt, true, elem)) {
-                                return false;
+                            if (!isVal) {
+                                if (!$.checkInputVal(val, types, opt, true, elem)) {
+                                    return false;
+                                }
+                            } else if (exceptions.length > 0) {
+                                if ($.checkInputExcept(val, opt)) {
+                                    return false;
+                                }
                             }
                             return !isVal || $.checkInputValLen(val, opt, false, true, elem);
                         }

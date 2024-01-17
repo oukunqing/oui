@@ -1640,3 +1640,6 @@ function isBoolean2 (b, dv) {
         }
 
         console.log(isBoolean2(undefined, false));
+
+console.log(/(\.\.\.)+|[\.]{4,}/.test('123..'));
+console.log(/(\.\.)+|(\d\.){4,}/.test('11.1.1.1.'));

@@ -40,7 +40,7 @@ button {width:120px;height:28px;}
             </tr>
             <tr>
                 <td></td>
-                <td><input type="text" id="fmt_num_angle" placeholder="只能输入角度值（小数或整数，0-360）" /></td>
+                <td><input type="text" id="fmt_num_angle" placeholder="只能输入角度值（小数或整数，0-360），保留2位小数" /></td>
             </tr>
             <tr>
                 <td></td>
@@ -109,7 +109,7 @@ button {width:120px;height:28px;}
     //没有引用jquery.js
     window.onload = function() {
 		$.addKeyListener(document, 'keyup',  function(e, n) {
-			console.log('e:', e.keyCode, n, e);
+			//console.log('e:', e.keyCode, n, e);
 		}, false);
         
         $.setInputFormat('txtMobile', {
