@@ -108,6 +108,15 @@ button {width:120px;height:28px;}
                     </select>
                 </td>
             </tr>
+            <tr>
+                <td></td>
+                <td>
+                    <select id="select2" onchange="console.log('select change:', this.value);">
+                        <option value="">--请选择--</option>
+                        <option value="10001">第1项</option>
+                    </select>
+                </td>
+            </tr>
         </table>
     </div>
     <div style="float:right;text-align:left;">
@@ -157,8 +166,9 @@ button {width:120px;height:28px;}
 
         $.setInputFormat('fmt_num_hex', {
             types: ['hex', 'option'],
-            options: ['a55a', '5aa5']
-            //type: 'hex'
+            options: ['a55a', '5aa5'],
+            //type: 'hex',
+            maxLen: 4
         });
 
         $.setInputFormat('fmt_num_angle', {
@@ -230,7 +240,8 @@ button {width:120px;height:28px;}
             maxLen: 3,
         }); 
         $.setInputFormat('fmt_option1', {
-            types: ['option']
+            types: ['option'],
+            maxLen: 4,
         }); 
         $.setInputFormat('fmt_option2', {
             types: ['option', 'word'],
@@ -252,6 +263,20 @@ button {width:120px;height:28px;}
             value: 456,
             //showValue: 同时显示值value和文本text，如果value===text则只显示text
             config: { 
+                showNumber: true, 
+                showValue: true,
+                //选项框最大显示高度，默认为360px
+                //maxHeight: 400
+            }
+        });
+
+        $.setInputFormat('select2', {
+            types: ['option', 'word'],
+            options: [{val:456,txt:'456456'}, {val:'ABC123',txt:'输入选项ABC123'}, 'hello', 'world', 'abcdefg', 'helloworld'],
+            value: 456,
+            //showValue: 同时显示值value和文本text，如果value===text则只显示text
+            config: { 
+                append: true,
                 showNumber: true, 
                 showValue: true,
                 //选项框最大显示高度，默认为360px

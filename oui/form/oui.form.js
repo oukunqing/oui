@@ -1303,588 +1303,713 @@
         }
     });
 
-    // setInputFormat
+    // $.input
     $.extend($, {
-        checkInputKey: function (ev, codes, excepts, opt) {
-            var e = ev || window.event,
-                keyCode = $.getKeyCode(e);
+        input: {
+            checkKey: function (ev, codes, excepts, opt) {
+                var e = ev || window.event,
+                    keyCode = $.getKeyCode(e);
 
-            //不允许shift键的情况下，只允许 shift + tab 组合键
-            if (!opt.shift && e.shiftKey && keyCode !== 9) {
-                return false;
-            } else {
-                return (codes || []).indexOf(keyCode) >= 0 && (excepts || []).indexOf(keyCode) < 0;
-            }
-        },
-        checkInputVal: function(val, types, opt, keydown, elem) {
-            opt = $.extend({}, opt);
-            types = $.extend([], types);
-            var patterns = $.extend([], opt.patterns), pass = false;
-            if (patterns && patterns.length > 0) {
-                for (var i = 0; i < patterns.length; i++) {
-                    var p = patterns[i];
-                    //3种模式，1-正则验证，2-function(val)，3-字符串比较
-                    if (($.isRegexp(p) && p.test(val)) || ($.isFunction(p) && p(val)) || p.toString() === val) {
-                        pass = true;
-                        break;
-                    }
-                }
-                return !pass ? false : $.checkInputValLen(val, opt, false, keydown, elem);
-            }
-            var pc = {
-                number: [/^[\-]?[0-9]{0,}$/i],
-                char: [/^[A-Z\-]{0,}$/i],
-                char_number: [/^[A-Z0-9\-]{0,}$/i],
-                word: [/^[\w]{0,}$/i],
-                name: [/^[\w-]{0,}$/i],
-                bool: [/^([01]?)$/],
-                int: [$.PATTERN.Int, /^([0]?|[-])$/],
-                long: [$.PATTERN.Long, /^([0]?|[-])$/],
-                float: [$.PATTERN.Float, /^([0]?|[-]|[.])$/],
-                double: [$.PATTERN.Double, /^([0]?|[-]|[.])$/],
-                port: [$.PATTERN.Port, /^[0]?$/],
-                angle: [/^360(\.[0]{0,8})?$|^([1-3][0-5][0-9]|[1-2][0-9]+|[0-9]{1,2})([.][\d]{0,8})?$/, /^[0]?$/],
-                hex: [/^[A-F0-9]{1,}$/i, /^[0]{0}$/],
-                md5: [/^[A-F0-9]{32}$/i, /^[0]{0}$/]
-            }, ps = [], nc = 0;
-
-            for (var i = 0; i < types.length; i++) {
-                var t = types[i], p = pc[t] || null;
-                if (p) {
-                    ps = ps.concat(p);
-                }
-            }
-
-            for (var j = 0; j < ps.length; j++) {
-                if (!ps[j].test(val)) {
-                    nc++;
-                }
-            }
-
-            if (nc > 0 && nc === ps.length) {
-                return false;
-            }
-            return $.checkInputValLen(val, opt, false, keydown, elem);
-        },
-        checkInputExcept: function (val, opt) {
-            var exceptions = $.extend([], opt.exceptions), pass = false;
-            for (var i = 0; i < exceptions.length; i++) {
-                var p = exceptions[i];
-                if (($.isRegexp(p) && p.test(val)) || ($.isFunction(p) && p(val)) || p.toString() === val) {
-                    return true;
-                }
-            }
-            return false;
-        },
-        getElementOptionConfig: function (elem) {
-            var options = [], arr = [], i;
-            if (!$.isElement(elem = $.toElement(elem))) {
-                return options;
-            }
-            if (elem.tagName === 'SELECT') {
-                arr = elem.options;
-                for (i = 0; i < arr.length; i++) {
-                    options.push({val: arr[i].value, txt: arr[i].text});
-                }
-            } else {
-                arr = ($.getAttribute(elem, 'options') || '').split(/[,;\|]/);
-                for (i = 0; i < arr.length; i++) {
-                    if (arr[i] !== '') {
-                        if (arr[i].indexOf(':') > 0) {
-                            var tmp = arr[i].split(':');
-                            options.push({val: tmp[0], txt: tmp[1] || tmp[0]});
-                        } else {
-                            options.push({val: arr[i], txt: arr[i]});
-                        }
-                    }
-                }
-            }
-            return options;
-        },
-        getOptionValues: function (opt) {
-            var values = [];
-            for (var i = 0; i < opt.length; i++) {
-                values.push($.isObject(opt[i]) ? $.getParam(opt[i], 'value,val,v') : $.isArray(opt[i]) ? opt[i][0] : opt[i]);
-            }
-            return values;
-        },
-        setOptionValues: function (opt) {
-            var values = [], val, txt;
-            for (var i = 0; i < opt.length; i++) {
-                if ($.isObject(opt[i])) {
-                    val = $.getParam(opt[i], 'value,val,v,text,txt,t');
-                    txt = $.getParam(opt[i], 'text,txt,t');
-                } else if ($.isArray(opt[i])) {
-                    val = opt[i][0];
-                    txt = opt[i][1] || opt[i][0];
-                } else {
-                    val = txt = opt[i];
-                }
-                values.push({ val: val, txt: txt });
-            }
-            return values;
-        },
-        checkInputFormat: function (elem, options, isPattern) {
-            var v = elem.value.trim(), vs = $.extend([], options);
-            if ('' === v || vs.length <= 0) {
-                return $.setInputWarnColor(elem, true);
-            }
-            for (var i = 0; i < vs.length; i++) {
-                if (isPattern) {
-                    var p = vs[i];
-                    if (($.isRegexp(p) && p.test(v)) || ($.isFunction(p) && p(v)) || p.toString() === v) {
-                        return $.setInputWarnColor(elem, true);
-                    }
-                } else {
-                    var val = $.isObject(vs[i]) ? $.getParam(vs[i], 'value,val,v') : $.isArray(vs[i]) ? vs[i][0] : vs[i];
-                    if (val.toString().trim() === v) {
-                        return $.setInputWarnColor(elem, true);
-                    }
-                }
-            }
-            return $.setInputWarnColor(elem, false);
-        },
-        setInputWarnColor: function (elem, pass, focus) {
-            if (!pass) {
-                if (!elem.oldColor) {
-                    elem.oldColor  = $.getElementStyle(elem, 'color');
-                }
-                if (focus) {
-                    elem.focus();
-                }
-                elem.style.color = '#f00';
-            } else if (elem.oldColor) {
-                elem.style.color = elem.oldColor;
-            }
-            return pass;
-        },
-        checkInputValLen: function (val, opt, paste, keydown, elem) {
-            opt = $.extend({}, opt);
-            if (val.length > 0) {
-                if (paste) {
-                    if ((opt.maxLen && opt.maxLen > 0 && val.length >= opt.maxLen) || (opt.valLen && opt.valLen > 0 && val.length >= opt.valLen)) {
-                        return false;
-                    }
-                    if (opt.maxVal && parseFloat('0' + val, 10) >= opt.maxVal) {
-                        return false;
-                    }
-                    if (opt.minVal && parseFloat('0' + val, 10) < opt.minVal) {
-                        return false;
-                    }
-                } else {                        
-                    if ((opt.maxLen && opt.maxLen > 0 && val.length > opt.maxLen) || (opt.valLen && opt.valLen > 0 && val.length > opt.valLen)) {
-                        return false;
-                    }
-                    if (opt.maxVal && parseFloat('0' + val, 10) > opt.maxVal) {
-                        return false;
-                    }
-                    if (!keydown && opt.minVal && parseFloat('0' + val, 10) < opt.minVal) {
-                        return false;
-                    }
-                }
-
-                if (opt.valLen && opt.valLen > 0 && val.length !== opt.valLen) {
-                    $.setInputWarnColor(elem, false, true);
-                } else if(opt.minLen && opt.minLen > 0 && val.length < opt.minLen) {
-                    $.setInputWarnColor(elem, false, true);
-                }
-            }
-            return true;
-        },
-        setCurrentOption: function (elem, div) {
-            var val = elem.value.trim(),
-                arr = div.querySelectorAll('li');
-
-            for (var i = 0; i < arr.length; i++) {
-                var v = $.getAttribute(arr[i], 'data-value');
-                if (val === v) {
-                    $.addClass(arr[i], 'cur');
-                } else {
-                    $.removeClass(arr[i], 'cur');
-                }
-            }
-            return this;
-        },
-        setInputOption: function (elem, options, config) {
-            var cfg = $.extend({}, config),
-                opt = $.isArray(options) ? 
-                    options : $.isUndefinedOrNull(options) ? 
-                    [] : $.isString(options, true) ? 
-                    options.split(/[,;\|]/) : [options];
-
-            cfg.relative = $.getParam(cfg, 'relativePosition,relative,follow', false);
-
-            if (!$.isElement(elem = $.toElement(elem)) || opt.length <= 0) {
-                return this;
-            }
-            if (elem.optbox) {
-                elem.optbox.style.display = elem.optbox.style.display === 'none' ? '' : 'none';
-                $.setPanelPosition(elem, elem.optbox, cfg);
-                $.setCurrentOption(elem, elem.optbox);
-                return this;
-            }
-
-            var es = $.getOffset(elem, cfg.relative),
-                div = document.createElement('div'),
-                len = opt.length,
-                top = es.top + es.height + 1,
-                idx = 0,
-                n = len.toString().length,
-                elemVal = elem.value.trim(),
-                html = [ '<ul class="input-option-ul">' ],
-                isSelect = elem.tagName === 'SELECT';
-
-            if (document.getElementById('input_option_panel_style_001') === null) {
-                var css = document.createElement('div');
-                css.id = 'input_option_panel_style_001';
-                css.style.cssText = 'position:absolute;left:-3000px;top:-3000px;display:none;';
-                css.innerHTML = [
-                    '<style style="text/css">',
-                    '.input-option-panel-box{position:absolute;border:solid 1px #ddd;background:#fff;border-radius:4px;opacity:0.99;',
-                    ' overflow:auto;box-shadow: 0 2px 3px 0 rgba(0,0,0,.32);}',
-                    '.input-option-ul {margin:0;padding:1px 0;}',
-                    '.input-option-ul i{font-style:normal;color:#ccc;display:inline-block;text-align:right;',
-                    ' border:none;margin:0 7px 0 0;padding:0;font-size:14px;}',
-                    '.input-option-ul li{margin:0 1px;list-style:none;line-height:26px;font-size:14px;border:none;cursor:default;}',
-                    '.input-option-ul li:hover,.input-option-ul li.cur:hover{background:#dfe8f6;color:#000;}',
-                    '.input-option-ul li.cur{background:#eee;color:#000;}',
-                    '.input-option-ul li:hover i,.input-option-ul li.cur:hover i{color:#f50;}',
-                    '.input-option-ul li.cur i{color:#f00;}',
-                    '.input-option-ul li span{margin:0;padding:0;font-size:14px;}',
-                    '</style>'
-                ].join('');
-                document.body.appendChild(css);
-            }
-
-            div.target = elem.tagName;
-            div.className = 'input-option-panel-box';
-            div.id = 'input-option-panel-' + (elem.id || new Date().getTime());
-
-            div.style.cssText = [
-                'max-height:' + (parseInt('0' + cfg.maxHeight, 10) || 360) + 'px;',
-                'top:' + top + 'px;',
-                'left:' + (es.left) + 'px;',
-                'width:' + (es.width - 2) + 'px;',
-                cfg.relative ? '' : 'z-index:' + (cfg.zIndex || cfg.zindex || 99999999) + ';'
-            ].join(';');
-
-            for (var i = 0; i < len; i++) {
-                var val = opt[i].val, 
-                    txt = opt[i].txt;
-
-                if ($.isString(txt, true) || $.isNumber(txt) || $.isString(val, true) || $.isNumber(val)) {
-                    idx++;
-                    if (cfg.showValue && val.toString() !== '' && val.toString() !== txt.toString()) {
-                        txt = val + ' - ' + txt;
-                    }
-                    html.push([
-                        '<li class="input-option-panel-item', (elemVal === val.toString() ? ' cur' : ''), '"',
-                        ' style="padding:', (cfg.showNumber ? '0 5px 0 0' : '0 5px'), ';"',
-                        ' data-value="', val.toString().replace(/["]/g, '&quot;'), '">', 
-                        cfg.showNumber ? ('<i style="width:' + (n * 12) + 'px;">' + idx + '</i>') : '',
-                        '<span>', txt, '</span>', 
-                        '</li>'
-                    ].join(''));
-                }
-            }
-            html.push('</ul>');
-
-            div.innerHTML = html.join('');
-            if (cfg.relative) {
-                //elem.parentNode.insertBefore((elem.optbox = div), elem);
-                elem.parentNode.appendChild((elem.optbox = div));
-            } else {
-                document.body.appendChild((elem.optbox = div));
-            }
-            $.setPanelPosition(elem, elem.optbox, cfg);
-            $.setCurrentOption(elem, elem.optbox);
-
-            window.inputFormatTimers = {};
-
-            if (!window.inputOptionDocEventListener) {
-                window.inputOptionDocEventListener = 1;
-                $.addListener(document, 'mousedown', function(ev) {
-                    if ((ev.target.tagName === 'LI' && ev.target.className.indexOf('input-option-panel-item') > -1) || 
-                        (ev.target.tagName === 'SELECT' && ev.target.className.indexOf('input-option-panel-select') > -1)) {
-                        return false;
-                    }
-                    var arr = document.querySelectorAll('.input-option-panel-box');
-                    //每次只显示当前选项框，隐藏其他的选项框
-                    for (var i = 0; i < arr.length; i++) {
-                        if (arr[i].style.display !== 'none') {
-                            arr[i].style.display = 'none';
-                        }
-                    }
-                });
-            }
-
-            var arr = div.querySelectorAll('li');
-            for (var i = 0; i < arr.length; i++) {
-                $.addListener(arr[i], 'mousedown', function(ev) {
-                    $.cancelBubble(ev);
+                //不允许shift键的情况下，只允许 shift + tab 组合键
+                if (!opt.shift && e.shiftKey && keyCode !== 9) {
                     return false;
-                });
-                $.addListener(arr[i], 'click', function(ev) {
-                    $.cancelBubble(ev);
-                    var val = $.getAttribute(this, 'data-value');
-                    if (elem.tagName === 'SELECT') {
-                        elem.options.length = 0;
-                        var node = this.querySelector('span');
-                        if (node) {
-                            elem.options.add(new Option(node.innerText || node.innerHTML, val));
+                } else {
+                    return (codes || []).indexOf(keyCode) >= 0 && (excepts || []).indexOf(keyCode) < 0;
+                }
+            },
+            checkVal: function(val, types, opt, keydown, elem) {
+                opt = $.extend({}, opt);
+                types = $.extend([], types);
+                var patterns = $.extend([], opt.patterns), pass = false;
+                if (patterns && patterns.length > 0) {
+                    for (var i = 0; i < patterns.length; i++) {
+                        var p = patterns[i];
+                        //3种模式，1-正则验证，2-function(val)，3-字符串比较
+                        if (($.isRegexp(p) && p.test(val)) || ($.isFunction(p) && p(val)) || p.toString() === val) {
+                            pass = true;
+                            break;
                         }
-                        $.trigger(elem, 'change');
+                    }
+                    return !pass ? false : $.input.checkValLen(val, opt, false, keydown, elem);
+                }
+                var pc = {
+                    number: [/^[\-]?[0-9]{0,}$/i],
+                    char: [/^[A-Z\-]{0,}$/i],
+                    char_number: [/^[A-Z0-9\-]{0,}$/i],
+                    word: [/^[\w]{0,}$/i],
+                    name: [/^[\w-]{0,}$/i],
+                    bool: [/^([01]?)$/],
+                    int: [$.PATTERN.Int, /^([0]?|[-])$/],
+                    long: [$.PATTERN.Long, /^([0]?|[-])$/],
+                    float: [$.PATTERN.Float, /^([0]?|[-]|[.])$/],
+                    double: [$.PATTERN.Double, /^([0]?|[-]|[.])$/],
+                    port: [$.PATTERN.Port, /^[0]?$/],
+                    angle: [/^360(\.[0]{0,8})?$|^([1-3][0-5][0-9]|[1-2][0-9]+|[0-9]{1,2})([.][\d]{0,8})?$/, /^[0]?$/],
+                    hex: [/^[A-F0-9]{1,}$/i, /^[0]{0}$/],
+                    md5: [/^[A-F0-9]{32}$/i, /^[0]{0}$/]
+                }, ps = [], nc = 0;
+
+                for (var i = 0; i < types.length; i++) {
+                    var t = types[i], p = pc[t] || null;
+                    if (p) {
+                        ps = ps.concat(p);
+                    }
+                }
+
+                for (var j = 0; j < ps.length; j++) {
+                    if (!ps[j].test(val)) {
+                        nc++;
+                    }
+                }
+
+                if (nc > 0 && nc === ps.length) {
+                    return false;
+                }
+                return $.input.checkValLen(val, opt, false, keydown, elem);
+            },
+            checkExcept: function (val, opt) {
+                var exceptions = $.extend([], opt.exceptions), pass = false;
+                for (var i = 0; i < exceptions.length; i++) {
+                    var p = exceptions[i];
+                    if (($.isRegexp(p) && p.test(val)) || ($.isFunction(p) && p(val)) || p.toString() === val) {
+                        return true;
+                    }
+                }
+                return false;
+            },
+            getElementOptionConfig: function (elem) {
+                var options = [], arr = [], i;
+                if (!$.isElement(elem = $.toElement(elem))) {
+                    return options;
+                }
+                if (elem.tagName === 'SELECT') {
+                    arr = elem.options;
+                    for (i = 0; i < arr.length; i++) {
+                        options.push({val: arr[i].value, txt: arr[i].text});
+                    }
+                } else {
+                    arr = ($.getAttribute(elem, 'options') || '').split(/[,;\|]/);
+                    for (i = 0; i < arr.length; i++) {
+                        if (arr[i] !== '') {
+                            if (arr[i].indexOf(':') > 0) {
+                                var tmp = arr[i].split(':');
+                                options.push({val: tmp[0], txt: tmp[1] || tmp[0]});
+                            } else {
+                                options.push({val: arr[i], txt: arr[i]});
+                            }
+                        }
+                    }
+                }
+                return options;
+            },
+            getOptionValues: function (opt) {
+                var values = [];
+                for (var i = 0; i < opt.length; i++) {
+                    values.push($.isObject(opt[i]) ? $.getParam(opt[i], 'value,val,v') : $.isArray(opt[i]) ? opt[i][0] : opt[i]);
+                }
+                return values;
+            },
+            setOptionValues: function (opt) {
+                var values = [], val, txt;
+                for (var i = 0; i < opt.length; i++) {
+                    if ($.isObject(opt[i])) {
+                        val = $.getParam(opt[i], 'value,val,v,text,txt,t');
+                        txt = $.getParam(opt[i], 'text,txt,t');
+                    } else if ($.isArray(opt[i])) {
+                        val = opt[i][0];
+                        txt = opt[i][1] || opt[i][0];
                     } else {
-                        elem.value = val;
+                        val = txt = opt[i];
                     }
-                    div.style.display = 'none';
-                    $.trigger(elem, 'blur');
-                });
-            }
-            return this;
-        },
-        // 设置输入框内容格式
-        // 需要设置输入格式的文本框，默认情况下是不允许空格和特殊字符的
-        setInputFormat: function (elements, options) {
-            var elems = [], elem, keyTypes = [
-                'open', //open 表示不限制输入，但需要验证选项等特殊格式
-                'char', 'number', 'char_number', 'word', 'int', 'long', 'float', 'double', 'bool', 'control', 'symbol', 
-                'option', 'ipv4', 'ipv6', 'port', 'hex', 'md5', 'angle'
-            ];
-            if ($.isArrayLike(elements) || $.isArray(elements)) {
-                elems = elements;
-            } else if ($.isElement(elements)) {
-                elems = [elements];
-            } else if ($.isString(elements, true)) {
-                elems = elements.split(/[,;\|]/).length > 1 ? elements.split(/[,;\|]/) : [elements];
-            }
-
-            if ((!$.isArrayLike(elems) && !$.isArray(elems)) || !(elem = elems[0])) {
-                return this;
-            }
-            var par = $.extend({}, options),
-                opt = $.extend({
-                    shift: true,            //是否允许shift键
-                    space: false,           //是否允许空格
-                    paste: true,            //是否允许粘贴
-                    minus: null,            //是否允许减号（负号）
-                    dot: null,              //是否允许小数点号
-                    minLen: null,           //内容最小长度，-1表示不限制
-                    maxLen: null,           //内容最大长度，-1表示不限制
-                    valLen: null,           //内容固定长度，-1表示不限制
-                    minVal: null,           //最小数值（整数、小数）
-                    maxVal: null,           //最大数值（整数、小数）
-                    types: null,
-                    patterns: [],           //正则表达式，用于验证数据值是否正确
-                    exceptions: [],         //例外的正则表达式，用于验证数据输入是否异常
-                    codes: [],
-                    excepts: [],
-                    options: [],            //内容选项
-                    value: null,              //默认值
-                    config: {}              //配置项
-                }, par),
-                config = $.extend({
-                    readonly: false,        //是否禁用输入(选项模式,只能选择不能输入)
-                    showValue: false,       //是否显示值(默认只显示text不显示value)
-                    showNumber: false,      //是否显示序号(行号)
-                    topPriority: false,     //是否优先显示在顶部
-                    maxHeight: 360,         //选项框最大显示高度
-                    relative: false,        //相对位置(用于弹出层中的表单)，默认是绝对位置
-                    zIndex: 0
-                }, par.config), i, j;
-
-            if (!par.config || $.isObject(par.config)) {
-                par.config = {};
-            }
-
-            opt.config = config;
-
-            opt.minLen = $.getParam(opt, 'minLength,minLen');
-            opt.maxLen = $.getParam(opt, 'maxLength,maxLen');
-            opt.valLen = $.getParam(opt, 'valueLength,valueLen,valLen');
-            opt.minVal = $.getParam(opt, 'minValue,minVal');
-            opt.maxVal = $.getParam(opt, 'maxValue,maxVal');
-
-            //如果没有配置选项，则尝试从元素属性中获取
-            if (!$.isArray(opt.options) || opt.options.length <= 0) {
-                opt.options = $.getElementOptionConfig(elem);
-            }
-
-            if ((!opt.patterns || opt.patterns.length <= 0) && $.isRegexp(opt.pattern)) {
-                opt.patterns = [opt.pattern];
-            } else if ($.isRegexp(opt.patterns)) {
-                opt.patterns = [opt.patterns];
-            }
-            if ((!opt.exceptions || opt.exceptions.length <= 0) && $.isRegexp(opt.exception)) {
-                opt.exceptions = [opt.exception];
-            } else if ($.isRegexp(opt.exceptions)) {
-                opt.exceptions = [opt.exceptions];
-            }
-
-            if ($.isString(opt.types, true)) {
-                opt.types = opt.types.split(/[,\|]/);
-            }
-            if ((!$.isArray(opt.types) || opt.types.length <= 0) && $.isString(opt.type, true)) {
-                opt.types = opt.type.split(/[,\|]/);
-            }
-
-            var types = $.isArray(opt.types) && opt.types.length > 0 ? opt.types : keyTypes,
-                excepts = $.isArray(opt.excepts) && opt.excepts.length > 0 ? opt.excepts : [],
-                ctls = [
-                    8,      // backspace
-                    9,      // tab
-                    13,     // enter
-                    108,    // enter
-                    37,     // left arrow
-                    38,     // up arrow
-                    39,     // right arrow
-                    40,     // down arrow
-                    46,     // delete
-                ],
-                // F1-F12功能键
-                funs = [112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123],
-                keys = ctls.concat(opt.codes || []).concat(funs),
-                patterns = $.extend([], opt.patterns),
-                exceptions = $.extend([], opt.exceptions),
-                isNum = false,
-                isOpt = false,
-                isVal = false,
-                isBool = false,
-                isSelect = false,   //是否select控件元素
-                //是否要限制内容输入，如果配置的限制类型不匹配，则不限制内容输入
-                limit = 0,
-                decimalLen = $.isNumber(opt.decimalLen) ? opt.decimalLen : 8;
-
-            keys = !opt.space ? keys : keys.concat([32]);
-            keys = !opt.minus ? keys : keys.concat([109, 189]); //109是小键盘中的减号-
-            keys = !opt.dot ? keys : keys.concat([110, 190]); //110是小键盘中的点号.
-
-            if (1 === types.length) {
-                if (['options', 'option'].indexOf(types[0]) > -1 && !opt.config.readonly) {
-                    types.push('open');
-                } else if (['boolean', 'bool'].indexOf(types[0]) > -1) {
-                    opt.config.readonly = $.isBoolean(par.config.readonly, true);
+                    values.push({ val: val, txt: txt });
                 }
-            }
-            
-            for (i = 0; i < types.length; i++) {
-                var type = (types[i] || '').toLowerCase();
-                if (keyTypes.indexOf(type) > -1) {
-                    limit++;
+                return values;
+            },
+            checkFormat: function (elem, options, isPattern) {
+                var v = elem.value.trim(), vs = $.extend([], options);
+                if ('' === v || vs.length <= 0) {
+                    return $.input.setWarnColor(elem, true);
                 }
-                if (['options', 'option'].indexOf(type) > -1) {
-                    isOpt = true;
-                    continue;
-                }
-                if (['open', 'number', 'char_number', 'int', 'float', 'word', 'ipv4', 'ipv6', 'port', 'hex', 'md5', 'angle'].indexOf(type) > -1) {
-                    keys = keys.concat([48, 49, 50, 51, 52, 53, 54, 55, 56, 57]);       // 0-9键
-                    keys = keys.concat([96, 97, 98, 99, 100, 101, 102, 103, 104, 105]); // 0-9键（小键盘）
-                    if (['number', 'int', 'float', 'angle'].indexOf(type) > -1) {
-                        opt.shift = false;
-                        isNum = true;
+                for (var i = 0; i < vs.length; i++) {
+                    if (isPattern) {
+                        var p = vs[i];
+                        if (($.isRegexp(p) && p.test(v)) || ($.isFunction(p) && p(v)) || p.toString() === v) {
+                            return $.input.setWarnColor(elem, true);
+                        }
+                    } else {
+                        var val = $.isObject(vs[i]) ? $.getParam(vs[i], 'value,val,v') : $.isArray(vs[i]) ? vs[i][0] : vs[i];
+                        if (val.toString().trim() === v) {
+                            return $.input.setWarnColor(elem, true);
+                        }
                     }
                 }
-                if (['open', 'control'].indexOf(type) > -1) {
-                    // ;: =+ ,< -_ .> /? `~
-                    keys = keys.concat([opt.space ? 32 : 0, 186, 187, 188, 189, 190, 191, 192]);
-                    // [{ \| ]} '"
-                    keys = keys.concat([219, 220, 221, 222]);
-                }
-                if (['open', 'symbol'].indexOf(type) > -1) {
-                    // * + - . / (小键盘)  * + - . / (主键盘)
-                    keys = keys.concat([106, 107, 109, 110, 111, 56, 187, 189, 190, 191]);
-                }
-
-                if (['open', 'char', 'char_number', 'word'].indexOf(type) > -1) {
-                    for (j = 65; j <= 90; j++) { keys.push(j); } // A-Z 键
-                } else if (['hex', 'ipv6', 'md5'].indexOf(type) > -1) {
-                    for (j = 65; j <= 70; j++) { keys.push(j); } // A-F 键
-                } else if (['boolean', 'bool'].indexOf(type) > -1) {   // 0, 1
-                    keys = keys.concat([48, 49]);
-                    if (opt.options.length <= 0) {
-                        opt.options = [{ val: 1, txt: '是' }, { val: 0, txt: '否' }];
+                return $.input.setWarnColor(elem, false);
+            },
+            setWarnColor: function (elem, pass, focus) {
+                if (!pass) {
+                    if (!elem.oldColor) {
+                        elem.oldColor  = $.getElementStyle(elem, 'color');
                     }
-                    isBool = true;
-                } else if (type === 'int') {
-                    // - (小键盘) - (主键盘)
-                    //keys = keys.concat([109, 189]);
-                } else if (type === 'float') {
-                    // - . (小键盘) - . (主键盘)
-                    //keys = keys.concat([109, 110, 189, 190]);
-                    // . (小键盘) . (主键盘)
-                    keys = keys.concat([110, 190]);
-                    patterns = patterns.concat([
-                        new RegExp('^(-?[1-9][0-9]{0,23}[.]?[0-9]{0,' + decimalLen + '}|-?[0]([.][0-9]{0,' + decimalLen + '})?)$'), 
-                        /^[0]?$/
-                    ]);
-                } else if (type === 'angle') {
-                    if (opt.dot === null || opt.dot) {
-                        keys = keys.concat([110, 190]);
+                    if (focus) {
+                        elem.focus();
                     }
-                    opt.maxVal = opt.maxVal || 360;
-                    patterns = patterns.concat([
-                        new RegExp('^360(\.[0]{0,' + decimalLen + '})?$|^([1-3][0-5][0-9]|[1-2][0-9]+|[0-9]{1,2})([.][0-9]{0,' + decimalLen + '})?$'), 
-                        /^[0]?$/
-                    ]);
-                } else if (type === 'port') {
-                    patterns = patterns.concat([$.PATTERN.Port, /^[0]?$/]);
-                    opt.maxLen = 5;
+                    elem.style.color = '#f00';
+                } else if (elem.oldColor) {
+                    elem.style.color = elem.oldColor;
                 }
-                //ipv4 ipv6
-                if (type === 'ipv4') {
-                    keys = keys.concat([110, 190]);
-                    isVal = true;
-                    patterns = patterns.concat([$.PATTERN.Ip, /^[0]{0}$/]);
-                    //错误的IPv4输入格式
-                    exceptions = exceptions.concat([/(\.\.)+|^([\d]{1,3}\.){4,}$|([\d]{4,})|(25[6-9]|(0|[3-9])[\d]{2})/]);
-                    opt.maxLen = 15;
-                } else if (type === 'ipv6') {
-                    keys = keys.concat([186]);
-                    isVal = true;
-                    opt.shift = true;
-                    patterns = patterns.concat([$.isIPv6, /^[0]{0}$/]);
-                    //错误的IPv6输入格式
-                    exceptions = exceptions.concat([/[^A-F0-9:]+|[:]{3,}|([\dA-F]{5,})|([\dA-F]{0,4}::|::[\dA-F]{0,4}){2,}|([\dA-F]{0,4}:[\dA-F]{0,4}){8,}/i]);
-                    opt.maxLen = 39;
-                }
-                if (type === 'word') {
-                    keys = keys.concat([189]);
-                    opt.shift = true;
-                }
-                if (type==='md5' && !opt.valLen) {
-                    opt.valLen = 32;
-                }
-            }
-            opt.patterns = patterns;
-            opt.exceptions = exceptions;
+                return pass;
+            },
+            checkValLen: function (val, opt, paste, keydown, elem) {
+                opt = $.extend({}, opt);
+                if (val.length > 0) {
+                    if (paste) {
+                        if ((opt.maxLen && opt.maxLen > 0 && val.length >= opt.maxLen) || (opt.valLen && opt.valLen > 0 && val.length >= opt.valLen)) {
+                            return false;
+                        }
+                        if (opt.maxVal && parseFloat('0' + val, 10) >= opt.maxVal) {
+                            return false;
+                        }
+                        if (opt.minVal && parseFloat('0' + val, 10) < opt.minVal) {
+                            return false;
+                        }
+                    } else {                        
+                        if ((opt.maxLen && opt.maxLen > 0 && val.length > opt.maxLen) || (opt.valLen && opt.valLen > 0 && val.length > opt.valLen)) {
+                            return false;
+                        }
+                        if (opt.maxVal && parseFloat('0' + val, 10) > opt.maxVal) {
+                            return false;
+                        }
+                        if (!keydown && opt.minVal && parseFloat('0' + val, 10) < opt.minVal) {
+                            return false;
+                        }
+                    }
 
-            for (i = 0; i < elems.length; i++) {
-                if (!$.isElement(elem = $.toElement(elems[i])) || !limit) {
-                    continue;
+                    if (opt.valLen && opt.valLen > 0 && val.length !== opt.valLen) {
+                        $.input.setWarnColor(elem, false, true);
+                    } else if(opt.minLen && opt.minLen > 0 && val.length < opt.minLen) {
+                        $.input.setWarnColor(elem, false, true);
+                    }
                 }
-                isSelect = elem.tagName === 'SELECT';
-
-                if (isOpt || isBool) {
-                    opt.options = $.setOptionValues(opt.options);
-
-                    if (!isSelect) {
-                        if (opt.config.readonly) {
-                            $.setAttribute(elem, 'readonly', 'readonly');
-                            elem.style.cursor = 'default';
+                return true;
+            },
+            setCurrentOption: function (elem, div) {
+                var arr = div.querySelectorAll('li'), i;
+                if ($.isNumber(elem)) {
+                    for (i = 0; i < arr.length; i++) {
+                        if (elem === i) {
+                            $.addClass(arr[i], 'cur');
                         } else {
-                            var str = $.getOptionValues(opt.options).join(',');
-                            if (str.length > 0 && elem.placeholder.indexOf(str) < 0) {
-                                elem.placeholder += (elem.placeholder ? '  ' : '') + '\u53ef\u9009\u9879\uff1a' + str;   //可选项：
+                            $.removeClass(arr[i], 'cur');
+                        }
+                    }
+                } else {
+                    var val = elem.value.trim();
+                    for (i = 0; i < arr.length; i++) {
+                        if (val === $.getAttribute(arr[i], 'data-value')) {
+                            $.addClass(arr[i], 'cur');
+                        } else {
+                            $.removeClass(arr[i], 'cur');
+                        }
+                    }
+                }
+                return this;
+            },
+            hideOptionPanel: function (curPanel) {
+                var arr = document.querySelectorAll('.input-option-panel-box');
+                for (var i = 0; i < arr.length; i++) {
+                    if ((!curPanel || arr[i] !== curPanel) && arr[i].style.display !== 'none') {
+                        arr[i].style.display = 'none';
+                    }
+                }
+                return this;
+            },
+            selectOptionItem: function (item, elem, div) {
+                if (!$.isElement(div = $.toElement(div))) {
+                    return this;
+                }
+                var isArrowKey = $.isNumber(item);
+                if (isArrowKey) {
+                    var num = item,
+                        arr = div.querySelectorAll('li'),
+                        len = arr.length;
+
+                    if (num < 0) {
+                        num = 0;
+                    } else if (num >= len) {
+                        num = len - 1;
+                    }
+                    item = arr[num];
+                    $.input.setCurrentOption(num, div);
+                }
+                var val = $.getAttribute(item, 'data-value'),
+                    idx = $.getAttribute(item, 'opt-idx').toInt(),
+                    cur = $.getAttribute(elem, 'opt-idx').toInt();
+
+                if (idx > 0 && idx === cur) {
+                    return this;
+                }
+
+                if (elem.tagName === 'SELECT') {
+                    elem.options.length = 0;
+                    var node = item.querySelector('span');
+                    if (node) {
+                        elem.options.add(new Option(node.innerText || node.innerHTML, val));
+                    }
+                    $.trigger(elem, 'change');
+                } else {
+                    elem.value = val;
+                }
+                $.setAttribute(elem, 'opt-idx', idx);
+
+                if (!isArrowKey) {
+                    div.style.display = 'none';
+                }
+                $.trigger(elem, 'blur');
+
+                return this;
+            },
+            setOption: function (elem, options, config, hide) {
+                var cfg = $.extend({}, config),
+                    opt = $.isArray(options) ? 
+                        options : $.isUndefinedOrNull(options) ? 
+                        [] : $.isString(options, true) ? 
+                        options.split(/[,;\|]/) : [options];
+
+                cfg.relative = $.getParam(cfg, 'relativePosition,relative,follow', false);
+
+                if (!$.isElement(elem = $.toElement(elem)) || opt.length <= 0) {
+                    return this;
+                }
+                if (elem.optbox) {
+                    elem.optbox.style.display = !hide && elem.optbox.style.display === 'none' ? '' : 'none';
+                    $.setPanelPosition(elem, elem.optbox, cfg);
+                    $.input.setCurrentOption(elem, elem.optbox);
+                    return this;
+                } else if (hide) {
+                    return this;
+                }
+
+                var es = $.getOffset(elem, cfg.relative),
+                    div = document.createElement('div'),
+                    len = opt.length,
+                    top = es.top + es.height + 1,
+                    idx = 0,
+                    curIdx = 0,
+                    n = len.toString().length,
+                    elemVal = elem.value.trim(),
+                    html = [ '<ul class="input-option-ul">' ],
+                    isSelect = elem.tagName === 'SELECT';
+
+                if (document.getElementById('input_option_panel_style_001') === null) {
+                    var css = document.createElement('div');
+                    css.id = 'input_option_panel_style_001';
+                    css.style.cssText = 'position:absolute;left:-3000px;top:-3000px;display:none;';
+                    css.innerHTML = [
+                        '<style style="text/css">',
+                        '.input-option-panel-box{position:absolute;border:solid 1px #ddd;background:#fff;border-radius:4px;opacity:0.99;',
+                        ' overflow:auto;box-shadow: 0 2px 3px 0 rgba(0,0,0,.32);}',
+                        '.input-option-ul {margin:0;padding:1px 0;}',
+                        '.input-option-ul i{font-style:normal;color:#ccc;display:inline-block;text-align:right;',
+                        ' border:none;margin:0 7px 0 0;padding:0;font-size:14px;}',
+                        '.input-option-ul li{margin:0 1px;list-style:none;line-height:26px;font-size:14px;border:none;cursor:default;}',
+                        '.input-option-ul li:hover,.input-option-ul li.cur:hover{background:#dfe8f6;color:#000;}',
+                        '.input-option-ul li.cur{background:#eee;color:#000;}',
+                        '.input-option-ul li:hover i,.input-option-ul li.cur:hover i{color:#f50;}',
+                        '.input-option-ul li.cur i{color:#f00;}',
+                        '.input-option-ul li a{margin:0;padding:0;font-size:14px;display:block;border:none;background:none;text-decoration:none;color:#000;cursor:default;}',
+                        '.input-option-ul li span{margin:0;padding:0;font-size:14px;}',
+                        '</style>'
+                    ].join('');
+                    document.body.appendChild(css);
+                }
+
+                div.target = elem.tagName;
+                div.className = 'input-option-panel-box';
+                div.id = 'input-option-panel-' + (elem.id || new Date().getTime());
+
+                div.style.cssText = [
+                    'max-height:' + (parseInt('0' + cfg.maxHeight, 10) || 360) + 'px;',
+                    'top:' + top + 'px;',
+                    'left:' + (es.left) + 'px;',
+                    'width:' + (es.width - 2) + 'px;',
+                    cfg.relative ? '' : 'z-index:' + (cfg.zIndex || cfg.zindex || 99999999) + ';'
+                ].join(';');
+
+                for (var i = 0; i < len; i++) {
+                    var val = opt[i].val, 
+                        txt = opt[i].txt,
+                        cur = elemVal === val.toString();
+
+                    if ($.isString(txt, true) || $.isNumber(txt) || $.isString(val, true) || $.isNumber(val)) {
+                        idx++;
+                        if (cfg.showValue && val.toString() !== '' && val.toString() !== txt.toString()) {
+                            txt = val + ' - ' + txt;
+                        }
+                        if (cur) {
+                            curIdx = i;
+                        }
+                        html.push([
+                            '<li class="input-option-panel-item', cur ? ' cur' : '', '"',
+                            ' style="padding:', (cfg.showNumber ? '0 5px 0 0' : '0 5px'), ';"',
+                            ' opt-idx="', i, '" data-value="', val.toString().replace(/["]/g, '&quot;'), '">',
+                            '<a href="javascript:void(0);">', 
+                            cfg.showNumber ? ('<i style="width:' + (n * 12) + 'px;">' + idx + '</i>') : '',
+                            '<span>', txt, '</span>',
+                            '</a>',
+                            '</li>'
+                        ].join(''));
+                    }
+                }
+                html.push('</ul>');
+
+                $.setAttribute(elem, 'opt-len', len);
+                $.setAttribute(elem, 'opt-idx', curIdx);
+                $.setAttribute(elem, 'opt-id', div.id);
+
+                div.innerHTML = html.join('');
+                if (cfg.relative) {
+                    //elem.parentNode.insertBefore((elem.optbox = div), elem);
+                    elem.parentNode.appendChild((elem.optbox = div));
+                } else {
+                    document.body.appendChild((elem.optbox = div));
+                }
+                $.setPanelPosition(elem, elem.optbox, cfg);
+                $.input.setCurrentOption(elem, elem.optbox);
+
+                window.inputFormatTimers = {};
+                if (!window.inputOptionDocEventListener) {
+                    window.inputOptionDocEventListener = 1;
+                    $.addListener(document, 'mousedown', function(ev) {
+                        if ((ev.target.tagName === 'LI' && ev.target.className.indexOf('input-option-panel-item') > -1) || 
+                            (ev.target.tagName === 'SELECT' && ev.target.className.indexOf('input-option-panel-select') > -1)) {
+                            return false;
+                        }
+                        $.input.hideOptionPanel();
+                    });
+                }
+                var arr = div.querySelectorAll('li');
+                for (var i = 0; i < arr.length; i++) {
+                    var li = arr[i];
+                    $.addListener(li, 'mousedown', function(ev) {
+                        $.cancelBubble(ev);
+                        return false;
+                    });
+                    $.addListener(li, 'click', function(ev) {
+                        $.cancelBubble(ev);
+                        $.input.selectOptionItem(this, elem, div);
+                    });
+                }
+                return this;
+            },
+            // 设置输入框内容格式
+            // 需要设置输入格式的文本框，默认情况下是不允许空格和特殊字符的
+            setFormat: function (elements, options) {
+                var elems = [], elem, keyTypes = [
+                    'open', //open 表示不限制输入，但需要验证选项等特殊格式
+                    'char', 'number', 'char_number', 'word', 'int', 'long', 'float', 'double', 'bool', 'control', 'symbol', 
+                    'option', 'ipv4', 'ipv6', 'port', 'hex', 'md5', 'angle'
+                ];
+                if ($.isArrayLike(elements) || $.isArray(elements)) {
+                    elems = elements;
+                } else if ($.isElement(elements)) {
+                    elems = [elements];
+                } else if ($.isString(elements, true)) {
+                    elems = elements.split(/[,;\|]/).length > 1 ? elements.split(/[,;\|]/) : [elements];
+                }
+
+                if ((!$.isArrayLike(elems) && !$.isArray(elems)) || !(elem = elems[0])) {
+                    return this;
+                }
+                var par = $.extend({}, options),
+                    opt = $.extend({
+                        shift: true,            //是否允许shift键
+                        space: false,           //是否允许空格
+                        paste: true,            //是否允许粘贴
+                        minus: null,            //是否允许减号（负号）
+                        dot: null,              //是否允许小数点号
+                        minLen: null,           //内容最小长度，-1表示不限制
+                        maxLen: null,           //内容最大长度，-1表示不限制
+                        valLen: null,           //内容固定长度，-1表示不限制
+                        minVal: null,           //最小数值（整数、小数）
+                        maxVal: null,           //最大数值（整数、小数）
+                        types: null,
+                        patterns: [],           //正则表达式，用于验证数据值是否正确
+                        exceptions: [],         //例外的正则表达式，用于验证数据输入是否异常
+                        codes: [],
+                        excepts: [],
+                        options: [],            //内容选项
+                        value: null,            //默认值
+                        config: {}              //配置项，用于options选项框
+                    }, par),
+                    config = $.extend({
+                        append: false,          //是否追加选项，true-表示options参数 + element属性options
+                        readonly: false,        //是否禁用输入(选项模式,只能选择不能输入)
+                        showValue: false,       //是否显示值(默认只显示text不显示value)
+                        showNumber: false,      //是否显示序号(行号)
+                        topPriority: false,     //是否优先显示在顶部
+                        maxHeight: 360,         //选项框最大显示高度
+                        relative: false,        //相对位置(用于弹出层中的表单)，默认是绝对位置
+                        zIndex: 0
+                    }, par.config), i, j;
+
+                if (!par.config || $.isObject(par.config)) {
+                    par.config = {};
+                }
+
+                opt.config = config;
+
+                opt.minLen = $.getParam(opt, 'minLength,minLen');
+                opt.maxLen = $.getParam(opt, 'maxLength,maxLen');
+                opt.valLen = $.getParam(opt, 'valueLength,valueLen,valLen');
+                opt.minVal = $.getParam(opt, 'minValue,minVal');
+                opt.maxVal = $.getParam(opt, 'maxValue,maxVal');
+
+                if (!$.isArray(opt.options)) {
+                    opt.options = [];
+                }
+
+                if (opt.config.append) {
+                    opt.options = $.input.getElementOptionConfig(elem).concat(opt.options);
+                } else if (opt.options.length <= 0) {
+                    //如果没有配置选项，则尝试从元素属性中获取
+                    opt.options = $.input.getElementOptionConfig(elem);
+                }
+
+                if ((!opt.patterns || opt.patterns.length <= 0) && $.isRegexp(opt.pattern)) {
+                    opt.patterns = [opt.pattern];
+                } else if ($.isRegexp(opt.patterns)) {
+                    opt.patterns = [opt.patterns];
+                }
+                if ((!opt.exceptions || opt.exceptions.length <= 0) && $.isRegexp(opt.exception)) {
+                    opt.exceptions = [opt.exception];
+                } else if ($.isRegexp(opt.exceptions)) {
+                    opt.exceptions = [opt.exceptions];
+                }
+
+                if ($.isString(opt.types, true)) {
+                    opt.types = opt.types.split(/[,\|]/);
+                }
+                if ((!$.isArray(opt.types) || opt.types.length <= 0) && $.isString(opt.type, true)) {
+                    opt.types = opt.type.split(/[,\|]/);
+                }
+
+                var types = $.isArray(opt.types) && opt.types.length > 0 ? opt.types : keyTypes,
+                    excepts = $.isArray(opt.excepts) && opt.excepts.length > 0 ? opt.excepts : [],
+                    ctls = [
+                        8,      // backspace
+                        9,      // tab
+                        27,     // esc
+                        13,     // enter
+                        108,    // enter
+                        37,     // left arrow
+                        38,     // up arrow
+                        39,     // right arrow
+                        40,     // down arrow
+                        46,     // delete
+                    ],
+                    // F1-F12功能键
+                    funs = [112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123],
+                    keys = ctls.concat(opt.codes || []).concat(funs),
+                    patterns = $.extend([], opt.patterns),
+                    exceptions = $.extend([], opt.exceptions),
+                    isNum = false,
+                    isOpt = false,
+                    isVal = false,
+                    isBool = false,
+                    isSelect = false,   //是否select控件元素
+                    //是否要限制内容输入，如果配置的限制类型不匹配，则不限制内容输入
+                    limit = 0,
+                    decimalLen = $.isNumber(opt.decimalLen) ? opt.decimalLen : 8;
+
+                keys = !opt.space ? keys : keys.concat([32]);
+                keys = !opt.minus ? keys : keys.concat([109, 189]); //109是小键盘中的减号-
+                keys = !opt.dot ? keys : keys.concat([110, 190]); //110是小键盘中的点号.
+
+                if (1 === types.length) {
+                    if (['options', 'option'].indexOf(types[0]) > -1 && !opt.config.readonly) {
+                        types.push('open');
+                    } else if (['boolean', 'bool'].indexOf(types[0]) > -1) {
+                        opt.config.readonly = $.isBoolean(par.config.readonly, true);
+                    }
+                }
+                
+                for (i = 0; i < types.length; i++) {
+                    var type = (types[i] || '').toLowerCase();
+                    if (keyTypes.indexOf(type) > -1) {
+                        limit++;
+                    }
+                    if (['options', 'option'].indexOf(type) > -1) {
+                        isOpt = true;
+                        continue;
+                    }
+                    if (['open', 'number', 'char_number', 'int', 'float', 'word', 'ipv4', 'ipv6', 'port', 'hex', 'md5', 'angle'].indexOf(type) > -1) {
+                        keys = keys.concat([48, 49, 50, 51, 52, 53, 54, 55, 56, 57]);       // 0-9键
+                        keys = keys.concat([96, 97, 98, 99, 100, 101, 102, 103, 104, 105]); // 0-9键（小键盘）
+                        if (['number', 'int', 'float', 'angle'].indexOf(type) > -1) {
+                            opt.shift = false;
+                            isNum = true;
+                        }
+                    }
+                    if (['open', 'control'].indexOf(type) > -1) {
+                        // ;: =+ ,< -_ .> /? `~
+                        keys = keys.concat([opt.space ? 32 : 0, 186, 187, 188, 189, 190, 191, 192]);
+                        // [{ \| ]} '"
+                        keys = keys.concat([219, 220, 221, 222]);
+                    }
+                    if (['open', 'symbol'].indexOf(type) > -1) {
+                        // * + - . / (小键盘)  * + - . / (主键盘)
+                        keys = keys.concat([106, 107, 109, 110, 111, 56, 187, 189, 190, 191]);
+                    }
+
+                    if (['open', 'char', 'char_number', 'word'].indexOf(type) > -1) {
+                        for (j = 65; j <= 90; j++) { keys.push(j); } // A-Z 键
+                    } else if (['hex', 'ipv6', 'md5'].indexOf(type) > -1) {
+                        for (j = 65; j <= 70; j++) { keys.push(j); } // A-F 键
+                    } else if (['boolean', 'bool'].indexOf(type) > -1) {   // 0, 1
+                        keys = keys.concat([48, 49]);
+                        if (opt.options.length <= 0) {
+                            opt.options = [{ val: 1, txt: '是' }, { val: 0, txt: '否' }];
+                        }
+                        isBool = true;
+                    } else if (type === 'int') {
+                        // - (小键盘) - (主键盘)
+                        //keys = keys.concat([109, 189]);
+                    } else if (type === 'float') {
+                        // - . (小键盘) - . (主键盘)
+                        //keys = keys.concat([109, 110, 189, 190]);
+                        // . (小键盘) . (主键盘)
+                        keys = keys.concat([110, 190]);
+                        patterns = patterns.concat([
+                            new RegExp('^(-?[1-9][0-9]{0,23}[.]?[0-9]{0,' + decimalLen + '}|-?[0]([.][0-9]{0,' + decimalLen + '})?)$'), 
+                            /^[0]?$/
+                        ]);
+                    } else if (type === 'angle') {
+                        if (opt.dot === null || opt.dot) {
+                            keys = keys.concat([110, 190]);
+                        }
+                        opt.maxVal = opt.maxVal || 360;
+                        patterns = patterns.concat([
+                            new RegExp('^360(\.[0]{0,' + decimalLen + '})?$|^([1-3][0-5][0-9]|[1-2][0-9]+|[0-9]{1,2})([.][0-9]{0,' + decimalLen + '})?$'), 
+                            /^[0]?$/
+                        ]);
+                    } else if (type === 'port') {
+                        patterns = patterns.concat([$.PATTERN.Port, /^[0]?$/]);
+                        opt.maxLen = 5;
+                    }
+                    //ipv4 ipv6
+                    if (type === 'ipv4') {
+                        keys = keys.concat([110, 190]);
+                        isVal = true;
+                        patterns = patterns.concat([$.PATTERN.Ip, /^[0]{0}$/]);
+                        //错误的IPv4输入格式
+                        exceptions = exceptions.concat([/(\.\.)+|^([\d]{1,3}\.){4,}$|([\d]{4,})|(25[6-9]|(0|[3-9])[\d]{2})/]);
+                        opt.maxLen = 15;
+                    } else if (type === 'ipv6') {
+                        keys = keys.concat([186]);
+                        isVal = true;
+                        opt.shift = true;
+                        patterns = patterns.concat([$.isIPv6, /^[0]{0}$/]);
+                        //错误的IPv6输入格式
+                        exceptions = exceptions.concat([/[^A-F0-9:]+|[:]{3,}|([\dA-F]{5,})|([\dA-F]{0,4}::|::[\dA-F]{0,4}){2,}|([\dA-F]{0,4}:[\dA-F]{0,4}){8,}/i]);
+                        opt.maxLen = 39;
+                    }
+                    if (type === 'word') {
+                        keys = keys.concat([189]);
+                        opt.shift = true;
+                    }
+                    if (type==='md5' && !opt.valLen) {
+                        opt.valLen = 32;
+                    }
+                }
+                opt.patterns = patterns;
+                opt.exceptions = exceptions;
+
+                for (i = 0; i < elems.length; i++) {
+                    if (!$.isElement(elem = $.toElement(elems[i])) || !limit) {
+                        continue;
+                    }
+                    isSelect = elem.tagName === 'SELECT';
+
+                    if (isOpt || isBool) {
+                        opt.options = $.input.setOptionValues(opt.options);
+
+                        function _showOption(ev, elem, opt, hide) {
+                            $.input.hideOptionPanel(elem.optbox);
+                            $.input.setOption(elem, opt.options, opt.config, hide);
+                        }
+                        function _haveOption(elem) {
+                            var id = $.getAttribute(elem, 'opt-id');
+                            return id && $I(id) !== null;
+                        }
+
+                        if (!isSelect) {
+                            if (opt.config.readonly) {
+                                $.setAttribute(elem, 'readonly', 'readonly');
+                                elem.style.cursor = 'default';
+                            } else {
+                                var str = $.input.getOptionValues(opt.options).join(',');
+                                if (str.length > 0 && elem.placeholder.indexOf(str) < 0) {
+                                    elem.placeholder += (elem.placeholder ? '  ' : '') + '\u53ef\u9009\u9879\uff1a' + str;   //可选项：
+                                }
+                            }
+                            
+                            //内容指定，当输入的内容与选项不匹配时，输入框锁定焦点
+                            $.addListener(elem, 'keyup,blur', function() {
+                                if(!$.input.checkFormat(elem, $.extend([], opt.options))) {
+                                    elem.focus();
+                                }
+                            });
+                            if (!$.isUndefinedOrNull(opt.value)) {
+                                elem.value = opt.value;
+                            }
+                        } else {
+                            elem.className += ' input-option-panel-select';
+                            elem.options.length = 0;
+                            if (opt.options.length > 0) {
+                                var p = opt.options[0];
+                                if (!$.isUndefinedOrNull(opt.value)) {
+                                    for (var j = 0; j < opt.options.length; j++) {
+                                        if (opt.options[j].val === opt.value) {
+                                            p = opt.options[j];
+                                            break;
+                                        }
+                                    }
+                                }
+                                var txt = opt.config.showValue && p.val !== p.txt ? p.val + ' - ' + p.txt : p.txt;
+                                elem.options.add(new Option(txt, p.val));
                             }
                         }
                         //这里为什么不用$.addListener？
-                        //因为这里需要阻止非法输入，而$.addListener不是独占式的             
+                        //因为这里需要阻止非法输入，而$.addListener不是独占式的
                         elem.onkeydown = function(ev) {
-                            if ($.checkInputKey(ev, ctls, excepts, opt) || $.checkInputKey(ev, funs, excepts, opt)) {
+                            var kc = $.getKeyCode(ev), ddl = this.tagName === 'SELECT', typed = $.getAttribute(this, 'typed', '0').toInt();
+                            if (kc.inArray([13, 108]) || ((ddl || keys.indexOf(32) < 0) && kc === 32)) {
+                                elem.focus();
+                                _showOption(ev, elem, opt);
+                                return false;
+                            }
+                            if ($.input.checkKey(ev, ctls, excepts, opt) || $.input.checkKey(ev, funs, excepts, opt)) {
+
+                                //9 - tab, 27 - esc
+                                if (kc.inArray([9, 27])) {
+                                    _showOption(ev, elem, opt, true);
+                                } else if (kc.inArray([37, 38, 39, 40]) && (ddl || opt.config.readonly || !typed)) {
+                                    $.cancelBubble(ev);
+                                    var idx = ($.getAttribute(elem, 'opt-idx') || '').toInt();
+                                    if (!_haveOption(elem)) {
+                                        _showOption(ev, elem, opt);
+                                        idx = -1;
+                                    }
+                                    $.input.selectOptionItem(kc.inArray([37, 38]) ? idx - 1 : idx + 1, elem, $.getAttribute(elem, 'opt-id'));
+                                }
+                                return true;
+                            }
+                            if (ddl) {
                                 return true;
                             }
                             //若只指定选项，而没有指定其他输入类型，则不限制输入键
-                            if ($.checkInputKey(ev, keys, excepts, opt) || types.length <= 1) {
+                            //当指定了输入类型(option除外)，则需要验证输入键值
+                            if ($.input.checkKey(ev, keys, excepts, opt) || types.length > 1) {
                                 if ($.getSelectedText(elem)) {
                                     return true;
                                 }
@@ -1894,149 +2019,126 @@
                                     val = pos <= 0 ? key + txt : txt.substr(0, pos) + key + txt.substr(pos);
 
                                 if (!isVal) {
-                                    if (!$.checkInputVal(val, types, opt, true, elem)) {
+                                    if (!$.input.checkVal(val, types, opt, true, elem)) {
                                         return false;
                                     }
                                 } else if (exceptions.length > 0) {
-                                    if ($.checkInputExcept(val, opt)) {
+                                    if ($.input.checkExcept(val, opt)) {
                                         return false;
                                     }
                                 }
-                                return !isVal || $.checkInputValLen(val, opt, false, true, elem);
+                                return !isVal || $.input.checkValLen(val, opt, false, true, elem);
                             }
-                            return false;
+                            return true;
                         };
-                        //内容指定，当输入的内容与选项不匹配时，输入框锁定焦点
-                        $.addListener(elem, 'keyup,blur', function() {
-                            if(!$.checkInputFormat(elem, $.extend([], opt.options))) {
-                                elem.focus();
-                            }
-                        });
-                        if (!$.isUndefinedOrNull(opt.value)) {
-                            elem.value = opt.value;
-                        }
-                    } else {
-                        elem.className += ' input-option-panel-select';
-                        elem.options.length = 0;
-                        if (opt.options.length > 0) {
-                            var p = opt.options[0];
-                            if (!$.isUndefinedOrNull(opt.value)) {
-                                for (var j = 0; j < opt.options.length; j++) {
-                                    if (opt.options[j].val === opt.value) {
-                                        p = opt.options[j];
-                                        break;
-                                    }
-                                }
-                            }
-                            var txt = opt.config.showValue && p.val !== p.txt ? p.val + ' - ' + p.txt : p.txt;
-                            elem.options.add(new Option(txt, p.val));
-                        }
-                    }
 
-                    function _showInputOption(ev, elem, opt) {
-                        $.cancelBubble(ev);
-                        var arr = document.querySelectorAll('.input-option-panel-box');
-                        //每次只显示当前选项框，隐藏其他的选项框
-                        for (var i = 0; i < arr.length; i++) {
-                            if (arr[i] !== elem.optbox && arr[i].style.display !== 'none') {
-                                arr[i].style.display = 'none';
-                            }
+                        if (!isSelect) {
+                            $.addListener(elem, 'keyup', function(ev) {
+                                var kc = $.getKeyCode(ev);
+                                if (kc.inArray([37, 38, 39, 40])) {
+                                    return true;
+                                }
+                                var val = elem.value.trim(), ps = $.input.getOptionValues(opt.options);
+                                $.setAttribute(elem, 'typed', val !== '' && ps.indexOf(val) < 0 ? 1 : 0);
+                                return true;
+                            });
                         }
-                        $.setInputOption(elem, opt.options, opt.config);
-                    }
-                    
-                    //选项模式，默认显示选项框，若不想显示选项，需设置 showOption:false
-                    if ($.isBoolean(opt.showOption, true)) {
-                        $.addListener(elem, 'mousedown', function(ev) {
-                            _showInputOption(ev, elem, opt);
-                            if (!isSelect && !opt.config.readonly) {
+
+                        //选项模式，默认显示选项框，若不想显示选项，需设置 showOption:false
+                        if ($.isBoolean(opt.showOption, true)) {
+                            $.addListener(elem, 'mousedown', function(ev) {
+                                $.cancelBubble(ev);
                                 elem.focus();
-                            }
-                            return true;
-                        });
-                    }
-                } else if (!isSelect) {
-                    //控制输入，当输入值不匹配时，输入框禁止输入
-                    elem.onkeydown = function(ev) {
-                        var kc = $.getKeyCode(ev), selected = $.getSelectedText(elem) ? true : false;
-                        if ($.checkInputKey(ev, ctls, excepts, opt) || $.checkInputKey(ev, funs, excepts, opt)) {
-                            return true;
+                                _showOption(ev, elem, opt);
+                                return false;
+                            });
                         }
-                        //Ctrl + A / C, Ctrl + V
-                        if ((ev.ctrlKey && (kc === 65 || kc === 67)) || (opt.paste && ev.ctrlKey && (kc === 86))) {
-                            return true;
-                        }
-                        if ($.checkInputKey(ev, keys, excepts, opt)) {
-                            if ($.getSelectedText(elem)) {
+                    } else if (!isSelect) {
+                        //控制输入，当输入值不匹配时，输入框禁止输入
+                        elem.onkeydown = function(ev) {
+                            var kc = $.getKeyCode(ev), selected = $.getSelectedText(elem) ? true : false;
+                            if ($.input.checkKey(ev, ctls, excepts, opt) || $.input.checkKey(ev, funs, excepts, opt)) {
                                 return true;
                             }
-                            var pos = $.getTextCursorPosition(elem),
-                                key = ev.key,
-                                txt = elem.value.trim(),
-                                val = pos <= 0 ? key + txt : txt.substr(0, pos) + key + txt.substr(pos);
+                            //Ctrl + A / C, Ctrl + V
+                            if ((ev.ctrlKey && (kc === 65 || kc === 67)) || (opt.paste && ev.ctrlKey && (kc === 86))) {
+                                return true;
+                            }
+                            if ($.input.checkKey(ev, keys, excepts, opt)) {
+                                if ($.getSelectedText(elem)) {
+                                    return true;
+                                }
+                                var pos = $.getTextCursorPosition(elem),
+                                    key = ev.key,
+                                    txt = elem.value.trim(),
+                                    val = pos <= 0 ? key + txt : txt.substr(0, pos) + key + txt.substr(pos);
 
-                            if (!isVal) {
-                                if (!$.checkInputVal(val, types, opt, true, elem)) {
-                                    return false;
+                                if (!isVal) {
+                                    if (!$.input.checkVal(val, types, opt, true, elem)) {
+                                        return false;
+                                    }
+                                } else if (exceptions.length > 0) {
+                                    if ($.input.checkExcept(val, opt)) {
+                                        return false;
+                                    }
                                 }
-                            } else if (exceptions.length > 0) {
-                                if ($.checkInputExcept(val, opt)) {
-                                    return false;
-                                }
+                                return !isVal || $.input.checkValLen(val, opt, false, true, elem);
                             }
-                            return !isVal || $.checkInputValLen(val, opt, false, true, elem);
-                        }
-                        return false;
-                    };
-                    $.addListener(elem, 'keyup', function() {
-                        var val = elem.value.trim();
-                        if (isVal) {
-                            if(!$.checkInputFormat(elem, patterns, true)) {
-                                return $.setInputWarnColor(elem, false, true);
-                            }
-                        } else if (isBool) {                            
-                            if (/^([0]{2,}|[1]{2,}|true|false)$/i.test(val)) {
-                                val = ('' + val).replace(/^(true|[1]{2,})$/i, 1).replace(/^(false|[0]{2,})$/i, 0);
-                                //value = /^true$/i.test(value) ? 1 : 0;
-                                element.val = val;
-                            }
-                        } else {
-                            if ((!isVal && !$.checkInputVal(val, types, opt, false, elem)) || !$.checkInputValLen(val, opt, false, false, elem)) {
-                                return $.setInputWarnColor(elem, false);
-                            }
-                        }
-                        return $.setInputWarnColor(elem, true);
-                    });
-                    $.addListener(elem, 'blur', function() {
-                        var v = elem.value.trim(), len = v.length;
-                        if (isNum && (v.endsWith('-') || v.endsWith('.'))) {
-                            return $.setInputWarnColor(elem, false, true);
-                        } else if (!$.checkInputVal(v, types, opt, false, elem)) {
-                            return $.setInputWarnColor(elem, false, true);
-                        } else if (isVal && (!$.checkInputFormat(elem, patterns, true) || $.checkInputExcept(v, opt))) {
-                            $.console.log('\u5185\u5bb9\u683c\u5f0f\u9519\u8bef', v);   //内容格式错误
-                            return $.setInputWarnColor(elem, false, true);
-                        }
-                        if (len > 0 && opt.minVal && parseFloat('0' + v, 10) < opt.minVal) {
-                            return $.setInputWarnColor(elem, false, true);
-                        }
-                        return $.setInputWarnColor(elem, true);
-                    });
-                    if (!opt.paste) {
-                        elem.onpaste = function() {
                             return false;
                         };
-                    } else {
-                        elem.onpaste = function() {
-                            //如果输入框的内容已经超出长度限制，则不能再粘贴内容
-                            if (!$.checkInputLen(this.value.trim(), opt, true, false, elem)) {
-                                return $.setInputWarnColor(elem, false);
+                        $.addListener(elem, 'keyup', function() {
+                            var val = elem.value.trim();
+                            if (isVal) {
+                                if(!$.input.checkFormat(elem, patterns, true)) {
+                                    return $.input.setWarnColor(elem, false, true);
+                                }
+                            } else if (isBool) {                            
+                                if (/^([0]{2,}|[1]{2,}|true|false)$/i.test(val)) {
+                                    val = ('' + val).replace(/^(true|[1]{2,})$/i, 1).replace(/^(false|[0]{2,})$/i, 0);
+                                    //value = /^true$/i.test(value) ? 1 : 0;
+                                    element.val = val;
+                                }
+                            } else {
+                                if ((!isVal && !$.input.checkVal(val, types, opt, false, elem)) || !$.input.checkValLen(val, opt, false, false, elem)) {
+                                    return $.input.setWarnColor(elem, false);
+                                }
                             }
-                        };
+                            return $.input.setWarnColor(elem, true);
+                        });
+                        $.addListener(elem, 'blur', function() {
+                            var v = elem.value.trim(), len = v.length;
+                            if (isNum && (v.endsWith('-') || v.endsWith('.'))) {
+                                return $.input.setWarnColor(elem, false, true);
+                            } else if (!$.input.checkVal(v, types, opt, false, elem)) {
+                                return $.input.setWarnColor(elem, false, true);
+                            } else if (isVal && (!$.input.checkFormat(elem, patterns, true) || $.input.checkExcept(v, opt))) {
+                                $.console.log('\u5185\u5bb9\u683c\u5f0f\u9519\u8bef', v);   //内容格式错误
+                                return $.input.setWarnColor(elem, false, true);
+                            }
+                            if (len > 0 && opt.minVal && parseFloat('0' + v, 10) < opt.minVal) {
+                                return $.input.setWarnColor(elem, false, true);
+                            }
+                            return $.input.setWarnColor(elem, true);
+                        });
+                        if (!opt.paste) {
+                            elem.onpaste = function() {
+                                return false;
+                            };
+                        } else {
+                            elem.onpaste = function() {
+                                //如果输入框的内容已经超出长度限制，则不能再粘贴内容
+                                if (!$.input.checkLen(this.value.trim(), opt, true, false, elem)) {
+                                    return $.input.setWarnColor(elem, false);
+                                }
+                            };
+                        }
                     }
                 }
+                return this;
             }
-            return this;
+        },
+        setInputFormat: function (elements, options) {
+            return $.input.setFormat(elements, options);
         }
     });
 }(OUI);
