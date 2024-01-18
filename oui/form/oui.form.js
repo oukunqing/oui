@@ -1540,6 +1540,7 @@
                     }
                     item = arr[num];
                     $.input.setCurrentOption(num, div);
+                    $.scrollTo(item, div);
                 }
                 var val = $.getAttribute(item, 'data-value'),
                     idx = $.getAttribute(item, 'opt-idx').toInt(),
@@ -1982,7 +1983,7 @@
                         //这里为什么不用$.addListener？
                         //因为这里需要阻止非法输入，而$.addListener不是独占式的
                         elem.onkeydown = function(ev) {
-                            var kc = $.getKeyCode(ev), ddl = this.tagName === 'SELECT', typed = $.getAttribute(this, 'typed', '0').toInt();
+                            var kc = $.getKeyCode(ev), ddl = this.tagName === 'SELECT', typed = $.getAttribute(this, 'opt-typed', '0').toInt();
                             if (kc.inArray([13, 108]) || ((ddl || keys.indexOf(32) < 0) && kc === 32)) {
                                 elem.focus();
                                 _showOption(ev, elem, opt);
@@ -2039,7 +2040,7 @@
                                     return true;
                                 }
                                 var val = elem.value.trim(), ps = $.input.getOptionValues(opt.options);
-                                $.setAttribute(elem, 'typed', val !== '' && ps.indexOf(val) < 0 ? 1 : 0);
+                                $.setAttribute(elem, 'opt-typed', val !== '' && ps.indexOf(val) < 0 ? 1 : 0);
                                 return true;
                             });
                         }

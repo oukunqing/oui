@@ -4444,14 +4444,14 @@
             }
             return scrollPos;
         },
-        scrollTo = function (elem) {
+        scrollTo = function (elem, pnode) {
             if ($.isString(elem, true)) {
                 elem = $.toElement(elem);
             }
             if (!$.isElement(elem)) {
                 return $;
             }
-            var parent = elem.parentNode,
+            var parent = $.isElement(pnode = $.toElement(pnode)) ? pnode : elem.parentNode,
                 offset = $.getOffset(elem),
                 offsetP = $.getOffset(parent),
                 posH = offset.top - offsetP.top;
