@@ -1322,8 +1322,9 @@
             var patterns = $.extend([], opt.patterns), pass = false;
             if (patterns && patterns.length > 0) {
                 for (var i = 0; i < patterns.length; i++) {
-                    //TODO:
-                    if ($.isRegexp(patterns[i]) && patterns[i].test(val)) {
+                    var p = patterns[i];
+                    //3种模式，1-正则验证，2-function(val)，3-字符串比较
+                    if (($.isRegexp(p) && p.test(val)) || ($.isFunction(p) && p(val)) || p.toString() === val) {
                         pass = true;
                         break;
                     }
@@ -1360,7 +1361,7 @@
                 }
             }
 
-            if (nc === ps.length) {
+            if (nc > 0 && nc === ps.length) {
                 return false;
             }
             return $.checkInputValLen(val, opt, false, keydown, elem);
@@ -1369,17 +1370,36 @@
             var exceptions = $.extend([], opt.exceptions), pass = false;
             for (var i = 0; i < exceptions.length; i++) {
                 var p = exceptions[i];
-                if ($.isRegexp(p)) {
-                    if (p.test(val)) {
-                        return true;
-                    }
-                } else if ($.isString(p) || $.isNumber(p)) {
-                    if (p.toString() === val) {
-                        return true;
-                    }
+                if (($.isRegexp(p) && p.test(val)) || ($.isFunction(p) && p(val)) || p.toString() === val) {
+                    return true;
                 }
             }
             return false;
+        },
+        getElementOptionConfig: function (elem) {
+            var options = [], arr = [], i;
+            if (!$.isElement(elem = $.toElement(elem))) {
+                return options;
+            }
+            if (elem.tagName === 'SELECT') {
+                arr = elem.options;
+                for (i = 0; i < arr.length; i++) {
+                    options.push({val: arr[i].value, txt: arr[i].text});
+                }
+            } else {
+                arr = ($.getAttribute(elem, 'options') || '').split(/[,;\|]/);
+                for (i = 0; i < arr.length; i++) {
+                    if (arr[i] !== '') {
+                        if (arr[i].indexOf(':') > 0) {
+                            var tmp = arr[i].split(':');
+                            options.push({val: tmp[0], txt: tmp[1] || tmp[0]});
+                        } else {
+                            options.push({val: arr[i], txt: arr[i]});
+                        }
+                    }
+                }
+            }
+            return options;
         },
         getOptionValues: function (opt) {
             var values = [];
@@ -1410,13 +1430,9 @@
                 return $.setInputWarnColor(elem, true);
             }
             for (var i = 0; i < vs.length; i++) {
-                /*
-                if (isPattern ? vs[i].test(val) : vs[i].toString().trim() === v) {
-                    return $.setInputWarnColor(elem, true);
-                }
-                */
                 if (isPattern) {
-                    if (vs[i].test(v)) {
+                    var p = vs[i];
+                    if (($.isRegexp(p) && p.test(v)) || ($.isFunction(p) && p(v)) || p.toString() === v) {
                         return $.setInputWarnColor(elem, true);
                     }
                 } else {
@@ -1631,8 +1647,9 @@
         // 需要设置输入格式的文本框，默认情况下是不允许空格和特殊字符的
         setInputFormat: function (elements, options) {
             var elems = [], elem, keyTypes = [
+                'open', //open 表示不限制输入，但需要验证选项等特殊格式
                 'char', 'number', 'char_number', 'word', 'int', 'long', 'float', 'double', 'bool', 'control', 'symbol', 
-                'option', 'ipv4', 'port', 'hex', 'md5', 'angle'
+                'option', 'ipv4', 'ipv6', 'port', 'hex', 'md5', 'angle'
             ];
             if ($.isArrayLike(elements) || $.isArray(elements)) {
                 elems = elements;
@@ -1642,10 +1659,11 @@
                 elems = elements.split(/[,;\|]/).length > 1 ? elements.split(/[,;\|]/) : [elements];
             }
 
-            if (!$.isArrayLike(elems) && !$.isArray(elems)) {
+            if ((!$.isArrayLike(elems) && !$.isArray(elems)) || !(elem = elems[0])) {
                 return this;
             }
-            var opt = $.extend({
+            var par = $.extend({}, options),
+                opt = $.extend({
                     shift: true,            //是否允许shift键
                     space: false,           //是否允许空格
                     paste: true,            //是否允许粘贴
@@ -1664,7 +1682,7 @@
                     options: [],            //内容选项
                     value: null,              //默认值
                     config: {}              //配置项
-                }, options),
+                }, par),
                 config = $.extend({
                     readonly: false,        //是否禁用输入(选项模式,只能选择不能输入)
                     showValue: false,       //是否显示值(默认只显示text不显示value)
@@ -1673,7 +1691,11 @@
                     maxHeight: 360,         //选项框最大显示高度
                     relative: false,        //相对位置(用于弹出层中的表单)，默认是绝对位置
                     zIndex: 0
-                }, options.config), i, j;
+                }, par.config), i, j;
+
+            if (!par.config || $.isObject(par.config)) {
+                par.config = {};
+            }
 
             opt.config = config;
 
@@ -1682,6 +1704,11 @@
             opt.valLen = $.getParam(opt, 'valueLength,valueLen,valLen');
             opt.minVal = $.getParam(opt, 'minValue,minVal');
             opt.maxVal = $.getParam(opt, 'maxValue,maxVal');
+
+            //如果没有配置选项，则尝试从元素属性中获取
+            if (!$.isArray(opt.options) || opt.options.length <= 0) {
+                opt.options = $.getElementOptionConfig(elem);
+            }
 
             if ((!opt.patterns || opt.patterns.length <= 0) && $.isRegexp(opt.pattern)) {
                 opt.patterns = [opt.pattern];
@@ -1731,40 +1758,53 @@
             keys = !opt.space ? keys : keys.concat([32]);
             keys = !opt.minus ? keys : keys.concat([109, 189]); //109是小键盘中的减号-
             keys = !opt.dot ? keys : keys.concat([110, 190]); //110是小键盘中的点号.
+
+            if (1 === types.length) {
+                if (['options', 'option'].indexOf(types[0]) > -1 && !opt.config.readonly) {
+                    types.push('open');
+                } else if (['boolean', 'bool'].indexOf(types[0]) > -1) {
+                    opt.config.readonly = $.isBoolean(par.config.readonly, true);
+                }
+            }
             
             for (i = 0; i < types.length; i++) {
                 var type = (types[i] || '').toLowerCase();
                 if (keyTypes.indexOf(type) > -1) {
                     limit++;
                 }
-                if (type === 'option' || type === 'options') {
+                if (['options', 'option'].indexOf(type) > -1) {
                     isOpt = true;
                     continue;
                 }
-                if (['number', 'char_number', 'int', 'float', 'word', 'ipv4', 'port', 'hex', 'md5', 'angle'].indexOf(type) > -1) {
+                if (['open', 'number', 'char_number', 'int', 'float', 'word', 'ipv4', 'ipv6', 'port', 'hex', 'md5', 'angle'].indexOf(type) > -1) {
                     keys = keys.concat([48, 49, 50, 51, 52, 53, 54, 55, 56, 57]);       // 0-9键
                     keys = keys.concat([96, 97, 98, 99, 100, 101, 102, 103, 104, 105]); // 0-9键（小键盘）
-                    opt.shift = false;
-                    isNum = true;
+                    if (['number', 'int', 'float', 'angle'].indexOf(type) > -1) {
+                        opt.shift = false;
+                        isNum = true;
+                    }
                 }
-                if (['char', 'char_number', 'word'].indexOf(type) > -1) {
+                if (['open', 'control'].indexOf(type) > -1) {
+                    // ;: =+ ,< -_ .> /? `~
+                    keys = keys.concat([opt.space ? 32 : 0, 186, 187, 188, 189, 190, 191, 192]);
+                    // [{ \| ]} '"
+                    keys = keys.concat([219, 220, 221, 222]);
+                }
+                if (['open', 'symbol'].indexOf(type) > -1) {
+                    // * + - . / (小键盘)  * + - . / (主键盘)
+                    keys = keys.concat([106, 107, 109, 110, 111, 56, 187, 189, 190, 191]);
+                }
+
+                if (['open', 'char', 'char_number', 'word'].indexOf(type) > -1) {
                     for (j = 65; j <= 90; j++) { keys.push(j); } // A-Z 键
-                } else if (['hex', 'md5'].indexOf(type) > -1) {
+                } else if (['hex', 'ipv6', 'md5'].indexOf(type) > -1) {
                     for (j = 65; j <= 70; j++) { keys.push(j); } // A-F 键
-                } else if (type === 'bool') {   // 0, 1
+                } else if (['boolean', 'bool'].indexOf(type) > -1) {   // 0, 1
                     keys = keys.concat([48, 49]);
                     if (opt.options.length <= 0) {
                         opt.options = [{ val: 1, txt: '是' }, { val: 0, txt: '否' }];
                     }
                     isBool = true;
-                } else if (type === 'control') {
-                    // ;: =+ ,< -_ .> /? `~
-                    keys = keys.concat([opt.space ? 32 : 0, 186, 187, 188, 189, 190, 191, 192]);
-                    // [{ \| ]} '"
-                    keys = keys.concat([219, 220, 221, 222]);
-                } else if (type === 'symbol') {
-                    // * + - . / (小键盘)  * + - . / (主键盘)
-                    keys = keys.concat([106, 107, 109, 110, 111, 56, 187, 189, 190, 191]);
                 } else if (type === 'int') {
                     // - (小键盘) - (主键盘)
                     //keys = keys.concat([109, 189]);
@@ -1790,13 +1830,22 @@
                     patterns = patterns.concat([$.PATTERN.Port, /^[0]?$/]);
                     opt.maxLen = 5;
                 }
+                //ipv4 ipv6
                 if (type === 'ipv4') {
                     keys = keys.concat([110, 190]);
                     isVal = true;
                     patterns = patterns.concat([$.PATTERN.Ip, /^[0]{0}$/]);
                     //错误的IPv4输入格式
-                    exceptions = exceptions.concat([/(\.\.)+|([\d]{1,3}\.){4,}|([\d]{4,})|(25[6-9]|(0|[3-9])[\d]{2})/]);
+                    exceptions = exceptions.concat([/(\.\.)+|^([\d]{1,3}\.){4,}$|([\d]{4,})|(25[6-9]|(0|[3-9])[\d]{2})/]);
                     opt.maxLen = 15;
+                } else if (type === 'ipv6') {
+                    keys = keys.concat([186]);
+                    isVal = true;
+                    opt.shift = true;
+                    patterns = patterns.concat([$.isIPv6, /^[0]{0}$/]);
+                    //错误的IPv6输入格式
+                    exceptions = exceptions.concat([/[^A-F0-9:]+|[:]{3,}|([\dA-F]{5,})|([\dA-F]{0,4}::|::[\dA-F]{0,4}){2,}|([\dA-F]{0,4}:[\dA-F]{0,4}){8,}/i]);
+                    opt.maxLen = 39;
                 }
                 if (type === 'word') {
                     keys = keys.concat([189]);
@@ -1825,7 +1874,7 @@
                         } else {
                             var str = $.getOptionValues(opt.options).join(',');
                             if (str.length > 0 && elem.placeholder.indexOf(str) < 0) {
-                                elem.placeholder += '\u53ef\u9009\u9879\uff1a' + str;   //可选项：
+                                elem.placeholder += (elem.placeholder ? '  ' : '') + '\u53ef\u9009\u9879\uff1a' + str;   //可选项：
                             }
                         }
                         //这里为什么不用$.addListener？
@@ -1900,6 +1949,9 @@
                     if ($.isBoolean(opt.showOption, true)) {
                         $.addListener(elem, 'mousedown', function(ev) {
                             _showInputOption(ev, elem, opt);
+                            if (!isSelect && !opt.config.readonly) {
+                                elem.focus();
+                            }
                             return true;
                         });
                     }
@@ -1961,7 +2013,7 @@
                             return $.setInputWarnColor(elem, false, true);
                         } else if (!$.checkInputVal(v, types, opt, false, elem)) {
                             return $.setInputWarnColor(elem, false, true);
-                        } else if (isVal && !$.checkInputFormat(elem, patterns, true)) {
+                        } else if (isVal && (!$.checkInputFormat(elem, patterns, true) || $.checkInputExcept(v, opt))) {
                             $.console.log('\u5185\u5bb9\u683c\u5f0f\u9519\u8bef', v);   //内容格式错误
                             return $.setInputWarnColor(elem, false, true);
                         }

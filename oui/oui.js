@@ -151,8 +151,11 @@
             Time: /^(20|21|22|23|[0-1]?\d):[0-5]?\d(:[0-5]?\d)?$/,
             //日期时间格式（可以不包含时间，时间可以省略“:秒”）
             DateTime: /^(19|20|21)[\d]{2}[\-\/](0?[1-9]|1[0-2])[\-\/](0?[1-9]|[12][0-9]|3[0-1])(\s+(20|21|22|23|[0-1]?\d):[0-5]?\d(:[0-5]?\d)?)?$/,
-            //IPV4
+            //IPv4
             Ip: /^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$/,
+            IPv4: /^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$/,
+            //IPv6
+            IPv6: /^((::)|(::[0-9A-F]{1,4})|([0-9A-F]{1,4}::)|[0-9A-F]{1,4}(:[0-9A-F]{1,4}){7})$/i,
             //Port  0 - 65535
             Port: /^([1-6][0-5]([0-5][0-3][0-5]|[0-4][0-9]{2})|[1-5]([\d]{1,4})?|[1-9]([\d]{1,3})?|[0])$/,
             //带参数的URL格式字符串
@@ -246,7 +249,7 @@
             return $.PATTERN.Ip.test(ip);
         },
         isIPv6 = function (ip) {
-            if(/^((::)|(::[0-9A-F]{1,4})|([0-9A-F]{1,4}::)|[0-9A-F]{1,4}(:[0-9A-F]{1,4}){7})$/i.test(ip)) {
+            if($.PATTERN.IPv6.test(ip)) {
                 return true;
             }
             var mc;
@@ -1749,6 +1752,9 @@
         in: function (obj) {
             return this.contains(obj);
         },
+        inArray: function (strArray) {
+            return $.isArray(strArray) ? strArray.indexOf(this) > -1 : false;
+        },
         replaceAll: function (pattern, v) {
             return this.replace($.isRegexp(pattern) ? pattern : new RegExp(pattern, 'gm'), v);
         },
@@ -2587,6 +2593,9 @@
         },
         set: function (min, max) {
             return this.setNumber(min, max);
+        },
+        inArray: function (numArray) {
+            return $.isArray(numArray) ? numArray.indexOf(this) > -1 : false;
         }
     }, 'Number.prototype');
 

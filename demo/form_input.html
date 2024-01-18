@@ -76,7 +76,11 @@ button {width:120px;height:28px;}
             </tr>
             <tr>
                 <td></td>
-                <td><input type="text" id="fmt_ipv4" placeholder="只能输入IPV4地址" /></td>
+                <td><input type="text" id="fmt_ipv4" placeholder="只能输入IPv4地址" /></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><input type="text" id="fmt_ipv6" placeholder="只能输入IPv6地址" /></td>
             </tr>
             <tr>
                 <td></td>
@@ -84,7 +88,11 @@ button {width:120px;height:28px;}
             </tr>
             <tr>
                 <td></td>
-                <td><input type="text" id="fmt_option" /></td>
+                <td><input type="text" id="fmt_option" placeholder="选择或输入" /></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><input type="text" id="fmt_option1" options="abc:abc123,acc,asd" placeholder="选择或输入" /></td>
             </tr>
             <tr>
                 <td></td>
@@ -92,7 +100,13 @@ button {width:120px;height:28px;}
             </tr>
             <tr>
                 <td></td>
-                <td><select id="select1" onchange="console.log('select change:', this.value);"></select></td>
+                <td>
+                    <select id="select1" onchange="console.log('select change:', this.value);">
+                        <option value="10001">第1项</option>
+                        <option value="10002">第2项</option>
+                        <option value="10003">第3项</option>
+                    </select>
+                </td>
             </tr>
         </table>
     </div>
@@ -109,7 +123,7 @@ button {width:120px;height:28px;}
     //没有引用jquery.js
     window.onload = function() {
 		$.addKeyListener(document, 'keyup',  function(e, n) {
-			//console.log('e:', e.keyCode, n, e);
+			console.log('e:', e.keyCode, n, e);
 		}, false);
         
         $.setInputFormat('txtMobile', {
@@ -194,19 +208,29 @@ button {width:120px;height:28px;}
             types: ['bool'],
             options: [{val:1, txt:'启用'},{val:0, txt:'禁用'}],
             value: 0,
-            config: { readonly: true, showValue: true }
+            config: { 
+                //bool型 默认readonly:true
+                readonly: false, 
+                showValue: true 
+            }
         });
         $.setInputFormat('fmt_ipv4', {
             types: ['ipv4']
+        });
+        $.setInputFormat('fmt_ipv6', {
+            types: ['ipv6']
         });
         $.setInputFormat('fmt_port', {
             types: ['port']
         });        
         $.setInputFormat('fmt_option', {
             types: ['option'],
-            options: ['abc', 'acc', 'asd', '123', '456'],
+            options: ['abc', 'acc', 'asd', '123', '456', '789'],
             //showOption: false,
-            maxLen: 3
+            maxLen: 3,
+        }); 
+        $.setInputFormat('fmt_option1', {
+            types: ['option']
         }); 
         $.setInputFormat('fmt_option2', {
             types: ['option', 'word'],
@@ -246,12 +270,12 @@ button {width:120px;height:28px;}
             '<div>',
             '文本框选项：<input type="text" id="txtDialogOpt1" style="width:360px;" />',
             '<br /><br />',
-            '下拉框选项：<select id="ddlDialogOpt2" style="width:360px;"></select>',
+            '下拉框选项：<select id="ddlDialogOpt2" style="width:372px;"></select>',
             '</div>'
         ];
         window.dialogForm123 = $.dialog.win(html.join(''), '相对位置演示', {
-            lock: false,
-            height: 300,
+            //lock: false,
+            height: 400,
             closeType: 'hide'
         });
 
@@ -263,7 +287,7 @@ button {width:120px;height:28px;}
             config: { 
                 showNumber: true, 
                 showValue: true,
-                readonly: true,
+                //readonly: true,
                 relative: true,
                 //选项框最大显示高度，默认为360px
                 maxHeight: 240

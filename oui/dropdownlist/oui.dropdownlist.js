@@ -346,8 +346,6 @@
                 that.text = elem;
                 that.elem = opt.element;
 
-                that.elem.className += ' oui-ddl-txt';
-
                 opt.title = opt.title || (that.elem.options.length > 0 ? that.elem.options[0].text : '') || texts[0];
 
             } else {
@@ -373,13 +371,11 @@
             if (opt.form || opt.anchor) {
                 that.elem.style.cssText = (that.elem.style.cssText || '') + Config.CssHidden;
             } else {
-                      that.elem.style.display = 'none';
+                that.elem.style.display = 'none';
             }
-            $.addListener(that.text, 'mousedown', function (ev) {
-                $.cancelBubble(ev);
+            $.addListener(that.text, 'mousedown', function () {
                 that.show(this);
                 Factory.closeOther(that);
-                return false;
             });
 
             if (opt.layout === Config.Layout.Grid && opt.itemWidth === '') {
