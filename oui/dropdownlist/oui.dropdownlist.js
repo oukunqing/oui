@@ -292,6 +292,8 @@
             showButton: false,
             //非列表布局时，是否显示选项边框
             itemBorder: false,
+            //是否允许扩展选项（可以自行输入不存在的选项值）
+            editable: false,
             //是否单选，条件等级优先于multi
             single: false,
             //是否多选
