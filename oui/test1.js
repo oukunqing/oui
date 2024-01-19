@@ -1651,3 +1651,7 @@ console.log(/[^A-F0-9:]+|[:]{3,}|([\dA-F]{5,})|([\dA-F]{0,4}::|::[\dA-F]{0,4}){2
 console.log(/[^A-F0-9:]+|[:]{3,}|([\dA-F]{5,})|([\dA-F]{0,4}::|::[\dA-F]{0,4}){2,}|([\dA-F:]{0,4}:[\dA-F]{0,4}){8,}/i.test('1234:1234:1234:1234:1234:1234:1324:1324'));
 
 console.log(/[^A-F0-9:]/.test('123:13:00)213:00'));
+
+
+                var ks = [['append'], ['editable'],['relative'],['number']];
+                console.log('ks:', ks.length);

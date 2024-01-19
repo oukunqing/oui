@@ -240,8 +240,9 @@ button {width:120px;height:28px;}
             maxLen: 3,
         }); 
         $.setInputFormat('fmt_option1', {
-            types: ['option'],
+            types: ['option', 'char'],
             maxLen: 4,
+            config: { editable: true }
         }); 
         $.setInputFormat('fmt_option2', {
             types: ['option', 'word'],
@@ -273,7 +274,7 @@ button {width:120px;height:28px;}
         $.setInputFormat('select2', {
             types: ['option', 'word'],
             options: [{val:456,txt:'456456'}, {val:'ABC123',txt:'输入选项ABC123'}, 'hello', 'world', 'abcdefg', 'helloworld'],
-            value: 456,
+            value: 'ABC123',
             //showValue: 同时显示值value和文本text，如果value===text则只显示text
             config: { 
                 append: true,

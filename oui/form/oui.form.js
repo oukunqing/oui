@@ -1425,7 +1425,7 @@
                 }
                 return values;
             },
-            checkFormat: function (elem, options, isPattern) {
+            checkFormat: function (elem, options, isPattern, editable) {
                 var v = elem.value.trim(), vs = $.extend([], options);
                 if ('' === v || vs.length <= 0) {
                     return $.input.setWarnColor(elem, true);
@@ -1438,7 +1438,7 @@
                         }
                     } else {
                         var val = $.isObject(vs[i]) ? $.getParam(vs[i], 'value,val,v') : $.isArray(vs[i]) ? vs[i][0] : vs[i];
-                        if (val.toString().trim() === v) {
+                        if (editable || val.toString().trim() === v) {
                             return $.input.setWarnColor(elem, true);
                         }
                     }
@@ -1629,11 +1629,11 @@
                 div.id = 'input-option-panel-' + (elem.id || new Date().getTime());
 
                 div.style.cssText = [
-                    'max-height:' + (parseInt('0' + cfg.maxHeight, 10) || 360) + 'px;',
+                    'max-height:' + (parseInt('0' + cfg.height, 10) || cfg.MAX_HEIGHT) + 'px;',
                     'top:' + top + 'px;',
                     'left:' + (es.left) + 'px;',
                     'width:' + (es.width - 2) + 'px;',
-                    cfg.relative ? '' : 'z-index:' + (cfg.zIndex || cfg.zindex || 99999999) + ';'
+                    cfg.relative ? '' : 'z-index:' + (cfg.zindex || cfg.ZINDEX) + ';'
                 ].join(';');
 
                 for (var i = 0; i < len; i++) {
@@ -1651,10 +1651,10 @@
                         }
                         html.push([
                             '<li class="input-option-panel-item', cur ? ' cur' : '', '"',
-                            ' style="padding:', (cfg.showNumber ? '0 5px 0 0' : '0 5px'), ';"',
+                            ' style="padding:', (cfg.number ? '0 5px 0 0' : '0 5px'), ';"',
                             ' opt-idx="', i, '" data-value="', val.toString().replace(/["]/g, '&quot;'), '">',
                             '<a href="javascript:void(0);">', 
-                            cfg.showNumber ? ('<i style="width:' + (n * 12) + 'px;">' + idx + '</i>') : '',
+                            cfg.number ? ('<i style="width:' + (n * 12) + 'px;">' + idx + '</i>') : '',
                             '<span>', txt, '</span>',
                             '</a>',
                             '</li>'
@@ -1718,7 +1718,7 @@
                     elems = elements.split(/[,;\|]/).length > 1 ? elements.split(/[,;\|]/) : [elements];
                 }
 
-                if ((!$.isArrayLike(elems) && !$.isArray(elems)) || !(elem = elems[0])) {
+                if ((!$.isArrayLike(elems) && !$.isArray(elems)) || !(elem = $.toElement(elems[0]))) {
                     return this;
                 }
                 var par = $.extend({}, options),
@@ -1742,22 +1742,40 @@
                         value: null,            //默认值
                         config: {}              //配置项，用于options选项框
                     }, par),
-                    config = $.extend({
-                        append: false,          //是否追加选项，true-表示options参数 + element属性options
+                    MAX_HEIGHT = 360,
+                    ZINDEX = 99999999,
+                    cfg = $.extend({
+                        append: null,           //是否追加选项，true-表示options参数 + element属性options
+                        editable: null,         //选项是否可编辑，true-表示可以自由扩展选项
+                        relative: null,         //相对位置(用于弹出层中的表单)，默认是绝对位置
+                        number: null,           //是否显示序号(行号)
                         readonly: false,        //是否禁用输入(选项模式,只能选择不能输入)
                         showValue: false,       //是否显示值(默认只显示text不显示value)
-                        showNumber: false,      //是否显示序号(行号)
                         topPriority: false,     //是否优先显示在顶部
-                        maxHeight: 360,         //选项框最大显示高度
-                        relative: false,        //相对位置(用于弹出层中的表单)，默认是绝对位置
-                        zIndex: 0
+                        height: MAX_HEIGHT,     //选项框最大显示高度
+                        zindex: 0               //选项框层级
                     }, par.config), i, j;
 
-                if (!par.config || $.isObject(par.config)) {
-                    par.config = {};
+                $.extend(cfg, {
+                    MAX_HEIGHT: MAX_HEIGHT,
+                    ZINDEX: ZINDEX
+                });
+
+                //获取默认参数值，如果没有明确配置参数值，则从element属性中获取
+                var ks = [['append'], ['editable'],['relative'],['number']];
+                for (var k = 0 ; k < ks.length; k++) {
+                    if (!$.isBoolean(cfg[ks[k][0]])) {
+                        cfg[ks[k][0]] = $.getAttribute(elem, 'opt-' + (ks[k][1] || ks[k][0]), 'false').inArray(['true', '1']);
+                    }
+                }
+                var ns = [['height', 'maxHeight,height'],['zindex', 'zindex,zIndex']];
+                for (var n = 0; n < ns.length; n++) {
+                    if (!(cfg[ns[n][0]] = $.getParam(cfg, ns[n][1], 0))) {
+                        cfg[ns[n][0]] = $.getAttribute(elem, 'opt-' + ns[n][0], 0);
+                    }
                 }
 
-                opt.config = config;
+                opt.config = cfg;
 
                 opt.minLen = $.getParam(opt, 'minLength,minLen');
                 opt.maxLen = $.getParam(opt, 'maxLength,maxLen');
@@ -1767,6 +1785,10 @@
 
                 if (!$.isArray(opt.options)) {
                     opt.options = [];
+                }
+
+                if ($.isDebug()) {
+                    $.console.log('$.input.setFormat:', elem.id, elem, opt);
                 }
 
                 if (opt.config.append) {
@@ -1956,7 +1978,7 @@
                             
                             //内容指定，当输入的内容与选项不匹配时，输入框锁定焦点
                             $.addListener(elem, 'keyup,blur', function() {
-                                if(!$.input.checkFormat(elem, $.extend([], opt.options))) {
+                                if(!$.input.checkFormat(elem, $.extend([], opt.options), false, opt.config.editable)) {
                                     elem.focus();
                                 }
                             });
@@ -2090,7 +2112,7 @@
                         $.addListener(elem, 'keyup', function() {
                             var val = elem.value.trim();
                             if (isVal) {
-                                if(!$.input.checkFormat(elem, patterns, true)) {
+                                if(!$.input.checkFormat(elem, patterns, true, opt.config.editable)) {
                                     return $.input.setWarnColor(elem, false, true);
                                 }
                             } else if (isBool) {                            
@@ -2112,7 +2134,7 @@
                                 return $.input.setWarnColor(elem, false, true);
                             } else if (!$.input.checkVal(v, types, opt, false, elem)) {
                                 return $.input.setWarnColor(elem, false, true);
-                            } else if (isVal && (!$.input.checkFormat(elem, patterns, true) || $.input.checkExcept(v, opt))) {
+                            } else if (isVal && (!$.input.checkFormat(elem, patterns, true, opt.config.editable) || $.input.checkExcept(v, opt))) {
                                 $.console.log('\u5185\u5bb9\u683c\u5f0f\u9519\u8bef', v);   //内容格式错误
                                 return $.input.setWarnColor(elem, false, true);
                             }
