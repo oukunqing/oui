@@ -4,10 +4,10 @@
     <title>表单输入内容限制示例</title>
 <style type="text/css">
 body {font-size:14px;}
-input {width: 600px; height: 28px; font-size:14px; border:solid 1px #000; margin:0; padding: 0 5px; border-radius:3px; outline: none;}
-input:focus{border:solid 1px #00f;}
-select{width: 612px; height:30px;border:solid 1px #000;margin:0; padding: 0 5px;border-radius:3px;}
-select:focus{border:solid 1px #00f;}
+input {width:240px; height: 28px; font-size:14px; border:solid 1px #000; margin:0; padding: 0 5px; border-radius:3px;}
+/*input:focus{border:solid 1px #00f;}*/
+select{width:252px; height:30px;border:solid 1px #000;margin:0; padding: 0 5px;border-radius:3px;}
+/*select:focus{border:solid 1px #00f;}*/
 button {width:120px;height:28px;}
 </style>
 </head>
@@ -260,20 +260,21 @@ button {width:120px;height:28px;}
 
         $.setInputFormat('select1', {
             types: ['option', 'word'],
-            options: [{val:'',txt:'请选择'},'abc', 'acc', 'asd', '123', {val:456,txt:'456456'}, {val:'ABC123',txt:'输入选项ABC123'}, 'hello', 'world', 'abcdefg', 'helloworld'],
+            options: [{val:'',txt:'请选择'},'abc', 'acc', 'asd', '123', {val:456,txt:'456456'}, {val:'ABC123',txt:'输入选项ABC123ABC123'}, 'hello', 'world', 'abcdefg', 'helloworld'],
             value: 456,
             //showValue: 同时显示值value和文本text，如果value===text则只显示text
             config: { 
                 showNumber: true, 
                 showValue: true,
                 //选项框最大显示高度，默认为360px
-                //maxHeight: 400
+                //maxHeight: 400,
+                maxWidth: 240
             }
         });
 
         $.setInputFormat('select2', {
             types: ['option', 'word'],
-            options: [{val:456,txt:'456456'}, {val:'ABC123',txt:'输入选项ABC123'}, 'hello', 'world', 'abcdefg', 'helloworld'],
+            options: [{val:456,txt:'456456'}, {val:'ABC123',txt:'输入选项ABC123ABC123'}, 'hello', 'world', 'abcdefg', 'helloworld'],
             value: 'ABC123',
             //showValue: 同时显示值value和文本text，如果value===text则只显示text
             config: { 
@@ -281,7 +282,9 @@ button {width:120px;height:28px;}
                 showNumber: true, 
                 showValue: true,
                 //选项框最大显示高度，默认为360px
-                //maxHeight: 400
+                //maxHeight: 400,
+                maxWidth: 200,
+                width: 190
             }
         });
 

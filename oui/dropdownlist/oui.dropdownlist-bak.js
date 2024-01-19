@@ -105,10 +105,8 @@
                 opt.itemBorder = $.getParam(opt, 'itemBorder,border');
                 opt.element = $.toElement(opt.element || opt.elem);
 
-                if ($.isBoolean(opt.single)) {
-                    opt.multi = !opt.single;
-                } else {
-                    opt.multi = $.isBoolean(opt.multi, false);
+                if (opt.single) {
+                    opt.multi = false;
                 }
                 opt.callbackLevel = $.getParam(opt, 'submit,callbackLevel');
                 if (!$.isNumber(opt.callbackLevel)) {
@@ -263,8 +261,6 @@
             name: '',
             title: '',
             element: '',
-            //是否下拉框： true - 下拉框， false - 文本框
-            select: true,
             //自定义样式名
             className: '',
             //输入框自定义样式
@@ -295,10 +291,12 @@
             //当没有“全选/反选”按钮时是否显示“确定”按钮
             showButton: false,
             //非列表布局时，是否显示选项边框
-            itemBorder: false,            
+            itemBorder: false,
             //是否允许扩展选项（可以自行输入不存在的选项值）
             editable: false,
-            //是否多选，默认多选
+            //是否单选，条件等级优先于multi
+            single: false,
+            //是否多选
             multi: true,
             //是否允许空值（单选模式）
             allowEmpty: '',
@@ -333,124 +331,71 @@
             var that = this,
                 opt = that.options,
                 elem = opt.element,
-                offset = $.getOffset(opt.element),
                 //texts = ['-请选择-', '请选择'],
                 texts = ['\u002d\u8bf7\u9009\u62e9\u002d', '\u8bf7\u9009\u62e9'];
 
-            $.console.log(elem.id, $.getElementStyle(elem, 'width'));
-
             if (opt.element.tagName === 'SELECT') {
+                var offset = $.getOffset(opt.element);
+                elem = document.createElement('INPUT');
+                elem.className = 'form-control oui-ddl-txt' + (opt.className ? ' ' + opt.className : '');
+                $.setAttribute(elem, 'readonly', 'readonly');
+                elem.style.cssText = [
+                    'background-color:#fff;padding: 0 20px 0 9px;',
+                    opt.textWidth === 'auto' ? '' : 'width:' + Factory.getStyleSize(opt.textWidth || offset.width) + ';',
+                    opt.style ? opt.style + ';' : ''
+                ].join('');
+                opt.element.parentNode.insertBefore(elem, opt.element);
+                that.text = elem;
                 that.elem = opt.element;
-                $.console.log('offset:', offset, opt.textWidth);
-                if (!opt.select) {
-                    var txt = document.createElement('INPUT');
-                    txt.className = 'form-control oui-ddl-txt' + (opt.className ? ' ' + opt.className : '');
-                    $.setAttribute(txt, 'readonly', 'readonly');
-                    txt.style.cssText = [
-                        'background-color:#fff;padding: 0 20px 0 9px;',
-                        opt.textWidth === 'auto' ? '' : 'width:' + Factory.getStyleSize(opt.textWidth || offset.width) + ';',
-                        opt.style ? opt.style + ';' : ''
-                    ].join('');
-                    opt.element.parentNode.insertBefore(txt, opt.element);
-                    that.text = elem = txt;
-                    that.elem.style.display = 'none';
-                } else {
-                    that.text = null;
-                    elem = that.elem;
-                    if (opt.textWidth !== 'auto') {
-                        elem.style.width = Factory.getStyleSize(opt.textWidth || offset.width);
-                    }
-                }
-                elem.className = elem.className.addClass('oui-ddl');
+
                 opt.title = opt.title || (that.elem.options.length > 0 ? that.elem.options[0].text : '') || texts[0];
+
             } else {
                 that.text = opt.element;
-                that.text.className = that.text.className.addClass('oui-ddl oui-ddl-txt').addClass(opt.className);
+                that.text.className += ' oui-ddl-txt' + (opt.className ? ' ' + opt.className : '');
                 $.setAttribute(that.text, 'readonly', 'readonly');
                 that.text.style.cssText = (that.text.style.cssText || '') + [
                     'background-color:#fff;padding: 0 20px 0 9px;',
-                    opt.style ? opt.style + ';' : '',
-                    opt.textWidth === 'auto' ? '' : 'width:' + Factory.getStyleSize(opt.textWidth || offset.width) + ';',
+                    opt.style ? opt.style + ';' : ''
                 ].join('');
-                var ddl = document.createElement('SELECT');
-                ddl.className = 'oui-ddl';
-                if (opt.textWidth !== 'auto') {
-                    ddl.style.width = Factory.getStyleSize(opt.textWidth || offset.width);
-                }
-                opt.element.parentNode.insertBefore(ddl, opt.element);
-                that.elem = ddl;
+                elem = document.createElement('SELECT');
+                opt.element.parentNode.insertBefore(elem, opt.element);
+                that.elem = elem;
 
-                if (opt.select) {
-                    that.text.style.display = 'none';
-                    elem = that.elem;
-                } else {
-                    that.elem.style.display = 'none';
-                    elem = that.text;
-                }                
                 opt.title = opt.title || that.text.value || texts[0];
             }
-
-            if (opt.select) {
-                that.elem.options.length = 0;
-                that.elem.options.add(new Option(opt.title || 'abcde', 'abc'));
-            } else {
-                that.text.value = opt.title || '';
-                if (opt.form || opt.anchor) {
-                    that.elem.style.cssText = (that.elem.style.cssText || '') + Config.CssHidden;
-                }
-            }
+            that.text.value = opt.title || '';
 
             if (!opt.name) {
                 opt.name = opt.title.replace(texts[0], '').replace(texts[1], '');
             }
 
-            $.addListener(elem, 'mousedown', function (ev) {
-                $.cancelBubble(ev);
+            if (opt.form || opt.anchor) {
+                that.elem.style.cssText = (that.elem.style.cssText || '') + Config.CssHidden;
+            } else {
+                that.elem.style.display = 'none';
+            }
+            $.addListener(that.text, 'mousedown', function () {
                 that.show(this);
-                this.focus();
                 Factory.closeOther(that);
-                return true;
-            });
-            $.addListener(elem, 'keydown', function (ev) {
-                var kc = $.getKeyCode(ev),
-                    div = $I($.getAttribute(elem, 'opt-id'));
-
-                if (kc.inArray([13, 32, 108])) {
-                    this.focus();
-                    $.cancelBubble(ev);
-                    that.show(this);
-                } else if (kc.inArray([9, 27])) {
-                    if(div !== null && div.style.display !== 'none') {
-                        $.cancelBubble(ev);
-                    }
-                    that.hide();
-                } else if (kc.inArray([37, 38, 39, 40])) {
-                    $.cancelBubble(ev);
-                    var idx = ($.getAttribute(elem, 'opt-idx') || '').toInt();
-                    idx = kc.inArray([37, 38]) ? idx - 1 : idx + 1;
-                    that.select(idx);
-                }
-                return false;
             });
 
             if (opt.layout === Config.Layout.Grid && opt.itemWidth === '') {
                 opt.itemWidth = 'auto';
             }
 
-            return that.build(elem);
+            return that.build();
         },
-        build: function (elem) {
+        build: function () {
             var that = this,
                 opt = that.options;
 
             $.createElement('DIV', function (box) {
-                var offset = $.getOffset(opt.select ? that.elem : that.text),
+                var offset = $.getOffset(that.text),
                     ua = navigator.userAgent,
                     edge = ua.indexOf('Edg/') > 0 || ua.indexOf('Edge') > 0,
                     boxWidth = opt.boxWidth === 'follow' ? offset.width : opt.boxWidth,
                     width = parseInt(boxWidth, 10);
-
-                $.console.log('elem:', elem);
 
                 if (!isNaN(width) && width > opt.maxWidth) {
                     opt.maxWidth = width;
@@ -475,10 +420,6 @@
                     ac = opt.callbackLevel ? 'ok' : 'no',
                     //texts = ['取消', '全选', '反选', opt.restore ? '还原' : '默认', '确定'],
                     texts = ['\u53d6\u6d88', '\u5168\u9009', '\u53cd\u9009', opt.restore ? '\u8fd8\u539f' : '\u9ed8\u8ba4', '\u786e\u5b9a'];
-
-                $.setAttribute(elem, 'opt-id', box.id);
-                $.setAttribute(elem, 'opt-len', len);
-                $.setAttribute(elem, 'opt-idx', -1);
 
                 if (opt.multi) {
                     if (opt.layout !== Config.Layout.List && len > 3 || len > 5) {
@@ -533,17 +474,11 @@
                     if (dr === 'sep' || dr.sep || dr.type === 'sep') {
                         html.push(['<li class="oui-ddl-item oui-ddl-sep"></li>'].join(''));
                     } else if (dr.head) {
-                        html.push(['<li class="oui-ddl-item oui-ddl-head">', dr.head, '</li>'].join(''));
+                        html.push(['<li class="oui-ddl-item oui-ddl-head">', dr.name || dr.head, '</li>'].join(''));
                     } else {
-                        var val = $.getParam(dr, 'value,val,code,id', ''),
-                            txt = $.getParam(dr, 'name,text,txt', ''),
-                            desc = dr.desc || '',
-                            title = txt + (desc && txt !== desc ? ' - ' + desc : '');
-
-                        if (val === '' && txt === '') {
-                            continue;
-                        }
-                        var chbId = key + val,
+                        var id = typeof dr.code !== 'undefined' ? dr.code : dr.id,
+                            name = dr.name + (dr.desc && dr.name !== dr.desc ? ' - ' + dr.desc : ''),
+                            chbId = key + dr.id,
                             checked = dr.checked || dr.dc ? ' checked="checked" dc="1"' : '',
                             use = dr.enabled || dr.use,
                             disabled = dr.disabled ? ' disabled="disabled"' : '';
@@ -551,19 +486,18 @@
                             '<li class="oui-ddl-item" style="',
                             opt.layout !== Config.Layout.List ? 'float:left;' : '',
                             opt.layout === Config.Layout.Grid ? 'min-width:' + Factory.getStyleSize(minWidth || opt.itemWidth) + ';' : '',
-                            '" opt-idx="', i, '" data-value="', val.toString().replace(/["]/g, '&quot;'),
                             '">',
                             '<label  class="oui-ddl-label', opt.layout !== Config.Layout.List && opt.itemBorder ? ' oui-ddl-label-border' : '', '">',
                             '<input class="oui-ddl-chb"', checked,
                             ' type="', opt.multi ? 'checkbox' : 'radio', '"',
                             ' id="', chbId, '"',
                             ' name="', key, '"',
-                            ' value="', val, '"',
-                            ' text="', (txt).filterHtml(true).replace(/["]/g, '&quot;'), '"',
-                            ' desc="', (desc).filterHtml(true).replace(/["]/g, '&quot;'), '"',
+                            ' value="', id, '"',
+                            ' text="', (dr.name || '').filterHtml(true).replace(/[\"]/, "\\\""), '"',
+                            ' desc="', (dr.desc || '').filterHtml(true).replace(/[\"]/, "\\\""), '"',
                             ' style="display:' + (opt.display ? '' : 'none') + ';"',
                             ' />',
-                            '<span', (use || typeof use === 'undefined') ? '' : ' class="del"', '>', title, '</span>',
+                            '<span', (use || typeof use === 'undefined') ? '' : ' class="del"', '>', name, '</span>',
                             '</label>',
                             '</li>'
                         ].join(''));
@@ -579,7 +513,7 @@
                 that.bar = box.childNodes[1];
 
                 $.addListener(document, 'mousedown', function (ev) {
-                    if (!$.isInElement(that.box, ev) && !$.isInElement(opt.select ? that.elem : that.text, ev)) {
+                    if (!$.isInElement(that.box, ev) && !$.isInElement(that.text, ev)) {
                         that.hide();
                     }
                 });
@@ -633,27 +567,7 @@
 
             return that;
         },
-        select: function (num) {
-            var that = this,
-                opt = that.options,
-                nodes = that.nodes,
-                len = nodes.length,
-                elem = opt.select ? that.elem : that.text,
-                idx = num < 0 ? 0 : num >= len ? len - 1 : num,
-                node = nodes[idx];
-
-            if (opt.multi) {
-
-            } else {
-                if (idx > 0 && idx === $.getAttribute(elem, 'opt-idx').toInt()) {
-                    return this;
-                }
-                $.setAttribute(elem, 'opt-idx', idx);
-                that.action(node, true);
-            }
-            return that;
-        },
-        action: function (node, show) {
+        action: function (node) {
             var that = this,
                 opt = that.options,
                 nodes = that.nodes,
@@ -669,9 +583,7 @@
                 for (var i = 0; i < nodes.length; i++) {
                     nodes[i].set(nodes[i].id === node.id, true);
                 }
-                if (!show) {
-                    that.hide();
-                }
+                that.hide();
             }
             if (multi && nodes.length > 1 && opt.callbackDebounce) {
                 $.debounce({}, function() {
@@ -712,8 +624,6 @@
             } else {
                 ac = $.isBoolean(ac, true);
                 dc = $.isBoolean(dc, false);
-
-                $.console.log('set:', ac, dc);
 
                 var vals = !$.isArray(val) ? val.split(/[,\|]/) : val.join(',').split(',');
                 if (opt.multi) {
@@ -775,14 +685,12 @@
                     c++;
                 }
             }
-            if (that.text) {
-                //显示文字
-                that.text.value = txts.join(',') || opt.title || '';
-                that.text.title = vals.length > 0 ? (opt.name ? opt.name + ': ' : '') + that.text.value : '';
-            }
+            //显示文字
+            that.text.value = txts.join(',') || opt.title || '';
+            that.text.title = vals.length > 0 ? (opt.name ? opt.name + ': ' : '') + that.text.value : '';
             //设置值
             that.elem.options.length = 0;
-            that.elem.options.add(new Option(txts.join(',') || opt.title || '', vals.join(',')));
+            that.elem.options.add(new Option(txts.join(','), vals.join(',')));
 
             return vals.join(',');
         },
@@ -816,29 +724,26 @@
                 show = !box.show;
             }
 
-            $.console.log('show:', elem);
-
             if ($.isElement(box)) {
                 //先取消高度设置
                 box.style.height = 'auto';
                 //再显示下拉列表
                 box.style.display = show ? '' : 'none';
                 box.show = show;
-                $.setClass(opt.select ? that.elem : that.text, 'oui-ddl-txt-cur', show);
+                $.setClass(that.text, 'oui-ddl-txt-cur', show);
                 //下拉列表位置停靠
                 that.size().position();
             }
             return that.activity = true, that;
         },
         hide: function () {
-            var that = this,
-                opt = that.options;
+            var that = this;
 
             if ($.isElement(that.box)) {
                 that.box.style.display = 'none';
                 that.box.show = false;
                 that.activity = false;
-                $.removeClass(opt.select ? that.elem : that.text, 'oui-ddl-txt-cur');
+                $.removeClass(that.text, 'oui-ddl-txt-cur');
             }
             return that;
         },
@@ -846,7 +751,7 @@
             var that = this,
                 opt = that.options,
                 box = that.box,
-                offset = $.getOffset(opt.select ? that.elem : that.text),
+                offset = $.getOffset(that.text),
                 width = 0,
                 minWidth = opt.minWidth,
                 maxWidth = opt.maxWidth;
@@ -878,7 +783,7 @@
                 box = that.box,
                 con = that.con,
                 size = $.getOffset(box),
-                offset = $.getOffset(opt.select ? that.elem : that.text),
+                offset = $.getOffset(that.text),
                 //left = offset.left - 1,
                 left = offset.left,
                 top = offset.top + offset.height - 1;

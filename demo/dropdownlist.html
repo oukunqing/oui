@@ -4,17 +4,29 @@
 	<meta charset="utf-8">
 	<title>下拉菜单（多选）</title>
 	<style type="text/css">
-		select {height:30px;height:32px;width:300px;border:solid 1px #ccc;}
-		input {outline: none; border-radius: 4px;height:30px;width:300px;border:solid 1px #ccc;}
+		select {height:30px;height:32px;min-width:200px;border:solid 1px #ccc;}
+		input {outline: none; border-radius: 4px;height:30px;min-width:200px;border:solid 1px #ccc;}
 	</style>
 	<script type="text/javascript" src="../oui/oui.js"></script>
 	<script type="text/javascript" src="../oui/dropdownlist/oui.dropdownlist.js"></script>
 </head>
 <body style="background: #eee;">
+<input type="text" />
+<br />
+<br />
 <select id="DeviceType" style=""></select>
 <br />
 <br />
 <input type="text" id="ServerType" style="" />
+<br />
+<br />
+<input type="text" id="ServerType1" style="" />
+<br />
+<br />
+<input type="text" id="ServerType2" style="" />
+<br />
+<br />
+<input type="text" />
 </body>
 </html>
 <script type="text/javascript">
@@ -30,8 +42,10 @@ window.onload = function() {
 		id: k,
 		element: k,
 		items: types,
+		single: true,
 		layout: 'list',
 		boxWidth: 'follow',
+		//select: false,
 		//boxStyle: 'border-radius:0px',
 		//textWidth: 200,
 		itemWidth: '48%',
@@ -46,7 +60,7 @@ window.onload = function() {
 		//按钮位置： left,center,right
 		buttonPosition: 'right',
 		callback: function (values, initial, ddl) {
-			$.console.log('initial:', initial, ddl);
+			$.console.log('initial11:', initial, ddl);
 			getDeviceList();
 		}
 	});
@@ -62,7 +76,9 @@ window.onload = function() {
 			{ id: 5, name: '图片采集服务', desc: '' },
 			{ id: 6, name: '平台级联服务', desc: '' },
 		],
+		select: false,
 		layout: 'list',
+		single: true,
 		boxWidth: 'follow',
 		//textWidth: 200,
 		itemWidth: '48%',
@@ -71,13 +87,74 @@ window.onload = function() {
 		//submit: 0,
         //callbackLevel: 0,
         callbackDebounce: true,
-        //是否单选，默认多选
-        //single: true,
 		title: '选择服务类型',
 		//按钮位置： left,center,right
 		buttonPosition: 'right',
 		callback: function (values, initial, ddl) {
-			$.console.log('initial:', initial, ddl);
+			$.console.log('initial22:', initial, ddl);
+			getDeviceList();
+		}
+	});
+
+	$.dropdownlist({
+		id: 'ServerType1',
+		element: 'ServerType1',
+		items: [
+			{ id: 1, name: 'WEB服务', desc: '' },
+			{ id: 2, name: '设备服务', desc: '' },
+			{ id: 3, name: '图片推送服务', desc: '' },
+			{ id: 4, name: '视频服务', desc: '' },
+			{ id: 5, name: '图片采集服务', desc: '' },
+			{ id: 6, name: '平台级联服务', desc: '' },
+		],
+		layout: 'list',
+		boxWidth: 'follow',
+		single: true,
+		//textWidth: 200,
+		itemWidth: '48%',
+		itemBorder: true,
+		//回调等级：0-选项实时回调，1-全选/反选等按钮事件回调，2-确定按钮事件回调
+		//submit: 0,
+        //callbackLevel: 0,
+        callbackDebounce: true,
+		title: '选择服务类型',
+		//按钮位置： left,center,right
+		buttonPosition: 'right',
+		callback: function (values, initial, ddl) {
+			$.console.log('initial22:', initial, ddl);
+			getDeviceList();
+		}
+	});
+
+
+	$.dropdownlist({
+		id: 'ServerType2',
+		element: 'ServerType2',
+		items: [
+			{ id: 1, name: 'WEB服务', desc: '' },
+			{ id: 2, name: '设备服务', desc: '' },
+			{ id: 3, name: '图片推送服务', desc: '' },
+			{ id: 4, name: '视频服务', desc: '' },
+			{ id: 5, name: '图片采集服务', desc: '' },
+			{ id: 6, name: '平台级联服务', desc: '' },
+		],
+		layout: 'grid',
+		boxWidth: 'follow',
+		//textWidth: 200,
+		itemWidth: '48%',
+		boxWidth: 400,
+		itemBorder: true,
+		//回调等级：0-选项实时回调，1-全选/反选等按钮事件回调，2-确定按钮事件回调
+		//submit: 0,
+        //callbackLevel: 0,
+        callbackDebounce: true,
+        //是否单选，默认多选
+        multi: true,
+		title: '选择服务类型',
+		//按钮位置： left,center,right
+		buttonPosition: 'right',
+		callback: function (values, initial, ddl) {
+			$.console.log('initial22:', initial, ddl);
 			getDeviceList();
 		}
 	});

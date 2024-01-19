@@ -2402,6 +2402,10 @@
                 return $.jsonToIni(rst.json || rst.data);
             }
             return '';
+        },
+        addClass: function(className) {
+            var s = this;
+            return s + (s ? ' ' : '') + className;
         }
     }, 'String.prototype');
 
@@ -5735,8 +5739,8 @@
             elem.focus();
             if (elem.setSelectionRange) {
                 elem.setSelectionRange(pos, pos);
-            } else {
-                var range = obj.createTextRange();
+            } else if (elem.createTextRange) {
+                var range = elem.createTextRange();
                 if (!$.isNumber(len)) {
                     len = elem.value.length;
                 }
@@ -5756,11 +5760,6 @@
             if (!$.isNumber(pos) || pos > len) {
                 pos = len;
             }
-            /*
-            window.setTimeout(function () {
-                $.setTextCursorPosition2(elem, pos, len);
-            }, 10);
-            */
             $.setTextCursorPosition2(elem, pos, len);
             return this;
         },

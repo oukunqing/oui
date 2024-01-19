@@ -1569,6 +1569,34 @@
 
                 return this;
             },
+            buildStyle: function () {
+                if (document.getElementById('input_option_panel_style_001') === null) {
+                    var css = document.createElement('div');
+                    css.id = 'input_option_panel_style_001';
+                    css.style.cssText = 'position:absolute;left:-3000px;top:-3000px;display:none;';
+                    css.innerHTML = [
+                        '<style style="text/css">',
+                        '.input-option-elem {outline:none;}',
+                        '.input-option-elem:focus {outline:none;border-color: #66afe9;box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);',
+                        ' -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);}',
+                        '.input-option-panel-box{position:absolute;border:solid 1px #ddd;background:#fff;border-radius:4px;opacity:0.99;',
+                        ' overflow:auto;box-shadow: 0 2px 3px 0 rgba(0,0,0,.32);}',
+                        '.input-option-ul {margin:0;padding:1px 0;}',
+                        '.input-option-ul i{font-style:normal;color:#ccc;display:inline-block;text-align:right;',
+                        ' border:none;margin:0 7px 0 0;padding:0;font-size:14px;}',
+                        '.input-option-ul li{margin:0 1px;list-style:none;line-height:26px;font-size:14px;border:none;cursor:default;}',
+                        '.input-option-ul li:hover,.input-option-ul li.cur:hover{background:#dfe8f6;color:#000;}',
+                        '.input-option-ul li.cur{background:#eee;color:#000;}',
+                        '.input-option-ul li:hover i,.input-option-ul li.cur:hover i{color:#f50;}',
+                        '.input-option-ul li.cur i{color:#f00;}',
+                        '.input-option-ul li a{margin:0;padding:0;font-size:14px;display:block;border:none;background:none;text-decoration:none;color:#000;cursor:default;}',
+                        '.input-option-ul li span{margin:0;padding:0;font-size:14px;}',
+                        '</style>'
+                    ].join('');
+                    document.body.appendChild(css);
+                }
+                return this;
+            },
             setOption: function (elem, options, config, hide) {
                 var cfg = $.extend({}, config),
                     opt = $.isArray(options) ? 
@@ -1586,8 +1614,6 @@
                     $.setPanelPosition(elem, elem.optbox, cfg);
                     $.input.setCurrentOption(elem, elem.optbox);
                     return this;
-                } else if (hide) {
-                    return this;
                 }
 
                 var es = $.getOffset(elem, cfg.relative),
@@ -1601,29 +1627,6 @@
                     html = [ '<ul class="input-option-ul">' ],
                     isSelect = elem.tagName === 'SELECT';
 
-                if (document.getElementById('input_option_panel_style_001') === null) {
-                    var css = document.createElement('div');
-                    css.id = 'input_option_panel_style_001';
-                    css.style.cssText = 'position:absolute;left:-3000px;top:-3000px;display:none;';
-                    css.innerHTML = [
-                        '<style style="text/css">',
-                        '.input-option-panel-box{position:absolute;border:solid 1px #ddd;background:#fff;border-radius:4px;opacity:0.99;',
-                        ' overflow:auto;box-shadow: 0 2px 3px 0 rgba(0,0,0,.32);}',
-                        '.input-option-ul {margin:0;padding:1px 0;}',
-                        '.input-option-ul i{font-style:normal;color:#ccc;display:inline-block;text-align:right;',
-                        ' border:none;margin:0 7px 0 0;padding:0;font-size:14px;}',
-                        '.input-option-ul li{margin:0 1px;list-style:none;line-height:26px;font-size:14px;border:none;cursor:default;}',
-                        '.input-option-ul li:hover,.input-option-ul li.cur:hover{background:#dfe8f6;color:#000;}',
-                        '.input-option-ul li.cur{background:#eee;color:#000;}',
-                        '.input-option-ul li:hover i,.input-option-ul li.cur:hover i{color:#f50;}',
-                        '.input-option-ul li.cur i{color:#f00;}',
-                        '.input-option-ul li a{margin:0;padding:0;font-size:14px;display:block;border:none;background:none;text-decoration:none;color:#000;cursor:default;}',
-                        '.input-option-ul li span{margin:0;padding:0;font-size:14px;}',
-                        '</style>'
-                    ].join('');
-                    document.body.appendChild(css);
-                }
-
                 div.target = elem.tagName;
                 div.className = 'input-option-panel-box';
                 div.id = 'input-option-panel-' + (elem.id || new Date().getTime());
@@ -1633,7 +1636,8 @@
                     'top:' + top + 'px;',
                     'left:' + (es.left) + 'px;',
                     'width:' + (es.width - 2) + 'px;',
-                    cfg.relative ? '' : 'z-index:' + (cfg.zindex || cfg.ZINDEX) + ';'
+                    cfg.relative ? '' : 'z-index:' + (cfg.zindex || cfg.ZINDEX) + ';',
+                    hide ? 'display:none;' : ''
                 ].join(';');
 
                 for (var i = 0; i < len; i++) {
@@ -1653,10 +1657,8 @@
                             '<li class="input-option-panel-item', cur ? ' cur' : '', '"',
                             ' style="padding:', (cfg.number ? '0 5px 0 0' : '0 5px'), ';"',
                             ' opt-idx="', i, '" data-value="', val.toString().replace(/["]/g, '&quot;'), '">',
-                            '<a href="javascript:void(0);">', 
                             cfg.number ? ('<i style="width:' + (n * 12) + 'px;">' + idx + '</i>') : '',
                             '<span>', txt, '</span>',
-                            '</a>',
                             '</li>'
                         ].join(''));
                     }
@@ -1721,6 +1723,9 @@
                 if ((!$.isArrayLike(elems) && !$.isArray(elems)) || !(elem = $.toElement(elems[0]))) {
                     return this;
                 }
+                
+                $.input.buildStyle();
+
                 var par = $.extend({}, options),
                     opt = $.extend({
                         shift: true,            //是否允许shift键
@@ -1753,6 +1758,9 @@
                         showValue: false,       //是否显示值(默认只显示text不显示value)
                         topPriority: false,     //是否优先显示在顶部
                         height: MAX_HEIGHT,     //选项框最大显示高度
+                        width: null,            //选项框宽度
+                        minWidth: 120,          //最小宽度
+                        maxWidth: null,         //最大宽度
                         zindex: 0               //选项框层级
                     }, par.config), i, j;
 
@@ -1768,9 +1776,9 @@
                         cfg[ks[k][0]] = $.getAttribute(elem, 'opt-' + (ks[k][1] || ks[k][0]), 'false').inArray(['true', '1']);
                     }
                 }
-                var ns = [['height', 'maxHeight,height'],['zindex', 'zindex,zIndex']];
+                var ns = [['width'],['height', 'maxHeight,height'],['zindex', 'zindex,zIndex']];
                 for (var n = 0; n < ns.length; n++) {
-                    if (!(cfg[ns[n][0]] = $.getParam(cfg, ns[n][1], 0))) {
+                    if (!(cfg[ns[n][0]] = $.getParam(cfg, ns[n][1] || ns[n][0], 0))) {
                         cfg[ns[n][0]] = $.getAttribute(elem, 'opt-' + ns[n][0], 0);
                     }
                 }
@@ -1807,6 +1815,13 @@
                     opt.exceptions = [opt.exception];
                 } else if ($.isRegexp(opt.exceptions)) {
                     opt.exceptions = [opt.exceptions];
+                }
+
+                if ($.isNumber(opt.config.minWidth) && opt.config.minWidth &&  opt.config.minWidth < 50) {
+                    opt.config.minWidth = 50;
+                }
+                if ($.isNumber(opt.config.width) && opt.config.width && opt.config.width < 50) {
+                    opt.config.width = 50;
                 }
 
                 if ($.isString(opt.types, true)) {
@@ -1952,6 +1967,20 @@
                         continue;
                     }
                     isSelect = elem.tagName === 'SELECT';
+                    $.console.log(elem.id, elem.className, 'className');
+                    elem.className = elem.className.addClass('input-option-elem');
+
+                    if (isSelect) {
+                        if (opt.config.minWidth) {
+                            elem.style.minWidth = opt.config.minWidth + 'px';
+                        }
+                        if ($.isNumber(opt.config.maxWidth) && opt.config.maxWidth && opt.config.maxWidth >= opt.config.minWidth) {
+                            elem.style.maxWidth = opt.config.maxWidth + 'px';
+                        }
+                        if ($.isNumber(opt.config.width) && opt.config.width) {
+                            elem.style.width = opt.config.width + 'px';
+                        }
+                    }
 
                     if (isOpt || isBool) {
                         opt.options = $.input.setOptionValues(opt.options);
@@ -1986,7 +2015,7 @@
                                 elem.value = opt.value;
                             }
                         } else {
-                            elem.className += ' input-option-panel-select';
+                            elem.className = elem.className.addClass('input-option-panel-select');
                             elem.options.length = 0;
                             if (opt.options.length > 0) {
                                 var p = opt.options[0];
@@ -2005,25 +2034,35 @@
                         //这里为什么不用$.addListener？
                         //因为这里需要阻止非法输入，而$.addListener不是独占式的
                         elem.onkeydown = function(ev) {
-                            var kc = $.getKeyCode(ev), ddl = this.tagName === 'SELECT', typed = $.getAttribute(this, 'opt-typed', '0').toInt();
+                            var kc = $.getKeyCode(ev), 
+                                ddl = this.tagName === 'SELECT', 
+                                typed = $.getAttribute(this, 'opt-typed', '0').toInt(),
+                                div = $I($.getAttribute(elem, 'opt-id'));
+
                             if (kc.inArray([13, 108]) || ((ddl || keys.indexOf(32) < 0) && kc === 32)) {
                                 elem.focus();
                                 _showOption(ev, elem, opt);
                                 return false;
                             }
                             if ($.input.checkKey(ev, ctls, excepts, opt) || $.input.checkKey(ev, funs, excepts, opt)) {
-
                                 //9 - tab, 27 - esc
                                 if (kc.inArray([9, 27])) {
+                                    //如果选项框弹出时，隐藏选项框，焦点不切换
+                                    //如果选项框隐藏时，切换焦点
+                                    if (div != null && div.style.display !== 'none') {
+                                        $.cancelBubble(ev);
+                                    }
                                     _showOption(ev, elem, opt, true);
+                                    $.setTextCursorPosition(elem);
                                 } else if (kc.inArray([37, 38, 39, 40]) && (ddl || opt.config.readonly || !typed)) {
                                     $.cancelBubble(ev);
                                     var idx = ($.getAttribute(elem, 'opt-idx') || '').toInt();
                                     if (!_haveOption(elem)) {
-                                        _showOption(ev, elem, opt);
+                                        _showOption(ev, elem, opt, true);
                                         idx = -1;
                                     }
-                                    $.input.selectOptionItem(kc.inArray([37, 38]) ? idx - 1 : idx + 1, elem, $.getAttribute(elem, 'opt-id'));
+                                    idx = kc.inArray([37, 38]) ? idx - 1 : idx + 1;
+                                    $.input.selectOptionItem(idx, elem, $.getAttribute(elem, 'opt-id'));
                                 }
                                 return true;
                             }

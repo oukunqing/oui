@@ -1,9 +1,18 @@
 .oui-ddl {
-	
+	outline: none;
+	min-width: 120px;
 }
+.oui-ddl:focus {
+	outline:none;
+	border-color: #66afe9;
+	box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);
+	-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);
+}
+
 .oui-ddl-edge {
 
 }
+
 .oui-ddl-txt {
 	border: solid 1px #ddd;
 	line-height: 28px;
@@ -12,10 +21,16 @@
 	/*border-right: none 0;*/
 	box-sizing: border-box;
 	background:#fff url('ddl_arrow_down.png?12') no-repeat right center;
+
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    user-select: none;
+    -ms-user-select: none;
+    outline: none;
 }
 .oui-ddl-txt-cur {
 	border-color: #66afe9;
-    box-shadow: 4px 4px 4px 4px rgba(102,175,233,.32);
+    box-shadow: 4px 4px 4px 4px rgba(102,175,233,.32);    
 }
 .oui-ddl-panel {
 	position:absolute;
@@ -88,14 +103,20 @@ label.oui-ddl-label-border {
     line-height: 27px;
 }
 label.oui-ddl-cur {
-	background: #99bbe8;
 	/*Chrome*/
+	/*
 	background: #1967d2;
 	color: #fff;
+	*/
+	background: #eee;
+	color: #000;
 }
 /*Edge*/
 .oui-ddl-edge label.oui-ddl-cur {
+	/*
 	background: #767676;
+	*/
+	background: #eee;
 }
 label.oui-ddl-label:hover {
 	background: #d6e3f3;
@@ -105,6 +126,7 @@ input.oui-ddl-chb {
 	float: left;
 	display: inline-block;
     border: solid 1px #ddd;
+    min-width: 13px;
     width: 13px;
     height: 13px;
     margin: 8px 0 0 0;
