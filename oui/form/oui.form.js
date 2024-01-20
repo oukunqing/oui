@@ -1458,8 +1458,8 @@
             },
             replaceValue: function (ev, elem, val, isCnAble, converts) {
                 var replace = false;
-                if (!isCnAble && /[。，、；‘’\u3220-\uFA29]+/ig.test(val)) {
-                    val = val.replace(/[。，、；‘’\u3220-\uFA29]+/ig, '');
+                if (!isCnAble && /([。，、：；‘’“”！……~｛【《》】｝]|[\u3220-\uFA29]|[`·])+/ig.test(val)) {
+                    val = val.replace(/([。，、：；‘’“”！……~｛【《》】｝]|[\u3220-\uFA29]|[`·])+/ig, '');
                     elem.value = val;
                 }
                 var kc = $.getKeyCode(ev) || 0;
