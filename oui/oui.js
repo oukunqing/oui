@@ -3810,6 +3810,9 @@
                 bs = $.getBodySize(),
                 es = $.getOffset(elem, $.getParam(cfg, 'relativePosition,relative', false));
 
+            panel.style.left = (es.left) + 'px';
+            panel.style.width = (es.width) + 'px';
+            
             //清除选项框高度
             panel.style.height = 'auto';
             //先显示在目标控件的下方

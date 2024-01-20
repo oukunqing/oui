@@ -1425,6 +1425,17 @@
                 }
                 return values;
             },
+            isInputTyped: function (opt, val) {
+                if (val === '') {
+                    return false;
+                }
+                for (var i = 0; i < opt.length; i++) {
+                    if (opt[i].toString() === val.toString()) {
+                        return false;
+                    }
+                }
+                return true;
+            },
             checkFormat: function (elem, options, isPattern, editable) {
                 var v = elem.value.trim(), vs = $.extend([], options);
                 if ('' === v || vs.length <= 0) {
@@ -1444,6 +1455,35 @@
                     }
                 }
                 return $.input.setWarnColor(elem, false);
+            },
+            replaceValue: function (ev, elem, val, isCnAble, converts) {
+                var replace = false;
+                if (!isCnAble && /[。，、；‘’\u3220-\uFA29]+/ig.test(val)) {
+                    val = val.replace(/[。，、；‘’\u3220-\uFA29]+/ig, '');
+                    elem.value = val;
+                }
+                var kc = $.getKeyCode(ev) || 0;
+                if (!$.isArray(converts) || kc.inArray([8, 46])) {
+                    return { replace: replace, val: val };
+                }
+                for (var i = 0; i < converts.length; i++) {
+                    var p = $.getParamValue(converts[i].src, converts[i][0]),
+                        v = $.getParamValue(converts[i].dest, converts[i][1], val);
+
+                    if ($.isRegexp(p)) {
+                        if (p.test(val)) {
+                            val = v;
+                            replace = true;
+                        }
+                    } else if (p === val) {
+                        val = v;
+                        replace = true;
+                    }
+                    if (replace) {
+                        elem.value = val;
+                    }
+                }
+                return { replace: replace, val: val };
             },
             setWarnColor: function (elem, pass, focus) {
                 if (!pass) {
@@ -1576,12 +1616,13 @@
                     css.style.cssText = 'position:absolute;left:-3000px;top:-3000px;display:none;';
                     css.innerHTML = [
                         '<style style="text/css">',
-                        '.input-option-elem {outline:none;}',
+                        '.oui-input-fmt{ime-mode:disabled;}',
+                        '.input-option-elem{outline:none;}',
                         '.input-option-elem:focus {outline:none;border-color: #66afe9;box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);',
                         ' -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);}',
                         '.input-option-panel-box{position:absolute;border:solid 1px #ddd;background:#fff;border-radius:4px;opacity:0.99;',
                         ' overflow:auto;box-shadow: 0 2px 3px 0 rgba(0,0,0,.32);}',
-                        '.input-option-ul {margin:0;padding:1px 0;}',
+                        '.input-option-ul{margin:0;padding:1px 0;}',
                         '.input-option-ul i{font-style:normal;color:#ccc;display:inline-block;text-align:right;',
                         ' border:none;margin:0 7px 0 0;padding:0;font-size:14px;}',
                         '.input-option-ul li{margin:0 1px;list-style:none;line-height:26px;font-size:14px;border:none;cursor:default;}',
@@ -1689,6 +1730,9 @@
                         }
                         $.input.hideOptionPanel();
                     });
+                    $.addListener(window, 'resize', function(ev) {
+                        $.input.hideOptionPanel();
+                    });
                 }
                 var arr = div.querySelectorAll('li');
                 for (var i = 0; i < arr.length; i++) {
@@ -1739,6 +1783,7 @@
                         minVal: null,           //最小数值（整数、小数）
                         maxVal: null,           //最大数值（整数、小数）
                         types: null,
+                        chinese: null,          //是否允许输入中文（默认不允许）
                         patterns: [],           //正则表达式，用于验证数据值是否正确
                         exceptions: [],         //例外的正则表达式，用于验证数据输入是否异常
                         codes: [],
@@ -1854,19 +1899,21 @@
                     isOpt = false,
                     isVal = false,
                     isBool = false,
+                    isCnAble = $.isBoolean(opt.chinese, false),   //是否允许输入中文
                     isSelect = false,   //是否select控件元素
                     //是否要限制内容输入，如果配置的限制类型不匹配，则不限制内容输入
                     limit = 0,
-                    decimalLen = $.isNumber(opt.decimalLen) ? opt.decimalLen : 8;
+                    decimalLen = $.isNumber(opt.decimalLen) ? opt.decimalLen : 8,
+                    converts = [];
 
                 keys = !opt.space ? keys : keys.concat([32]);
                 keys = !opt.minus ? keys : keys.concat([109, 189]); //109是小键盘中的减号-
                 keys = !opt.dot ? keys : keys.concat([110, 190]); //110是小键盘中的点号.
 
                 if (1 === types.length) {
-                    if (['options', 'option'].indexOf(types[0]) > -1 && !opt.config.readonly) {
+                    if (types[0].inArray(['options', 'option']) && !opt.config.readonly) {
                         types.push('open');
-                    } else if (['boolean', 'bool'].indexOf(types[0]) > -1) {
+                    } else if (types[0].inArray(['boolean', 'bool'])) {
                         opt.config.readonly = $.isBoolean(par.config.readonly, true);
                     }
                 }
@@ -1880,34 +1927,43 @@
                         isOpt = true;
                         continue;
                     }
-                    if (['open', 'number', 'char_number', 'int', 'float', 'word', 'ipv4', 'ipv6', 'port', 'hex', 'md5', 'angle'].indexOf(type) > -1) {
+                    if (type.inArray(['open', 'number', 'char_number', 'int', 'float', 'word', 'ipv4', 'ipv6', 'port', 'hex', 'md5', 'angle'])) {
                         keys = keys.concat([48, 49, 50, 51, 52, 53, 54, 55, 56, 57]);       // 0-9键
                         keys = keys.concat([96, 97, 98, 99, 100, 101, 102, 103, 104, 105]); // 0-9键（小键盘）
-                        if (['number', 'int', 'float', 'angle'].indexOf(type) > -1) {
-                            opt.shift = false;
+                        if (type.inArray(['number', 'int', 'float', 'angle'])) {
                             isNum = true;
                         }
+                        if (!type.inArray(['open', 'ipv6', 'word'])) {
+                            opt.shift = false;
+                        }
                     }
-                    if (['open', 'control'].indexOf(type) > -1) {
+                    if (type.inArray(['open', 'control'])) {
                         // ;: =+ ,< -_ .> /? `~
                         keys = keys.concat([opt.space ? 32 : 0, 186, 187, 188, 189, 190, 191, 192]);
                         // [{ \| ]} '"
                         keys = keys.concat([219, 220, 221, 222]);
                     }
-                    if (['open', 'symbol'].indexOf(type) > -1) {
+                    if (type.inArray(['open', 'symbol'])) {
                         // * + - . / (小键盘)  * + - . / (主键盘)
                         keys = keys.concat([106, 107, 109, 110, 111, 56, 187, 189, 190, 191]);
                     }
 
-                    if (['open', 'char', 'char_number', 'word'].indexOf(type) > -1) {
+                    if (type.inArray(['open', 'char', 'char_number', 'word'])) {
                         for (j = 65; j <= 90; j++) { keys.push(j); } // A-Z 键
-                    } else if (['hex', 'ipv6', 'md5'].indexOf(type) > -1) {
+                    } else if (type.inArray(['hex', 'ipv6', 'md5'])) {
                         for (j = 65; j <= 70; j++) { keys.push(j); } // A-F 键
-                    } else if (['boolean', 'bool'].indexOf(type) > -1) {   // 0, 1
+                    } else if (type.inArray(['boolean', 'bool'])) {   // 0, 1
                         keys = keys.concat([48, 49]);
+                        if (!opt.config.readonly) {
+                            //true false yes no
+                            keys = keys.concat([65, 69, 70, 76, 78, 79, 82, 83, 84, 85, 89]);
+                        }
                         if (opt.options.length <= 0) {
                             opt.options = [{ val: 1, txt: '是' }, { val: 0, txt: '否' }];
                         }
+                        converts = converts.concat([[/^(true|yes|[1]{2,}|[1][01A-Z]+)$/i, 1], [/^(false|no|[0]{2,}|[0][01A-Z]+)$/i, 0]]);
+                        opt.shift = false;
+                        opt.maxLen = 5;
                         isBool = true;
                     } else if (type === 'int') {
                         // - (小键盘) - (主键盘)
@@ -1942,10 +1998,10 @@
                         //错误的IPv4输入格式
                         exceptions = exceptions.concat([/(\.\.)+|^([\d]{1,3}\.){4,}$|([\d]{4,})|(25[6-9]|(0|[3-9])[\d]{2})/]);
                         opt.maxLen = 15;
+                        converts = converts.concat([{src: '127.', dest: '127.0.0.1'}, ['192.', '192.168.'], ['255.', '255.255.255.255']]);
                     } else if (type === 'ipv6') {
                         keys = keys.concat([186]);
                         isVal = true;
-                        opt.shift = true;
                         patterns = patterns.concat([$.isIPv6, /^[0]{0}$/]);
                         //错误的IPv6输入格式
                         exceptions = exceptions.concat([/[^A-F0-9:]+|[:]{3,}|([\dA-F]{5,})|([\dA-F]{0,4}::|::[\dA-F]{0,4}){2,}|([\dA-F]{0,4}:[\dA-F]{0,4}){8,}/i]);
@@ -1953,7 +2009,6 @@
                     }
                     if (type === 'word') {
                         keys = keys.concat([189]);
-                        opt.shift = true;
                     }
                     if (type==='md5' && !opt.valLen) {
                         opt.valLen = 32;
@@ -1967,8 +2022,7 @@
                         continue;
                     }
                     isSelect = elem.tagName === 'SELECT';
-                    $.console.log(elem.id, elem.className, 'className');
-                    elem.className = elem.className.addClass('input-option-elem');
+                    elem.className = elem.className.addClass('oui-input-fmt');
 
                     if (isSelect) {
                         if (opt.config.minWidth) {
@@ -1984,6 +2038,7 @@
 
                     if (isOpt || isBool) {
                         opt.options = $.input.setOptionValues(opt.options);
+                        elem.className = elem.className.addClass('input-option-elem');
 
                         function _showOption(ev, elem, opt, hide) {
                             $.input.hideOptionPanel(elem.optbox);
@@ -2004,13 +2059,6 @@
                                     elem.placeholder += (elem.placeholder ? '  ' : '') + '\u53ef\u9009\u9879\uff1a' + str;   //可选项：
                                 }
                             }
-                            
-                            //内容指定，当输入的内容与选项不匹配时，输入框锁定焦点
-                            $.addListener(elem, 'keyup,blur', function() {
-                                if(!$.input.checkFormat(elem, $.extend([], opt.options), false, opt.config.editable)) {
-                                    elem.focus();
-                                }
-                            });
                             if (!$.isUndefinedOrNull(opt.value)) {
                                 elem.value = opt.value;
                             }
@@ -2038,6 +2086,7 @@
                                 ddl = this.tagName === 'SELECT', 
                                 typed = $.getAttribute(this, 'opt-typed', '0').toInt(),
                                 div = $I($.getAttribute(elem, 'opt-id'));
+                                $.console.log('onkeydown:', elem.id, typed);
 
                             if (kc.inArray([13, 108]) || ((ddl || keys.indexOf(32) < 0) && kc === 32)) {
                                 elem.focus();
@@ -2078,9 +2127,15 @@
                                 var pos = $.getTextCursorPosition(elem),
                                     key = ev.key,
                                     txt = elem.value.trim(),
-                                    val = pos <= 0 ? key + txt : txt.substr(0, pos) + key + txt.substr(pos);
+                                    val = pos <= 0 ? key + txt : txt.substr(0, pos + 1) + key + txt.substr(pos),
+                                    ctl;
 
-                                if (!isVal) {
+                                if ((ctl = $.input.replaceValue(ev, elem, val, isCnAble, converts)).replace) {
+                                    return false;
+                                }
+                                val = ctl.val;
+
+                                if (!isVal && !isBool) {
                                     if (!$.input.checkVal(val, types, opt, true, elem)) {
                                         return false;
                                     }
@@ -2089,20 +2144,42 @@
                                         return false;
                                     }
                                 }
-                                return !isVal || $.input.checkValLen(val, opt, false, true, elem);
+                                return (!isVal && !isBool) || $.input.checkValLen(val, opt, false, true, elem);
                             }
-                            return true;
+                            return false;
                         };
 
                         if (!isSelect) {
                             $.addListener(elem, 'keyup', function(ev) {
-                                var kc = $.getKeyCode(ev);
+                                var kc = $.getKeyCode(ev),
+                                    val = elem.value.trim(),
+                                    ps = $.input.getOptionValues(opt.options),
+                                    ctl;
+
                                 if (kc.inArray([37, 38, 39, 40])) {
+                                    $.setAttribute(elem, 'opt-typed', $.input.isInputTyped(ps, val) ? 1 : 0);
                                     return true;
                                 }
-                                var val = elem.value.trim(), ps = $.input.getOptionValues(opt.options);
-                                $.setAttribute(elem, 'opt-typed', val !== '' && ps.indexOf(val) < 0 ? 1 : 0);
+                                if ((ctl = $.input.replaceValue(ev, elem, val, isCnAble, converts)).replace) {
+                                    $.setAttribute(elem, 'opt-typed', $.input.isInputTyped(ps, ctl.val) ? 1 : 0);
+                                    return false;
+                                }
+                                val = ctl.val;
+
+                                if(!$.input.checkFormat(elem, $.extend([], opt.options), false, opt.config.editable)) {
+                                    elem.focus();
+                                    return false;
+                                }
+                                $.setAttribute(elem, 'opt-typed', $.input.isInputTyped(ps, val) ? 1 : 0);
                                 return true;
+                            });
+                            
+                            //内容指定，当输入的内容与选项不匹配时，输入框锁定焦点
+                            $.addListener(elem, 'blur', function(ev) {
+                                $.input.replaceValue(ev, elem, elem.value.trim(), isCnAble, converts);
+                                if(!$.input.checkFormat(elem, $.extend([], opt.options), false, opt.config.editable)) {
+                                    elem.focus();
+                                }
                             });
                         }
 
@@ -2133,7 +2210,13 @@
                                 var pos = $.getTextCursorPosition(elem),
                                     key = ev.key,
                                     txt = elem.value.trim(),
-                                    val = pos <= 0 ? key + txt : txt.substr(0, pos) + key + txt.substr(pos);
+                                    val = pos <= 0 ? key + txt : txt.substr(0, pos) + key + txt.substr(pos),
+                                    ctl;
+
+                                if ((ctl = $.input.replaceValue(ev, elem, val, isCnAble, converts)).replace) {
+                                    return false;
+                                }
+                                val = ctl.val;
 
                                 if (!isVal) {
                                     if (!$.input.checkVal(val, types, opt, true, elem)) {
@@ -2148,17 +2231,15 @@
                             }
                             return false;
                         };
-                        $.addListener(elem, 'keyup', function() {
-                            var val = elem.value.trim();
+                        $.addListener(elem, 'keyup', function(ev) {
+                            var kc = $.getKeyCode(ev), val = elem.value.trim(), ctl;
+                            if ((ctl = $.input.replaceValue(ev, elem, val, isCnAble, converts)).replace) {
+                                return false;
+                            }
+                            val = ctl.val;
                             if (isVal) {
                                 if(!$.input.checkFormat(elem, patterns, true, opt.config.editable)) {
                                     return $.input.setWarnColor(elem, false, true);
-                                }
-                            } else if (isBool) {                            
-                                if (/^([0]{2,}|[1]{2,}|true|false)$/i.test(val)) {
-                                    val = ('' + val).replace(/^(true|[1]{2,})$/i, 1).replace(/^(false|[0]{2,})$/i, 0);
-                                    //value = /^true$/i.test(value) ? 1 : 0;
-                                    element.val = val;
                                 }
                             } else {
                                 if ((!isVal && !$.input.checkVal(val, types, opt, false, elem)) || !$.input.checkValLen(val, opt, false, false, elem)) {
@@ -2167,17 +2248,18 @@
                             }
                             return $.input.setWarnColor(elem, true);
                         });
-                        $.addListener(elem, 'blur', function() {
-                            var v = elem.value.trim(), len = v.length;
-                            if (isNum && (v.endsWith('-') || v.endsWith('.'))) {
+                        $.addListener(elem, 'blur', function(ev) {
+                            var val = elem.value.trim(), len = val.length;
+                            $.input.replaceValue(ev, elem, val, isCnAble, converts);
+                            if (isNum && (val.endsWith('-') || val.endsWith('.'))) {
                                 return $.input.setWarnColor(elem, false, true);
-                            } else if (!$.input.checkVal(v, types, opt, false, elem)) {
+                            } else if (!$.input.checkVal(val, types, opt, false, elem)) {
                                 return $.input.setWarnColor(elem, false, true);
-                            } else if (isVal && (!$.input.checkFormat(elem, patterns, true, opt.config.editable) || $.input.checkExcept(v, opt))) {
-                                $.console.log('\u5185\u5bb9\u683c\u5f0f\u9519\u8bef', v);   //内容格式错误
+                            } else if (isVal && (!$.input.checkFormat(elem, patterns, true, opt.config.editable) || $.input.checkExcept(val, opt))) {
+                                $.console.log('\u5185\u5bb9\u683c\u5f0f\u9519\u8bef', val);   //内容格式错误
                                 return $.input.setWarnColor(elem, false, true);
                             }
-                            if (len > 0 && opt.minVal && parseFloat('0' + v, 10) < opt.minVal) {
+                            if (len > 0 && opt.minVal && parseFloat('0' + val, 10) < opt.minVal) {
                                 return $.input.setWarnColor(elem, false, true);
                             }
                             return $.input.setWarnColor(elem, true);
@@ -2196,7 +2278,7 @@
                         }
                     }
                 }
-                return this;
+                return $;
             }
         },
         setInputFormat: function (elements, options) {

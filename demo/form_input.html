@@ -4,9 +4,9 @@
     <title>表单输入内容限制示例</title>
 <style type="text/css">
 body {font-size:14px;}
-input {width:240px; height: 28px; font-size:14px; border:solid 1px #000; margin:0; padding: 0 5px; border-radius:3px;}
+input {width:400px; height: 28px; font-size:14px; border:solid 1px #000; margin:0; padding: 0 5px; border-radius:3px;}
 /*input:focus{border:solid 1px #00f;}*/
-select{width:252px; height:30px;border:solid 1px #000;margin:0; padding: 0 5px;border-radius:3px;}
+select{width:412px; height:30px;border:solid 1px #000;margin:0; padding: 0 5px;border-radius:3px;}
 /*select:focus{border:solid 1px #00f;}*/
 button {width:120px;height:28px;}
 </style>
@@ -100,6 +100,10 @@ button {width:120px;height:28px;}
             </tr>
             <tr>
                 <td></td>
+                <td><input type="text" id="fmt_channel" placeholder="" /></td>
+            </tr>
+            <tr>
+                <td></td>
                 <td>
                     <select id="select1" onchange="console.log('select change:', this.value);">
                         <option value="10001">第1项</option>
@@ -131,9 +135,16 @@ button {width:120px;height:28px;}
 <script type="text/javascript">
     //没有引用jquery.js
     window.onload = function() {
-		$.addKeyListener(document, 'keyup',  function(e, n) {
-			console.log('e:', e.keyCode, n, e);
-		}, false);
+        
+        $.addKeyListener(document, 'keyup',  function(e, n) {
+            console.log('keyup:', e.keyCode, n, e);
+        }, false);
+        
+        /*
+        $.addKeyListener(document, 'keydown',  function(e, n) {
+            //console.log('keydown:', e.keyCode, n, e);
+        }, false);
+        */
         
         $.setInputFormat('txtMobile', {
             types: ['number'],
@@ -238,10 +249,13 @@ button {width:120px;height:28px;}
             options: ['abc', 'acc', 'asd', '123', '456', '789'],
             //showOption: false,
             maxLen: 3,
+            //config: { editable: true }
         }); 
         $.setInputFormat('fmt_option1', {
             types: ['option', 'char'],
             maxLen: 4,
+            //是否允许输入中文，默认不允许，需要限制输入格式的一般都是有特定格式规则的输入
+            //chinese: true,
             config: { editable: true }
         }); 
         $.setInputFormat('fmt_option2', {
@@ -258,6 +272,12 @@ button {width:120px;height:28px;}
             maxLen: 3
         });
 
+        $.setInputFormat('fmt_channel', {
+            types: ['int', 'option'],
+            options: buildOptions([0, 100, 16, 32], '通道'),
+            config: { editable: true }
+        });
+
         $.setInputFormat('select1', {
             types: ['option', 'word'],
             options: [{val:'',txt:'请选择'},'abc', 'acc', 'asd', '123', {val:456,txt:'456456'}, {val:'ABC123',txt:'输入选项ABC123ABC123'}, 'hello', 'world', 'abcdefg', 'helloworld'],
@@ -268,7 +288,7 @@ button {width:120px;height:28px;}
                 showValue: true,
                 //选项框最大显示高度，默认为360px
                 //maxHeight: 400,
-                maxWidth: 240
+                maxWidth: 320
             }
         });
 
@@ -284,11 +304,19 @@ button {width:120px;height:28px;}
                 //选项框最大显示高度，默认为360px
                 //maxHeight: 400,
                 maxWidth: 200,
-                width: 190
+                width: 240
             }
         });
 
     };
+
+    function buildOptions(numbers, name) {
+        var options = [];
+        for (var i = 0; i < numbers.length; i++) {
+            options.push({ val: numbers[i], txt: (numbers[i] ? numbers[i] : '无') + name });
+        }
+        return options;
+    }
 
     function showForm() {
         if (window.dialogForm123) {
