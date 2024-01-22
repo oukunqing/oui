@@ -4475,6 +4475,21 @@
             var keyCode = $.isNumber(ev) ? ev : getKeyCode(ev);
             return String.fromCharCode(keyCode).toUpperCase();
         },
+        isCtrlKey = function (ev, keys) {
+            //若keys==true，则表示只验证是否是ctrlKey
+            if ($.isBoolean(keys, false)) {
+                return ev.ctrlKey;
+            }
+            var ks = $.isArray(keys) ? keys : $.isString(keys, true) ? keys.split(/[,;\|]/g) : null;
+            if ($.isArray(keys) && keys.length > 0) {
+                for (var i = 0; i < ks.length; i++) {
+                    if (ev[ks[i]]) {
+                        return true;
+                    }
+                }
+            }
+            return ev.ctrlKey || ev.shiftKey || ev.altKey;
+        },
         getContentSize = function (txt, options) {
             if (!$.isObject(options)) {
                 options = {};
@@ -5279,6 +5294,7 @@
         scrollTo: scrollTo,
         getKeyCode: getKeyCode,
         getKeyChar: getKeyChar,
+        isCtrlKey: isCtrlKey,
         getContentSize: getContentSize,
         getInnerText: getInnerText,
         isOnElement: isOnElement,

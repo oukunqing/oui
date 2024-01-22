@@ -1436,6 +1436,17 @@
                 }
                 return true;
             },
+            isInOption: function (opt, val) {
+                if (val === '' || !$.isArray(opt)) {
+                    return false;
+                }
+                for (var i = 0; i < opt.length; i++) {
+                    if (opt[i].toString() === val.toString()) {
+                        return true;
+                    }
+                }
+                return false;
+            },
             checkFormat: function (elem, options, isPattern, editable) {
                 var v = elem.value.trim(), vs = $.extend([], options);
                 if ('' === v || vs.length <= 0) {
@@ -1456,9 +1467,11 @@
                 }
                 return $.input.setWarnColor(elem, false);
             },
-            replaceValue: function (ev, elem, val, isCnAble, converts) {
+            replaceValue: function (ev, elem, val, isCnAble, converts, optionValues) {
                 var replace = false;
-                if (!isCnAble && /([。，、：；‘’“”！……~｛【《》】｝]|[\u3220-\uFA29]|[`·])+/ig.test(val)) {
+                //当没有选项并且也不允许中文输入的情况，清除中文（包括标点符号）
+                if (!$.input.isInOption(optionValues, val) && !isCnAble && 
+                    /([。，、：；‘’“”！……~｛【《》】｝]|[\u3220-\uFA29]|[`·])+/ig.test(val)) {
                     val = val.replace(/([。，、：；‘’“”！……~｛【《》】｝]|[\u3220-\uFA29]|[`·])+/ig, '');
                     elem.value = val;
                 }
@@ -1638,12 +1651,17 @@
                 }
                 return this;
             },
-            setOption: function (elem, options, config, hide) {
+            //action: 0 - hide, 1 - toggle, 2 - show
+            setOption: function (elem, options, config, action) {
                 var cfg = $.extend({}, config),
                     opt = $.isArray(options) ? 
                         options : $.isUndefinedOrNull(options) ? 
                         [] : $.isString(options, true) ? 
                         options.split(/[,;\|]/) : [options];
+
+                if (!$.isNumber(action)) {
+                    action = 1;
+                }
 
                 cfg.relative = $.getParam(cfg, 'relativePosition,relative,follow', false);
 
@@ -1651,7 +1669,8 @@
                     return this;
                 }
                 if (elem.optbox) {
-                    elem.optbox.style.display = !hide && elem.optbox.style.display === 'none' ? '' : 'none';
+                    var display = !action ? 'none' : 2 === action ? '' : elem.optbox.style.display === 'none' ? '' : 'none';
+                    elem.optbox.style.display = display;
                     $.setPanelPosition(elem, elem.optbox, cfg);
                     $.input.setCurrentOption(elem, elem.optbox);
                     return this;
@@ -1678,7 +1697,7 @@
                     'left:' + (es.left) + 'px;',
                     'width:' + (es.width - 2) + 'px;',
                     cfg.relative ? '' : 'z-index:' + (cfg.zindex || cfg.ZINDEX) + ';',
-                    hide ? 'display:none;' : ''
+                    !action ? 'display:none;' : ''
                 ].join(';');
 
                 for (var i = 0; i < len; i++) {
@@ -2040,9 +2059,9 @@
                         opt.options = $.input.setOptionValues(opt.options);
                         elem.className = elem.className.addClass('input-option-elem');
 
-                        function _showOption(ev, elem, opt, hide) {
+                        function _showOption(ev, elem, opt, action) {
                             $.input.hideOptionPanel(elem.optbox);
-                            $.input.setOption(elem, opt.options, opt.config, hide);
+                            $.input.setOption(elem, opt.options, opt.config, action);
                         }
                         function _haveOption(elem) {
                             var id = $.getAttribute(elem, 'opt-id');
@@ -2086,7 +2105,6 @@
                                 ddl = this.tagName === 'SELECT', 
                                 typed = $.getAttribute(this, 'opt-typed', '0').toInt(),
                                 div = $I($.getAttribute(elem, 'opt-id'));
-                                $.console.log('onkeydown:', elem.id, typed);
 
                             if (kc.inArray([13, 108]) || ((ddl || keys.indexOf(32) < 0) && kc === 32)) {
                                 elem.focus();
@@ -2101,26 +2119,35 @@
                                     if (div != null && div.style.display !== 'none') {
                                         $.cancelBubble(ev);
                                     }
-                                    _showOption(ev, elem, opt, true);
+                                    _showOption(ev, elem, opt, 0);
                                     $.setTextCursorPosition(elem);
                                 } else if (kc.inArray([37, 38, 39, 40]) && (ddl || opt.config.readonly || !typed)) {
                                     $.cancelBubble(ev);
                                     var idx = ($.getAttribute(elem, 'opt-idx') || '').toInt();
                                     if (!_haveOption(elem)) {
-                                        _showOption(ev, elem, opt, true);
+                                        _showOption(ev, elem, opt, 0);
                                         idx = -1;
                                     }
+                                    $.console.log('onkeydown11:', val, idx);
+                                    if (!idx && !elem.value.trim()) {
+                                        idx = -1;
+                                    }
+                                    $.console.log('onkeydown22:', val, idx);
                                     idx = kc.inArray([37, 38]) ? idx - 1 : idx + 1;
                                     $.input.selectOptionItem(idx, elem, $.getAttribute(elem, 'opt-id'));
+                                } else if (!ddl && opt.config.readonly && kc.inArray([8, 46])) {
+                                    $.input.selectOptionItem(-1, elem, $.getAttribute(elem, 'opt-id'));
+                                    elem.value = '';
                                 }
                                 return true;
                             }
                             if (ddl) {
                                 return true;
                             }
+                            //允许输入的情况下
                             //若只指定选项，而没有指定其他输入类型，则不限制输入键
                             //当指定了输入类型(option除外)，则需要验证输入键值
-                            if ($.input.checkKey(ev, keys, excepts, opt) || types.length > 1) {
+                            if (!opt.config.readonly && ($.input.checkKey(ev, keys, excepts, opt) || types.length > 1)) {
                                 if ($.getSelectedText(elem)) {
                                     return true;
                                 }
@@ -2130,13 +2157,16 @@
                                     val = pos <= 0 ? key + txt : txt.substr(0, pos + 1) + key + txt.substr(pos),
                                     ctl;
 
-                                if ((ctl = $.input.replaceValue(ev, elem, val, isCnAble, converts)).replace) {
+                                if ((ctl = $.input.replaceValue(ev, elem, val, isCnAble, converts, $.input.getOptionValues(opt.options))).replace) {
                                     return false;
                                 }
                                 val = ctl.val;
 
                                 if (!isVal && !isBool) {
                                     if (!$.input.checkVal(val, types, opt, true, elem)) {
+                                        if (!$.isCtrlKey(ev)) {
+                                            _showOption(ev, elem, opt, 2);
+                                        }
                                         return false;
                                     }
                                 } else if (exceptions.length > 0) {
@@ -2145,6 +2175,8 @@
                                     }
                                 }
                                 return (!isVal && !isBool) || $.input.checkValLen(val, opt, false, true, elem);
+                            } else if (opt.config.readonly && !$.isCtrlKey(ev)) {
+                                _showOption(ev, elem, opt, 2);
                             }
                             return false;
                         };
@@ -2160,7 +2192,7 @@
                                     $.setAttribute(elem, 'opt-typed', $.input.isInputTyped(ps, val) ? 1 : 0);
                                     return true;
                                 }
-                                if ((ctl = $.input.replaceValue(ev, elem, val, isCnAble, converts)).replace) {
+                                if ((ctl = $.input.replaceValue(ev, elem, val, isCnAble, converts, $.input.getOptionValues(opt.options))).replace) {
                                     $.setAttribute(elem, 'opt-typed', $.input.isInputTyped(ps, ctl.val) ? 1 : 0);
                                     return false;
                                 }
@@ -2176,7 +2208,7 @@
                             
                             //内容指定，当输入的内容与选项不匹配时，输入框锁定焦点
                             $.addListener(elem, 'blur', function(ev) {
-                                $.input.replaceValue(ev, elem, elem.value.trim(), isCnAble, converts);
+                                $.input.replaceValue(ev, elem, elem.value.trim(), isCnAble, converts, $.input.getOptionValues(opt.options));
                                 if(!$.input.checkFormat(elem, $.extend([], opt.options), false, opt.config.editable)) {
                                     elem.focus();
                                 }
@@ -2203,7 +2235,7 @@
                             if ((ev.ctrlKey && (kc === 65 || kc === 67)) || (opt.paste && ev.ctrlKey && (kc === 86))) {
                                 return true;
                             }
-                            if ($.input.checkKey(ev, keys, excepts, opt)) {
+                            if (!opt.config.readonly && $.input.checkKey(ev, keys, excepts, opt)) {
                                 if ($.getSelectedText(elem)) {
                                     return true;
                                 }
@@ -2213,7 +2245,7 @@
                                     val = pos <= 0 ? key + txt : txt.substr(0, pos) + key + txt.substr(pos),
                                     ctl;
 
-                                if ((ctl = $.input.replaceValue(ev, elem, val, isCnAble, converts)).replace) {
+                                if ((ctl = $.input.replaceValue(ev, elem, val, isCnAble, converts, $.input.getOptionValues(opt.options))).replace) {
                                     return false;
                                 }
                                 val = ctl.val;
@@ -2233,7 +2265,7 @@
                         };
                         $.addListener(elem, 'keyup', function(ev) {
                             var kc = $.getKeyCode(ev), val = elem.value.trim(), ctl;
-                            if ((ctl = $.input.replaceValue(ev, elem, val, isCnAble, converts)).replace) {
+                            if ((ctl = $.input.replaceValue(ev, elem, val, isCnAble, converts, $.input.getOptionValues(opt.options))).replace) {
                                 return false;
                             }
                             val = ctl.val;
@@ -2250,7 +2282,7 @@
                         });
                         $.addListener(elem, 'blur', function(ev) {
                             var val = elem.value.trim(), len = val.length;
-                            $.input.replaceValue(ev, elem, val, isCnAble, converts);
+                            $.input.replaceValue(ev, elem, val, isCnAble, converts, $.input.getOptionValues(opt.options));
                             if (isNum && (val.endsWith('-') || val.endsWith('.'))) {
                                 return $.input.setWarnColor(elem, false, true);
                             } else if (!$.input.checkVal(val, types, opt, false, elem)) {
