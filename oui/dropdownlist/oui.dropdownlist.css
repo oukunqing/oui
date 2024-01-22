@@ -103,22 +103,10 @@ label.oui-ddl-label-border {
     line-height: 27px;
 }
 label.oui-ddl-cur {
-	/*Chrome*/
-	/*
-	background: #1967d2;
-	color: #fff;
-	*/
 	background: #eee;
 	color: #000;
 }
-/*Edge*/
-.oui-ddl-edge label.oui-ddl-cur {
-	/*
-	background: #767676;
-	*/
-	background: #eee;
-}
-label.oui-ddl-label:hover {
+label.oui-ddl-label:hover,label.oui-ddl-hover {
 	background: #d6e3f3;
 	color: #000;
 }
@@ -153,8 +141,8 @@ ul.oui-ddl-flow label.oui-ddl-label,ul.oui-ddl-grid label.oui-ddl-label {
 	padding: 0 5px;
 }
 ul.oui-ddl-flow label.oui-ddl-cur,ul.oui-ddl-grid label.oui-ddl-cur {
-	color: #f00;
-	background: none;
+	/*color: #f00;*/
+	background: #eee;
 }
 
 .oui-ddl-panel .oui-ddl-oper {

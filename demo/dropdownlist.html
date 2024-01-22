@@ -26,6 +26,9 @@
 <input type="text" id="ServerType2" style="" />
 <br />
 <br />
+<input type="text" id="ServerType3" style="" />
+<br />
+<br />
 <input type="text" />
 </body>
 </html>
@@ -130,6 +133,38 @@ window.onload = function() {
 	$.dropdownlist({
 		id: 'ServerType2',
 		element: 'ServerType2',
+		items: [
+			{ id: 1, name: 'WEB服务', desc: '' },
+			{ id: 2, name: '设备服务', desc: '' },
+			{ id: 3, name: '图片推送服务', desc: '' },
+			{ id: 4, name: '视频服务', desc: '' },
+			{ id: 5, name: '图片采集服务', desc: '' },
+			{ id: 6, name: '平台级联服务', desc: '' },
+		],
+		//layout: 'grid',
+		boxWidth: 'follow',
+		//textWidth: 200,
+		itemWidth: '48%',
+		boxWidth: 400,
+		itemBorder: true,
+		//回调等级：0-选项实时回调，1-全选/反选等按钮事件回调，2-确定按钮事件回调
+		//submit: 0,
+        //callbackLevel: 0,
+        callbackDebounce: true,
+        //是否单选，默认多选
+        multi: true,
+		title: '选择服务类型',
+		//按钮位置： left,center,right
+		buttonPosition: 'right',
+		callback: function (values, initial, ddl) {
+			$.console.log('initial22:', initial, ddl);
+			getDeviceList();
+		}
+	});
+
+	$.dropdownlist({
+		id: 'ServerType3',
+		element: 'ServerType3',
 		items: [
 			{ id: 1, name: 'WEB服务', desc: '' },
 			{ id: 2, name: '设备服务', desc: '' },

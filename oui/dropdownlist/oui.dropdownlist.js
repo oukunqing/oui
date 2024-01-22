@@ -410,6 +410,7 @@
             });
             $.addListener(elem, 'keydown', function (ev) {
                 var kc = $.getKeyCode(ev),
+                    idx = ($.getAttribute(elem, 'opt-idx') || '').toInt(),
                     div = $I($.getAttribute(elem, 'opt-id')),
                     arrowList = [37, 38, 40, 39],   //左 上 下 右
                     vimKeyList = [72, 75, 74, 76];  //H  K  J  L
@@ -417,7 +418,13 @@
                 if (kc.inArray([13, 32, 108])) {
                     this.focus();
                     $.cancelBubble(ev);
-                    that.show(this);
+                    var hover = $.getAttribute(elem, 'opt-hover', '0').toInt();
+                    if (hover) {
+                        that.action(idx, null, false);
+                        $.setAttribute(elem, 'opt-hover', 0);
+                    } else {
+                        that.show(this);
+                    }
                 } else if (kc.inArray([9, 27])) {
                     if(div !== null && div.style.display !== 'none') {
                         $.cancelBubble(ev);
@@ -425,7 +432,6 @@
                     that.hide();
                 } else if (kc.inArray(arrowList) || kc.inArray(vimKeyList)) {
                     $.cancelBubble(ev);
-                    var idx = ($.getAttribute(elem, 'opt-idx') || '').toInt();
                     if (kc.inArray(vimKeyList)) {
                         kc = arrowList[vimKeyList.indexOf(kc)];
                     }
@@ -602,10 +608,12 @@
                             var txt = node.text + (node.desc ? ' - ' + node.desc : '');
                             if ($.isFunction(opt.beforeChange)) {
                                 opt.beforeChange(txt, function() {
-                                    that.action(node);
+                                    $.setAttribute(elem, 'opt-hover', 0);
+                                    that.action(node, true, true);
                                 });
                             } else {
-                                that.action(node);
+                                $.setAttribute(elem, 'opt-hover', 0);
+                                that.action(node, true, true);
                             }                       
                         }
                     }));
@@ -642,35 +650,46 @@
                 elem = opt.select ? that.elem : that.text,
                 idx = num < 0 ? 0 : num >= len ? len - 1 : num;
 
-            if (opt.multi) {
+            if ($.isNumber(keyCode)) {
+                switch(keyCode) {
+                case 37: idx = 0; break;
+                case 39: idx = len - 1; break;
+                }
+            }
+            if ((idx > 0 && idx === $.getAttribute(elem, 'opt-idx').toInt()) || !nodes[idx]) {
+                return that;
+            }
+            $.setAttribute(elem, 'opt-idx', idx);
 
+            if (opt.multi) {
+                for (var i = 0; i < nodes.length; i++) {
+                    $.setClass(nodes[i].label, 'oui-ddl-hover', nodes[i] === nodes[idx]);
+                }
+                $.setAttribute(elem, 'opt-hover', 1);
             } else {
-                if ($.isNumber(keyCode)) {
-                    switch(keyCode) {
-                    case 37: idx = 0; break;
-                    case 39: idx = len - 1; break;
-                    }
-                }
-                if (idx > 0 && idx === $.getAttribute(elem, 'opt-idx').toInt()) {
-                    return this;
-                }
-                $.setAttribute(elem, 'opt-idx', idx);
-                that.action(nodes[idx], true);
+                that.action(nodes[idx], true, false);
             }
             return that;
         },
-        action: function (node, show) {
+        action: function (node, show, clickEvent) {
             var that = this,
                 opt = that.options,
                 nodes = that.nodes,
                 multi = opt.multi;
 
             if (multi) {
+                if ($.isNumber(node)) {
+                    node = nodes[node];
+                }
+                if (!node) {
+                    return that;
+                }
                 //检测多选项的数量限制
                 if (!node.checked && opt.maxLimit && that.list(true).length >= opt.maxLimit) {
                     return that.msg();
                 }
-                node.set(!node.checked, true);
+                node.set(!node.checked, clickEvent);
+                $.setClass(node.label, 'oui-ddl-hover', false);
             } else {
                 for (var i = 0; i < nodes.length; i++) {
                     nodes[i].set(nodes[i].id === node.id, true);
