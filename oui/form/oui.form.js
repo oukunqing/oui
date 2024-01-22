@@ -1594,8 +1594,8 @@
 
                     if ($.isNumber(keyCode)) {
                         switch(keyCode) {
-                        case 37: num = 0; break;
-                        case 39: num = len - 1; break;
+                            case 37: num = 0; break;
+                            case 39: num = len - 1; break;
                         }
                     }
 
@@ -2116,12 +2116,32 @@
                             var kc = $.getKeyCode(ev), 
                                 ddl = this.tagName === 'SELECT', 
                                 typed = $.getAttribute(this, 'opt-typed', '0').toInt(),
-                                div = $I($.getAttribute(elem, 'opt-id'));
+                                div = $I($.getAttribute(elem, 'opt-id')),
+                                arrowList = [37, 38, 40, 39],   //左 上 下 右
+                                vimKeyList = [72, 75, 74, 76];  //H  K  J  L
 
                             if (kc.inArray([13, 108]) || ((ddl || keys.indexOf(32) < 0) && kc === 32)) {
                                 elem.focus();
                                 _showOption(ev, elem, opt);
                                 return false;
+                            }
+                            if ((kc.inArray(arrowList) || ((ddl || opt.config.readonly || !kc.inArray(keys)) && kc.inArray(vimKeyList))) && 
+                                (ddl || opt.config.readonly || !typed)) {
+                                $.cancelBubble(ev);
+                                var idx = ($.getAttribute(elem, 'opt-idx') || '').toInt();
+                                if (!_haveOption(elem)) {
+                                    _showOption(ev, elem, opt, 0);
+                                    idx = -1;
+                                }
+                                if (!idx && !elem.value.trim()) {
+                                    idx = -1;
+                                }
+                                if (kc.inArray(vimKeyList)) {
+                                    kc = arrowList[vimKeyList.indexOf(kc)];
+                                }
+                                idx = kc.inArray([37, 38]) ? idx - 1 : idx + 1;
+                                $.input.selectOptionItem(idx, kc, elem, $.getAttribute(elem, 'opt-id'));
+                                return true;
                             }
                             if ($.input.checkKey(ev, ctls, excepts, opt) || $.input.checkKey(ev, funs, excepts, opt)) {
                                 //9 - tab, 27 - esc
@@ -2133,18 +2153,6 @@
                                     }
                                     _showOption(ev, elem, opt, 0);
                                     $.setTextCursorPosition(elem);
-                                } else if (kc.inArray([37, 38, 39, 40]) && (ddl || opt.config.readonly || !typed)) {
-                                    $.cancelBubble(ev);
-                                    var idx = ($.getAttribute(elem, 'opt-idx') || '').toInt();
-                                    if (!_haveOption(elem)) {
-                                        _showOption(ev, elem, opt, 0);
-                                        idx = -1;
-                                    }
-                                    if (!idx && !elem.value.trim()) {
-                                        idx = -1;
-                                    }
-                                    idx = kc.inArray([37, 38]) ? idx - 1 : idx + 1;
-                                    $.input.selectOptionItem(idx, kc, elem, $.getAttribute(elem, 'opt-id'));
                                 } else if (!ddl && opt.config.readonly && kc.inArray([8, 46])) {
                                     //backspace, delete键，表示选项被取消，用-2表示索引
                                     $.input.selectOptionItem(-2, null, elem, $.getAttribute(elem, 'opt-id'));

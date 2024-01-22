@@ -410,7 +410,9 @@
             });
             $.addListener(elem, 'keydown', function (ev) {
                 var kc = $.getKeyCode(ev),
-                    div = $I($.getAttribute(elem, 'opt-id'));
+                    div = $I($.getAttribute(elem, 'opt-id')),
+                    arrowList = [37, 38, 40, 39],   //左 上 下 右
+                    vimKeyList = [72, 75, 74, 76];  //H  K  J  L
 
                 if (kc.inArray([13, 32, 108])) {
                     this.focus();
@@ -421,9 +423,12 @@
                         $.cancelBubble(ev);
                     }
                     that.hide();
-                } else if (kc.inArray([37, 38, 39, 40])) {
+                } else if (kc.inArray(arrowList) || kc.inArray(vimKeyList)) {
                     $.cancelBubble(ev);
                     var idx = ($.getAttribute(elem, 'opt-idx') || '').toInt();
+                    if (kc.inArray(vimKeyList)) {
+                        kc = arrowList[vimKeyList.indexOf(kc)];
+                    }
                     idx = kc.inArray([37, 38]) ? idx - 1 : idx + 1;
                     that.select(idx, kc);
                     return false;
