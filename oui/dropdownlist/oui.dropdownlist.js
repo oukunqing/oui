@@ -337,11 +337,8 @@
                 //texts = ['-请选择-', '请选择'],
                 texts = ['\u002d\u8bf7\u9009\u62e9\u002d', '\u8bf7\u9009\u62e9'];
 
-            $.console.log(elem.id, $.getElementStyle(elem, 'width'));
-
             if (opt.element.tagName === 'SELECT') {
                 that.elem = opt.element;
-                $.console.log('offset:', offset, opt.textWidth);
                 if (!opt.select) {
                     var txt = document.createElement('INPUT');
                     txt.className = 'form-control oui-ddl-txt' + (opt.className ? ' ' + opt.className : '');
@@ -428,7 +425,8 @@
                     $.cancelBubble(ev);
                     var idx = ($.getAttribute(elem, 'opt-idx') || '').toInt();
                     idx = kc.inArray([37, 38]) ? idx - 1 : idx + 1;
-                    that.select(idx);
+                    that.select(idx, kc);
+                    return false;
                 }
                 return false;
             });
@@ -449,8 +447,6 @@
                     edge = ua.indexOf('Edg/') > 0 || ua.indexOf('Edge') > 0,
                     boxWidth = opt.boxWidth === 'follow' ? offset.width : opt.boxWidth,
                     width = parseInt(boxWidth, 10);
-
-                $.console.log('elem:', elem);
 
                 if (!isNaN(width) && width > opt.maxWidth) {
                     opt.maxWidth = width;
@@ -633,23 +629,28 @@
 
             return that;
         },
-        select: function (num) {
+        select: function (num, keyCode) {
             var that = this,
                 opt = that.options,
                 nodes = that.nodes,
                 len = nodes.length,
                 elem = opt.select ? that.elem : that.text,
-                idx = num < 0 ? 0 : num >= len ? len - 1 : num,
-                node = nodes[idx];
+                idx = num < 0 ? 0 : num >= len ? len - 1 : num;
 
             if (opt.multi) {
 
             } else {
+                if ($.isNumber(keyCode)) {
+                    switch(keyCode) {
+                    case 37: idx = 0; break;
+                    case 39: idx = len - 1; break;
+                    }
+                }
                 if (idx > 0 && idx === $.getAttribute(elem, 'opt-idx').toInt()) {
                     return this;
                 }
                 $.setAttribute(elem, 'opt-idx', idx);
-                that.action(node, true);
+                that.action(nodes[idx], true);
             }
             return that;
         },
@@ -712,8 +713,6 @@
             } else {
                 ac = $.isBoolean(ac, true);
                 dc = $.isBoolean(dc, false);
-
-                $.console.log('set:', ac, dc);
 
                 var vals = !$.isArray(val) ? val.split(/[,\|]/) : val.join(',').split(',');
                 if (opt.multi) {
@@ -815,9 +814,6 @@
             if (elem) {
                 show = !box.show;
             }
-
-            $.console.log('show:', elem);
-
             if ($.isElement(box)) {
                 //先取消高度设置
                 box.style.height = 'auto';

@@ -1576,13 +1576,13 @@
                 }
                 return this;
             },
-            selectOptionItem: function (item, elem, div) {
+            selectOptionItem: function (item, keyCode, elem, div) {
                 if (!$.isElement(div = $.toElement(div))) {
                     return this;
                 }
                 var isArrowKey = $.isNumber(item);
                 if (isArrowKey) {
-                    var num = item,
+                    var num = item, n = num,
                         arr = div.querySelectorAll('li'),
                         len = arr.length;
 
@@ -1591,8 +1591,19 @@
                     } else if (num >= len) {
                         num = len - 1;
                     }
+
+                    if ($.isNumber(keyCode)) {
+                        switch(keyCode) {
+                        case 37: num = 0; break;
+                        case 39: num = len - 1; break;
+                        }
+                    }
+
+                    //如果索引序号为-2表示输入框中的内容选项被清除，当前没有选项被选中
+                    //所以要清除选项中的当前选项标记
+                    $.input.setCurrentOption(n >= -1 ? num : n, div);
+
                     item = arr[num];
-                    $.input.setCurrentOption(num, div);
                     $.scrollTo(item, div);
                 }
                 var val = $.getAttribute(item, 'data-value'),
@@ -1645,6 +1656,7 @@
                         '.input-option-ul li.cur i{color:#f00;}',
                         '.input-option-ul li a{margin:0;padding:0;font-size:14px;display:block;border:none;background:none;text-decoration:none;color:#000;cursor:default;}',
                         '.input-option-ul li span{margin:0;padding:0;font-size:14px;}',
+                        '.input-option-ul li span.i-t{color:#999;margin:0;padding:0;font-size:14px;border:none;background:none;}',
                         '</style>'
                     ].join('');
                     document.body.appendChild(css);
@@ -1708,7 +1720,7 @@
                     if ($.isString(txt, true) || $.isNumber(txt) || $.isString(val, true) || $.isNumber(val)) {
                         idx++;
                         if (cfg.showValue && val.toString() !== '' && val.toString() !== txt.toString()) {
-                            txt = val + ' - ' + txt;
+                            txt = val + '<span class="i-t"> - ' + txt + '</span>';
                         }
                         if (cur) {
                             curIdx = i;
@@ -1762,7 +1774,7 @@
                     });
                     $.addListener(li, 'click', function(ev) {
                         $.cancelBubble(ev);
-                        $.input.selectOptionItem(this, elem, div);
+                        $.input.selectOptionItem(this, null, elem, div);
                     });
                 }
                 return this;
@@ -2128,15 +2140,14 @@
                                         _showOption(ev, elem, opt, 0);
                                         idx = -1;
                                     }
-                                    $.console.log('onkeydown11:', val, idx);
                                     if (!idx && !elem.value.trim()) {
                                         idx = -1;
                                     }
-                                    $.console.log('onkeydown22:', val, idx);
                                     idx = kc.inArray([37, 38]) ? idx - 1 : idx + 1;
-                                    $.input.selectOptionItem(idx, elem, $.getAttribute(elem, 'opt-id'));
+                                    $.input.selectOptionItem(idx, kc, elem, $.getAttribute(elem, 'opt-id'));
                                 } else if (!ddl && opt.config.readonly && kc.inArray([8, 46])) {
-                                    $.input.selectOptionItem(-1, elem, $.getAttribute(elem, 'opt-id'));
+                                    //backspace, delete键，表示选项被取消，用-2表示索引
+                                    $.input.selectOptionItem(-2, null, elem, $.getAttribute(elem, 'opt-id'));
                                     elem.value = '';
                                 }
                                 return true;
