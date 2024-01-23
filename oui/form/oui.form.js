@@ -1577,49 +1577,66 @@
                 return this;
             },
             selectOptionItem: function (item, keyCode, elem, div, shortcut) {
-                if (!$.isElement(div = $.toElement(div))) {
-                    return this;
-                }
-                var isArrowKey = $.isNumber(item);
-                if (isArrowKey) {
-                    var idx = item, n = idx,
-                        arr = div.querySelectorAll('li'),
-                        len = arr.length;
+                var that = this,
+                    isArrowKey = $.isNumber(item),
+                    cur = $.getAttribute(elem, 'opt-idx').toInt();
 
-                    if (idx < 0) {
-                        idx = 0;
-                    } else if (idx >= len) {
-                        idx = len - (shortcut ? 0 : 1);
-                    }
+                if (!$.isElement(div = $.toElement(div))) {
+                    return that;
+                }
+
+                if (isArrowKey) {
+                    var arr = div.querySelectorAll('li'),
+                        len = arr.length,
+                        idx = item < 0 ? 0 : item > len ? len : item, 
+                        //n = item,
+                        n = idx;
+
                     if (shortcut) {
-                        if (len < 10) {
-                            idx -= 1;
-                        } else {
-                            //TODO:
-                            
+                        if (len >= 10) {
+                            var ni = cur * 10 + idx;
+                            if (ni > len) {
+                                ni = idx;
+                            }
+                            idx = ni;
                         }
                     } else {                        
                         if ($.isNumber(keyCode)) {
                             switch(keyCode) {
-                                case 37: idx = 0; break;
-                                case 39: idx = len - 1; break;
-                                case 77: idx = parseInt(len / 2, 10) - (len % 2 ? 0 : 1); break;
+                                case 37: idx = 1; break;
+                                case 39: idx = len; break;
+                                case 77: idx = parseInt(len / 2, 10) + (len % 2 ? 1 : 0); break;
                             }
                         }
+                        if ((idx > 0 && idx === cur) || !arr[idx - 1]) {
+                            return that;
+                        }
                     }
-                    //如果索引序号为-2表示输入框中的内容选项被清除，当前没有选项被选中
+                    $.setAttribute(elem, 'opt-idx', idx--);
+
+                    //如果索引序号为-1表示输入框中的内容选项被清除，当前没有选项被选中
                     //所以要清除选项中的当前选项标记
-                    $.input.setCurrentOption(n >= -1 ? idx : n, div);
+                    $.input.setCurrentOption(n >= 0 ? idx : n, div);
+                    $.scrollTo(arr[idx < 0 ? 0 : idx], div);
 
                     item = arr[idx];
-                    $.scrollTo(item, div);
+                }
+                if (!item) {
+                    if (elem.tagName === 'SELECT') {
+                        elem.options.length = 0;
+                        elem.options.add(new Option($.getAttribute(elem, 'opt-title', ''), ''));
+                        $.trigger(elem, 'change');
+                    } else {
+                        elem.value = '';
+                    }
+                    return that;
                 }
                 var val = $.getAttribute(item, 'data-value'),
-                    num = $.getAttribute(item, 'opt-idx').toInt(),
-                    cur = $.getAttribute(elem, 'opt-idx').toInt();
+                    num = $.getAttribute(item, 'opt-idx').toInt();
 
                 if (num > 0 && num === cur) {
-                    return this;
+                    $.console.log('nonono', num);
+                    return that;
                 }
 
                 if (elem.tagName === 'SELECT') {
@@ -1639,7 +1656,7 @@
                 }
                 $.trigger(elem, 'blur');
 
-                return this;
+                return that;
             },
             buildStyle: function () {
                 if (document.getElementById('input_option_panel_style_001') === null) {
@@ -1731,12 +1748,12 @@
                             txt = val + '<span class="i-t"> - ' + txt + '</span>';
                         }
                         if (cur) {
-                            curIdx = i;
+                            curIdx = idx;
                         }
                         html.push([
                             '<li class="input-option-panel-item', cur ? ' cur' : '', '"',
                             ' style="padding:', (cfg.number ? '0 5px 0 0' : '0 5px'), ';"',
-                            ' opt-idx="', i, '" data-value="', val.toString().replace(/["]/g, '&quot;'), '">',
+                            ' opt-idx="', (i + 1), '" data-value="', val.toString().replace(/["]/g, '&quot;'), '">',
                             cfg.number ? ('<i style="width:' + (n * 12) + 'px;">' + idx + '</i>') : '',
                             '<span>', txt, '</span>',
                             '</li>'
@@ -1748,6 +1765,8 @@
                 $.setAttribute(elem, 'opt-len', len);
                 $.setAttribute(elem, 'opt-idx', curIdx);
                 $.setAttribute(elem, 'opt-id', div.id);
+                var title = (cfg.title || '') + (cfg.name || '');
+                $.setAttribute(elem, 'opt-title', title.toString().replace(/["]/g, '&quot;'));
 
                 div.innerHTML = html.join('');
                 if (cfg.relative) {
@@ -1835,6 +1854,8 @@
                     ZINDEX = 99999999,
                     cfg = $.extend({
                         append: null,           //是否追加选项，true-表示options参数 + element属性options
+                        title: '请选择',         //选项默认标题（当没有选择选项时显示）
+                        name: '',               //选项名称
                         editable: null,         //选项是否可编辑，true-表示可以自由扩展选项
                         relative: null,         //相对位置(用于弹出层中的表单)，默认是绝对位置
                         number: null,           //是否显示序号(行号)
@@ -2129,7 +2150,8 @@
                                 typed = $.getAttribute(this, 'opt-typed', '0').toInt(),
                                 div = $I($.getAttribute(elem, 'opt-id')),
                                 arrowList = [37, 38, 40, 39],   //左 上 下 右
-                                vimKeyList = [72, 75, 74, 76, 77];  //H  K  J  L M
+                                vimKeyList = [72, 75, 74, 76, 77],  //H  K  J  L M
+                                shortcut = kc >= 48 && kc % 48 < 10;
 
                             if (kc.inArray([13, 108]) || ((ddl || keys.indexOf(32) < 0) && kc === 32)) {
                                 elem.focus();
@@ -2137,23 +2159,22 @@
                                 return false;
                             }
                             if ((kc.inArray(arrowList) || 
-                                ((ddl || opt.config.readonly || !kc.inArray(keys)) && (kc.inArray(vimKeyList) || kc % 48 < 10))) && 
+                                ((ddl || opt.config.readonly || !kc.inArray(keys)) && (kc.inArray(vimKeyList) || shortcut))) && 
                                 (ddl || opt.config.readonly || !typed)) {
                                 $.cancelBubble(ev);
                                 var idx = ($.getAttribute(elem, 'opt-idx') || '').toInt(),
                                     val = elem.value.trim(),
-                                    ps = $.input.getOptionValues(opt.options),
-                                    shortcut = kc % 48 < 10;
+                                    ps = $.input.getOptionValues(opt.options);
 
                                 if (!_haveOption(elem)) {
                                     _showOption(ev, elem, opt, 0);
-                                    idx = -1;
+                                    idx = 0;
                                 }
                                 if (shortcut) {
                                     idx = kc % 48;
                                 } else {
                                     if (!idx && '' === val && ps.indexOf(val) < 0) {
-                                        idx = -1;
+                                        idx = 0;
                                     }
                                     if (kc.inArray(vimKeyList)) {
                                         kc = arrowList[vimKeyList.indexOf(kc)] || kc;
@@ -2176,7 +2197,7 @@
                                     $.setTextCursorPosition(elem);
                                 } else if (!ddl && opt.config.readonly && kc.inArray([8, 46])) {
                                     //backspace, delete键，表示选项被取消，用-2表示索引
-                                    $.input.selectOptionItem(-2, null, elem, $.getAttribute(elem, 'opt-id'));
+                                    $.input.selectOptionItem(-1, null, elem, $.getAttribute(elem, 'opt-id'));
                                     elem.value = '';
                                 }
                                 return true;

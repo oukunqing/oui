@@ -116,7 +116,6 @@ button {width:120px;height:28px;}
                 <td></td>
                 <td>
                     <select id="select2" onchange="console.log('select change:', this.value);">
-                        <option value="">--请选择--</option>
                         <option value="10001">第1项</option>
                     </select>
                 </td>
@@ -281,10 +280,11 @@ button {width:120px;height:28px;}
 
         $.setInputFormat('select1', {
             types: ['option', 'word'],
-            options: [{val:'',txt:'请选择'},'abc', 'acc', 'asd', '123', {val:456,txt:'456456'}, {val:'ABC123',txt:'输入选项ABC123ABC123'}, 'hello', 'world', 'abcdefg', 'helloworld'],
-            value: 456,
+            options: ['abc', 'acc', 'asd', '123', {val:456,txt:'456456'}, {val:'ABC123',txt:'输入选项ABC123ABC123'}, 'hello', 'world', 'abcdefg', 'helloworld', 'linux', 'windows'],
+            //value: 456,
             //showValue: 同时显示值value和文本text，如果value===text则只显示text
             config: { 
+                name: '选项',
                 //是否显示序号（行号），默认不显示
                 number: true, 
                 //是否显示“值”
@@ -360,7 +360,7 @@ button {width:120px;height:28px;}
 
         $.setInputFormat('ddlDialogOpt2', {
             types: ['option', 'word'],
-            options: [{val:'',txt:'请选择'},'abc', 'acc', 'asd', '123', {val:456,txt:'456456'}, {val:'ABC123',txt:'输入选项ABC123'}, 'hello', 'world', 'abcdefg', 'helloworld'],
+            options: [{val:'',txt:'空选项'},'abc', 'acc', 'asd', '123', {val:456,txt:'456456'}, {val:'ABC123',txt:'输入选项ABC123'}, 'hello', 'world', 'abcdefg', 'helloworld'],
             value: 456,
             //showValue: 同时显示值value和文本text，如果value===text则只显示text
             config: { 

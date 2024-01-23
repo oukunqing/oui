@@ -450,7 +450,7 @@
 
                 $.setAttribute(elem, 'opt-id', box.id);
                 $.setAttribute(elem, 'opt-len', len);
-                $.setAttribute(elem, 'opt-idx', -1);
+                $.setAttribute(elem, 'opt-idx', 0);
 
                 if (opt.multi) {
                     if (opt.layout !== Config.Layout.List && len > 3 || len > 5) {
@@ -532,7 +532,7 @@
                             '<li class="oui-ddl-item" style="',
                             opt.layout !== Config.Layout.List ? 'float:left;' : '',
                             opt.layout === Config.Layout.Grid ? 'min-width:' + Factory.getStyleSize(minWidth || opt.itemWidth) + ';' : '',
-                            '" opt-idx="', i, '" data-value="', val.toString().replace(/["]/g, '&quot;'),
+                            '" opt-idx="', (i + 1), '" data-value="', val.toString().replace(/["]/g, '&quot;'),
                             '">',
                             '<label  class="oui-ddl-label', opt.layout !== Config.Layout.List && opt.itemBorder ? ' oui-ddl-label-border' : '', '">',
                             '<input class="oui-ddl-chb"', checked,
@@ -661,7 +661,7 @@
                             i = minList.indexOf(kc);
                         }
                         $.trigger(btns[i], 'click');
-                    } else if (kc % 48 < 10) {
+                    } else if (kc >= 48 && kc % 48 < 10) {
                         that.select(kc % 48, kc, true, div);
                     }
                     return false;
@@ -680,31 +680,31 @@
                 nodes = that.nodes,
                 len = nodes.length,
                 elem = opt.select ? that.elem : that.text,
-                idx = num < 0 ? 0 : num >= len ? len - (shortcut ? 0 : 1) : num,
+                idx = num < 0 ? 0 : num > len ? len : num,
                 cur = $.getAttribute(elem, 'opt-idx').toInt();
 
             if (shortcut) {
-                if (len < 10 || cur <= 0 || (cur * 10 + idx > len)) {
-                    idx -= 1;
-                } else {
-                    //TODO:
-                    $.console.log('select:', cur, idx);
+                if (len >= 10) {
+                    var ni = cur * 10 + idx;
+                    if (ni > len) {
+                        ni = idx;
+                    }
+                    idx = ni;
                 }
-                $.console.log('select:', idx);
             } else {
                 if ($.isNumber(keyCode)) {
                     switch(keyCode) {
-                    case 37: idx = 0; break;
-                    case 39: idx = len - 1; break;
-                    //M键（中间位置项）
-                    case 77: idx = parseInt(len / 2, 10) - (len % 2 ? 0 : 1); break;
+                        case 37: idx = 1; break;
+                        case 39: idx = len; break;
+                        case 77: idx = parseInt(len / 2, 10) + (len % 2 ? 1 : 0); break;
                     }
                 }
-                if ((idx > 0 && idx === cur) || !nodes[idx]) {
+                if ((idx > 0 && idx === cur) || !nodes[idx - 1]) {
                     return that;
                 }
             }
-            $.setAttribute(elem, 'opt-idx', idx);
+            $.setAttribute(elem, 'opt-idx', idx--);
+            $.scrollTo(nodes[idx < 0 ? 0 : idx].label, div);
 
             if (opt.multi) {
                 for (var i = 0; i < nodes.length; i++) {
@@ -713,8 +713,11 @@
                 $.setAttribute(elem, 'opt-hover', 1);
             } else {
                 that.action(nodes[idx], true, false);
-            }            
-            $.scrollTo(nodes[idx < 0 ? 0 : idx].label, div);
+                if (idx < 0 && cur > 0) {
+                    nodes[cur - 1].set(false, false);
+                    that.get();
+                }
+            }
             return that;
         },
         action: function (node, show, clickEvent) {
@@ -723,13 +726,14 @@
                 nodes = that.nodes,
                 multi = opt.multi;
 
+            if ($.isNumber(node)) {
+                node = nodes[node - 1];
+            }
+            if (!node) {
+                return that.callback();
+            }
+
             if (multi) {
-                if ($.isNumber(node)) {
-                    node = nodes[node];
-                }
-                if (!node) {
-                    return that;
-                }
                 //检测多选项的数量限制
                 if (!node.checked && opt.maxLimit && that.list(true).length >= opt.maxLimit) {
                     return that.msg();
