@@ -289,17 +289,25 @@
             return that;
         },
         keyPaging = function (ev, that, obj) {
-            var op = that.options, pageIndex = 0, ec = ev.keyCode;
-            if (ec === 13) {
+            //H-72 J-74 K-75 L-76 M-77
+            //D-68 F-70 B-66 U-85
+            var op = that.options, pageIndex = 0, kc = ev.keyCode;
+            if (kc === 13) {
                 pageIndex = getValue(obj);
-            } else if ((ec === 38 || ec === 72) && op.pageIndex > op.pageStart) {
+            } else if ((kc === 38 || kc === 72) && op.pageIndex > op.pageStart) {
                 pageIndex = op.pageStart + op.minuend;
-            } else if ((ec === 40 || ec === 76) && (op.pageIndex + op.minuend) < op.pageCount) {
+            } else if ((kc === 40 || kc === 76) && (op.pageIndex + op.minuend) < op.pageCount) {
                 pageIndex = op.pageCount;
-            } else if ((ec === 37 || ec === 75) && (op.pageIndex - op.minuend - op.pageStart) >= op.pageStart) {
+            } else if ((kc === 37 || kc === 75) && (op.pageIndex - op.minuend - op.pageStart) >= op.pageStart) {
                 pageIndex = op.pageIndex - 1 + op.minuend;
-            } else if ((ec === 39 || ec === 74) && (op.pageIndex + op.minuend) < op.pageCount) {
+            } else if ((kc === 39 || kc === 74) && (op.pageIndex + op.minuend) < op.pageCount) {
                 pageIndex = op.pageIndex + 1 + op.minuend;
+            } else if (kc === 77) {
+                pageIndex = parseInt(op.pageCount / 2, 10);// + (op.pageCount % 2 !== 0 ? 0 : 0);
+            } else if (kc === 68 || kc === 70) {    //D-68 F-70
+                pageIndex = op.pageIndex + (kc === 68 ? 5 : 10) + op.minuend;
+            } else if (kc === 66 || kc === 85) {    //B-66 U-85
+                pageIndex = op.pageIndex - (kc === 85 ? 5 : 10) + op.minuend;
             } else {
                 obj.value = obj.value.replace(/[^\d]/, '');
                 return false;
@@ -379,6 +387,7 @@
                 } else {
                     realCallback(that, checkInputValue(op, val - minuend));
                 }
+                return false;
             });
         },
         getClassName = function (that) {

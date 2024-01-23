@@ -94,6 +94,14 @@ label.oui-ddl-label span {
 label.oui-ddl-label span.del {
     text-decoration:line-through;
 }
+label.oui-ddl-label span.i-t {
+    color: #999;
+    margin: 0 0 0 8px;
+    padding: 0;
+    font-size: 14px;
+    border: none;
+    background: none;
+}
 
 label.oui-ddl-label-border {	
     border: solid 1px #ddd;
@@ -106,7 +114,7 @@ label.oui-ddl-cur {
 	background: #eee;
 	color: #000;
 }
-label.oui-ddl-label:hover,label.oui-ddl-hover {
+label.oui-ddl-label:hover,label.oui-ddl-cur:hover,label.oui-ddl-hover {
 	background: #d6e3f3;
 	color: #000;
 }
@@ -145,6 +153,16 @@ ul.oui-ddl-flow label.oui-ddl-cur,ul.oui-ddl-grid label.oui-ddl-cur {
 	background: #eee;
 }
 
+ul.oui-ddl-flow label.oui-ddl-hover,ul.oui-ddl-grid label.oui-ddl-hover {
+	background: #d6e3f3;
+	color: #000;
+}
+
+ul.oui-ddl-flow label.oui-ddl-cur:hover,ul.oui-ddl-grid label.oui-ddl-cur:hover {
+	background: #d6e3f3;
+	color: #000;
+}
+
 .oui-ddl-panel .oui-ddl-oper {
 	border: none;
 	border-top: solid 1px #eee;
@@ -180,6 +198,14 @@ ul.oui-ddl-flow label.oui-ddl-cur,ul.oui-ddl-grid label.oui-ddl-cur {
 	margin: 0;
 	font-size: 14px;
 	font-family: Arial,宋体;
+}
+.oui-ddl-panel button.btn em {
+	margin:0 0 0 3px;
+	padding: 0;
+	font-style: normal;
+}
+.oui-ddl-panel button.btn u {
+
 }
 .oui-ddl-panel button.btn:hover {
 	background: #e6e6e6;

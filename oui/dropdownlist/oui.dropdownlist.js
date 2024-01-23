@@ -294,8 +294,12 @@
             buttonPosition: 'center',
             //当没有“全选/反选”按钮时是否显示“确定”按钮
             showButton: false,
+            //是否支持按钮快捷键功能
+            shortcutKey: true,
+            //是否显示按钮快捷键数字
+            shortcutNum: false,
             //非列表布局时，是否显示选项边框
-            itemBorder: false,            
+            itemBorder: false,
             //是否允许扩展选项（可以自行输入不存在的选项值）
             editable: false,
             //是否多选，默认多选
@@ -401,47 +405,6 @@
                 opt.name = opt.title.replace(texts[0], '').replace(texts[1], '');
             }
 
-            $.addListener(elem, 'mousedown', function (ev) {
-                $.cancelBubble(ev);
-                that.show(this);
-                this.focus();
-                Factory.closeOther(that);
-                return true;
-            });
-            $.addListener(elem, 'keydown', function (ev) {
-                var kc = $.getKeyCode(ev),
-                    idx = ($.getAttribute(elem, 'opt-idx') || '').toInt(),
-                    div = $I($.getAttribute(elem, 'opt-id')),
-                    arrowList = [37, 38, 40, 39],   //左 上 下 右
-                    vimKeyList = [72, 75, 74, 76];  //H  K  J  L
-
-                if (kc.inArray([13, 32, 108])) {
-                    this.focus();
-                    $.cancelBubble(ev);
-                    var hover = $.getAttribute(elem, 'opt-hover', '0').toInt();
-                    if (hover) {
-                        that.action(idx, null, false);
-                        $.setAttribute(elem, 'opt-hover', 0);
-                    } else {
-                        that.show(this);
-                    }
-                } else if (kc.inArray([9, 27])) {
-                    if(div !== null && div.style.display !== 'none') {
-                        $.cancelBubble(ev);
-                    }
-                    that.hide();
-                } else if (kc.inArray(arrowList) || kc.inArray(vimKeyList)) {
-                    $.cancelBubble(ev);
-                    if (kc.inArray(vimKeyList)) {
-                        kc = arrowList[vimKeyList.indexOf(kc)];
-                    }
-                    idx = kc.inArray([37, 38]) ? idx - 1 : idx + 1;
-                    that.select(idx, kc);
-                    return false;
-                }
-                return false;
-            });
-
             if (opt.layout === Config.Layout.Grid && opt.itemWidth === '') {
                 opt.itemWidth = 'auto';
             }
@@ -543,17 +506,19 @@
                         html.push(['<li class="oui-ddl-item oui-ddl-head">', dr.head, '</li>'].join(''));
                     } else {
                         var val = $.getParam(dr, 'value,val,code,id', ''),
-                            txt = $.getParam(dr, 'name,text,txt', ''),
-                            desc = dr.desc || '',
-                            title = txt + (desc && txt !== desc ? ' - ' + desc : '');
+                            txt = $.getParam(dr, 'name,text,txt', '');
 
                         if (val === '' && txt === '') {
                             continue;
                         }
+
                         var chbId = key + val,
                             checked = dr.checked || dr.dc ? ' checked="checked" dc="1"' : '',
                             use = dr.enabled || dr.use,
-                            disabled = dr.disabled ? ' disabled="disabled"' : '';
+                            disabled = dr.disabled ? ' disabled="disabled"' : '',
+                            desc = dr.desc || '',
+                            title = txt + (desc && txt !== desc ? '<span class="i-t">- ' + desc + '</span>' : '');
+
                         html.push([
                             '<li class="oui-ddl-item" style="',
                             opt.layout !== Config.Layout.List ? 'float:left;' : '',
@@ -614,7 +579,7 @@
                             } else {
                                 $.setAttribute(elem, 'opt-hover', 0);
                                 that.action(node, true, true);
-                            }                       
+                            }
                         }
                     }));
                     that.indexs[chb.id] = i;
@@ -622,7 +587,14 @@
 
                 var btns = document.querySelectorAll('#' + Config.IdPrefix + opt.id + ' .oui-ddl-oper button');
                 for (i = 0; i < btns.length; i++) {
-                    btns[i].onclick = function () {
+                    if (opt.shortcutKey) {
+                        if (opt.shortcutNum) {
+                            btns[i].innerHTML += '<em>(<u>' + (i + 1) + '</u>)</em>';
+                        } else {
+                            btns[i].title += '快捷键: ' + (i + 1);
+                        }
+                    }
+                    $.addListener(btns[i], 'click', function(ev) {
                         var ac = $.getAttribute(this, 'ac');
                         if (ac === 'no') {
                             that.hide();
@@ -633,8 +605,58 @@
                             that.set('', parseInt(ac, 10));
                             that.callback(Config.CallbackLevel.Select);
                         }
-                    };
+                    });
                 }
+
+                $.addListener(elem, 'mousedown', function (ev) {
+                    $.cancelBubble(ev);
+                    that.show(this);
+                    this.focus();
+                    Factory.closeOther(that);
+                    return true;
+                });
+                $.addListener(elem, 'keydown', function (ev) {
+                    var kc = $.getKeyCode(ev),
+                        idx = ($.getAttribute(elem, 'opt-idx') || '').toInt(),
+                        div = $I($.getAttribute(elem, 'opt-id')),
+                        arrowList = [37, 38, 40, 39],   //左 上 下 右
+                        vimKeyList = [72, 75, 74, 76, 77],  //H  K  J  L M(中间)
+                        numList = [49, 50, 51, 52, 53],
+                        minList = [97, 98, 99, 100, 101];
+
+                    if (kc.inArray([13, 32, 108])) {
+                        this.focus();
+                        $.cancelBubble(ev);
+                        var hover = $.getAttribute(elem, 'opt-hover', '0').toInt();
+                        if (hover) {
+                            that.action(idx, null, false);
+                            $.setAttribute(elem, 'opt-hover', 0);
+                        } else {
+                            that.show(this);
+                        }
+                    } else if (kc.inArray([9, 27])) {
+                        if(div !== null && div.style.display !== 'none') {
+                            $.cancelBubble(ev);
+                        }
+                        that.hide();
+                    } else if (kc.inArray(arrowList) || kc.inArray(vimKeyList)) {
+                        $.cancelBubble(ev);
+                        if (kc.inArray(vimKeyList)) {
+                            kc = arrowList[vimKeyList.indexOf(kc)] || kc;
+                        }
+                        idx = kc.inArray([37, 38]) ? idx - 1 : idx + 1;
+                        that.select(idx, kc);
+                        return false;
+                    } else if (opt.shortcutKey && (kc.inArray(numList) || kc.inArray(minList))) {
+                        var i = numList.indexOf(kc);
+                        if (i < 0) {
+                            i = minList.indexOf(kc);
+                        }
+                        $.trigger(btns[i], 'click');
+                    }
+                    return false;
+                });
+
                 that.callback(Config.CallbackLevel.Initial);
             }, document.body);
 
@@ -654,6 +676,8 @@
                 switch(keyCode) {
                 case 37: idx = 0; break;
                 case 39: idx = len - 1; break;
+                //M键（中间位置项），索引从0开始，这里要减1
+                case 77: idx = parseInt(len / 2, 10) - 1; break;
                 }
             }
             if ((idx > 0 && idx === $.getAttribute(elem, 'opt-idx').toInt()) || !nodes[idx]) {
