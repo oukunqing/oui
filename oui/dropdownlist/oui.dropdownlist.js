@@ -294,6 +294,8 @@
             buttonPosition: 'center',
             //当没有“全选/反选”按钮时是否显示“确定”按钮
             showButton: false,
+            //是否显示序号(行号)
+            showNumber: false,
             //是否支持按钮快捷键功能
             shortcutKey: true,
             //是否显示按钮快捷键数字
@@ -505,8 +507,15 @@
                     } else if (dr.head) {
                         html.push(['<li class="oui-ddl-item oui-ddl-head">', dr.head, '</li>'].join(''));
                     } else {
+                        if ($.isString(dr, true) || $.isNumber(dr)) {
+                            dr = {val: dr, txt: dr};
+                        } else if ($.isArray(dr)) {
+                            dr = {val: dr[0], txt: dr[1] || dr[0]}
+                        } else if (!$.isObject(dr)) {
+                            continue;
+                        }
                         var val = $.getParam(dr, 'value,val,code,id', ''),
-                            txt = $.getParam(dr, 'name,text,txt', '');
+                            txt = $.getParam(dr, 'name,text,txt', '') + '';
 
                         if (val === '' && txt === '') {
                             continue;
@@ -590,9 +599,8 @@
                     if (opt.shortcutKey) {
                         if (opt.shortcutNum) {
                             btns[i].innerHTML += '<em>(<u>' + (i + 1) + '</u>)</em>';
-                        } else {
-                            btns[i].title += '快捷键: ' + (i + 1);
                         }
+                        btns[i].title += '快捷键: shift + ' + (i + 1);
                     }
                     $.addListener(btns[i], 'click', function(ev) {
                         var ac = $.getAttribute(this, 'ac');
@@ -645,14 +653,16 @@
                             kc = arrowList[vimKeyList.indexOf(kc)] || kc;
                         }
                         idx = kc.inArray([37, 38]) ? idx - 1 : idx + 1;
-                        that.select(idx, kc);
+                        that.select(idx, kc, false, div);
                         return false;
-                    } else if (opt.shortcutKey && (kc.inArray(numList) || kc.inArray(minList))) {
+                    } else if (opt.shortcutKey && ev.shiftKey && (kc.inArray(numList) || kc.inArray(minList))) {
                         var i = numList.indexOf(kc);
                         if (i < 0) {
                             i = minList.indexOf(kc);
                         }
                         $.trigger(btns[i], 'click');
+                    } else if (kc % 48 < 10) {
+                        that.select(kc % 48, kc, true, div);
                     }
                     return false;
                 });
@@ -664,24 +674,35 @@
 
             return that;
         },
-        select: function (num, keyCode) {
+        select: function (num, keyCode, shortcut, div) {
             var that = this,
                 opt = that.options,
                 nodes = that.nodes,
                 len = nodes.length,
                 elem = opt.select ? that.elem : that.text,
-                idx = num < 0 ? 0 : num >= len ? len - 1 : num;
+                idx = num < 0 ? 0 : num >= len ? len - (shortcut ? 0 : 1) : num,
+                cur = $.getAttribute(elem, 'opt-idx').toInt();
 
-            if ($.isNumber(keyCode)) {
-                switch(keyCode) {
-                case 37: idx = 0; break;
-                case 39: idx = len - 1; break;
-                //M键（中间位置项），索引从0开始，这里要减1
-                case 77: idx = parseInt(len / 2, 10) - 1; break;
+            if (shortcut) {
+                if (len < 10 || cur <= 0 || (cur * 10 + idx > len)) {
+                    idx -= 1;
+                } else {
+                    //TODO:
+                    $.console.log('select:', cur, idx);
                 }
-            }
-            if ((idx > 0 && idx === $.getAttribute(elem, 'opt-idx').toInt()) || !nodes[idx]) {
-                return that;
+                $.console.log('select:', idx);
+            } else {
+                if ($.isNumber(keyCode)) {
+                    switch(keyCode) {
+                    case 37: idx = 0; break;
+                    case 39: idx = len - 1; break;
+                    //M键（中间位置项）
+                    case 77: idx = parseInt(len / 2, 10) - (len % 2 ? 0 : 1); break;
+                    }
+                }
+                if ((idx > 0 && idx === cur) || !nodes[idx]) {
+                    return that;
+                }
             }
             $.setAttribute(elem, 'opt-idx', idx);
 
@@ -692,7 +713,8 @@
                 $.setAttribute(elem, 'opt-hover', 1);
             } else {
                 that.action(nodes[idx], true, false);
-            }
+            }            
+            $.scrollTo(nodes[idx < 0 ? 0 : idx].label, div);
             return that;
         },
         action: function (node, show, clickEvent) {

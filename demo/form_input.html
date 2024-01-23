@@ -285,7 +285,9 @@ button {width:120px;height:28px;}
             value: 456,
             //showValue: 同时显示值value和文本text，如果value===text则只显示text
             config: { 
-                showNumber: true, 
+                //是否显示序号（行号），默认不显示
+                number: true, 
+                //是否显示“值”
                 showValue: true,
                 //选项框最大显示高度，默认为360px
                 //maxHeight: 400,
@@ -295,11 +297,14 @@ button {width:120px;height:28px;}
 
         $.setInputFormat('select2', {
             types: ['option', 'word'],
-            options: [{val:456,txt:'456456'}, {val:'ABC123',txt:'输入选项ABC123ABC123'}, 'hello', 'world', 'abcdefg', 'helloworld'],
+            options: [{val:456,txt:'456456'}, {val:'ABC123',txt:'选项ABC123'}, 'hello', 'world', 'abcdefg', 'helloworld'],
             value: 'ABC123',
             //showValue: 同时显示值value和文本text，如果value===text则只显示text
             config: { 
+                //是否追加选项，追加选项表示将select控件元素原有的<option>项 + options配置 作为选项参数
+                //若 append:false 是不启用原有<option>项的
                 append: true,
+                //是否显示序号（行号），默认不显示
                 showNumber: true, 
                 showValue: true,
                 //选项框最大显示高度，默认为360px

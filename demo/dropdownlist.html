@@ -29,6 +29,9 @@
 <input type="text" id="ServerType3" style="" />
 <br />
 <br />
+<input type="text" id="ServerType4" style="" />
+<br />
+<br />
 <input type="text" />
 </body>
 </html>
@@ -172,6 +175,7 @@ window.onload = function() {
 			{ id: 4, name: '视频服务', desc: '' },
 			{ id: 5, name: '图片采集服务', desc: '' },
 			{ id: 6, name: '平台级联服务', desc: '' },
+			{ id: 7, name: '图片分析服务', desc: '' },
 		],
 		layout: 'grid',
 		boxWidth: 'follow',
@@ -185,6 +189,33 @@ window.onload = function() {
         callbackDebounce: true,
         //是否单选，默认多选
         multi: true,
+        //是否支持按钮快捷键（默认支持）
+        shortcutKey: true,
+        //是否显示快捷键数字（默认不显示）
+        shortcutNum: true,
+		title: '选择服务类型',
+		//按钮位置： left,center,right
+		buttonPosition: 'right',
+		callback: function (values, initial, ddl) {
+			$.console.log('initial22:', initial, ddl);
+			getDeviceList();
+		}
+	});
+
+	$.dropdownlist({
+		id: 'ServerType4',
+		element: 'ServerType4',
+		items: [
+			1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32
+		],
+		boxWidth: 'follow',
+		itemWidth: '48%',
+		maxHeight: 400,
+		itemBorder: true,
+        //callbackLevel: 0,
+        callbackDebounce: true,
+        //是否单选，默认多选
+        multi: false,
         //是否支持按钮快捷键（默认支持）
         shortcutKey: true,
         //是否显示快捷键数字（默认不显示）

@@ -36,7 +36,7 @@
 	position:absolute;
 	z-index:999999;
 	display:block;
-	overflow:hidden;
+	overflow:auto;
 	border:solid 1px #ccc;
     box-shadow: 0 2px 3px 0 rgba(0,0,0,.32);
 	box-sizing: border-box;

@@ -1437,7 +1437,7 @@
                 return true;
             },
             isInOption: function (opt, val) {
-                if (val === '' || !$.isArray(opt)) {
+                if (!$.isArray(opt)) {
                     return false;
                 }
                 for (var i = 0; i < opt.length; i++) {
@@ -1576,41 +1576,49 @@
                 }
                 return this;
             },
-            selectOptionItem: function (item, keyCode, elem, div) {
+            selectOptionItem: function (item, keyCode, elem, div, shortcut) {
                 if (!$.isElement(div = $.toElement(div))) {
                     return this;
                 }
                 var isArrowKey = $.isNumber(item);
                 if (isArrowKey) {
-                    var num = item, n = num,
+                    var idx = item, n = idx,
                         arr = div.querySelectorAll('li'),
                         len = arr.length;
 
-                    if (num < 0) {
-                        num = 0;
-                    } else if (num >= len) {
-                        num = len - 1;
+                    if (idx < 0) {
+                        idx = 0;
+                    } else if (idx >= len) {
+                        idx = len - (shortcut ? 0 : 1);
                     }
-
-                    if ($.isNumber(keyCode)) {
-                        switch(keyCode) {
-                            case 37: num = 0; break;
-                            case 39: num = len - 1; break;
+                    if (shortcut) {
+                        if (len < 10) {
+                            idx -= 1;
+                        } else {
+                            //TODO:
+                            
+                        }
+                    } else {                        
+                        if ($.isNumber(keyCode)) {
+                            switch(keyCode) {
+                                case 37: idx = 0; break;
+                                case 39: idx = len - 1; break;
+                                case 77: idx = parseInt(len / 2, 10) - (len % 2 ? 0 : 1); break;
+                            }
                         }
                     }
-
                     //如果索引序号为-2表示输入框中的内容选项被清除，当前没有选项被选中
                     //所以要清除选项中的当前选项标记
-                    $.input.setCurrentOption(n >= -1 ? num : n, div);
+                    $.input.setCurrentOption(n >= -1 ? idx : n, div);
 
-                    item = arr[num];
+                    item = arr[idx];
                     $.scrollTo(item, div);
                 }
                 var val = $.getAttribute(item, 'data-value'),
-                    idx = $.getAttribute(item, 'opt-idx').toInt(),
+                    num = $.getAttribute(item, 'opt-idx').toInt(),
                     cur = $.getAttribute(elem, 'opt-idx').toInt();
 
-                if (idx > 0 && idx === cur) {
+                if (num > 0 && num === cur) {
                     return this;
                 }
 
@@ -1624,7 +1632,7 @@
                 } else {
                     elem.value = val;
                 }
-                $.setAttribute(elem, 'opt-idx', idx);
+                $.setAttribute(elem, 'opt-idx', num);
 
                 if (!isArrowKey) {
                     div.style.display = 'none';
@@ -1844,6 +1852,9 @@
                     MAX_HEIGHT: MAX_HEIGHT,
                     ZINDEX: ZINDEX
                 });
+
+                cfg.number = $.getParam(cfg, 'number,showNumber', null);
+                cfg.showValue = $.getParam(cfg, 'value,showValue', null);
 
                 //获取默认参数值，如果没有明确配置参数值，则从element属性中获取
                 var ks = [['append'], ['editable'],['relative'],['number']];
@@ -2118,29 +2129,39 @@
                                 typed = $.getAttribute(this, 'opt-typed', '0').toInt(),
                                 div = $I($.getAttribute(elem, 'opt-id')),
                                 arrowList = [37, 38, 40, 39],   //左 上 下 右
-                                vimKeyList = [72, 75, 74, 76];  //H  K  J  L
+                                vimKeyList = [72, 75, 74, 76, 77];  //H  K  J  L M
 
                             if (kc.inArray([13, 108]) || ((ddl || keys.indexOf(32) < 0) && kc === 32)) {
                                 elem.focus();
                                 _showOption(ev, elem, opt);
                                 return false;
                             }
-                            if ((kc.inArray(arrowList) || ((ddl || opt.config.readonly || !kc.inArray(keys)) && kc.inArray(vimKeyList))) && 
+                            if ((kc.inArray(arrowList) || 
+                                ((ddl || opt.config.readonly || !kc.inArray(keys)) && (kc.inArray(vimKeyList) || kc % 48 < 10))) && 
                                 (ddl || opt.config.readonly || !typed)) {
                                 $.cancelBubble(ev);
-                                var idx = ($.getAttribute(elem, 'opt-idx') || '').toInt();
+                                var idx = ($.getAttribute(elem, 'opt-idx') || '').toInt(),
+                                    val = elem.value.trim(),
+                                    ps = $.input.getOptionValues(opt.options),
+                                    shortcut = kc % 48 < 10;
+
                                 if (!_haveOption(elem)) {
                                     _showOption(ev, elem, opt, 0);
                                     idx = -1;
                                 }
-                                if (!idx && !elem.value.trim()) {
-                                    idx = -1;
+                                if (shortcut) {
+                                    idx = kc % 48;
+                                } else {
+                                    if (!idx && '' === val && ps.indexOf(val) < 0) {
+                                        idx = -1;
+                                    }
+                                    if (kc.inArray(vimKeyList)) {
+                                        kc = arrowList[vimKeyList.indexOf(kc)] || kc;
+                                    }
+                                    idx = kc.inArray([37, 38]) ? idx - 1 : idx + 1;
                                 }
-                                if (kc.inArray(vimKeyList)) {
-                                    kc = arrowList[vimKeyList.indexOf(kc)];
-                                }
-                                idx = kc.inArray([37, 38]) ? idx - 1 : idx + 1;
-                                $.input.selectOptionItem(idx, kc, elem, $.getAttribute(elem, 'opt-id'));
+                                $.input.selectOptionItem(idx, kc, elem, $.getAttribute(elem, 'opt-id'), shortcut);
+
                                 return true;
                             }
                             if ($.input.checkKey(ev, ctls, excepts, opt) || $.input.checkKey(ev, funs, excepts, opt)) {
@@ -2211,7 +2232,7 @@
                                     $.setAttribute(elem, 'opt-typed', $.input.isInputTyped(ps, val) ? 1 : 0);
                                     return true;
                                 }
-                                if ((ctl = $.input.replaceValue(ev, elem, val, isCnAble, converts, $.input.getOptionValues(opt.options))).replace) {
+                                if ((ctl = $.input.replaceValue(ev, elem, val, isCnAble, converts, ps)).replace) {
                                     $.setAttribute(elem, 'opt-typed', $.input.isInputTyped(ps, ctl.val) ? 1 : 0);
                                     return false;
                                 }

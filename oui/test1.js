@@ -224,12 +224,12 @@ console.log(str.replace('http:', 'https:'));
 
 function buildResult(arrActor, arrDub) {
     var len1 = arrActor.length,
-        len2 = arrDub.length,
-        reverse = len2 > len1,
-        len = reverse ? len2 : len1,
-        x = 0,
-        y = 0,
-        res = [];
+    len2 = arrDub.length,
+    reverse = len2 > len1,
+    len = reverse ? len2 : len1,
+    x = 0,
+    y = 0,
+    res = [];
 
     for (var i = 0; i < len; i++) {
         res.push({ 'actor': arrActor[x], 'dub': arrDub[y] });
@@ -265,9 +265,9 @@ console.log(2.5 * 0.50);
 
 function distillPlayIndex(con) {
     var pos = con.indexOf('$http'),
-        txt = con.substr(0, pos),
-        pattern = /(第|集|期|[-]{2,})/gi,
-        idx = txt.replace(pattern, '');
+    txt = con.substr(0, pos),
+    pattern = /(第|集|期|[-]{2,})/gi,
+    idx = txt.replace(pattern, '');
     return idx.replace(/(^[\s]*)|([\s]*$)/g, '');;
 }
 
@@ -346,7 +346,7 @@ console.log(n22.toDate().format('tms'));
 var pp = /\<(img[\w\d\s\=\"\-\:\/\.]+)/i;
 
 var str = '<div id="main" class="main" v-data="accd" lang="2" custom-attr="hello" a-b-c="123"> <div class="left tree t1">左边栏</div>'
-    + '<img src="http://www.baidu.com/logo.png" /> </div>';
++ '<img src="http://www.baidu.com/logo.png" /> </div>';
 console.log(pp.test(str));
 console.log(str.match(pp));
 
@@ -378,7 +378,7 @@ function buildDeviceCodeList(devCode) {
 console.log(buildDeviceCodeList('abc'));
 
 var url = "http://122.227.179.90:40000/device?action=getdeviceinfo&html=1&log=1" +
-    "&status=-1&version=1&data=1&page=a&size=20";
+"&status=-1&version=1&data=1&page=a&size=20";
 var pattern = /(&page=[\d\w]{0,}|&pageIndex=[\d\w]{0,})/i;
 var url2 = url.replace(pattern, '');
 console.log(url2);
@@ -719,7 +719,7 @@ var items = [
     { host: 'abc', len: 3 },
     { host: 'acc', len: 2 },
     { host: 'asd', len: 5 }
-];
+    ];
 
 items.sort(function (a, b) {
     return a.len - b.len;
@@ -769,22 +769,22 @@ function parseCapturePlan(plan) {
         var j = 0;
         for (var i = 0; i < con.length; i += 6) {
             var h = hexToInt(con.substr(i, 2)),
-                m = hexToInt(con.substr(i + 2, 2)),
-                p = hexToInt(con.substr(i + 4, 2));
+            m = hexToInt(con.substr(i + 2, 2)),
+            p = hexToInt(con.substr(i + 4, 2));
 
             j++;
             switch (j % 3) {
-                case 0:
-                    t += ' - ' + h + ':' + m + ' ]';
-                    times.push(t);
-                    t = '';
-                    break;
-                case 1:
-                    t += parseInt(h, 10) * 60 + parseInt(m, 10) + ' ';
-                    break;
-                case 2:
-                    t += '[ ' + h + ':' + m;
-                    break;
+            case 0:
+                t += ' - ' + h + ':' + m + ' ]';
+                times.push(t);
+                t = '';
+                break;
+            case 1:
+                t += parseInt(h, 10) * 60 + parseInt(m, 10) + ' ';
+                break;
+            case 2:
+                t += '[ ' + h + ':' + m;
+                break;
             }
         }
     }
@@ -919,18 +919,18 @@ console.log('ts:', ts)
 
 var opt = [
     [5, '5'], [10, '10']
-];
+    ];
 
 console.log(1.5 * 60 * 60);
 
 
 var getTimeNumber = function () {
     var dt = new Date(),
-        h = dt.getHours(),
-        m = dt.getMinutes(),
-        s = dt.getSeconds(),
-        val = h + '' + (m < 10 ? '0' + m : m) + '' + (m < 10 ? '0' + s : s),
-        num = parseInt(val, 10);
+    h = dt.getHours(),
+    m = dt.getMinutes(),
+    s = dt.getSeconds(),
+    val = h + '' + (m < 10 ? '0' + m : m) + '' + (m < 10 ? '0' + s : s),
+    num = parseInt(val, 10);
     return num;
 };
 
@@ -957,191 +957,191 @@ var n = 35,         //总数量
     y = 1,          //送的数量
     p = 8;          //单价
 
-var num = (n - n % (x + y)) * x / (x + y) * p + (n % (x + y) * p);
-console.log('总价：', num)
+    var num = (n - n % (x + y)) * x / (x + y) * p + (n % (x + y) * p);
+    console.log('总价：', num)
 
-var num2 = n * x / (x + y) * p;
-console.log('总价：', num2);
+    var num2 = n * x / (x + y) * p;
+    console.log('总价：', num2);
 
-console.log('\n\n\n')
-console.log((1638518099).toDate().format());
-console.log('8d2aab61'.hexToInt(true).toDate().format('ts'));
+    console.log('\n\n\n')
+    console.log((1638518099).toDate().format());
+    console.log('8d2aab61'.hexToInt(true).toDate().format('ts'));
 
-var con = 'abc<svg xmls="http:///"></svg>acc';
-var pattern = /[<](svg)(.|\n)*?[><\/](svg)[>]/;
+    var con = 'abc<svg xmls="http:///"></svg>acc';
+    var pattern = /[<](svg)(.|\n)*?[><\/](svg)[>]/;
 
-console.log(con.match(pattern));
+    console.log(con.match(pattern));
 
-console.log(con.replace(pattern, "$1 $3", "img"))
+    console.log(con.replace(pattern, "$1 $3", "img"))
 
-var con = 'abc<svg xmls="http://www.baidu.com/"></svg><svg xmls="http://www.baidu.com/"></svg>acc';
-console.log(con.replace(/[<](svg)/gi, "<img").replace(/><\/svg>/gi, " />"));
+    var con = 'abc<svg xmls="http://www.baidu.com/"></svg><svg xmls="http://www.baidu.com/"></svg>acc';
+    console.log(con.replace(/[<](svg)/gi, "<img").replace(/><\/svg>/gi, " />"));
 
-var pattern = /^[0-9A-Z][0-9A-Z_#&$\-]{1,16}$/i;
-var id = '869383054030390@';
+    var pattern = /^[0-9A-Z][0-9A-Z_#&$\-]{1,16}$/i;
+    var id = '869383054030390@';
 
-console.log(pattern.test(id));
+    console.log(pattern.test(id));
 
-var filesize = 1069238;
-var mb = 1024 * 1024;
+    var filesize = 1069238;
+    var mb = 1024 * 1024;
 
-var tn = parseInt(filesize / mb, 10);
-console.log(tn);
-var fs = tn + (Math.round((filesize % mb) / mb * 1000) / 1000) + 'MB';
+    var tn = parseInt(filesize / mb, 10);
+    console.log(tn);
+    var fs = tn + (Math.round((filesize % mb) / mb * 1000) / 1000) + 'MB';
 
-console.log(fs);
-console.log((Math.round((filesize % mb) * 1000) / 1000));
+    console.log(fs);
+    console.log((Math.round((filesize % mb) * 1000) / 1000));
 
-console.log(filesize % mb / mb);
+    console.log(filesize % mb / mb);
 
-console.log(mb);
-
-
-var url = 'http://112.54.97.178:81/api/?id=123&type=udp&line=-1';
-url = url.setUrlParam({ line: 0, transmode: "udp" }, false);
-console.log(url);
-
-var val = false;
-console.log($.isBoolean(val, true))
-
-console.log($.setUrlParam('key', 'val', true));
-
-var str = 'line={line|-1_1}&type={type;type2|udp}';
-console.log(str.format({ line: 2, type3: 123 }));
-
-var str = 'line={data.key2,key|a}';
-console.log(str.format({ data: { key3: 'abc' } }));
-
-var str = "val2={val}";
-console.log(str.formatError(false).format({ val2: 123 }));
-
-var str = "val3={data.val}";
-console.log(str.format({ data: { val: 12345 } }));
-
-var str = "id={data>id,code|-1}";
-console.log(str.format({ data: { ids: "abc" } }));
-
-var str = "id={0:d3}";
-console.log(str.format(1));
-
-console.log('{0:X4}'.format(121))
-console.log('{0:X4}'.format(0x79))
+    console.log(mb);
 
 
+    var url = 'http://112.54.97.178:81/api/?id=123&type=udp&line=-1';
+    url = url.setUrlParam({ line: 0, transmode: "udp" }, false);
+    console.log(url);
 
-console.log('dt:', '2021-01-06 13:25:12'.toDate('HH:mm'))
-console.log('{0:F3}'.format(12.5))
+    var val = false;
+    console.log($.isBoolean(val, true))
 
-console.log('{0:s644}'.format('330226195905265112'))
-console.log('{0:-344}'.format('13626836885'))
-console.log('13626836885'.formatTo('{0:-}'))
-console.log('{0::}'.format('330226195905265112'))
-var num = 12.5;
-console.log(num.formatTo('{0:C3}'))
-console.log(num.formatTo('{0:F3}'))
-console.log((12).formatTo('{0:D3}'))
+    console.log($.setUrlParam('key', 'val', true));
 
-var k = 's';
-console.log('a b c'.replace(new RegExp('\\' + k, 'gi'), '2'))
+    var str = 'line={line|-1_1}&type={type;type2|udp}';
+    console.log(str.format({ line: 2, type3: 123 }));
 
-console.log('{0:S34}'.substr(2 + 1, 1));
-console.log('{0:s445}'.format('12345678901234001'))
+    var str = 'line={data.key2,key|a}';
+    console.log(str.format({ data: { key3: 'abc' } }));
 
+    var str = "val2={val}";
+    console.log(str.formatError(false).format({ val2: 123 }));
 
-console.log((1 + 100) * 50)
+    var str = "val3={data.val}";
+    console.log(str.format({ data: { val: 12345 } }));
 
+    var str = "id={data>id,code|-1}";
+    console.log(str.format({ data: { ids: "abc" } }));
 
-var x = 2, y = 100;
-var z = (x + y) * (y - x + 1) / 2;
+    var str = "id={0:d3}";
+    console.log(str.format(1));
 
-console.log(z);
-
-
-console.log('重新加载'.chineseToUnicode());
-console.log('重新加载'.toUnicode());
-console.log('\\u91cd\\u65b0\\u52a0\\u8f7d'.unUnicode());
-
-console.log($.unUnicode('\\u91cd\\u65b0\\u52a0\\u8f7d'));
+    console.log('{0:X4}'.format(121))
+    console.log('{0:X4}'.format(0x79))
 
 
-console.log((1642439910).toDate().format());
-console.log('e1a4e561'.hexToInt(true).toDate().format('ts'));
-console.log('8d2aab61'.hexToInt(true));
+
+    console.log('dt:', '2021-01-06 13:25:12'.toDate('HH:mm'))
+    console.log('{0:F3}'.format(12.5))
+
+    console.log('{0:s644}'.format('330226195905265112'))
+    console.log('{0:-344}'.format('13626836885'))
+    console.log('13626836885'.formatTo('{0:-}'))
+    console.log('{0::}'.format('330226195905265112'))
+    var num = 12.5;
+    console.log(num.formatTo('{0:C3}'))
+    console.log(num.formatTo('{0:F3}'))
+    console.log((12).formatTo('{0:D3}'))
+
+    var k = 's';
+    console.log('a b c'.replace(new RegExp('\\' + k, 'gi'), '2'))
+
+    console.log('{0:S34}'.substr(2 + 1, 1));
+    console.log('{0:s445}'.format('12345678901234001'))
+
+
+    console.log((1 + 100) * 50)
+
+
+    var x = 2, y = 100;
+    var z = (x + y) * (y - x + 1) / 2;
+
+    console.log(z);
+
+
+    console.log('重新加载'.chineseToUnicode());
+    console.log('重新加载'.toUnicode());
+    console.log('\\u91cd\\u65b0\\u52a0\\u8f7d'.unUnicode());
+
+    console.log($.unUnicode('\\u91cd\\u65b0\\u52a0\\u8f7d'));
+
+
+    console.log((1642439910).toDate().format());
+    console.log('e1a4e561'.hexToInt(true).toDate().format('ts'));
+    console.log('8d2aab61'.hexToInt(true));
 //a55a0e00485a534830303130453637353530303935 05ce21 01 ff 61e5a4e6 0000000000000000 1a1996
 
-console.log('e1a4e561'.hexToInt(true).toDate().format());
-console.log('5e15e661'.hexToInt(true).toDate().format());
-console.log('e2a4e561'.hexToInt(true).toDate().format());
-console.log('0527e661'.hexToInt(true).toDate().format());
+    console.log('e1a4e561'.hexToInt(true).toDate().format());
+    console.log('5e15e661'.hexToInt(true).toDate().format());
+    console.log('e2a4e561'.hexToInt(true).toDate().format());
+    console.log('0527e661'.hexToInt(true).toDate().format());
 
 //a55a0400485a53483030313045363735353030393507e6010527e661100096
 
 
-var str22 = 'abc123';
-console.log(str22.insert('Hello', 1, 2));
+    var str22 = 'abc123';
+    console.log(str22.insert('Hello', 1, 2));
 
 
-console.log('{0:s44-}'.format('1234567890123400123456'))
-console.log('{0:s64-}'.format('330681198103093291'))
+    console.log('{0:s44-}'.format('1234567890123400123456'))
+    console.log('{0:s64-}'.format('330681198103093291'))
 
-var num = 450*2+1080+1500*6+2100+3000*2;
-console.log(num);
-var num = 360*3+1200*9;
-console.log(num);
-
-
-var num = 330*3+890+1100*8;
-console.log(num);
-var num = 240*4+520+800*7;
-
-var x = 50, y = 80, c = 800;
-
-var a2 = 50 * c / y;
-
-console.log('a: ', a2);
-
-var z = (x + y) * ( c / y) / 2;
-
-console.log(z)
-
-var path = 'HTTP://112.54.97.178:81/upfiles/datum/update-20230419.1000-76c638ade0081c2c9cb499675e32be20-33181822-V1.tar.gz?ts=1234';
-
-console.log('path:', path);
-console.log('getFilePath:', path.getFilePath(true));
-console.log('getUrlHost:', path.getUrlHost(true));
-
-console.log($.getUrlHost(path, true));
-console.log($.getFilePath(path, 'http://112.54.97.178:81/upfiles/datum/'));
-console.log('getFileName:', $.getFileName(path, false));
-console.log('getFileName:', $.getFileName(path, true));
-console.log('getFileName:', path.getFileName(true));
-console.log($.getFullPath(path, true));
-console.log(path.getFullPath( true));
-console.log(path.getExtension( true));
-console.log(path.getFileDir( true));
-console.log('/upfiles/datum/update-20230419.rar'.getFileDir());
-console.log('/upfiles/datum/update-20230419.rar'.getFileDirName());
-
-console.log((4780638).toFileSize());
+    var num = 450*2+1080+1500*6+2100+3000*2;
+    console.log(num);
+    var num = 360*3+1200*9;
+    console.log(num);
 
 
-var title='', userId = 0;
+    var num = 330*3+890+1100*8;
+    console.log(num);
+    var num = 240*4+520+800*7;
 
-console.log(title || (userId ? '编辑用户信息' : '新增用户信息'));
+    var x = 50, y = 80, c = 800;
+
+    var a2 = 50 * c / y;
+
+    console.log('a: ', a2);
+
+    var z = (x + y) * ( c / y) / 2;
+
+    console.log(z)
+
+    var path = 'HTTP://112.54.97.178:81/upfiles/datum/update-20230419.1000-76c638ade0081c2c9cb499675e32be20-33181822-V1.tar.gz?ts=1234';
+
+    console.log('path:', path);
+    console.log('getFilePath:', path.getFilePath(true));
+    console.log('getUrlHost:', path.getUrlHost(true));
+
+    console.log($.getUrlHost(path, true));
+    console.log($.getFilePath(path, 'http://112.54.97.178:81/upfiles/datum/'));
+    console.log('getFileName:', $.getFileName(path, false));
+    console.log('getFileName:', $.getFileName(path, true));
+    console.log('getFileName:', path.getFileName(true));
+    console.log($.getFullPath(path, true));
+    console.log(path.getFullPath( true));
+    console.log(path.getExtension( true));
+    console.log(path.getFileDir( true));
+    console.log('/upfiles/datum/update-20230419.rar'.getFileDir());
+    console.log('/upfiles/datum/update-20230419.rar'.getFileDirName());
+
+    console.log((4780638).toFileSize());
 
 
-var config = {
-            language:{
-                name   : "cn",
-                month  : ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"],
-                weeks  : [ "日", "一", "二", "三", "四", "五", "六" ],
-                times  : ["小时","分钟","秒数"],
-                timetxt: ["时间选择","开始时间","结束时间"],
-                backtxt:"返回日期",
-                clear  : "清空",
-                today  : "现在",
-                yes    : "确定"
-            },
+    var title='', userId = 0;
+
+    console.log(title || (userId ? '编辑用户信息' : '新增用户信息'));
+
+
+    var config = {
+        language:{
+            name   : "cn",
+            month  : ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"],
+            weeks  : [ "日", "一", "二", "三", "四", "五", "六" ],
+            times  : ["小时","分钟","秒数"],
+            timetxt: ["时间选择","开始时间","结束时间"],
+            backtxt:"返回日期",
+            clear  : "清空",
+            today  : "现在",
+            yes    : "确定"
+        },
             format:"YYYY-MM-DD hh:mm:ss",               //日期格式
             minDate:"1900-01-01 00:00:00",              //最小日期
             maxDate:"2099-12-31 23:59:59",              //最大日期
@@ -1172,120 +1172,120 @@ var config = {
             parent: null                                  //容器
         };
 
-var options = {
-language: {yes:'OKOK'},
-};
-$.extend(config.language, options.language || {});
-delete options.language;
+        var options = {
+            language: {yes:'OKOK'},
+        };
+        $.extend(config.language, options.language || {});
+        delete options.language;
 
-var cfg = $.extend(config, options||{});
-
-
-console.log(cfg);
-
-var dir = 'top';
-console.log(dir === 'left' || dir === 'right' ? 100 : 50);
-
-function loadtest() {
-    if(!$.firstLoad([12,13])) {
-        return false;
-    }
-    console.log('loadtest');
-}
-console.log($.firstLoad(''));
-console.log($.firstLoad('a'));
-console.log($.firstLoad(''));
-console.log($.firstLoad({id:3}));
-
-loadtest();
-loadtest();
-loadtest();
-loadtest();
-
-console.log(new Date('Wed Feb 14 2001 08:00:00 GMT+0800 (中国标准时间) '))
-
-console.log(new Date())
+        var cfg = $.extend(config, options||{});
 
 
+        console.log(cfg);
 
-function toDateFormat(dt) {
-    var year = dt.getFullYear(),
-        month = dt.getMonth() + 1,
-        date = dt.getDate();
+        var dir = 'top';
+        console.log(dir === 'left' || dir === 'right' ? 100 : 50);
 
-    var val = year + '-' + month + '-' + date;
+        function loadtest() {
+            if(!$.firstLoad([12,13])) {
+                return false;
+            }
+            console.log('loadtest');
+        }
+        console.log($.firstLoad(''));
+        console.log($.firstLoad('a'));
+        console.log($.firstLoad(''));
+        console.log($.firstLoad({id:3}));
 
-    return val;
-}
+        loadtest();
+        loadtest();
+        loadtest();
+        loadtest();
 
-console.log(toDateFormat(new Date()))
+        console.log(new Date('Wed Feb 14 2001 08:00:00 GMT+0800 (中国标准时间) '))
 
-console.log(new Date().format());
-console.log(new Date().format('yyyy-MM-dd'));
-var ts = parseInt(new Date().getTime()/1000, 10);
-console.log(ts);
-console.log(new Date((ts + 30)*1000).format());
+        console.log(new Date())
 
-var title = 'abc<br/>123';
-console.log(title.encodeHtml())
-console.log(title)
 
-var fd = { title: 'abc<br />1&2"3', id: 123, content: '你好abc', desc: '<a>aa</a>' };
-console.log($.encodeHtml(fd, ['title', 'desc']));
-console.log(fd);
-console.log($.decodeHtml(fd, 'title,desc'));
 
-console.log('ab|ac,123||4t,aa'.splitStr(/[,|]/g))
+        function toDateFormat(dt) {
+            var year = dt.getFullYear(),
+            month = dt.getMonth() + 1,
+            date = dt.getDate();
 
-console.log('{0}'.format(123));
+            var val = year + '-' + month + '-' + date;
 
-var val = '0', val2 = '';
+            return val;
+        }
 
-console.log(val||val2);
+        console.log(toDateFormat(new Date()))
 
-console.log('AAAAAA');
-console.log('abc\n\n\nasd\n\n123'.removeEmptyLine())
-console.log('BBBBBB');
-console.log('abc\r\n\r\n\nasd\r\n    \r\n  \r\n12\r5\r4\n3'.removeEmptyLine())
-console.log('CCCCCC');
-console.log('abc\r\rasd\r\r123'.removeEmptyLine())
+        console.log(new Date().format());
+        console.log(new Date().format('yyyy-MM-dd'));
+        var ts = parseInt(new Date().getTime()/1000, 10);
+        console.log(ts);
+        console.log(new Date((ts + 30)*1000).format());
 
-console.log('test<<<<<script 123 >>>>《你好》 2<3 b>a c<d <script>alert(123);</script><a>'.filterHtml());
+        var title = 'abc<br/>123';
+        console.log(title.encodeHtml())
+        console.log(title)
 
-console.log('a‘b"\id=1'.toDate());
+        var fd = { title: 'abc<br />1&2"3', id: 123, content: '你好abc', desc: '<a>aa</a>' };
+        console.log($.encodeHtml(fd, ['title', 'desc']));
+        console.log(fd);
+        console.log($.decodeHtml(fd, 'title,desc'));
 
-var obj = 'abc';
+        console.log('ab|ac,123||4t,aa'.splitStr(/[,|]/g))
 
-console.log(new Date() instanceof Date);
+        console.log('{0}'.format(123));
 
-console.log(Date.parse('2023-06-07'));
-console.log(new Date(Date.parse('2299-06-07 09:20:10')).getTime());
-console.log(new Date(Date.parse('1970-01-01 00:00:00')).getTime() + 8*3600*1000);
+        var val = '0', val2 = '';
 
-console.log(new Date(0));
-console.log(new Date('2023-06-07'));
-console.log(new Date('a‘b"\id=1'));
-console.log(new Date(Date.parse('a‘b"\id=1')));
-console.log(new Date(0000000000000));
+        console.log(val||val2);
 
-var isDateString2 = function (str) {
-    var pattern = /^(19|20|21)[\d]{2}[-\/](1[012]|0?[\d])$/;
+        console.log('AAAAAA');
+        console.log('abc\n\n\nasd\n\n123'.removeEmptyLine())
+        console.log('BBBBBB');
+        console.log('abc\r\n\r\n\nasd\r\n    \r\n  \r\n12\r5\r4\n3'.removeEmptyLine())
+        console.log('CCCCCC');
+        console.log('abc\r\rasd\r\r123'.removeEmptyLine())
+
+        console.log('test<<<<<script 123 >>>>《你好》 2<3 b>a c<d <script>alert(123);</script><a>'.filterHtml());
+
+        console.log('a‘b"\id=1'.toDate());
+
+        var obj = 'abc';
+
+        console.log(new Date() instanceof Date);
+
+        console.log(Date.parse('2023-06-07'));
+        console.log(new Date(Date.parse('2299-06-07 09:20:10')).getTime());
+        console.log(new Date(Date.parse('1970-01-01 00:00:00')).getTime() + 8*3600*1000);
+
+        console.log(new Date(0));
+        console.log(new Date('2023-06-07'));
+        console.log(new Date('a‘b"\id=1'));
+        console.log(new Date(Date.parse('a‘b"\id=1')));
+        console.log(new Date(0000000000000));
+
+        var isDateString2 = function (str) {
+            var pattern = /^(19|20|21)[\d]{2}[-\/](1[012]|0?[\d])$/;
 
     //只考虑当前有效的时间戳格式
-    return /^[0-9]{10,13}$/.test(str);
-};
+            return /^[0-9]{10,13}$/.test(str);
+        };
 
-console.log(isDateString2('1686096000000'));
+        console.log(isDateString2('1686096000000'));
 
-console.log($.PATTERN.Date.test('2023-6-7'));
-console.log($.PATTERN.DateTime.test('2023-6-7 9:22:25'));
-console.log($.PATTERN.DateTime.test('2023-06-07'));
+        console.log($.PATTERN.Date.test('2023-6-7'));
+        console.log($.PATTERN.DateTime.test('2023-6-7 9:22:25'));
+        console.log($.PATTERN.DateTime.test('2023-06-07'));
 
-console.log($.PATTERN.IOTMobile.test('14112345678'));
+        console.log($.PATTERN.IOTMobile.test('14112345678'));
 
-console.log('/module.aspx'.setQueryString({module:'10001', menuCode:'10001'}, false));
+        console.log('/module.aspx'.setQueryString({module:'10001', menuCode:'10001'}, false));
 
-function getQKey(obj, name) {
+        function getQKey(obj, name) {
 
             if (!$.isNullOrUndefined(name)) {
                 if ($.isString(name, true) && /[,|]/g.test(name)) {
@@ -1305,62 +1305,62 @@ function getQKey(obj, name) {
                 return obj[name] || '';
             }
             return '';
-}
+        }
 
-console.log(getQKey({id:123,code:'abc',name:'asd',debug3:1}, 'debug,debug2'));
+        console.log(getQKey({id:123,code:'abc',name:'asd',debug3:1}, 'debug,debug2'));
 
-console.log(Math.pow(5, 2));
-console.log(Math.pow(5, 3));
-console.log(Math.pow(5, 1));
-console.log(Math.pow(5, 0));
-console.log(Math.pow(5, -1));
-console.log(Math.pow(-5, 3));
-console.log(Math.pow(-5, -1));
+        console.log(Math.pow(5, 2));
+        console.log(Math.pow(5, 3));
+        console.log(Math.pow(5, 1));
+        console.log(Math.pow(5, 0));
+        console.log(Math.pow(5, -1));
+        console.log(Math.pow(-5, 3));
+        console.log(Math.pow(-5, -1));
 
-console.log('2099-12-31 23:59:59'.toDate().format('ts'));
+        console.log('2099-12-31 23:59:59'.toDate().format('ts'));
 
-console.log((1687305181).toDate().format());
-console.log((1687333981).toDate().format());
+        console.log((1687305181).toDate().format());
+        console.log((1687333981).toDate().format());
 
-console.log('b1b29264'.hexToTime());
-console.log('21ac9264'.hexToTime());
+        console.log('b1b29264'.hexToTime());
+        console.log('21ac9264'.hexToTime());
 
-console.log($.jsonToIni({id:123}));
+        console.log($.jsonToIni({id:123}));
 
-console.log('{"id":123}'.jsonToIni());
+        console.log('{"id":123}'.jsonToIni());
 
-var obj = {id: 1234, name: 'abc'};
+        var obj = {id: 1234, name: 'abc'};
 
-console.log(obj);
-console.log($.toJsonStr(obj).jsonToIni());
+        console.log(obj);
+        console.log($.toJsonStr(obj).jsonToIni());
 
-var body = {server__http_port:123, "server__version": 'abc'};
-console.log(body);
-console.log($.toIniJson(body, '__'));
-console.log($.jsonToIni($.toIniJson(body)));
+        var body = {server__http_port:123, "server__version": 'abc'};
+        console.log(body);
+        console.log($.toIniJson(body, '__'));
+        console.log($.jsonToIni($.toIniJson(body)));
 
-console.log(new Date().format('ts', 10));
+        console.log(new Date().format('ts', 10));
 
-var cache = {};
-console.log($.toJsonString(cache).length);
+        var cache = {};
+        console.log($.toJsonString(cache).length);
 
-var a1 = 0, b1 = 0;
+        var a1 = 0, b1 = 0;
 
-console.log(a1 || b1 ? '123' : 'abs');
+        console.log(a1 || b1 ? '123' : 'abs');
 
-var url = '/modules/picturePlay/show/test.ashx?&device={0}&path={1}&idx={2}&name=abc#你好{3}&history={4}';
+        var url = '/modules/picturePlay/show/test.ashx?&device={0}&path={1}&idx={2}&name=abc#你好{3}&history={4}';
 
-var device = 'dx01',
-    path = '/pic/20230710/305283/20230710080143_01_305283_001_01.jpg',
-    idx = 1,
-    deviceName = '35 JiDian 11X 72#/JiDian 12X 61#(SP001)', 
-    history = 0;
+        var device = 'dx01',
+        path = '/pic/20230710/305283/20230710080143_01_305283_001_01.jpg',
+        idx = 1,
+        deviceName = '35 JiDian 11X 72#/JiDian 12X 61#(SP001)', 
+        history = 0;
 
-console.log(url.format(device, path, idx, deviceName, history));
+        console.log(url.format(device, path, idx, deviceName, history));
 
-var pattern = /^(\/|http:\/\/|https:\/\/)(.*)(.(as[hp][x]?|jsp|[s]?htm[l]?|php|do)|\/)\?[&]?(.*)=(.*)([&]{1,}(.*)=(.*)){0,}/gi;
-console.log('a', pattern.test('/modules/show/?device={0}&path={1}&idx={2}&name={3}&history={4}'));
-console.log('b', $.PATTERN.UrlParam.test('/modules/show/?device={0}&path={1}&idx={2}&name={3}&history={4}'));
+        var pattern = /^(\/|http:\/\/|https:\/\/)(.*)(.(as[hp][x]?|jsp|[s]?htm[l]?|php|do)|\/)\?[&]?(.*)=(.*)([&]{1,}(.*)=(.*)){0,}/gi;
+        console.log('a', pattern.test('/modules/show/?device={0}&path={1}&idx={2}&name={3}&history={4}'));
+        console.log('b', $.PATTERN.UrlParam.test('/modules/show/?device={0}&path={1}&idx={2}&name={3}&history={4}'));
 //cq15871462362
 /*
 1.自动推送
@@ -1371,287 +1371,292 @@ console.log('b', $.PATTERN.UrlParam.test('/modules/show/?device={0}&path={1}&idx
 6.审核推送->已审核->取消推送（不推送）
 */
 
-console.log($.getUrlHost('/abc/1.aspx'));
-console.log('c', $.PATTERN.UrlParam.test('/modules/show/?device=123'));
+        console.log($.getUrlHost('/abc/1.aspx'));
+        console.log('c', $.PATTERN.UrlParam.test('/modules/show/?device=123'));
 
-var pattern22 = /^(\/|http:\/\/|https:\/\/)(.*)(.(as[hp][x]?|jsp|[s]?htm[l]?|php|do)|\/)(\?[&]?(.*)=(.*)([&]{1,}(.*)=(.*)){0,})?/gi;
-console.log('c', pattern.test('http://112.54.97.178:81/?a=b&id=1'));
+        var pattern22 = /^(\/|http:\/\/|https:\/\/)(.*)(.(as[hp][x]?|jsp|[s]?htm[l]?|php|do)|\/)(\?[&]?(.*)=(.*)([&]{1,}(.*)=(.*)){0,})?/gi;
+        console.log('c', pattern.test('http://112.54.97.178:81/?a=b&id=1'));
 
-console.log((0).toTimeStr());
+        console.log((0).toTimeStr());
 
-console.log((150)|15<<8);
+        console.log((150)|15<<8);
 
-var str = '#comment\n';
+        var str = '#comment\n';
 
-console.log(/^\s*#[\s\S]*?\n/.test(str));
+        console.log(/^\s*#[\s\S]*?\n/.test(str));
 
-console.log(str.replace(/^\s*#[\s\S]*?\n/, ""));
+        console.log(str.replace(/^\s*#[\s\S]*?\n/, ""));
 
-console.log('data:image/jpg;base64,'.isImageFile());
+        console.log('data:image/jpg;base64,'.isImageFile());
 
 
-var arr = '1,2,3,4,5,6,7,8,9,10,12,15,16,17,18,24,31,34'.split(',');
-console.log(arr);
+        var arr = '1,2,3,4,5,6,7,8,9,10,12,15,16,17,18,24,31,34'.split(',');
+        console.log(arr);
 
-var ids = [
-    "2",
-    "3",
-    "4",
-    "5",
-    "6",
-    "7",
-    "9",
-    "10",
-    "8",
-    "12",
-    "24",
-    "31",
-    "1",
-    "15",
-    "16",
-    "34",
-    "17",
-    "18"
-];
+        var ids = [
+            "2",
+            "3",
+            "4",
+            "5",
+            "6",
+            "7",
+            "9",
+            "10",
+            "8",
+            "12",
+            "24",
+            "31",
+            "1",
+            "15",
+            "16",
+            "34",
+            "17",
+            "18"
+            ];
 
-console.log(ids.sort((a,b) => a-b).join(','));
+        console.log(ids.sort((a,b) => a-b).join(','));
 
-console.log(new Date().format(''));
-console.log(new Date().addSeconds(10).format(''));
+        console.log(new Date().format(''));
+        console.log(new Date().addSeconds(10).format(''));
 
-console.log((86400).toTimeStr());
+        console.log((86400).toTimeStr());
 
-console.log((86400).toDurationStr());
+        console.log((86400).toDurationStr());
 
-console.log(parseInt(250/100).padLeft(2) + ':' + 1250%60);
+        console.log(parseInt(250/100).padLeft(2) + ':' + 1250%60);
 
-function filter(dr){
+        function filter(dr){
 
-    delete dr.id;
-}
+            delete dr.id;
+        }
 
-var dr = {id:123,name:'abc',code:'acc'};
-filter(dr);
-console.log(dr);
+        var dr = {id:123,name:'abc',code:'acc'};
+        filter(dr);
+        console.log(dr);
 
-var units = ['时','分','秒'];
-var ts = ['08','23','15'];
+        var units = ['时','分','秒'];
+        var ts = ['08','23','15'];
 
-console.log(ts.join(units));
+        console.log(ts.join(units));
 
-121.123456
+        121.123456
 
-console.log(1/111000);
-console.log(360/(6378137*2*3.1415926));
+        console.log(1/111000);
+        console.log(360/(6378137*2*3.1415926));
 
-console.log(3.1415926*6378137/180);
-console.log(3.1415926*6378137/180*360/3.1415926/2);
+        console.log(3.1415926*6378137/180);
+        console.log(3.1415926*6378137/180*360/3.1415926/2);
 
-var EARTH_CIRCUMFERENCE = 3.1415926*6378137*2;
+        var EARTH_CIRCUMFERENCE = 3.1415926*6378137*2;
 
-console.log('EARTH_CIRCUMFERENCE:', EARTH_CIRCUMFERENCE);
-var lat_len = 3.1415926*6378137/180;
-var lng_len = lat_len * Math.cos(38);
-console.log(EARTH_CIRCUMFERENCE, lat_len, lng_len);
+        console.log('EARTH_CIRCUMFERENCE:', EARTH_CIRCUMFERENCE);
+        var lat_len = 3.1415926*6378137/180;
+        var lng_len = lat_len * Math.cos(38);
+        console.log(EARTH_CIRCUMFERENCE, lat_len, lng_len);
 
-console.log(EARTH_CIRCUMFERENCE/lat_len);
+        console.log(EARTH_CIRCUMFERENCE/lat_len);
 
-function GetEarthCircumference(latitude) {
-    return EARTH_CIRCUMFERENCE * Math.cos(latitude);
-}
+        function GetEarthCircumference(latitude) {
+            return EARTH_CIRCUMFERENCE * Math.cos(latitude);
+        }
 
-console.log(GetEarthCircumference(29.12345));
+        console.log(GetEarthCircumference(29.12345));
 
-console.log(Math.abs(EARTH_CIRCUMFERENCE * Math.cos(29)/360), Math.cos(0));
+        console.log(Math.abs(EARTH_CIRCUMFERENCE * Math.cos(29)/360), Math.cos(0));
 
-console.log(360/Math.abs(EARTH_CIRCUMFERENCE * Math.cos(29)), Math.cos(0));
+        console.log(360/Math.abs(EARTH_CIRCUMFERENCE * Math.cos(29)), Math.cos(0));
 
-var measurePoint = function ( x, y, d) {
-    this.x = x;
-    this.y = y;
-    this.d = d;
-};
-Math.atan(10);
-console.log(measurePoint(1,2,3));
-console.log(new measurePoint(1,2,3));
+        var measurePoint = function ( x, y, d) {
+            this.x = x;
+            this.y = y;
+            this.d = d;
+        };
+        Math.atan(10);
+        console.log(measurePoint(1,2,3));
+        console.log(new measurePoint(1,2,3));
 
-console.log(Math.PI);
+        console.log(Math.PI);
 
-console.log(Math.pow(2.12345, 2));
-console.log(2.12345*2.12345);
+        console.log(Math.pow(2.12345, 2));
+        console.log(2.12345*2.12345);
 
-$.console.debug('1234');
-console.debug('1234');
+        $.console.debug('1234');
+        console.debug('1234');
 
-var py2 = 35.28577076250284;
-var py1 = 29.001458388511015;
-var px3 = 316.5047887447397;
-var py3 = 35.28577076250284;
-var px2 = 316.5047887447397;
+        var py2 = 35.28577076250284;
+        var py1 = 29.001458388511015;
+        var px3 = 316.5047887447397;
+        var py3 = 35.28577076250284;
+        var px2 = 316.5047887447397;
         var b = ((py2 - py1) * px3 * px3 - (py3 - py1) * px2 * px2) / (px2 * px3 * px3 - px3 * px2 * px2);
         $.console.debug('b:', b);
 
-var obj = {};
+        var obj = {};
 
-console.log(obj.length);
+        console.log(obj.length);
 
-var names =  [
-                '格式输入错误', 
-                '输入错误',
-                '可选项：',
-                '内容格式错误',
-                '端口数值应介于',
-                '之间'
+        var names =  [
+            '格式输入错误', 
+            '输入错误',
+            '可选项：',
+            '内容格式错误',
+            '端口数值应介于',
+            '之间'
             ];;
-for(var i =0; i<names.length;i++){
-    console.log('//', names[i], names[i].toUnicode());
-}
+        for(var i =0; i<names.length;i++){
+            console.log('//', names[i], names[i].toUnicode());
+        }
 
-var data = {
-    DeviceId: 617,
-    Name: 'abc',
-    TypeId: 12,
-    Camera: {
-        Id: 2,
-        ChannelNo: 1,
-        Name: null,
-        Type: undefined
-    },
-    Types: [1,2,3],
-    Channels: [
-        {Id:1, Number:2, Name:'通道2'},
-        {Id:2, Number:3, Name:'通道3'}
-    ],
-    Server_line: 3
-};
+        var data = {
+            DeviceId: 617,
+            Name: 'abc',
+            TypeId: 12,
+            Camera: {
+                Id: 2,
+                ChannelNo: 1,
+                Name: null,
+                Type: undefined
+            },
+            Types: [1,2,3],
+            Channels: [
+                {Id:1, Number:2, Name:'通道2'},
+                {Id:2, Number:3, Name:'通道3'}
+                ],
+            Server_line: 3
+        };
 
 //https://graph.qq.com/oauth2.0/show?which=Login&display=pc&client_id=100270989&response_type=code&redirect_uri=https://passport.csdn.net/account/login?pcAuthType=qq&newAuth=true&state=test
 
-console.log(55/(1.58*1.58));
+        console.log(55/(1.58*1.58));
 
 //var o = {"type":"request","command":"setworkmode","sequence":12345,"device":"12345678901234009","body":{"mode":1,"time":1639996782,"duration":0,"expire":1639996782,"action":0,"update_time":1639996782}};
 
-console.log('2099-12-31 23:59:59'.toDate().format('ts'));
+        console.log('2099-12-31 23:59:59'.toDate().format('ts'));
 
-console.log((1700803715).toDateFormat());
+        console.log((1700803715).toDateFormat());
 
-console.log($.buildAjaxData({"name":"abc",status:1,id:123}, {id:3,type:'unit'}));
-console.log($.buildUrlData({"name":"abc",status:1,id:123}, {id:3,type:'unit'}));
+        console.log($.buildAjaxData({"name":"abc",status:1,id:123}, {id:3,type:'unit'}));
+        console.log($.buildUrlData({"name":"abc",status:1,id:123}, {id:3,type:'unit'}));
 
-console.log($.setQueryString('1.html', 'name', 'abc'));
+        console.log($.setQueryString('1.html', 'name', 'abc'));
 
-console.log($.buildUrlParam({"name":"acc", id: 123}));
-console.log($.setUrlParam({"name":"acc", id: 123}, 'abc', '1.html'));
+        console.log($.buildUrlParam({"name":"acc", id: 123}));
+        console.log($.setUrlParam({"name":"acc", id: 123}, 'abc', '1.html'));
 
-console.log($.isBoolean(false, true));
+        console.log($.isBoolean(false, true));
 
-var num2 = 28;
+        var num2 = 28;
 
-console.log('hex', num2.toHex(4, true));
+        console.log('hex', num2.toHex(4, true));
 
-console.log('{0:S2}'.format('19810309'));
+        console.log('{0:S2}'.format('19810309'));
 
-console.log(/^([01]?|true|false)$/.test('1'));
+        console.log(/^([01]?|true|false)$/.test('1'));
 
-console.log(/^[\w-]{0,}$/i.test('ABCabc123_-'));
+        console.log(/^[\w-]{0,}$/i.test('ABCabc123_-'));
 
-function _getVal(keyCode) {
-    if ((keyCode >= 48 && keyCode <= 57) || (keyCode >= 96 && keyCode <= 105) || (keyCode >= 65 && keyCode <= 90)) {
-        return String.fromCharCode(keyCode);
-    } else if (keyCode === 109 || keyCode === 189) {
-        return '-';
-    } else if (keyCode === 110 || keyCode === 190) {
-        return '.';
-    }
-    return '';
-}
+        function _getVal(keyCode) {
+            if ((keyCode >= 48 && keyCode <= 57) || (keyCode >= 96 && keyCode <= 105) || (keyCode >= 65 && keyCode <= 90)) {
+                return String.fromCharCode(keyCode);
+            } else if (keyCode === 109 || keyCode === 189) {
+                return '-';
+            } else if (keyCode === 110 || keyCode === 190) {
+                return '.';
+            }
+            return '';
+        }
 
-console.log(parseInt('0123abc'));
+        console.log(parseInt('0123abc'));
 
-console.log(['abc','acc','asd'].indexOf('acc'));
+        console.log(['abc','acc','asd'].indexOf('acc'));
 
-console.log(/^([1-6][0-5]([0-5][0-3][0-5]|[0-4][0-9]{2})|[1-5]([\d]{1,4})?|[1-9]([\d]{1,3})?|[0])$/.test('55555'));
+        console.log(/^([1-6][0-5]([0-5][0-3][0-5]|[0-4][0-9]{2})|[1-5]([\d]{1,4})?|[1-9]([\d]{1,3})?|[0])$/.test('55555'));
 
-var hostpattern = /^((?!-)([A-Z0-9\-]{1,63}.){1,3}[A-Z]{1,8})$/i;
-console.log(hostpattern.test('yd.3gvs-web3gvs-web.comaaaabcaa'));
+        var hostpattern = /^((?!-)([A-Z0-9\-]{1,63}.){1,3}[A-Z]{1,8})$/i;
+        console.log(hostpattern.test('yd.3gvs-web3gvs-web.comaaaabcaa'));
 
 //var ippattern = /^((::)|[0-9A-F]{1,4}(:[0-9A-F]{1,4}){7}| (([0-9A-F]{1,4}:){0,3})?((:[0-9A-F]{1,4}){0,3})?)$/i;
-var ippattern = /^((::)|[0-9A-F]{1,4}(:[0-9A-F]{1,4}){7})$/i;
+        var ippattern = /^((::)|[0-9A-F]{1,4}(:[0-9A-F]{1,4}){7})$/i;
 //var ippattern2 = /^((([0-9A-F]{1,4})?:){1,4}(([0-9A-F]{1,4})?:){1,4})$/i;
-var ippattern2 = /^(([0-9A-F]{1,4})?(:([0-9A-F]{1,4})?){0,7})$/i;
+        var ippattern2 = /^(([0-9A-F]{1,4})?(:([0-9A-F]{1,4})?){0,7})$/i;
 
-var ipv6 = [
-    'FC00:0000:130F:0000:0000:09C0:876A:130B',
-    'FC00:0:130F:0:0:9C0:876A:130B',
-    'FC00:0:130F::9C0:130B:0:0',
-    'FC00:0:130F::9C0::130B',
-    '::0:130F:9C0:130B',
-    ':0:0:0:0:0::',
-    '0::',
-    '::0',
-    'ASD:0::',
-    '::',
-    ':',
-    ''
-];
-for(var i=0; i<ipv6.length;i++) {
+        var ipv6 = [
+            'FC00:0000:130F:0000:0000:09C0:876A:130B',
+            'FC00:0:130F:0:0:9C0:876A:130B',
+            'FC00:0:130F::9C0:130B:0:0',
+            'FC00:0:130F::9C0::130B',
+            '::0:130F:9C0:130B',
+            ':0:0:0:0:0::',
+            '0::',
+            '::0',
+            'ASD:0::',
+            '::',
+            ':',
+            ''
+            ];
+        for(var i=0; i<ipv6.length;i++) {
     //console.log(ipv6[i], ippattern.test(ipv6[i]), ippattern2.test(ipv6[i]));
 
-    console.log('isIPv6(ipv6[i]):', ipv6[i], isIPv6(ipv6[i]));
-}
-
-
-function isIPv6(ip) {
-    if(/^((::)|(::[0-9A-F]{1,4})|([0-9A-F]{1,4}::)|[0-9A-F]{1,4}(:[0-9A-F]{1,4}){7})$/i.test(ip)) {
-        return true;
-    }
-    var mc;
-    if (!/^[0-9A-F:]{2,39}$/i.test(ip) || !(mc = ip.match(/(::)/g)) || mc.length > 1) {
-        return false;
-    }
-    var arr = ip.split(':'), len = arr.length, c = 0;
-    if (len < 3 || len > 8) {
-        return false;
-    }
-    for (var i = 0; i < len; i++) {
-        if ((c += arr[i] === '' ? 1 : 0) > 2) {
-            return false;
+            console.log('isIPv6(ipv6[i]):', ipv6[i], isIPv6(ipv6[i]));
         }
-    }
-    return true;
-}
 
 
-var p22 = /360|^([1-3][0-5][0-9]|[1-2][0-9]+|[0-9]{1,2})(.[\d]{1,8})?$/;
-console.log(p22.test('124.123413242'));
+        function isIPv6(ip) {
+            if(/^((::)|(::[0-9A-F]{1,4})|([0-9A-F]{1,4}::)|[0-9A-F]{1,4}(:[0-9A-F]{1,4}){7})$/i.test(ip)) {
+                return true;
+            }
+            var mc;
+            if (!/^[0-9A-F:]{2,39}$/i.test(ip) || !(mc = ip.match(/(::)/g)) || mc.length > 1) {
+                return false;
+            }
+            var arr = ip.split(':'), len = arr.length, c = 0;
+            if (len < 3 || len > 8) {
+                return false;
+            }
+            for (var i = 0; i < len; i++) {
+                if ((c += arr[i] === '' ? 1 : 0) > 2) {
+                    return false;
+                }
+            }
+            return true;
+        }
 
-console.log(/^[\s]{0}$/.test(' '));
-var pss  = [/^360$/, /^([1-3][0-5][0-9]|[1-2][0-9]+|[0-9]{1,2})(.[\d]{1,8})?$/, /^[0]?$/];
-for(var i=0; i<pss.length;i++) {
-    console.log(pss[i].test('123.12345'));
-}
 
-console.log(/^[A-Z0-9]{0,}$/i.test('a'));
+        var p22 = /360|^([1-3][0-5][0-9]|[1-2][0-9]+|[0-9]{1,2})(.[\d]{1,8})?$/;
+        console.log(p22.test('124.123413242'));
+
+        console.log(/^[\s]{0}$/.test(' '));
+        var pss  = [/^360$/, /^([1-3][0-5][0-9]|[1-2][0-9]+|[0-9]{1,2})(.[\d]{1,8})?$/, /^[0]?$/];
+        for(var i=0; i<pss.length;i++) {
+            console.log(pss[i].test('123.12345'));
+        }
+
+        console.log(/^[A-Z0-9]{0,}$/i.test('a'));
 
 
-function isBoolean2 (b, dv) {
+        function isBoolean2 (b, dv) {
             var bool = typeof b === 'boolean';
             return typeof dv === 'boolean' ? (bool ? b : dv) : bool;
         }
 
         console.log(isBoolean2(undefined, false));
 
-console.log('---------------------------------');
-console.log(/(\.\.)+|[\.]{4,}/.test('..'));
-console.log(/(\.\.)+|[\d\.]{4,}/.test('12.1.1.1.'));
-console.log(/[:]{3,}|([\dA-F]{5,})|([\dA-F]{0,4}::|::[\dA-F]{0,4}){2,}|^([\dA-F]{0,4}:[\dA-F]{0,4}){8,}$|[;]+/i.test('FC00:0000:130F:0000:0000:09C0:876A:130B'));
-console.log(/[:]{3,}|([\dA-F]{5,})|([\dA-F]{0,4}::|::[\dA-F]{0,4}){2,}|^([\dA-F]{0,4}:[\dA-F]{0,4}){8,}$|[;]+/i.test('FC00:::0000:0000:09C0:876A:130B'));
-console.log(/[:]{3,}|([\dA-F]{5,})|([\dA-F]{0,4}::|::[\dA-F]{0,4}){2,}|^([\dA-F]{0,4}:[\dA-F]{0,4}){8,}$|[;]+/i.test('FC00:::0000:0000:09C0:876A:130B'));
-console.log(/[^A-F0-9:]+|[:]{3,}|([\dA-F]{5,})|([\dA-F]{0,4}::|::[\dA-F]{0,4}){2,}|([\dA-F:]{0,4}:[\dA-F]{0,4}){8,}/i.test('FC00:::0000;09C0:876A:130B'));
-console.log(/[^A-F0-9:]+|[:]{3,}|([\dA-F]{5,})|([\dA-F]{0,4}::|::[\dA-F]{0,4}){2,}|([\dA-F:]{0,4}:[\dA-F]{0,4}){8,}/i.test('1234:1234:1234:1234:1234:1234:1324:1324'));
+        console.log('---------------------------------');
+        console.log(/(\.\.)+|[\.]{4,}/.test('..'));
+        console.log(/(\.\.)+|[\d\.]{4,}/.test('12.1.1.1.'));
+        console.log(/[:]{3,}|([\dA-F]{5,})|([\dA-F]{0,4}::|::[\dA-F]{0,4}){2,}|^([\dA-F]{0,4}:[\dA-F]{0,4}){8,}$|[;]+/i.test('FC00:0000:130F:0000:0000:09C0:876A:130B'));
+        console.log(/[:]{3,}|([\dA-F]{5,})|([\dA-F]{0,4}::|::[\dA-F]{0,4}){2,}|^([\dA-F]{0,4}:[\dA-F]{0,4}){8,}$|[;]+/i.test('FC00:::0000:0000:09C0:876A:130B'));
+        console.log(/[:]{3,}|([\dA-F]{5,})|([\dA-F]{0,4}::|::[\dA-F]{0,4}){2,}|^([\dA-F]{0,4}:[\dA-F]{0,4}){8,}$|[;]+/i.test('FC00:::0000:0000:09C0:876A:130B'));
+        console.log(/[^A-F0-9:]+|[:]{3,}|([\dA-F]{5,})|([\dA-F]{0,4}::|::[\dA-F]{0,4}){2,}|([\dA-F:]{0,4}:[\dA-F]{0,4}){8,}/i.test('FC00:::0000;09C0:876A:130B'));
+        console.log(/[^A-F0-9:]+|[:]{3,}|([\dA-F]{5,})|([\dA-F]{0,4}::|::[\dA-F]{0,4}){2,}|([\dA-F:]{0,4}:[\dA-F]{0,4}){8,}/i.test('1234:1234:1234:1234:1234:1234:1324:1324'));
 
-console.log(/[^A-F0-9:]/.test('123:13:00)213:00'));
+        console.log(/[^A-F0-9:]/.test('123:13:00)213:00'));
 
 
-                var ks = [['append'], ['editable'],['relative'],['number']];
-                console.log('ks:', ks.length);
+        var ks = [['append'], ['editable'],['relative'],['number']];
+        console.log('ks:', ks.length);
+
+
+        var len = 12;
+        console.log(len % 2);
+        console.log(len % 2 ? 0 : 1);
