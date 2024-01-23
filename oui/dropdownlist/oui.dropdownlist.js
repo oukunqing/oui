@@ -474,7 +474,7 @@
 
                 var html = [
                     '<ul class="oui-ddl-box oui-ddl-', opt.layout, '">'
-                ], i, key = Config.ItemPrefix + that.id;
+                ], i, n = len.toString().length, key = Config.ItemPrefix + that.id;
 
                 var columns = opt.columns || opt.cells || 0,
                     conWidth = Factory.getItemConWidth(opt.items, opt.itemWidth, columns, opt.display),
@@ -526,7 +526,7 @@
                             use = dr.enabled || dr.use,
                             disabled = dr.disabled ? ' disabled="disabled"' : '',
                             desc = dr.desc || '',
-                            title = txt + (desc && txt !== desc ? '<span class="i-t">- ' + desc + '</span>' : '');
+                            title = '<span>' + txt + '</span>' + (desc && txt !== desc ? '<span class="i-t">- ' + desc + '</span>' : '');
 
                         html.push([
                             '<li class="oui-ddl-item" style="',
@@ -534,7 +534,9 @@
                             opt.layout === Config.Layout.Grid ? 'min-width:' + Factory.getStyleSize(minWidth || opt.itemWidth) + ';' : '',
                             '" opt-idx="', (i + 1), '" data-value="', val.toString().replace(/["]/g, '&quot;'),
                             '">',
-                            '<label  class="oui-ddl-label', opt.layout !== Config.Layout.List && opt.itemBorder ? ' oui-ddl-label-border' : '', '">',
+                            '<label class="oui-ddl-label', opt.layout !== Config.Layout.List && opt.itemBorder ? ' oui-ddl-label-border' : '', '"',
+                            opt.showNumber ? ' style="padding-left:4px;"' : '', '>',
+                            opt.showNumber ? '<i style="width:' + (n * 12) + 'px;">' + (i + 1)  + '</i>' : '',
                             '<input class="oui-ddl-chb"', checked,
                             ' type="', opt.multi ? 'checkbox' : 'radio', '"',
                             ' id="', chbId, '"',
