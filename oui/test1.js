@@ -1660,3 +1660,12 @@ var n = 35,         //总数量
         var len = 12;
         console.log(len % 2);
         console.log(len % 2 ? 0 : 1);
+
+        var list = [4800, 9600, 19200, 38400, 57600, 115200, 230400, 460800, 921600];
+        var sb = [];
+
+        for(var i=0;i<list.length;i++){
+            sb.push('[' + list[i] + ',' + list[i] + ']');
+        }
+
+        console.log(sb.join(','));

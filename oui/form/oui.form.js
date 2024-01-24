@@ -1581,7 +1581,8 @@
                     }
                     return this;
                 },
-                showOptionValue: function (elem, val, empty) {
+                showOptionValue: function (elem, item, empty) {
+                    var val = $.getAttribute(item, 'data-value') || '';
                     if (elem.tagName === 'SELECT') {
                         elem.options.length = 0;
                         if (empty) {
@@ -1625,7 +1626,7 @@
                                 }
                                 idx = ni;
                             }
-                        } else {                        
+                        } else {
                             if ($.isNumber(keyCode)) {
                                 switch(keyCode) {
                                     case 37: idx = 1; break;
@@ -1637,6 +1638,7 @@
                                 return that;
                             }
                         }
+                        //设置当前索引编号
                         $.setAttribute(elem, 'opt-idx', idx--);
 
                         //如果索引序号为-1表示输入框中的内容选项被清除，当前没有选项被选中
@@ -1654,9 +1656,10 @@
                         num = $.getAttribute(item, 'opt-idx').toInt();
 
                     if (num > 0 && num === cur) {
+                        $.input.hideOptionPanel();
                         return that;
                     }
-                    $.setAttribute($.input.showOptionValue(elem, val), 'opt-idx', num);
+                    $.setAttribute($.input.showOptionValue(elem, item), 'opt-idx', num);
 
                     if (!isArrowKey) {
                         div.style.display = 'none';
@@ -1862,7 +1865,7 @@
                             config: {}              //配置项，用于options选项框
                         }, par),
                         MAX_HEIGHT = 360,
-                        ZINDEX = 99999999,
+                        ZINDEX = 999999999,
                         cfg = $.extend({
                             append: null,           //是否追加选项，true-表示options参数 + element属性options
                             title: '请选择',         //选项默认标题（当没有选择选项时显示）
