@@ -36,7 +36,7 @@
 	position:absolute;
 	z-index:999999;
 	display:block;
-	overflow:auto;
+	overflow:hidden;
 	border:solid 1px #ccc;
     box-shadow: 0 2px 3px 0 rgba(0,0,0,.32);
 	box-sizing: border-box;
@@ -177,14 +177,14 @@ ul.oui-ddl-flow label.oui-ddl-cur:hover,ul.oui-ddl-grid label.oui-ddl-cur:hover 
 	border: none;
 	box-sizing: border-box;
 	margin: 1px 1px 0;
-	padding: 7px 5px;
+	padding: 5px 5px 7px;
 	clear: both;
 	display: block;
 	overflow: hidden;
 	text-align: center;
 }
 .oui-ddl-panel .oui-ddl-oper .btn-group {
-	padding: 0 4px;
+	padding: 0 0px;
 	border: none 0;
 }
 .oui-ddl-panel .oui-ddl-oper-flow .btn-group {
@@ -194,7 +194,7 @@ ul.oui-ddl-flow label.oui-ddl-cur:hover,ul.oui-ddl-grid label.oui-ddl-cur:hover 
 	padding: 0;
 }
 .oui-ddl-panel .oui-ddl-oper .btn-group-block {
-	padding: 0 4px;
+	padding: 0 0px;
 	display: block;
 }
 .oui-ddl-panel button.btn {
@@ -206,6 +206,7 @@ ul.oui-ddl-flow label.oui-ddl-cur:hover,ul.oui-ddl-grid label.oui-ddl-cur:hover 
 	margin: 0;
 	font-size: 14px;
 	font-family: Arial,宋体;
+	border-right: none;
 }
 .oui-ddl-panel button.btn em {
 	margin:0 0 0 3px;
@@ -218,6 +219,7 @@ ul.oui-ddl-flow label.oui-ddl-cur:hover,ul.oui-ddl-grid label.oui-ddl-cur:hover 
 .oui-ddl-panel button.btn:hover {
 	background: #e6e6e6;
 	border: solid 1px #adadad;
+	border-right: none;
 }
 
 .oui-ddl-panel .btn-group .btn-primary {
@@ -225,6 +227,7 @@ ul.oui-ddl-flow label.oui-ddl-cur:hover,ul.oui-ddl-grid label.oui-ddl-cur:hover 
 	background: #337ab7;
 	/*border-radius: 4px;*/
 	box-sizing: border-box;
+
 }
 
 .oui-ddl-panel .btn-group .btn-primary:hover {

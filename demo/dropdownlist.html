@@ -4,8 +4,8 @@
 	<meta charset="utf-8">
 	<title>下拉菜单（多选）</title>
 	<style type="text/css">
-		select {height:30px;height:32px;min-width:280px;border:solid 1px #ccc;}
-		input {outline: none; border-radius: 4px;height:30px;min-width:280px;border:solid 1px #ccc;}
+		select {height:30px;height:32px;min-width:200px;border:solid 1px #ccc;}
+		input {outline: none; border-radius: 4px;height:30px;min-width:200px;border:solid 1px #ccc;}
 	</style>
 	<script type="text/javascript" src="../oui/oui.js"></script>
 	<script type="text/javascript" src="../oui/dropdownlist/oui.dropdownlist.js"></script>
@@ -26,7 +26,7 @@
 <input type="text" id="ServerType2" style="" />
 <br />
 <br />
-<input type="text" id="ServerType3" style="" />
+<input type="text" id="ServerType3" style="width:300px;" />
 <br />
 <br />
 <input type="text" id="ServerType4" style="" />
@@ -144,7 +144,7 @@ window.onload = function() {
 			{ id: 5, name: '图片采集服务', desc: '' },
 			{ id: 6, name: '平台级联服务', desc: '' },
 		],
-		//layout: 'grid',
+		layout: 'grid',
 		boxWidth: 'follow',
 		//textWidth: 200,
 		itemWidth: '48%',
@@ -181,7 +181,7 @@ window.onload = function() {
 		boxWidth: 'follow',
 		//textWidth: 200,
 		itemWidth: '48%',
-		boxWidth: 400,
+		//boxWidth: 400,
 		itemBorder: true,
 		//回调等级：0-选项实时回调，1-全选/反选等按钮事件回调，2-确定按钮事件回调
 		//submit: 0,
@@ -210,16 +210,17 @@ window.onload = function() {
 		],
 		boxWidth: 'follow',
 		itemWidth: '48%',
-		maxHeight: 400,
+		//maxHeight: 70,
+		//maxHeight: 'auto',
 		itemBorder: true,
         //callbackLevel: 0,
         callbackDebounce: true,
         //是否单选，默认多选
-        multi: false,
+        multi: true,
         //是否支持按钮快捷键（默认支持）
         shortcutKey: true,
         //是否显示快捷键数字（默认不显示）
-        shortcutNum: true,
+        //shortcutNum: true,
 		title: '选择服务类型',
 		//按钮位置： left,center,right
 		buttonPosition: 'right',

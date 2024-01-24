@@ -38,19 +38,8 @@
         },
         // 当高度超过浏览器窗口大小时，保留边距
         BodyPadding: 10,
-        // 选项高度
-        BoxItemHeight: 30,
-        // 选项底部高度
-        BoxBarHeight: 42,
-        // 选项框默认最大高度
-        BoxMaxHeight: 360,
-        // 选项框(网格)默认最大高度
-        BoxGridMaxHeight: 400,
-        // 选项框(网格)最小宽度
-        BoxGridMinWidth: 456,
         // 选项框最小宽度设置
-        BoxMinWidth: [125, 245, 345],
-        BoxMinHeight: [64, 90, 140],
+        BoxMinWidth: [240, 350],
         // 隐藏但是需要占位
         CssHidden: ';visibility:hidden;width:0px;height:0px;border:none;margin:0;padding:0;font-size:1px;line-height:0px;float:left;'
     },
@@ -209,29 +198,6 @@
                     }
                 });
                 return this;
-            },
-            getSize: function(opt, bs) {
-                var min1 = opt.layout === 'grid' ? Config.BoxGridMinWidth : Config.BoxMinWidth[1],
-                    min2 = opt.layout === 'grid' ? Config.BoxGridMinWidth : Config.BoxMinWidth[2],
-                    min = 0,
-                    num = opt.shortcutNum;
-
-                if (num && (bs.min < min2 || bs.max < min2 || bs.width < min2)) {
-                    min = min2;
-                } else if (bs.min < min1 || bs.max < min1 || bs.width < min1) {
-                    min = min1;
-                }
-
-                if (bs.min < min) {
-                    bs.min = min;
-                }
-                if (bs.max < min) {
-                    bs.max = min;
-                }
-                if (bs.width < min) {
-                    bs.width = min;
-                }
-                return bs;
             }
         };
 
@@ -316,8 +282,8 @@
             maxWidth: 500,
             //box最小高度
             minHeight: 30,
-            //box最大高度，默认400像素
-            maxHeight: Config.BoxMaxHeight,
+            //box最大高度，默认不指定
+            maxHeight: '',
             //布局： list-下拉列表，flow-流布局，grid-网格
             layout: 'list', //list, flow, grid
             //输入框宽度，默认跟随下拉框宽度
@@ -360,8 +326,6 @@
             //Function:选项切换时触发
             beforeChange: null
         }, options));
-
-        opt.maxHeight = options.maxHeight || (opt.layout === 'grid' ? Config.BoxGridMaxHeight : Config.BoxMaxHeight);
 
         this.id = opt.id;
         this.options = opt;
@@ -459,15 +423,13 @@
                 var offset = $.getOffset(opt.select ? that.elem : that.text),
                     ua = navigator.userAgent,
                     edge = ua.indexOf('Edg/') > 0 || ua.indexOf('Edge') > 0,
-                    bs = {
-                        width: parseInt(opt.boxWidth === 'follow' ? offset.width : opt.boxWidth, 10),
-                        min: opt.minWidth || (offset.width + 1),
-                        max: opt.maxWidth
-                    };
+                    boxWidth = parseInt(opt.boxWidth === 'follow' ? offset.width : opt.boxWidth, 10),
+                    boxMinWidth = opt.minWidth || (offset.width + 1),
+                    boxMaxWidth = opt.maxWidth;
 
-                if (!isNaN(bs.width) && bs.width > opt.maxWidth) {
-                    opt.maxWidth = bs.width;
-                    bs.max = bs.width;
+                if (!isNaN(boxWidth) && boxWidth > opt.maxWidth) {
+                    opt.maxWidth = boxWidth;
+                    boxMaxWidth = boxWidth;
                 }
 
                 box.className = 'oui-ddl oui-ddl-panel' + (edge ? ' oui-ddl-edge' : '');
@@ -510,24 +472,24 @@
                     }
                 }
 
-                if (btnLen >= 5 && opt.shortcutKey) {
-                    Factory.getSize(opt, bs);
-                }
-                if ($.isNumber(opt.minHeight)) {
-                    var minH = btnLen > 0 ? Config.BoxBarHeight: 0;
-                    minH += (len >= 3 ? Config.BoxMinHeight[1] : len * Config.BoxItemHeight);
-                    if (opt.minHeight < minH) {
-                        opt.minHeight = minH;
+                $.console.log('boxMinWidth:', btnLen >= 5 , opt.shortcutKey , opt.shortcutNum, boxWidth, boxMinWidth);
+                if (btnLen >= 5 && opt.shortcutKey && opt.shortcutNum) {
+                    if (opt.shortcutNum && (boxMinWidth < Config.BoxMinWidth[1] || boxWidth < Config.BoxMinWidth[1])) {
+                        boxMinWidth = opt.minWidth = Config.BoxMinWidth[1];
+                        boxWidth = opt.boxWidth = Config.BoxMinWidth[1]   ;
+                        $.console.log('boxMinWidth:', boxMinWidth, boxWidth);
+                    } else if (boxMinWidth < Config.BoxMinWidth[0] || boxWidth < Config.BoxMinWidth[0]) {
+                        boxMinWidth = opt.minWidth = Config.BoxMinWidth[0];
+                        boxWidth = opt.boxWidth = Config.BoxMinWidth[0]   ;
+                        $.console.log('boxMinWidth:', boxMinWidth, boxWidth);
                     }
-                    if (opt.maxHeight < minH) {
-                        opt.maxHeight = minH;
-                    }
                 }
+
                 box.style.cssText = [
                     'display:none;top:', offset.top + offset.height - 1, 'px;left:', offset.left, 'px;',
-                    'min-width:', bs.min, 'px;',
-                    'max-width:', bs.max, 'px;',
-                    bs.width ? 'width:' + Factory.getStyleSize(bs.width) + ';' : '',
+                    'min-width:', boxMinWidth, 'px;',
+                    'max-width:', boxMaxWidth, 'px;',
+                    boxWidth ? 'width:' + Factory.getStyleSize(boxWidth) + ';' : '',
                     'min-height:', Factory.getStyleSize(opt.minHeight), ';',
                     opt.maxHeight ? 'max-height:' + Factory.getStyleSize(opt.maxHeight) + ';' : '',
                     opt.boxStyle || ''
@@ -646,26 +608,26 @@
                             if ($.isFunction(opt.beforeChange)) {
                                 opt.beforeChange(txt, function() {
                                     $.setAttribute(elem, 'opt-hover', 0);
-                                    that.action(node, null, true);
+                                    that.action(node, true, true);
                                 });
                             } else {
                                 $.setAttribute(elem, 'opt-hover', 0);
-                                that.action(node, null, true);
+                                that.action(node, true, true);
                             }
                         }
                     }));
                     that.indexs[chb.id] = i;
                 }
 
-                that.btns = document.querySelectorAll('#' + Config.IdPrefix + opt.id + ' .oui-ddl-oper button');
-                for (i = 0; i < that.btns.length; i++) {
+                var btns = document.querySelectorAll('#' + Config.IdPrefix + opt.id + ' .oui-ddl-oper button');
+                for (i = 0; i < btns.length; i++) {
                     if (opt.shortcutKey) {
                         if (opt.shortcutNum) {
-                            that.btns[i].innerHTML += '<em>(<u>' + (i + 1) + '</u>)</em>';
+                            btns[i].innerHTML += '<em>(<u>' + (i + 1) + '</u>)</em>';
                         }
-                        that.btns[i].title += '快捷键: shift + ' + (i + 1);
+                        btns[i].title += '快捷键: shift + ' + (i + 1);
                     }
-                    $.addListener(that.btns[i], 'click', function(ev) {
+                    $.addListener(btns[i], 'click', function(ev) {
                         var ac = $.getAttribute(this, 'ac');
                         if (ac === 'no') {
                             that.hide();
@@ -723,7 +685,7 @@
                         if (i < 0) {
                             i = minList.indexOf(kc);
                         }
-                        $.trigger(that.btns[i], 'click');
+                        $.trigger(btns[i], 'click');
                     } else if (kc >= 48 && kc % 48 < 10) {
                         that.select(kc % 48, kc, true, that.con);
                     }
@@ -775,7 +737,7 @@
                 }
                 $.setAttribute(elem, 'opt-hover', 1);
             } else {
-                that.action(nodes[idx], null, false);
+                that.action(nodes[idx], true, false);
                 if (idx < 0 && cur > 0) {
                     nodes[cur - 1].set(false, false);
                     that.get();
@@ -807,7 +769,7 @@
                 for (var i = 0; i < nodes.length; i++) {
                     nodes[i].set(nodes[i].id === node.id, true);
                 }
-                if (!show && clickEvent) {
+                if (!show) {
                     that.hide();
                 }
             }
@@ -980,55 +942,40 @@
                 opt = that.options,
                 box = that.box,
                 offset = $.getOffset(opt.select ? that.elem : that.text),
-                bs = {
-                    width: opt.boxWidth,
-                    min: opt.minWidth,
-                    max: opt.maxWidth
-                };
-
-            //先清除选项内容框高度
-            that.con.style.height = 'auto';
+                width = 0,
+                minWidth = opt.minWidth,
+                maxWidth = opt.maxWidth;
 
             if ($.isObject(size) || $.isNumber(size)) {
-                bs.width = size.width || size;
-                if (bs.width > bs.max) {
-                    bs.max = bs.width;
+                width = size.width || size;
+                if (width > maxWidth) {
+                    maxWidth = width;
                 }
+                box.style.width = width + 'px';
+                box.style.maxWidth = maxWidth + 'px';
             } else if (opt.boxWidth === 'follow') {
-                bs.width = offset.width;
-                if (bs.width > bs.max) {
-                    bs.max = bs.width;
+                var width = offset.width;
+                if (width > maxWidth) {
+                    maxWidth = width;
                 }
-                if (bs.width < bs.min) {
-                    bs.min = bs.width;
+                if (width < minWidth) {
+                    minWidth = width;
                 }
+                box.style.width = width + 'px';
+                box.style.minWidth = minWidth + 'px';
+                box.style.maxWidth = maxWidth + 'px';
             }
-
-            if (that.btns.length >= 5 && opt.shortcutKey) {
-                Factory.getSize(opt, bs);
-            }
-
-            box.style.width = bs.width + 'px';
-            box.style.minWidth = bs.min + 'px';
-            box.style.maxWidth = bs.max + 'px';
-
-            var barH = $.getOffset(that.bar).height;
-            //再设置选项内容框高度
-            that.con.style.height = ($.getOffset(box).height - barH - (barH ? 2 : 0)) + 'px';
+            that.con.style.height = ($.getOffset(box).height - $.getOffset(that.bar).height) + 'px';
             
             return that;
         },
         position: function () {
-            var that = this,
-                opt = that.options,
-                bs = $.getBodySize(),
+            var that = this, opt = that.options, elem = opt.element;
+            var bs = $.getBodySize(),
                 box = that.box,
                 con = that.con,
                 size = $.getOffset(box),
-                elem = opt.select ? that.elem : that.text,
-                idx = $.getAttribute(elem, 'opt-idx').toInt(),
-                node = that.nodes[idx - 1],
-                offset = $.getOffset(elem),
+                offset = $.getOffset(opt.select ? that.elem : that.text),
                 //left = offset.left - 1,
                 left = offset.left,
                 top = offset.top + offset.height - 1;
@@ -1056,10 +1003,8 @@
                     h = opt.maxHeight;
                 }
                 box.style.height = h + 'px';
+
                 con.style.height = (h - that.bar.offsetHeight) + 'px';
-            }
-            if (node) {
-                $.scrollTo(node.label, con);
             }
             return that;
         },

@@ -104,6 +104,10 @@ button {width:120px;height:28px;}
             </tr>
             <tr>
                 <td></td>
+                <td><input type="text" id="fmt_channel2" placeholder="" /></td>
+            </tr>
+            <tr>
+                <td></td>
                 <td>
                     <select id="select1" onchange="console.log('select change:', this.value);">
                         <option value="10001">第1项</option>
@@ -274,9 +278,16 @@ button {width:120px;height:28px;}
 
         $.setInputFormat('fmt_channel', {
             types: ['int', 'option'],
-            options: buildOptions([0, 16, 32, 100, 1000], '通道'),
-            config: { editable: true }
+            options: buildOptions([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,100,1000], '通道'),
+            config: { readonly: false }
         });
+
+        $.setInputFormat('fmt_channel2', {
+            types: ['int', 'option'],
+            options: buildOptions([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,100,1000], '通道'),
+            config: { readonly: true }
+        });
+
 
         $.setInputFormat('select1', {
             types: ['option', 'word'],
