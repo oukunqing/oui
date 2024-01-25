@@ -2777,14 +2777,19 @@
 !function ($) {
     'use strict';
 
-    var throwError = function (msg, str, args) {
-        console.log('[FormatError]\r\nerr:', msg);
+    var throwError = function (msg, str, args, matchFmtStr) {
+        $.console.log('[stirng format error]\r\nerr:', msg);
         try {
-            if (!$.isUndefined(str)) { console.log('str:', str, '\r\narg:', args); } console.trace();
+            if (!$.isUndefined(str)) { 
+                $.console.log('str:', str, '\r\narg:', args); 
+            } 
+            console.trace();
         } catch (e) { }
+
         if ($.formatThrowError) {
             throw new Error(msg);
         }
+        return matchFmtStr;
     }, formatNumberZero = function (arv, arn) {
         var arr = [], idx = arn.length - 1;
         for (var i = arv.length - 1; i >= 0; i--) {
@@ -2993,126 +2998,169 @@
         return $.isObject(v) ? !$.isUndefined(dv) ? dv : throwError(err, str, vals) : v;
     };
 
-    if ($.isUndefined(String.prototype.format)) {
-        $.formatThrowError = true;
+    //字符串格式化错误时是否直接抛出异常
+    //代码级异常，JS程序代码将中断执行
+    $.formatThrowError = true;
 
-        String.prototype.formatError = function (isThrow) {
-            var err = $.isBoolean(isThrow, true);
-            $.formatThrowError = err;
-            return this;
-        };
+    String.formatError = String.formatException = function (isThrowError) {
+        if ($.isBoolean(isThrowError)) {
+            $.formatThrowError = isThrowError;
+            $.console.log('[set] string format throw error: ', $.formatThrowError);
+        } else {
+            $.console.log('[get] string format throw error: ', $.formatThrowError);
+        }
+        return $.formatThrowError;
+    };
 
-        String.prototype.format = function (args) {
-            var s = this, vals = [], rst = [], pattern = /({|})/g, ms = s.match(pattern);
-            if ($.isNull(ms)) {
-                return s.toString() || s;
-            }
-            var err = [
-                //输入字符串的格式不正确。
-                '\u8f93\u5165\u5b57\u7b26\u4e32\u7684\u683c\u5f0f\u4e0d\u6b63\u786e\u3002',
-                //索引(从零开始)必须大于或等于零，且小于参数列表的大小。
-                '\u7d22\u5f15\u0028\u4ece\u96f6\u5f00\u59cb\u0029\u5fc5\u987b\u5927\u4e8e\u6216\u7b49\u4e8e\u96f6\uff0c\u4e14\u5c0f\u4e8e\u53c2\u6570\u5217\u8868\u7684\u5927\u5c0f\u3002',
-                //值不能为null（或undefined）。
-                '\u503c\u4e0d\u80fd\u4e3a\u006e\u0075\u006c\u006c\uff08\u6216\u0075\u006e\u0064\u0065\u0066\u0069\u006e\u0065\u0064\uff09\u3002',
-                //格式说明符无效。
-                '\u683c\u5f0f\u8bf4\u660e\u7b26\u65e0\u6548\u3002'
-            ];
+    String.isFormatError = String.isFormatException = function () {
+        return String.formatError();
+    };
 
-            if (arguments.length > 1) {
-                for (var i = 0, c = arguments.length; i < c; i++) {
-                    if (!$.isNullOrUndefined(arguments[i])) {
-                        vals.push(arguments[i]);
-                    } else {
-                        //\u7b2c 第
-                        //\u4e2a\u53c2\u6570\u503c\u4e3a\uff1a 个参数值为：
-                        var er = err[2] + '\u7b2c' + (i + 1) + '\u4e2a\u53c2\u6570\u503c\u4e3a\uff1a' + arguments[i];
-                        throwError(err, s, args);
-                    }
+    String.prototype.formatError = String.prototype.formatException = function (isThrowError) {
+        String.formatError(isThrowError);
+        return this;
+    };
+
+    /*
+        字符串格式化
+        默认没有容错，当字符串格式错误或参数异常时，抛出异常，以防止代码错误被隐藏。
+        2024-01-25 增加了容错设计：
+        当参数数量大于格式数量且最后一个参数为boolean值(且只能是true)时，允许容错，
+        但是会在控制台输出一个异常信息以提醒开发人员，以便及时发现并更正错误
+    */
+    String.prototype.formats = function (args) {
+        var s = this, vals = [], rst = [], pattern = /({|})/g, ms = s.match(pattern);
+        if ($.isNull(ms)) {
+            return s.toString() || s;
+        }
+        var err = [
+            //输入字符串的格式不正确。
+            '\u8f93\u5165\u5b57\u7b26\u4e32\u7684\u683c\u5f0f\u4e0d\u6b63\u786e\u3002',
+            //索引(从零开始)必须大于或等于零，且小于参数列表的大小。
+            '\u7d22\u5f15\u0028\u4ece\u96f6\u5f00\u59cb\u0029\u5fc5\u987b\u5927\u4e8e\u6216\u7b49\u4e8e\u96f6\uff0c\u4e14\u5c0f\u4e8e\u53c2\u6570\u5217\u8868\u7684\u5927\u5c0f\u3002',
+            //值不能为null（或undefined）。
+            '\u503c\u4e0d\u80fd\u4e3a\u006e\u0075\u006c\u006c\uff08\u6216\u0075\u006e\u0064\u0065\u0066\u0069\u006e\u0065\u0064\uff09\u3002',
+            //格式说明符无效。
+            '\u683c\u5f0f\u8bf4\u660e\u7b26\u65e0\u6548\u3002'
+        ],
+        //是否抛出异常
+        formatException = String.isFormatError();
+
+        if (arguments.length > 1) {
+            for (var i = 0, c = arguments.length; i < c; i++) {
+                if (!$.isNullOrUndefined(arguments[i]) || !formatException) {
+                    vals.push(arguments[i]);
+                } else {
+                    //\u7b2c 第
+                    //\u4e2a\u53c2\u6570\u503c\u4e3a\uff1a 个参数值为：
+                    var er = err[2] + '\u7b2c' + (i + 1) + '\u4e2a\u53c2\u6570\u503c\u4e3a\uff1a' + arguments[i];
+                    vals.push(throwError(err, s, args, arguments[i]));
                 }
-            } else if ($.isArray(args)) {
-                vals = args;
-            } else if (!$.isNullOrUndefined(args)) {
-                vals.push(args);
             }
-            if (ms.length % 2 !== 0) {
+        } else if ($.isArray(args)) {
+            vals = args;
+        } else if (!$.isNullOrUndefined(args) || !formatException) {
+            vals.push(args);
+        }
+        if (ms.length % 2 !== 0) {
+            throwError(err[0], s, vals);
+        }
+        //匹配提取{}的正则
+        //var matchs = s.match(/({+[-\d]+(:[\D\d]*?)*?}+)|({+([\D]*?|[:\d]*?)}+)|([{]{1,2}[\w]*?)|([\w]*?[}]{1,2})/g);
+        var matchs = s.match(/({+[-\d]+(:[\D\d]*?)*?}+)|({+([\D]*?|[:\d]*?)}+)|({+([\w\.>\-,;\|\d]*?)}+)|([{]{1,2}[\w]*?)|([\w]*?[}]{1,2})/g);
+        if (null === matchs) {
+            return s.toString() || s;
+        }
+        var vc = vals.length,
+            mc = matchs.length,
+            //若没有传递参数，则取window对象作为参数(对象)
+            //obj = vc === 0 ? window : $.isObject(vals[0]) ? vals[0] : {},
+            obj = vc === 0 ? (typeof window !== 'undefined' ? window : {}) : $.isObject(vals[0]) ? vals[0] : {},
+            isObject = $.isObject(obj),
+            isUrl = $.PATTERN.UrlParam.test(s),
+            urlParamSymbolPattern = /[&#]/g,
+            //是否允许容错
+            //当参数数量大于格式符数量且最后一个参数为boolean值(且只能是true)时，允许容错
+            faultTolerance = vc > mc && $.isBoolean(vals[vc - 1], false);
+
+        for (var i = 0; i < mc; i++) {
+            var m = matchs[i], 
+                mv = m.replace(pattern, ''), 
+                p = s.indexOf(m), 
+                idx = parseInt(mv, 10),
+                c = /{/g.test(m) ? m.match(/{/g).length : 0, 
+                d = /}/g.test(m) ? m.match(/}/g).length : 0;
+
+            if ((c + d) % 2 != 0) {
                 throwError(err[0], s, vals);
             }
-            //匹配提取{}的正则
-            //var matchs = s.match(/({+[-\d]+(:[\D\d]*?)*?}+)|({+([\D]*?|[:\d]*?)}+)|([{]{1,2}[\w]*?)|([\w]*?[}]{1,2})/g);
-            var matchs = s.match(/({+[-\d]+(:[\D\d]*?)*?}+)|({+([\D]*?|[:\d]*?)}+)|({+([\w\.>\-,;\|\d]*?)}+)|([{]{1,2}[\w]*?)|([\w]*?[}]{1,2})/g);
-            if (null === matchs) {
-                return s.toString() || s;
-            }
-            //var len = vals.length, mc = matchs.length, isObject = $.isObject(vals[0]), obj = isObject ? vals[0] : {};
-            var len = vals.length,
-                mc = matchs.length,
-                //若没有传递参数，则取window对象作为参数(对象)
-                obj = len === 0 ? window : $.isObject(vals[0]) ? vals[0] : {},
-                isObject = $.isObject(obj),
-                isUrl = $.PATTERN.UrlParam.test(s),
-                urlParamSymbolPattern = /[&#]/g;
+            var m2 = m.replace(/{{/g, '{').replace(/}}/g, '}'),
+                odd = c % 2 != 0 || d % 2 != 0, single = c <= 2 && d <= 2;
 
-            for (var i = 0; i < mc; i++) {
-                var m = matchs[i], mv = m.replace(pattern, ''), p = s.indexOf(m), idx = parseInt(mv, 10);
-                var c = /{/g.test(m) ? m.match(/{/g).length : 0, d = /}/g.test(m) ? m.match(/}/g).length : 0;
-                if ((c + d) % 2 != 0) {
-                    throwError(err[0], s, vals);
+            if (!isNaN(idx)) {
+                var v = formatNumber(mv, vals[idx], err, s, vals);
+                if ($.isBoolean(v) && !v) {
+                    return false;
                 }
-                var m2 = m.replace(/{{/g, '{').replace(/}}/g, '}');
-                var odd = c % 2 != 0 || d % 2 != 0, single = c <= 2 && d <= 2;
-
-                if (!isNaN(idx)) {
-                    var v = formatNumber(mv, vals[idx], err, s, vals);
-                    if ($.isBoolean(v) && !v) {
-                        return false;
-                    }
-                    if (isUrl && urlParamSymbolPattern.test(v)) {
-                        console.log('value: ', v);
-                        v = encodeURIComponent(v);
-                        console.log('value encode: ', v);
-                    }
-                    if (/^-\d$/g.test(mv) && odd) { throwError(err[0], s, vals); }
-                    else if (idx >= len) { throwError(err[1], s, vals); }
-                    else if ($.isNullOrUndefined(v)) { throwError(err[2], s, vals); }
-
-                    rst.push(s.substr(0, p) + (c > 1 || d > 1 ? (c % 2 != 0 || d % 2 != 0 ? m2.replace('{' + idx + '}', v) : m2) : v));
-                } else if (odd) {
-                    if (c === 1 && d === 1) {
-                        if (!isObject || !single) {
-                            throwError(err[0], s, vals);
-                        }
-                        v = distillObjVal(mv, obj, err[0], s, vals);
-                        if (isUrl && urlParamSymbolPattern.test(v)) {
-                            console.log('value: ', v);
-                            v = encodeURIComponent(v);
-                            console.log('value encode: ', v);
-                        }
-                        rst.push(s.substr(0, p) + (c > 1 || d > 1 ? (c % 2 !== 0 || d % 2 !== 0 ? m2.replace('{' + idx + '}', v) : m2) : v));
+                if (isUrl && urlParamSymbolPattern.test(v)) {
+                    $.console.log('value: ', v);
+                    v = encodeURIComponent(v);
+                    $.console.log('value encode: ', v);
+                }
+                if (/^-\d$/g.test(mv) && odd) { 
+                    v = throwError(err[0], s, vals, m); 
+                } else if (idx >= vc && vc > 0) {
+                    if (faultTolerance || !formatException) {
+                        //容错机制：当只有1个字符格式时，匹配第1个参数
+                        //否则原样显示格式字符
+                        v = 1 === mc && vc <= (faultTolerance ? 2 : 1) ? vals[0] : m;
+                        $.console.trace(err[1]);
                     } else {
-                        var mcs = m2.match(/({[\w\.>\-,;\|\d]+})/g);
-                        if (mcs != null && mcs.length > 0) {
-                            rst.push(s.substr(0, p) + m2.replace(mcs[0], distillObjVal(mcs[0].replace(/({|})/g, ''), obj, err[0], s)));
-                        } else {
-                            throwError(err[0], s, vals);
-                        }
+                        throwError(err[1], s, vals); 
                     }
-                } else {
-                    rst.push(s.substr(0, p) + m2);
                 }
-                s = s.substr(p + m.length);
+                else if ($.isNullOrUndefined(v)) {
+                    $.console.log('v:', v);
+                    throwError(err[2], s, vals);
+                }
+                rst.push(s.substr(0, p) + (c > 1 || d > 1 ? (c % 2 != 0 || d % 2 != 0 ? m2.replace('{' + idx + '}', v) : m2) : v));
+            } else if (odd) {
+                if (c === 1 && d === 1) {
+                    if (!isObject || !single) {
+                        throwError(err[0], s, vals);
+                    }
+                    v = distillObjVal(mv, obj, err[0], s, vals);
+                    if (isUrl && urlParamSymbolPattern.test(v)) {
+                        $.console.log('value: ', v);
+                        v = encodeURIComponent(v);
+                        $.console.log('value encode: ', v);
+                    }
+                    rst.push(s.substr(0, p) + (c > 1 || d > 1 ? (c % 2 !== 0 || d % 2 !== 0 ? m2.replace('{' + idx + '}', v) : m2) : v));
+                } else {
+                    var mcs = m2.match(/({[\w\.>\-,;\|\d]+})/g);
+                    if (mcs != null && mcs.length > 0) {
+                        rst.push(s.substr(0, p) + m2.replace(mcs[0], distillObjVal(mcs[0].replace(/({|})/g, ''), obj, err[0], s)));
+                    } else {
+                        throwError(err[0], s, vals);
+                    }
+                }
+            } else {
+                rst.push(s.substr(0, p) + m2);
             }
-            rst.push(s);
+            s = s.substr(p + m.length);
+        }
+        rst.push(s);
 
-            return rst.join('');
-        };
+        return rst.join('');
+    };
+
+    if ($.isUndefined(String.prototype.format)) {
+        String.prototype.format = String.prototype.formats;
     }
 
     String.prototype.formatTo = function (fmt) {
         fmt = (!$.isString(fmt, true) ? '{0}' : fmt).trim();
-        if (!fmt.startsWith('{') || !fmt.endWith('}')) {
-            return this;
-        }
-        return fmt.format(this);
+        return (!fmt.startsWith('{') || !fmt.endWith('}')) ? this : fmt.format(this);
     };
 
     //String.format

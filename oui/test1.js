@@ -1013,7 +1013,7 @@ var n = 35,         //总数量
     console.log(str.format({ data: { key3: 'abc' } }));
 
     var str = "val2={val}";
-    console.log(str.formatError(false).format({ val2: 123 }));
+    //console.log(String.formatError(false).format({ val2: 123 }));
 
     var str = "val3={data.val}";
     console.log(str.format({ data: { val: 12345 } }));
@@ -1669,3 +1669,15 @@ var n = 35,         //总数量
         }
 
         console.log(sb.join(','));
+
+String.formatException(false);
+
+console.log('copyright {2025}'.format('2024', 2023, 123, true));
+var con22 = 'undefined';
+console.log('copyright {0}'.format(con22, true));
+
+function test22(arg) {
+    console.log(arg, typeof arg);
+}
+
+test22(con22);
