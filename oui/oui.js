@@ -897,7 +897,8 @@
             return isBoolean ? true : val;
         },
         //获取参数值（参数名重载）
-        getParam = function (opt, key, dval) {
+        //notAllowEmpty - 不允许空值，默认为允许
+        getParam = function (opt, key, dval, notAllowEmpty) {
             if (!$.isObject(opt)) {
                 return dval;
             }
@@ -908,16 +909,39 @@
                     val = opt[k];
                 }
                 if (!$.isNullOrUndefined(val)) {
-                    return val;
+                    if ($.isString(val)) {
+                        if (!notAllowEmpty || val.trim() !== '') {
+                            return val.trim();
+                        }
+                    } else {
+                        return val;
+                    }
                 }
             }
             return dval;
         },
-        //用于获取参数名重载
+        //用于获取参数名重载（参数内容允许为null值）
         getParamValue = function() {
             for(var i = 0; i < arguments.length; i++) {
                 if(typeof arguments[i] !== 'undefined') {
                     return arguments[i];
+                }
+            }
+            return undefined;
+        },
+        //用于获取参数内容（仅获取有效的内容，不包含null和空字符串）
+        getParamCon = function() {
+            var arg;
+            for(var i = 0; i < arguments.length; i++) {
+                arg = arguments[i];
+                if(!$.isNullOrUndefined(arg)) {
+                    if ($.isString(arg)) {
+                        if (arg.trim() !== '') {
+                            return arg.trim();
+                        }
+                    } else {
+                        return arg;
+                    }
                 }
             }
             return undefined;
@@ -1055,6 +1079,7 @@
         filterValue: filterValue, keywordOverload: keywordOverload, keyOverload: keywordOverload,
         setValue: setValue, getValue: getValue, isValue: isValue, getParam: getParam,
         getParamValue: getParamValue, getParVal: getParamValue, cleanSlash: cleanSlash,
+        getParamCon: getParamCon, getParamContent: getParamCon, getParCon: getParamCon,
         toGpsString: function (gps, decimalLen) {
             var con = [],
                 len = $.checkNumber(decimalLen, 3, 14) ? decimalLen : 8;
@@ -3006,7 +3031,7 @@
         if ($.isBoolean(isThrowError)) {
             $.formatThrowError = isThrowError;
             $.console.log('[set] string format throw error: ', $.formatThrowError);
-        } else {
+        } else if ($.isDebug()) {
             $.console.log('[get] string format throw error: ', $.formatThrowError);
         }
         return $.formatThrowError;

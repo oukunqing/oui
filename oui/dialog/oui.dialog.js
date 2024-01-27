@@ -405,6 +405,7 @@
                 if (!$.isObject(opt)) {
                     opt = {};
                 }
+                /*
                 opt.element = elem || opt.element;
                 opt.content = content || opt.content || content;
                 opt.title = title || opt.title || title;
@@ -412,19 +413,33 @@
                 opt.callback = func || opt.callback;
                 opt.complete = opt.complete || opt.onload || opt.ready;
                 opt.coverOCX = opt.coverOCX || opt.coverOcx || opt.cover;
+                */
+
+                opt.element = $.getParamCon(elem, opt.element);
+                opt.content = $.getParamCon(content, opt.content);
+                opt.title = $.getParamCon(title, opt.title);
+                opt.target = $.getParamCon(target, opt.anchor, opt.target);
+                opt.callback = $.getParamCon(func, opt.callback);
+                opt.complete = $.getParam(opt, 'complete,onload,ready', null, true);
+                opt.coverOCX = $.getParam(opt, 'coverOCX,coverOcx,cover', null, true);
+
+                //当closeType为hide，关闭（隐藏）对话框后重新显示对话框时，是否只显示（而不更新对话框内容）
+                //主要用于对iframe对话框的重新显示，如果更新内容，iframe页面会重新加载
+                //而有时并不想要重新加载iframe页面，只是重新显示，因为要保留对话框状态
+                opt.showOnly = $.isBoolean($.getParam(opt, 'showOnly,showonly,onlyShow,onlyshow'), false);
 
                 if (!$.isString(opt.title) && !$.isNumber(opt.title)) {
                     opt.title = undefined;
                 }
 
                 //对话框关闭后，要获取焦点的HTML控件
-                opt.focusTo = opt.focusTo || opt.focus;
+                opt.focusTo = $.getParamCon(opt.focusTo, opt.focus);
                 if (!$.isElement(opt.focusTo)) {
                     opt.focusTo = $.isString(opt.focusTo, true) ? $I(opt.focusTo) : undefined;
                 }
 
                 //对话框尺寸改变后，要回调的函数
-                opt.resize = opt.resize || opt.onresize;
+                opt.resize = $.getParamCon(opt.resize, opt.onresize);
 
                 opt.type = this.checkType(opt.type, false);
 
@@ -444,7 +459,7 @@
 
                 opt.forname = (opt.forname || opt.forName) || (opt.forid || opt.forId) || opt.for;
                 if ($.isElement(opt.forname)) {
-                    opt.forname = opt.forname.id || opt.forname.name || '';
+                    opt.forname = $.getParamon(opt.forname.id, opt.forname.name) || '';
                 }
 
                 if ($.isBoolean(opt.boxShadow) || opt.boxShadow === 'none') {
@@ -1010,7 +1025,11 @@
 
                 var d = p ? p.dialog : undefined;
                 if (p && d && p.controls && p.controls.dialog) {
-                    d.update(opt.content, opt.title, opt).show();
+                    if (opt.closeType === 'hide' && opt.showOnly) {
+                        d.show();
+                    } else {
+                        d.update(opt.content, opt.title, opt).show();
+                    }
                 } else {
                     this.initCache(opt.id, null);
                     d = new Dialog(opt.content, opt.title, opt);
@@ -4048,6 +4067,7 @@
                 closeAble: true,        //是否允许关闭
                 closeIcon: '',          //Close关闭按钮图标，close0, close1, close2, close3, 默认为空
                 closeType: 'close',     //关闭方式， close | hide
+                showOnly: null,         //重新显示时，是否仅显示(而不更新内容)，主要用于 iframe(url)对话框, 当closeType==='hide'有效
                 clickClose: false,      //鼠标点击(dblclick | click)document(非对话框范围)关闭对话框
                 escClose: false,        //是否允许按Esc关闭
                 keyClose: true,         //是否允许快捷键关闭

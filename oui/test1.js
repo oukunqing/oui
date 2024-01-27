@@ -1670,14 +1670,58 @@ var n = 35,         //总数量
 
         console.log(sb.join(','));
 
-String.formatException(false);
+        String.formatException(false);
 
-console.log('copyright {2025}'.format('2024', 2023, 123, true));
-var con22 = 'undefined';
-console.log('copyright {0}'.format(con22, true));
+        console.log('copyright {2025}'.format('2024', 2023, 123, true));
+        var con22 = 'undefined';
+        console.log('copyright {0}'.format(con22, true));
 
-function test22(arg) {
-    console.log(arg, typeof arg);
+        function test22(arg) {
+            console.log(arg, typeof arg);
+        }
+
+        test22(con22);
+
+        var PersonConfig = {
+            value: null
+        };
+        function Person () {
+            
+        }
+
+        Person.prototype = {
+            set: function (val) {
+                PersonConfig.value = val;
+            },
+            get: function () {
+                return PersonConfig.value;
+            }
+
+        };
+
+var p = new Person();
+
+        Object.defineProperty(p, 'value', {
+            /*value: 'hello',
+            writable: true,
+            configurable: true,
+            */
+            get: function () {
+               return p.get();// PersonConfig.value;
+            },
+            set: function (val) {
+                p.set(val);
+            }
+        });
+
+        Person.value = 'abc';
+        console.log(Person.value);
+
+        console.log(Person);
+
+
+var list = [], baseLen = 10, flagLen = 1, itemLen = 9;
+for (var i = 0; i < 51; i++) {
+    list.push((i) + '\t' + (baseLen + flagLen + itemLen * i));
 }
-
-test22(con22);
+console.log(list.join('\r\n'));
