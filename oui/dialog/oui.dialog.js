@@ -119,14 +119,16 @@
             close: 'close',
             hide: 'hide',
             tooltip: 'tooltip',
-            reload: 'reload'
+            reload: 'reload',
+            resize: 'resize'
         },
         DialogStatusText: {
             min: { english: 'Minimize', chinese: '\u6700\u5c0f\u5316' },                  //最小化
             max: { english: 'Maximize', chinese: '\u6700\u5927\u5316' },                  //最大化
             close: { english: 'Close', chinese: '\u5173\u95ed' },                         //关闭
             restore: { english: 'Restore', chinese: '\u8fd8\u539f' },                     //还原
-            reload: { english: 'Reload', chinese: '\u91cd\u65b0\u52a0\u8f7d' }            //重新加载
+            reload: { english: 'Reload', chinese: '\u91cd\u65b0\u52a0\u8f7d' },           //重新加载
+            resize: { english: 'Resize', chinese: '\u91cd\u7f6e\u5927\u5c0f' }            //重置大小
         },
         CloseType: {
             close: 'Close',
@@ -985,17 +987,25 @@
                     case Config.DialogType.message:
                     case Config.DialogType.msg:
                     case Config.DialogType.tooltip:
+                    case Config.DialogType.tips:
                     default:
                         opt.buttons = Config.DialogButtons.None;
                         opt.showHead = opt.showFoot = opt.dragSize = false;
-                        //opt.width = opt.minWidth = 'auto';
+                        if ($.isUndefined(par.width)) {
+                            opt.width = 'auto';
+                        }
+                        if ($.isUndefined(par.minWidth)) {
+                            opt.minWidth = 'auto';
+                        }
                         opt.height = opt.minHeight = 'auto';
                         opt.minAble = opt.maxAble = opt.lock = false;
+                        //closeAble默认为true
                         //tooltip要允许关闭，因为tooltip用于表单验证提示时，需要自动关闭
+                        //当autoClose为true，也要允许关闭
                         if (Config.DialogType.tooltip !== opt.type) {
-                            opt.closeAble = $.isBoolean(opt.closeAble, false);
+                            opt.closeAble = $.isBoolean(par.closeAble, par.autoClose || false);
                         }
-                        opt.showClose = $.isBoolean(opt.showClose, false);
+                        opt.showClose = $.isBoolean(par.showClose, false);
                         break;
                 }
                 //设置 tooltip 默认位置为 right
@@ -2349,7 +2359,6 @@
                         ctls.dialog.style.borderRadius = radius + (('' + opt.radius).indexOf('%') > 0 ? '' : 'px');
                     }
                 }
-
                 for (var name in par) {
                     var val = par[name];
                     if (!$.isNullOrUndefined(val)) {
@@ -3350,8 +3359,8 @@
                 s.height += ismsg ? 10 : 20;
 
                 if (isLimit) {
-                    var mw = parseInt('0' + opt.minWidth, 10),
-                        mh = parseInt('0' + opt.minHeight, 10);
+                    var mw = parseInt('0' + opt.minWidth, 10) || s.width,
+                        mh = parseInt('0' + opt.minHeight, 10) || s.height;
 
                     if (s.width < mw) {
                         s.width = mw;
@@ -4442,17 +4451,20 @@
                 }
 
                 if (isMin) {
-                    Util.setSize(that, { type: Config.DialogStatus.normal });
                     Util.setPosition(that);
                 }
                 Util.buildContent(that, true).setBodySize(that).setCache(that);
 
                 if (isMin) {
-                    Util.setSize(that, { type: Config.DialogStatus.min });
+                    Util.setSize(that, $.extend(options, { update: true, type: Config.DialogStatus.min }));
                 }
 
                 if (isAutoSize && isChanged) {
-                    window.setTimeout(function () { Util.setPosition(that); }, 10);
+                    //TODO: 如果对话框关闭了，再更新显示的话，对话框大小设置需要改进
+                    
+                    window.setTimeout(function () {
+                        Util.setPosition(that); 
+                    }, 10);
                 }
 
                 if (!p.options.lock) {

@@ -164,7 +164,8 @@ var test12345 = function(){
 
 var test23456 = function(skin) {
 	$.alert('这是一个没有标题的对话框', {
-		id: 'dialog123'
+		id: 'dialog123',
+        //title: ''
 	});
 	/*.update('这是一个没有标题的对话框', {
 		skin: skin
@@ -758,7 +759,9 @@ var msgWin, msgTimer = null;
 function msg(isFixWidth){
 	var id = isFixWidth ? 1 : 0;
     msgWin= $.dialog.msg('msg: Message提示信息演示' + (isFixWidth ? '(固定宽度)' : ''), {
-        id: 'msg' + id, autoClose: false, closeTiming: 15000, fixed: false,
+        id: 'msg' + id, 
+        autoClose: true, closeTiming: 8 * 1000, 
+        fixed: false,
         //position: 'bottomleft', 
         position: 5, 
         //shadow: false,
@@ -775,7 +778,7 @@ function msg(isFixWidth){
         //icon: isFixWidth ? 'happy' : 'sad',
         icon: 'loading',
         closeType: 'hide',
-		closeAble: true,
+		//closeAble: true,
         closeIcon: 0,   //0,1,2,3 若不指定则采用默认的样式
         dragSize: false,
         callback: function() {
@@ -901,7 +904,7 @@ function update() {
     for(var i=0; i<35; i++){
         str += (i + 1) + '. 内容更改了内容更改了内容更改了内容更改了内容更改了内容更改了内容更改了内容更改了<br />';
     }
-    var dialog = $.alert('Hello!对话框<br />' + str, {id:2, lock: false, escClose: true, autoClose: false});
+    var dialog = $.alert('Hello!对话框<br />' + str, {id:12, lock: false, escClose: true, autoClose: false});
 
     //dialog.setZindex(1005);
 
