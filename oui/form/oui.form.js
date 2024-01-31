@@ -1690,17 +1690,27 @@
                         '.input-option-ul{margin:0;padding:1px 0;}',
                         '.input-option-ul i{font-style:normal;color:#ccc;display:inline-block;text-align:right;',
                         ' border:none;margin:0 7px 0 0;padding:0;font-size:14px;}',
-                        '.input-option-ul li{margin:0 1px;list-style:none;line-height:26px;font-size:14px;border:none;cursor:default;}',
+                        '.input-option-ul li{margin:0 1px;list-style:none;line-height:29px;height:29px;overflow:hidden;font-size:14px;border:none;cursor:default;}',
                         '.input-option-ul li:hover,.input-option-ul li.cur:hover{background:#dfe8f6;color:#000;}',
                         '.input-option-ul li.cur{background:#eee;color:#000;}',
                         '.input-option-ul li:hover i,.input-option-ul li.cur:hover i{color:#f50;}',
                         '.input-option-ul li.cur i{color:#f00;}',
                         '.input-option-ul li a{margin:0;padding:0;font-size:14px;display:block;border:none;background:none;text-decoration:none;color:#000;cursor:default;}',
-                        '.input-option-ul li span{margin:0;padding:0;font-size:14px;}',
-                        '.input-option-ul li span.i-t{color:#999;margin:0;padding:0;font-size:14px;border:none;background:none;}',
+                        '.input-option-ul li span{margin:0;padding:0;font-size:14px;border:none;margin:0;padding:0;}',
+                        '.input-option-ul li u{text-decoration:none;color:#999;font-size:14px;margin:03px;padding:0;border:0;background:none;}',
+                        '.input-option-ul li span.i-t{color:#999;margin:0 0 0 8px;padding:0;font-size:14px;border:none;background:none;}',
                         '</style>'
                     ].join('');
                     document.body.appendChild(css);
+                }
+                return this;
+            },
+            setTitle: function (box) {
+                var spans = document.querySelectorAll('#' + box.id + ' span'),
+                    itemHeight = 30;
+
+                for (i = 0; i < spans.length; i++) {
+                    spans[i].title = $.getOffset(spans[i]).height > itemHeight ? spans[i].innerHTML.filterHtml() : '';
                 }
                 return this;
             },
@@ -1726,6 +1736,7 @@
                     elem.optbox.style.display = display;
                     $.setPanelPosition(elem, elem.optbox, cfg);
                     $.input.setCurrentOption(elem, elem.optbox);
+                    $.input.setTitle(elem.optbox);
                     return this;
                 }
 
@@ -1761,7 +1772,7 @@
                     if ($.isString(txt, true) || $.isNumber(txt) || $.isString(val, true) || $.isNumber(val)) {
                         idx++;
                         if (cfg.display && val.toString() !== '' && val.toString() !== txt.toString()) {
-                            txt = val + '<span class="i-t"> - ' + txt + '</span>';
+                            txt = val + '<span class="i-t">' + txt + '</span>';
                         }
                         if (cur) {
                             curIdx = idx;
@@ -1793,6 +1804,7 @@
                 }
                 $.setPanelPosition(elem, elem.optbox, cfg);
                 $.input.setCurrentOption(elem, elem.optbox);
+                $.input.setTitle(elem.optbox);
 
                 window.inputFormatTimers = {};
                 if (!window.inputOptionDocEventListener) {
@@ -1894,8 +1906,8 @@
                     ZINDEX: ZINDEX
                 });
 
-                cfg.number = $.getParam(cfg, 'number,showNumber', null);
-                cfg.display = $.getParam(cfg, 'display,show,showValue', null);
+                cfg.number = $.getParam(cfg, 'showNumber,number', null);
+                cfg.display = $.getParam(cfg, 'showValue,display,show', null);
 
                 //获取默认参数值，如果没有明确配置参数值，则从element属性中获取
                 var ks = [['append'], ['editable'],['relative'],['number']];

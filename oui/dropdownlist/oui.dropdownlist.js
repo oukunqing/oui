@@ -132,8 +132,8 @@
 
                 //是否显示选框,默认情况下：单选框不显示，复选框显示
                 //若指定display为true或false，则按指定规则显示
-                if (!$.isBoolean(opt.display)) {
-                    opt.display = opt.multi;
+                if (!$.isBoolean(opt.choose)) {
+                    opt.choose = opt.multi;
                 }
 
                 opt.allowEmpty = $.getParamValue(opt.allowEmpty, opt.empty);
@@ -246,6 +246,7 @@
         initial: function (par) {
             var that = this;
             that.id = par.id;
+            that.elem = par.elem;
             that.multi = par.multi;
             that.label = par.label;
             that.input = par.input;
@@ -259,6 +260,7 @@
 
             that.label.onmousedown = function () {
                 $.cancelBubble();
+                that.elem.focus();
                 if ($.isFunction(that.callback)) {
                     that.callback(that);
                 }
@@ -266,6 +268,9 @@
             if (that.checked) {
                 that.set(true);
             }
+            that.input.onchange = function() {
+                that.elem.focus();
+            };
             return that;
         },
         set: function (checked, clickEvent) {
@@ -279,9 +284,9 @@
             } else {
                 that.input.checked = that.checked;
             }
-
             return that;
         },
+        //dc: defaultChecked - 是否默认选中 
         setVal: function (ac, dc) {
             var node = this;
             node.set(ac);
@@ -329,15 +334,17 @@
             //按钮位置：left-左，center-中，right-右
             buttonPosition: 'center',
             //当没有“全选/反选”按钮时是否显示“确定”按钮
-            showButton: false,
+            button: false,
             //是否显示序号(行号)
-            showNumber: false,
+            number: false,
+            //是否显示值内容
+            display: false,
             //是否支持按钮快捷键功能
             shortcutKey: true,
             //是否显示按钮快捷键数字
             shortcutNum: false,
             //非列表布局时，是否显示选项边框
-            itemBorder: false,
+            border: false,
             //是否允许扩展选项（可以自行输入不存在的选项值）
             editable: false,
             //是否多选，默认多选
@@ -349,8 +356,8 @@
             //多选数量限制提示
             maxLimitMsg: '',
             //是否显示选框,默认情况下：单选框不显示，复选框显示
-            //若指定display为true或false，则按指定规则显示
-            display: null,
+            //若指定choose为true或false，则按指定规则显示
+            choose: null,
             //回调等级：0-选项实时回调，1-全选/反选等按钮事件回调，2-确定按钮事件回调
             callbackLevel: 1,
             //是否防抖，多选模式下，点击选项时有效
@@ -362,6 +369,13 @@
         }, options));
 
         opt.maxHeight = options.maxHeight || (opt.layout === 'grid' ? Config.BoxGridMaxHeight : Config.BoxMaxHeight);
+
+        opt.buttonPosition = $.getParam(opt, 'buttonPosition,buttonPos,btnPos');
+        opt.button = $.getParam(opt, 'showButton,button');
+        opt.number = $.getParam(opt, 'showNumber,number');
+        opt.display = $.getParam(opt, 'showValue,display');
+        opt.choose = $.getParam(opt, 'chooseBox,choosebox,choose');
+        opt.border = $.getParam(opt, 'itemBorder,border,');
 
         this.id = opt.id;
         this.options = opt;
@@ -491,19 +505,19 @@
                 if (opt.multi) {
                     if (opt.layout !== Config.Layout.List && len > 3 || len > 5) {
                         selects = [
-                            '<button class="btn btn-default btn-first" ac="1">', texts[1], '</button>',
-                            '<button class="btn btn-default" ac="2">', texts[2], '</button>',
-                            '<button class="btn btn-default" ac="0">', texts[0], '</button>',
-                            '<button class="btn btn-default" ac="3">', texts[3], '</button>',
+                            '<button class="oui-ddl-btn btn btn-default btn-first" ac="1">', texts[1], '</button>',
+                            '<button class="oui-ddl-btn btn btn-default" ac="2">', texts[2], '</button>',
+                            '<button class="oui-ddl-btn btn btn-default" ac="0">', texts[0], '</button>',
+                            '<button class="oui-ddl-btn btn btn-default" ac="3">', texts[3], '</button>',
                         ].join('');
                         oneBtn = false;
                         btnLen += 4;
                     }
-                    if (!oneBtn || opt.callbackLevel > 0 || opt.showButton) {
+                    if (!oneBtn || opt.callbackLevel > 0 || opt.button) {
                         btn.push('<div class="oui-ddl-oper oui-ddl-oper-' + opt.layout + '" style="text-align:' + (opt.buttonPosition || 'center') + ';">');
                         btn.push('<div class="btn-group btn-group-xs' + (oneBtn ? ' btn-group-block' : '') + '">');
                         btn.push(selects.join(''));
-                        btn.push('<button class="btn btn-primary btn-' + ac + (oneBtn ? ' btn-block' : '') + '" ac="' + ac + '">', texts[4], '</button>');
+                        btn.push('<button class="oui-ddl-btn btn btn-primary btn-' + ac + (oneBtn ? ' btn-block' : '') + '" ac="' + ac + '">', texts[4], '</button>');
                         btn.push('</div>');
                         btn.push('</div>');
                         btnLen += 1;
@@ -538,7 +552,7 @@
                 ], i, n = len.toString().length, key = Config.ItemPrefix + that.id;
 
                 var columns = opt.columns || opt.cells || 0,
-                    conWidth = Factory.getItemConWidth(opt.items, opt.itemWidth, columns, opt.display),
+                    conWidth = Factory.getItemConWidth(opt.items, opt.itemWidth, columns, opt.choose),
                     minWidth = opt.layout === Config.Layout.Grid ? conWidth : 0;
 
                 if (!opt.multi && opt.allowEmpty) {
@@ -547,14 +561,14 @@
                         opt.layout !== Config.Layout.List ? 'float:left;' : '',
                         opt.layout === Config.Layout.Grid ? 'min-width:' + Factory.getStyleSize(minWidth || opt.itemWidth) + ';' : '',
                         '">',
-                        '<label  class="oui-ddl-label', opt.layout !== Config.Layout.List && opt.itemBorder ? ' oui-ddl-label-border' : '', '">',
+                        '<label  class="oui-ddl-label', opt.layout !== Config.Layout.List && opt.border ? ' oui-ddl-label-border' : '', '">',
                         '<input class="oui-ddl-chb"', checked,
                         ' type="', opt.multi ? 'checkbox' : 'radio', '"',
                         ' id="', '"',
                         ' name="', key, '"',
                         ' value="', '"',
                         ' text="', opt.allowEmpty, '"',
-                        ' style="display:' + (opt.display ? '' : 'none') + ';"',
+                        ' style="display:' + (opt.choose ? '' : 'none') + ';"',
                         ' />',
                         '<span>', opt.allowEmpty, '</span>',
                         '</label>',
@@ -587,17 +601,18 @@
                             use = dr.enabled || dr.use,
                             disabled = dr.disabled ? ' disabled="disabled"' : '',
                             desc = dr.desc || '',
-                            title = '<span>' + txt + '</span>' + (desc && txt !== desc ? '<span class="i-t">- ' + desc + '</span>' : '');
+                            title = '<span class="oui-ddl-li-txt">' + (opt.display && val !== txt ? val + '<u>-</u>' + txt : txt) + '</span>' +
+                                (desc && txt !== desc ? '<span class="oui-ddl-li-txt i-t">' + desc + '</span>' : '');
 
                         html.push([
                             '<li class="oui-ddl-item" style="',
                             opt.layout !== Config.Layout.List ? 'float:left;' : '',
                             opt.layout === Config.Layout.Grid ? 'min-width:' + Factory.getStyleSize(minWidth || opt.itemWidth) + ';' : '',
-                            '" opt-idx="', (i + 1), '" data-value="', val.toString().replace(/["]/g, '&quot;'),
-                            '">',
-                            '<label class="oui-ddl-label', opt.layout !== Config.Layout.List && opt.itemBorder ? ' oui-ddl-label-border' : '', '"',
-                            opt.showNumber ? ' style="padding-left:4px;"' : '', '>',
-                            opt.showNumber ? '<i style="width:' + (n * 12) + 'px;">' + (i + 1)  + '</i>' : '',
+                            '" opt-idx="', (i + 1), '" data-value="', val.toString().replace(/["]/g, '&quot;'), '"',
+                            '>',
+                            '<label class="oui-ddl-label', opt.layout !== Config.Layout.List && opt.border ? ' oui-ddl-label-border' : '', '"',
+                            opt.number ? ' style="padding-left:4px;"' : '', '>',
+                            opt.number ? '<i style="width:' + (n * 12) + 'px;">' + (i + 1)  + '</i>' : '',
                             '<input class="oui-ddl-chb"', checked,
                             ' type="', opt.multi ? 'checkbox' : 'radio', '"',
                             ' id="', chbId, '"',
@@ -605,7 +620,7 @@
                             ' value="', val, '"',
                             ' text="', (txt).filterHtml(true).replace(/["]/g, '&quot;'), '"',
                             ' desc="', (desc).filterHtml(true).replace(/["]/g, '&quot;'), '"',
-                            ' style="display:' + (opt.display ? '' : 'none') + ';"',
+                            ' style="display:' + (opt.choose ? '' : 'none') + ';"',
                             ' />',
                             '<span', (use || typeof use === 'undefined') ? '' : ' class="del"', '>', title, '</span>',
                             '</label>',
@@ -633,10 +648,11 @@
                     }
                 });
 
-                var arr = $N(Config.ItemPrefix + that.id);
+                var arr = $N(key);
                 for (i = 0; i < arr.length; i++) {
                     var chb = arr[i];
                     that.nodes.push(new Node({
+                        elem: elem,
                         id: chb.value,
                         label: chb.parentNode,
                         input: chb,
@@ -657,7 +673,7 @@
                     that.indexs[chb.id] = i;
                 }
 
-                that.btns = document.querySelectorAll('#' + Config.IdPrefix + opt.id + ' .oui-ddl-oper button');
+                that.btns = document.querySelectorAll('#' + Config.IdPrefix + opt.id + ' .oui-ddl-oper .oui-ddl-btn');
                 for (i = 0; i < that.btns.length; i++) {
                     if (opt.shortcutKey) {
                         if (opt.shortcutNum) {
@@ -666,6 +682,7 @@
                         that.btns[i].title += '快捷键: shift + ' + (i + 1);
                     }
                     $.addListener(that.btns[i], 'click', function(ev) {
+                        elem.focus();
                         var ac = $.getAttribute(this, 'ac');
                         if (ac === 'no') {
                             that.hide();
@@ -679,11 +696,13 @@
                     });
                 }
 
+
                 $.addListener(elem, 'mousedown', function (ev) {
                     $.cancelBubble(ev);
                     that.show(this);
                     this.focus();
                     Factory.closeOther(that);
+
                     return true;
                 });
                 $.addListener(elem, 'keydown', function (ev) {
@@ -960,6 +979,13 @@
                 $.setClass(opt.select ? that.elem : that.text, 'oui-ddl-txt-cur', show);
                 //下拉列表位置停靠
                 that.size().position();
+
+                if (show) {
+                    var spans = document.querySelectorAll('#' + Config.IdPrefix + opt.id + ' .oui-ddl-li-txt');
+                    for (i = 0; i < spans.length; i++) {
+                        spans[i].title = $.getOffset(spans[i]).height > Config.BoxItemHeight ? spans[i].innerHTML.filterHtml() : '';
+                    }
+                }
             }
             return that.activity = true, that;
         },

@@ -89,8 +89,9 @@ label.oui-ddl-label {
 }
 label.oui-ddl-label span {
 	margin: 0 0 0 0;
-	float: left;
+	float: none;
 	line-height: 29px;
+	overflow: hidden;
 }
 
 label.oui-ddl-label i {
@@ -99,16 +100,27 @@ label.oui-ddl-label i {
     float: left;
 }
 
-label.oui-ddl-label span.del {
+label.oui-ddl-label .del, label.oui-ddl-label .del span {
     text-decoration:line-through;
 }
-label.oui-ddl-label span.i-t {
+label.oui-ddl-label u{
+	text-decoration: none;
+	color: #999;
+	font-size: 14px;
+	margin: 0 3px;
+	padding: 0;
+	border: 0;
+	background: none;
+}
+
+label.oui-ddl-label .i-t {
     color: #999;
     margin: 0 0 0 8px;
     padding: 0;
     font-size: 14px;
     border: none;
     background: none;
+	float: none;
 }
 
 label.oui-ddl-label-border {	
@@ -197,7 +209,7 @@ ul.oui-ddl-flow label.oui-ddl-cur:hover,ul.oui-ddl-grid label.oui-ddl-cur:hover 
 	padding: 0 0px;
 	display: block;
 }
-.oui-ddl-panel button.btn {
+.oui-ddl-panel .btn {
 	border:solid 1px #ccc;
 	box-sizing: border-box;
 	height: 28px;
@@ -208,15 +220,15 @@ ul.oui-ddl-flow label.oui-ddl-cur:hover,ul.oui-ddl-grid label.oui-ddl-cur:hover 
 	font-family: Arial,宋体;
 	border-right: none;
 }
-.oui-ddl-panel button.btn em {
+.oui-ddl-panel .btn em {
 	margin:0 0 0 3px;
 	padding: 0;
 	font-style: normal;
 }
-.oui-ddl-panel button.btn u {
+.oui-ddl-panel .btn u {
 
 }
-.oui-ddl-panel button.btn:hover {
+.oui-ddl-panel .btn:hover {
 	background: #e6e6e6;
 	border: solid 1px #adadad;
 	border-right: none;
@@ -234,18 +246,18 @@ ul.oui-ddl-flow label.oui-ddl-cur:hover,ul.oui-ddl-grid label.oui-ddl-cur:hover 
 	background: #286090;
 	border: solid 1px #204d74;
 }
-.oui-ddl-panel button.btn-no {
+.oui-ddl-panel .btn-no {
 	padding: 0 10px;
 	margin-right: 2px;
 }
-.oui-ddl-panel button.btn-ok {
+.oui-ddl-panel .btn-ok {
 	padding: 0 15px;
 	margin-right: 2px;
 }
-.oui-ddl-panel .btn-group button.btn-first {
+.oui-ddl-panel .btn-group .btn-first {
 	margin-left: 2px;
 }
-.oui-ddl-panel .btn-group-block button.btn-ok,.oui-ddl-panel .btn-group-block button.btn-block {
+.oui-ddl-panel .btn-group-block .btn-ok,.oui-ddl-panel .btn-group-block .btn-block {
 	width: 100%;
 	border-radius: 4px;
 }
