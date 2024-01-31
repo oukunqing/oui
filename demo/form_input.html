@@ -235,7 +235,7 @@ button {width:120px;height:28px;}
             config: { 
                 //bool型 默认readonly:true
                 readonly: false, 
-                showValue: true 
+                display: true 
             }
         });
         $.setInputFormat('fmt_ipv4', {
@@ -264,10 +264,10 @@ button {width:120px;height:28px;}
         $.setInputFormat('fmt_option2', {
             types: ['option', 'word'],
             options: ['abc', 'acc', 'asd', '123', {val:456,txt:'456456'}, '输入选项ABC123', 'hello', 'world', 'abcdefg', 'helloworld'],
-            //showValue: 同时显示值value和文本text，如果value===text则只显示text
+            //display: 同时显示值value和文本text，如果value===text则只显示text
             config: { 
-                showNumber: true, 
-                showValue: true,
+                number: true, 
+                display: true,
                 readonly: true,
                 //选项框最大显示高度，默认为360px
                 //maxHeight: 400
@@ -279,13 +279,13 @@ button {width:120px;height:28px;}
         $.setInputFormat('fmt_channel', {
             types: ['int', 'option'],
             options: buildOptions([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,100,1000], '通道'),
-            config: { readonly: false }
+            config: { readonly: false, title: '请输入AT指令'  }
         });
 
         $.setInputFormat('fmt_channel2', {
             types: ['int', 'option'],
             options: buildOptions([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,100,1000], '通道'),
-            config: { readonly: true }
+            config: { readonly: true, number: true, display: true }
         });
 
 
@@ -293,13 +293,13 @@ button {width:120px;height:28px;}
             types: ['option', 'word'],
             options: ['abc', 'acc', 'asd', '123', {val:456,txt:'456456'}, {val:'ABC123',txt:'输入选项ABC123ABC123'}, 'hello', 'world', 'abcdefg', 'helloworld', 'linux', 'windows'],
             //value: 456,
-            //showValue: 同时显示值value和文本text，如果value===text则只显示text
+            //display: 同时显示值value和文本text，如果value===text则只显示text
             config: { 
                 name: '选项',
                 //是否显示序号（行号），默认不显示
                 number: true, 
                 //是否显示“值”
-                showValue: true,
+                display: true,
                 //选项框最大显示高度，默认为360px
                 //maxHeight: 400,
                 maxWidth: 320
@@ -310,14 +310,14 @@ button {width:120px;height:28px;}
             types: ['option', 'word'],
             options: [{val:456,txt:'456456'}, {val:'ABC123',txt:'选项ABC123'}, 'hello', 'world', 'abcdefg', 'helloworld'],
             value: 'ABC123',
-            //showValue: 同时显示值value和文本text，如果value===text则只显示text
+            //display: 同时显示值value和文本text，如果value===text则只显示text
             config: { 
                 //是否追加选项，追加选项表示将select控件元素原有的<option>项 + options配置 作为选项参数
                 //若 append:false 是不启用原有<option>项的
                 append: true,
                 //是否显示序号（行号），默认不显示
-                showNumber: true, 
-                showValue: true,
+                number: true, 
+                display: true,
                 //选项框最大显示高度，默认为360px
                 //maxHeight: 400,
                 maxWidth: 200,
@@ -357,10 +357,10 @@ button {width:120px;height:28px;}
         $.setInputFormat('txtDialogOpt1', {
             types: ['option', 'word'],
             options: ['abc', 'acc', 'asd', '123', {val:456,txt:'456456'}, '输入选项ABC123', 'hello', 'world', 'abcdefg', 'helloworld'],
-            //showValue: 同时显示值value和文本text，如果value===text则只显示text
+            //display: 同时显示值value和文本text，如果value===text则只显示text
             config: { 
-                showNumber: true, 
-                showValue: true,
+                number: true, 
+                display: true,
                 //readonly: true,
                 relative: true,
                 //选项框最大显示高度，默认为360px
@@ -373,10 +373,10 @@ button {width:120px;height:28px;}
             types: ['option', 'word'],
             options: [{val:'',txt:'空选项'},'abc', 'acc', 'asd', '123', {val:456,txt:'456456'}, {val:'ABC123',txt:'输入选项ABC123'}, 'hello', 'world', 'abcdefg', 'helloworld'],
             value: 456,
-            //showValue: 同时显示值value和文本text，如果value===text则只显示text
+            //display: 同时显示值value和文本text，如果value===text则只显示text
             config: { 
-                showNumber: true, 
-                showValue: true,
+                number: true, 
+                display: true,
                 relativePosition: true,
                 //选项框最大显示高度，默认为360px
                 maxHeight: 200

@@ -1724,4 +1724,5 @@ var list = [], baseLen = 10, flagLen = 1, itemLen = 9;
 for (var i = 0; i < 51; i++) {
     list.push((i) + '\t' + (baseLen + flagLen + itemLen * i));
 }
-console.log(list.join('\r\n'));
+
+console.log('41542b43434c4b3f0d0d0a2b43434c4b3a202232342f30312f33302c31303a30343a3533220d0a0d0a4f4b0d0a'.hexToAscii())
