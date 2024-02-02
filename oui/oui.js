@@ -2106,6 +2106,15 @@
         toHex: function () {
             return $.toAsciiHex(this.toAscii(), true);
         },
+        //lower: 是否小写
+        //cutoff: 是否截断长度
+        toNumHex: function(len, lower, cutoff) {
+            var num = parseInt(this, 10);
+            if (!isNaN(num)) {
+                return num.toHex(len, lower, cutoff);
+            }
+            return '';
+        },
         parseUnicode: function (returnArray) {
             return $.unicodeToChinese(this, returnArray);
         },
@@ -2258,13 +2267,22 @@
             return arr.join('');
         },
         hexToInt: function (reverse) {
-            var s = this.isEvenLen(),
-                hex = reverse ? s.reverseHex(reverse) : s,
+            var s = this.isEvenLen();
+            if (!/^[0-9A-F]{0,}$/ig.test(s)) {
+                $.console.log('hexToInt: [', s, '] hex内容格式错误');
+                return 0;
+            }
+            var hex = reverse ? s.reverseHex(reverse) : s,
                 num = eval('0x' + hex).toString(10);
             return parseInt(num, 10);
         },
         hexToFloat: function (reverse, decimalLen) {
-            var a = reverse ? this.reverseHex(reverse) : this;
+            var str = this.isEvenLen();
+            if (!/^[0-9A-F]{8}$/ig.test(str)) {
+                $.console.log('hexToFloat: [', str, '] hex内容格式错误');
+                return 0;
+            }
+            var a = reverse ? str.reverseHex(reverse) : str;
             var b = parseInt(a, 16);
             var s = (b & 0x80000000) ? -1 : 1;
             var e = (b & 0x7f800000) / 0x800000 - 127;
@@ -2475,12 +2493,23 @@
         isHexNumber: function () { return $.isHexNumeric(this); },
         isNaN: function () { return isNaN(parseFloat(this, 10)); },
         toAscii: function () { return this.toString().charCodeAt(); },
-        toHex: function (len, lower) {
-            var hex = this.toString(16);
+        //cutoff: 是否截断长度（截断长度会带来一些问题，应在特定情况下谨慎使用）
+        toHex: function (len, lower, cutoff) {
+            var num = this, c, tmp,
+                hex = num.toString(16);
             if (len) {
-                hex = hex.padLeft(len, '0');
+                tmp = hex.padLeft(len, '0');
+                c = tmp.length;
+                if ($.isBoolean(cutoff, false)) {
+                    hex = tmp.substr(c - len);
+                    if (c > len) {
+                        $.console.log('toHex:', num, '=>', tmp, ', cutoff[' + len + '] =>', hex);
+                    }
+                } else {
+                    hex = tmp;
+                }
             }
-            return lower ? hex.toLowerCase() : hex.toUpperCase();
+            return $.isBoolean(lower) ? (lower ? hex.toLowerCase() : hex.toUpperCase()) : hex;
         },
         floatToHex: function(reverse) {
             return this.toString().floatToHex(reverse);

@@ -1725,4 +1725,9 @@ for (var i = 0; i < 51; i++) {
     list.push((i) + '\t' + (baseLen + flagLen + itemLen * i));
 }
 
-console.log('41542b43434c4b3f0d0d0a2b43434c4b3a202232342f30312f33302c31303a30343a3533220d0a0d0a4f4b0d0a'.hexToAscii())
+console.log('41542b43434c4b3f0d0d0a2b43434c4b3a202232342f30312f33302c31303a30343a3533220d0a0d0a4f4b0d0a'.hexToStr())
+
+
+console.log('000a'.hexToInt());
+console.log('40E400'.hexToFloat());
+console.log((123456789).toHex(6, null, true));

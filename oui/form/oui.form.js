@@ -1841,7 +1841,7 @@
             // 设置输入框内容格式
             // 需要设置输入格式的文本框，默认情况下是不允许空格和特殊字符的
             setFormat: function (elements, options) {
-                var elems = [], elem, keyTypes = [
+                var elems = [], element, keyTypes = [
                     'open', //open 表示不限制输入，但需要验证选项等特殊格式
                     'char', 'number', 'char_number', 'word', 'int', 'long', 'float', 'double', 'bool', 'control', 'symbol', 
                     'option', 'ipv4', 'ipv6', 'port', 'hex', 'md5', 'angle', 'at'
@@ -1854,7 +1854,7 @@
                     elems = elements.split(/[,;\|]/).length > 1 ? elements.split(/[,;\|]/) : [elements];
                 }
 
-                if ((!$.isArrayLike(elems) && !$.isArray(elems)) || !(elem = $.toElement(elems[0]))) {
+                if ((!$.isArrayLike(elems) && !$.isArray(elems)) || !(element = $.toElement(elems[0]))) {
                     return this;
                 }
                 
@@ -1913,13 +1913,13 @@
                 var ks = [['append'], ['editable'],['relative'],['number']];
                 for (var k = 0 ; k < ks.length; k++) {
                     if (!$.isBoolean(cfg[ks[k][0]])) {
-                        cfg[ks[k][0]] = $.getAttribute(elem, 'opt-' + (ks[k][1] || ks[k][0]), 'false').inArray(['true', '1']);
+                        cfg[ks[k][0]] = $.getAttribute(element, 'opt-' + (ks[k][1] || ks[k][0]), 'false').inArray(['true', '1']);
                     }
                 }
                 var ns = [['width'],['height', 'maxHeight,height'],['zindex', 'zindex,zIndex']];
                 for (var n = 0; n < ns.length; n++) {
                     if (!(cfg[ns[n][0]] = $.getParam(cfg, ns[n][1] || ns[n][0], 0))) {
-                        cfg[ns[n][0]] = $.getAttribute(elem, 'opt-' + ns[n][0], 0);
+                        cfg[ns[n][0]] = $.getAttribute(element, 'opt-' + ns[n][0], 0);
                     }
                 }
 
@@ -1936,14 +1936,14 @@
                 }
 
                 if ($.isDebug()) {
-                    $.console.log('$.input.setFormat:', elem.id, elem, opt);
+                    $.console.log('$.input.setFormat:', element.id, element, opt);
                 }
 
                 if (opt.config.append) {
-                    opt.options = $.input.getElementOptionConfig(elem).concat(opt.options);
+                    opt.options = $.input.getElementOptionConfig(element).concat(opt.options);
                 } else if (opt.options.length <= 0) {
                     //如果没有配置选项，则尝试从元素属性中获取
-                    opt.options = $.input.getElementOptionConfig(elem);
+                    opt.options = $.input.getElementOptionConfig(element);
                 }
 
                 if ((!opt.patterns || opt.patterns.length <= 0) && $.isRegexp(opt.pattern)) {
@@ -2115,7 +2115,8 @@
                 //$.console.log('keys: ', keys, ', patterns: ', opt.patterns);
 
                 for (i = 0; i < elems.length; i++) {
-                    if (!$.isElement(elem = $.toElement(elems[i])) || !limit) {
+                    var elem = $.toElement(elems[i]);
+                    if (!$.isElement(elem) || !limit) {
                         continue;
                     }
                     isSelect = elem.tagName === 'SELECT';
@@ -2185,26 +2186,26 @@
                             var kc = $.getKeyCode(ev), 
                                 ddl = this.tagName === 'SELECT', 
                                 typed = $.getAttribute(this, 'opt-typed', '0').toInt(),
-                                div = $I($.getAttribute(elem, 'opt-id')),
+                                div = $I($.getAttribute(this, 'opt-id')),
                                 arrowList = [37, 38, 40, 39],   //左 上 下 右
                                 vimKeyList = [72, 75, 74, 76, 77],  //H  K  J  L M
                                 shortcut = kc >= 48 && kc % 48 < 10;
 
                             if (kc.inArray([13, 108]) || ((ddl || keys.indexOf(32) < 0) && kc === 32)) {
-                                elem.focus();
-                                _showOption(ev, elem, opt);
+                                this.focus();
+                                _showOption(ev, this, opt);
                                 return false;
                             }
                             if ((kc.inArray(arrowList) || 
                                 ((ddl || opt.config.readonly || !kc.inArray(keys)) && (kc.inArray(vimKeyList) || shortcut))) && 
                                 (ddl || opt.config.readonly || !typed)) {
                                 $.cancelBubble(ev);
-                                var idx = ($.getAttribute(elem, 'opt-idx') || '').toInt(),
-                                    val = elem.value.trim(),
+                                var idx = ($.getAttribute(this, 'opt-idx') || '').toInt(),
+                                    val = this.value.trim(),
                                     ps = $.input.getOptionValues(opt.options);
 
-                                if (!_haveOption(elem)) {
-                                    _showOption(ev, elem, opt, 0);
+                                if (!_haveOption(this)) {
+                                    _showOption(ev, this, opt, 0);
                                     idx = 0;
                                 }
                                 if (shortcut) {
@@ -2218,7 +2219,7 @@
                                     }
                                     idx = kc.inArray([37, 38]) ? idx - 1 : idx + 1;
                                 }
-                                $.input.selectOptionItem(idx, kc, elem, $.getAttribute(elem, 'opt-id'), shortcut);
+                                $.input.selectOptionItem(idx, kc, this, $.getAttribute(this, 'opt-id'), shortcut);
 
                                 return true;
                             }
@@ -2230,12 +2231,12 @@
                                     if (div != null && div.style.display !== 'none') {
                                         $.cancelBubble(ev);
                                     }
-                                    _showOption(ev, elem, opt, 0);
-                                    $.setTextCursorPosition(elem);
+                                    _showOption(ev, this, opt, 0);
+                                    $.setTextCursorPosition(this);
                                 } else if (!ddl && opt.config.readonly && kc.inArray([8, 46])) {
                                     //backspace, delete键，表示选项被取消，用-1表示索引
-                                    $.input.selectOptionItem(-1, null, elem, $.getAttribute(elem, 'opt-id'));
-                                    elem.value = '';
+                                    $.input.selectOptionItem(-1, null, this, $.getAttribute(this, 'opt-id'));
+                                    this.value = '';
                                 }
                                 return true;
                             }
@@ -2246,24 +2247,24 @@
                             //若只指定选项，而没有指定其他输入类型，则不限制输入键
                             //当指定了输入类型(option除外)，则需要验证输入键值
                             if (!opt.config.readonly && ($.input.checkKey(ev, keys, excepts, opt) || types.length > 1)) {
-                                if ($.getSelectedText(elem)) {
+                                if ($.getSelectedText(this)) {
                                     return true;
                                 }
-                                var pos = $.getTextCursorPosition(elem),
+                                var pos = $.getTextCursorPosition(this),
                                     key = ev.key,
-                                    txt = elem.value.trim(),
+                                    txt = this.value.trim(),
                                     val = pos <= 0 ? key + txt : txt.substr(0, pos + 1) + key + txt.substr(pos),
                                     ctl;
 
-                                if ((ctl = $.input.replaceValue(ev, elem, val, isCnAble, converts, $.input.getOptionValues(opt.options))).replace) {
+                                if ((ctl = $.input.replaceValue(ev, this, val, isCnAble, converts, $.input.getOptionValues(opt.options))).replace) {
                                     return false;
                                 }
                                 val = ctl.val;
 
                                 if (!isVal && !isBool) {
-                                    if (!$.input.checkVal(val, types, opt, true, elem)) {
+                                    if (!$.input.checkVal(val, types, opt, true, this)) {
                                         if (!$.isCtrlKey(ev)) {
-                                            _showOption(ev, elem, opt, 2);
+                                            _showOption(ev, this, opt, 2);
                                         }
                                         return false;
                                     }
@@ -2272,7 +2273,7 @@
                                         return false;
                                     }
                                 }
-                                return (!isVal && !isBool) || $.input.checkValLen(val, opt, false, true, elem);
+                                return (!isVal && !isBool) || $.input.checkValLen(val, opt, false, true, this);
                             } else if (opt.config.readonly && !$.isCtrlKey(ev)) {
                                 _showOption(ev, elem, opt, 2);
                             }
@@ -2282,33 +2283,33 @@
                         if (!isSelect) {
                             $.addListener(elem, 'keyup', function(ev) {
                                 var kc = $.getKeyCode(ev),
-                                    val = elem.value.trim(),
+                                    val = this.value.trim(),
                                     ps = $.input.getOptionValues(opt.options),
                                     ctl;
 
                                 if (kc.inArray([37, 38, 39, 40])) {
-                                    $.setAttribute(elem, 'opt-typed', $.input.isInputTyped(ps, val) ? 1 : 0);
+                                    $.setAttribute(this, 'opt-typed', $.input.isInputTyped(ps, val) ? 1 : 0);
                                     return true;
                                 }
                                 if ((ctl = $.input.replaceValue(ev, elem, val, isCnAble, converts, ps)).replace) {
-                                    $.setAttribute(elem, 'opt-typed', $.input.isInputTyped(ps, ctl.val) ? 1 : 0);
+                                    $.setAttribute(this, 'opt-typed', $.input.isInputTyped(ps, ctl.val) ? 1 : 0);
                                     return false;
                                 }
                                 val = ctl.val;
 
-                                if(!$.input.checkFormat(elem, $.extend([], opt.options), false, opt.config.editable)) {
-                                    elem.focus();
+                                if(!$.input.checkFormat(this, $.extend([], opt.options), false, opt.config.editable)) {
+                                    this.focus();
                                     return false;
                                 }
-                                $.setAttribute(elem, 'opt-typed', $.input.isInputTyped(ps, val) ? 1 : 0);
+                                $.setAttribute(this, 'opt-typed', $.input.isInputTyped(ps, val) ? 1 : 0);
                                 return true;
                             });
                             
                             //内容指定，当输入的内容与选项不匹配时，输入框锁定焦点
                             $.addListener(elem, 'blur', function(ev) {
-                                $.input.replaceValue(ev, elem, elem.value.trim(), isCnAble, converts, $.input.getOptionValues(opt.options));
-                                if(!$.input.checkFormat(elem, $.extend([], opt.options), false, opt.config.editable)) {
-                                    elem.focus();
+                                $.input.replaceValue(ev, this, this.value.trim(), isCnAble, converts, $.input.getOptionValues(opt.options));
+                                if(!$.input.checkFormat(this, $.extend([], opt.options), false, opt.config.editable)) {
+                                    this.focus();
                                 }
                             });
                         }
@@ -2317,15 +2318,15 @@
                         if ($.isBoolean(opt.showOption, true)) {
                             $.addListener(elem, 'mousedown', function(ev) {
                                 $.cancelBubble(ev);
-                                elem.focus();
-                                _showOption(ev, elem, opt);
+                                this.focus();
+                                _showOption(ev, this, opt);
                                 return false;
                             });
                         }
                     } else if (!isSelect) {
                         //控制输入，当输入值不匹配时，输入框禁止输入
                         elem.onkeydown = function(ev) {
-                            var kc = $.getKeyCode(ev), selected = $.getSelectedText(elem) ? true : false;
+                            var kc = $.getKeyCode(ev), selected = $.getSelectedText(this) ? true : false;
                             if ($.input.checkKey(ev, ctls, excepts, opt) || $.input.checkKey(ev, funs, excepts, opt)) {
                                 return true;
                             }
@@ -2334,22 +2335,22 @@
                                 return true;
                             }
                             if (!opt.config.readonly && $.input.checkKey(ev, keys, excepts, opt)) {
-                                if ($.getSelectedText(elem)) {
+                                if ($.getSelectedText(this)) {
                                     return true;
                                 }
-                                var pos = $.getTextCursorPosition(elem),
+                                var pos = $.getTextCursorPosition(this),
                                     key = ev.key,
-                                    txt = elem.value.trim(),
+                                    txt = this.value.trim(),
                                     val = pos <= 0 ? key + txt : txt.substr(0, pos) + key + txt.substr(pos),
                                     ctl;
 
-                                if ((ctl = $.input.replaceValue(ev, elem, val, isCnAble, converts, $.input.getOptionValues(opt.options))).replace) {
+                                if ((ctl = $.input.replaceValue(ev, this, val, isCnAble, converts, $.input.getOptionValues(opt.options))).replace) {
                                     return false;
                                 }
                                 val = ctl.val;
 
                                 if (!isVal) {
-                                    if (!$.input.checkVal(val, types, opt, true, elem)) {
+                                    if (!$.input.checkVal(val, types, opt, true, this)) {
                                         return false;
                                     }
                                 } else if (exceptions.length > 0) {
@@ -2357,42 +2358,42 @@
                                         return false;
                                     }
                                 }
-                                return !isVal || $.input.checkValLen(val, opt, false, true, elem);
+                                return !isVal || $.input.checkValLen(val, opt, false, true, this);
                             }
                             return false;
                         };
                         $.addListener(elem, 'keyup', function(ev) {
-                            var kc = $.getKeyCode(ev), val = elem.value.trim(), ctl;
-                            if ((ctl = $.input.replaceValue(ev, elem, val, isCnAble, converts, $.input.getOptionValues(opt.options))).replace) {
+                            var kc = $.getKeyCode(ev), val = this.value.trim(), ctl;
+                            if ((ctl = $.input.replaceValue(ev, this, val, isCnAble, converts, $.input.getOptionValues(opt.options))).replace) {
                                 return false;
                             }
                             val = ctl.val;
                             if (isVal) {
-                                if(!$.input.checkFormat(elem, patterns, true, opt.config.editable)) {
-                                    return $.input.setWarnColor(elem, false, true);
+                                if(!$.input.checkFormat(this, patterns, true, opt.config.editable)) {
+                                    return $.input.setWarnColor(this, false, true);
                                 }
                             } else {
-                                if ((!isVal && !$.input.checkVal(val, types, opt, false, elem)) || !$.input.checkValLen(val, opt, false, false, elem)) {
-                                    return $.input.setWarnColor(elem, false);
+                                if ((!isVal && !$.input.checkVal(val, types, opt, false, this)) || !$.input.checkValLen(val, opt, false, false, this)) {
+                                    return $.input.setWarnColor(this, false);
                                 }
                             }
                             return $.input.setWarnColor(elem, true);
                         });
                         $.addListener(elem, 'blur', function(ev) {
-                            var val = elem.value.trim(), len = val.length;
-                            $.input.replaceValue(ev, elem, val, isCnAble, converts, $.input.getOptionValues(opt.options));
+                            var val = this.value.trim(), len = val.length;
+                            $.input.replaceValue(ev, this, val, isCnAble, converts, $.input.getOptionValues(opt.options));
                             if (isNum && (val.endsWith('-') || val.endsWith('.'))) {
-                                return $.input.setWarnColor(elem, false, true);
-                            } else if (!$.input.checkVal(val, types, opt, false, elem)) {
-                                return $.input.setWarnColor(elem, false, true);
-                            } else if (isVal && (!$.input.checkFormat(elem, patterns, true, opt.config.editable) || $.input.checkExcept(val, opt))) {
+                                return $.input.setWarnColor(this, false, true);
+                            } else if (!$.input.checkVal(val, types, opt, false, this)) {
+                                return $.input.setWarnColor(this, false, true);
+                            } else if (isVal && (!$.input.checkFormat(this, patterns, true, opt.config.editable) || $.input.checkExcept(val, opt))) {
                                 $.console.log('\u5185\u5bb9\u683c\u5f0f\u9519\u8bef', val);   //内容格式错误
-                                return $.input.setWarnColor(elem, false, true);
+                                return $.input.setWarnColor(this, false, true);
                             }
                             if (len > 0 && opt.minVal && parseFloat('0' + val, 10) < opt.minVal) {
-                                return $.input.setWarnColor(elem, false, true);
+                                return $.input.setWarnColor(this, false, true);
                             }
-                            return $.input.setWarnColor(elem, true);
+                            return $.input.setWarnColor(this, true);
                         });
                         if (!opt.paste) {
                             elem.onpaste = function() {
@@ -2401,8 +2402,8 @@
                         } else {
                             elem.onpaste = function() {
                                 //如果输入框的内容已经超出长度限制，则不能再粘贴内容
-                                if (!$.input.checkLen(this.value.trim(), opt, true, false, elem)) {
-                                    return $.input.setWarnColor(elem, false);
+                                if (!$.input.checkValLen(this.value.trim(), opt, true, false, this)) {
+                                    return $.input.setWarnColor(this, false);
                                 }
                             };
                         }

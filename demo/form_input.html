@@ -40,7 +40,7 @@ button {width:120px;height:28px;}
             </tr>
             <tr>
                 <td></td>
-                <td><input type="text" id="fmt_num_angle" placeholder="只能输入角度值（小数或整数，0-360），保留2位小数" /></td>
+                <td><input type="text" id="fmt-num-angle" placeholder="只能输入角度值（小数或整数，0-360），保留2位小数" /></td>
             </tr>
             <tr>
                 <td></td>
@@ -185,8 +185,9 @@ button {width:120px;height:28px;}
             maxLen: 4
         });
 
-        $.setInputFormat('fmt_num_angle', {
-            types: ['angle'],
+        $.setInputFormat('fmt-num-angle', {
+            //types: ['angle'],
+            types: 'angle',
             maxVal: 360,
             //dot: false
             decimalLen: 2

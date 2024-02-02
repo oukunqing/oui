@@ -172,10 +172,10 @@
                 }
                 return '0';
             },
-            getItemConWidth: function (items, itemWidth, columns, display) {
+            getItemConWidth: function (items, itemWidth, columns, display) {          
                 if (itemWidth === 'cell') {
                     var width = 0;
-                    if (columns > 0) {
+                    if ($.isNumber(columns) && columns > 0) {
                         width = parseInt(100 / columns - 2, 10) + '%';
                     } else {
                         for (var i = 0; i < items.length; i++) {
@@ -327,7 +327,7 @@
             layout: 'list', //list, flow, grid
             //输入框宽度，默认跟随下拉框宽度
             textWidth: '',
-            //网格布局时选项宽度
+            //网格布局时选项宽度: cell, 48%
             itemWidth: '',
             //停靠位置：left-左下，right-右下
             position: 'left',
