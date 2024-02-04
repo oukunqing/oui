@@ -2875,10 +2875,199 @@
         return fn + '.' + en + (so[f] || f) + symbol + postfix;
     }, regPattern = {
         numberSymbol: /([CDEFGNRX])/gi, number: /^(0x)?[\dA-Fa-f]+$/
+    }, formatMultiSeparate = function (vc, ns, fu, str) {
+        var v = '', arr = [], idx = 0, len = vc.length, i,
+            symbol = fu === 'S' ? ' ' : fu,
+            loop = false, loopIdx = -1;
+
+        function pushItem (arr, pr) {
+            if (pr.list.length > 0) {
+                arr.push(pr);
+            }
+            return arr;
+        }
+
+        if (ns.indexOf('[') < 0) {
+            arr = [{ type: 0, list: ns.split(''), loop: 0 }];
+        } else {
+            var nc = ns.length, k = 0, n = 0, pos0, pos1, pr = {};
+            while (k < nc) {
+                pos0 = ns.indexOf('[');
+                if (pos0 < 0) {
+                    pushItem(arr, {type: 0, list: ns.split(''), loop: 0 });
+                    break;
+                }
+                pr = {type: 0, list: ns.substr(0, pos0).split(''), loop: 0 };
+                ns = ns.substr(pos0);
+                k += pos0;
+                pushItem(arr, pr);
+
+                pos1 = ns.indexOf(']');                
+                if (pos1 < 0) {
+                    pushItem(arr, {type: 0, list: ns.split(''), loop: 0 });
+                    break;
+                }
+                pr = {type: 1, list: ns.substr(1, pos1 - 1).split(''), loop: 0 };
+                ns = ns.substr(pos1 + 1);
+                k += pos1;
+
+                if (ns[0] === '<') {
+                    pos1 = ns.indexOf('>');
+                    if (pos1 < 0) {
+                        ns = ns.substr(1);
+                        k += 1;
+                    } else {
+                        n = parseInt('0' + ns.substr(1, pos1 - 1), 10);
+                        pr.loop = n;
+                        ns = ns.substr(pos1 + 1);
+                        k += pos1;
+                    }
+                } else if(/(\d|\[)/.test(ns[0])) {
+                    pr.loop = -1;
+                    loop = true;
+                    loopIdx = arr.length;
+                }
+                pushItem(arr, pr);
+            }
+        }
+
+        var rc = arr.length;
+
+        $.console.log('arr:', arr, loop, loopIdx);
+
+        for (i = 0; i < rc; i++) {
+            if (idx >= len) {
+                break;
+            }
+            var d = arr[i], c = d.list.length, j = 0, p = 0, pn = 0;
+            if (c <= 0) {
+                continue;
+            }
+            while (idx < len) {
+                if (p >= c) {
+                    if (j >= d.loop) {
+                        if (d.loop >= 0) {
+                            //如果没有无限循环，并且是最后一个规则，并且没有设置循环次数
+                            if (!loop && i === rc - 1 && d.loop === 0) {
+                                p = c - 1;
+                            } else {
+                                break;
+                            }
+                        } else {
+                            p = 0;
+                            //如果剩余内容长度小于无限循环长度规则，则中断
+                            if (len - idx < parseInt('0' + d.list[p], 10)) {
+                                break;
+                            }
+                        }
+                        j = 0;
+                    } else {
+                        p = 0;
+                    }
+                }
+                pn = parseInt('0' + d.list[p], 10);
+                v += (idx > 0 ? symbol : '') + vc.substr(idx, pn);
+                p++;
+                idx += pn;
+                j += p >= c ? 1 : 0;
+            }
+        }
+        if (idx < len) {
+            v += (idx > 0 ? symbol : '') + vc.substr(idx);
+        }
+        return v;
+    }, formatSeparate = function (vc, ns, fu, str, loop, freedom) {
+        var arrS = ns.toString().split(''), arrL = [], arrE = [],
+            ve = '', elen = 0, alen = 0, idx = 0, len = vc.length,
+            symbol = fu === 'S' ? ' ' : fu,
+            v = '', i = 0, p = 0, pn = 0;
+
+        if (loop) {
+            var multi = ns.match(/(\[)/g);
+            if (multi && multi.length > 1) {
+                return formatMultiSeparate(vc, ns, fu, str);
+            }
+            var pos0 = ns.indexOf('['), pos1 = ns.indexOf('.'), elen = 0;
+            if (pos0 >= 0) {
+                arrS = ns.substr(0, pos0).split('');
+                pos1 = ns.indexOf(']');
+                arrL = ns.substr(pos0 + 1, pos1 - pos0 - 1).split('');
+                arrL = arrL.length <= 0 ? [2] : arrL;
+                arrE = ns.substr(pos1 + 1).split('');
+            } else if (pos1 >= 0) {
+                arrS = pos1 > 1 ? ns.substr(0, pos1 - 1).split('') : [];
+                //若没有指定循环体大小，默认为2
+                arrL = pos1 > 0 ? ns.substr(pos1 - 1, 1).split('') : [2];
+                arrE = ns.substr(pos1 + 1).split('');
+            }                    
+            for (i = 0; i < arrE.length; i++) {
+                elen += parseInt('0' + arrE[i], 10);
+            }
+            if (elen > 0) {
+                ve = vc.substr(len - elen);
+                vc = vc.substr(0, len - elen);
+                len = vc.length;
+            }
+            alen = arrL.length;
+        }
+        if (arrS.length === 1 && alen <= 0) {
+            return vc.separate(symbol, parseInt(arrS[0], 10));
+        }
+
+        i = 0;
+        while (idx < len) {
+            if (i >= arrS.length) {
+                break;
+            }
+            v += (idx > 0 ? symbol : '') + vc.substr(idx, (pn = parseInt(arrS[i++], 10)));
+            idx += pn;
+        }
+        if (idx >= len) {
+            return v;
+        }
+        var spare = vc.substr(idx),
+            slen = spare.length,
+            cv = parseInt(slen / pn, 10);
+
+        if (alen <= 0) {
+            if (freedom && (slen % pn) < parseInt(pn / 2, 10)) {
+                cv -= 1;
+            }
+            for (i = 0; i < cv; i++) {
+                v += symbol + spare.substr(p, pn);
+                p += pn;
+            }
+            v += (p < slen ? symbol + spare.substr(p) : '');
+            return v;
+        }
+
+        i = 0;
+        while (idx < len) {
+            if (i >= alen) {
+                if (!loop) {
+                    break;
+                }
+                i = 0;
+            }
+            v += (idx > 0 ? symbol : '') + vc.substr(idx, (pn = parseInt(arrL[i++], 10)));
+            idx += pn;
+
+            if (freedom && alen === 1 && len - idx < parseInt(pn / 2, 10)) {
+                v += vc.substr(idx);
+                idx = len;
+            }
+        }        
+        if (ve.length > 0 && arrE.length > 0) {
+            p = 0;
+            for (i = 0; i < arrE.length; i++) {
+                v += symbol + ve.substr(p, (pn = parseInt(arrE[i], 10)));
+                p += pn;
+            }
+        }
+        return v;
     }, formatNumberSwitch = function (v, f, ns, dn, err, str, args, freedom, loop) {
         //console.log('v: ', v, ', f: ', f, ',is: ', (isHexNumber(v) && fu !== 'X'), ', n: ', n);
         var fu = f.toUpperCase(),
-            pos = 0, 
             numLen = dn[0].length, 
             decimalLen = (dn[1] || '').length,
             n = $.isNumber(ns) || /[\d]+/g.test(ns) ? parseInt(ns, 10) : 0;
@@ -2929,91 +3118,7 @@
             case ':':   //冒号分隔
             case '.':   //点号分隔
             case '_':   //下划线分隔
-                //先将内容结果清空
-                v = '';
-
-                var arrS = ns.toString().split(''), arrL = [], arrE = [],
-                    ve = '', elen = 0, alen = 0,
-                    symbol = fu === 'S' ? ' ' : fu,
-                    i = 0, p = 0, pn = 0;
-
-                if (loop) {
-                    var pos0 = ns.indexOf('['), pos1 = ns.indexOf('.'), elen = 0;
-                    if (pos0 >= 0) {
-                        arrS = ns.substr(0, pos0).split('');
-                        pos1 = ns.indexOf(']');
-                        arrL = ns.substr(pos0 + 1, pos1 - pos0 - 1).split('');
-                        arrL = arrL.length <= 0 ? [2] : arrL;
-                        arrE = ns.substr(pos1 + 1).split('');
-                    } else if (pos1 >= 0) {
-                        arrS = pos1 > 1 ? ns.substr(0, pos1 - 1).split('') : [];
-                        //若没有指定循环体大小，默认为2
-                        arrL = pos1 > 0 ? ns.substr(pos1 - 1, 1).split('') : [2];
-                        arrE = ns.substr(pos1 + 1).split('');
-                    }                    
-                    for (i = 0; i < arrE.length; i++) {
-                        elen += parseInt('0' + arrE[i], 10);
-                    }
-                    if (elen > 0) {
-                        ve = vc.substr(len - elen);
-                        vc = vc.substr(0, len - elen);
-                        len = vc.length;
-                    }
-                    alen = arrL.length;
-                }
-                if (arrS.length === 1 && alen <= 0) {
-                    return vc.separate(symbol, parseInt(arrS[0], 10));
-                }
-
-                i = 0;
-                while (pos < len) {
-                    if (i >= arrS.length) {
-                        break;
-                    }
-                    v += (pos > 0 ? symbol : '') + vc.substr(pos, (pn = parseInt(arrS[i++], 10)));
-                    pos += pn;
-                }
-                if (pos >= len) {
-                    return v;
-                }
-                var spare = vc.substr(pos),
-                    slen = spare.length,
-                    cv = parseInt(slen / pn, 10);
-
-                if (alen > 0) {
-                    i = 0;
-                    while (pos < len) {
-                        if (i >= alen) {
-                            if (!loop) {
-                                break;
-                            }
-                            i = 0;
-                        }
-                        v += (pos > 0 ? symbol : '') + vc.substr(pos, (pn = parseInt(arrL[i++], 10)));
-                        pos += pn;
-
-                        if (freedom && alen === 1 && len - pos < parseInt(pn / 2, 10)) {
-                            v += vc.substr(pos);
-                            pos = len;
-                        }
-                    }
-                } else {
-                    if (freedom && (slen % pn) < parseInt(pn / 2, 10)) {
-                        cv -= 1;
-                    }
-                    for (i = 0; i < cv; i++) {
-                        v += symbol + spare.substr(p, pn);
-                        p += pn;
-                    }
-                    v += (p < slen ? symbol + spare.substr(p) : '');
-                }
-                if (ve.length > 0 && arrE.length > 0) {
-                    p = 0;
-                    for (i = 0; i < arrE.length; i++) {
-                        v += symbol + ve.substr(p, (pn = parseInt(arrE[i], 10)));
-                        p += pn;
-                    }
-                }
+                v = formatSeparate(vc, ns, fu, str, loop, freedom);
                 break;
         }
         return v;
@@ -3043,7 +3148,7 @@
                 p3 = /^([BCDEFGNOPRSX%_\-\.\:][\d]+[\.\-]?)$/gi,
                 p4 = /^([A-Z]{1}[\d]+)$/gi,
                 //循环分隔
-                p5 = /^([S_\-\.\:])\d{0,}?(\[[\d]{0,}\]|[.])\d{0,}?$/gi,
+                p5 = /^([S_\-\.\:])(\d{0,}?((\[[\d]{0,}\])(<[\d]+>)?|[.])\d{0,}?)+$/gi,
                 //结尾是否自由组合，与p3规则配套使用
                 freedom = ss.endsWith('.') || ss.endWith('-'),
                 //是否循环分隔，与p5规则配套使用
