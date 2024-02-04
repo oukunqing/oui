@@ -40,6 +40,10 @@ button {width:120px;height:28px;}
             </tr>
             <tr>
                 <td></td>
+                <td><input type="text" id="fmt_num_hex1" placeholder="只能输入十六进制字符" /></td>
+            </tr>
+            <tr>
+                <td></td>
                 <td><input type="text" id="fmt-num-angle" placeholder="只能输入角度值（小数或整数，0-360），保留2位小数" /></td>
             </tr>
             <tr>
@@ -183,6 +187,10 @@ button {width:120px;height:28px;}
             options: ['a55a', '5aa5'],
             //type: 'hex',
             maxLen: 4
+        });
+        $.setInputFormat('fmt_num_hex1', {
+            type: 'hex',
+            space: true
         });
 
         $.setInputFormat('fmt-num-angle', {

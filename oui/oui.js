@@ -2875,9 +2875,14 @@
         return fn + '.' + en + (so[f] || f) + symbol + postfix;
     }, regPattern = {
         numberSymbol: /([CDEFGNRX])/gi, number: /^(0x)?[\dA-Fa-f]+$/
-    }, formatNumberSwitch = function (v, f, n, dn, err, str, args, freedom) {
+    }, formatNumberSwitch = function (v, f, ns, dn, err, str, args, freedom, loop) {
         //console.log('v: ', v, ', f: ', f, ',is: ', (isHexNumber(v) && fu !== 'X'), ', n: ', n);
-        var fu = f.toUpperCase(), pos = 0, numLen = dn[0].length, decimalLen = (dn[1] || '').length;
+        var fu = f.toUpperCase(),
+            pos = 0, 
+            numLen = dn[0].length, 
+            decimalLen = (dn[1] || '').length,
+            n = $.isNumber(ns) || /[\d]+/g.test(ns) ? parseInt(ns, 10) : 0;
+
         //if(isHexNumber(v) && ['C', 'F', 'N'].indexOf(fu) >= 0){
         if (isHexNumber(v) && regPattern.numberSymbol.test(fu)) {
             v = parseInt(v, 10), dn = v.toString().split('.'), numLen = dn[0].length;
@@ -2919,35 +2924,94 @@
                 var radix = fu === 'O' ? 8 : fu === 'B' ? 2 : 16;
                 v = (parseInt(v, 10) >>> 0).toString(radix).toUpperCase().padLeft(n);
                 break;
-            case 'S': //空格分隔符
-            case '-':
-            case ':':
-            case '.':
-                var arr = n.toString().split(''), isSingle = arr.length === 1, symbol = fu === 'S' ? ' ' : fu;
-                if (isSingle) {
-                    v = vc.separate(symbol, n);
-                } else {
-                    var nv = '', i = 0, pn = parseInt(arr[0], 10);
-                    while (pos < len) {
-                        if (i >= arr.length) { break; }
-                        pn = parseInt(arr[i], 10);
-                        nv += (pos > 0 ? symbol : '') + vc.substr(pos, pn), pos += pn, i += 1;
+            case 'S':   //空格分隔符
+            case '-':   //连接符分隔
+            case ':':   //冒号分隔
+            case '.':   //点号分隔
+            case '_':   //下划线分隔
+                //先将内容结果清空
+                v = '';
+
+                var arrS = ns.toString().split(''), arrL = [], arrE = [],
+                    ve = '', elen = 0, alen = 0,
+                    symbol = fu === 'S' ? ' ' : fu,
+                    i = 0, p = 0, pn = 0;
+
+                if (loop) {
+                    var pos0 = ns.indexOf('['), pos1 = ns.indexOf('.'), elen = 0;
+                    if (pos0 >= 0) {
+                        arrS = ns.substr(0, pos0).split('');
+                        pos1 = ns.indexOf(']');
+                        arrL = ns.substr(pos0 + 1, pos1 - pos0 - 1).split('');
+                        arrL = arrL.length <= 0 ? [2] : arrL;
+                        arrE = ns.substr(pos1 + 1).split('');
+                    } else if (pos1 >= 0) {
+                        arrS = pos1 > 1 ? ns.substr(0, pos1 - 1).split('') : [];
+                        //若没有指定循环体大小，默认为2
+                        arrL = pos1 > 0 ? ns.substr(pos1 - 1, 1).split('') : [2];
+                        arrE = ns.substr(pos1 + 1).split('');
+                    }                    
+                    for (i = 0; i < arrE.length; i++) {
+                        elen += parseInt('0' + arrE[i], 10);
                     }
-                    //v = nv + (pos < len ? symbol + vc.substr(pos) : '');
-                    v = nv;
-                    if (pos < len) {
-                        var spare = vc.substr(pos),
-                            slen = spare.length,
-                            cv = parseInt(slen / pn, 10),
-                            p = 0;
-                        if (freedom && (slen % pn) < parseInt(pn / 2, 10)) {
-                            cv -= 1;
+                    if (elen > 0) {
+                        ve = vc.substr(len - elen);
+                        vc = vc.substr(0, len - elen);
+                        len = vc.length;
+                    }
+                    alen = arrL.length;
+                }
+                if (arrS.length === 1 && alen <= 0) {
+                    return vc.separate(symbol, parseInt(arrS[0], 10));
+                }
+
+                i = 0;
+                while (pos < len) {
+                    if (i >= arrS.length) {
+                        break;
+                    }
+                    v += (pos > 0 ? symbol : '') + vc.substr(pos, (pn = parseInt(arrS[i++], 10)));
+                    pos += pn;
+                }
+                if (pos >= len) {
+                    return v;
+                }
+                var spare = vc.substr(pos),
+                    slen = spare.length,
+                    cv = parseInt(slen / pn, 10);
+
+                if (alen > 0) {
+                    i = 0;
+                    while (pos < len) {
+                        if (i >= alen) {
+                            if (!loop) {
+                                break;
+                            }
+                            i = 0;
                         }
-                        for (var i = 0; i < cv; i++) {
-                            v += symbol + spare.substr(p, pn);
-                            p += pn;
+                        v += (pos > 0 ? symbol : '') + vc.substr(pos, (pn = parseInt(arrL[i++], 10)));
+                        pos += pn;
+
+                        if (freedom && alen === 1 && len - pos < parseInt(pn / 2, 10)) {
+                            v += vc.substr(pos);
+                            pos = len;
                         }
-                        v += (p < slen ? symbol + spare.substr(p) : '')
+                    }
+                } else {
+                    if (freedom && (slen % pn) < parseInt(pn / 2, 10)) {
+                        cv -= 1;
+                    }
+                    for (i = 0; i < cv; i++) {
+                        v += symbol + spare.substr(p, pn);
+                        p += pn;
+                    }
+                    v += (p < slen ? symbol + spare.substr(p) : '');
+                }
+                if (ve.length > 0 && arrE.length > 0) {
+                    p = 0;
+                    for (i = 0; i < arrE.length; i++) {
+                        v += symbol + ve.substr(p, (pn = parseInt(arrE[i], 10)));
+                        p += pn;
                     }
                 }
                 break;
@@ -2972,17 +3036,32 @@
                 v = mv.substr(mv.indexOf(':') + 1);
             }
         } else if (isNum) {
-            //C-货币，D-数字，E-科学计数，F-小数，G-标准数字，N-千位分隔，-十六进制
-            var p1 = /([BCDEFGNOPRSX%\-\.\:])/gi,
+            //C-货币，D-数字，E-科学计数，F-小数，G-标准数字，N-千位分隔，X-十六进制
+            var p1 = /([BCDEFGNOPRSX%_\-\.\:])/gi,
                 p2 = /([A-Z])/gi,
                 //最后以(.或-)结尾的表示可以优化截取
-                p3 = /^([BCDEFGNOPRSX%\-\.\:][\d]+[\.\-]?)$/gi,
-                p4 = /^([A-Z]{1}[\d]+)$/gi;
-            if ((ss.length === 1 && p1.test(ss)) || (ss.length >= 2 && p3.test(ss))) {
-                var nv = parseInt(ss.substr(1), 10), dn = v.toString().split('.'), n = isNaN(nv) ? (f.toUpperCase() === 'D' ? 0 : 2) : nv;
-                //如果分隔规则以.结果，表示可以优化分隔最后一组内容，不至于出现单吊的内容
+                p3 = /^([BCDEFGNOPRSX%_\-\.\:][\d]+[\.\-]?)$/gi,
+                p4 = /^([A-Z]{1}[\d]+)$/gi,
+                //循环分隔
+                p5 = /^([S_\-\.\:])\d{0,}?(\[[\d]{0,}\]|[.])\d{0,}?$/gi,
+                //结尾是否自由组合，与p3规则配套使用
+                freedom = ss.endsWith('.') || ss.endWith('-'),
+                //是否循环分隔，与p5规则配套使用
+                loop = p5.test(ss),
+                nv, dn, n;
+
+            if (loop) {
+                nv = ss.substr(1);
+                dn = v.toString().split('.');
+                v = formatNumberSwitch(v, f, nv, dn, err, str, args, freedom, loop);
+            } else if ((ss.length === 1 && p1.test(ss)) || (ss.length >= 2 && p3.test(ss))) {
+                nv = parseInt(ss.substr(1), 10);
+                dn = v.toString().split('.');
+                n = isNaN(nv) ? (f.toUpperCase() === 'D' ? 0 : 2) : nv;
+
+                //如果分隔规则以.结尾，表示可以优化分隔最后一组内容，不至于出现单吊的内容
                 //比如 1234 1234 5 这样的，可以优化为 1234 12345
-                v = formatNumberSwitch(v, f, n, dn, err, str, args, ss.endsWith('.') || ss.endWith('-'));
+                v = formatNumberSwitch(v, f, n, dn, err, str, args, freedom, loop);
             } else if ((ss.length === 1 && p2.test(ss)) || (ss.length >= 2 && p4.test(ss))) {
                 throwError(err[3], str, args);
             } else if (/([0]+)/g.test(ss)) {
@@ -3215,6 +3294,10 @@
     String.prototype.formatTo = function (fmt) {
         fmt = (!$.isString(fmt, true) ? '{0}' : fmt).trim();
         return (!fmt.startsWith('{') || !fmt.endWith('}')) ? this : fmt.format(this);
+    };
+
+    String.prototype.formatTest = function (fmt) {
+        return '"' + this + '" ' + (this.format(fmt));
     };
 
     //String.format
