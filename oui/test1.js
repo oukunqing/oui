@@ -1685,6 +1685,7 @@ var n = 35,         //总数量
         var PersonConfig = {
             value: null
         };
+
         function Person () {
             
         }
@@ -1699,7 +1700,7 @@ var n = 35,         //总数量
 
         };
 
-var p = new Person();
+    var p = new Person();
 
         Object.defineProperty(p, 'value', {
             /*value: 'hello',
@@ -1715,7 +1716,7 @@ var p = new Person();
         });
 
         Person.value = 'abc';
-        console.log(Person.value);
+        console.log('Person defineProperty:', Person.value);
 
         console.log(Person);
 
@@ -1764,7 +1765,7 @@ console.log('{0:-8444C}'.formatTest('25f9e794323b453885f5181f1b624d0b'));
 console.log('{0:-8444C|}'.formatTest('a55a0169cd011b030557300186a00186a00493e00186a00186a044d496'));
 
 console.log('{0:C3}'.formatTest(1234567));
-console.log('{0:F3}'.formatTest(1234567));
+console.log('小数格式化{0:F3}'.formatTest(1234.12567));
 console.log('{0:N3}'.formatTest(1234567));
 console.log('{0:D}'.formatTest(1234567));
 console.log('{0:D8}'.formatTest(1234567));

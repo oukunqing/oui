@@ -1,0 +1,86 @@
+<html>
+	<head>
+		<title>内容格式化</title>
+		<style type="text/css">
+			body{font-size: 14px;font-family: 'Courier New';}
+			ul,li {margin:0;padding:0;list-style: none;}
+			dl,dt,dd {margin:0;padding:0;list-style: none;}
+			dt {font-size: 16px;font-weight: bold;}
+			dd{line-height: 24px;}
+			b,i,em {font-style: normal; font-weight: normal;}
+			b{color: #777;}
+			i{color:#f90;}
+			em {color: #333;}
+			div.desc{color:#999;}
+			pre{margin:0;padding: 0;line-height: 20px;}
+		</style>
+	</head>
+	<body>
+		<div id="div1"></div>
+	</body>
+</html>
+<script type="text/javascript" src="../oui/oui.js?"></script>
+<script type="text/javascript">
+	window.onload = function() {
+		initial();
+	};
+
+	function initial() {
+		var cfg = [{ 
+			name: '数字格式化',
+			list: [
+				{ fmt:'整数长度格式化 {0:D6}', con: 1234 },
+				{ fmt:'小数长度格式化 {0:F3}（保留3位小数）, {0:F0} (不保留小数)', con: 1234.5678 },
+				{ fmt:'小数长度格式化 {0:F} (无数字）, {0:F2}（保留2位小数）', con: 12345 },
+				{ fmt:'货币金额格式化 {0:C3}', con: 1234.5678 },
+				{ fmt:'数字千位分隔 {0:N3} (保留3位小数)，{0:N0} (不保留小数), {1:N} (不保留小数)', con: [1234567890.5678, 1234567890] },
+				{ fmt:'整数数字千位分隔 {0:N} (不保留小数)，{0:N2} (保留2小数)', con: 1234567890 },
+				{ fmt:'货币金额格式化 {0:N3}', con: 1234.5678 }
+			]
+		}, {
+			name: '对象格式化',
+			list: [
+				{ fmt: 'Id:{id}, Name:{name}', con: {id:123, name:'张小明'}},
+				{ fmt: 'Id:{id}, Name:{name}，年龄：{1} 岁，体重{2:F1}公斤', con: [{id:123, name:'张小明'}, 30, 62.56], desc: '（对象参数必须是第0个参数，对象字段不匹配会报错)'}
+			]
+		}, {
+			name: '字符串分隔',
+			list: [
+				{ fmt: '手机号码 {0:-344} (横杠分隔)', con: '13012345678' },
+				{ fmt: '手机号码 {0:S344} (空格分隔)', con: '13012345678' },
+				{ fmt: '身份证号码 {0:S64224} (空格分隔)', con: '330211198106093451' },
+				{ fmt: 'GUID格式 {0:-8[4]C} (GUID字符串格式8-4-4-4-12)', con: '25d55ad283aa400af464c76d713c07ad' },
+				{ fmt: '字符串分隔（循环模式）{0:S44[2]<4>[6]42}', con: 'a55a0169cd011b030557300186a00186a00493e00186a00186a044d496', desc: '[2]<4>表示2字节循环4次，[6]表示6字节无限循环，[6]后面跟的42表示4和2字节各分隔1次且优先级高于[6]'},
+				{ fmt: '{0:S44[2]<4>/[666/]/42}', con: 'a55a0169cd011b030557300186a00186a00493e00186a00186a044d496', desc: '换行： \\\\ 表示 \\n, / 表示 &lt;br /&gt;, | 表示截断内容'},
+				{ fmt: '<pre> {0:S44[2]<4>\\[666\\]\\42}</pre>', con: 'a55a0169cd011b030557300186a00186a00493e00186a00186a044d496', desc: '换行： \\\\ 表示 \\n, / 表示 &lt;br /&gt;, | 表示截断内容。这里显示内容是放在&lt;pre&gt;&lt;/pre&gt;中的，所以能看到\\n换行的效果'},
+				{ fmt: '{0:S44[2]<4>[6]|}', con: 'a55a0169cd011b030557300186a00186a00493e00186a00186a044d496', desc: '| 在最后，且内容长度刚好循环结束，所以这里没有截断'},
+				{ fmt: '{0:S44[2]<4>[6]<3>|}', con: 'a55a0169cd011b030557300186a00186a00493e00186a00186a044d496', desc: '| 在最后, [6]<3>循环3次之后截断内容'}
+			]
+		}
+		], div = $I('div1'), sb = [];
+
+		//当格式化参数或字段错误时，不抛出异常(仅打印错误信息)
+		//在实际应用中建议要抛出异常，这样不会隐藏代码中的格式化字串参数的错误问题
+		String.formatException(false);
+
+		for (var i = 0; i < cfg.length; i++) {
+			var dr = cfg[i];
+			sb.push(['<dl>', '<dt>', dr.name, '</dt>'].join(''));
+			for (var j = 0; j < dr.list.length; j++) {
+				var d = dr.list[j],
+					v = $.isArray(d.con) || $.isObject(d.con) ? $.toJsonString(d.con) : d.con;
+				sb.push([
+					'<dd>', (j + 1), '. fmt: <b>', d.fmt, '</b>, con: <i>', v, '</i>, rst:<br />',
+					'<em>', d.fmt.format(d.con), '</em>', 
+					d.desc ? ['<div class="desc">desc: ', d.desc, '</div>'].join('') : '',
+					'</dd>'].join(''));
+			}
+			sb.push('</dl>');
+		}
+
+		div.innerHTML = sb.join('<br />');
+
+		console.log('{0:D6}'.format('1234'));
+		console.log('{0:F6}'.format('1234.1256'));
+	}
+</script>

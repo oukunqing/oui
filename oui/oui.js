@@ -3024,7 +3024,7 @@
                         ns = ns.substr(pos1 + 1);
                         k += pos1;
                     }
-                } else if(/(\d|\[|\/|\\)/.test(ns[0]) || !ns) {
+                } else if(/([\d\/\|\[\\])/.test(ns[0]) || !ns) {
                     pr.loop = -1;
                     loop += 1;
                     loopIdx = arr.length;
@@ -3041,6 +3041,7 @@
         if ($.isDebug()) {
             $.console.log('formatMultiSeparate:', arr);
         }
+            $.console.log('formatMultiSeparate:', arr);
 
         var rc = arr.length;
         for (i = 0; i < rc; i++) {
@@ -3221,8 +3222,8 @@
         var fu = f.toUpperCase(),
             numLen = dn[0].length, 
             decimalLen = (dn[1] || '').length,
-            n = $.isNumber(nv) || /[\d]+/g.test(nv) ? parseInt(nv, 10) : 
-                (/[A-Z]/gi.test(nv) ? nv.num36ToInt() : (f.toUpperCase() === 'D' ? 0 : 2));
+            n = $.isNumber(nv) || /[\d]+/g.test(nv) ? parseInt(nv, 10) : (/[A-Z]/gi.test(nv) ? nv.num36ToInt() : 
+                (fu === 'D' ? 0 : ['C', 'F', 'N'].indexOf(fu) > -1 && v === parseInt(v, 10) ? 0 : 2));
 
         if (isHexNumber(v) && regPattern.numberSymbol.test(fu)) {
             v = parseInt(v, 10), dn = v.toString().split('.'), numLen = dn[0].length;
