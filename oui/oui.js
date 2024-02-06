@@ -1957,6 +1957,12 @@
         join: function () {
             return this.toString();
         },
+        ellipsis: function (show) {
+            if (!$.isBoolean(show, false)) {
+                return this;
+            }
+            return this + '...';
+        },
         isEmpty: function () { return this.trim() === ''; },
         isNumeric: function () { return $.isNumeric(this); },
         isDecimal: function () { return $.isDecimal(this); },
@@ -2283,7 +2289,7 @@
             }
             var s = this.isEvenLen().toUpperCase();
             if (!/^[0-9A-F]{0,}$/ig.test(s)) {
-                $.console.log('hexToInt: [', s, '] hex内容格式错误');
+                $.console.trace('hexToInt: [', s, '] hex内容格式错误');
                 return 0;
             }
             var hex = reverse ? s.reverseHex(reverse) : s,
@@ -2297,7 +2303,7 @@
             }
             var s = this.isEvenLen().toUpperCase(), r = radix || 16;
             if (!(r === 36 ? /^[0-9A-Z]{0,}$/ig : /^[0-9A-F]{0,}$/ig).test(s)) {
-                $.console.log('radixToInt: [', s, '] ' + r + '进制内容格式错误');
+                $.console.trace('radixToInt: [', s, '] ' + r + '进制内容格式错误');
                 return 0;
             }
             var arr = (reverse ? s.reverseHex(reverse) : s).split(''),
@@ -2323,7 +2329,7 @@
             }
             var str = this.isEvenLen();
             if (!/^[0-9A-F]{8}$/ig.test(str)) {
-                $.console.log('hexToFloat: [', str, '] hex内容格式错误');
+                $.console.trace('hexToFloat: [', str, '] hex内容格式错误');
                 return 0;
             }
             var a = reverse ? str.reverseHex(reverse) : str;
@@ -2910,16 +2916,11 @@
     'use strict';
 
     var throwError = function (msg, str, args, matchFmtStr) {
-        $.console.log('[stirng format error]\r\nerr:', msg);
-        try {
-            if (!$.isUndefined(str)) { 
-                $.console.log('str:', str, '\r\narg:', args); 
-            } 
-            console.trace();
-        } catch (e) { }
-
         if ($.formatThrowError) {
+            $.console.trace('[stirng format error]', msg, '\r\n', 'str:', str, ', arg:', args);
             throw new Error(msg);
+        } else {
+            $.console.trace('[stirng format error]', msg, '\r\n', 'str:', str, '\r\narg:', args);
         }
         return matchFmtStr;
     }, formatNumberZero = function (arv, arn) {
@@ -2974,6 +2975,8 @@
             c += n;
         }
         return c;
+    }, isCutOff = function (t) {
+        return ['|'].indexOf(t) > -1;
     }, isLineSeparate = function (vs, t) {
         if (['/','\\'].indexOf(t) > -1) {
             vs.push(t === '\\' ? '\n' : '<br />');
@@ -3035,7 +3038,9 @@
             vc = vc.substr(0, len - elen);
             len -= elen;
         }
-        $.console.log('formatMultiSeparate:', arr);
+        if ($.isDebug()) {
+            $.console.log('formatMultiSeparate:', arr);
+        }
 
         var rc = arr.length;
         for (i = 0; i < rc; i++) {
@@ -3069,7 +3074,9 @@
                     }
                 }
                 t = dr[p++].toUpperCase();
-                if (!isLineSeparate(vs, t)) {
+                if (isCutOff(t)) {
+                    return vs.join('').ellipsis(idx < len);
+                } else if (!isLineSeparate(vs, t)) {
                     vs.push((idx > 0 ? symbol : '') + vc.substr(idx, (pn = t.num36ToInt())));
                     idx += pn;
                 }
@@ -3101,7 +3108,9 @@
                     }
                 }
                 t = dr[p++].toUpperCase();
-                if (!isLineSeparate(vs, t)) {
+                if (isCutOff(t)) {
+                    return vs.join('').ellipsis(idx < elen);
+                } else if (!isLineSeparate(vs, t)) {
                     vs.push((!vs.length ? '' : symbol) + ve.substr(idx, (pn = t.num36ToInt())));
                     idx += pn;
                 }
@@ -3109,29 +3118,29 @@
             }
         }
         return vs.join('');
-    }, formatSeparate = function (vc, ns, fu, str, loop, freedom) {
-        var arrS = ns.toString().split(''), arrL = [], arrE = [],
+    }, formatSeparate = function (vc, nv, fu, str, loop, freedom) {
+        var arrS = nv.toString().split(''), arrL = [], arrE = [],
             ve = '', elen = 0, alen = 0, idx = 0, len = vc.length,
             symbol = fu === 'S' ? ' ' : fu,
             vs = [], t = '', i = 0, p = 0, pn = 0;
 
         if (loop) {
-            var multi = ns.match(/(\[)/g);
-            if (multi && (multi.length > 1) || (/(<)/g.test(ns))) {
-                return formatMultiSeparate(vc, ns, fu, str);
+            var multi = nv.match(/(\[)/g);
+            if (multi && (multi.length > 1) || (/(<)/g.test(nv))) {
+                return formatMultiSeparate(vc, nv, fu, str);
             }
-            var pos0 = ns.indexOf('['), pos1 = ns.indexOf('.'), elen = 0;
+            var pos0 = nv.indexOf('['), pos1 = nv.indexOf('.'), elen = 0;
             if (pos0 >= 0) {
-                arrS = ns.substr(0, pos0).split('');
-                pos1 = ns.indexOf(']');
-                arrL = ns.substr(pos0 + 1, pos1 - pos0 - 1).split('');
+                arrS = nv.substr(0, pos0).split('');
+                pos1 = nv.indexOf(']');
+                arrL = nv.substr(pos0 + 1, pos1 - pos0 - 1).split('');
                 arrL = arrL.length <= 0 ? [2] : arrL;
-                arrE = ns.substr(pos1 + 1).split('');
+                arrE = nv.substr(pos1 + 1).split('');
             } else if (pos1 >= 0) {
-                arrS = pos1 > 1 ? ns.substr(0, pos1 - 1).split('') : [];
+                arrS = pos1 > 1 ? nv.substr(0, pos1 - 1).split('') : [];
                 //若没有指定循环体大小，默认为2
-                arrL = pos1 > 0 ? ns.substr(pos1 - 1, 1).split('') : [2];
-                arrE = ns.substr(pos1 + 1).split('');
+                arrL = pos1 > 0 ? nv.substr(pos1 - 1, 1).split('') : [2];
+                arrE = nv.substr(pos1 + 1).split('');
             }                    
             for (i = 0; i < arrE.length; i++) {
                 elen += arrE[i].num36ToInt();
@@ -3153,7 +3162,9 @@
                 break;
             }
             t = arrS[i++].toUpperCase();
-            if (!isLineSeparate(vs, t)) {
+            if (isCutOff(t)) {
+                return vs.join('').ellipsis(idx < len)
+            } else if (!isLineSeparate(vs, t)) {
                 vs.push((idx > 0 ? symbol : '') + vc.substr(idx, (pn = t.num36ToInt())));
                 idx += pn;
             }
@@ -3185,8 +3196,11 @@
                 }
                 i = 0;
             }
-            t = arrL[i++].toUpperCase();
-            if (!isLineSeparate(vs, t)) {
+            t = ('' + arrL[i++]).toUpperCase();
+
+            if (isCutOff(t)) {
+                return vs.join('').ellipsis(idx < len);
+            } else if (!isLineSeparate(vs, t)) {
                 vs.push((idx > 0 ? symbol : '') + vc.substr(idx, (pn = t.num36ToInt())));
                 idx += pn;
             }
@@ -3203,14 +3217,13 @@
             }
         }
         return vs.join('');
-    }, formatNumberSwitch = function (v, f, ns, dn, err, str, args, freedom, loop) {
-        //console.log('v: ', v, ', f: ', f, ',is: ', (isHexNumber(v) && fu !== 'X'), ', n: ', n);
+    }, formatNumberSwitch = function (v, f, nv, dn, err, str, args, freedom, loop) {
         var fu = f.toUpperCase(),
             numLen = dn[0].length, 
             decimalLen = (dn[1] || '').length,
-            n = $.isNumber(ns) || /[\d]+/g.test(ns) ?  parseInt(ns, 10) : 0;
+            n = $.isNumber(nv) || /[\d]+/g.test(nv) ? parseInt(nv, 10) : 
+                (/[A-Z]/gi.test(nv) ? nv.num36ToInt() : (f.toUpperCase() === 'D' ? 0 : 2));
 
-        //if(isHexNumber(v) && ['C', 'F', 'N'].indexOf(fu) >= 0){
         if (isHexNumber(v) && regPattern.numberSymbol.test(fu)) {
             v = parseInt(v, 10), dn = v.toString().split('.'), numLen = dn[0].length;
         }
@@ -3256,7 +3269,7 @@
             case ':':   //冒号分隔
             case '.':   //点号分隔
             case '_':   //下划线分隔
-                v = formatSeparate(vc, ns, fu, str, loop, freedom);
+                v = formatSeparate(vc, nv, fu, str, loop, freedom);
                 break;
         }
         return v;
@@ -3283,10 +3296,10 @@
             var p1 = /([BCDEFGNOPRSX%_\-\.\:])/gi,
                 p2 = /([A-Z])/gi,
                 //最后以(.或-)结尾的表示可以优化截取
-                p3 = /^([BCDEFGNOPRSX%_\-\.\:][\dA-Z]+[\.\-]?)$/gi,
+                p3 = /^([BCDEFGNOPRSX%_\-\.\:][\dA-Z\/\|\\]+[\.\-]?)$/gi,
                 p4 = /^([A-Z]{1}[\dA-Z]+)$/gi,
-                //循环分隔, 分隔长度0-35(9+26), N 表示换行符\r\n, R 表示 <br />
-                p5 = /^([S_\-\.\:])([\dA-Z\/\\]{0,}?((\[[\dA-Z\/\\]{0,}\])(<[\d]+>)?|[.])[\dA-Z\/\\]{0,}?)+$/gi,
+                //循环分隔, 分隔长度0-35(9+26), \\ 表示换行符\r\n, / 表示 <br />, | 表示截断(不显示之后的内容)
+                p5 = /^([S_\-\.\:])([\dA-Z\/\|\\]{0,}?((\[[\dA-Z\/\|\\]{0,}\])(<[\d]+>)?|[.])[\dA-Z\/\|\\]{0,}?)+$/gi,
                 //结尾是否自由组合，与p3规则配套使用
                 freedom = ss.endsWith('.') || ss.endWith('-'),
                 //是否循环分隔，与p5规则配套使用
@@ -3298,13 +3311,16 @@
                 dn = v.toString().split('.');
                 v = formatNumberSwitch(v, f, nv, dn, err, str, args, freedom, loop);
             } else if ((ss.length === 1 && p1.test(ss)) || (ss.length >= 2 && p3.test(ss))) {
-                nv = parseInt(ss.substr(1), 10);
+                /*nv = parseInt(ss.substr(1), 10);
                 dn = v.toString().split('.');
                 n = isNaN(nv) ? (f.toUpperCase() === 'D' ? 0 : 2) : nv;
+                */
+                nv = ss.substr(1);
+                dn = v.toString().split('.');
 
                 //如果分隔规则以.结尾，表示可以优化分隔最后一组内容，不至于出现单吊的内容
                 //比如 1234 1234 5 这样的，可以优化为 1234 12345
-                v = formatNumberSwitch(v, f, n, dn, err, str, args, freedom, loop);
+                v = formatNumberSwitch(v, f, nv, dn, err, str, args, freedom, loop);
             } else if ((ss.length === 1 && p2.test(ss)) || (ss.length >= 2 && p4.test(ss))) {
                 throwError(err[3], str, args);
             } else if (/([0]+)/g.test(ss)) {
@@ -3381,9 +3397,9 @@
     String.formatError = String.formatException = function (isThrowError) {
         if ($.isBoolean(isThrowError)) {
             $.formatThrowError = isThrowError;
-            $.console.log('[set] string format throw error: ', $.formatThrowError);
+            $.console.trace('[set] string format throw error: ', $.formatThrowError);
         } else if ($.isDebug()) {
-            $.console.log('[get] string format throw error: ', $.formatThrowError);
+            $.console.trace('[get] string format throw error: ', $.formatThrowError);
         }
         return $.formatThrowError;
     };
@@ -3535,12 +3551,16 @@
     }
 
     String.prototype.formatTo = function (fmt) {
+        var con = this;
         fmt = (!$.isString(fmt, true) ? '{0}' : fmt).trim();
-        return (!fmt.startsWith('{') || !fmt.endWith('}')) ? this : fmt.format(this);
+        $.console.log('[content]', con, '[format]', fmt);
+        return (!fmt.startsWith('{') || !fmt.endWith('}')) ? con : fmt.format(con);
     };
 
-    String.prototype.formatTest = function (fmt) {
-        return '"' + this + '" ' + (this.format(fmt));
+    String.prototype.formatTest = function (con) {
+        var fmt = this;
+        $.console.log('[format]', fmt, '[content]', con);
+        return fmt.format(con);
     };
 
     //String.format
