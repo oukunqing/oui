@@ -681,46 +681,55 @@
                 setValue: function (element, value, fieldConfig, isArray) {
                     var fc = fieldConfig.field || {},
                         attr = fc.attribute || fc.attr,
-                        val = isArray ? value.join(',') : value;
+                        val = isArray ? value.join(',') : value,
+                        con = '',
+                        elem = $I(element.id) || element;
 
                     if (!isArray && ('' + val).trim() !== '') {
-                        var dtfmt = $.getAttribute(element, customAttrs.DATE_FORMAT);
+                        var dtfmt = $.getAttribute(elem, customAttrs.DATE_FORMAT);
                         if (dtfmt && $.isDate(val)) {
                             val = val.format($.isTrue(dtfmt) ? '' : dtfmt || '');
                         } else if (dtfmt && $.isDate(val.toDate(true))) {
                             val = val.toDateString($.isTrue(dtfmt) ? '' : dtfmt || '');
                         } else {
-                            var fmt = $.getAttribute(element, customAttrs.DATA_FORMAT);
+                            var fmt = $.getAttribute(elem, customAttrs.DATA_FORMAT);
                             if (fmt) {
                                 val = fmt.format(val);
                             }
                         }
                     }
                     if (!op.isLegalName(attr)) {
-                        if (typeof element.value === 'undefined') {
-                            element.innerHTML = op.encodeHtml(val, fc.encode);
+                        if (typeof elem.value === 'undefined') {
+                            elem.innerHTML = op.encodeHtml(val, fc.decode);
                         } else {
-                            element.value = op.decodeHtml(val, fc.decode);
+                            elem.value = (con = op.decodeHtml(val, fc.decode));
+                            //设置elem.val是为了与$.dropdownlist数据绑定联动
+                            elem.val = con;
                         }
                     } else {
-                        element.setAttribute(attr, op.encodeHtml(val, fc.encode));
+                        elem.setAttribute(attr, (con = op.encodeHtml(val, fc.decode)));
+                        elem.setAttribute('val', con);
                     }
                     return true;
                 },
                 setSelectOption: function (element, value, fieldConfig, isArray) {
-                    var text = value, val = value, isEmptyArray = false;
+                    var text = value, val = value, isEmptyArray = false,
+                        elem = $I(element.id) || element;
+
                     if (isArray) {
                         isEmptyArray = 0 === value.length, val = value[0] || '', text = value[1] || val;
                     }
-                    element.value = value;
+                    elem.value = value;
+                    //设置elem.val是为了与$.dropdownlist数据绑定联动
+                    elem.val = value;
                     //当下拉选项不存在时，是否追加选项
                     if (fieldConfig.field.appendOption && element.selectedIndex < 0) {
                         if (isEmptyArray) {
                             return false;
                         }
-                        element.options.add(new Option(text, val));
-                        //element.value = value;
-                        element.selectedIndex = element.options.length - 1;
+                        elem.options.add(new Option(text, val));
+                        //elem.value = value;
+                        elem.selectedIndex = element.options.length - 1;
                     }
                 },
                 setCheckBoxChecked: function (element, value, fieldConfig, isArray) {
@@ -1592,16 +1601,14 @@
                 return this;
             },
             showOptionValue: function (elem, item, empty) {
-                var val = $.getAttribute(item, 'data-value') || '';
+                var val = $.getAttribute(item, 'data-value') || '',
+                    txt = $.getAttribute(item, 'data-text') || '';
                 if (elem.tagName === 'SELECT') {
                     elem.options.length = 0;
                     if (empty) {
-                        elem.options.add(new Option($.getAttribute(elem, 'opt-title'), ''));
+                        elem.options.add(new Option(val, ''));
                     } else {
-                        var node = item.querySelector('span');
-                        if (node) {
-                            elem.options.add(new Option(node.innerText || node.innerHTML, val));
-                        }
+                        elem.options.add(new Option(txt, val));
                     }
                     $.trigger(elem, 'change');
                 } else {
@@ -1718,13 +1725,16 @@
                 }
                 return this;
             },
+            buildOption: function (options) {
+                return $.isArray(options) ? 
+                    options : $.isUndefinedOrNull(options) ? 
+                    [] : $.isString(options, true) ? 
+                    options.split(/[,;\|]/) : [options];
+            },
             //action: 0 - hide, 1 - toggle, 2 - show
             setOption: function (elem, options, config, action) {
                 var cfg = $.extend({}, config),
-                    opt = $.isArray(options) ? 
-                        options : $.isUndefinedOrNull(options) ? 
-                        [] : $.isString(options, true) ? 
-                        options.split(/[,;\|]/) : [options];
+                    opt = $.input.buildOption(options);
 
                 if (!$.isNumber(action)) {
                     action = 1;
@@ -1733,7 +1743,7 @@
                 cfg.relative = $.getParam(cfg, 'relativePosition,relative,follow', false);
 
                 if (!$.isElement(elem = $.toElement(elem)) || opt.length <= 0) {
-                    return this;
+                    return null;
                 }
                 if (elem.optbox) {
                     var display = !action ? 'none' : 2 === action ? '' : elem.optbox.style.display === 'none' ? '' : 'none';
@@ -1741,7 +1751,7 @@
                     $.setPanelPosition(elem, elem.optbox, cfg);
                     $.input.setCurrentOption(elem, elem.optbox);
                     $.input.setTitle(elem.optbox);
-                    return this;
+                    return opt;
                 }
 
                 var es = $.getOffset(elem, cfg.relative),
@@ -1771,12 +1781,13 @@
                 for (var i = 0; i < len; i++) {
                     var val = opt[i].val, 
                         txt = opt[i].txt,
+                        con = txt,
                         cur = elemVal === val.toString();
 
                     if ($.isString(txt, true) || $.isNumber(txt) || $.isString(val, true) || $.isNumber(val)) {
                         idx++;
                         if (cfg.display && val.toString() !== '' && val.toString() !== txt.toString()) {
-                            txt = val + '<span class="i-t">' + txt + '</span>';
+                            con = val + '<span class="i-t">' + txt + '</span>';
                         }
                         if (cur) {
                             curIdx = idx;
@@ -1784,9 +1795,12 @@
                         html.push([
                             '<li class="input-option-panel-item', cur ? ' cur' : '', '"',
                             ' style="padding:', (cfg.number ? '0 5px 0 0' : '0 5px'), ';"',
-                            ' opt-idx="', (i + 1), '" data-value="', val.toString().replace(/["]/g, '&quot;'), '">',
+                            ' opt-idx="', (i + 1), '"',
+                            ' data-value="', val.toString().replace(/["]/g, '&quot;'), '"',
+                            ' data-text="', txt.toString().replace(/["]/g, '&quot;'), '"',
+                            '>',
                             cfg.number ? ('<i style="width:' + (n * 12) + 'px;">' + idx + '</i>') : '',
-                            '<span>', txt, '</span>',
+                            '<span>', con, '</span>',
                             '</li>'
                         ].join(''));
                     }
@@ -1809,6 +1823,8 @@
                 $.setPanelPosition(elem, elem.optbox, cfg);
                 $.input.setCurrentOption(elem, elem.optbox);
                 $.input.setTitle(elem.optbox);
+
+                elem.div = div;
 
                 window.inputFormatTimers = {};
                 if (!window.inputOptionDocEventListener) {
@@ -1840,7 +1856,7 @@
                     $.cancelBubble(ev);
                     return false;
                 });
-                return this;
+                return opt;
             },
             // 设置输入框内容格式
             // 需要设置输入格式的文本框，默认情况下是不允许空格和特殊字符的
@@ -1890,13 +1906,13 @@
                     ZINDEX = 999999999,
                     cfg = $.extend({
                         append: null,           //是否追加选项，true-表示options参数 + element属性options
-                        title: '请选择',         //选项默认标题（当没有选择选项时显示）
+                        title: '',              //选项默认标题（当没有选择选项时显示）
                         name: '',               //选项名称
                         editable: null,         //选项是否可编辑，true-表示可以自由扩展选项
                         relative: null,         //相对位置(用于弹出层中的表单)，默认是绝对位置
                         number: null,           //是否显示序号(行号)
                         readonly: false,        //是否禁用输入(选项模式,只能选择不能输入)
-                        display: false,         //是否显示值(默认只显示text不显示value)
+                        display: true,          //是否显示值(value)
                         topPriority: false,     //是否优先显示在顶部
                         height: MAX_HEIGHT,     //选项框最大显示高度
                         width: null,            //选项框宽度
@@ -2012,6 +2028,9 @@
                 if (1 === types.length) {
                     if (types[0].inArray(['options', 'option']) && !opt.config.readonly) {
                         types.push('open');
+                        if (!opt.config.editable) {
+                            opt.config.readonly = $.isBoolean((par.config || {}).readonly, true);
+                        }
                     } else if (types[0].inArray(['boolean', 'bool'])) {
                         opt.config.readonly = $.isBoolean(par.config.readonly, true);
                     }
@@ -2144,7 +2163,8 @@
 
                         function _showOption(ev, elem, opt, action) {
                             $.input.hideOptionPanel(elem.optbox);
-                            $.input.setOption(elem, opt.options, opt.config, action);
+                            //这里不能用options，因为options是select元素的自有属性
+                            elem.values = $.input.setOption(elem, opt.options, opt.config, action);
                         }
                         function _haveOption(elem) {
                             var id = $.getAttribute(elem, 'opt-id');
@@ -2155,13 +2175,17 @@
                             if (opt.config.readonly) {
                                 $.setAttribute(elem, 'readonly', 'readonly');
                                 elem.style.cursor = 'default';
-                                elem.placeholder = elem.placeholder || cfg.title;
+                                elem.placeholder = cfg.title || elem.placeholder || '\u8bf7\u9009\u62e9'; //请选择
                             } else {
                                 var str = $.input.getOptionValues(opt.options).join(',');
                                 if (cfg.title) {
                                     elem.placeholder = cfg.title;
                                 } else if (str.length > 0 && elem.placeholder.indexOf(str) < 0) {
-                                    elem.placeholder += (elem.placeholder ? '  ' : '') + '\u53ef\u9009\u9879\uff1a' + str;   //可选项：
+                                    //\u9009\u62e9\u6216\u8f93\u5165  选择或输入
+                                    //\u53ef\u9009\u9879\uff1a  可选项：
+                                    elem.placeholder += (elem.placeholder ? ' ' : '\u9009\u62e9\u6216\u8f93\u5165 ') + '\u53ef\u9009\u9879\uff1a' + str;
+                                } else if (!elem.placeholder) {
+                                    elem.placeholder = '\u8bf7\u9009\u62e9';    //请选择
                                 }
                             }
                             if (!$.isUndefinedOrNull(opt.value)) {
@@ -2224,7 +2248,6 @@
                                     idx = kc.inArray([37, 38]) ? idx - 1 : idx + 1;
                                 }
                                 $.input.selectOptionItem(idx, kc, this, $.getAttribute(this, 'opt-id'), shortcut);
-
                                 return true;
                             }
                             if ($.input.checkKey(ev, ctls, excepts, opt) || $.input.checkKey(ev, funs, excepts, opt)) {
@@ -2327,6 +2350,28 @@
                                 return false;
                             });
                         }
+
+                        Object.defineProperty(elem, 'val', {
+                            /*value: 'hello',
+                            writable: true,
+                            configurable: true,
+                            */
+                            get: function () {
+                                return elem.value;
+                            },
+                            set: function (val) {
+                                if (!elem.values) {
+                                    _showOption(null, elem, opt, 0);
+                                }
+                                for (var i = 0; i < elem.values.length; i++) {
+                                    var v = elem.values[i].val;
+                                    if (v === val || v.toString() === val.toString()) {
+                                        $.input.selectOptionItem(i + 1, null, elem, elem.div);
+                                        break;
+                                    }
+                                }
+                            }
+                        });
                     } else if (!isSelect) {
                         //控制输入，当输入值不匹配时，输入框禁止输入
                         elem.onkeydown = function(ev) {
@@ -2411,7 +2456,21 @@
                                 }
                             };
                         }
-                    }
+
+                        Object.defineProperty(elem, 'val', {
+                            /*value: 'hello',
+                            writable: true,
+                            configurable: true,
+                            */
+                            get: function () {
+                                return elem.value;
+                            },
+                            set: function (val) {
+                                elem.value = val;
+                                $.trigger(elem, 'blur');
+                            }
+                        });
+                    }            
                 }
                 return $;
             }

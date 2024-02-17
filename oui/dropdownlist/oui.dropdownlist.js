@@ -251,6 +251,7 @@
             that.label = par.label;
             that.input = par.input;
             that.value = par.value || par.input.value;
+            that.code = par.code || $.getAttribute(par.input, 'code') || '';
             that.text = par.text || $.getAttribute(par.input, 'text');
             that.desc = par.desc || $.getAttribute(par.input, 'desc');
             that.checked = par.checked || par.input.checked;
@@ -419,6 +420,8 @@
                 elem.className = elem.className.addClass('oui-ddl');
                 opt.title = opt.title || (that.elem.options.length > 0 ? that.elem.options[0].text : '') || texts[0];
             } else {
+                var rid = opt.element.id || '';
+
                 that.text = opt.element;
                 that.text.className = that.text.className.addClass('oui-ddl oui-ddl-txt').addClass(opt.className);
                 $.setAttribute(that.text, 'readonly', 'readonly');
@@ -434,6 +437,10 @@
                 }
                 opt.element.parentNode.insertBefore(ddl, opt.element);
                 that.elem = ddl;
+
+                opt.element.id = rid + '_oui_ddl_copy';
+                that.elem.id = rid;
+                //$.setAttribute(that.elem, 'id', rid);
 
                 if (opt.select) {
                     that.text.style.display = 'none';
@@ -589,8 +596,13 @@
                         } else if (!$.isObject(dr)) {
                             continue;
                         }
-                        var val = $.getParam(dr, 'value,val,code,id', ''),
-                            txt = $.getParam(dr, 'name,text,txt', '') + '';
+                        var val = $.getParam(dr, 'value,val,id', ''),
+                            txt = $.getParam(dr, 'name,text,txt', '') + '',
+                            cod = $.getParam(dr, 'code');
+
+                        if (val === '' && cod !== '') {
+                            val = cod;
+                        }
 
                         if (val === '' && txt === '') {
                             continue;
@@ -618,6 +630,7 @@
                             ' id="', chbId, '"',
                             ' name="', key, '"',
                             ' value="', val, '"',
+                            ' code="', cod, '"',
                             ' text="', (txt).filterHtml(true).replace(/["]/g, '&quot;'), '"',
                             ' desc="', (desc).filterHtml(true).replace(/["]/g, '&quot;'), '"',
                             ' style="display:' + (opt.choose ? '' : 'none') + ';"',
@@ -695,8 +708,6 @@
                         }
                     });
                 }
-
-
                 $.addListener(elem, 'mousedown', function (ev) {
                     $.cancelBubble(ev);
                     that.show(this);
@@ -747,6 +758,21 @@
                         that.select(kc % 48, kc, true, that.con);
                     }
                     return false;
+                });
+
+                Object.defineProperty(elem, 'val', {
+                    /*value: 'hello',
+                    writable: true,
+                    configurable: true,
+                    */
+                    get: function () {
+                        return elem.value;
+                    },
+                    set: function (val) {
+                        if (val !== undefined) {
+                            that.set(val, true);
+                        }
+                    }
                 });
 
                 that.callback(Config.CallbackLevel.Initial);
@@ -870,7 +896,7 @@
                 ac = $.isBoolean(ac, true);
                 dc = $.isBoolean(dc, false);
 
-                var vals = !$.isArray(val) ? val.split(/[,\|]/) : val.join(',').split(',');
+                var vals = !$.isArray(val) ? val.toString().split(/[,\|]/) : val.join(',').split(',');
                 if (opt.multi) {
                     for (var i = 0; i < nodes.length; i++) {
                         if (vals.indexOf(nodes[i].value) > - 1) {
@@ -919,27 +945,48 @@
                 nodes = that.nodes,
                 vals = [],
                 txts = [],
+                cods = [],
                 single = !opt.multi,
-                c = 0;
+                c = 0,
+                txt = '',
+                val = '',
+                cod = '';
 
             for (var i = 0; i < nodes.length; i++) {
                 var n = nodes[i];
                 if (n.checked) {
-                    vals.push(n.value.trim());
+                    val = n.value.trim();
+                    if (val !== '') {
+                        vals.push(val);
+                    }
                     txts.push(n.text.trim() + (single && n.desc && n.text !== n.desc ? ' - ' + n.desc : ''));
+                    cod = n.code.trim();
+                    if (cod !== '') {
+                        cods.push(cod);
+                    }
                     c++;
                 }
             }
-            if (that.text) {
-                //显示文字
-                that.text.value = txts.join(',') || opt.title || '';
-                that.text.title = vals.length > 0 ? (opt.name ? opt.name + ': ' : '') + that.text.value : '';
-            }
+            txt = txts.join(',') || opt.title || '';
+            val = vals.join(',');
+            cod = cods.join(',');
+
             //设置值
             that.elem.options.length = 0;
-            that.elem.options.add(new Option(txts.join(',') || opt.title || '', vals.join(',')));
+            that.elem.options.add(new Option(txt, val));
+            $.setAttribute(that.elem, 'code', cod);
 
-            return vals.join(',');
+            if (that.text) {
+                that.text.title = vals.length > 0 ? (opt.name ? opt.name + ': ' : '') + txt : '';
+                //显示文字
+                if (opt.select) {
+                    txt = val;
+                }
+                that.text.value = txt;
+                $.setAttribute(that.text, 'value', txt);
+                $.setAttribute(that.text, 'code', cod);
+            }
+            return val;
         },
         callback: function (callbackLevel) {
             var that = this,

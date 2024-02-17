@@ -92,7 +92,7 @@ button {width:120px;height:28px;}
             </tr>
             <tr>
                 <td></td>
-                <td><input type="text" id="fmt_option" placeholder="选择或输入" /></td>
+                <td><input type="text" id="fmt_option" placeholder="" /></td>
             </tr>
             <tr>
                 <td></td>
@@ -125,6 +125,8 @@ button {width:120px;height:28px;}
                 <td>
                     <select id="select2" onchange="console.log('select change:', this.value);">
                         <option value="10001">第1项</option>
+                        <option value="10002">第2项</option>
+                        <option value="10003">第3项</option>
                     </select>
                 </td>
             </tr>
@@ -255,7 +257,10 @@ button {width:120px;height:28px;}
         });
         $.setInputFormat('fmt_port', {
             types: ['port']
-        });        
+        });
+
+        $I('fmt_port').val = 1234;
+
         $.setInputFormat('fmt_option', {
             types: ['option'],
             options: ['abc', 'acc', 'asd', '123', '456', '789'],
@@ -284,11 +289,14 @@ button {width:120px;height:28px;}
             maxLen: 3,
             //chinese: true
         });
+        window.setTimeout(function() {
+            $I('fmt_option2').val = 'asd';
+        }, 3000);
 
         $.setInputFormat('fmt_channel', {
             types: ['int', 'option'],
             options: buildOptions([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,100,1000], '通道'),
-            config: { readonly: false, title: '请输入AT指令'  }
+            config: { readonly: false, title: '请选择通道'  }
         });
 
         $.setInputFormat('fmt_channel2', {
@@ -314,10 +322,13 @@ button {width:120px;height:28px;}
                 maxWidth: 320
             }
         });
+        window.setTimeout(function() {
+            $I('select1').val = 'hello';
+        }, 3000);
 
         $.setInputFormat('select2', {
             types: ['option', 'word'],
-            options: [{val:456,txt:'456456'}, {val:'ABC123',txt:'选项ABC123'}, 'hello', 'world', 'abcdefg', 'helloworld'],
+            options: [{val:456,txt:'456456'}, '123', {val:'ABC123',txt:'选项ABC123'}, 'hello', 'world', 'abcdefg', 'helloworld'],
             value: 'ABC123',
             //display: 同时显示值value和文本text，如果value===text则只显示text
             config: { 
@@ -333,7 +344,9 @@ button {width:120px;height:28px;}
                 width: 240
             }
         });
+        $I('select2').val = 123;
 
+        $.console.log($I('select2').val);
     };
 
     function buildOptions(numbers, name) {
