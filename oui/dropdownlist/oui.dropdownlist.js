@@ -335,7 +335,7 @@
             //按钮位置：left-左，center-中，right-右
             buttonPosition: 'center',
             //当没有“全选/反选”按钮时是否显示“确定”按钮
-            button: false,
+            button: true,
             //是否显示序号(行号)
             number: false,
             //是否显示值内容
@@ -350,6 +350,8 @@
             editable: false,
             //是否多选，默认多选
             multi: true,
+            //多选项分隔符号
+            symbol: ',',
             //是否允许空值（单选模式）
             allowEmpty: '',
             //多选最大数量限制
@@ -967,7 +969,7 @@
                     c++;
                 }
             }
-            txt = txts.join(',') || opt.title || '';
+            txt = txts.join(opt.symbol || ',') || opt.title || '';
             val = vals.join(',');
             cod = cods.join(',');
 

@@ -182,12 +182,12 @@ window.onload = function() {
 			{ id: 1, code: 'web', name: 'WEB服务', desc: '400万高清摄像机' },
 			{ id: 2, code: 'device', name: '设备服务', desc: '' },
 			{ id: 3, code: 'pic', name: '图片推送服务', desc: '' },
-			{ id: 4, code: 'video', name: '视频服务', desc: '' },
+			/*{ id: 4, code: 'video', name: '视频服务', desc: '' },
 			{ id: 5, code: 'capture', name: '图片采集服务', desc: '' },
 			{ id: 6, code: 'linkage', name: '平台级联服务', desc: '' },
-			{ id: 7, code: 'ai', name: '图片分析服务', desc: '' },
+			{ id: 7, code: 'ai', name: '图片分析服务', desc: '' },*/
 		],
-		layout: 'grid',
+		layout: 'list',
 		boxWidth: 'follow',
 		//textWidth: 200,
 		itemWidth: '48%',
@@ -206,6 +206,8 @@ window.onload = function() {
 		title: '选择服务类型',
 		//按钮位置： left,center,right
 		buttonPosition: 'right',
+		button: false,
+		callbackLevel: 0,
 		callback: function (values, initial, ddl) {
 			$.console.log('initial22:', values, initial, ddl);
 			getDeviceList();
