@@ -1793,10 +1793,10 @@ console.log((1679615).toNum36(6));
 
 var code = '';
 
-console.log(!code);
+console.log(code?'a':'b');
 code = '0';
 
-console.log(!code);
+console.log(code?'a':'b');
 code = 0;
 
-console.log(!code);
+console.log(code?'a':'b');

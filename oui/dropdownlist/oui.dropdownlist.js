@@ -49,7 +49,7 @@
         // 选项框(网格)最小宽度
         BoxGridMinWidth: 456,
         // 选项框最小宽度设置
-        BoxMinWidth: [125, 245, 345],
+        BoxMinWidth: [85, 245, 345],
         BoxMinHeight: [64, 90, 140],
         // 隐藏但是需要占位
         CssHidden: ';visibility:hidden;width:0px;height:0px;border:none;margin:0;padding:0;font-size:1px;line-height:0px;float:left;'
@@ -172,7 +172,7 @@
                 }
                 return '0';
             },
-            getItemConWidth: function (items, itemWidth, columns, display) {          
+            getItemConWidth: function (items, itemWidth, columns, display) {
                 if (itemWidth === 'cell') {
                     var width = 0;
                     if ($.isNumber(columns) && columns > 0) {
@@ -316,10 +316,10 @@
             //列表框自定义样式
             boxStyle: '',
             //列表框宽度，默认不指定
-            //follow - 表示跟随源控件宽度
+            //follow - 表示固定跟随源控件宽度
             boxWidth: '',
             //box最小宽度
-            minWidth: 120,
+            minWidth: 80,
             //box最大宽度
             maxWidth: 500,
             //box最小高度
@@ -497,6 +497,9 @@
                     opt.maxWidth = bs.width;
                     bs.max = bs.width;
                 }
+                if (bs.min < offset.width) {
+                    bs.min = offset.width;
+                }
 
                 box.className = 'oui-ddl oui-ddl-panel' + (edge ? ' oui-ddl-edge' : '');
                 box.id = Config.IdPrefix + opt.id;
@@ -613,10 +616,10 @@
                         }
                         var val = $.getParam(dr, (opt.field || '') + ',value,val,id', ''),
                             txt = $.getParam(dr, 'name,text,txt', '') + '',
-                            cod = $.getParam(dr, 'code');
+                            con = $.getParam(dr, 'code');
 
-                        if (val === '' && cod !== '') {
-                            val = cod;
+                        if (val === '' && con !== '') {
+                            val = con;
                         }
 
                         if (val === '' && txt === '') {
@@ -645,7 +648,7 @@
                             ' id="', chbId, '"',
                             ' name="', key, '"',
                             ' value="', val, '"',
-                            ' code="', cod, '"',
+                            ' code="', con, '"',
                             ' text="', (txt).filterHtml(true).replace(/["]/g, '&quot;'), '"',
                             ' desc="', (desc).filterHtml(true).replace(/["]/g, '&quot;'), '"',
                             ' style="display:' + (opt.choose ? '' : 'none') + ';"',
@@ -701,7 +704,9 @@
                     that.indexs[chb.id] = i;
                 }
 
+                that.items = document.querySelectorAll('#' + Config.IdPrefix + opt.id + ' li');
                 that.btns = document.querySelectorAll('#' + Config.IdPrefix + opt.id + ' .oui-ddl-oper .oui-ddl-btn');
+
                 for (i = 0; i < that.btns.length; i++) {
                     if (opt.shortcutKey) {
                         if (opt.shortcutNum) {
@@ -970,13 +975,13 @@
             for (var i = 0; i < nodes.length; i++) {
                 var n = nodes[i];
                 if (n.checked) {
-                    val = n.value.trim();
-                    if (val !== '') {
+                    val = n.value.toString().trim();
+                    if (val) {
                         vals.push(val);
                     }
-                    txts.push(n.text.trim() + (single && n.desc && n.text !== n.desc ? ' - ' + n.desc : ''));
-                    con = n.code.trim();
-                    if (!con) {
+                    txts.push(n.text.toString().trim() + (single && n.desc && n.text !== n.desc ? ' - ' + n.desc : ''));
+                    con = n.code.toString().trim();
+                    if (con) {
                         cons.push(con);
                     }
                     c++;
@@ -989,7 +994,7 @@
             //设置值
             that.elem.options.length = 0;
             that.elem.options.add(new Option(txt, val));
-            if (!con) {
+            if (con) {
                 $.setAttribute(that.elem, 'code', con);
             }
 
@@ -1001,7 +1006,7 @@
                 }
                 that.text.value = txt;
                 $.setAttribute(that.text, 'value', txt);
-                if (!con) {
+                if (con) {
                     $.setAttribute(that.text, 'code', con);
                 }
             }
@@ -1081,6 +1086,10 @@
             //先清除选项内容框高度
             that.con.style.height = 'auto';
 
+            //宽度不能小于宿主框宽度
+            if (bs.min < offset.width) {
+                bs.min = offset.width;
+            }
             if ($.isObject(size) || $.isNumber(size)) {
                 bs.width = size.width || size;
                 if (bs.width > bs.max) {
