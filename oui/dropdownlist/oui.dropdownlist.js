@@ -246,6 +246,7 @@
         initial: function (par) {
             var that = this;
             that.id = par.id;
+            that.idx = par.idx;
             that.elem = par.elem;
             that.multi = par.multi;
             that.label = par.label;
@@ -262,6 +263,7 @@
             that.label.onmousedown = function () {
                 $.cancelBubble();
                 that.elem.focus();
+                $.setAttribute(that.elem, 'opt-idx', that.idx);
                 if ($.isFunction(that.callback)) {
                     that.callback(that);
                 }
@@ -685,6 +687,7 @@
                     that.nodes.push(new Node({
                         elem: elem,
                         id: chb.value,
+                        idx: i + 1,
                         label: chb.parentNode,
                         input: chb,
                         multi: opt.multi,
@@ -1048,6 +1051,7 @@
                 box.style.display = show ? '' : 'none';
                 box.show = show;
                 $.setClass(opt.select ? that.elem : that.text, 'oui-ddl-txt-cur', show);
+                that.get();
                 //下拉列表位置停靠
                 that.size().position();
 
