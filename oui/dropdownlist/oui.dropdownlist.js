@@ -376,7 +376,7 @@
         opt.maxHeight = options.maxHeight || (opt.layout === 'grid' ? Config.BoxGridMaxHeight : Config.BoxMaxHeight);
 
         opt.buttonPosition = $.getParam(opt, 'buttonPosition,buttonPos,btnPos');
-        opt.buttonLimit = $.getParam(opt, 'buttonLimit,buttonLength,buttonLen,btnLimit,btnLength,btnLen')
+        opt.buttonLimit = $.getParam(opt, 'buttonLimit,buttonLength,buttonLen,btnLimit,btnLength,btnLen');
         opt.button = $.getParam(opt, 'showButton,button');
         opt.number = $.getParam(opt, 'showNumber,number');
         opt.display = $.getParam(opt, 'showValue,display');
