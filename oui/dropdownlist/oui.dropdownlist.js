@@ -302,6 +302,8 @@
     function DropDownList(options) {
         var opt = Factory.checkOptions($.extend({
             id: '',
+            //Id/Value字段
+            field: '',
             name: '',
             title: '',
             element: '',
@@ -609,7 +611,7 @@
                         } else if (!$.isObject(dr)) {
                             continue;
                         }
-                        var val = $.getParam(dr, 'value,val,id', ''),
+                        var val = $.getParam(dr, (opt.field || '') + ',value,val,id', ''),
                             txt = $.getParam(dr, 'name,text,txt', '') + '',
                             cod = $.getParam(dr, 'code');
 
