@@ -1790,3 +1790,13 @@ console.log('F'.charToInt());
 console.log((65535).toNum16(null, false));
 console.log((1679615).toNum36(6));
 */
+
+var code = '';
+
+console.log(!code);
+code = '0';
+
+console.log(!code);
+code = 0;
+
+console.log(!code);

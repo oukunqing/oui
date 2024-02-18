@@ -328,7 +328,7 @@
             layout: 'list', //list, flow, grid
             //输入框宽度，默认跟随下拉框宽度
             textWidth: '',
-            //网格布局时选项宽度: cell, 48%
+            //网格布局时选项宽度: auto, cell, 百分比,如：48%
             itemWidth: '',
             //停靠位置：left-左下，right-右下
             position: 'left',
@@ -336,6 +336,8 @@
             buttonPosition: 'center',
             //当没有“全选/反选”按钮时是否显示“确定”按钮
             button: true,
+            //显示的按钮数量：“确定” + “全选/反选/取消/默认”，最多5个按钮
+            buttonLimit: null,
             //是否显示序号(行号)
             number: false,
             //是否显示值内容
@@ -374,6 +376,7 @@
         opt.maxHeight = options.maxHeight || (opt.layout === 'grid' ? Config.BoxGridMaxHeight : Config.BoxMaxHeight);
 
         opt.buttonPosition = $.getParam(opt, 'buttonPosition,buttonPos,btnPos');
+        opt.buttonLimit = $.getParam(opt, 'buttonLimit,buttonLength,buttonLen,btnLimit,btnLength,btnLen')
         opt.button = $.getParam(opt, 'showButton,button');
         opt.number = $.getParam(opt, 'showNumber,number');
         opt.display = $.getParam(opt, 'showValue,display');
@@ -498,8 +501,9 @@
 
                 var btn = [],
                     btnLen = 0,
+                    btnLimit = $.isNumber(opt.buttonLimit) ? opt.buttonLimit : -1,
                     len = opt.items.length,
-                    selects = '',
+                    selects = [],
                     oneBtn = true,
                     ac = opt.callbackLevel ? 'ok' : 'no',
                     texts = [
@@ -507,22 +511,29 @@
                         '\u53d6\u6d88', '\u5168\u9009', '\u53cd\u9009', opt.restore ? '\u8fd8\u539f' : '\u9ed8\u8ba4', '\u786e\u5b9a'
                     ];
 
+                if (opt.callbackLevel > 0 && btnLimit === 0) {
+                    btnLimit = 1;
+                }
+
                 $.setAttribute(elem, 'opt-id', box.id);
                 $.setAttribute(elem, 'opt-len', len);
                 $.setAttribute(elem, 'opt-idx', 0);
 
                 if (opt.multi) {
-                    if (opt.layout !== Config.Layout.List && len > 3 || len > 5) {
+                    if ((len > 5 || (opt.layout !== Config.Layout.List && len > 3)) && (opt.button || opt.callbackLevel > 0)) {
                         selects = [
-                            '<button class="oui-ddl-btn btn btn-default btn-first" ac="1">', texts[1], '</button>',
-                            '<button class="oui-ddl-btn btn btn-default" ac="2">', texts[2], '</button>',
-                            '<button class="oui-ddl-btn btn btn-default" ac="0">', texts[0], '</button>',
-                            '<button class="oui-ddl-btn btn btn-default" ac="3">', texts[3], '</button>',
-                        ].join('');
-                        oneBtn = false;
-                        btnLen += 4;
+                            '<button class="oui-ddl-btn btn btn-default btn-first" ac="1">' + texts[1] + '</button>',
+                            '<button class="oui-ddl-btn btn btn-default" ac="2">' + texts[2] + '</button>',
+                            '<button class="oui-ddl-btn btn btn-default" ac="0">' + texts[0] + '</button>',
+                            '<button class="oui-ddl-btn btn btn-default" ac="3">' + texts[3] + '</button>',
+                        ];
+                        if (btnLimit >= 0 && selects.length >= btnLimit - 1) {
+                            selects.length = btnLimit - 1;
+                        }
+                        oneBtn = selects.length <= 0;
+                        btnLen += selects.length;
                     }
-                    if (!oneBtn || opt.callbackLevel > 0 || opt.button) {
+                    if (!oneBtn || opt.callbackLevel > 0 || opt.button || btnLimit > 0) {
                         btn.push('<div class="oui-ddl-oper oui-ddl-oper-' + opt.layout + '" style="text-align:' + (opt.buttonPosition || 'center') + ';">');
                         btn.push('<div class="btn-group btn-group-xs' + (oneBtn ? ' btn-group-block' : '') + '">');
                         btn.push(selects.join(''));
@@ -947,12 +958,12 @@
                 nodes = that.nodes,
                 vals = [],
                 txts = [],
-                cods = [],
+                cons = [],
                 single = !opt.multi,
                 c = 0,
                 txt = '',
                 val = '',
-                cod = '';
+                con = '';
 
             for (var i = 0; i < nodes.length; i++) {
                 var n = nodes[i];
@@ -962,21 +973,23 @@
                         vals.push(val);
                     }
                     txts.push(n.text.trim() + (single && n.desc && n.text !== n.desc ? ' - ' + n.desc : ''));
-                    cod = n.code.trim();
-                    if (cod !== '') {
-                        cods.push(cod);
+                    con = n.code.trim();
+                    if (!con) {
+                        cons.push(con);
                     }
                     c++;
                 }
             }
             txt = txts.join(opt.symbol || ',') || opt.title || '';
             val = vals.join(',');
-            cod = cods.join(',');
+            con = cons.join(',');
 
             //设置值
             that.elem.options.length = 0;
             that.elem.options.add(new Option(txt, val));
-            $.setAttribute(that.elem, 'code', cod);
+            if (!con) {
+                $.setAttribute(that.elem, 'code', con);
+            }
 
             if (that.text) {
                 that.text.title = vals.length > 0 ? (opt.name ? opt.name + ': ' : '') + txt : '';
@@ -986,7 +999,9 @@
                 }
                 that.text.value = txt;
                 $.setAttribute(that.text, 'value', txt);
-                $.setAttribute(that.text, 'code', cod);
+                if (!con) {
+                    $.setAttribute(that.text, 'code', con);
+                }
             }
             return val;
         },

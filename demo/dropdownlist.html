@@ -6,6 +6,8 @@
 	<style type="text/css">
 		select {height:30px;height:32px;min-width:240px;border:solid 1px #ccc; border-radius:4px;}
 		input {outline:none; border-radius:4px;height:30px;min-width:240px;border:solid 1px #ccc;}
+		table {}
+		table td {padding:0 10px 10px 0;}
 	</style>
 	<script type="text/javascript" src="../oui/oui.js"></script>
 	<script type="text/javascript" src="../oui/dropdownlist/oui.dropdownlist.js"></script>
@@ -26,9 +28,38 @@
 <input type="text" id="ServerType2" style="" />
 <br />
 <br />
-<input type="text" id="ServerType3" style="width:300px;" />
-<br />
-<br />
+<table cellpadding="0" cellspacing="0">
+	<tr>
+		<td><input type="text" id="ServerType20" style="width:300px;" /></td>
+		<td><input type="text" id="ServerType21" style="width:300px;" /></td>
+		<td><input type="text" id="ServerType22" style="width:300px;" /></td>
+	</tr>
+	<tr>
+		<td><input type="text" id="ServerType23" style="width:300px;" /></td>
+		<td><input type="text" id="ServerType24" style="width:300px;" /></td>
+		<td><input type="text" id="ServerType25" style="width:300px;" /></td>
+	</tr>
+	<tr>
+		<td><input type="text" id="ServerType26" style="width:300px;" /></td>
+		<td><input type="text" id="ServerType27" style="width:300px;" /></td>
+		<td><input type="text" id="ServerType28" style="width:300px;" /></td>
+	</tr>
+	<tr>
+		<td><input type="text" id="ServerType30" style="width:300px;" /></td>
+		<td><input type="text" id="ServerType31" style="width:300px;" /></td>
+		<td><input type="text" id="ServerType32" style="width:300px;" /></td>
+	</tr>
+	<tr>
+		<td><input type="text" id="ServerType33" style="width:300px;" /></td>
+		<td><input type="text" id="ServerType34" style="width:300px;" /></td>
+		<td><input type="text" id="ServerType35" style="width:300px;" /></td>
+	</tr>
+	<tr>
+		<td><input type="text" id="ServerType36" style="width:300px;" /></td>
+		<td><input type="text" id="ServerType37" style="width:300px;" /></td>
+		<td><input type="text" id="ServerType38" style="width:300px;" /></td>
+	</tr>
+</table>
 <input type="text" id="ServerType4" style="" />
 <br />
 <br />
@@ -153,12 +184,12 @@ window.onload = function() {
 			{ id: 6, name: '平台级联服务', desc: '' },
 		],
 		layout: 'grid',
+		//boxWidth: 400,
 		boxWidth: 'follow',
 		//textWidth: 200,
 		//itemWidth: '48%',
 		itemWidth: 'cell',
-		//columns: 3,
-		boxWidth: 400,
+		columns: 2,
 		itemBorder: true,
 		//回调等级：0-选项实时回调，1-全选/反选等按钮事件回调，2-确定按钮事件回调
 		//submit: 0,
@@ -175,46 +206,90 @@ window.onload = function() {
 		}
 	});
 
-	$.dropdownlist({
-		id: 'ServerType3',
-		element: 'ServerType3',
-		items: [
-			{ id: 1, code: 'web', name: 'WEB服务', desc: '400万高清摄像机' },
-			{ id: 2, code: 'device', name: '设备服务', desc: '' },
-			{ id: 3, code: 'pic', name: '图片推送服务', desc: '' },
-			/*{ id: 4, code: 'video', name: '视频服务', desc: '' },
-			{ id: 5, code: 'capture', name: '图片采集服务', desc: '' },
-			{ id: 6, code: 'linkage', name: '平台级联服务', desc: '' },
-			{ id: 7, code: 'ai', name: '图片分析服务', desc: '' },*/
-		],
-		layout: 'list',
-		boxWidth: 'follow',
-		//textWidth: 200,
-		itemWidth: '48%',
-		//boxWidth: 400,
-		itemBorder: true,
-		//回调等级：0-选项实时回调，1-全选/反选等按钮事件回调，2-确定按钮事件回调
-		//submit: 0,
-        //callbackLevel: 0,
-        callbackDebounce: true,
-        //是否单选，默认多选
-        multi: true,
-        //是否支持按钮快捷键（默认支持）
-        shortcutKey: true,
-        //是否显示快捷键数字（默认不显示）
-        shortcutNum: true,
-		title: '选择服务类型',
-		//按钮位置： left,center,right
-		buttonPosition: 'right',
-		button: false,
-		callbackLevel: 0,
-		callback: function (values, initial, ddl) {
-			$.console.log('initial22:', values, initial, ddl);
-			getDeviceList();
-		}
-	});
+	var items = [
+		{ id: 1, code: 'web', name: 'WEB服务', desc: '' },
+		{ id: 2, code: 'device', name: '设备服务', desc: '' },
+		{ id: 3, code: 'pic', name: '图片推送服务', desc: '' },
+		{ id: 4, code: 'video', name: '视频服务', desc: '高清' },
+		{ id: 5, code: 'capture', name: '图片采集服务', desc: '' },
+		{ id: 6, code: 'linkage', name: '平台级联服务', desc: '' },
+		{ id: 7, code: 'ai', name: '图片分析服务', desc: '' },
+		{ id: 8, code: 'alarm', name: '图片报警服务', desc: '' },
+		{ id: 9, code: 'measure', name: '雷达扫描测距', desc: '' },
+	], len = 9;
 
-	$I('ServerType3').val = '3,5,6';
+	for (var i = 0; i < len; i++) {
+		var id = 'ServerType2' + i,
+			opts = [].concat(items);
+
+		$.dropdownlist({
+			id: id,
+			element: id,
+			items: opts,
+			layout: 'grid',
+			boxWidth: i >= len - 3 ? 'follow' : '',
+			//textWidth: 200,
+			//itemWidth: '48%',
+			itemWidth: i > 5 ? 'auto' : 'cell',
+			columns: i <= 2 ? 2 : 3,
+			//boxWidth: 400,
+			itemBorder: true,
+			//回调等级：0-选项实时回调，1-全选/反选等按钮事件回调，2-确定按钮事件回调
+			//submit: 0,
+	        //callbackLevel: 0,
+	        callbackDebounce: true,
+	        //是否单选，默认多选
+	        multi: true,
+	        //是否支持按钮快捷键（默认支持）
+	        shortcutKey: true,
+	        //是否显示快捷键数字（默认不显示）
+	        shortcutNum: true,
+			title: '选择服务类型',
+			//按钮位置： left,center,right
+			buttonPosition: 'right',
+			button: i >= 4,
+			buttonLimit: i === 1 || i === 4 || i === 7 ? 3 : i === 2 || i === 5 || i === 8 ? 1 : -1,
+			callbackLevel: i >= 3 ? 0 : 1,
+			callback: function (values, initial, ddl) {
+				$.console.log('initial22:', values, initial, ddl);
+				getDeviceList();
+			}
+		});
+	}
+
+	for (var i = 0; i < len; i++) {
+		var id = 'ServerType3' + i,
+			opts = [].concat(items);
+		if (i > 7) {
+			opts.length = 5;
+		}
+		$.dropdownlist({
+			id: id,
+			element: id,
+			items: opts,
+			layout: 'list',
+			boxWidth: 'follow',
+			itemBorder: true,
+	        //是否支持按钮快捷键（默认支持）
+	        shortcutKey: true,
+	        //是否显示快捷键数字（默认不显示）
+	        shortcutNum: true,
+			title: '选择服务类型',
+			//按钮位置： left,center,right
+			buttonPosition: 'right',
+			button: i === 4,
+			buttonLimit: i === 1 || i === 4 || i === 7 || i === 6 ? 3 : i === 2 || i === 5 || i === 8 ? 1 : -1,
+			callbackLevel: i >= 3 && i <= 5 ? 0 : i === 7 ? 2 : 1,
+			callback: function (values, initial, ddl) {
+				$.console.log('initial33:', values, initial, ddl);
+				getDeviceList();
+			}
+		});
+	}
+
+	
+
+	$I('ServerType30').val = '3,5,6';
 
 	$.dropdownlist({
 		id: 'ServerType4',
