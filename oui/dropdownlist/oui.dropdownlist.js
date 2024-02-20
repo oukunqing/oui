@@ -117,6 +117,12 @@
 
                 opt.itemBorder = $.getParam(opt, 'itemBorder,border');
                 opt.element = $.toElement(opt.element || opt.elem);
+                if (!$.isElement(opt.element) && opt.id) {
+                    opt.element = $.toElement(opt.id);
+                }
+                if ((!opt.id && !opt.id.toString()) && $.isElement(opt.element)) {
+                    opt.id = opt.element.id;
+                }
 
                 if ($.isBoolean(opt.single)) {
                     opt.multi = !opt.single;
