@@ -68,6 +68,17 @@
 		<td><input type="text" id="ServerType50" style="" /></td>
 		<td><select id="ServerType51" style=""></select></td>
 	</tr>
+	<tr>
+		<td>
+			<select id="append1" style="">
+				<option value="-1">推送图片类型</option>
+	            <option value="0">都推送</option>
+	            <option value="1">仅推送抓拍图</option>
+	            <option value="2">仅推送报警图</option>
+	            <option value="3">都不推送</option>
+			</select>
+	</td>
+	</tr>
 </table>
 </body>
 </html>
@@ -177,7 +188,7 @@ window.onload = function() {
 	});
 
 	//window.setTimeout(function() { $I('ServerType1').val = 3; }, 2000);
-	$I('ServerType1').val = 3;
+	//$I('ServerType1').val = 3;
 
 
 	$.dropdownlist({
@@ -363,6 +374,33 @@ window.onload = function() {
 		});
 	}
 	
+	$.dropdownlist({
+			id: 'append1',
+			element: 'append1',
+			items: [],
+			//append: true,
+			boxWidth: 'follow',
+			itemWidth: '48%',
+			//maxHeight: 70,
+			//maxHeight: 'auto',
+			itemBorder: true,
+			single: true,
+	        //callbackLevel: 0,
+	        callbackDebounce: true,
+	        //是否单选，默认多选
+	        multi: true,
+	        //是否支持按钮快捷键（默认支持）
+	        shortcutKey: true,
+	        //是否显示快捷键数字（默认不显示）
+	        //shortcutNum: true,
+			title: '',
+			//按钮位置： left,center,right
+			buttonPosition: 'right',
+			callback: function (values, initial, ddl) {
+				$.console.log('initial22:', values, initial, ddl);
+				getDeviceList();
+			}
+		});
 };
 
 function getDeviceList() {

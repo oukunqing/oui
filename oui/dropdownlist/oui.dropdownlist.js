@@ -232,7 +232,32 @@
                     bs.width = min;
                 }
                 return bs;
-            }
+            },
+            getElementOptionConfig: function (elem) {
+                var options = [], arr = [], i;
+                if (!$.isElement(elem = $.toElement(elem))) {
+                    return options;
+                }
+                if (elem.tagName === 'SELECT') {
+                    arr = elem.options;
+                    for (i = 0; i < arr.length; i++) {
+                        options.push({val: arr[i].value, txt: arr[i].text});
+                    }
+                } else {
+                    arr = ($.getAttribute(elem, 'options') || '').split(/[,;\|]/);
+                    for (i = 0; i < arr.length; i++) {
+                        if (arr[i] !== '') {
+                            if (arr[i].indexOf(':') > 0) {
+                                var tmp = arr[i].split(':');
+                                options.push({val: tmp[0], txt: tmp[1] || tmp[0]});
+                            } else {
+                                options.push({val: arr[i], txt: arr[i]});
+                            }
+                        }
+                    }
+                }
+                return options;
+            },
         };
 
     //先加载样式文件
@@ -311,6 +336,9 @@
             value: null,    //默认值
             index: 0,       //默认选中项（单选有效）
             element: '',
+            items: [],
+            //是否追加选项，true-表示元素原有的选项+items
+            append: null,
             //是否下拉框： true - 下拉框， false - 文本框
             select: true,
             //自定义样式名
@@ -390,6 +418,7 @@
         opt.border = $.getParam(opt, 'itemBorder,border,');
         opt.value = $.getParam(opt, 'selectedValue,selectedvalue,value');
         opt.index = $.getParam(opt, 'selectedIndex,selectedindex,index', 0);
+        opt.items = $.extend([], opt.items, opt.options);
 
         this.id = opt.id;
         this.options = opt;
@@ -408,6 +437,18 @@
                 offset = $.getOffset(opt.element),
                 //texts = ['-请选择-', '请选择'],
                 texts = ['\u002d\u8bf7\u9009\u62e9\u002d', '\u8bf7\u9009\u62e9'];
+
+            if (!$.isElement(elem)) {
+                return that;
+            }
+
+            if (!$.isArray(opt.items)) {
+                opt.items = [];
+            }
+            //如果没有配置选项，则尝试从元素属性中获取
+            if (opt.append || opt.items.length <= 0) {
+                opt.items = Factory.getElementOptionConfig(elem).concat(opt.items);
+            }
 
             if (opt.element.tagName === 'SELECT') {
                 that.elem = opt.element;
@@ -940,9 +981,7 @@
                     }
                 } else {
                     for (var i = 0; i < nodes.length; i++) {
-                        if (nodes[i].value === vals[0]) {
-                            nodes[i].setVal(ac, dc);
-                        }
+                        nodes[i].setVal(nodes[i].value === vals[0] ? ac : false, dc);
                     }
                 }
             }
