@@ -308,6 +308,8 @@
             field: '',
             name: '',
             title: '',
+            value: null,    //默认值
+            index: 0,       //默认选中项（单选有效）
             element: '',
             //是否下拉框： true - 下拉框， false - 文本框
             select: true,
@@ -386,6 +388,8 @@
         opt.display = $.getParam(opt, 'showValue,display');
         opt.choose = $.getParam(opt, 'chooseBox,choosebox,choose');
         opt.border = $.getParam(opt, 'itemBorder,border,');
+        opt.value = $.getParam(opt, 'selectedValue,selectedvalue,value');
+        opt.index = $.getParam(opt, 'selectedIndex,selectedindex,index', 0);
 
         this.id = opt.id;
         this.options = opt;
@@ -620,7 +624,7 @@
                             txt = $.getParam(dr, 'name,text,txt', '') + '',
                             con = $.getParam(dr, 'code');
 
-                        if (val === '' && con !== '') {
+                        if (val === '' && con && con !== '') {
                             val = con;
                         }
 
@@ -797,6 +801,14 @@
                         }
                     }
                 });
+
+                if (!$.isUndefinedOrNull(opt.value)) {
+                    that.set(opt.value, true);
+                } else if (!opt.multi) {
+                    if ($.isNumber(opt.index) && opt.index >= 0) {
+                        that.select(opt.index + 1);
+                    }
+                }
 
                 that.callback(Config.CallbackLevel.Initial);
             }, document.body);

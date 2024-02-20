@@ -1330,11 +1330,14 @@
             type: 'switch',     //switch, scroll
             event: 'click',     //click, mouseover
             skin: 'default',
-            style: {                
+            style: {
                 //box: 'margin: 0 5px;',
                 //tab: 'margin: 0 1px;',
                 //txt: 'font-size:14px;',
                 //panel: 'overflow: hidden;'
+            },
+            callback: function (key, tab) {
+                //$.console.log('callback:', key, tab);
             }
         }, opt = Util.checkOptions(options);
 
@@ -1479,6 +1482,9 @@
                         break;
                     }
                 }
+            }
+            if ($.isFunction(opt.callback)) {
+                opt.callback(key, that);
             }
             return that;
         },

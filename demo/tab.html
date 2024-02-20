@@ -188,11 +188,15 @@
 	$.tabs($I('nav5'), $I('content5'), {
         id: 'tab5',
         skin: 'orange',
-        type: 'scroll',
+        //type: 'scroll',
+        type: 'switch',
         event: 'mouseover',
         color: '#fff',
         tabHeight: 30,
-        conHeight: 240
+        conHeight: 240,
+        callback: function (key, tab) {
+            $.console.log('callback:', key, tab);
+        }
     }).show('con5_1');
 
     $.tabs($I('nav6'), $I('content6'), {
