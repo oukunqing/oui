@@ -147,6 +147,10 @@
                 opt.textWidth = $.getParamValue(opt.textWidth, opt.elemWidth, opt.width);
                 opt.style = $.getParamValue(opt.style, opt.css);
 
+                if (opt.index < 0) {
+                    opt.index = 0;
+                }
+
                 if (!$.isNumber(opt.maxLimit)) {
                     opt.maxLimit = 0;
                 }
@@ -160,16 +164,33 @@
                 var opt = $.extend({
                     id: '',
                     element: ''
-                }, options);
+                }, options), cache, ddl;
 
                 opt.id = opt.id || opt.element.id;
 
-                var cache = Factory.getCache(opt.id);
-                if (cache) {
+                var arr = $.isArray(opt.id) ? opt.id : $.isString(opt.id) ? opt.id.split(/[,;\|]/) : opt.id.toString().split(/[,;\|]/);
+                if (arr.length > 1) {
+                    var list = [];
+                    for (var i = 0; i < arr.length; i++) {
+                        var id = arr[i], elem;
+                        if ($.isElement(id)) {
+                            elem = id;
+                            id = elem.id || id;
+                        }
+                        var p = $.extend(opt, {id: id, element: elem});
+                        if ((cache = Factory.getCache(id))) {
+                            list.push(cache.ddl);
+                        } else {
+                            Factory.setCache(p, (ddl = new DropDownList(p)));
+                            list.push(ddl);
+                        }
+                    }
+                    return list;
+                }
+                if ((cache = Factory.getCache(opt.id))) {
                     return cache.ddl;
                 }
-                var ddl = new DropDownList(opt);
-                return Factory.setCache(opt, ddl), ddl;
+                return Factory.setCache(opt, (ddl = new DropDownList(opt))), ddl;
             },
             getStyleSize: function (size) {
                 if ($.isNumber(size)) {
@@ -460,10 +481,13 @@
             //如果没有配置选项，则尝试从元素属性中获取
             if (opt.append || opt.items.length <= 0) {
                 opt.items = Factory.getElementOptionConfig(elem).concat(opt.items);
+                if (elem.tagName === 'SELECT') {
+                    opt.index = opt.index || elem.selectedIndex || opt.index;
+                }
             }
 
-            if (opt.element.tagName === 'SELECT') {
-                that.elem = opt.element;
+            if (elem.tagName === 'SELECT') {
+                that.elem = elem;
                 if (!opt.select) {
                     var txt = document.createElement('INPUT');
                     txt.className = 'form-control oui-ddl-txt' + (opt.className ? ' ' + opt.className : '');
@@ -473,7 +497,7 @@
                         opt.textWidth === 'auto' ? '' : 'width:' + Factory.getStyleSize(opt.textWidth || offset.width) + ';',
                         opt.style ? opt.style + ';' : ''
                     ].join('');
-                    opt.element.parentNode.insertBefore(txt, opt.element);
+                    opt.element.parentNode.insertBefore(txt, elem);
                     that.text = elem = txt;
                     that.elem.style.display = 'none';
                 } else {
@@ -938,7 +962,7 @@
                 $.setClass(node.label, 'oui-ddl-hover', false);
             } else {
                 for (var i = 0; i < nodes.length; i++) {
-                    nodes[i].set(nodes[i].id === node.id, true);
+                    nodes[i].set(nodes[i].idx === node.idx, true);
                 }
                 if (!show && clickEvent) {
                     that.hide();
@@ -992,8 +1016,14 @@
                         }
                     }
                 } else {
+                    var c = 0;
                     for (var i = 0; i < nodes.length; i++) {
-                        nodes[i].setVal(nodes[i].value === vals[0] ? ac : false, dc);
+                        if (nodes[i].value === vals[0]) {
+                            nodes[i].setVal(c <= 0 ? ac : false, dc);
+                            c++;
+                        } else {
+                            nodes[i].setVal(false, dc);
+                        }
                     }
                 }
             }
