@@ -1,6 +1,6 @@
 .oui-ddl {
 	outline: none;
-	min-width: 80px;
+	min-width: 40px;
 }
 .oui-ddl:focus {
 	outline:none;
@@ -42,7 +42,7 @@
 	box-sizing: border-box;
 	padding: 0;
 	margin: 0;
-	min-width: 80px;
+	min-width: 40px;
 	max-width:500px;
 	min-height: 30px;
 	background:#fff;
@@ -152,10 +152,12 @@ label.oui-ddl-label-border input.oui-ddl-chb {
 }
 ul.oui-ddl-box {
 	display: block;
-	margin: 0;
-	padding: 0;
+	margin: 0 0 0 0;
+	padding: 0 0 1px 0;
 	overflow: auto;
 	clear: both;
+	border: none;
+	box-sizing: border-box;
 }
 ul.oui-ddl-flow,ul.oui-ddl-grid {
 	padding: 5px 3px;

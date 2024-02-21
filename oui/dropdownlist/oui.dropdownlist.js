@@ -49,7 +49,7 @@
         // 选项框(网格)最小宽度
         BoxGridMinWidth: 456,
         // 选项框最小宽度设置
-        BoxMinWidth: [85, 245, 345],
+        BoxMinWidth: [40, 245, 345],
         BoxMinHeight: [64, 90, 140],
         // 隐藏但是需要占位
         CssHidden: ';visibility:hidden;width:0px;height:0px;border:none;margin:0;padding:0;font-size:1px;line-height:0px;float:left;'
@@ -143,7 +143,8 @@
                 }
 
                 opt.allowEmpty = $.getParamValue(opt.allowEmpty, opt.empty);
-                opt.boxWidth = $.getParamValue(opt.boxWidth, opt.width);
+                opt.boxWidth = $.getParamValue(opt.boxWidth, opt.panelWidth);
+                opt.textWidth = $.getParamValue(opt.textWidth, opt.elemWidth, opt.width);
                 opt.style = $.getParamValue(opt.style, opt.css);
 
                 if (!$.isNumber(opt.maxLimit)) {
@@ -335,16 +336,21 @@
     function DropDownList(options) {
         var opt = Factory.checkOptions($.extend({
             id: '',
-            //Id/Value字段
+            element: undefined,
+            //指定Id/Value字段，有时需要用别的字段当id字段来用，比如用 code 表示 id
             field: '',
+            //指定复选框checkbox或单选框radio的name属性
             name: '',
+            //选项未选中时的默认显示文字
             title: '',
-            value: null,    //默认值
-            index: 0,       //默认选中项（单选有效）
-            element: '',
+            //默认值（优先于index）
+            value: undefined,
+            //默认选中项（单选有效）
+            index: 0,
+            //选项，JSON数组格式，示例： [{value|val|id:1, name|text|txt:'第1项',code:'',desc:'',use:1|0}]
             items: [],
             //是否追加选项，true-表示元素原有的选项+items
-            append: null,
+            append: undefined,
             //是否下拉框： true - 下拉框， false - 文本框
             select: true,
             //自定义样式名
@@ -355,9 +361,9 @@
             boxStyle: '',
             //列表框宽度，默认不指定
             //follow - 表示固定跟随源控件宽度
-            boxWidth: '',
+            boxWidth: undefined,
             //box最小宽度
-            minWidth: 80,
+            minWidth: Config.BoxMinWidth[0],
             //box最大宽度
             maxWidth: 500,
             //box最小高度
@@ -367,9 +373,9 @@
             //布局： list-下拉列表，flow-流布局，grid-网格
             layout: 'list', //list, flow, grid
             //输入框宽度，默认跟随下拉框宽度
-            textWidth: '',
+            textWidth: undefined,
             //网格布局时选项宽度: auto, cell, 百分比,如：48%
-            itemWidth: '',
+            itemWidth: undefined,
             //停靠位置：left-左下，right-右下
             position: 'left',
             //按钮位置：left-左，center-中，right-右
@@ -377,7 +383,7 @@
             //当没有“全选/反选”按钮时是否显示“确定”按钮
             button: true,
             //显示的按钮数量：“确定” + “全选/反选/取消/默认”，最多5个按钮
-            buttonLimit: null,
+            buttonLimit: undefined,
             //是否显示序号(行号)
             number: false,
             //是否显示值内容
@@ -402,15 +408,15 @@
             maxLimitMsg: '',
             //是否显示选框,默认情况下：单选框不显示，复选框显示
             //若指定choose为true或false，则按指定规则显示
-            choose: null,
+            choose: undefined,
             //回调等级：0-选项实时回调，1-全选/反选等按钮事件回调，2-确定按钮事件回调
             callbackLevel: 1,
             //是否防抖，多选模式下，点击选项时有效
             callbackDebounce: false,
             //回调函数
-            callback: null,
+            callback: undefined,
             //Function:选项切换时触发
-            beforeChange: null
+            beforeChange: undefined
         }, options));
 
         opt.maxHeight = options.maxHeight || (opt.layout === 'grid' ? Config.BoxGridMaxHeight : Config.BoxMaxHeight);
@@ -1176,7 +1182,7 @@
 
             var barH = $.getOffset(that.bar).height;
             //再设置选项内容框高度
-            that.con.style.height = ($.getOffset(box).height - barH - (barH ? 2 : 0)) + 'px';
+            that.con.style.height = ($.getOffset(box).height - barH - 2) + 'px';
             
             return that;
         },
@@ -1237,6 +1243,9 @@
         },
         ddlist: function (options) {
             return Factory.buildList(options);
+        },
+        singlelist: function (options) {
+            return Factory.buildList($.extend(options, { single: true }));
         }
     });
 
