@@ -879,11 +879,11 @@
                     }
                 });
 
-                if (!$.isUndefinedOrNull(opt.value)) {
+                if (!$.isUndefinedOrNull(opt.value) && (opt.value !== '' || !opt.multi)) {
                     that.set(opt.value, true);
                 } else if (!opt.multi) {
                     if ($.isNumber(opt.index) && opt.index >= 0) {
-                        that.select(opt.index + 1);
+                        that.select(opt.index + 1, null, null, box, Config.CallbackLevel.Initial);
                     }
                 }
 
@@ -894,7 +894,7 @@
 
             return that;
         },
-        select: function (num, keyCode, shortcut, div) {
+        select: function (num, keyCode, shortcut, div, callbackLevel) {
             var that = this,
                 opt = that.options,
                 nodes = that.nodes,
@@ -902,6 +902,8 @@
                 elem = opt.select ? that.elem : that.text,
                 idx = num < 0 ? 0 : num > len ? len : num,
                 cur = $.getAttribute(elem, 'opt-idx').toInt();
+
+            $.console.log('select:', that.id, num, idx);
 
             if (shortcut) {
                 if (len >= 10) {
@@ -932,7 +934,7 @@
                 }
                 $.setAttribute(elem, 'opt-hover', 1);
             } else {
-                that.action(nodes[idx], null, false);
+                that.action(nodes[idx], null, false, callbackLevel);
                 if (idx < 0 && cur > 0) {
                     nodes[cur - 1].set(false, false);
                     that.get();
@@ -940,7 +942,7 @@
             }
             return that;
         },
-        action: function (node, show, clickEvent) {
+        action: function (node, show, clickEvent, callbackLevel) {
             var that = this,
                 opt = that.options,
                 nodes = that.nodes,
@@ -950,7 +952,7 @@
                 node = nodes[node - 1];
             }
             if (!node) {
-                return that.callback();
+                return that.callback(callbackLevel);
             }
 
             if (multi) {
@@ -970,11 +972,12 @@
             }
             if (multi && nodes.length > 1 && opt.callbackDebounce) {
                 $.debounce({}, function() {
-                    that.callback();
+                    that.callback(callbackLevel);
                 });
             } else {
-                return that.callback();
+                return that.callback(callbackLevel);
             }
+            return that;
         },
         msg: function() {
             var that = this, opt = that.options;
@@ -985,7 +988,9 @@
         set: function (val, ac, dc) {
             var that = this,
                 opt = that.options,
-                nodes = that.nodes;
+                nodes = that.nodes,
+                elem = that.elem,
+                idx = 0;
 
             if (ac && opt.maxLimit && that.list(true).length >= opt.maxLimit) {
                 return that.msg();
@@ -1013,6 +1018,7 @@
                     for (var i = 0; i < nodes.length; i++) {
                         if (vals.indexOf(nodes[i].value) > - 1) {
                             nodes[i].setVal(ac, dc);
+                            idx = nodes[i].idx;
                         }
                     }
                 } else {
@@ -1020,6 +1026,9 @@
                     for (var i = 0; i < nodes.length; i++) {
                         if (nodes[i].value === vals[0]) {
                             nodes[i].setVal(c <= 0 ? ac : false, dc);
+                            if (c <= 0 && ac) {
+                                idx = nodes[i].idx;
+                            }
                             c++;
                         } else {
                             nodes[i].setVal(false, dc);
@@ -1037,9 +1046,15 @@
                     that.set(vals, false, false);
                 }
             }
-
-            that.get();
-
+            if (!opt.multi) {
+                //单选模式，如果没有指定选中项，则设置选中第1项
+                if (idx >= 0 && idx <= nodes.length) {
+                    $.setAttribute(elem, 'opt-idx', idx);
+                    nodes[idx - (idx > 0 ? 1 : 0)].set(true, false);
+                }
+            } else {
+                that.get();
+            }
             return that;
         },
         list: function (selected) {
@@ -1112,7 +1127,7 @@
             var that = this,
                 opt = that.options,
                 vals = that.get(),
-                level = callbackLevel || 0;
+                level = !$.isNumber(callbackLevel) ? 0 :(callbackLevel || 0);
 
             if (level === Config.CallbackLevel.Initial) {
                 if (vals === '') {
