@@ -873,6 +873,7 @@
                         return elem.value;
                     },
                     set: function (val) {
+                        $.console.log('set [property]', elem.id, val, typeof val);
                         if (val !== undefined) {
                             that.set(val, true);
                         }
@@ -902,8 +903,6 @@
                 elem = opt.select ? that.elem : that.text,
                 idx = num < 0 ? 0 : num > len ? len : num,
                 cur = $.getAttribute(elem, 'opt-idx').toInt();
-
-            $.console.log('select:', that.id, num, idx);
 
             if (shortcut) {
                 if (len >= 10) {
@@ -993,6 +992,7 @@
                 idx = 0;
 
             if (ac && opt.maxLimit && that.list(true).length >= opt.maxLimit) {
+                $.console.log('set [limit]:', that.id, opt.maxLimit);
                 return that.msg();
             }
 
@@ -1049,8 +1049,9 @@
             if (!opt.multi) {
                 //单选模式，如果没有指定选中项，则设置选中第1项
                 if (idx >= 0 && idx <= nodes.length) {
-                    $.setAttribute(elem, 'opt-idx', idx);
                     nodes[idx - (idx > 0 ? 1 : 0)].set(true, false);
+                    $.setAttribute(elem, 'opt-idx', idx);
+                    that.get();
                 }
             } else {
                 that.get();

@@ -259,6 +259,8 @@
             if (cache.dragStart && !cache.dragAble) {
                 $('#' + cache.switch_shade_id).show();
                 cache.dragAble = true;
+            } else {
+                cache.dragAble = false;
             }
             if (!cache.dragAble) {
                 return false;
@@ -290,12 +292,12 @@
             var cache = Config.cache;
             $('#' + cache.switch_shade_id).hide();
             Factory.hideShade(cache);
+            cache.dragStart = false;
 
             if (!cache.dragAble) {
                 return this;
             }
             cache.dragAble = false;
-            cache.dragStart = false;
 
             $.removeEventListener(document, 'mousemove', Factory.mouseMove);
             $.removeEventListener(document, 'mouseup', Factory.mouseUp);
