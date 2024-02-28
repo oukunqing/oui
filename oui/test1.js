@@ -1800,3 +1800,15 @@ console.log(code?'a':'b');
 code = 0;
 
 console.log(code?'a':'b');
+
+console.log('123456'.md5());
+
+var angle = 80;
+for(var i=0; i<20;i++) {
+    angle -= 0.15;
+    console.log(i, angle);
+}
+
+var val = '0true';
+
+console.log(val.startWith('1') || val.toLowerCase().startWith('true') ? 1 : 0);

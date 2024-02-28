@@ -863,7 +863,6 @@
             }
         }
         if (warns.length > 0) {
-            //if (configs.focusInvalid) {
             if (!configs.focusInvalid) {
                 op.setFocus(warns[0].element);
             }
@@ -873,7 +872,6 @@
                 var v = data[k];
                 if ($.isArray(v)) {
                     if (v.length <= 1) {
-                        //data[k] = v[0] || '';
                         data[k] = ($.isUndefined(v[0]) || v[0] === '') ? '' : v[0];
                     } else if (configs.isJoin) {
                         data[k] = v.join(configs.joinSeparate);
@@ -899,24 +897,52 @@
     },
     getFormParam = function (formElement, options, elements) {
         var opt = $.extend({ tagName: '' }, options);
-        var param = {}, appointTag = opt.tagName.trim() !== '';
+        var param = {}, appointTag = opt.tagName.trim() !== '', 
+            i, obj, id, tag, dataType;
+
+        function _getParVal (obj) {
+            var dataType = $.getAttribute(obj, 'data-type|dataType|datatype'),
+                tag = obj.tagName.toUpperCase(),
+                type = obj.type.toLowerCase(),
+                val = obj.value.trim();
+            if (tag === 'INPUT' && ['checkbox', 'radio'].indexOf(type) > -1) {
+                val = obj.checked ? obj.value || '1' : '0';
+            }
+            switch (dataType) {
+            case 'int': case 'long': case 'port':
+                val = parseInt(val, 10);
+                val = isNaN(val) ? 0 : val;
+                break;
+            case 'float': case 'double': case 'decimal': 
+                val = parseFloat(val, 10);
+                val = isNaN(val) ? 0 : val;
+                break;
+            case 'bool':
+                val = val.startWith('1') || val.toLowerCase().startWith('true') ? 1 : 0;
+                break;
+            }
+            return val;
+        }
         if ($.isArray(elements)) {
-            for (var i = 0; i < elements.length; i++) {
-                var obj = elements[i], id = obj.id;
-                if (id) {
-                    param[obj.id] = obj.value.trim();
+            for (i = 0; i < elements.length; i++) {
+                obj = $.toElement(elements[i]);
+                id = obj.id;
+                if ($.isElement(obj) && id) {
+                    param[id] = _getParVal(obj);
                 }
             }
         } else {
             var form = $.toElement(formElement);
             elements = form.getElementsByTagName(opt.tagName || "*");
-            for (var i = 0; i < elements.length; i++) {
-                var obj = elements[i], id = obj.id, tag = obj.tagName.toUpperCase(), type = obj.type;
+            for (i = 0; i < elements.length; i++) {
+                obj = elements[i];
+                tag = obj.tagName.toUpperCase();
+                id = obj.id;
                 if (id) {
                     if ((appointTag && tag === opt.tagName) ||
                         (!appointTag && ['INPUT', 'SELECT', 'TEXTAREA'].indexOf(tag) > -1 &&
-                            ['button', 'submit', 'hidden', 'password'].indexOf(type) < 0)) {
-                        param[obj.id] = obj.value.trim();
+                            ['button', 'submit', 'hidden', 'password'].indexOf(obj.type) < 0)) {
+                        param[id] = _getParVal(obj);;
                     }
                 }
             }
