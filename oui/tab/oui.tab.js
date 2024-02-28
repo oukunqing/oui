@@ -1363,12 +1363,18 @@
 
             //var tabs = that.tabContainer.childNodes, cons = that.conContainer.childNodes;
             var tabs = that.tabContainer.querySelectorAll('a'),
-                cons = that.conContainer.querySelectorAll('div');
+                cons = that.conContainer.querySelectorAll('div'),
+                i;
 
             that.tabs = tabs;
-            that.cons = cons;
+            that.cons = [];
+            for (i = 0; i < cons.length; i++) {
+                if (cons[i].parentNode === that.conContainer) {
+                    that.cons.push(cons[i]);
+                }
+            }
 
-            if (tabs.length > 0) {
+            if (that.tabs.length > 0) {
                 var parent = tabs[0].parentNode;
                 if (parent.className.indexOf('oui-tabs') > -1) {
                     $.createElement('DIV', '', function(elem) {
@@ -1376,8 +1382,8 @@
                         if (opt.style.box) {
                             elem.style.cssText = opt.style.box;
                         }
-                        for (var i = 0; i < tabs.length; i++) {
-                            elem.appendChild(tabs[i]);
+                        for (var i = 0; i < that.tabs.length; i++) {
+                            elem.appendChild(that.tabs[i]);
                         }
                         elem.oncontextmenu = function(ev) {
                             return false;
@@ -1394,12 +1400,12 @@
                     }; 
                 }
             }
-            for(var i = 0; i < tabs.length; i++) {
-                $.addClass(tabs[i], 'tab-item');
+            for(var i = 0; i < that.tabs.length; i++) {
+                $.addClass(that.tabs[i], 'tab-item');
                 if (opt.style.tab) {
-                    tabs[i].style.cssText = opt.style.tab;
+                    that.tabs[i].style.cssText = opt.style.tab;
                 }
-                $.addListener(tabs[i], opt.event, function() {
+                $.addListener(that.tabs[i], opt.event, function() {
                     var key = $.getAttribute(this, 'tab|key|rel');
                     that.show(key);
                 });
@@ -1415,11 +1421,11 @@
                     }
                     that.scrollTimer = window.setTimeout(function() {
                         var bs = $.getOffset(box);
-                        for (var i = 0; i < cons.length; i++) {
-                            var cs = $.getOffset(cons[i]);
+                        for (var i = 0; i < that.cons.length; i++) {
+                            var cs = $.getOffset(that.cons[i]);
                             if ((cs.top <= bs.top && (cs.top + cs.height > bs.top + bs.height)) ||
                                 (cs.top >= bs.top && cs.top < bs.top + bs.height)) {
-                                if (tabs[i].className.indexOf('cur') < 0) {
+                                if (that.tabs[i].className.indexOf('cur') < 0) {
                                     that.scrollSwitch(i);
                                 }
                                 break;
@@ -1429,11 +1435,11 @@
                 });
             }
 
-            for(var i = 0; i < cons.length; i++) {
+            for(var i = 0; i < that.cons.length; i++) {
                 if(!isScroll) {
-                    cons[i].style.display = 'none';
+                    that.cons[i].style.display = 'none';
                 }
-                $.addClass(cons[i], 'tab-panel');
+                $.addClass(that.cons[i], 'tab-panel');
             }
             return that;
         },

@@ -3,6 +3,18 @@
 <head>
     <meta charset="utf-8">
     <title>Tab标签 - $.tab</title>
+	<style type="text/css">
+	.tab-content {
+		border:solid 1px #ddd;
+		border-top:none;
+		overflow:hidden;
+        padding-top: 0px;
+	}
+    .tab-con {
+        border-bottom: solid 1px #eee;
+    }
+	#nav4 .tab2,#nav5 .tab2,#nav6 .tab2 {padding: 0 15px;}
+	</style>
     <script type="text/javascript" src="../oui/oui.js?"></script>
 	<script>
     var WEB_LANG = 'English';
@@ -11,66 +23,90 @@
 </head>
 <body>
 	
-	<div id="nav" style="width:700px;" class="oui-tabs">
-        <div class="tab-box" style="width:700px;">
-			<ul class="tab-container">
-				<li class="tab-item"><a class="tab-txt" tab="one">标签页1</a></li>
-				<li class="tab-item"><a class="tab-txt" tab="two">标签页2标签页2</a></li>
-				<li class="tab-item"><a class="tab-txt" tab="03">标签页3</a></li>
-				<li class="tab-item"><a class="tab-txt" rel="04">标签页4</a></li>
-				<li class="tab-item"><a class="tab-txt" rel="05">标签页5</a></li>
-				<li class="tab-item"><a class="tab-txt" rel="06">标签页6</a></li>
-			</ul>
+    <div style="margin:10px 10px 10px 0;">
+        <div id="nav4" style="width:400px;">
+			<div>
+				<a tab="con4_1" class="tab2">11</a>
+				<a tab="con4_2" class="tab2">22</a>
+				<a tab="con4_3" class="tab2">33</a>
+				<a tab="con4_4" class="tab2">44</a>
+			</div>
+        </div>
+        <div id="content4" style="width:400px;height:300px;" class="tab-content">
+			<div tab="con4_1" class="tab-con" style="height:200px;">111<br />将现在的HTML生成TAB样式</div>
+			<div tab="con4_2" class="tab-con" style="height:200px;">222</div>
+			<div tab="con4_3" class="tab-con" style="height:200px;">333</div>
+			<div tab="con4_4" class="tab-con" style="height:200px;">444</div>
         </div>
     </div>
-	<div id="content" style="width:700px;" class="oui-tabs-contents">
-		<div key="one">内容1</div>
-		<div key="03">内容3</div>
-		<div rel="04">内容4</div>
-		<div key="05">内容5</div>
-		<div tab="two">内容2<br />内容2<br />内容2<br /></div>
-		<div key="06">内容6</div>
-	</div>
+    <div style="float:left;margin:10px 10px 10px 0;">
+        <div id="nav5" style="width:400px;">
+			<div>
+				<a tab="con5_1" class="tab2">11</a>
+				<a tab="con5_2" class="tab2">22</a>
+				<a tab="con5_3" class="tab2">33</a>
+				<a tab="con5_4" class="tab2">44</a>
+			</div>
+        </div>
+        <div id="content5" style="width:400px;height:300px;" class="tab-content">
+			<div tab="con5_1" class="tab-con" style="height:200px;">111<br />将现在的HTML生成TAB样式</div>
+			<div tab="con5_2" class="tab-con" style="height:200px;">222</div>
+			<div tab="con5_3" class="tab-con" style="height:200px;">333</div>
+			<div tab="con5_4" class="tab-con" style="height:200px;">444</div>
+        </div>
+    </div>
 
-	
-	<div id="nav2" style="width:700px;" class="oui-tabs">
-        <div class="tab-box" style="width:700px;">
-			<ul class="tab-container">
-				<li class="tab-item"><a class="tab-txt" tab="one">标签页1</a></li>
-				<li class="tab-item"><a class="tab-txt" rel="two">标签页2标签页2</a></li>
-				<li class="tab-item"><a class="tab-txt" key="03">标签页3</a></li>
-				<li class="tab-item"><a class="tab-txt" tab="04">标签页4</a></li>
-				<li class="tab-item"><a class="tab-txt" tab="05">标签页5</a></li>
-				<li class="tab-item"><a class="tab-txt" tab="06">标签页6</a></li>
-			</ul>
+    <div style="float:left;margin:10px 10px 10px 0;">
+        <div id="nav6" style="width:400px;">
+            <a tab="con6_1" class="tab2">11</a>
+            <a tab="con6_2" class="tab2">22</a>
+            <a tab="con6_3" class="tab2">33</a>
+            <a tab="con6_4" class="tab2">44</a>
+        </div>
+        <div id="content6" style="width:400px;height:300px;" class="tab-content">
+            <div tab="con6_1" class="tab-con" style="height:200px;">111<br />将现在的HTML生成TAB样式</div>
+            <div tab="con6_2" class="tab-con" style="height:200px;">222</div>
+            <div tab="con6_3" class="tab-con" style="height:200px;">333</div>
+            <div tab="con6_4" class="tab-con" style="height:200px;">444</div>
         </div>
     </div>
-	<div id="content2" style="width:700px;" class="oui-tabs-contents">
-		<div key="one">内容1</div>
-		<div tab="03">内容3</div>
-		<div rel="04">内容4</div>
-		<div key="05">内容5</div>
-		<div key="two">内容2</div>
-		<div key="06">内容6</div>
-	</div>
 </body>
 </html>
 <script type="text/javascript">
-    var tabId = 'tab1';
-    var tab = $.tabs($I('nav'), $I('content'), {
-        id: tabId,
-		skin: 'green',
-        //eventName: 'click',		//click, mouseover
-        //eventName: 'mouseover',		//click, mouseover
-        event: 'click',		//click, mouseover
-    }).show('two');
+	$.tabs($I('nav4'), $I('content4'), {
+        id: 'tab4',
+        skin: 'bluegray',
+        //type: 'scroll',
+        type: 'switch',
+        event: 'click',
+        color: '#fff',
+        tabHeight: 30,
+        conHeight: 240,
+        callback: function (key, tab) {
+            $.console.log('callback:', key, tab);
+        }
+    }).show('con4_1');
+	$.tabs($I('nav5'), $I('content5'), {
+        id: 'tab5',
+        skin: 'orange',
+        //type: 'scroll',
+        type: 'switch',
+        event: 'mouseover',
+        color: '#fff',
+        tabHeight: 30,
+        conHeight: 240,
+        callback: function (key, tab) {
+            $.console.log('callback:', key, tab);
+        }
+    }).show('con5_1');
 
-	
-    var tab2 = $.tabs($I('nav2'), $I('content2'), {
-        id: 'tab2',
-		skin: 'blue',
-        //eventName: 'click',		//click, mouseover
-        //eventName: 'mouseover',		//click, mouseover
-        event: 'mouseover',		//click, mouseover
-    }).show();
+    $.tabs($I('nav6'), $I('content6'), {
+        id: 'tab6',
+        skin: 'blue',
+        type: 'scroll',
+        event: 'mouseover',
+        color: '#fff',
+        tabHeight: 30,
+        conHeight: 240
+    }).show('con6_1');
 </script>
