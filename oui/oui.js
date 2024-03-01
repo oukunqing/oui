@@ -2696,7 +2696,7 @@
 
             return (data.d ? data.d + (daysUnit || '天') : '') + time.join(':');
         },
-        toDurationStr: function(hideDays, units) {
+        toDurationStr: function(hideDays, timeUnits) {
             var seconds = this,
                 data = seconds.toTimeData(0, hideDays),
                 time = [
@@ -2705,12 +2705,26 @@
                     data.m,
                     data.s
                 ],
+                len = time.length,
                 html = [],
-                unit = units || ['天', '小时', '分钟', '秒'];
+                us = timeUnits,
+                units = $.isArray(us) ? [us[0] || '天', us[1] || '小时', us[2] || '分钟', us[2] || '秒'] 
+                    : $.isBoolean(us, false) ? ['天', '小时', '分钟', '秒'] : [' ', ':', ':'],
+                complete = units.join('').replace(/[\s:]/g, '') === '',
+                none = true, u = ':';
 
-            for(var i = 0; i < time.length; i++) {
-                if (time[i]) {
-                    html.push(time[i] + unit[i]);
+            for(var i = 0; i < len; i++) {
+                if (time[i] || complete) {
+                    if (i === 0 && hideDays) {
+                        continue;
+                    }
+                    if (time[i]) {
+                        none = false;
+                    } else if (none) {
+                        continue;
+                    }
+                    u = units[i] || (i < len - 1 ? ':' : '');
+                    html.push((complete || u === ':' ? time[i].padLeft(2) : time[i]) + '' + u);
                 }
             }
             return html.join('');

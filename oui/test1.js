@@ -1809,6 +1809,44 @@ for(var i=0; i<20;i++) {
     console.log(i, angle);
 }
 
-var val = '0true';
 
-console.log(val.startWith('1') || val.toLowerCase().startWith('true') ? 1 : 0);
+
+        String.prototype.toFloat2 = function (decimalLen, val) {
+            var s = this,
+                num = parseFloat(s, 10);
+            if (isNaN(num)) {
+                return val || 0;
+            }
+            if (typeof decimalLen === 'number' && decimalLen >= 0) {
+                var rate = Math.pow(10, decimalLen);
+                num = Math.round(num * rate) / rate;
+            }
+            return num;
+        };
+
+    console.log('123.12345'.toFloat2(0));
+
+console.log((1765).toTimeStr(0, false));
+console.log((1765).toTimeStr(0, true));
+
+console.log((7205).toDurationStr(true, true));
+console.log((1205).toDurationStr(true, false));
+
+
+console.log('a.aspx?a=1&b=2&c=3'.getQueryString('d|b'));
+
+console.log('d|b'.split(/[,\|]/g));
+
+var names =  [
+            '限时预览倒计时',
+            '重新开始倒计时',
+            '重置', 
+            '后关闭',
+            '可选项：',
+            '内容格式错误',
+            '端口数值应介于',
+            '之间'
+            ];;
+        for(var i =0; i<names.length;i++){
+            console.log('//', names[i], names[i].toUnicode());
+        }
