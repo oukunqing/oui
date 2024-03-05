@@ -4061,6 +4061,7 @@
                 lock: true,             //是否锁屏
                 hide: false,            //是否默认隐藏（创建立即隐藏）
                 title: null,            //标题
+                //title: '',
                 content: null,          //文字内容
                 url: null,              //加载的URL
                 form: false,            //是否为Form表单，Form表单则默认允许复制和选择内容
@@ -4163,7 +4164,7 @@
                 p.hasParent = true;
             }
             if (!$.isString(opt.title) && !$.isNumber(opt.title)) {
-                opt.title = Common.getDialogText('Title', opt.lang);
+                opt.title = opt.title === null ? '' : Common.getDialogText('Title', opt.lang);
             }
 
             if (!opt.showHead && !opt.showFoot && !opt.lock &&

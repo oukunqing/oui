@@ -552,7 +552,12 @@
                 return txt;
             },
             buildMenuCallback: function (dr, opt) {
-                return dr.callback || dr.func || opt.callback || opt.func;
+                //return dr.callback || dr.func || opt.callback || opt.func;
+                var func = $.getParam(dr, 'callback,function,func');
+                if (!$.isFunction(func)) {
+                    func = $.getParam(opt, 'callback,function,func');
+                }
+                return func;
             },
             buildMenuPar: function (dr, opt, chbId) {
                 var par = $.extend({

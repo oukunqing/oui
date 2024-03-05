@@ -10,7 +10,7 @@ var dt1 = '2018-11-15 00:00:00'.toDate();
 
 console.log(dt1.format('ts', 10));
 
-var dt2 = '2019-01-21 13:00:00'.toDate();
+var dt2 = '2019-01-21 13:00:00'.toDate();G
 
 var dt2 =  new Date();
 
@@ -1850,3 +1850,16 @@ var names =  [
         for(var i =0; i<names.length;i++){
             console.log('//', names[i], names[i].toUnicode());
         }
+
+new Promise(function (resolve, reject) {
+    var a = 0;
+    var b = 1;
+    if (b == 0) reject("Divide zero");
+    else resolve(a / b);
+}).then(function (value) {
+    console.log("a / b = " + value);
+}).catch(function (err) {
+    console.log(err);
+}).finally(function () {
+    console.log("End");
+});

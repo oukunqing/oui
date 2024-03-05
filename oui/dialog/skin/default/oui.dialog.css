@@ -501,7 +501,7 @@
     border-radius: 3px;
     border-style: solid;
     text-align: center;
-	/*outline: none;*/
+	outline: inherit;
     
     -webkit-touch-callout: none;
     -webkit-user-select: none;
