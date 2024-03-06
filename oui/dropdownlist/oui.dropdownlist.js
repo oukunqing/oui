@@ -129,10 +129,15 @@
                 } else {
                     opt.multi = $.isBoolean(opt.multi, false);
                 }
+                opt.initial = $.isBoolean(opt.initial, false);
+
                 opt.callbackLevel = $.getParam(opt, 'submit,callbackLevel');
                 if (!$.isNumber(opt.callbackLevel)) {
                     opt.callbackLevel = Config.CallbackLevel.Return;
                 }
+
+                opt.columns = $.getParam(opt, 'columns,cells,column,cell');
+                opt.textAlign = $.getParam(opt, 'itemAlign,textAlign,align');
 
                 opt.callbackDebounce = $.getParam(opt, 'callbackDebounce,debounce');
 
@@ -168,7 +173,7 @@
 
                 opt.id = opt.id || opt.element.id;
 
-                var arr = $.isArray(opt.id) ? opt.id : $.isString(opt.id) ? opt.id.split(/[,;\|]/) : opt.id.toString().split(/[,;\|]/);
+                var arr = $.isArray(opt.id) ? opt.id : $.isString(opt.id) ? opt.id.split(/[,;\|，]/) : opt.id.toString().split(/[,;\|，]/);
                 if (arr.length > 1) {
                     var list = [];
                     for (var i = 0; i < arr.length; i++) {
@@ -201,10 +206,11 @@
                 return '0';
             },
             getItemConWidth: function (items, itemWidth, columns, display) {
+                var width = 0;
+                /*
                 if (itemWidth === 'cell') {
-                    var width = 0;
                     if ($.isNumber(columns) && columns > 0) {
-                        width = parseInt(100 / columns - 2, 10) + '%';
+                        width = parseInt(100 / columns, 10) + '%';
                     } else {
                         for (var i = 0; i < items.length; i++) {
                             var dr = items[i],
@@ -217,9 +223,28 @@
                         //加上padding和checkbox宽度
                         width += 7 * 2 + (display ? 20 : 0);
                     }
+                    $.console.log('width:', width);
                     return width;
                 }
                 return itemWidth === 'auto' ? 0 : itemWidth;
+                */
+                if ($.isNumber(columns) && columns > 0) {
+                    width = parseFloat(100 / columns, 10).round(2) + '%';
+                } else if (itemWidth === 'cell') {
+                    for (var i = 0; i < items.length; i++) {
+                        var dr = items[i],
+                            con = dr.name + (dr.desc ? ' - ' + dr.desc : ''),
+                            w = $.getContentSize(con).width;
+                        if (w > width) {
+                            width = w;
+                        }
+                    }
+                    //加上padding和checkbox宽度
+                    width += 7 * 2 + (display ? 20 : 0);
+                } else {
+                    width = itemWidth === 'auto' ? 0 : itemWidth;
+                }
+                return width;
             },
             isRepeat: function (name) {
                 return Cache.events[name] ? true : (Cache.events[name] = true, false);
@@ -395,8 +420,10 @@
             layout: 'list', //list, flow, grid
             //输入框宽度，默认跟随下拉框宽度
             textWidth: undefined,
-            //网格布局时选项宽度: auto, cell, 百分比,如：48%
+            //网格布局时选项宽度: auto, cell, 百分比,如：50% 33%
             itemWidth: undefined,
+            //列数（当列数设置不正确时，自动调整显示的列数）
+            columns: undefined,
             //停靠位置：left-左下，right-右下
             position: 'left',
             //按钮位置：left-左，center-中，right-右
@@ -405,6 +432,8 @@
             button: true,
             //显示的按钮数量：“确定” + “全选/反选/取消/默认”，最多5个按钮
             buttonLimit: undefined,
+            //选项文字对齐方式：left,center,right
+            textAlign: '',
             //是否显示序号(行号)
             number: false,
             //是否显示值内容
@@ -436,6 +465,8 @@
             callbackDebounce: false,
             //回调函数
             callback: undefined,
+            //初始化时是否回调，默认不回调
+            initial: undefined,
             //Function:选项切换时触发
             beforeChange: undefined
         }, options));
@@ -659,7 +690,7 @@
                     '<ul class="oui-ddl-box oui-ddl-', opt.layout, '">'
                 ], i, n = len.toString().length, key = Config.ItemPrefix + that.id;
 
-                var columns = opt.columns || opt.cells || 0,
+                var columns = opt.columns || 0,
                     conWidth = Factory.getItemConWidth(opt.items, opt.itemWidth, columns, opt.choose),
                     minWidth = opt.layout === Config.Layout.Grid ? conWidth : 0;
 
@@ -683,6 +714,7 @@
                         '</li>'
                     ].join(''));
                 }
+                var align = opt.textAlign ? 'text-align:' + opt.textAlign + ';' : '';
                 for (i = 0; i < len; i++) {
                     var dr = opt.items[i];
                     if (dr === 'sep' || dr.sep || dr.type === 'sep') {
@@ -724,7 +756,10 @@
                             '" opt-idx="', (i + 1), '" data-value="', val.toString().replace(/["]/g, '&quot;'), '"',
                             '>',
                             '<label class="oui-ddl-label', opt.layout !== Config.Layout.List && opt.border ? ' oui-ddl-label-border' : '', '"',
-                            opt.number ? ' style="padding-left:4px;"' : '', '>',
+                            ' style="',
+                            opt.number ? 'padding-left:4px;' : '', align,
+                            '"',
+                            '>',
                             opt.number ? '<i style="width:' + (n * 12) + 'px;">' + (i + 1)  + '</i>' : '',
                             '<input class="oui-ddl-chb"', checked,
                             ' type="', opt.multi ? 'checkbox' : 'radio', '"',
@@ -1139,7 +1174,7 @@
                     return that;
                 }
             }
-            if ($.isFunction(opt.callback)) {
+            if ((opt.initial || level !== Config.CallbackLevel.Initial) && $.isFunction(opt.callback)) {
                 opt.callback(vals, level === Config.CallbackLevel.Initial, that);
             }
             return that;
@@ -1229,6 +1264,28 @@
             var barH = $.getOffset(that.bar).height;
             //再设置选项内容框高度
             that.con.style.height = ($.getOffset(box).height - barH - 2) + 'px';
+
+            //行列布局时，当选项内容宽度超过预设的宽度时，动态调用列数，以使行列对齐
+            if (opt.layout !== 'list' && $.isNumber(opt.columns) && opt.columns > 0) {
+                var i, bw, dw, rw, w = 0, cs, cw;
+                for (i = 0; i < that.items.length; i++) {
+                    if (!bw) {
+                        bw = that.items[i].parentNode.offsetWidth;
+                    }
+                    rw = that.items[i].offsetWidth;
+                    if (rw > w) {
+                        w = rw;
+                    }
+                }
+                if (w > parseFloat(bw / opt.columns, 10).round(2)) {
+                    cs = parseInt(bw / w, 10);
+                    if (cs)
+                    cw = parseFloat(100 / (cs <= 0 ? 1 : cs), 10).round(2);
+                    for (i = 0; i < that.items.length; i++) {
+                        that.items[i].style.minWidth = cw + '%';
+                    }
+                }
+            }
             
             return that;
         },

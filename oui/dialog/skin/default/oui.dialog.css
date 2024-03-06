@@ -501,7 +501,7 @@
     border-radius: 3px;
     border-style: solid;
     text-align: center;
-	outline: inherit;
+	/*outline: none;*/
     
     -webkit-touch-callout: none;
     -webkit-user-select: none;
@@ -509,6 +509,10 @@
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+}
+
+.oui-dialog .dialog-foot .dialog-btn:focus {
+    
 }
 
 .oui-dialog .btn-primary {

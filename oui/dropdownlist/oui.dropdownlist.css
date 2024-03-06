@@ -160,15 +160,18 @@ ul.oui-ddl-box {
 	box-sizing: border-box;
 }
 ul.oui-ddl-flow,ul.oui-ddl-grid {
-	padding: 5px 3px;
+	padding: 4px 3px;
 }
 ul.oui-ddl-flow li.oui-ddl-item, ul.oui-ddl-grid li.oui-ddl-item {
 	float:left;
-	margin: 4px 2px 3px 5px;
-	border: none 0;	
+	border: none 0;
+	height: 35px;
+	margin: 0;
+	padding: 0;
 }
 ul.oui-ddl-flow label.oui-ddl-label,ul.oui-ddl-grid label.oui-ddl-label {
 	padding: 0 5px;
+	margin: 3px 3px 2px 3px;
 }
 ul.oui-ddl-flow label.oui-ddl-cur,ul.oui-ddl-grid label.oui-ddl-cur {
 	/*color: #f00;*/
@@ -191,11 +194,15 @@ ul.oui-ddl-flow label.oui-ddl-cur:hover,ul.oui-ddl-grid label.oui-ddl-cur:hover 
 	border: none;
 	box-sizing: border-box;
 	margin: 1px 1px 0;
-	padding: 5px 5px 7px;
+	/*padding: 5px 5px 7px;*/
+	padding: 1px 5px 7px;
 	clear: both;
 	display: block;
 	overflow: hidden;
 	text-align: center;
+}
+.oui-ddl-panel .oui-ddl-oper-list {
+	padding-top:4px;
 }
 .oui-ddl-panel .oui-ddl-oper .btn-group {
 	padding: 0 0px;

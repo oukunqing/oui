@@ -1863,3 +1863,10 @@ new Promise(function (resolve, reject) {
 }).finally(function () {
     console.log("End");
 });
+
+
+console.log(null ?? 'printA')
+console.log(undefined ?? 'printB')
+console.log(false ?? 'printB')
+console.log(true ?? 'printB')
+
