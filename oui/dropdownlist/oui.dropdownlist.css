@@ -195,7 +195,7 @@ ul.oui-ddl-flow label.oui-ddl-cur:hover,ul.oui-ddl-grid label.oui-ddl-cur:hover 
 	box-sizing: border-box;
 	margin: 1px 1px 0;
 	/*padding: 5px 5px 7px;*/
-	padding: 1px 5px 7px;
+	padding: 1px 4px 6px;
 	clear: both;
 	display: block;
 	overflow: hidden;
@@ -221,13 +221,14 @@ ul.oui-ddl-flow label.oui-ddl-cur:hover,ul.oui-ddl-grid label.oui-ddl-cur:hover 
 .oui-ddl-panel .btn {
 	border:solid 1px #ccc;
 	box-sizing: border-box;
-	height: 28px;
-	line-height: 20px;
+	height: 29px;
+	line-height: 19px;
 	padding: 3px 6px;
 	margin: 0;
 	font-size: 14px;
 	font-family: Arial,宋体;
-	border-right: none;
+  	border-radius: 4px;
+  	cursor: pointer;
 }
 .oui-ddl-panel .btn em {
 	margin:0 0 0 3px;
@@ -240,7 +241,6 @@ ul.oui-ddl-flow label.oui-ddl-cur:hover,ul.oui-ddl-grid label.oui-ddl-cur:hover 
 .oui-ddl-panel .btn:hover {
 	background: #e6e6e6;
 	border: solid 1px #adadad;
-	border-right: none;
 }
 
 .oui-ddl-panel .btn-group .btn-primary {
@@ -269,4 +269,56 @@ ul.oui-ddl-flow label.oui-ddl-cur:hover,ul.oui-ddl-grid label.oui-ddl-cur:hover 
 .oui-ddl-panel .btn-group-block .btn-ok,.oui-ddl-panel .btn-group-block .btn-block {
 	width: 100%;
 	border-radius: 4px;
+}
+
+/* 以下代码参考引用 bootstrap3.3.7 */
+.oui-ddl-panel .btn-group {
+  	position: relative;
+  	display: inline-block;
+  	vertical-align: middle;
+}
+.oui-ddl-panel .btn-group > .btn {
+  	position: relative;
+  	float: left;
+}
+.oui-ddl-panel .btn-group > .btn:hover,
+.oui-ddl-panel .btn-group > .btn:focus,
+.oui-ddl-panel .btn-group > .btn:active,
+.oui-ddl-panel .btn-group > .btn.active {
+  	z-index: 2;
+}
+.oui-ddl-panel .btn-group .btn + .btn,
+.oui-ddl-panel .btn-group .btn + .btn-group,
+.oui-ddl-panel .btn-group .btn-group + .btn,
+.oui-ddl-panel .btn-group .btn-group + .btn-group {
+  	margin-left: -1px;
+}
+
+.oui-ddl-panel .btn-group > .btn:not(:first-child):not(:last-child) {
+  	border-radius: 0;
+}
+.oui-ddl-panel .btn-group > .btn:first-child {
+  	margin-left: 0;
+}
+.oui-ddl-panel .btn-group > .btn:first-child:not(:last-child) {
+  	border-top-right-radius: 0;
+  	border-bottom-right-radius: 0;
+}
+.oui-ddl-panel .btn-group > .btn:last-child:not(:first-child) {
+  	border-top-left-radius: 0;
+  	border-bottom-left-radius: 0;
+}
+.oui-ddl-panel .btn-group > .btn-group {
+  	float: left;
+}
+.oui-ddl-panel .btn-group > .btn-group:not(:first-child):not(:last-child) > .btn {
+  	border-radius: 0;
+}
+.oui-ddl-panel .btn-group > .btn-group:first-child:not(:last-child) > .btn:last-child{
+  	border-top-right-radius: 0;
+  	border-bottom-right-radius: 0;
+}
+.oui-ddl-panel .btn-group > .btn-group:last-child:not(:first-child) > .btn:first-child {
+  	border-top-left-radius: 0;
+  	border-bottom-left-radius: 0;
 }

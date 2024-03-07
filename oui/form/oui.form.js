@@ -1796,6 +1796,7 @@
                 div.id = 'input-option-panel-' + (elem.id || new Date().getTime());
 
                 div.style.cssText = [
+                    'box-sizing:border-box;',
                     'max-height:' + (parseInt('0' + cfg.height, 10) || cfg.MAX_HEIGHT) + 'px;',
                     'top:' + top + 'px;',
                     'left:' + (es.left) + 'px;',
@@ -2142,7 +2143,7 @@
                         //错误的IPv4输入格式
                         exceptions = exceptions.concat([/(\.\.)+|^([\d]{1,3}\.){4,}$|([\d]{4,})|(25[6-9]|(0|[3-9])[\d]{2})/]);
                         opt.maxLen = 15;
-                        converts = converts.concat([{src: '127.', dest: '127.0.0.1'}, ['192.', '192.168.'], ['255.', '255.255.255.255']]);
+                        converts = converts.concat([{src: '127.', dest: '127.0.0.1'}, ['192.', '192.168.'], ['255.', '255.255.255.0']]);
                     } else if (type === 'ipv6') {
                         keys = keys.concat([186]);
                         isVal = true;

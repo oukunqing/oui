@@ -787,3 +787,57 @@
     border-left-color: #ffb4a8;
     margin-top: -7px;
 }
+
+
+/* 以下代码参考引用 bootstrap3.3.7 */
+.oui-dialog .btn-group {
+    position: relative;
+    display: inline-block;
+    vertical-align: middle;
+}
+.oui-dialog .btn-group > .btn {
+    position: relative;
+    float: left;
+    border-radius: 4px;
+}
+.oui-dialog .btn-group > .btn:hover,
+.oui-dialog .btn-group > .btn:focus,
+.oui-dialog .btn-group > .btn:active,
+.oui-dialog .btn-group > .btn.active {
+    z-index: 2;
+}
+.oui-dialog .btn-group .btn + .btn,
+.oui-dialog .btn-group .btn + .btn-group,
+.oui-dialog .btn-group .btn-group + .btn,
+.oui-dialog .btn-group .btn-group + .btn-group {
+    margin-left: -1px;
+}
+
+.oui-dialog .btn-group > .btn:not(:first-child):not(:last-child) {
+    border-radius: 0;
+}
+.oui-dialog .btn-group > .btn:first-child {
+    margin-left: 0;
+}
+.oui-dialog .btn-group > .btn:first-child:not(:last-child) {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+.oui-dialog .btn-group > .btn:last-child:not(:first-child) {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+.oui-dialog .btn-group > .btn-group {
+    float: left;
+}
+.oui-dialog .btn-group > .btn-group:not(:first-child):not(:last-child) > .btn {
+    border-radius: 0;
+}
+.oui-dialog .btn-group > .btn-group:first-child:not(:last-child) > .btn:last-child{
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+.oui-dialog .btn-group > .btn-group:last-child:not(:first-child) > .btn:first-child {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
