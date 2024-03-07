@@ -4247,7 +4247,14 @@
             if (isOffset) {
                 return { width: doc.offsetWidth, height: doc.offsetHeight };
             }
-            return { width: doc.clientWidth, height: doc.clientHeight, scrollTop: doc.scrollTop, scrollHeight: doc.scrollHeight };
+            var scrollLeft = window.scrollX || window.pageXOffset || doc.scrollLeft,
+                scrollTop = window.scrollY || window.pageYOffset || doc.scrollTop;
+
+            return { 
+                width: doc.clientWidth, height: doc.clientHeight, 
+                scrollTop: scrollTop, scrollLeft: scrollLeft, 
+                scrollWidth: doc.scrollWidth, scrollHeight: doc.scrollHeight 
+            };
         },
         getDocumentSize = function (isOffset) {
             return getBodySize(isOffset);
@@ -4268,10 +4275,12 @@
         setPanelPosition = function (elem, panel, config) {
             var cfg = $.extend({
                     topPriority: false,
-                    relativePosition: null
+                    relativePosition: null,
                 }, config),
                 bs = $.getBodySize(),
-                es = $.getOffset(elem, $.getParam(cfg, 'relativePosition,relative', false));
+                es = $.getOffset(elem, $.getParam(cfg, 'relativePosition,relative', false)),
+                //选项框显示位置：0-下方，1-上方，2-中间（横跨，窗口高度不够导致）
+                pos = 'bottom';
 
             panel.style.left = (es.left) + 'px';
             panel.style.width = (es.width) + 'px';
@@ -4294,6 +4303,7 @@
             if (offset > 0) {
                 top = es.top - ds.height;
                 panel.style.top = top + 'px';
+                pos = 'top';
 
                 //如果选项框位置窗口小于滚动高度，需要设置选项框位置和位置偏移
                 if (top < bs.scrollTop) {
@@ -4306,10 +4316,18 @@
                     } else {
                         //默认显示在目标控件下方，并向上偏移，偏移量即之前超出窗口高度的值
                         panel.style.top = (es.top + es.height - offset - whiteSpace) + 'px';
+                        pos = 'middle';
                     }
                 }
             }
-            return this;
+            return { 
+                top: parseInt(panel.style.top, 10), 
+                left: parseInt(panel.style.left, 10), 
+                width: parseInt('0' + panel.style.width, 10) || panel.offsetWidth,
+                height: parseInt('0' + panel.style.height, 10) || panel.offsetHeight,
+                position: pos
+            }
+            //return this;
         },
         isArrayLike = function (obj) {
             if ($.isString(obj)) {
@@ -4893,16 +4911,6 @@
         getEvent = function () {
             return window.event || arguments.callee.caller.arguments[0];
         },
-        getEventPosition = function (ev, elem) {
-            var e = ev || getEvent();
-            if (e.pageX || e.pageY) {
-                return { x: e.pageX, y: e.pageY };
-            }
-            return {
-                x: e.clientX + document.body.scrollLeft - document.body.clientLeft,
-                y: e.clientY + document.body.scrollTop - document.body.clientTop
-            };
-        },
         getScrollPosition = function () {
             var scrollPos = {};
             if (typeof window.pageYOffset !== 'undefined') {
@@ -4913,6 +4921,20 @@
                 scrollPos = { top: doc.body.scrollTop, left: doc.body.scrollLeft };
             }
             return scrollPos;
+        },
+        getEventPosition = function (ev, elem) {
+            var e = ev || getEvent();
+            if (e.pageX || e.pageY) {
+                return { 
+                    x: e.pageX, 
+                    y: e.pageY
+                };
+            }
+            var scroll = getScrollPosition();
+            return {
+                x: e.clientX + scroll.left - document.body.clientLeft,
+                y: e.clientY + scroll.top - document.body.clientTop
+            };
         },
         scrollTo = function (elem, pnode) {
             if ($.isString(elem, true)) {
@@ -4997,7 +5019,13 @@
             if (!isElement(elem = toElement(elem)) || !ev) {
                 return false;
             }
-            var pos = ev.fromElement || typeof ev.x === 'undefined' ? getEventPosition(ev) : ev;
+            var pos, scroll;
+            if (ev.fromElement || typeof ev.x === 'undefined') {
+                pos = getEventPosition(ev);
+            } else {
+                scroll = getScrollPosition();
+                pos = { x: ev.x + scroll.left, y: ev.y + scroll.top };
+            }
             if (isOnElem(elem, pos)) {
                 return true;
             }

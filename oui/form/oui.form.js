@@ -300,7 +300,8 @@
                             //验证输入内容是否在选项中
                             if (optionValue.length > 0) {
                                 for (var i = 0; i < optionValue.length; i++) {
-                                    if (optionValue[i] === value) {
+                                    var ps = optionValue[i].split(/[:\|]/);
+                                    if (ps[0] === value) {
                                         return result(true, value);
                                     }
                                 }
@@ -1455,16 +1456,21 @@
                 return values;
             },
             setOptionValues: function (opt) {
-                var values = [], val, txt;
+                var values = [], p, val, txt;
                 for (var i = 0; i < opt.length; i++) {
-                    if ($.isArray(opt[i])) {
-                        val = opt[i][0];
-                        txt = opt[i][1] || opt[i][0];
-                    } else if ($.isObject(opt[i])) {
-                        val = $.getParam(opt[i], 'value,val,v,text,txt,t');
-                        txt = $.getParam(opt[i], 'text,txt,t');
+                    p = opt[i];
+                    if ($.isArray(p)) {
+                        val = p[0];
+                        txt = p[1] || p[0];
+                    } else if ($.isObject(p)) {
+                        val = $.getParam(p, 'value,val,v,text,txt,t');
+                        txt = $.getParam(p, 'text,txt,t');
+                    } else if ($.isString(p, true)) {
+                        var ps = p.split(/[:\|]/);
+                        val = ps[0];
+                        txt = $.getParamCon(ps[1], ps[0]);
                     } else {
-                        val = txt = opt[i];
+                        val = txt = p;
                     }
                     values.push({ val: val, txt: txt });
                 }
@@ -1722,12 +1728,14 @@
                         '.input-option-elem{outline:none;}',
                         '.input-option-elem:focus {outline:none;border-color: #66afe9;box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);',
                         ' -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);}',
-                        '.input-option-panel-box{position:absolute;border:solid 1px #ddd;background:#fff;border-radius:4px;opacity:0.99;',
+                        '.input-option-panel-box{position:absolute;border:solid 1px #ddd;background:#fff;border-radius:4px;opacity:1;',
                         ' overflow:auto;box-shadow: 0 2px 3px 0 rgba(0,0,0,.32);}',
                         '.input-option-ul{margin:0;padding:1px 0;}',
                         '.input-option-ul i{font-style:normal;color:#ccc;display:inline-block;text-align:right;',
                         ' border:none;margin:0 7px 0 0;padding:0;font-size:14px;}',
-                        '.input-option-ul li{margin:0 1px;list-style:none;line-height:29px;height:29px;overflow:hidden;font-size:14px;border:none;cursor:default;}',
+                        '.input-option-ul li{margin:0 1px;list-style:none;line-height:29px;height:29px;overflow:hidden;font-size:14px;',
+                        '   border:none;cursor:default;}',
+                        '.input-option-ul li:last-child{border-bottom:none;}',
                         '.input-option-ul li:hover,.input-option-ul li.cur:hover{background:#dfe8f6;color:#000;}',
                         '.input-option-ul li.cur{background:#eee;color:#000;}',
                         '.input-option-ul li:hover i,.input-option-ul li.cur:hover i{color:#f50;}',
@@ -1883,6 +1891,21 @@
                     $.cancelBubble(ev);
                     return false;
                 });
+                
+                $.addListener(document, 'wheel', function (ev) {
+                    if (div.style.display !== 'none' && !$.isOnElement(elem.optbox, ev)) {
+                        elem.optbox.style.display = 'none';
+                    }
+                    return false;
+                });
+
+                $.addListener(elem, 'wheel', function (ev) {
+                    if (div.style.display !== 'none') {
+                        elem.optbox.style.display = 'none';
+                    }
+                    return false;
+                });
+
                 return opt;
             },
             // 设置输入框内容格式
@@ -2485,10 +2508,6 @@
                         }
 
                         Object.defineProperty(elem, 'val', {
-                            /*value: 'hello',
-                            writable: true,
-                            configurable: true,
-                            */
                             get: function () {
                                 return elem.value;
                             },

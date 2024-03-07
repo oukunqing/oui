@@ -47,8 +47,19 @@
 	min-height: 30px;
 	background:#fff;
 	border-radius: 4px;
-	border-top-left-radius: 0px;
-	border-top-right-radius: 0px;
+	/*border-top-left-radius: 0px;
+	border-top-right-radius: 0px;*/
+	opacity: 1;
+}
+
+.oui-ddl-bottom {
+	/*border-top-left-radius: 0px;
+	border-top-right-radius: 0px;*/
+}
+.oui-ddl-top {
+	/*border-bottom-left-radius: 0px;
+	border-bottom-right-radius: 0px;*/
+    box-shadow: 2px 0 3px 0 rgba(0,0,0,.32);
 }
 
 li.oui-ddl-item {

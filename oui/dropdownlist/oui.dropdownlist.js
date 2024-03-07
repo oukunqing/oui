@@ -207,27 +207,6 @@
             },
             getItemConWidth: function (items, itemWidth, columns, display) {
                 var width = 0;
-                /*
-                if (itemWidth === 'cell') {
-                    if ($.isNumber(columns) && columns > 0) {
-                        width = parseInt(100 / columns, 10) + '%';
-                    } else {
-                        for (var i = 0; i < items.length; i++) {
-                            var dr = items[i],
-                                con = dr.name + (dr.desc ? ' - ' + dr.desc : ''),
-                                w = $.getContentSize(con).width;
-                            if (w > width) {
-                                width = w;
-                            }
-                        }
-                        //加上padding和checkbox宽度
-                        width += 7 * 2 + (display ? 20 : 0);
-                    }
-                    $.console.log('width:', width);
-                    return width;
-                }
-                return itemWidth === 'auto' ? 0 : itemWidth;
-                */
                 if ($.isNumber(columns) && columns > 0) {
                     width = parseFloat(100 / columns, 10).round(2) + '%';
                 } else if (itemWidth === 'cell') {
@@ -783,6 +762,7 @@
                 box.innerHTML = html.join('');
                 box.show = false;
                 that.box = box;
+                that.className = box.className;
                 that.con = box.childNodes[0];
                 that.bar = box.childNodes[1];
 
@@ -790,13 +770,29 @@
                     if (!$.isInElement(that.box, ev) && !$.isInElement(opt.select ? that.elem : that.text, ev)) {
                         that.hide();
                     }
+                    return false;
                 });
-                $.addListener(document, 'keyup', function (e) {
-                    if (27 === $.getKeyCode(e)) {   // Esc键值为27
+                $.addListener(document, 'keyup', function (ev) {
+                    if (27 === $.getKeyCode(ev)) {   // Esc键值为27
                         that.hide();
                     }
+                    return false;
+                });
+                
+                $.addListener(document, 'wheel', function (ev) {
+                    if (that.box.style.display !== 'none' && !$.isOnElement(that.box, ev)) {
+                        that.hide();
+                    }
+                    return false;
                 });
 
+                $.addListener(elem, 'wheel', function (ev) {
+                    if (that.box.style.display !== 'none') {
+                        that.hide();
+                    }
+                    return false;
+                });
+                
                 var arr = $N(key);
                 for (i = 0; i < arr.length; i++) {
                     var chb = arr[i];
@@ -1212,7 +1208,7 @@
             var that = this,
                 opt = that.options;
 
-            if ($.isElement(that.box)) {
+            if ($.isElement(that.box) && that.box.style.display !== 'none') {
                 that.box.style.display = 'none';
                 that.box.show = false;
                 that.activity = false;
@@ -1230,6 +1226,10 @@
                     min: opt.minWidth,
                     max: opt.maxWidth
                 };
+
+            if (that.items.length <= 0 || that.box.style.display === 'none') {
+                return that;
+            }
 
             //先清除选项内容框高度
             that.con.style.height = 'auto';
@@ -1262,73 +1262,121 @@
             box.style.maxWidth = bs.max + 'px';
 
             var barH = $.getOffset(that.bar).height;
-            //再设置选项内容框高度
-            that.con.style.height = ($.getOffset(box).height - barH - 2) + 'px';
+            //that.con.style.height = ($.getOffset(box).height - barH - 2) + 'px';
 
             //行列布局时，当选项内容宽度超过预设的宽度时，动态调用列数，以使行列对齐
             if (opt.layout !== 'list' && $.isNumber(opt.columns) && opt.columns > 0) {
-                var i, bw, dw, rw, w = 0, cs, cw;
+                var i, w = 0, 
+                    cs = opt.columns, 
+                    bw = that.items[0].parentNode.offsetWidth, rw, 
+                    cw = parseFloat(100 / cs, 10).round(2),
+                    nw = cw;
+
+                //先以预设的列数显示
                 for (i = 0; i < that.items.length; i++) {
-                    if (!bw) {
-                        bw = that.items[i].parentNode.offsetWidth;
-                    }
+                    that.items[i].style.minWidth = cw + '%';
+                }
+                //获取实际的选项内容最大宽度
+                for (i = 0; i < that.items.length; i++) {
                     rw = that.items[i].offsetWidth;
                     if (rw > w) {
                         w = rw;
                     }
                 }
+                //重新动态设置列数
                 if (w > parseFloat(bw / opt.columns, 10).round(2)) {
-                    cs = parseInt(bw / w, 10);
-                    if (cs)
-                    cw = parseFloat(100 / (cs <= 0 ? 1 : cs), 10).round(2);
-                    for (i = 0; i < that.items.length; i++) {
-                        that.items[i].style.minWidth = cw + '%';
+                    cs = parseInt(bw / w, 10) || 1;
+                    cw = parseFloat(100 / cs, 10).round(2);
+                    if (cw !== nw) {
+                        for (i = 0; i < that.items.length; i++) {
+                            that.items[i].style.minWidth = cw + '%';
+                        }
                     }
                 }
             }
+            //先清除选项内容框高度
+            that.con.style.height = 'auto';
+            //再设置选项内容框高度
+            that.con.style.height = ($.getOffset(box).height - barH - 2) + 'px';
             
             return that;
         },
         position: function () {
             var that = this,
+                cfg = {
+                    topPriority: false,
+                    relativePosition: null,
+                },
                 opt = that.options,
                 bs = $.getBodySize(),
                 box = that.box,
                 con = that.con,
-                size = $.getOffset(box),
+                ds = $.getOffset(box),
                 elem = opt.select ? that.elem : that.text,
                 idx = $.getAttribute(elem, 'opt-idx').toInt(),
                 node = that.nodes[idx - 1],
-                offset = $.getOffset(elem),
-                //left = offset.left - 1,
-                left = offset.left,
-                top = offset.top + offset.height - 1;
+                es = $.getOffset(elem),
+                left = es.left,
+                top = es.top + es.height,
+                pos = 'bottom';
 
             if (opt.position === Config.Position.Right) {
-                left = offset.left + offset.width - size.width - 1;
+                left = es.left + es.width - ds.width - 1;
                 if (left <= 0) {
                     left = 0;
                 }
-            } else if (left + size.width > bs.width) {
-                left -= (left + size.width - bs.width);
-            }
-            if (top + size.height > bs.height) {
-                top -= (top + size.height) - bs.height;
-                if (top < 0) {
-                    top = 0;
-                }
+            } else if (left + ds.width > bs.width) {
+                left -= (left + ds.width - bs.width);
             }
             box.style.left = left + 'px';
+
+            //清除选项框高度
+            box.style.height = 'auto';
+            //先显示在目标控件的下方
             box.style.top = top + 'px';
 
-            if (top + size.height > bs.height) {
-                var h = bs.height - top - 2 - Config.BodyPadding;
-                if (opt.maxHeight && h > opt.maxHeight) {
-                    h = opt.maxHeight;
-                }
-                box.style.height = h + 'px';
-                con.style.height = (h - that.bar.offsetHeight) + 'px';
+            //再获取选项框尺寸位置
+            ds = $.getOffset(box), top = ds.top;
+            //如果选项框高度大于窗口高度，则限制选项框高度
+            if (ds.height > bs.height) {
+                ds.height = bs.height - 6;
+                box.style.height = ds.height + 'px';
             }
+
+            var offset = ds.top + ds.height - (bs.height + bs.scrollTop);
+            //如果选项框位置高度超过窗口高度，则显示在目标控件的上方
+            if (offset > 0) {
+                top = es.top - ds.height;
+                box.style.top = top + 'px';
+                pos = 'top';
+
+                //如果选项框位置窗口小于滚动高度，需要设置选项框位置和位置偏移
+                if (top < bs.scrollTop) {
+                    //保留4个像素的留白位置
+                    var whiteSpace = 4;
+
+                    if (cfg.topPriority) {
+                        //设置了顶部优先，则显示在目标控件的上方
+                        top = bs.scrollTop + whiteSpace;
+                    } else {
+                        //默认显示在目标控件下方，并向上偏移，偏移量即之前超出窗口高度的值
+                        top = es.top + es.height - offset - whiteSpace;
+                        pos = 'middle';
+
+                        if (top + ds.height >= bs.height) {
+                            var h = bs.height - 2 - Config.BodyPadding;
+                            if (opt.maxHeight && h > opt.maxHeight) {
+                                h = opt.maxHeight;
+                            }
+                            box.style.height = h + 'px';
+                            con.style.height = (h - (that.bar ? that.bar.offsetHeight : 0)) + 'px';
+                        }
+                    }
+                    box.style.top = top + 'px';
+                }
+            }
+            box.className = that.className + ' oui-ddl-' + pos;
+            
             if (node) {
                 $.scrollTo(node.label, con);
             }
