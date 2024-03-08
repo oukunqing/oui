@@ -290,6 +290,11 @@
                 }
                 return options;
             },
+            setRadius: function (elem, pos) {
+                $.removeClass(elem, 'oui-ddl-bottom,oui-ddl-top');
+                $.addClass(elem, 'oui-ddl-' + pos);
+                return this;
+            }
         };
 
     //先加载样式文件
@@ -1184,6 +1189,9 @@
             if (elem) {
                 show = !box.show;
             }
+            if (!show) {
+                return that.hide();
+            }
             if ($.isElement(box)) {
                 //先取消高度设置
                 box.style.height = 'auto';
@@ -1191,6 +1199,7 @@
                 box.style.display = show ? '' : 'none';
                 box.show = show;
                 $.setClass(opt.select ? that.elem : that.text, 'oui-ddl-txt-cur', show);
+
                 that.get();
                 //下拉列表位置停靠
                 that.size().position();
@@ -1213,6 +1222,7 @@
                 that.box.show = false;
                 that.activity = false;
                 $.removeClass(opt.select ? that.elem : that.text, 'oui-ddl-txt-cur');
+                $.removeClass(opt.select ? that.elem : that.text, 'oui-ddl-bottom,oui-ddl-top');
             }
             return that;
         },
@@ -1317,18 +1327,9 @@
                 node = that.nodes[idx - 1],
                 es = $.getOffset(elem),
                 left = es.left,
-                top = es.top + es.height,
-                pos = 'bottom';
-
-            if (opt.position === Config.Position.Right) {
-                left = es.left + es.width - ds.width - 1;
-                if (left <= 0) {
-                    left = 0;
-                }
-            } else if (left + ds.width > bs.width) {
-                left -= (left + ds.width - bs.width);
-            }
-            box.style.left = left + 'px';
+                top = es.top + es.height - 1,
+                pos = 'bottom',
+                dir = '';
 
             //清除选项框高度
             box.style.height = 'auto';
@@ -1346,7 +1347,7 @@
             var offset = ds.top + ds.height - (bs.height + bs.scrollTop);
             //如果选项框位置高度超过窗口高度，则显示在目标控件的上方
             if (offset > 0) {
-                top = es.top - ds.height;
+                top = es.top - ds.height + 1;
                 box.style.top = top + 'px';
                 pos = 'top';
 
@@ -1375,8 +1376,25 @@
                     box.style.top = top + 'px';
                 }
             }
-            box.className = that.className + ' oui-ddl-' + pos;
+
+            if (opt.position === Config.Position.Right) {
+                left = es.left + es.width - ds.width - 1;
+                if (left <= 0) {
+                    left = 0;
+                }
+                dir = box.offsetWidth > elem.offsetWidth + 4 ? 'right' : '';
+            } else {
+                if (left + ds.width > bs.width) {
+                    left -= (left + ds.width - bs.width);
+                }                
+                dir = box.offsetWidth > elem.offsetWidth + 4 ? 'left' : '';
+            }
+            box.style.left = left + 'px';
+
+            box.className = that.className + ' oui-ddl-panel-' + pos + (dir ? '-' + dir : '');
             
+            Factory.setRadius(elem, pos);
+
             if (node) {
                 $.scrollTo(node.label, con);
             }

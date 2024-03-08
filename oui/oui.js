@@ -3055,7 +3055,6 @@
         if ($.isDebug()) {
             $.console.log('formatMultiSeparate:', arr);
         }
-            $.console.log('formatMultiSeparate:', arr);
 
         var rc = arr.length;
         for (i = 0; i < rc; i++) {
@@ -3595,12 +3594,12 @@
 !function ($) {
     'use strict';
 
-    var rnothtmlwhite = (/[^\x20\t\r\n\f]+/g);
-    var isAttributeValue = function (value) {
-        return $.isString(value) || $.isNumber(value);
-    };
-
-    var win = function () { try { return window } catch (e) { return null } }(),
+    //空白字符，用于分割样式，增加 ,;| 分割符
+    var rnothtmlwhite = (/[^\x20\t\r\n\f,;\|]+/g),
+        isAttributeValue = function (value) {
+            return $.isString(value) || $.isNumber(value);
+        },
+        win = function () { try { return window } catch (e) { return null } }(),
         doc = function () { try { return document } catch (e) { return null } }(),
         docElem = function () { try { return document.documentElement } catch (e) { return null } }(),
         head = doc ? doc.getElementsByTagName('head')[0] : null,
@@ -4506,6 +4505,9 @@
             return tokens.join(' ');
         },
         getClass = function (elem) {
+            if (elem.tagName === 'OPTION') {
+                elem = elem.parentNode;
+            }
             return elem.getAttribute && elem.getAttribute('class') || '';
         },
         classesToArray = function (value) {
@@ -4540,27 +4542,32 @@
             if ($.isNullOrUndefined(elem)) {
                 return this;
             }
+            var elems = [];
             if (isArrayLike(elem)) {
-                elem = makeArray(elem);
+                elems = makeArray(elem);
             } else if (!$.isArray(elem)) {
-                elem = [elem];
+                elems = [elem];
             }
-            for (var i = 0, c = elem.length; i < c; i++) {
-                var classes = classesToArray(value), j = 0, curValue, cur, finalValue, css;
-                if (classes.length > 0) {
-                    curValue = getClass(elem[i]);
-                    cur = elem[i].nodeType === 1 && stripAndCollapse(curValue).space();
+            for (var i = 0, c = elems.length; i < c; i++) {
+                var classes = classesToArray(value), j = 0, curValue, cur, finalValue, css,
+                    obj = $.toElement(elems[i]);
+                if ($.isElement(obj) && classes.length > 0) {
+                    if (obj.tagName === 'OPTION') {
+                        obj = obj.parentNode;
+                    }
+                    curValue = getClass(elems[i]);
+                    cur = obj.nodeType === 1 && stripAndCollapse(curValue).space();
                     if (cur) {
                         while ((css = classes[j++])) {
                             if ('toggle' === action) {
-                                cur = setClassValue(cur, css, hasClass(elem[i], css) ? 'remove' : 'add');
+                                cur = setClassValue(cur, css, hasClass(obj, css) ? 'remove' : 'add');
                             } else {
                                 cur = setClassValue(cur, css, action);
                             }
                         }
                         finalValue = stripAndCollapse(cur);
                         if (curValue != finalValue) {
-                            elem[i].setAttribute('class', finalValue);
+                            obj.setAttribute('class', finalValue);
                         }
                     }
                 }
