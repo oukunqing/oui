@@ -1,12 +1,10 @@
 .oui-ddl {
 	outline: none;
 	min-width: 40px;
-	border-top-left-radius: 4px;
-	border-top-right-radius: 4px;
-	border-bottom-left-radius: 4px;
-	border-bottom-right-radius: 4px;
-	border-radius: 4px 4px 4px 4px;
+	box-sizing: border-box;
+	border-radius: 5px;
 }
+
 .oui-ddl:focus {
 	outline:none;
 	border-color: #66afe9;
@@ -15,15 +13,11 @@
 	-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);
 }
 
-.oui-ddl-edge {
-
-}
 .oui-ddl-txt {
 	border: solid 1px #ddd;
 	line-height: 28px;
 	cursor: default;
 	margin: 0;
-	/*border-right: none 0;*/
 	box-sizing: border-box;
 	background:#fff url('ddl_arrow_down.png?12') no-repeat right center;
 
@@ -35,20 +29,25 @@
 }
 .oui-ddl-txt-cur {
 	border-color: #66afe9;
-	border-top-left-radius: 4px;
-	border-top-right-radius: 4px;
-	border-bottom-left-radius: 4px;
-	border-bottom-right-radius: 4px;
-    box-shadow: 4px 4px 4px 4px rgba(102,175,233,.32);    
+	box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);
+	-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);
+}
+.oui-ddl-txt-cur-top,.oui-ddl-txt-cur-top:focus {
+	border-top-color: #eee;
+}
+.oui-ddl-txt-cur-bottom,.oui-ddl-txt-cur-bottom:focus {
+	border-bottom-color: #eee;
 }
 
 .oui-ddl-panel {
 	position:absolute;
-	z-index:999999;
+	z-index: 999999;
 	display:block;
 	overflow:hidden;
-	border:solid 1px #ccc;
-    box-shadow: 1px 1px 3px 0 rgba(100,100,100,0.32);
+	border:solid 1px #66afe9;
+    /*box-shadow: 1px 1px 3px 0 rgba(100,100,100,0.32);*/
+	box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);
+	-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);
 	box-sizing: border-box;
 	padding: 0;
 	margin: 0;
@@ -56,7 +55,7 @@
 	max-width:500px;
 	min-height: 30px;
 	background:#fff;
-	border-radius: 4px;
+	border-radius: 5px;
 	/*border-top-left-radius: 0px;
 	border-top-right-radius: 0px;*/
 	opacity: 1;
@@ -65,6 +64,7 @@
 .oui-ddl-bottom {
 	border-bottom-left-radius: 0px;
 	border-bottom-right-radius: 0px;
+	border-bottom-color: #fff;
 }
 
 .oui-ddl-top {
@@ -75,22 +75,31 @@
 .oui-ddl-panel-bottom {
 	border-top-left-radius: 0px;
 	border-top-right-radius: 0px;
+	margin-top: -1px;
 }
 .oui-ddl-panel-bottom-left {
 	border-top-left-radius: 0px;
+	border-top-right-radius: 5px;
+	margin-top: -1px;
 }
 .oui-ddl-panel-bottom-right {
+	border-top-left-radius: 5px;
 	border-top-right-radius: 0px;
+	margin-top: -1px;
 }
 .oui-ddl-panel-top {
 	border-bottom-left-radius: 0px;
 	border-bottom-right-radius: 0px;
-    box-shadow: 1px -1px 3px 0 rgba(100,100,100,0.32);
+	margin-top: 1px;
+	box-shadow: inset 1px 0 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);
+	-webkit-box-shadow: inset 1px 0 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);
 }
 .oui-ddl-panel-top-left {
 	border-bottom-left-radius: 0px;
+	border-bottom-right-radius: 5px;
 }
 .oui-ddl-panel-top-right {
+	border-bottom-left-radius: 5px;
 	border-bottom-right-radius: 0px;
 }
 
@@ -270,7 +279,7 @@ ul.oui-ddl-flow label.oui-ddl-cur:hover,ul.oui-ddl-grid label.oui-ddl-cur:hover 
 	margin: 0;
 	font-size: 14px;
 	font-family: Arial,宋体;
-  	border-radius: 4px;
+  	border-radius: 5px;
   	cursor: pointer;
 }
 .oui-ddl-panel .btn em {
@@ -289,7 +298,7 @@ ul.oui-ddl-flow label.oui-ddl-cur:hover,ul.oui-ddl-grid label.oui-ddl-cur:hover 
 .oui-ddl-panel .btn-group .btn-primary {
 	border: solid 1px #2e6da4;
 	background: #337ab7;
-	/*border-radius: 4px;*/
+	/*border-radius: 5px;*/
 	box-sizing: border-box;
 
 }
@@ -311,7 +320,7 @@ ul.oui-ddl-flow label.oui-ddl-cur:hover,ul.oui-ddl-grid label.oui-ddl-cur:hover 
 }
 .oui-ddl-panel .btn-group-block .btn-ok,.oui-ddl-panel .btn-group-block .btn-block {
 	width: 100%;
-	border-radius: 4px;
+	border-radius: 5px;
 }
 
 /* 以下代码参考引用 bootstrap3.3.7 */

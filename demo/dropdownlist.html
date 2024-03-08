@@ -4,11 +4,13 @@
 	<meta charset="utf-8">
 	<title>下拉菜单（多选）</title>
 	<style type="text/css">
+		
 		body {font-size: 14px;}
-		select {height:30px;height:32px;min-width:240px;border:solid 1px #ccc; border-radius:4px;}
-		input {outline:none; border-radius:4px;height:30px;min-width:240px;border:solid 1px #ccc;}
+		select {height:34px;min-width:240px;border:solid 1px #ccc; border-radius:5px;padding:0 5px;}
+		input {outline:none;padding:0 5px; border-radius:5px;height:30px;min-width:240px;border:solid 1px #ccc;}
 		table {}
 		table td {padding:0 10px 10px 0;}
+		
 	</style>
 	<script type="text/javascript" src="../oui/oui.js"></script>
 	<script type="text/javascript" src="../oui/dropdownlist/oui.dropdownlist.js"></script>
@@ -29,7 +31,7 @@
 </table>
 <br />
 <br />
-<div style="height:400px;"></div>
+<div style="height:500px;"></div>
 <table cellpadding="0" cellspacing="0">
 	<tr>
 		<td colspan="3">Grid布局 每行3列</td>
@@ -88,7 +90,7 @@
 	</td>
 	</tr>
 </table>
-<div style="height:400px;"></div>
+<div style="height:500px;"></div>
 </body>
 </html>
 <script type="text/javascript">
@@ -263,7 +265,7 @@ window.onload = function() {
 			element: id,
 			items: opts,
 			layout: 'grid',
-			boxWidth: i >= len - 3 ? 'follow' : '',
+			boxWidth: i >= len / 2 ? 'follow' : '',
 			//textWidth: 200,
 			//itemWidth: '48%',
 			//itemWidth: i > 5 ? 'auto' : 'cell',
@@ -305,8 +307,9 @@ window.onload = function() {
 			id: id,
 			element: id,
 			items: opts,
-			layout: 'list',
-			boxWidth: 'follow',
+			//layout: 'list',
+			layout: 'grid',
+			boxWidth: i >= len / 2 ? 'follow' : '',
 			itemBorder: true,
 	        //是否支持按钮快捷键（默认支持）
 	        shortcutKey: true,

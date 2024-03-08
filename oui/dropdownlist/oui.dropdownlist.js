@@ -236,7 +236,10 @@
                     for (var i = 0; i < Cache.ids.length; i++) {
                         var d = Factory.getList(Cache.ids[i].key);
                         if (d && !d.isClosed()) {
-                            d.size().position();
+                            //改变选项框尺寸和位置
+                            //d.size().position();
+                            //改为隐藏选项框（参考原生select显示规则）
+                            d.hide();
                         }
                     }
                 });
@@ -410,6 +413,8 @@
             columns: undefined,
             //停靠位置：left-左下，right-右下
             position: 'left',
+            //外边距，主要是设置上边距，比如设置为-1
+            margin: 0,
             //按钮位置：left-左，center-中，right-右
             buttonPosition: 'center',
             //当没有“全选/反选”按钮时是否显示“确定”按钮
@@ -584,7 +589,7 @@
             $.createElement('DIV', function (box) {
                 var offset = $.getOffset(opt.select ? that.elem : that.text),
                     ua = navigator.userAgent,
-                    edge = ua.indexOf('Edg/') > 0 || ua.indexOf('Edge') > 0,
+                    //edge = ua.indexOf('Edg/') > 0 || ua.indexOf('Edge') > 0,
                     bs = {
                         width: parseInt(opt.boxWidth === 'follow' ? offset.width : opt.boxWidth, 10),
                         min: opt.minWidth || (offset.width + 1),
@@ -599,7 +604,8 @@
                     bs.min = offset.width;
                 }
 
-                box.className = 'oui-ddl oui-ddl-panel' + (edge ? ' oui-ddl-edge' : '');
+                //box.className = 'oui-ddl oui-ddl-panel' + (edge ? ' oui-ddl-edge' : '');
+                box.className = 'oui-ddl oui-ddl-panel';
                 box.id = Config.IdPrefix + opt.id;
 
                 var btn = [],
@@ -809,9 +815,10 @@
                         input: chb,
                         multi: opt.multi,
                         callback: function (node) {
-                            var txt = node.text + (node.desc ? ' - ' + node.desc : '');
+                            var val = node.value,
+                                txt = node.text + (node.desc ? ' - ' + node.desc : '');
                             if ($.isFunction(opt.beforeChange)) {
-                                opt.beforeChange(txt, function() {
+                                opt.beforeChange(val, txt, function() {
                                     $.setAttribute(elem, 'opt-hover', 0);
                                     that.action(node, null, true);
                                 });
@@ -1221,7 +1228,7 @@
                 that.box.style.display = 'none';
                 that.box.show = false;
                 that.activity = false;
-                $.removeClass(opt.select ? that.elem : that.text, 'oui-ddl-txt-cur');
+                $.removeClass(opt.select ? that.elem : that.text, 'oui-ddl-txt-cur,oui-ddl-txt-cur-top,oui-ddl-txt-cur-bottom');
                 $.removeClass(opt.select ? that.elem : that.text, 'oui-ddl-bottom,oui-ddl-top');
             }
             return that;
@@ -1327,7 +1334,7 @@
                 node = that.nodes[idx - 1],
                 es = $.getOffset(elem),
                 left = es.left,
-                top = es.top + es.height - 1,
+                top = es.top + es.height + (opt.margin || 0),
                 pos = 'bottom',
                 dir = '';
 
@@ -1347,7 +1354,7 @@
             var offset = ds.top + ds.height - (bs.height + bs.scrollTop);
             //如果选项框位置高度超过窗口高度，则显示在目标控件的上方
             if (offset > 0) {
-                top = es.top - ds.height + 1;
+                top = es.top - ds.height;
                 box.style.top = top + 'px';
                 pos = 'top';
 
@@ -1378,7 +1385,7 @@
             }
 
             if (opt.position === Config.Position.Right) {
-                left = es.left + es.width - ds.width - 1;
+                left = es.left + es.width - ds.width;
                 if (left <= 0) {
                     left = 0;
                 }
@@ -1390,8 +1397,14 @@
                 dir = box.offsetWidth > elem.offsetWidth + 4 ? 'left' : '';
             }
             box.style.left = left + 'px';
+            
+            var className = that.className + ' oui-ddl-panel-' + pos;
+            if (dir) {
+                className += ' oui-ddl-panel-' + pos + '-' + dir;
+            }
+            box.className = className;
 
-            box.className = that.className + ' oui-ddl-panel-' + pos + (dir ? '-' + dir : '');
+            elem.className += ' oui-ddl-txt-cur-' + pos;
             
             Factory.setRadius(elem, pos);
 
