@@ -52,7 +52,7 @@ button {width:120px;height:30px;}
             </tr>
             <tr>
                 <td><label for="txtType">科目编号</label></td>
-                <td><input type="text" id="txtType" options="1,2,3" placeholder="可选项：1,2,3" data-type="int" data-show="0" /></td>
+                <td><input type="text" id="txtType" options="1,2,3" editable="0" placeholder="可选项：1,2,3" data-type="int" data-show="0" /></td>
             </tr>
             <tr>
                 <td><label for="txtScore">分数</label></td>
@@ -100,7 +100,7 @@ button {width:120px;height:30px;}
 				singleStep:false
 			},
             rules: {
-                Id: { dataType: 'int' },
+                Id: { dataType: 'int',  editable: true },
                 Number: { dataType: 'int' },
                 //Code: { minLength: 3, maxLength: 12 },
                     Mobile: { pattern:/^1([38][0-9]|4[57]|[59][0-3,5-9]|6[6]|7[0-3,5-8])\d{8}$/, messages: {valLength:'{0}长度为{1}位数字'} },

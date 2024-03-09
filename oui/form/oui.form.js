@@ -103,6 +103,8 @@
                     //是否严格模式（检测输入内容的类型）
                     strict: false,
                     md5: false,
+                    readonly: null,
+                    editable: null,
                     same: { id: '', msg: '' },
                     distinct: { id: '', msg: '' },
                     //检测字段内容是否已存在
@@ -245,9 +247,12 @@
                             if (!pass && arguments.length <= 2) { message = value; value = ''; }
                             return { pass: pass, value: value, message: message || '' };
                         },
-                        title = getTitle(field, '').replace(/\s/g, '');
+                        title = getTitle(field, '').replace(/\s/g, ''),
+                        required = field.required || $.getAttribute(element, 'required') === 'required',
+                        readonly = field.readonly || $.getAttribute(element, 'readonly') === 'readonly',
+                        editable = field.editable || ['1','true', 'editable'].indexOf($.getAttribute(element, 'editable')) > -1;
 
-                    if (field.required && !field.empty && '' === value) {   // 空值验证
+                    if (required && !field.empty && '' === value) {   // 空值验证
                         if (field.tag === 'SELECT' || op.isLegalName(field.attribute)) {
                             return result(false, (messages.select || messages.required || configs.messages.select).format(title));
                         } else {
@@ -256,8 +261,8 @@
                     }
 
                     if (field.dataType === 'string') {
-                        var pattern = field.pattern || op.valuePattern[field.type], validate = field.validate || configs.validate;
-                        var minLen = field.minLength || field.minLen,
+                        var pattern = field.pattern || op.valuePattern[field.type], validate = field.validate || configs.validate,
+                            minLen = field.minLength || field.minLen,
                             maxLen = field.maxLength || field.maxLen,
                             valLen = field.valLength || field.valLen,
                             optionValue = field.optionValue;
@@ -280,7 +285,7 @@
                         */
                         if ($.isFunction(validate)) {    // 外部验证函数（优先）
                             if (!validate(value, element)) { return result(false); }
-                        } else if (field.required && ('' === value || len <= 0)) {
+                        } else if (required && ('' === value || len <= 0)) {
                             return result(false, (messages.required || configs.messages.required).format(title));
                         } else if (len > 0) {
                             if ($.isInteger(valLen) && valLen > 0 && len !== valLen) {
@@ -298,7 +303,7 @@
                             }
                             optionValue = optionValue.length > 0 ? optionValue.split(/[,;\|]/) : [];
                             //验证输入内容是否在选项中
-                            if (optionValue.length > 0) {
+                            if ((!editable || readonly) && optionValue.length > 0) {
                                 for (var i = 0; i < optionValue.length; i++) {
                                     var ps = optionValue[i].split(/[:\|]/);
                                     if (ps[0] === value) {
@@ -323,9 +328,11 @@
                     } else {
                         // 验证数字输入，大小值范围限定，其中 type="hidden" 默认值至少为0
                         //数字
-                        var val = value.trim(), numType = '\u6570\u5b57', strict = field.strict || configs.strict;
+                        var val = value.trim(), numType = '\u6570\u5b57', 
+                            strict = field.strict || configs.strict;
+
                         //不是必填项的数字，如果没有填写，则取默认值或0
-                        if (value === '' && !field.required) {
+                        if (value === '' && !required) {
                             value = field.value || 0;
                             //var dataShow = $.getAttribute(element, 'data-show,data-auto', '1').toInt();
                             var dataShow = $.getAttribute(element, customAttrs.DATA_SHOW, '1').toInt();
@@ -365,7 +372,7 @@
                                 //重新赋值
                                 val = value.toString();
                                 break;
-                        }  
+                        } 
                         if (isNaN(value)) {
                             var dv = $.isNumeric(field.value) ? field.value :
                                 ($.isNumeric(configs.defaultValue) ? configs.defaultValuel : (element.type === 'hidden' ? 0 : ''));
@@ -411,9 +418,9 @@
                                 optionValue = $.getAttribute(element, customAttrs.OPPTION_VALUE, '');
                             }
                             optionValue = optionValue.length > 0 ? optionValue.split(/[,;\|]/) : [];
-                            if (optionValue.length > 0) {
+                            if ((!editable || readonly) && optionValue.length > 0) {
                                 if (val.length <= 0) {
-                                    return !field.required ? result(true, value) : result(false, (messages.required || configs.messages.required).format(title));
+                                    return !required ? result(true, value) : result(false, (messages.required || configs.messages.required).format(title));
                                 }
                                 for (var i = 0; i < optionValue.length; i++) {
                                     var pv = field.dataType === 'float' ? parseFloat(optionValue[i], 10) : parseInt(optionValue[i], 10);
@@ -574,6 +581,8 @@
                         md5: false,                 //是否MD5加密
                         encode: false,              //是否进行html标记编码
                         decode: false,              //是否进行html标记解码
+                        readonly: null,             //控件是否只读
+                        editable: null,             //控件是否可编辑（用于选项输入框）
                         //为加强数据安全，默认过滤HTML标记
                         filter: true,              //是否过滤html标记
                         minLength: '',              //字节最小长度
@@ -1623,12 +1632,26 @@
                 }
                 return this;
             },
+            hidePanel: function (div, elem, hide) {
+                div.style.display = $.isBoolean(hide, true) ? 'none' : '';
+                $.removeClass(div, 'input-opt-panel-box-top,input-opt-panel-box-bottom');
+                if (elem) {
+                    $.removeClass(elem, 'input-opt-elem-top,input-opt-elem-bottom');
+                }
+                return this;
+            },
             hideOptionPanel: function (curPanel) {
-                var arr = document.querySelectorAll('.input-option-panel-box');
-                for (var i = 0; i < arr.length; i++) {
+                var arr = document.querySelectorAll('.input-opt-panel-box'),
+                    elems = document.querySelectorAll('.input-opt-elem'),
+                    i;
+                for (i = 0; i < arr.length; i++) {
                     if ((!curPanel || arr[i] !== curPanel) && arr[i].style.display !== 'none') {
                         arr[i].style.display = 'none';
+                        $.removeClass(arr[i], 'input-opt-panel-box-top,input-opt-panel-box-bottom');
                     }
+                }
+                for (i = 0; i < elems.length; i++) {
+                    $.removeClass(elems[i], 'input-opt-elem-top,input-opt-elem-bottom');
                 }
                 return this;
             },
@@ -1711,7 +1734,7 @@
                 $.setAttribute($.input.showOptionValue(elem, item), 'opt-idx', num);
 
                 if (!isArrowKey) {
-                    div.style.display = 'none';
+                    $.input.hidePanel(div, elem);
                 }
                 $.trigger(elem, 'blur');
 
@@ -1725,25 +1748,30 @@
                     css.innerHTML = [
                         '<style style="text/css">',
                         '.oui-input-fmt{ime-mode:disabled;}',
-                        '.input-option-elem{outline:none;}',
-                        '.input-option-elem:focus {outline:none;border-color: #66afe9;box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);',
+                        '.input-opt-elem{outline:none;}',
+                        '.input-opt-elem:focus {outline:none;border-color: #66afe9;box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);',
                         ' -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);}',
-                        '.input-option-panel-box{position:absolute;border:solid 1px #ddd;background:#fff;border-radius:4px;opacity:1;',
-                        ' overflow:auto;box-shadow: 0 2px 3px 0 rgba(0,0,0,.32);}',
-                        '.input-option-ul{margin:0;padding:1px 0;}',
-                        '.input-option-ul i{font-style:normal;color:#ccc;display:inline-block;text-align:right;',
+                        '.input-opt-elem-top{border-top-left-radius:0;border-top-right-radius:0;}',
+                        '.input-opt-elem-bottom{border-bottom-left-radius:0;border-bottom-right-radius:0;}',
+                        '.input-opt-panel-box{position:absolute;border:solid 1px #66afe9;background:#fff;border-radius:5px;overflow:auto;opacity:1;',
+                        ' box-shadow:inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);margin:0;padding:0;box-sizing:border-box;',
+                        ' -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);}',
+                        '.input-opt-panel-box-top{border-bottom-left-radius:0;border-bottom-right-radius:0;margin-top:1px;}',
+                        '.input-opt-panel-box-bottom{border-top-left-radius:0;border-top-right-radius:0;margin-top:-1px;}',
+                        '.input-opt-ul{margin:0;padding:1px 0;}',
+                        '.input-opt-ul i{font-style:normal;color:#ccc;display:inline-block;text-align:right;',
                         ' border:none;margin:0 7px 0 0;padding:0;font-size:14px;}',
-                        '.input-option-ul li{margin:0 1px;list-style:none;line-height:29px;height:29px;overflow:hidden;font-size:14px;',
+                        '.input-opt-ul li{margin:0 1px;list-style:none;line-height:29px;height:29px;overflow:hidden;font-size:14px;',
                         '   border:none;cursor:default;}',
-                        '.input-option-ul li:last-child{border-bottom:none;}',
-                        '.input-option-ul li:hover,.input-option-ul li.cur:hover{background:#dfe8f6;color:#000;}',
-                        '.input-option-ul li.cur{background:#eee;color:#000;}',
-                        '.input-option-ul li:hover i,.input-option-ul li.cur:hover i{color:#f50;}',
-                        '.input-option-ul li.cur i{color:#f00;}',
-                        '.input-option-ul li a{margin:0;padding:0;font-size:14px;display:block;border:none;background:none;text-decoration:none;color:#000;cursor:default;}',
-                        '.input-option-ul li span{margin:0;padding:0;font-size:14px;border:none;margin:0;padding:0;}',
-                        '.input-option-ul li u{text-decoration:none;color:#999;font-size:14px;margin:03px;padding:0;border:0;background:none;}',
-                        '.input-option-ul li span.i-t{color:#999;margin:0 0 0 8px;padding:0;font-size:14px;border:none;background:none;}',
+                        '.input-opt-ul li:last-child{border-bottom:none;}',
+                        '.input-opt-ul li:hover,.input-opt-ul li.cur:hover{background:#dfe8f6;color:#000;}',
+                        '.input-opt-ul li.cur{background:#eee;color:#000;}',
+                        '.input-opt-ul li:hover i,.input-opt-ul li.cur:hover i{color:#f50;}',
+                        '.input-opt-ul li.cur i{color:#f00;}',
+                        '.input-opt-ul li a{margin:0;padding:0;font-size:14px;display:block;border:none;background:none;text-decoration:none;color:#000;cursor:default;}',
+                        '.input-opt-ul li span{margin:0;padding:0;font-size:14px;border:none;margin:0;padding:0;}',
+                        '.input-opt-ul li u{text-decoration:none;color:#999;font-size:14px;margin:03px;padding:0;border:0;background:none;}',
+                        '.input-opt-ul li span.i-t{color:#999;margin:0 0 0 8px;padding:0;font-size:14px;border:none;background:none;}',
                         '</style>'
                     ].join('');
                     document.body.appendChild(css);
@@ -1768,7 +1796,8 @@
             //action: 0 - hide, 1 - toggle, 2 - show
             setOption: function (elem, options, config, action) {
                 var cfg = $.extend({}, config),
-                    opt = $.input.buildOption(options);
+                    opt = $.input.buildOption(options),
+                    show = true, display = '';
 
                 if (!$.isNumber(action)) {
                     action = 1;
@@ -1780,11 +1809,19 @@
                     return null;
                 }
                 if (elem.optbox) {
-                    var display = !action ? 'none' : 2 === action ? '' : elem.optbox.style.display === 'none' ? '' : 'none';
-                    elem.optbox.style.display = display;
-                    $.setPanelPosition(elem, elem.optbox, cfg);
+                    show = !action ? 'none' : 2 === action ? true : elem.optbox.style.display === 'none';
                     $.input.setCurrentOption(elem, elem.optbox);
                     $.input.setTitle(elem.optbox);
+                    $.input.hidePanel(elem.optbox, elem, !show);
+                    if (!show) {
+                        return opt;
+                    }
+                    var pos = $.setPanelPosition(elem, elem.optbox, cfg);
+                    $.addClass(elem.optbox, 'input-opt-panel-box-' + pos.position);
+                    $.addClass(elem, 'input-opt-elem-' + pos.position);                    
+                    if (cfg.x) {
+                        elem.optbox.style.left = parseFloat(elem.optbox.style.left, 10) + cfg.x + 'px';
+                    }
                     return opt;
                 }
 
@@ -1796,12 +1833,12 @@
                     curIdx = 0,
                     n = len.toString().length,
                     elemVal = elem.value.trim(),
-                    html = [ '<ul class="input-option-ul">' ],
+                    html = [ '<ul class="input-opt-ul">' ],
                     isSelect = elem.tagName === 'SELECT';
 
                 div.target = elem.tagName;
-                div.className = 'input-option-panel-box';
-                div.id = 'input-option-panel-' + (elem.id || new Date().getTime());
+                div.className = 'input-opt-panel-box';
+                div.id = 'input-opt-panel-' + (elem.id || new Date().getTime());
 
                 div.style.cssText = [
                     'box-sizing:border-box;',
@@ -1828,7 +1865,7 @@
                             curIdx = idx;
                         }
                         html.push([
-                            '<li class="input-option-panel-item', cur ? ' cur' : '', '"',
+                            '<li class="input-opt-panel-item', cur ? ' cur' : '', '"',
                             ' style="padding:', (cfg.number ? '0 5px 0 0' : '0 5px'), ';"',
                             ' opt-idx="', (i + 1), '"',
                             ' data-value="', val.toString().replace(/["]/g, '&quot;'), '"',
@@ -1855,7 +1892,14 @@
                 } else {
                     document.body.appendChild((elem.optbox = div));
                 }
-                $.setPanelPosition(elem, elem.optbox, cfg);
+                var pos = $.setPanelPosition(elem, elem.optbox, cfg);
+                if (cfg.x) {
+                    elem.optbox.style.left = parseInt(elem.optbox.style.left, 10) + cfg.x + 'px';
+                }
+                if (action) {
+                    $.addClass(elem.optbox, 'input-opt-panel-box-' + pos.position);
+                    $.addClass(elem, 'input-opt-elem-' + pos.position);
+                }
                 $.input.setCurrentOption(elem, elem.optbox);
                 $.input.setTitle(elem.optbox);
 
@@ -1865,8 +1909,8 @@
                 if (!window.inputOptionDocEventListener) {
                     window.inputOptionDocEventListener = 1;
                     $.addListener(document, 'mousedown', function(ev) {
-                        if ((ev.target.tagName === 'LI' && ev.target.className.indexOf('input-option-panel-item') > -1) || 
-                            (ev.target.tagName === 'SELECT' && ev.target.className.indexOf('input-option-panel-select') > -1)) {
+                        if ((ev.target.tagName === 'LI' && ev.target.className.indexOf('input-opt-panel-item') > -1) || 
+                            (ev.target.tagName === 'SELECT' && ev.target.className.indexOf('input-opt-panel-select') > -1)) {
                             return false;
                         }
                         $.input.hideOptionPanel();
@@ -1894,14 +1938,14 @@
                 
                 $.addListener(document, 'wheel', function (ev) {
                     if (div.style.display !== 'none' && !$.isOnElement(elem.optbox, ev)) {
-                        elem.optbox.style.display = 'none';
+                        $.input.hidePanel(elem.optbox, elem);
                     }
                     return false;
                 });
 
                 $.addListener(elem, 'wheel', function (ev) {
                     if (div.style.display !== 'none') {
-                        elem.optbox.style.display = 'none';
+                        $.input.hidePanel(elem.optbox, elem);
                     }
                     return false;
                 });
@@ -1968,7 +2012,9 @@
                         width: null,            //选项框宽度
                         minWidth: 120,          //最小宽度
                         maxWidth: null,         //最大宽度
-                        zindex: 0               //选项框层级
+                        zindex: 0,              //选项框层级
+                        x: null,
+                        y: null
                     }, par.config), i, j;
 
                 $.extend(cfg, {
@@ -1978,6 +2024,8 @@
 
                 cfg.number = $.getParam(cfg, 'showNumber,number', null);
                 cfg.display = $.getParam(cfg, 'showValue,display,show', null);
+                cfg.x = $.getParam(cfg, 'left,x', 0);
+                cfg.y = $.getParam(cfg, 'top,y', 0);
 
                 //获取默认参数值，如果没有明确配置参数值，则从element属性中获取
                 var ks = [['append'], ['editable'],['relative'],['number']];
@@ -2209,7 +2257,7 @@
 
                     if (isOpt || isBool) {
                         opt.options = $.input.setOptionValues(opt.options);
-                        elem.className = elem.className.addClass('input-option-elem');
+                        elem.className = elem.className.addClass('input-opt-elem');
 
                         function _showOption(ev, elem, opt, action) {
                             $.input.hideOptionPanel(elem.optbox);
@@ -2242,7 +2290,7 @@
                                 elem.value = opt.value;
                             }
                         } else {
-                            elem.className = elem.className.addClass('input-option-panel-select');
+                            elem.className = elem.className.addClass('input-opt-panel-select');
                             elem.options.length = 0;
                             if (opt.options.length > 0) {
                                 var p = opt.options[0];

@@ -4320,10 +4320,10 @@
                 }
             }
             return { 
-                top: parseInt(panel.style.top, 10), 
-                left: parseInt(panel.style.left, 10), 
-                width: parseInt('0' + panel.style.width, 10) || panel.offsetWidth,
-                height: parseInt('0' + panel.style.height, 10) || panel.offsetHeight,
+                top: parseFloat(panel.style.top, 10).round(2), 
+                left: parseFloat(panel.style.left, 10).round(2), 
+                width: (parseFloat('0' + panel.style.width, 10) || panel.offsetWidth).round(2),
+                height: (parseFloat('0' + panel.style.height, 10) || panel.offsetHeight).round(2),
                 position: pos
             }
             //return this;

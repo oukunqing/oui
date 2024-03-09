@@ -1,23 +1,34 @@
-.oui-ddl {
+.oui-ddl,.oui-ddl-elem {
 	outline: none;
 	min-width: 40px;
 	box-sizing: border-box;
-	border-radius: 5px;
+	/*border-radius: 5px;*/
 }
 
-.oui-ddl:focus {
+.oui-ddl:focus,.oui-ddl-elem:focus {
 	outline:none;
 	border-color: #66afe9;
-
 	box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);
 	-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);
+}
+
+.oui-ddl-cur {
+	border-color: #66afe9;
+	box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);
+	-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);
+}
+.oui-ddl-cur-top,.oui-ddl-cur-top:focus {
+	border-top-color: #eee;
+}
+.oui-ddl-cur-bottom,.oui-ddl-cur-bottom:focus {
+	border-bottom-color: #eee;
 }
 
 .oui-ddl-txt {
 	border: solid 1px #ddd;
 	line-height: 28px;
-	cursor: default;
 	margin: 0;
+	cursor: default;
 	box-sizing: border-box;
 	background:#fff url('ddl_arrow_down.png?12') no-repeat right center;
 
@@ -26,17 +37,6 @@
     user-select: none;
     -ms-user-select: none;
     outline: none;
-}
-.oui-ddl-txt-cur {
-	border-color: #66afe9;
-	box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);
-	-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);
-}
-.oui-ddl-txt-cur-top,.oui-ddl-txt-cur-top:focus {
-	border-top-color: #eee;
-}
-.oui-ddl-txt-cur-bottom,.oui-ddl-txt-cur-bottom:focus {
-	border-bottom-color: #eee;
 }
 
 .oui-ddl-panel {
@@ -105,7 +105,7 @@
 
 li.oui-ddl-item {
 	display: block;
-	margin: 1px 1px 0;
+	margin: 0 0 0 1px;
 	padding: 0;
 	overflow: hidden;
 	height: 29px;
@@ -159,7 +159,7 @@ label.oui-ddl-label u{
 	text-decoration: none;
 	color: #999;
 	font-size: 14px;
-	margin: 0 3px;
+	margin: 0 4px;
 	padding: 0;
 	border: 0;
 	background: none;
@@ -182,11 +182,11 @@ label.oui-ddl-label-border {
     margin: 0 0 5px 0;
     line-height: 27px;
 }
-label.oui-ddl-cur {
+label.oui-ddl-item-cur {
 	background: #eee;
 	color: #000;
 }
-label.oui-ddl-label:hover,label.oui-ddl-cur:hover,label.oui-ddl-hover {
+label.oui-ddl-label:hover,label.oui-ddl-item-cur:hover,label.oui-ddl-hover {
 	background: #d6e3f3;
 	color: #000;
 }
@@ -204,28 +204,28 @@ label.oui-ddl-label-border input.oui-ddl-chb {
 }
 ul.oui-ddl-box {
 	display: block;
-	margin: 0 0 0 0;
-	padding: 0 0 1px 0;
+	margin: 0;
+	padding: 0;
 	overflow: auto;
 	clear: both;
 	border: none;
 	box-sizing: border-box;
 }
 ul.oui-ddl-flow,ul.oui-ddl-grid {
-	padding: 4px 3px;
+	padding: 4px 3px 3px;
 }
 ul.oui-ddl-flow li.oui-ddl-item, ul.oui-ddl-grid li.oui-ddl-item {
 	float:left;
 	border: none 0;
-	height: 35px;
+	height: 34px;
 	margin: 0;
 	padding: 0;
 }
 ul.oui-ddl-flow label.oui-ddl-label,ul.oui-ddl-grid label.oui-ddl-label {
 	padding: 0 5px;
-	margin: 3px 3px 2px 3px;
+	margin: 2px 3px 2px 2px;
 }
-ul.oui-ddl-flow label.oui-ddl-cur,ul.oui-ddl-grid label.oui-ddl-cur {
+ul.oui-ddl-flow label.oui-ddl-item-cur,ul.oui-ddl-grid label.oui-ddl-item-cur {
 	/*color: #f00;*/
 	background: #eee;
 }
@@ -235,7 +235,7 @@ ul.oui-ddl-flow label.oui-ddl-hover,ul.oui-ddl-grid label.oui-ddl-hover {
 	color: #000;
 }
 
-ul.oui-ddl-flow label.oui-ddl-cur:hover,ul.oui-ddl-grid label.oui-ddl-cur:hover {
+ul.oui-ddl-flow label.oui-ddl-item-cur:hover,ul.oui-ddl-grid label.oui-ddl-item-cur:hover {
 	background: #d6e3f3;
 	color: #000;
 }
@@ -373,4 +373,57 @@ ul.oui-ddl-flow label.oui-ddl-cur:hover,ul.oui-ddl-grid label.oui-ddl-cur:hover 
 .oui-ddl-panel .btn-group > .btn-group:last-child:not(:first-child) > .btn:first-child {
   	border-top-left-radius: 0;
   	border-bottom-left-radius: 0;
+}
+
+
+.oui-ddl-edit {
+	width: 100%;
+	display: block;
+	overflow: hidden;
+	margin: 0;
+	padding: 0;
+}
+.oui-ddl-edit .oui-ddl-form {
+	border-top: solid 1px #f1f1f1;
+	margin: 0 1px;
+	padding: 5px 4px ;
+	display: block;
+	overflow: hidden;
+}
+
+.oui-ddl-edit .oui-ddl-val {
+	float: left;
+	min-width: 30px;
+
+	height: 30px;
+	margin: 0 -1px 0 0;
+	padding: 0 5px;
+	box-sizing: border-box;
+	border: solid 1px #ccc;
+	border-radius: 5px;
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
+
+}
+.oui-ddl-edit .oui-ddl-val-err {
+	border-color: #f90;
+	color: #f00;
+}
+.oui-ddl-edit .oui-ddl-val:focus {
+	outline:none;
+	color: #000;
+	border-color: #66afe9;
+	box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);
+	-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);
+}
+.oui-ddl-edit .btn {
+	outline:none;
+	min-width: 50px;
+	max-width: 100px;
+	height: 30px;
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
 }

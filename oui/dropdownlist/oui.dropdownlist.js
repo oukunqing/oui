@@ -165,11 +165,21 @@
 
                 return opt;
             },
-            buildList: function (options) {
+            buildList: function (id, options, single) {
+                if ($.isObject(id) && $.isUndefined(options)) {
+                    options = id;
+                    id = null;
+                } else if ($.isString(id, true)) {
+                    options = $.extend({}, options, {id: id});
+                }
                 var opt = $.extend({
                     id: '',
                     element: ''
                 }, options), cache, ddl;
+
+                if (single) {
+                    opt.single = true;
+                }
 
                 opt.id = opt.id || opt.element.id;
 
@@ -201,7 +211,7 @@
                 if ($.isNumber(size)) {
                     return (size < 0 ? 0 : size) + 'px';
                 } else if ($.isString(size)) {
-                    return size.endWith('%') ? size : parseInt('0' + size, 10) + 'px';
+                    return size.endWith('%') ? size : parseFloat('0' + size, 10).round(2) + 'px';
                 }
                 return '0';
             },
@@ -297,6 +307,14 @@
                 $.removeClass(elem, 'oui-ddl-bottom,oui-ddl-top');
                 $.addClass(elem, 'oui-ddl-' + pos);
                 return this;
+            },
+            isInList: function (nodes, val) {
+                for (var i = 0; i < nodes.length; i++) {
+                    if (nodes[i].value === val || nodes[i].value.toString() === val.toString()) {
+                        return true;
+                    }
+                }
+                return false;
             }
         };
 
@@ -343,7 +361,7 @@
         },
         set: function (checked, clickEvent) {
             var that = this;
-            $.setClass(that.label, 'oui-ddl-cur', checked);
+            $.setClass(that.label, 'oui-ddl-item-cur', checked);
             that.checked = checked;
             if (that.input.type === 'checkbox') {
                 //复选框 点击事件 负负得正
@@ -413,8 +431,10 @@
             columns: undefined,
             //停靠位置：left-左下，right-右下
             position: 'left',
-            //外边距，主要是设置上边距，比如设置为-1
-            margin: 0,
+            //水平偏移量
+            x: undefined,
+            //垂直偏移量
+            y: undefined,
             //按钮位置：left-左，center-中，right-右
             buttonPosition: 'center',
             //当没有“全选/反选”按钮时是否显示“确定”按钮
@@ -433,8 +453,6 @@
             shortcutNum: false,
             //非列表布局时，是否显示选项边框
             border: false,
-            //是否允许扩展选项（可以自行输入不存在的选项值）
-            editable: false,
             //是否多选，默认多选
             multi: true,
             //多选项分隔符号
@@ -457,7 +475,10 @@
             //初始化时是否回调，默认不回调
             initial: undefined,
             //Function:选项切换时触发
-            beforeChange: undefined
+            beforeChange: undefined,
+            //是否允许扩展选项（可以自行输入不存在的选项值）
+            editable: false,
+            config: {}
         }, options));
 
         opt.maxHeight = options.maxHeight || (opt.layout === 'grid' ? Config.BoxGridMaxHeight : Config.BoxMaxHeight);
@@ -472,6 +493,22 @@
         opt.value = $.getParam(opt, 'selectedValue,selectedvalue,value');
         opt.index = $.getParam(opt, 'selectedIndex,selectedindex,index', 0);
         opt.items = $.extend([], opt.items, opt.options);
+        opt.x = $.getParam(opt, 'left,x', 0);
+        opt.y = $.getParam(opt, 'margin,top,y', 0);
+
+        if (opt.editable) {
+            opt.config = $.extend({
+                maxLength: null,
+                placeholder: '选项不存在？请输入：',
+                dataType: null,
+                button: '确定',
+                //是否保留输入框内容
+                keep: false
+            }, options.config);
+
+            opt.config.maxLength = $.getParam(opt.config, 'maxLength,maxlength', 64);
+            opt.config.dataType = $.getParam(opt.config, 'dataType,datatype', 'string');
+        }
 
         this.id = opt.id;
         this.options = opt;
@@ -527,13 +564,12 @@
                         elem.style.width = Factory.getStyleSize(opt.textWidth || offset.width);
                     }
                 }
-                elem.className = elem.className.addClass('oui-ddl');
+                elem.className = elem.className.addClass('oui-ddl oui-ddl-elem');
                 opt.title = opt.title || (that.elem.options.length > 0 ? that.elem.options[0].text : '') || texts[0];
             } else {
                 var rid = opt.element.id || '';
 
                 that.text = opt.element;
-                that.text.className = that.text.className.addClass('oui-ddl oui-ddl-txt').addClass(opt.className);
                 $.setAttribute(that.text, 'readonly', 'readonly');
                 that.text.style.cssText = (that.text.style.cssText || '') + [
                     'background-color:#fff;padding: 0 20px 0 9px;',
@@ -541,7 +577,7 @@
                     opt.textWidth === 'auto' ? '' : 'width:' + Factory.getStyleSize(opt.textWidth || offset.width) + ';',
                 ].join('');
                 var ddl = document.createElement('SELECT');
-                ddl.className = 'oui-ddl';
+                ddl.className = that.text.className.addClass('oui-ddl oui-ddl-elem');
                 if (opt.textWidth !== 'auto') {
                     ddl.style.width = Factory.getStyleSize(opt.textWidth || offset.width);
                 }
@@ -559,7 +595,9 @@
                     that.elem.style.display = 'none';
                     elem = that.text;
                 }                
-                opt.title = opt.title || that.text.value || texts[0];
+                opt.title = opt.title || that.text.value || texts[0];                
+                
+                that.text.className = that.text.className.addClass('oui-ddl oui-ddl-txt').addClass(opt.className);
             }
 
             if (opt.select) {
@@ -591,7 +629,7 @@
                     ua = navigator.userAgent,
                     //edge = ua.indexOf('Edg/') > 0 || ua.indexOf('Edge') > 0,
                     bs = {
-                        width: parseInt(opt.boxWidth === 'follow' ? offset.width : opt.boxWidth, 10),
+                        width: parseFloat(opt.boxWidth === 'follow' ? offset.width : opt.boxWidth, 10).round(2),
                         min: opt.minWidth || (offset.width + 1),
                         max: opt.maxWidth
                     };
@@ -618,7 +656,8 @@
                     texts = [
                         //'取消', '全选', '反选', opt.restore ? '还原' : '默认', '确定'
                         '\u53d6\u6d88', '\u5168\u9009', '\u53cd\u9009', opt.restore ? '\u8fd8\u539f' : '\u9ed8\u8ba4', '\u786e\u5b9a'
-                    ];
+                    ],
+                    key = Config.ItemPrefix + that.id;
 
                 if (opt.callbackLevel > 0 && btnLimit === 0) {
                     btnLimit = 1;
@@ -627,6 +666,20 @@
                 $.setAttribute(elem, 'opt-id', box.id);
                 $.setAttribute(elem, 'opt-len', len);
                 $.setAttribute(elem, 'opt-idx', 0);
+
+                if (!opt.multi && opt.editable) {
+                    btn.push([
+                        '<div class="oui-ddl-edit">',
+                        '<div class="oui-ddl-form">',
+                        '<input type="text" class="oui-ddl-val oui-ddl-new"',
+                        ' placeholder="', opt.config.placeholder, '" id="', key + '_val"',
+                        ' maxlength="', opt.config.maxLength, '" data-type="', opt.config.dataType, '"',
+                        ' />',
+                        '<button class="btn btn-default btn-sm oui-ddl-btn oui-ddl-new">', opt.config.button, '</button>',
+                        '</div>',
+                        '</div>'
+                    ].join(''));
+                }
 
                 if (opt.multi) {
                     if ((len > 5 || (opt.layout !== Config.Layout.List && len > 3)) && (opt.button || opt.callbackLevel > 0)) {
@@ -678,7 +731,7 @@
 
                 var html = [
                     '<ul class="oui-ddl-box oui-ddl-', opt.layout, '">'
-                ], i, n = len.toString().length, key = Config.ItemPrefix + that.id;
+                ], i, n = len.toString().length;
 
                 var columns = opt.columns || 0,
                     conWidth = Factory.getItemConWidth(opt.items, opt.itemWidth, columns, opt.choose),
@@ -706,13 +759,20 @@
                 }
                 var align = opt.textAlign ? 'text-align:' + opt.textAlign + ';' : '';
                 for (i = 0; i < len; i++) {
-                    var dr = opt.items[i];
+                    var dr = opt.items[i], n;
                     if (dr === 'sep' || dr.sep || dr.type === 'sep') {
                         html.push(['<li class="oui-ddl-item oui-ddl-sep"></li>'].join(''));
                     } else if (dr.head) {
                         html.push(['<li class="oui-ddl-item oui-ddl-head">', dr.head, '</li>'].join(''));
                     } else {
-                        if ($.isString(dr, true) || $.isNumber(dr)) {
+                        if ($.isString(dr, true)) {
+                            if (dr.indexOf(':') > 0) {
+                                n = dr.indexOf(':');
+                                dr = {val: dr.substr(0, n), txt: dr.substr(n + 1)};
+                            } else {
+                                dr = {val: dr, txt: dr};
+                            }
+                        } else if ($.isNumber(dr)) {
                             dr = {val: dr, txt: dr};
                         } else if ($.isArray(dr)) {
                             dr = {val: dr[0], txt: dr[1] || dr[0]}
@@ -832,16 +892,17 @@
                 }
 
                 that.items = document.querySelectorAll('#' + Config.IdPrefix + opt.id + ' li');
-                that.btns = document.querySelectorAll('#' + Config.IdPrefix + opt.id + ' .oui-ddl-oper .oui-ddl-btn');
+                that.buttons = document.querySelectorAll('#' + Config.IdPrefix + opt.id + ' .oui-ddl-oper .oui-ddl-btn');
+                that.texts = document.querySelectorAll('#' + Config.IdPrefix + opt.id + ' .oui-ddl-edit .oui-ddl-new');
 
-                for (i = 0; i < that.btns.length; i++) {
+                for (i = 0; i < that.buttons.length; i++) {
                     if (opt.shortcutKey) {
                         if (opt.shortcutNum) {
-                            that.btns[i].innerHTML += '<em>(<u>' + (i + 1) + '</u>)</em>';
+                            that.buttons[i].innerHTML += '<em>(<u>' + (i + 1) + '</u>)</em>';
                         }
-                        that.btns[i].title += '快捷键: shift + ' + (i + 1);
+                        that.buttons[i].title += '快捷键: shift + ' + (i + 1);
                     }
-                    $.addListener(that.btns[i], 'click', function(ev) {
+                    $.addListener(that.buttons[i], 'click', function(ev) {
                         elem.focus();
                         var ac = $.getAttribute(this, 'ac');
                         if (ac === 'no') {
@@ -900,15 +961,55 @@
                         if (i < 0) {
                             i = minList.indexOf(kc);
                         }
-                        $.trigger(that.btns[i], 'click');
+                        $.trigger(that.buttons[i], 'click');
                     } else if (kc >= 48 && kc % 48 < 10) {
                         that.select(kc % 48, kc, true, that.con);
                     }
                     return false;
                 });
 
+                if (that.texts.length > 0) {
+                    function _inputNewVal() {
+                        $.removeClass(that.texts[0], 'oui-ddl-val-err');
+                        
+                        var val = that.texts[0].value.trim(),
+                            type = $.getAttribute(that.texts[0], 'data-type'),
+                            num = false;
+                        if (val === '') {
+                            that.elem.focus();
+                            return false;
+                        }
+                        switch(type) {
+                        case 'int': case 'long': num = true; val = parseInt(val, 10); break;
+                        case 'float': case 'double': num = true; val = parseFloat(val, 10); break;
+                        }
+                        if (num && isNaN(val)) {
+                            $.console.log('oui-ddl-edit:', that.id, type, ', input value format error');
+                            $.addClass(that.texts[0], 'oui-ddl-val-err');
+                            return false;
+                        }
+                        if (!opt.config.keep) {
+                            that.texts[0].value = '';
+                        }
+                        that.set(val);
+                        that.callback(opt.callbackLevel);
+                    }
+                    $.addListener(that.texts[0], 'keyup', function(ev) {
+                        if (ev.keyCode === 13) {
+                            _inputNewVal();
+                        }
+                    });
+                    $.addListener(that.texts[1], 'click', function(ev) {
+                        _inputNewVal();
+                    });
+                    $.addHitListener(elem, 'keyup', 73, function() {
+                        that.texts[0].focus();
+                    });
+                }
+
                 Object.defineProperty(elem, 'val', {
-                    /*value: 'hello',
+                    /*
+                    value: 'hello',
                     writable: true,
                     configurable: true,
                     */
@@ -918,6 +1019,7 @@
                     set: function (val) {
                         $.console.log('set [property]', elem.id, val, typeof val);
                         if (val !== undefined) {
+                            elem.inputValue = val;
                             that.set(val, true);
                         }
                     }
@@ -1032,6 +1134,7 @@
                 opt = that.options,
                 nodes = that.nodes,
                 elem = that.elem,
+                cur = $.getAttribute(elem, 'opt-idx').toInt() - 1,
                 idx = 0;
 
             if (ac && opt.maxLimit && that.list(true).length >= opt.maxLimit) {
@@ -1055,6 +1158,19 @@
             } else {
                 ac = $.isBoolean(ac, true);
                 dc = $.isBoolean(dc, false);
+
+                if (!Factory.isInList(nodes, val)) {
+                    if (cur >= 0 && nodes[cur]) {
+                        nodes[cur].set(false, false);
+                    }
+                    $.setAttribute(elem, 'opt-idx', 0);
+                    if (opt.editable) {
+                        elem.inputValue = val;
+                        elem.focus();
+                        return that.callback(opt.callbackLevel).hide();
+                    }
+                    return that.get();                    
+                }
 
                 var vals = !$.isArray(val) ? val.toString().split(/[,\|]/) : val.join(',').split(',');
                 if (opt.multi) {
@@ -1128,19 +1244,28 @@
                 con = '';
 
             for (var i = 0; i < nodes.length; i++) {
-                var n = nodes[i];
+                var n = nodes[i], desc;
                 if (n.checked) {
                     val = n.value.toString().trim();
-                    if (val) {
+                    txt = n.text.toString().trim();
+                    desc = single && n.desc && n.text !== n.desc ? ' - ' + n.desc : '';
+                    if (val !== '') {
                         vals.push(val);
                     }
-                    txts.push(n.text.toString().trim() + (single && n.desc && n.text !== n.desc ? ' - ' + n.desc : ''));
+                    if (single && opt.display && val !== txt) {
+                        txt = val + ' - ' + txt;
+                    }
+                    txts.push(txt + desc);
                     con = n.code.toString().trim();
                     if (con) {
                         cons.push(con);
                     }
                     c++;
                 }
+            }
+            if (vals.length <= 0 && !$.isUndefinedOrNull(that.elem.inputValue)) {
+                vals.push(that.elem.inputValue);
+                txts.push(that.elem.inputValue);
             }
             txt = txts.join(opt.symbol || ',') || opt.title || '';
             val = vals.join(',');
@@ -1205,7 +1330,7 @@
                 //再显示下拉列表
                 box.style.display = show ? '' : 'none';
                 box.show = show;
-                $.setClass(opt.select ? that.elem : that.text, 'oui-ddl-txt-cur', show);
+                $.setClass(opt.select ? that.elem : that.text, 'oui-ddl-cur', show);
 
                 that.get();
                 //下拉列表位置停靠
@@ -1228,7 +1353,7 @@
                 that.box.style.display = 'none';
                 that.box.show = false;
                 that.activity = false;
-                $.removeClass(opt.select ? that.elem : that.text, 'oui-ddl-txt-cur,oui-ddl-txt-cur-top,oui-ddl-txt-cur-bottom');
+                $.removeClass(opt.select ? that.elem : that.text, 'oui-ddl-cur,oui-ddl-cur-top,oui-ddl-cur-bottom');
                 $.removeClass(opt.select ? that.elem : that.text, 'oui-ddl-bottom,oui-ddl-top');
             }
             return that;
@@ -1242,7 +1367,7 @@
                     width: opt.boxWidth,
                     min: opt.minWidth,
                     max: opt.maxWidth
-                };
+                }, i;
 
             if (that.items.length <= 0 || that.box.style.display === 'none') {
                 return that;
@@ -1260,7 +1385,7 @@
                 if (bs.width > bs.max) {
                     bs.max = bs.width;
                 }
-            } else if (opt.boxWidth === 'follow') {
+            } else if (opt.boxWidth === 'follow' || (!opt.boxWidth && !opt.multi)) {
                 bs.width = offset.width;
                 if (bs.width > bs.max) {
                     bs.max = bs.width;
@@ -1270,7 +1395,7 @@
                 }
             }
 
-            if (that.btns.length >= 5 && opt.shortcutKey) {
+            if (that.buttons.length >= 5 && opt.shortcutKey) {
                 Factory.getSize(opt, bs);
             }
 
@@ -1278,8 +1403,21 @@
             box.style.minWidth = bs.min + 'px';
             box.style.maxWidth = bs.max + 'px';
 
+            $.console.log(that.id, bs.width, bs.max);
+
+            //设置输入框宽度
+            if (opt.editable && that.texts.length > 0) {
+                var c = that.texts.length,
+                    fw = (bs.width || bs.max) - 10 - that.texts[c - 1].offsetWidth,
+                    tw = parseFloat(fw / (c - 1), 10).round(2) - 1;
+
+                for (i = 0; i < c - 1; i++) {
+                    that.texts[i].style.width = tw + 'px';
+                    that.texts[i].style.display = '';
+                }
+            }
+
             var barH = $.getOffset(that.bar).height;
-            //that.con.style.height = ($.getOffset(box).height - barH - 2) + 'px';
 
             //行列布局时，当选项内容宽度超过预设的宽度时，动态调用列数，以使行列对齐
             if (opt.layout !== 'list' && $.isNumber(opt.columns) && opt.columns > 0) {
@@ -1334,7 +1472,7 @@
                 node = that.nodes[idx - 1],
                 es = $.getOffset(elem),
                 left = es.left,
-                top = es.top + es.height + (opt.margin || 0),
+                top = es.top + es.height + (opt.y || 0),
                 pos = 'bottom',
                 dir = '';
 
@@ -1396,18 +1534,17 @@
                 }                
                 dir = box.offsetWidth > elem.offsetWidth + 4 ? 'left' : '';
             }
-            box.style.left = left + 'px';
+            box.style.left = (left + opt.x) + 'px';
             
+            Factory.setRadius(elem, pos);
+            elem.className += ' oui-ddl-cur-' + pos;
+
             var className = that.className + ' oui-ddl-panel-' + pos;
             if (dir) {
                 className += ' oui-ddl-panel-' + pos + '-' + dir;
             }
             box.className = className;
-
-            elem.className += ' oui-ddl-txt-cur-' + pos;
             
-            Factory.setRadius(elem, pos);
-
             if (node) {
                 $.scrollTo(node.label, con);
             }
@@ -1420,14 +1557,14 @@
     };
 
     $.extend({
-        dropdownlist: function (options) {
-            return Factory.buildList(options);
+        dropdownlist: function (id, options) {
+            return Factory.buildList(id, options);
         },
-        ddlist: function (options) {
-            return Factory.buildList(options);
+        ddlist: function (id, options) {
+            return Factory.buildList(id, options);
         },
-        singlelist: function (options) {
-            return Factory.buildList($.extend(options, { single: true }));
+        singlelist: function (id, options) {
+            return Factory.buildList(id, options, true);
         }
     });
 

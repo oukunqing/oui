@@ -4,11 +4,11 @@
     <title>表单输入内容限制示例</title>
 <style type="text/css">
 body {font-size:14px;}
-input {width:400px; height: 28px; font-size:14px; border:solid 1px #000; margin:0; padding: 0 5px; border-radius:3px;}
+input {width:400px; height: 34px; font-size:14px; border:solid 1px #ccc; box-sizing: border-box; margin:0; padding: 0 8px; border-radius:4px;}
 /*input:focus{border:solid 1px #00f;}*/
-select{width:412px; height:30px;border:solid 1px #000;margin:0; padding: 0 5px;border-radius:3px;}
+select{width:412px; height:34px;border:solid 1px #ccc;margin:0; padding: 0 8px;border-radius:4px; box-sizing: border-box;}
 /*select:focus{border:solid 1px #00f;}*/
-button {width:120px;height:28px;}
+button {width:120px;height:30px;}
 </style>
 </head>
 <body>
@@ -291,7 +291,7 @@ button {width:120px;height:28px;}
         });
         window.setTimeout(function() {
             $I('fmt_option2').val = 'asd';
-        }, 3000);
+        }, 1000);
 
         $.setInputFormat('fmt_channel', {
             types: ['int', 'option'],
@@ -324,7 +324,7 @@ button {width:120px;height:28px;}
         });
         window.setTimeout(function() {
             $I('select1').val = 'hello';
-        }, 3000);
+        }, 1000);
 
         $.setInputFormat('select2', {
             types: ['option', 'word'],
