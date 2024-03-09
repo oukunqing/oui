@@ -595,7 +595,7 @@
                     that.elem.style.display = 'none';
                     elem = that.text;
                 }                
-                opt.title = opt.title || that.text.value || texts[0];                
+                opt.title = opt.title || that.text.value || texts[0];
                 
                 that.text.className = that.text.className.addClass('oui-ddl oui-ddl-txt').addClass(opt.className);
             }
@@ -1026,7 +1026,7 @@
                 });
 
                 if (!$.isUndefinedOrNull(opt.value) && (opt.value !== '' || !opt.multi)) {
-                    that.set(opt.value, true);
+                    that.set(opt.value, true, false, true);
                 } else if (!opt.multi) {
                     if ($.isNumber(opt.index) && opt.index >= 0) {
                         that.select(opt.index + 1, null, null, box, Config.CallbackLevel.Initial);
@@ -1129,7 +1129,7 @@
             $.alert(opt.maxLimitMsg || ((opt.name || '') + '\u6700\u591a\u53ea\u80fd\u9009\u62e9' + opt.maxLimit + '\u4e2a'));
             return that;
         },
-        set: function (val, ac, dc) {
+        set: function (val, ac, dc, initial) {
             var that = this,
                 opt = that.options,
                 nodes = that.nodes,
@@ -1158,18 +1158,22 @@
             } else {
                 ac = $.isBoolean(ac, true);
                 dc = $.isBoolean(dc, false);
-
+                
                 if (!Factory.isInList(nodes, val)) {
                     if (cur >= 0 && nodes[cur]) {
                         nodes[cur].set(false, false);
                     }
-                    $.setAttribute(elem, 'opt-idx', 0);
-                    if (opt.editable) {
+                    idx = initial ? 1 : 0;
+                    $.setAttribute(elem, 'opt-idx', idx);
+                    if (idx > 0) {
+                        nodes[idx - 1].set(true, true);
+                    }
+                    if (!initial && opt.editable) {
                         elem.inputValue = val;
                         elem.focus();
                         return that.callback(opt.callbackLevel).hide();
                     }
-                    return that.get();                    
+                    return that.get();
                 }
 
                 var vals = !$.isArray(val) ? val.toString().split(/[,\|]/) : val.join(',').split(',');
