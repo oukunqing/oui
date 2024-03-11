@@ -117,10 +117,9 @@
         var opt = $.extend(cfg, options),
             elem = $.toElement(opt.element);
 
-        if (opt.interval <= 0) {
+        if (!$.isNumber(opt.interval) || opt.interval <= 0) {
             opt.interval = 60;
         }
-
         this.cache = {
             timer: null,
             number: opt.interval,
@@ -137,6 +136,9 @@
         initial: function (opt) {
             if($.isNumber(opt) && opt > 0) {
                 opt = { interval: opt };
+            }
+            if (!$.isNumber(opt.interval) || opt.interval <= 0) {
+                opt.interval = 60;
             }
             //频率参数有变化时
             if (opt.interval !== this.cache.options.interval) {

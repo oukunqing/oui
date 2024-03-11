@@ -499,8 +499,10 @@
         if (opt.editable) {
             opt.config = $.extend({
                 maxLength: null,
-                placeholder: '选项不存在？请输入：',
                 dataType: null,
+                minValue: null,
+                maxValue: null,
+                placeholder: '选项不存在？请输入：',
                 button: '确定',
                 //是否保留输入框内容
                 keep: false,
@@ -509,6 +511,8 @@
 
             opt.config.maxLength = $.getParam(opt.config, 'maxLength,maxlength', 64);
             opt.config.dataType = $.getParam(opt.config, 'dataType,datatype', 'string');
+            opt.config.minValue = $.getParam(opt.config, 'minValue,minVal,min');
+            opt.config.maxValue = $.getParam(opt.config, 'maxValue,maxVal,max');
         }
 
         this.id = opt.id;
@@ -645,7 +649,7 @@
 
                 //box.className = 'oui-ddl oui-ddl-panel' + (edge ? ' oui-ddl-edge' : '');
                 box.className = 'oui-ddl oui-ddl-panel';
-                box.id = Config.IdPrefix + opt.id;
+                box.id = Config.IdPrefix + that.id;
 
                 var btn = [],
                     btnLen = 0,
@@ -969,13 +973,13 @@
                     return false;
                 });
 
-                if (that.texts.length > 0) {
+                if (opt.editable && that.texts.length > 0) {
                     function _inputNewVal() {
                         $.removeClass(that.texts[0], 'oui-ddl-val-err');
                         
                         var val = that.texts[0].value.trim(),
                             type = $.getAttribute(that.texts[0], 'data-type'),
-                            num = false;
+                            num = false, min, max;
                         if (val === '') {
                             that.elem.focus();
                             return false;
@@ -984,10 +988,23 @@
                         case 'int': case 'long': num = true; val = parseInt(val, 10); break;
                         case 'float': case 'double': num = true; val = parseFloat(val, 10); break;
                         }
-                        if (num && isNaN(val)) {
-                            $.console.log('oui-ddl-edit:', that.id, type, ', input value format error');
-                            $.addClass(that.texts[0], 'oui-ddl-val-err');
-                            return false;
+                        if (num) {
+                            if (isNaN(val)) {
+                                $.console.log('oui-ddl-edit:', that.id, type, ', input value format error');
+                                $.addClass(that.texts[0], 'oui-ddl-val-err');
+                                return false;
+                            } else {
+                                if ($.isNumber((min = opt.config.minValue)) && val < min) {
+                                    $.console.log('oui-ddl-edit:', that.id, ', input number entered must be greater than or equal to ' + min);
+                                    $.addClass(that.texts[0], 'oui-ddl-val-err');
+                                    return false;
+                                }
+                                if ($.isNumber((max = opt.config.maxValue)) && val > max) {
+                                    $.console.log('oui-ddl-edit:', that.id, ', input number should be less than or equal to ' + max);
+                                    $.addClass(that.texts[0], 'oui-ddl-val-err');
+                                    return false;
+                                }
+                            }
                         }
                         if (!opt.config.keep) {
                             that.texts[0].value = '';
@@ -1003,19 +1020,11 @@
                     $.addListener(that.texts[1], 'click', function(ev) {
                         _inputNewVal();
                     });
-                    
-                    /* 
-                    //快捷键 A I
-                    $.addKeyListener(elem, 'keyup', [65, 73], function(ev) {
-                        that.form();
-                        $.console.log('65:', arguments);
-                    });
-                    */
-                    
-                    //65 - A, 73 - I
+                    // 65 - A; 73 - I
+                    // shift
                     $.addHitListener(elem, 'keyup', [65, 73], function(ev) {
                         ev.keyCode === 65 ? that.form() : that.form(true, true);
-                    });
+                    }, true);
                 }
 
                 Object.defineProperty(elem, 'val', {
@@ -1564,9 +1573,12 @@
             if (form === null) {
                 return that;
             }
-            var display = ($.isBoolean(show) ? show : form.style.display === 'none') ? '' : 'none';
-            form.style.display = display;
+            var display = opt.editable && ($.isBoolean(show) ? show : form.style.display === 'none');
+            form.style.display = display ? '' : 'none';
 
+            if (that.box.style.display === 'none') {
+                return that;
+            }
             if ($.isBoolean(focus, false)) {
                 that.texts[0].focus();
             }

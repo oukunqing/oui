@@ -4904,6 +4904,14 @@
             } else {
                 codes = $.isArray(keyCode) ? keyCode : [keyCode];
             }
+            if ($.isBoolean(timeout)) {
+                isShiftKey = timeout;
+                timeout = 0;
+                times = 0;
+            } else if ($.isBoolean(times)) {
+                isShiftKey = times;
+                times = 0;
+            }
             for (var i = 0; i < codes.length; i++) {
                 addHitListener2(elem, evName, codes[i], func, timeout, times, isShiftKey);
             }
