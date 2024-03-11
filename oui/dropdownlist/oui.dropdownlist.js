@@ -503,7 +503,8 @@
                 dataType: null,
                 button: '确定',
                 //是否保留输入框内容
-                keep: false
+                keep: false,
+                show: true
             }, options.config);
 
             opt.config.maxLength = $.getParam(opt.config, 'maxLength,maxlength', 64);
@@ -669,7 +670,7 @@
 
                 if (!opt.multi && opt.editable) {
                     btn.push([
-                        '<div class="oui-ddl-edit">',
+                        '<div class="oui-ddl-edit" id="', key + '_form"', opt.config.show ? '' : ' style="display:none;"', '>',
                         '<div class="oui-ddl-form">',
                         '<input type="text" class="oui-ddl-val oui-ddl-new"',
                         ' placeholder="', opt.config.placeholder, '" id="', key + '_val"',
@@ -1002,8 +1003,18 @@
                     $.addListener(that.texts[1], 'click', function(ev) {
                         _inputNewVal();
                     });
-                    $.addHitListener(elem, 'keyup', 73, function() {
-                        that.texts[0].focus();
+                    
+                    /* 
+                    //快捷键 A I
+                    $.addKeyListener(elem, 'keyup', [65, 73], function(ev) {
+                        that.form();
+                        $.console.log('65:', arguments);
+                    });
+                    */
+                    
+                    //65 - A, 73 - I
+                    $.addHitListener(elem, 'keyup', [65, 73], function(ev) {
+                        ev.keyCode === 65 ? that.form() : that.form(true, true);
                     });
                 }
 
@@ -1407,19 +1418,7 @@
             box.style.minWidth = bs.min + 'px';
             box.style.maxWidth = bs.max + 'px';
 
-            $.console.log(that.id, bs.width, bs.max);
-
-            //设置输入框宽度
-            if (opt.editable && that.texts.length > 0) {
-                var c = that.texts.length,
-                    fw = (bs.width || bs.max) - 10 - that.texts[c - 1].offsetWidth,
-                    tw = parseFloat(fw / (c - 1), 10).round(2) - 1;
-
-                for (i = 0; i < c - 1; i++) {
-                    that.texts[i].style.width = tw + 'px';
-                    that.texts[i].style.display = '';
-                }
-            }
+            that.formSize(bs.width || bs.max);
 
             var barH = $.getOffset(that.bar).height;
 
@@ -1551,6 +1550,47 @@
             
             if (node) {
                 $.scrollTo(node.label, con);
+            }
+            return that;
+        },
+        form: function (show, focus) {
+            var that = this,
+                opt = that.options,
+                key = Config.ItemPrefix + that.id,
+                elem = opt.select ? that.elem : that.text,
+                offset = $.getOffset(elem),
+                form = $I(key + '_form');
+
+            if (form === null) {
+                return that;
+            }
+            var display = ($.isBoolean(show) ? show : form.style.display === 'none') ? '' : 'none';
+            form.style.display = display;
+
+            if ($.isBoolean(focus, false)) {
+                that.texts[0].focus();
+            }
+            if (parseInt(that.box.style.top, 10) > offset.top) {
+                return that.formSize();
+            }
+            return that.size().position();
+        },
+        formSize: function (boxWidth) {
+            var that = this,
+                opt = that.options,
+                box = that.box,
+                bw = boxWidth || box.offsetWidth;
+
+            //设置输入框宽度
+            if (opt.editable && that.texts.length > 0) {
+                var c = that.texts.length,
+                    fw = bw - 10 - that.texts[c - 1].offsetWidth,
+                    tw = parseFloat(fw / (c - 1), 10).round(2) - 1;
+
+                for (i = 0; i < c - 1; i++) {
+                    that.texts[i].style.width = tw + 'px';
+                    that.texts[i].style.display = '';
+                }
             }
             return that;
         },

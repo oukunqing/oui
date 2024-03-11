@@ -77,6 +77,7 @@
 		<td><input type="text" id="ServerType4" style="" /></td>
 		<td><input type="text" id="ServerType50" style="" /></td>
 		<td><select id="ServerType51" style=""></select></td>
+		<td><select id="ServerType52" style=""></select></td>
 	</tr>
 	<tr>
 		<td>
@@ -361,7 +362,7 @@ window.onload = function() {
 		}
 	});
 
-	for (var i = 0; i < 2; i++) {
+	for (var i = 0; i < 3; i++) {
 		$.dropdownlist({
 			id: 'ServerType5' + i,
 			element: 'ServerType5' + i,
@@ -396,7 +397,8 @@ window.onload = function() {
 			editable: i > 0,
 			config: {
 				maxlength: 3,
-				datatype: 'int'
+				datatype: 'int',
+				show: i > 1
 			}
 		});
 	}

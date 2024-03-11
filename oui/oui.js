@@ -4780,19 +4780,15 @@
         },
         //键盘按键事件监听  keyCode 可以设置为 keyCode (数字) 如：70, 也可以设置 key（字符）, 如 F
         //可以作为快捷键
-        addKeyListener = function (elem, evName, keyCode, func, isShiftKey) {
+        addKeyListener2 = function (elem, evName, keyCode, func, isShiftKey) {
             if (!$.isDocument(elem) && !$.isElement(elem = $.toElement(elem))) {
                 return false;
             }
-            if (typeof keyCode === 'function') {
-                isShiftKey = func;
-                func = keyCode;
-                keyCode = undefined;
-            }
-            isShiftKey = $.isBoolean(isShiftKey, true);
             var evKey = 'keyEvTimes' + keyCode;
             //设置一个变量以记录按键次数
             elem[evKey] = 0;
+
+            isShiftKey = $.isBoolean(isShiftKey, true);
 
             var callback = function (ev) {
                 var e = ev || event, elem = this;
@@ -4804,37 +4800,45 @@
                 if (typeof keyCode === 'undefined') {
                     func(e, ++elem[evKey]);
                 } else if (typeof keyCode === 'number' && e.keyCode === keyCode) {
-                    console.log('KeyListener: ', e.keyCode);
+                    $.console.log('KeyListener: ', e.keyCode);
                     func(e, ++elem[evKey], keyCode, e.key.toUpperCase());
                 } else if (typeof keyCode === 'string' && keyCode.toUpperCase().indexOf(e.key.toUpperCase()) > -1) {
-                    console.log('KeyListener: ', e.keyCode, e.key, keyCode);
+                    $.console.log('KeyListener: ', e.keyCode, e.key, keyCode);
                     func(e, ++elem[evKey], keyCode, e.key.toUpperCase());
                 }
             };
             return $.addEventListener(elem, evName, callback), this;
         },
-        //键盘或鼠标连击事件监听
-        addHitListener = function (elem, evName, keyCode, func, timout, times, isShiftKey) {
+        addKeyListener = function (elem, evName, keyCode, func, isShiftKey) {
             if (!$.isDocument(elem) && !$.isElement(elem = $.toElement(elem))) {
                 return false;
             }
+            var codes = [];
             if (typeof keyCode === 'function') {
-                isShiftKey = times;
-                times = timout;
-                timout = func;
+                isShiftKey = func;
                 func = keyCode;
-                keyCode = undefined;
+                codes = [undefined];
+            } else {
+                codes = $.isArray(keyCode) ? keyCode : [keyCode];
             }
-            isShiftKey = $.isBoolean(isShiftKey, false);
-
-            timout = timout || 3000;
-            times = times || 5;
-
+            for (var i = 0; i < codes.length; i++) {
+                addKeyListener2(elem, evName, codes[i], func, isShiftKey);
+            }
+            return this;
+        },
+        addHitListener2 = function (elem, evName, keyCode, func, timeout, times, isShiftKey) {
+            if (!$.isDocument(elem) && !$.isElement(elem = $.toElement(elem))) {
+                return false;
+            }
             //设置一个变量以记录按键次数
             var keyCount = evName + (keyCode || '') + 'HitCount',
                 keyTimes = evName + (keyCode || '') + 'HitTimes';
             elem[keyCount] = 1;
             elem[keyTimes] = 0;
+
+            isShiftKey = $.isBoolean(isShiftKey, false);
+            timeout = timeout || 3000;
+            times = times || 5;
 
             var callback = function (ev) {
                 var e = ev || event, type = e.type, pass = false;
@@ -4848,12 +4852,13 @@
                         if (!$.isBody(e.target)) {
                             return false;
                         }
-                    }
+                    }                
                     if (typeof keyCode === 'number' && e.keyCode === keyCode) {
                         pass = true;
                     } else if (typeof keyCode === 'string' && keyCode.toUpperCase().indexOf(e.key.toUpperCase()) > -1) {
                         pass = true;
                     }
+
                 } else if (type.startsWith('mouse') && e.target === elem) {
                     //若是鼠标连击，则必须点击在指定的元素，冒泡的不算
                     //比如指定了某个DIV，则点击DIV中的元素（按钮或链接）无效，必须点击在DIV空白处
@@ -4862,23 +4867,47 @@
                 if (!pass) {
                     return false;
                 }
+
                 var ts = new Date().getTime(), tc = ts - elem[keyTimes];
-                if (elem[keyCount] == 1 || (elem[keyCount] > 1 && tc > timout)) {
+                if (elem[keyCount] == 1 || (elem[keyCount] > 1 && tc > timeout)) {
                     elem[keyCount] = 1;
                     elem[keyTimes] = ts;
                     tc = ts - elem[keyTimes];
                 }
-                $.console.log('HitListener: ', evName.append(keyCode, ':'), e.keyCode || '', elem[keyCount]);
+                $.console.log('HitListener: ', evName.append(e.keyCode, ':'), e.keyCode || '', elem[keyCount], tc);
                 if (elem[keyCount] >= times) {
-                    try { func(e, elem[keyCount], keyCode || '', (e.key || '').toUpperCase()); } catch (ex) { }
+                    try { func(e, elem[keyCount], e.keyCode || '', (e.key || '').toUpperCase()); } catch (ex) { }
                     elem[keyCount] = 1;
                     elem[keyTimes] = 0;
+                    //elem['keyCode'] = null;
                     return false;
                 }
-                elem[keyCount] = tc < timout ? elem[keyCount] + 1 : 1;
+                elem[keyCount] = tc < timeout ? elem[keyCount] + 1 : 1;
             };
 
             return $.addEventListener(elem, evName, callback), this;
+        },
+        //键盘或鼠标连击事件监听
+        //连续快速点击某个控件元素或连续快速输入某个键位值
+        //默认连续次数为5次
+        addHitListener = function (elem, evName, keyCode, func, timeout, times, isShiftKey) {
+            if (!$.isDocument(elem) && !$.isElement(elem = $.toElement(elem))) {
+                return false;
+            }
+            var codes = [];
+            if (typeof keyCode === 'function') {
+                isShiftKey = times;
+                times = timeout;
+                timeout = func;
+                func = keyCode;
+                codes = [undefined];
+            } else {
+                codes = $.isArray(keyCode) ? keyCode : [keyCode];
+            }
+            for (var i = 0; i < codes.length; i++) {
+                addHitListener2(elem, evName, codes[i], func, timeout, times, isShiftKey);
+            }
+            return this;
         },
         disableEvent = function (elem, evName, func) {
             if ($.isElement(elem = $.toElement(elem)) && $.isString(evName, true)) {
