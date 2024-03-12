@@ -52,7 +52,7 @@
 		<td><input type="text" id="ServerType28" style="width:300px;" /></td>
 	</tr>
 	<tr>
-		<td colspan="3">List布局</td>
+		<td colspan="3">不同的列数布局和不同的按钮数量</td>
 	</tr>
 	<tr>
 		<td><input type="text" id="ServerType30" style="width:300px;" /></td>
@@ -74,10 +74,10 @@
 <br />
 <table cellpadding="0" cellspacing="0">
 	<tr>
-		<td><input type="text" id="ServerType4" style="" /></td>
-		<td><input type="text" id="ServerType50" style="" /></td>
-		<td><select id="ServerType51" style=""></select></td>
-		<td><select id="ServerType52" style=""></select></td>
+		<td>多选（不可编辑）<br /><input type="text" id="ServerType4" style="" /></td>
+		<td>不可编辑<br /><input type="text" id="ServerType50" style="" /></td>
+		<td>可编辑但默认不显示（shift + A.5）<br /><select id="ServerType51" style=""></select></td>
+		<td>可编辑<br /><select id="ServerType52" style=""></select></td>
 	</tr>
 	<tr>
 		<td>
@@ -313,7 +313,7 @@ window.onload = function() {
 			boxWidth: i >= len / 2 ? 'follow' : '',
 			columns: i >= len / 2 ? 0 : 3,
 			//editable: true,
-	        single: true,
+	        //single: true,
 			itemBorder: true,
 	        //是否支持按钮快捷键（默认支持）
 	        shortcutKey: true,

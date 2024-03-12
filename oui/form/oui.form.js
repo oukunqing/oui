@@ -1894,7 +1894,7 @@
                 }
                 var pos = $.setPanelPosition(elem, elem.optbox, cfg);
                 if (cfg.x) {
-                    elem.optbox.style.left = parseInt(elem.optbox.style.left, 10) + cfg.x + 'px';
+                    elem.optbox.style.left = parseFloat(elem.optbox.style.left, 10) + cfg.x + 'px';
                 }
                 if (action) {
                     $.addClass(elem.optbox, 'input-opt-panel-box-' + pos.position);

@@ -435,6 +435,8 @@
             x: undefined,
             //垂直偏移量
             y: undefined,
+            //宽度补偿
+            w: undefined,
             //按钮位置：left-左，center-中，right-右
             buttonPosition: 'center',
             //当没有“全选/反选”按钮时是否显示“确定”按钮
@@ -493,8 +495,9 @@
         opt.value = $.getParam(opt, 'selectedValue,selectedvalue,value');
         opt.index = $.getParam(opt, 'selectedIndex,selectedindex,index', 0);
         opt.items = $.extend([], opt.items, opt.options);
-        opt.x = $.getParam(opt, 'left,x', 0);
-        opt.y = $.getParam(opt, 'margin,top,y', 0);
+        opt.x = parseInt('0' + $.getParam(opt, 'left,x', 0), 10);
+        opt.y = parseInt('0' + $.getParam(opt, 'margin,top,y', 0), 10);
+        opt.w = parseInt('0' + $.getParam(opt, 'w', 0), 10);
 
         if (opt.editable) {
             opt.config = $.extend({
@@ -571,6 +574,11 @@
                 }
                 elem.className = elem.className.addClass('oui-ddl oui-ddl-elem');
                 opt.title = opt.title || (that.elem.options.length > 0 ? that.elem.options[0].text : '') || texts[0];
+                //宽度补偿，用于input-group样式中的下拉列表框
+                if (opt.w === 0 && (opt.boxWidth === 'follow' || !opt.boxWidth) && 
+                    parseInt($.getElementStyle(elem, 'borderRightWidth'), 10) <= 0) {
+                    opt.w = 1;
+                }
             } else {
                 var rid = opt.element.id || '';
 
@@ -1396,6 +1404,8 @@
             if (that.items.length <= 0 || that.box.style.display === 'none') {
                 return that;
             }
+
+            offset.width += opt.w;
 
             //先清除选项内容框高度
             that.con.style.height = 'auto';
