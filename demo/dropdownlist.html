@@ -25,7 +25,7 @@
 		<td><input type="text" id="ServerType" style="" /></td>
 	</tr>
 	<tr>
-		<td><select id="ServerType1" style=""></select></td>
+		<td><select id="ServerType1" style="" onchange="print1(this);"></select></td>
 		<td><input type="text" id="ServerType2" style="" /></td>
 	</tr>
 </table>
@@ -81,7 +81,7 @@
 	</tr>
 	<tr>
 		<td>
-			<select id="append1" style="">
+			<select id="origin1" style="">
 				<option value="-1">推送图片类型</option>
 	            <option value="0">都推送</option>
 	            <option value="1" selected="selected">仅推送抓拍图</option>
@@ -97,12 +97,12 @@
 <script type="text/javascript">
 window.onload = function() {
 	var types = [
-		{ id: 4, name: '视频设备', desc: '400万像素高清摄像机' },
+		{ id: 1, name: '视频设备', desc: '400万像素高清摄像机' },
 		{ id: 2, name: 'DTU设备', desc: '' },
 		{ id: 3, name: 'LED设备', desc: 'LED显示屏' },
 		{ id: 4, name: '雷达测距设备', desc: '' },
 		{ id: 5, name: '传感器设备', desc: '传感器设备' },
-		{ id: 4, name: '激光测距设备', desc: '' }
+		{ id: 6, name: '激光测距设备', desc: '' }
 	];
 	var k = 'DeviceType';
 	$.dropdownlist({
@@ -114,10 +114,6 @@ window.onload = function() {
 		//single:true,
 		layout: 'list',
 		boxWidth: 'follow',
-		//select: false,
-		//boxStyle: 'border-radius:0px',
-		//textWidth: 200,
-		itemWidth: '48%',
 		itemBorder: true,
 		//回调等级：0-选项实时回调，1-全选/反选等按钮事件回调，2-确定按钮事件回调
 		//submit: 0,
@@ -153,6 +149,8 @@ window.onload = function() {
 		select: false,
 		layout: 'list',
 		single: true,
+		display: true,
+		number: true,
 		//value: '5',
 		//index: 2,
 		//boxWidth: 'follow',
@@ -172,6 +170,35 @@ window.onload = function() {
 		}
 	});
 
+	$I('ServerType').val = 2;
+	
+
+	window.setTimeout(function() {
+		$.singlelist.update('ServerType', {
+			items: [
+				{ id: 11, name: 'WEB服务', desc: '' },
+				{ id: 12, name: '设备服务', desc: '' },
+				{ id: 13, name: '图片推送服务', desc: '' },
+				{ id: 14, name: '视频服务', desc: '' },
+				{ id: 15, name: '图片采集服务2', desc: '' },
+				{ id: 16, name: '平台级联服务', desc: '' },
+				{ id: 17, name: '流媒体', desc: '' },
+			],
+			value: 16,
+			append: true,
+			//更新模式下，以下参数不起作用
+			select: false,
+			layout: 'list',
+			single: true,
+			display: true,
+			number: true,
+			callback: function (values, initial, ddl) {
+				$.console.log('initial22:', values, initial, ddl);
+				getDeviceList();
+			}
+		});
+	}, 5000);
+	
 	$.dropdownlist({
 		id: 'ServerType1',
 		element: 'ServerType1',
@@ -189,6 +216,8 @@ window.onload = function() {
 		//textWidth: 200,
 		itemWidth: '48%',
 		itemBorder: true,
+		number:true,
+		display: true,
 		//回调等级：0-选项实时回调，1-全选/反选等按钮事件回调，2-确定按钮事件回调
 		//submit: 0,
         //callbackLevel: 0,
@@ -202,6 +231,23 @@ window.onload = function() {
 		}
 	});
 
+
+	window.setTimeout(function() {
+		$.singlelist.update('ServerType1', {
+			items: [
+				{ id: 11, name: 'WEB服务', desc: '' },
+				{ id: 12, name: '设备服务', desc: '' },
+				{ id: 13, name: '图片推送服务', desc: '' },
+				{ id: 14, name: '视频服务', desc: '' },
+				{ id: 15, name: '图片采集服务2', desc: '' },
+				{ id: 16, name: '平台级联服务', desc: '' },
+				{ id: 17, name: '流媒体', desc: '' },
+			],
+			value: 15,
+			append: false
+		});
+	}, 5000);
+
 	//window.setTimeout(function() { $I('ServerType1').val = 3; }, 2000);
 	//$I('ServerType1').val = 3;
 
@@ -212,7 +258,7 @@ window.onload = function() {
 		items: [
 			{ id: 1, name: 'WEB服务WEB服务', desc: '' },
 			{ id: 2, name: '设备服务', desc: '' },
-			{ id: 3, name: '图片推送服务', desc: '' },
+			{ id: 3, name: '图片推送服务', desc: '', checked: true },
 			{ id: 4, name: '视频服务', desc: '' },
 			{ id: 5, name: '图片采集服务', desc: '' },
 			{ id: 6, name: '平台级联服务', desc: '' },
@@ -406,10 +452,10 @@ window.onload = function() {
 	}
 	
 	$.dropdownlist({
-			id: 'append1',
-			element: 'append1',
+			id: 'origin1',
+			element: 'origin1',
 			items: [],
-			//append: true,
+			origin: true,
 			boxWidth: 'follow',
 			itemWidth: '48%',
 			//maxHeight: 70,
@@ -436,5 +482,9 @@ window.onload = function() {
 
 function getDeviceList() {
 
+}
+
+function print1(ddl) {
+	$.console.log('changed:', ddl.id, ddl.value);
 }
 </script>

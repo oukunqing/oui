@@ -165,17 +165,17 @@
 
                 return opt;
             },
-            buildList: function (id, options, single) {
-                if ($.isObject(id) && $.isUndefined(options)) {
-                    options = id;
+            buildList: function (id, par, single) {
+                if ($.isObject(id) && $.isUndefined(par)) {
+                    par = id;
                     id = null;
                 } else if ($.isString(id, true)) {
-                    options = $.extend({}, options, {id: id});
+                    par = $.extend({}, par, {id: id});
                 }
                 var opt = $.extend({
                     id: '',
                     element: ''
-                }, options), cache, ddl;
+                }, par), cache, ddl;
 
                 if (single) {
                     opt.single = true;
@@ -315,6 +315,433 @@
                     }
                 }
                 return false;
+            },
+            buildItems: function (ddl, items, listbox) {
+                var that = ddl,
+                    opt = that.options,
+                    columns = opt.columns || 0,
+                    conWidth = Factory.getItemConWidth(items, opt.itemWidth, columns, opt.choose),
+                    minWidth = opt.layout === Config.Layout.Grid ? conWidth : 0,
+                    key = Config.ItemPrefix + that.id,
+                    len = items.length,
+                    n = len.toString().length,
+                    num = 0,
+                    html = [],
+                    listbox = $.toElement(listbox);
+
+                if (!opt.multi && opt.allowEmpty) {
+                    html.push([
+                        '<li class="oui-ddl-item" style="',
+                        opt.layout !== Config.Layout.List ? 'float:left;' : '',
+                        opt.layout === Config.Layout.Grid ? 'min-width:' + Factory.getStyleSize(minWidth || opt.itemWidth) + ';' : '',
+                        '">',
+                        '<label  class="oui-ddl-label', opt.layout !== Config.Layout.List && opt.border ? ' oui-ddl-label-border' : '', '">',
+                        '<input class="oui-ddl-chb"', checked,
+                        ' type="', opt.multi ? 'checkbox' : 'radio', '"',
+                        ' id="', '"',
+                        ' name="', key, '"',
+                        ' value="', '"',
+                        ' text="', opt.allowEmpty, '"',
+                        ' style="display:' + (opt.choose ? '' : 'none') + ';"',
+                        ' />',
+                        '<span>', opt.allowEmpty, '</span>',
+                        '</label>',
+                        '</li>'
+                    ].join(''));
+                }
+                var align = opt.textAlign ? 'text-align:' + opt.textAlign + ';' : '';
+                for (i = 0; i < len; i++) {
+                    var dr = items[i], p;
+                    if (dr === 'sep' || dr.sep || dr.type === 'sep') {
+                        html.push(['<li class="oui-ddl-item oui-ddl-sep"></li>'].join(''));
+                    } else if (dr.head) {
+                        html.push(['<li class="oui-ddl-item oui-ddl-head">', dr.head, '</li>'].join(''));
+                    } else {
+                        if ($.isString(dr, true)) {
+                            if (dr.indexOf(':') > 0) {
+                                p = dr.indexOf(':');
+                                dr = {val: dr.substr(0, p), txt: dr.substr(p + 1)};
+                            } else {
+                                dr = {val: dr, txt: dr};
+                            }
+                        } else if ($.isNumber(dr)) {
+                            dr = {val: dr, txt: dr};
+                        } else if ($.isArray(dr)) {
+                            dr = {val: dr[0], txt: dr[1] || dr[0]}
+                        } else if (!$.isObject(dr)) {
+                            continue;
+                        }
+                        var val = $.getParam(dr, (opt.field || '') + ',value,val,id', ''),
+                            txt = $.getParam(dr, 'name,text,txt', '') + '',
+                            con = $.getParam(dr, 'code');
+
+                        if (val === '' && con && con !== '') {
+                            val = con;
+                        }
+
+                        if (val === '' && txt === '') {
+                            continue;
+                        }
+
+                        var chbId = key + val,
+                            checked = dr.checked || dr.dc ? ' checked="checked" dc="1"' : '',
+                            use = dr.enabled || dr.use,
+                            disabled = dr.disabled ? ' disabled="disabled"' : '',
+                            desc = dr.desc || '',
+                            title = '<span class="oui-ddl-li-txt">' + (opt.display && val !== txt ? val + '<u>-</u>' + txt : txt) + '</span>' +
+                                (desc && txt !== desc ? '<span class="oui-ddl-li-txt i-t">' + desc + '</span>' : '');
+
+                        html.push([
+                            '<li class="oui-ddl-item" style="',
+                            opt.layout !== Config.Layout.List ? 'float:left;' : '',
+                            opt.layout === Config.Layout.Grid ? 'min-width:' + Factory.getStyleSize(minWidth || opt.itemWidth) + ';' : '',
+                            '" opt-idx="', (num + i + 1), '" data-value="', val.toString().replace(/["]/g, '&quot;'), '"',
+                            '>',
+                            '<label class="oui-ddl-label', opt.layout !== Config.Layout.List && opt.border ? ' oui-ddl-label-border' : '', '"',
+                            ' style="',
+                            opt.number ? 'padding-left:4px;' : '', align,
+                            '"',
+                            '>',
+                            opt.number ? '<i style="width:' + (n * 12) + 'px;">' + (num + i + 1)  + '</i>' : '',
+                            '<input class="oui-ddl-chb"', checked,
+                            ' type="', opt.multi ? 'checkbox' : 'radio', '"',
+                            ' id="', chbId, '"',
+                            ' name="', key, '"',
+                            ' value="', val, '"',
+                            ' code="', con, '"',
+                            ' text="', (txt).filterHtml(true).replace(/["]/g, '&quot;'), '"',
+                            ' desc="', (desc).filterHtml(true).replace(/["]/g, '&quot;'), '"',
+                            ' style="display:' + (opt.choose ? '' : 'none') + ';"',
+                            ' />',
+                            '<span', (use || typeof use === 'undefined') ? '' : ' class="del"', '>', title, '</span>',
+                            '</label>',
+                            '</li>'
+                        ].join(''));
+                    }
+                }
+                if ($.isElement(listbox)) {
+                    listbox.innerHTML = html.join('');
+                    return this;
+                }
+                return html.join('');
+            },
+            buildButtons: function (ddl) {
+                var that = ddl,
+                    opt = that.options,
+                    html = [],
+                    btnLen = 0,
+                    btnLimit = $.isNumber(opt.buttonLimit) ? opt.buttonLimit : -1,
+                    len = opt.items.length,
+                    selects = [],
+                    oneBtn = true,
+                    ac = opt.callbackLevel ? 'ok' : 'no',
+                    texts = [
+                        //'取消', '全选', '反选', opt.restore ? '还原' : '默认', '确定'
+                        '\u53d6\u6d88', '\u5168\u9009', '\u53cd\u9009', opt.restore ? '\u8fd8\u539f' : '\u9ed8\u8ba4', '\u786e\u5b9a'
+                    ],
+                    key = Config.ItemPrefix + that.id;
+
+                if (opt.callbackLevel > 0 && btnLimit === 0) {
+                    btnLimit = 1;
+                }
+
+                if (!opt.multi && opt.editable) {
+                    html.push([
+                        '<div class="oui-ddl-edit" id="', key + '_form"', opt.config.show ? '' : ' style="display:none;"', '>',
+                        '<div class="oui-ddl-form">',
+                        '<input type="text" class="oui-ddl-val oui-ddl-new"',
+                        ' placeholder="', opt.config.placeholder, '" id="', key + '_val"',
+                        ' maxlength="', opt.config.maxLength, '" data-type="', opt.config.dataType, '"',
+                        ' />',
+                        '<button class="btn btn-default btn-sm oui-ddl-btn oui-ddl-new">', opt.config.button, '</button>',
+                        '</div>',
+                        '</div>'
+                    ].join(''));
+                }
+
+                if (opt.multi) {
+                    if ((len > 5 || (opt.layout !== Config.Layout.List && len > 3)) && (opt.button || opt.callbackLevel > 0)) {
+                        selects = [
+                            '<button class="oui-ddl-btn btn btn-default btn-first" ac="1">' + texts[1] + '</button>',
+                            '<button class="oui-ddl-btn btn btn-default" ac="2">' + texts[2] + '</button>',
+                            '<button class="oui-ddl-btn btn btn-default" ac="0">' + texts[0] + '</button>',
+                            '<button class="oui-ddl-btn btn btn-default" ac="3">' + texts[3] + '</button>',
+                        ];
+                        if (btnLimit >= 0 && selects.length >= btnLimit - 1) {
+                            selects.length = btnLimit - 1;
+                        }
+                        oneBtn = selects.length <= 0;
+                        btnLen += selects.length;
+                    }
+                    if (!oneBtn || opt.callbackLevel > 0 || opt.button || btnLimit > 0) {
+                        html.push('<div class="oui-ddl-oper oui-ddl-oper-' + opt.layout + '" style="text-align:' + (opt.buttonPosition || 'center') + ';">');
+                        html.push('<div class="btn-group btn-group-xs' + (oneBtn ? ' btn-group-block' : '') + '">');
+                        html.push(selects.join(''));
+                        html.push('<button class="oui-ddl-btn btn btn-primary btn-' + ac + (oneBtn ? ' btn-block' : '') + '" ac="' + ac + '">', texts[4], '</button>');
+                        html.push('</div>');
+                        html.push('</div>');
+                        btnLen += 1;
+                    }
+                }
+                return {html: html.join(''), len: btnLen};
+            },
+            setNodes: function (ddl, append) {
+                var that = ddl,
+                    opt = that.options,
+                    elem = that.elem,
+                    key = Config.ItemPrefix + that.id,
+                    n = 0;
+
+                if (!append) {
+                    that.nodes = [];
+                }
+
+                var arr = $N(key);
+                for (i = n; i < arr.length; i++) {
+                    var chb = arr[i];
+                    that.nodes.push(new Node({
+                        elem: elem,
+                        id: chb.value,
+                        idx: i + 1,
+                        label: chb.parentNode,
+                        input: chb,
+                        multi: opt.multi,
+                        callback: function (node) {
+                            var val = node.value,
+                                txt = node.text + (node.desc ? ' - ' + node.desc : '');
+                            if ($.isFunction(opt.beforeChange)) {
+                                opt.beforeChange(val, txt, function() {
+                                    $.setAttribute(elem, 'opt-hover', 0);
+                                    that.action(node, {click: true});
+                                });
+                            } else {
+                                $.setAttribute(elem, 'opt-hover', 0);
+                                that.action(node, {click: true});
+                            }
+                        }
+                    }));
+                    that.indexs[chb.id] = i;
+                }
+                that.items = document.querySelectorAll('#' + Config.IdPrefix + opt.id + ' li');
+
+                return this;
+            },
+            setEditEvent: function (ddl) {
+                var that = ddl,
+                    opt = that.options,
+                    elem = opt.select ? that.elem : that.text;
+
+                that.texts = document.querySelectorAll('#' + Config.IdPrefix + opt.id + ' .oui-ddl-edit .oui-ddl-new');
+
+                if (opt.editable && that.texts.length > 0) {
+                    function _inputNewVal() {
+                        $.removeClass(that.texts[0], 'oui-ddl-val-err');
+                        
+                        var val = that.texts[0].value.trim(),
+                            type = $.getAttribute(that.texts[0], 'data-type'),
+                            num = false, min, max;
+                        if (val === '') {
+                            that.elem.focus();
+                            return false;
+                        }
+                        switch(type) {
+                        case 'int': case 'long': num = true; val = parseInt(val, 10); break;
+                        case 'float': case 'double': num = true; val = parseFloat(val, 10); break;
+                        }
+                        if (num) {
+                            if (isNaN(val)) {
+                                $.console.log('oui-ddl-edit:', that.id, type, ', input value format error');
+                                $.addClass(that.texts[0], 'oui-ddl-val-err');
+                                return false;
+                            } else {
+                                if ($.isNumber((min = opt.config.minValue)) && val < min) {
+                                    $.console.log('oui-ddl-edit:', that.id, ', input number entered must be greater than or equal to ' + min);
+                                    $.addClass(that.texts[0], 'oui-ddl-val-err');
+                                    return false;
+                                }
+                                if ($.isNumber((max = opt.config.maxValue)) && val > max) {
+                                    $.console.log('oui-ddl-edit:', that.id, ', input number should be less than or equal to ' + max);
+                                    $.addClass(that.texts[0], 'oui-ddl-val-err');
+                                    return false;
+                                }
+                            }
+                        }
+                        if (!opt.config.keep) {
+                            that.texts[0].value = '';
+                        }
+                        that.set(val, {edit: true});
+                        that.callback(opt.callbackLevel);
+                    }
+                    $.addListener(that.texts[0], 'keyup', function(ev) {
+                        if (ev.keyCode === 13) {
+                            _inputNewVal();
+                        }
+                    });
+                    $.addListener(that.texts[1], 'click', function(ev) {
+                        _inputNewVal();
+                    });
+                    // 65 - A; 73 - I
+                    // shift
+                    $.addHitListener(elem, 'keyup', [65, 73], function(ev) {
+                        ev.keyCode === 65 ? that.form() : that.form(true, true);
+                    }, true);
+                }
+                return this;
+            },
+            setButtonEvent: function (ddl) {
+                var that = ddl,
+                    opt = that.options,
+                    elem = opt.select ? that.elem : that.text;
+                
+                that.buttons = document.querySelectorAll('#' + Config.IdPrefix + opt.id + ' .oui-ddl-oper .oui-ddl-btn');
+
+                for (i = 0; i < that.buttons.length; i++) {
+                    if (opt.shortcutKey) {
+                        if (opt.shortcutNum) {
+                            that.buttons[i].innerHTML += '<em>(<u>' + (i + 1) + '</u>)</em>';
+                        }
+                        that.buttons[i].title += '快捷键: shift + ' + (i + 1);
+                    }
+                    $.addListener(that.buttons[i], 'click', function(ev) {
+                        elem.focus();
+                        var ac = $.getAttribute(this, 'ac');
+                        if (ac === 'no') {
+                            that.hide();
+                        } else if (ac === 'ok') {
+                            that.callback(Config.CallbackLevel.Return);
+                            that.hide();
+                        } else {
+                            that.set('', {action: parseInt(ac, 10)});
+                            that.callback(Config.CallbackLevel.Select);
+                        }
+                    });
+                }
+                return this;
+            },
+            setElemEvent: function (ddl) {
+                var that = ddl,
+                    opt = that.options,
+                    elem = opt.select ? that.elem : that.text;
+
+                $.addListener(document, 'mousedown', function (ev) {
+                    if (!$.isInElement(that.box, ev) && !$.isInElement(opt.select ? that.elem : that.text, ev)) {
+                        that.hide();
+                    }
+                    return false;
+                });
+                $.addListener(document, 'keyup', function (ev) {
+                    if (27 === $.getKeyCode(ev)) {   // Esc键值为27
+                        that.hide();
+                    }
+                    return false;
+                });
+                
+                $.addListener(document, 'wheel', function (ev) {
+                    if (that.box.style.display !== 'none' && !$.isOnElement(that.box, ev)) {
+                        that.hide();
+                    }
+                    return false;
+                });
+
+                $.addListener(elem, 'wheel', function (ev) {
+                    if (that.box.style.display !== 'none') {
+                        that.hide();
+                    }
+                    return false;
+                });
+
+                $.addListener(elem, 'mousedown', function (ev) {
+                    $.cancelBubble(ev);
+                    that.show(this);
+                    this.focus();
+                    Factory.closeOther(that);
+
+                    return true;
+                });
+                $.addListener(elem, 'keydown', function (ev) {
+                    var kc = $.getKeyCode(ev),
+                        idx = ($.getAttribute(elem, 'opt-idx') || '').toInt(),
+                        div = $I($.getAttribute(elem, 'opt-id')),
+                        arrowList = [37, 38, 40, 39],   //左 上 下 右
+                        vimKeyList = [72, 75, 74, 76, 77],  //H  K  J  L M(中间)
+                        numList = [49, 50, 51, 52, 53],
+                        minList = [97, 98, 99, 100, 101];
+
+                    if (kc.inArray([13, 32, 108])) {
+                        this.focus();
+                        $.cancelBubble(ev);
+                        var hover = $.getAttribute(elem, 'opt-hover', '0').toInt();
+                        if (hover) {
+                            that.action(idx);
+                            $.setAttribute(elem, 'opt-hover', 0);
+                        } else {
+                            that.show(this);
+                        }
+                    } else if (kc.inArray([9, 27])) {
+                        if(div !== null && div.style.display !== 'none') {
+                            $.cancelBubble(ev);
+                        }
+                        that.hide();
+                    } else if (kc.inArray(arrowList) || kc.inArray(vimKeyList)) {
+                        $.cancelBubble(ev);
+                        if (kc.inArray(vimKeyList)) {
+                            kc = arrowList[vimKeyList.indexOf(kc)] || kc;
+                        }
+                        idx = kc.inArray([37, 38]) ? idx - 1 : idx + 1;
+                        that.select(idx, {keyCode: kc, shortcut: false, panel: that.con});
+                        return false;
+                    } else if (opt.shortcutKey && ev.shiftKey && (kc.inArray(numList) || kc.inArray(minList))) {
+                        var i = numList.indexOf(kc);
+                        if (i < 0) {
+                            i = minList.indexOf(kc);
+                        }
+                        $.trigger(that.buttons[i], 'click');
+                    } else if (kc >= 48 && kc % 48 < 10) {
+                        that.select(kc % 48, {keyCode: kc, shortcut: true, panel: that.con});
+                    }
+                    return false;
+                });
+                return this;
+            },
+            setElemProperty: function (ddl) {
+                var that = ddl,
+                    elem = that.elem;
+
+                Object.defineProperty(elem, 'val', {
+                    /*
+                    value: 'hello',
+                    writable: true,
+                    configurable: true,
+                    */
+                    get: function () {
+                        return elem.value;
+                    },
+                    set: function (val) {
+                        $.console.log('set [property]', elem.id, val, typeof val);
+                        if (val !== undefined) {
+                            elem.inputValue = val;
+                            that.set(val);
+                            elem.inputValue = null;
+                        }
+                    }
+                });
+                return this;
+            },
+            initValue: function (ddl) {
+                var that = ddl,
+                    opt = that.options,
+                    elem = opt.select ? that.elem : that.text,
+                    len = opt.items.length;
+
+                $.setAttribute(elem, 'opt-len', len);
+                $.setAttribute(elem, 'opt-idx', 0);
+
+                that.elem.options.length = 0;
+                if (that.text) {
+                    that.text.value = '';
+                }
+
+                return this;
             }
         };
 
@@ -400,8 +827,8 @@
             index: 0,
             //选项，JSON数组格式，示例： [{value|val|id:1, name|text|txt:'第1项',code:'',desc:'',use:1|0}]
             items: [],
-            //是否追加选项，true-表示元素原有的选项+items
-            append: undefined,
+            //是否获取下拉列表元素原有的options，true-表示元素原有的选项+items
+            origin: undefined,
             //是否下拉框： true - 下拉框， false - 文本框
             select: true,
             //自定义样式名
@@ -476,6 +903,8 @@
             callback: undefined,
             //初始化时是否回调，默认不回调
             initial: undefined,
+            //是否触发onchange事件
+            change: true,
             //Function:选项切换时触发
             beforeChange: undefined,
             //是否允许扩展选项（可以自行输入不存在的选项值）
@@ -494,6 +923,7 @@
         opt.border = $.getParam(opt, 'itemBorder,border,');
         opt.value = $.getParam(opt, 'selectedValue,selectedvalue,value');
         opt.index = $.getParam(opt, 'selectedIndex,selectedindex,index', 0);
+        opt.origin = $.isBoolean($.getParam(opt, 'origin,original'), false);
         opt.items = $.extend([], opt.items, opt.options);
         opt.x = parseInt('0' + $.getParam(opt, 'left,x', 0), 10);
         opt.y = parseInt('0' + $.getParam(opt, 'margin,top,y', 0), 10);
@@ -544,7 +974,7 @@
                 opt.items = [];
             }
             //如果没有配置选项，则尝试从元素属性中获取
-            if (opt.append || opt.items.length <= 0) {
+            if (opt.origin || opt.items.length <= 0) {
                 opt.items = Factory.getElementOptionConfig(elem).concat(opt.items);
                 if (elem.tagName === 'SELECT') {
                     opt.index = opt.index || elem.selectedIndex || opt.index;
@@ -553,6 +983,9 @@
 
             if (elem.tagName === 'SELECT') {
                 that.elem = elem;
+                if (!opt.textWidth && (!opt.multi || opt.layout === 'list') && elem.className.indexOf('form-control') > -1) {
+                    opt.textWidth = 'auto';
+                }
                 if (!opt.select) {
                     var txt = document.createElement('INPUT');
                     txt.className = 'form-control oui-ddl-txt' + (opt.className ? ' ' + opt.className : '');
@@ -596,6 +1029,7 @@
                 }
                 opt.element.parentNode.insertBefore(ddl, opt.element);
                 that.elem = ddl;
+                ddl.style.width = Factory.getStyleSize(opt.textWidth || offset.width);
 
                 opt.element.id = rid + '_oui_ddl_copy';
                 that.elem.id = rid;
@@ -633,14 +1067,14 @@
 
             return that.build(elem);
         },
-        build: function (elem) {
+        build: function (element) {
             var that = this,
-                opt = that.options;
+                opt = that.options,
+                elem = element || (opt.select ? that.elem : that.text);
 
             $.createElement('DIV', function (box) {
                 var offset = $.getOffset(opt.select ? that.elem : that.text),
                     ua = navigator.userAgent,
-                    //edge = ua.indexOf('Edg/') > 0 || ua.indexOf('Edge') > 0,
                     bs = {
                         width: parseFloat(opt.boxWidth === 'follow' ? offset.width : opt.boxWidth, 10).round(2),
                         min: opt.minWidth || (offset.width + 1),
@@ -655,75 +1089,21 @@
                     bs.min = offset.width;
                 }
 
-                //box.className = 'oui-ddl oui-ddl-panel' + (edge ? ' oui-ddl-edge' : '');
                 box.className = 'oui-ddl oui-ddl-panel';
                 box.id = Config.IdPrefix + that.id;
-
-                var btn = [],
-                    btnLen = 0,
-                    btnLimit = $.isNumber(opt.buttonLimit) ? opt.buttonLimit : -1,
-                    len = opt.items.length,
-                    selects = [],
-                    oneBtn = true,
-                    ac = opt.callbackLevel ? 'ok' : 'no',
-                    texts = [
-                        //'取消', '全选', '反选', opt.restore ? '还原' : '默认', '确定'
-                        '\u53d6\u6d88', '\u5168\u9009', '\u53cd\u9009', opt.restore ? '\u8fd8\u539f' : '\u9ed8\u8ba4', '\u786e\u5b9a'
-                    ],
-                    key = Config.ItemPrefix + that.id;
-
-                if (opt.callbackLevel > 0 && btnLimit === 0) {
-                    btnLimit = 1;
-                }
-
                 $.setAttribute(elem, 'opt-id', box.id);
-                $.setAttribute(elem, 'opt-len', len);
-                $.setAttribute(elem, 'opt-idx', 0);
 
-                if (!opt.multi && opt.editable) {
-                    btn.push([
-                        '<div class="oui-ddl-edit" id="', key + '_form"', opt.config.show ? '' : ' style="display:none;"', '>',
-                        '<div class="oui-ddl-form">',
-                        '<input type="text" class="oui-ddl-val oui-ddl-new"',
-                        ' placeholder="', opt.config.placeholder, '" id="', key + '_val"',
-                        ' maxlength="', opt.config.maxLength, '" data-type="', opt.config.dataType, '"',
-                        ' />',
-                        '<button class="btn btn-default btn-sm oui-ddl-btn oui-ddl-new">', opt.config.button, '</button>',
-                        '</div>',
-                        '</div>'
-                    ].join(''));
-                }
+                var btn = Factory.buildButtons(that),
+                    key = Config.ItemPrefix + that.id,
+                    len = opt.items.length;
 
-                if (opt.multi) {
-                    if ((len > 5 || (opt.layout !== Config.Layout.List && len > 3)) && (opt.button || opt.callbackLevel > 0)) {
-                        selects = [
-                            '<button class="oui-ddl-btn btn btn-default btn-first" ac="1">' + texts[1] + '</button>',
-                            '<button class="oui-ddl-btn btn btn-default" ac="2">' + texts[2] + '</button>',
-                            '<button class="oui-ddl-btn btn btn-default" ac="0">' + texts[0] + '</button>',
-                            '<button class="oui-ddl-btn btn btn-default" ac="3">' + texts[3] + '</button>',
-                        ];
-                        if (btnLimit >= 0 && selects.length >= btnLimit - 1) {
-                            selects.length = btnLimit - 1;
-                        }
-                        oneBtn = selects.length <= 0;
-                        btnLen += selects.length;
-                    }
-                    if (!oneBtn || opt.callbackLevel > 0 || opt.button || btnLimit > 0) {
-                        btn.push('<div class="oui-ddl-oper oui-ddl-oper-' + opt.layout + '" style="text-align:' + (opt.buttonPosition || 'center') + ';">');
-                        btn.push('<div class="btn-group btn-group-xs' + (oneBtn ? ' btn-group-block' : '') + '">');
-                        btn.push(selects.join(''));
-                        btn.push('<button class="oui-ddl-btn btn btn-primary btn-' + ac + (oneBtn ? ' btn-block' : '') + '" ac="' + ac + '">', texts[4], '</button>');
-                        btn.push('</div>');
-                        btn.push('</div>');
-                        btnLen += 1;
-                    }
-                }
-
-                if (btnLen >= 5 && opt.shortcutKey) {
+                if (btn.len >= 5 && opt.shortcutKey) {
                     Factory.getSize(opt, bs);
                 }
+
+
                 if ($.isNumber(opt.minHeight)) {
-                    var minH = btnLen > 0 ? Config.BoxBarHeight: 0;
+                    var minH = btn.len > 0 ? Config.BoxBarHeight: 0;
                     minH += (len >= 3 ? Config.BoxMinHeight[1] : len * Config.BoxItemHeight);
                     if (opt.minHeight < minH) {
                         opt.minHeight = minH;
@@ -743,106 +1123,11 @@
                 ].join('');
 
                 var html = [
-                    '<ul class="oui-ddl-box oui-ddl-', opt.layout, '">'
-                ], i, n = len.toString().length;
-
-                var columns = opt.columns || 0,
-                    conWidth = Factory.getItemConWidth(opt.items, opt.itemWidth, columns, opt.choose),
-                    minWidth = opt.layout === Config.Layout.Grid ? conWidth : 0;
-
-                if (!opt.multi && opt.allowEmpty) {
-                    html.push([
-                        '<li class="oui-ddl-item" style="',
-                        opt.layout !== Config.Layout.List ? 'float:left;' : '',
-                        opt.layout === Config.Layout.Grid ? 'min-width:' + Factory.getStyleSize(minWidth || opt.itemWidth) + ';' : '',
-                        '">',
-                        '<label  class="oui-ddl-label', opt.layout !== Config.Layout.List && opt.border ? ' oui-ddl-label-border' : '', '">',
-                        '<input class="oui-ddl-chb"', checked,
-                        ' type="', opt.multi ? 'checkbox' : 'radio', '"',
-                        ' id="', '"',
-                        ' name="', key, '"',
-                        ' value="', '"',
-                        ' text="', opt.allowEmpty, '"',
-                        ' style="display:' + (opt.choose ? '' : 'none') + ';"',
-                        ' />',
-                        '<span>', opt.allowEmpty, '</span>',
-                        '</label>',
-                        '</li>'
-                    ].join(''));
-                }
-                var align = opt.textAlign ? 'text-align:' + opt.textAlign + ';' : '';
-                for (i = 0; i < len; i++) {
-                    var dr = opt.items[i], n;
-                    if (dr === 'sep' || dr.sep || dr.type === 'sep') {
-                        html.push(['<li class="oui-ddl-item oui-ddl-sep"></li>'].join(''));
-                    } else if (dr.head) {
-                        html.push(['<li class="oui-ddl-item oui-ddl-head">', dr.head, '</li>'].join(''));
-                    } else {
-                        if ($.isString(dr, true)) {
-                            if (dr.indexOf(':') > 0) {
-                                n = dr.indexOf(':');
-                                dr = {val: dr.substr(0, n), txt: dr.substr(n + 1)};
-                            } else {
-                                dr = {val: dr, txt: dr};
-                            }
-                        } else if ($.isNumber(dr)) {
-                            dr = {val: dr, txt: dr};
-                        } else if ($.isArray(dr)) {
-                            dr = {val: dr[0], txt: dr[1] || dr[0]}
-                        } else if (!$.isObject(dr)) {
-                            continue;
-                        }
-                        var val = $.getParam(dr, (opt.field || '') + ',value,val,id', ''),
-                            txt = $.getParam(dr, 'name,text,txt', '') + '',
-                            con = $.getParam(dr, 'code');
-
-                        if (val === '' && con && con !== '') {
-                            val = con;
-                        }
-
-                        if (val === '' && txt === '') {
-                            continue;
-                        }
-
-                        var chbId = key + val,
-                            checked = dr.checked || dr.dc ? ' checked="checked" dc="1"' : '',
-                            use = dr.enabled || dr.use,
-                            disabled = dr.disabled ? ' disabled="disabled"' : '',
-                            desc = dr.desc || '',
-                            title = '<span class="oui-ddl-li-txt">' + (opt.display && val !== txt ? val + '<u>-</u>' + txt : txt) + '</span>' +
-                                (desc && txt !== desc ? '<span class="oui-ddl-li-txt i-t">' + desc + '</span>' : '');
-
-                        html.push([
-                            '<li class="oui-ddl-item" style="',
-                            opt.layout !== Config.Layout.List ? 'float:left;' : '',
-                            opt.layout === Config.Layout.Grid ? 'min-width:' + Factory.getStyleSize(minWidth || opt.itemWidth) + ';' : '',
-                            '" opt-idx="', (i + 1), '" data-value="', val.toString().replace(/["]/g, '&quot;'), '"',
-                            '>',
-                            '<label class="oui-ddl-label', opt.layout !== Config.Layout.List && opt.border ? ' oui-ddl-label-border' : '', '"',
-                            ' style="',
-                            opt.number ? 'padding-left:4px;' : '', align,
-                            '"',
-                            '>',
-                            opt.number ? '<i style="width:' + (n * 12) + 'px;">' + (i + 1)  + '</i>' : '',
-                            '<input class="oui-ddl-chb"', checked,
-                            ' type="', opt.multi ? 'checkbox' : 'radio', '"',
-                            ' id="', chbId, '"',
-                            ' name="', key, '"',
-                            ' value="', val, '"',
-                            ' code="', con, '"',
-                            ' text="', (txt).filterHtml(true).replace(/["]/g, '&quot;'), '"',
-                            ' desc="', (desc).filterHtml(true).replace(/["]/g, '&quot;'), '"',
-                            ' style="display:' + (opt.choose ? '' : 'none') + ';"',
-                            ' />',
-                            '<span', (use || typeof use === 'undefined') ? '' : ' class="del"', '>', title, '</span>',
-                            '</label>',
-                            '</li>'
-                        ].join(''));
-                    }
-                }
-                html.push('</ul>');
-                html.push(btn.join(''));
-
+                    '<ul class="oui-ddl-box oui-ddl-', opt.layout, '" id="', key, '_list">',
+                    Factory.buildItems(that, opt.items),
+                    '</ul>',
+                    btn.html
+                ];
                 box.innerHTML = html.join('');
                 box.show = false;
                 that.box = box;
@@ -850,214 +1135,18 @@
                 that.con = box.childNodes[0];
                 that.bar = box.childNodes[1];
 
-                $.addListener(document, 'mousedown', function (ev) {
-                    if (!$.isInElement(that.box, ev) && !$.isInElement(opt.select ? that.elem : that.text, ev)) {
-                        that.hide();
-                    }
-                    return false;
-                });
-                $.addListener(document, 'keyup', function (ev) {
-                    if (27 === $.getKeyCode(ev)) {   // Esc键值为27
-                        that.hide();
-                    }
-                    return false;
-                });
-                
-                $.addListener(document, 'wheel', function (ev) {
-                    if (that.box.style.display !== 'none' && !$.isOnElement(that.box, ev)) {
-                        that.hide();
-                    }
-                    return false;
-                });
-
-                $.addListener(elem, 'wheel', function (ev) {
-                    if (that.box.style.display !== 'none') {
-                        that.hide();
-                    }
-                    return false;
-                });
-                
-                var arr = $N(key);
-                for (i = 0; i < arr.length; i++) {
-                    var chb = arr[i];
-                    that.nodes.push(new Node({
-                        elem: elem,
-                        id: chb.value,
-                        idx: i + 1,
-                        label: chb.parentNode,
-                        input: chb,
-                        multi: opt.multi,
-                        callback: function (node) {
-                            var val = node.value,
-                                txt = node.text + (node.desc ? ' - ' + node.desc : '');
-                            if ($.isFunction(opt.beforeChange)) {
-                                opt.beforeChange(val, txt, function() {
-                                    $.setAttribute(elem, 'opt-hover', 0);
-                                    that.action(node, null, true);
-                                });
-                            } else {
-                                $.setAttribute(elem, 'opt-hover', 0);
-                                that.action(node, null, true);
-                            }
-                        }
-                    }));
-                    that.indexs[chb.id] = i;
-                }
-
-                that.items = document.querySelectorAll('#' + Config.IdPrefix + opt.id + ' li');
-                that.buttons = document.querySelectorAll('#' + Config.IdPrefix + opt.id + ' .oui-ddl-oper .oui-ddl-btn');
-                that.texts = document.querySelectorAll('#' + Config.IdPrefix + opt.id + ' .oui-ddl-edit .oui-ddl-new');
-
-                for (i = 0; i < that.buttons.length; i++) {
-                    if (opt.shortcutKey) {
-                        if (opt.shortcutNum) {
-                            that.buttons[i].innerHTML += '<em>(<u>' + (i + 1) + '</u>)</em>';
-                        }
-                        that.buttons[i].title += '快捷键: shift + ' + (i + 1);
-                    }
-                    $.addListener(that.buttons[i], 'click', function(ev) {
-                        elem.focus();
-                        var ac = $.getAttribute(this, 'ac');
-                        if (ac === 'no') {
-                            that.hide();
-                        } else if (ac === 'ok') {
-                            that.callback(Config.CallbackLevel.Return);
-                            that.hide();
-                        } else {
-                            that.set('', parseInt(ac, 10));
-                            that.callback(Config.CallbackLevel.Select);
-                        }
-                    });
-                }
-                $.addListener(elem, 'mousedown', function (ev) {
-                    $.cancelBubble(ev);
-                    that.show(this);
-                    this.focus();
-                    Factory.closeOther(that);
-
-                    return true;
-                });
-                $.addListener(elem, 'keydown', function (ev) {
-                    var kc = $.getKeyCode(ev),
-                        idx = ($.getAttribute(elem, 'opt-idx') || '').toInt(),
-                        div = $I($.getAttribute(elem, 'opt-id')),
-                        arrowList = [37, 38, 40, 39],   //左 上 下 右
-                        vimKeyList = [72, 75, 74, 76, 77],  //H  K  J  L M(中间)
-                        numList = [49, 50, 51, 52, 53],
-                        minList = [97, 98, 99, 100, 101];
-
-                    if (kc.inArray([13, 32, 108])) {
-                        this.focus();
-                        $.cancelBubble(ev);
-                        var hover = $.getAttribute(elem, 'opt-hover', '0').toInt();
-                        if (hover) {
-                            that.action(idx, null, false);
-                            $.setAttribute(elem, 'opt-hover', 0);
-                        } else {
-                            that.show(this);
-                        }
-                    } else if (kc.inArray([9, 27])) {
-                        if(div !== null && div.style.display !== 'none') {
-                            $.cancelBubble(ev);
-                        }
-                        that.hide();
-                    } else if (kc.inArray(arrowList) || kc.inArray(vimKeyList)) {
-                        $.cancelBubble(ev);
-                        if (kc.inArray(vimKeyList)) {
-                            kc = arrowList[vimKeyList.indexOf(kc)] || kc;
-                        }
-                        idx = kc.inArray([37, 38]) ? idx - 1 : idx + 1;
-                        that.select(idx, kc, false, that.con);
-                        return false;
-                    } else if (opt.shortcutKey && ev.shiftKey && (kc.inArray(numList) || kc.inArray(minList))) {
-                        var i = numList.indexOf(kc);
-                        if (i < 0) {
-                            i = minList.indexOf(kc);
-                        }
-                        $.trigger(that.buttons[i], 'click');
-                    } else if (kc >= 48 && kc % 48 < 10) {
-                        that.select(kc % 48, kc, true, that.con);
-                    }
-                    return false;
-                });
-
-                if (opt.editable && that.texts.length > 0) {
-                    function _inputNewVal() {
-                        $.removeClass(that.texts[0], 'oui-ddl-val-err');
-                        
-                        var val = that.texts[0].value.trim(),
-                            type = $.getAttribute(that.texts[0], 'data-type'),
-                            num = false, min, max;
-                        if (val === '') {
-                            that.elem.focus();
-                            return false;
-                        }
-                        switch(type) {
-                        case 'int': case 'long': num = true; val = parseInt(val, 10); break;
-                        case 'float': case 'double': num = true; val = parseFloat(val, 10); break;
-                        }
-                        if (num) {
-                            if (isNaN(val)) {
-                                $.console.log('oui-ddl-edit:', that.id, type, ', input value format error');
-                                $.addClass(that.texts[0], 'oui-ddl-val-err');
-                                return false;
-                            } else {
-                                if ($.isNumber((min = opt.config.minValue)) && val < min) {
-                                    $.console.log('oui-ddl-edit:', that.id, ', input number entered must be greater than or equal to ' + min);
-                                    $.addClass(that.texts[0], 'oui-ddl-val-err');
-                                    return false;
-                                }
-                                if ($.isNumber((max = opt.config.maxValue)) && val > max) {
-                                    $.console.log('oui-ddl-edit:', that.id, ', input number should be less than or equal to ' + max);
-                                    $.addClass(that.texts[0], 'oui-ddl-val-err');
-                                    return false;
-                                }
-                            }
-                        }
-                        if (!opt.config.keep) {
-                            that.texts[0].value = '';
-                        }
-                        that.set(val);
-                        that.callback(opt.callbackLevel);
-                    }
-                    $.addListener(that.texts[0], 'keyup', function(ev) {
-                        if (ev.keyCode === 13) {
-                            _inputNewVal();
-                        }
-                    });
-                    $.addListener(that.texts[1], 'click', function(ev) {
-                        _inputNewVal();
-                    });
-                    // 65 - A; 73 - I
-                    // shift
-                    $.addHitListener(elem, 'keyup', [65, 73], function(ev) {
-                        ev.keyCode === 65 ? that.form() : that.form(true, true);
-                    }, true);
-                }
-
-                Object.defineProperty(elem, 'val', {
-                    /*
-                    value: 'hello',
-                    writable: true,
-                    configurable: true,
-                    */
-                    get: function () {
-                        return elem.value;
-                    },
-                    set: function (val) {
-                        $.console.log('set [property]', elem.id, val, typeof val);
-                        if (val !== undefined) {
-                            elem.inputValue = val;
-                            that.set(val, true);
-                        }
-                    }
-                });
+                Factory.setNodes(that, false)
+                    .initValue(that)
+                    .setButtonEvent(that)
+                    .setElemEvent(that)
+                    .setElemProperty(that)
+                    .setEditEvent(that);
 
                 if (!$.isUndefinedOrNull(opt.value) && (opt.value !== '' || !opt.multi)) {
-                    that.set(opt.value, true, false, true);
+                    that.set(opt.value, {initial: true});
                 } else if (!opt.multi) {
                     if ($.isNumber(opt.index) && opt.index >= 0) {
-                        that.select(opt.index + 1, null, null, box, Config.CallbackLevel.Initial);
+                        that.select(opt.index + 1, {panel: box, level: Config.CallbackLevel.Initial});
                     }
                 }
 
@@ -1068,16 +1157,45 @@
 
             return that;
         },
-        select: function (num, keyCode, shortcut, div, callbackLevel) {
+        update: function (arg) {
+            var that = this,
+                opt = that.options,
+                key = Config.ItemPrefix + that.id,
+                len = opt.items.length,
+                items = $.extend([], arg.items, arg.options),
+                par = $.extend({
+                    append: false,
+                    value: null
+                }, arg);
+
+            if (par.append) {
+                opt.items = opt.items.concat(items);
+            } else {
+                opt.items = items;
+            }
+
+            Factory.buildItems(that, opt.items, key + '_list')
+                .setNodes(that)
+                .initValue(that);
+
+            return that.size().position().set(par.value);
+        },
+        select: function (num, arg) {
             var that = this,
                 opt = that.options,
                 nodes = that.nodes,
                 len = nodes.length,
                 elem = opt.select ? that.elem : that.text,
                 idx = num < 0 ? 0 : num > len ? len : num,
-                cur = $.getAttribute(elem, 'opt-idx').toInt();
+                cur = $.getAttribute(elem, 'opt-idx').toInt(),
+                par = $.extend({
+                    keyCode: null,
+                    shortcut: null,
+                    panel: null,
+                    level: 0
+                }, arg);
 
-            if (shortcut) {
+            if (par.shortcut) {
                 if (len >= 10) {
                     var ni = cur * 10 + idx;
                     if (ni > len) {
@@ -1086,8 +1204,8 @@
                     idx = ni;
                 }
             } else {
-                if ($.isNumber(keyCode)) {
-                    switch(keyCode) {
+                if ($.isNumber(par.keyCode)) {
+                    switch(par.keyCode) {
                         case 37: idx = 1; break;
                         case 39: idx = len; break;
                         case 77: idx = parseInt(len / 2, 10) + (len % 2 ? 1 : 0); break;
@@ -1098,7 +1216,7 @@
                 }
             }
             $.setAttribute(elem, 'opt-idx', idx--);
-            $.scrollTo(nodes[idx < 0 ? 0 : idx].label, div);
+            $.scrollTo(nodes[idx < 0 ? 0 : idx].label, par.panel);
 
             if (opt.multi) {
                 for (var i = 0; i < nodes.length; i++) {
@@ -1106,7 +1224,7 @@
                 }
                 $.setAttribute(elem, 'opt-hover', 1);
             } else {
-                that.action(nodes[idx], null, false, callbackLevel);
+                that.action(nodes[idx], {level: par.level});
                 if (idx < 0 && cur > 0) {
                     nodes[cur - 1].set(false, false);
                     that.get();
@@ -1114,17 +1232,22 @@
             }
             return that;
         },
-        action: function (node, show, clickEvent, callbackLevel) {
+        action: function (node, arg) {
             var that = this,
                 opt = that.options,
                 nodes = that.nodes,
-                multi = opt.multi;
+                multi = opt.multi,
+                par = $.extend({
+                    show: false,
+                    click: false,
+                    level: 0
+                }, arg);
 
             if ($.isNumber(node)) {
                 node = nodes[node - 1];
             }
             if (!node) {
-                return that.callback(callbackLevel);
+                return that.callback(par.level);
             }
 
             if (multi) {
@@ -1132,22 +1255,22 @@
                 if (!node.checked && opt.maxLimit && that.list(true).length >= opt.maxLimit) {
                     return that.msg();
                 }
-                node.set(!node.checked, clickEvent);
+                node.set(!node.checked, par.click);
                 $.setClass(node.label, 'oui-ddl-hover', false);
             } else {
                 for (var i = 0; i < nodes.length; i++) {
                     nodes[i].set(nodes[i].idx === node.idx, true);
                 }
-                if (!show && clickEvent) {
+                if (!par.show && par.click) {
                     that.hide();
                 }
             }
             if (multi && nodes.length > 1 && opt.callbackDebounce) {
                 $.debounce({}, function() {
-                    that.callback(callbackLevel);
+                    that.callback(par.level);
                 });
             } else {
-                return that.callback(callbackLevel);
+                return that.callback(par.level);
             }
             return that;
         },
@@ -1157,24 +1280,34 @@
             $.alert(opt.maxLimitMsg || ((opt.name || '') + '\u6700\u591a\u53ea\u80fd\u9009\u62e9' + opt.maxLimit + '\u4e2a'));
             return that;
         },
-        set: function (val, ac, dc, initial) {
+        set: function (val, arg) {
             var that = this,
                 opt = that.options,
                 nodes = that.nodes,
                 elem = that.elem,
-                cur = $.getAttribute(elem, 'opt-idx').toInt() - 1,
-                idx = 0;
+                cur = $.getAttribute(elem, 'opt-idx', '').toInt() - 1,
+                idx = 0,
+                par = $.extend({
+                    action: true,
+                    checked: false,
+                    initial: false,
+                    edit: false
+                }, arg);
 
-            if (ac && opt.maxLimit && that.list(true).length >= opt.maxLimit) {
+            if ($.isUndefinedOrNull(val)) {
+                val = '';
+            }
+
+            if (par.action && opt.maxLimit && that.list(true).length >= opt.maxLimit) {
                 $.console.log('set [limit]:', that.id, opt.maxLimit);
                 return that.msg();
             }
 
-            if ($.isNumber(ac)) {
-                switch (ac) {
+            if ($.isNumber(par.action)) {
+                switch (par.action) {
                     case 0:
                     case 1:
-                        for (var i = 0; i < nodes.length; i++) { nodes[i].set(ac); }
+                        for (var i = 0; i < nodes.length; i++) { nodes[i].set(par.action); }
                         break;
                     case 2:
                         for (var i = 0; i < nodes.length; i++) { nodes[i].set(!nodes[i].checked); }
@@ -1184,31 +1317,31 @@
                         break;
                 }
             } else {
-                ac = $.isBoolean(ac, true);
-                dc = $.isBoolean(dc, false);
+                par.action = $.isBoolean(par.action, true);
+                par.checked = $.isBoolean(par.checked, false);
                 
-                if (!Factory.isInList(nodes, val)) {
+                if (par.edit && !Factory.isInList(nodes, val)) {
                     if (cur >= 0 && nodes[cur]) {
                         nodes[cur].set(false, false);
                     }
-                    idx = initial ? 1 : 0;
+                    idx = par.initial ? 1 : 0;
                     $.setAttribute(elem, 'opt-idx', idx);
                     if (idx > 0) {
                         nodes[idx - 1].set(true, true);
                     }
-                    if (!initial && opt.editable) {
+                    if (!par.initial && opt.editable) {
                         elem.inputValue = val;
                         elem.focus();
                         return that.callback(opt.callbackLevel).hide();
                     }
                     return that.get();
                 }
-
+                
                 var vals = !$.isArray(val) ? val.toString().split(/[,\|]/) : val.join(',').split(',');
                 if (opt.multi) {
                     for (var i = 0; i < nodes.length; i++) {
                         if (vals.indexOf(nodes[i].value) > - 1) {
-                            nodes[i].setVal(ac, dc);
+                            nodes[i].setVal(par.action, par.checked);
                             idx = nodes[i].idx;
                         }
                     }
@@ -1216,13 +1349,13 @@
                     var c = 0;
                     for (var i = 0; i < nodes.length; i++) {
                         if (nodes[i].value === vals[0]) {
-                            nodes[i].setVal(c <= 0 ? ac : false, dc);
-                            if (c <= 0 && ac) {
+                            nodes[i].setVal(c <= 0 ? par.action : false, par.checked);
+                            if (c <= 0 && par.action) {
                                 idx = nodes[i].idx;
                             }
                             c++;
                         } else {
-                            nodes[i].setVal(false, dc);
+                            nodes[i].setVal(false, par.checked);
                         }
                     }
                 }
@@ -1234,7 +1367,7 @@
                     for (var i = opt.maxLimit; i < len; i++) {
                         vals.push(list[i]);
                     }
-                    that.set(vals, false, false);
+                    that.set(vals, {action: false});
                 }
             }
             if (!opt.multi) {
@@ -1243,6 +1376,9 @@
                     nodes[idx - (idx > 0 ? 1 : 0)].set(true, false);
                     $.setAttribute(elem, 'opt-idx', idx);
                     that.get();
+                    if (par.edit) {
+                        return that.callback(opt.callbackLevel).hide();
+                    }
                 }
             } else {
                 that.get();
@@ -1328,6 +1464,7 @@
             var that = this,
                 opt = that.options,
                 vals = that.get(),
+                elem = opt.select ? that.elem : that.text,
                 level = !$.isNumber(callbackLevel) ? 0 :(callbackLevel || 0);
 
             if (level === Config.CallbackLevel.Initial) {
@@ -1339,8 +1476,13 @@
                     return that;
                 }
             }
-            if ((opt.initial || level !== Config.CallbackLevel.Initial) && $.isFunction(opt.callback)) {
-                opt.callback(vals, level === Config.CallbackLevel.Initial, that);
+            if ((opt.initial || level !== Config.CallbackLevel.Initial)) {
+                if ($.isFunction(opt.callback)) {
+                    opt.callback(vals, level === Config.CallbackLevel.Initial, that);
+                }
+                if (opt.change) {
+                    $.trigger(elem, 'change');
+                }
             }
             return that;
         },
@@ -1623,14 +1765,14 @@
     };
 
     $.extend({
-        dropdownlist: function (id, options) {
-            return Factory.buildList(id, options);
+        dropdownlist: function (id, par) {
+            return Factory.buildList(id, par);
         },
-        ddlist: function (id, options) {
-            return Factory.buildList(id, options);
+        ddlist: function (id, par) {
+            return Factory.buildList(id, par);
         },
-        singlelist: function (id, options) {
-            return Factory.buildList(id, options, true);
+        singlelist: function (id, par) {
+            return Factory.buildList(id, par, true);
         }
     });
 
@@ -1645,9 +1787,36 @@
         set: function(id, values, action, defaultChecked) {
             var cache = Factory.getCache(id);
             if (cache) {
-                cache.ddl.set(values, action, defaultChecked);
+                return cache.ddl.set(values, {action: action, checked: defaultChecked});
             }
             return this;
+        },
+        update: function (id, par) {
+            if ($.isObject(id) && $.isUndefined(par)) {
+                par = id;
+                id = null;
+            }
+            if ($.isArray(par)) {
+                par = {items: par};
+            }
+            var cache = Factory.getCache(id);
+            if (cache) {
+                return cache.ddl.update(par);
+            } else {
+                return Factory.buildList(id, par);
+            }
+        }
+    });
+
+    $.extend($.singlelist, {
+        get: function(id) {
+            return $.dropdownlist.get(id);
+        },
+        set: function(id, values, action, defaultChecked) {
+            return $.dropdownlist.set(id, values, action, defaultChecked);
+        },
+        update: function (id, par) {
+            return $.dropdownlist.update(id, par);
         }
     });
 
@@ -1657,6 +1826,9 @@
         },
         set: function(id, values, action, defaultChecked) {
             return $.dropdownlist.set(id, values, action, defaultChecked);
+        },
+        update: function (id, par) {
+            return $.dropdownlist.update(id, par);
         }
     });
 }(OUI);
