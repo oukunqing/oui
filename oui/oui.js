@@ -4904,7 +4904,16 @@
             } else {
                 codes = $.isArray(keyCode) ? keyCode : [keyCode];
             }
-            if ($.isBoolean(timeout)) {
+            if ($.isObject(timeout)) {
+                var par = $.extend({
+                    timeout: 3000,
+                    times: times || 5,
+                    shiftKey: $.isBoolean(isShiftKey, false)
+                }, timeout);
+                timeout = par.timeout;
+                times = par.times;
+                isShiftKey = $.getParam(par, 'shiftKey,shift');
+            } else if ($.isBoolean(timeout)) {
                 isShiftKey = timeout;
                 timeout = 0;
                 times = 0;

@@ -1845,7 +1845,11 @@ var names =  [
             '可选项：',
             '内容格式错误',
             '端口数值应介于',
-            '之间'
+            '之间',
+            '确定',
+            '选项不存在？',
+            '找不到选项？',
+            '请输入：'
             ];;
         for(var i =0; i<names.length;i++){
             console.log('//', names[i], names[i].toUnicode());

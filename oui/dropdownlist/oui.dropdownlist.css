@@ -105,10 +105,10 @@
 
 li.oui-ddl-item {
 	display: block;
-	margin: 0 0 0 1px;
+	margin: 0 1px 0 1px;
 	padding: 0;
 	overflow: hidden;
-	height: 29px;
+	height: 30px;
 	border: none 0;
 }
 li.oui-ddl-sep {
@@ -124,14 +124,14 @@ li.oui-ddl-head {
 	color: #777;
 	padding: 0 10px;
 	font-size: 12px;
-	height: 24px;
-    line-height: 24px;
+	height: 26px;
+    line-height: 26px;
     white-space: nowrap;
 }
 label.oui-ddl-label {
     font-size: 14px;
-    height: 29px;;
-    line-height: 29px;
+    height: 30px;;
+    line-height: 30px;
     padding: 0 9px;
     margin: 0;
     display: block;
@@ -142,7 +142,7 @@ label.oui-ddl-label {
 label.oui-ddl-label span {
 	margin: 0 0 0 0;
 	float: none;
-	line-height: 29px;
+	line-height: 30px;
 	overflow: hidden;
 }
 
@@ -180,7 +180,7 @@ label.oui-ddl-label-border {
     border-radius: 5px;
     padding: 0 5px;
     margin: 0 0 5px 0;
-    line-height: 27px;
+    line-height: 28px;
 }
 label.oui-ddl-item-cur {
 	background: #eee;
@@ -194,9 +194,9 @@ input.oui-ddl-chb {
 	float: left;
 	display: inline-block;
     border: solid 1px #ddd;
-    min-width: 13px;
-    width: 13px;
-    height: 13px;
+    min-width: 14px;
+    width: 14px;
+    height: 14px;
     margin: 8px 5px 0 0;
 }
 label.oui-ddl-label-border input.oui-ddl-chb {
@@ -205,7 +205,7 @@ label.oui-ddl-label-border input.oui-ddl-chb {
 ul.oui-ddl-box {
 	display: block;
 	margin: 0;
-	padding: 0;
+	padding: 1px 0;
 	overflow: auto;
 	clear: both;
 	border: none;
@@ -217,7 +217,7 @@ ul.oui-ddl-flow,ul.oui-ddl-grid {
 ul.oui-ddl-flow li.oui-ddl-item, ul.oui-ddl-grid li.oui-ddl-item {
 	float:left;
 	border: none 0;
-	height: 34px;
+	height: 35px;
 	margin: 0;
 	padding: 0;
 }
@@ -273,8 +273,8 @@ ul.oui-ddl-flow label.oui-ddl-item-cur:hover,ul.oui-ddl-grid label.oui-ddl-item-
 .oui-ddl-panel .btn {
 	border:solid 1px #ccc;
 	box-sizing: border-box;
-	height: 29px;
-	line-height: 19px;
+	height: 30px;
+	line-height: 20px;
 	padding: 3px 6px;
 	margin: 0;
 	font-size: 14px;
@@ -386,9 +386,11 @@ ul.oui-ddl-flow label.oui-ddl-item-cur:hover,ul.oui-ddl-grid label.oui-ddl-item-
 .oui-ddl-edit .oui-ddl-form {
 	border-top: solid 1px #f1f1f1;
 	margin: 0 1px;
-	padding: 5px 4px ;
+	padding: 0;
 	display: block;
 	overflow: hidden;
+	position: relative;
+	height: 42px;
 }
 
 .oui-ddl-edit .oui-ddl-val {
@@ -403,6 +405,9 @@ ul.oui-ddl-flow label.oui-ddl-item-cur:hover,ul.oui-ddl-grid label.oui-ddl-item-
 	border-radius: 5px;
 	border-top-right-radius: 0;
 	border-bottom-right-radius: 0;
+	position: absolute;
+	top: 6px;
+	left: 5px;
 
 }
 .oui-ddl-edit .oui-ddl-val-err {
@@ -426,4 +431,7 @@ ul.oui-ddl-flow label.oui-ddl-item-cur:hover,ul.oui-ddl-grid label.oui-ddl-item-
 	box-sizing: border-box;
 	border-top-left-radius: 0;
 	border-bottom-left-radius: 0;
+	top: 6px;
+	right: 5px;
+	position: absolute;
 }

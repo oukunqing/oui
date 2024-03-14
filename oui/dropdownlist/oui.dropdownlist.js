@@ -581,9 +581,17 @@
                         _inputNewVal();
                     });
                     // 65 - A; 73 - I
-                    // shift
+                    // shift                    
                     $.addHitListener(elem, 'keyup', [65, 73], function(ev) {
                         ev.keyCode === 65 ? that.form() : that.form(true, true);
+                    }, 2000, 3, true);
+                    /*
+                    $.addHitListener(elem, 'keyup', [65, 73], function(ev) {
+                        ev.keyCode === 65 ? that.form() : that.form(true, true);
+                    }, {times: 3, shift: true});
+                    */
+                    $.addKeyListener(elem, 'keyup', [69, 70], function(ev) {
+                        ev.keyCode === 69 ? that.form(null, true) : that.focus(true);
                     }, true);
                 }
                 return this;
@@ -903,6 +911,8 @@
             callback: undefined,
             //初始化时是否回调，默认不回调
             initial: undefined,
+            //完成后回调
+            complete: undefined,
             //是否触发onchange事件
             change: true,
             //Function:选项切换时触发
@@ -928,6 +938,7 @@
         opt.x = parseInt('0' + $.getParam(opt, 'left,x', 0), 10);
         opt.y = parseInt('0' + $.getParam(opt, 'margin,top,y', 0), 10);
         opt.w = parseInt('0' + $.getParam(opt, 'w', 0), 10);
+        opt.change = $.isBoolean($.getParam(opt, 'onchange,change'), true);
 
         if (opt.editable) {
             opt.config = $.extend({
@@ -935,8 +946,10 @@
                 dataType: null,
                 minValue: null,
                 maxValue: null,
-                placeholder: '选项不存在？请输入：',
-                button: '确定',
+                //找不到选项？请输入：
+                placeholder: '\u627e\u4e0d\u5230\u9009\u9879\uff1f\u8bf7\u8f93\u5165\uff1a',
+                //确定
+                button: '\u786e\u5b9a',
                 //是否保留输入框内容
                 keep: false,
                 show: true
@@ -953,6 +966,7 @@
         this.nodes = [];
         this.indexs = {};
         this.activity = false;
+        this.cache = {};
 
         this.initial();
     }
@@ -973,9 +987,12 @@
             if (!$.isArray(opt.items)) {
                 opt.items = [];
             }
+            //保存原始的选项
+            that.cache['originOptions'] = Factory.getElementOptionConfig(elem);
+
             //如果没有配置选项，则尝试从元素属性中获取
             if (opt.origin || opt.items.length <= 0) {
-                opt.items = Factory.getElementOptionConfig(elem).concat(opt.items);
+                opt.items = that.cache['originOptions'].concat(opt.items);
                 if (elem.tagName === 'SELECT') {
                     opt.index = opt.index || elem.selectedIndex || opt.index;
                 }
@@ -1150,7 +1167,7 @@
                     }
                 }
 
-                that.callback(Config.CallbackLevel.Initial);
+                that.complete(true).callback(Config.CallbackLevel.Initial);
             }, document.body);
 
             Factory.setWindowResize();
@@ -1178,7 +1195,7 @@
                 .setNodes(that)
                 .initValue(that);
 
-            return that.size().position().set(par.value);
+            return that.size().position().set(par.value).complete();
         },
         select: function (num, arg) {
             var that = this,
@@ -1479,10 +1496,24 @@
             if ((opt.initial || level !== Config.CallbackLevel.Initial)) {
                 if ($.isFunction(opt.callback)) {
                     opt.callback(vals, level === Config.CallbackLevel.Initial, that);
+                } else if ($.isDebug()) {
+                    $.console.log(that.id, '[callback]', ', values:', vals, ', initial:', initial, that);
                 }
                 if (opt.change) {
                     $.trigger(elem, 'change');
                 }
+            }
+            return that;
+        },
+        complete: function (initial) {
+            var that = this,
+                opt = that.options,
+                vals = that.get();
+
+            if ($.isFunction(opt.complete)) {
+                opt.complete(vals, $.isBoolean(initial, false), that);
+            } else if ($.isDebug()) {
+                $.console.log(that.id, '[complete]', ', values:', vals, ', initial:', initial, that);
             }
             return that;
         },
@@ -1755,6 +1786,20 @@
                     that.texts[i].style.width = tw + 'px';
                     that.texts[i].style.display = '';
                 }
+            }
+            return that;
+        },
+        focus: function (edit) {
+            var that = this,
+                opt = that.options,
+                elem = opt.select ? that.elem : that.text;
+
+            if (edit) {
+                if (opt.editable && that.texts.length > 0 && that.texts[0].style.display !== 'none') {
+                    that.texts[0].focus();
+                }
+            } else {
+                elem.focus();
             }
             return that;
         },

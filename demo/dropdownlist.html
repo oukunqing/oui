@@ -164,14 +164,16 @@ window.onload = function() {
 		title: '选择服务类型',
 		//按钮位置： left,center,right
 		buttonPosition: 'right',
+		complete: function (values, initial, ddl) {
+			$.console.log(ddl.id, '[complete]', ', values:', values, ', initial:', initial, ddl);
+		},
 		callback: function (values, initial, ddl) {
-			$.console.log('initial22:', values, initial, ddl);
+			$.console.log(ddl.id, '[callback]', ', values:', values, ', initial:', initial);
 			getDeviceList();
 		}
 	});
 
 	$I('ServerType').val = 2;
-	
 
 	window.setTimeout(function() {
 		$.singlelist.update('ServerType', {
@@ -187,15 +189,17 @@ window.onload = function() {
 			value: 16,
 			append: true,
 			//更新模式下，以下参数不起作用
+			/*
 			select: false,
 			layout: 'list',
 			single: true,
 			display: true,
 			number: true,
 			callback: function (values, initial, ddl) {
-				$.console.log('initial22:', values, initial, ddl);
+				$.console.log(ddl.id, '[callback]', ', values:', values, ', initial:', initial);
 				getDeviceList();
 			}
+			*/
 		});
 	}, 5000);
 	
@@ -226,7 +230,7 @@ window.onload = function() {
 		//按钮位置： left,center,right
 		buttonPosition: 'right',
 		callback: function (values, initial, ddl) {
-			$.console.log('initial22:', values, initial, ddl);
+			$.console.log(ddl.id, '[callback]', ', values:', values, ', initial:', initial);
 			getDeviceList();
 		}
 	});
@@ -281,7 +285,7 @@ window.onload = function() {
 		//按钮位置： left,center,right
 		buttonPosition: 'right',
 		callback: function (values, initial, ddl) {
-			$.console.log('initial22:', values, initial, ddl);
+			$.console.log(ddl.id, '[callback]', ', values:', values, ', initial:', initial);
 			getDeviceList();
 		}
 	});
@@ -338,7 +342,7 @@ window.onload = function() {
 			buttonLimit: i === 1 || i === 4 || i === 7 ? 3 : i === 2 || i === 5 || i === 8 ? 1 : -1,
 			callbackLevel: i >= 3 ? 0 : 1,
 			callback: function (values, initial, ddl) {
-				$.console.log('initial22:', values, initial, ddl);
+				$.console.log(ddl.id, '[callback]', ', values:', values, ', initial:', initial);
 				getDeviceList();
 			}
 		});
@@ -403,7 +407,7 @@ window.onload = function() {
 		//按钮位置： left,center,right
 		buttonPosition: 'right',
 		callback: function (values, initial, ddl) {
-			$.console.log('initial22:', values, initial, ddl);
+			$.console.log(ddl.id, '[callback]', ', values:', values, ', initial:', initial);
 			getDeviceList();
 		}
 	});
@@ -437,7 +441,7 @@ window.onload = function() {
 			//按钮位置： left,center,right
 			buttonPosition: 'right',
 			callback: function (values, initial, ddl) {
-				$.console.log('initial22:', values, initial, ddl);
+				$.console.log(ddl.id, '[callback]', ', values:', values, ', initial:', initial);
 				getDeviceList();
 			},
 			editable: i > 0,
@@ -474,7 +478,7 @@ window.onload = function() {
 			//按钮位置： left,center,right
 			buttonPosition: 'right',
 			callback: function (values, initial, ddl) {
-				$.console.log('initial22:', values, initial, ddl);
+				$.console.log(ddl.id, '[callback]', ', values:', values, ', initial:', initial);
 				getDeviceList();
 			}
 		});
