@@ -1877,3 +1877,55 @@ console.log(true ?? 'printB')
 
 console.log('1:CIF(352×288),2:CIF(352×288),3:4CIF(704×576),5:4CIF(704×576),7:WD1(960×576),36:WD1(960×576),16:VGA(640×480),18:SVGA(800×600),14:XVGA(1024×768),35:SXGA(1280×1024),17:UXGA(1600×1200),57:WXGA(1280×800),19:HD720P(1280×720),41:HD720P(1280×720),21:HD900P(1280×960),23:HD900P(1280×960),27:1080P(1920×1080),43:1080P(1920×1080),30:3MP(2048×1536),70:4MP(2560×1440),44:5MP(2592×2048),66:5MP(3072×1728),64:8MP(3840×2160),63:8MP(4096×2160)'.split(/[,]/));
 console.log('1:CIF(352×288)'.split(/[:\|]/));
+
+
+var types = [
+    { id: 1, name: '视频设备', desc: '400万像素高清摄像机' },
+    { id: 2, name: 'DTU设备', desc: '' },
+    { id: 3, name: 'LED设备', desc: 'LED显示屏' },
+    { id: 4, name: '雷达测距设备', desc: '' },
+    { id: 5 },
+    { id: 6, name: '激光测距设备', desc: '' },
+
+    { id: 7, pid: 6 },
+    { id: 8, pid: 4 },
+    { id: 9, pid: 5 },
+    { id: 10, pid: 6 },
+    { id: 11, level: 2, pid: 8 },
+    { id: 12, pid: 5 },
+    { id: 13, pid: 5 },
+    { id: 14, pid: 5 },
+    { id: 15, pid: 5 },
+];
+
+for (var i=0; i<5;i++) {
+    types.push({id:15+i+1, pid:5});
+}
+
+console.log(types);
+console.log($.toTreeList(types));
+
+var tdata = [
+  { id: 1, name: '视频设备', desc: '400万像素高清摄像机' },
+  { id: 2, name: 'DTU设备', desc: '' },
+  { id: 3, name: 'LED设备', desc: 'LED显示屏' },
+  { id: 4, name: '雷达测距设备', desc: '' },
+  { id: 8, pid: 4 },
+  { id: 11, pid: 8 },
+  { id: 5 },
+  { id: 9, pid: 5 },
+  { id: 12, pid: 5 },
+  { id: 13, pid: 5 },
+  { id: 14, pid: 5 },
+  { id: 15, pid: 5 },
+  { id: 16, pid: 5 },
+  { id: 17, pid: 5 },
+  { id: 18, pid: 5 },
+  { id: 19, pid: 5 },
+  { id: 20, pid: 5 },
+  { id: 6, name: '激光测距设备', desc: '' },
+  { id: 7, pid: 6 },
+  { id: 10, pid: 6 }
+];
+tdata = $.toTreeData(tdata);
+console.log(tdata);

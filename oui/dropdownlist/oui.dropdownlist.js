@@ -42,6 +42,12 @@
         BoxItemHeight: 30,
         // 选项底部高度
         BoxBarHeight: 42,
+        // 选项序号(单个数字)宽度
+        ItemNumberWidth: 12,
+        // 选项序号(多个数字的单个数字)宽度
+        ItemNumberWidth2: 10,
+        // 树形结构层级缩进宽度
+        TreeIndentWidth: 30,
         // 选项框默认最大高度
         BoxMaxHeight: 360,
         // 选项框(网格)默认最大高度
@@ -387,12 +393,15 @@
                             checked = dr.checked || dr.dc ? ' checked="checked" dc="1"' : '',
                             use = dr.enabled || dr.use,
                             disabled = dr.disabled ? ' disabled="disabled"' : '',
-                            desc = dr.desc || '',
-                            title = '<span class="oui-ddl-li-txt">' + (opt.display && val !== txt ? val + '<u>-</u>' + txt : txt) + '</span>' +
+                            desc = dr.desc || (opt.desc ? val.toString() : ''),
+                            title = '<span class="oui-ddl-li-txt">' + 
+                                (opt.display && val !== txt ? val + '<u>-</u>' + txt : txt === '' ? val : txt) + 
+                                '</span>' +
                                 (desc && txt !== desc ? '<span class="oui-ddl-li-txt i-t">' + desc + '</span>' : '');
 
                         html.push([
-                            '<li class="oui-ddl-item" style="',
+                            '<li class="oui-ddl-item', opt.tree ? ' oui-ddl-tree-item' : '', dr.disabled ? ' oui-ddl-item-disabled' : '', '"',
+                            ' style="',
                             opt.layout !== Config.Layout.List ? 'float:left;' : '',
                             opt.layout === Config.Layout.Grid ? 'min-width:' + Factory.getStyleSize(minWidth || opt.itemWidth) + ';' : '',
                             '" opt-idx="', (num + i + 1), '" data-value="', val.toString().replace(/["]/g, '&quot;'), '"',
@@ -402,8 +411,9 @@
                             opt.number ? 'padding-left:4px;' : '', align,
                             '"',
                             '>',
-                            opt.number ? '<i style="width:' + (n * 12) + 'px;">' + (num + i + 1)  + '</i>' : '',
-                            '<input class="oui-ddl-chb"', checked,
+                            opt.number ? '<i style="width:' + (n * (n > 1 ? Config.ItemNumberWidth2 : Config.ItemNumberWidth)) + 'px;">' + (num + i + 1)  + '</i>' : '',
+                            opt.tree ? '<span class="oui-ddl-item-space"' + (' style="width:' + dr.level * Config.TreeIndentWidth + 'px;"') + '></span>' : '',
+                            '<input class="oui-ddl-chb"', checked, disabled,
                             ' type="', opt.multi ? 'checkbox' : 'radio', '"',
                             ' id="', chbId, '"',
                             ' name="', key, '"',
@@ -474,7 +484,7 @@
                         btnLen += selects.length;
                     }
                     if (!oneBtn || opt.callbackLevel > 0 || opt.button || btnLimit > 0) {
-                        html.push('<div class="oui-ddl-oper oui-ddl-oper-' + opt.layout + '" style="text-align:' + (opt.buttonPosition || 'center') + ';">');
+                        html.push('<div class="oui-ddl-oper oui-ddl-oper-' + opt.layout + '" style="text-align:' + opt.buttonPosition + ';">');
                         html.push('<div class="btn-group btn-group-xs' + (oneBtn ? ' btn-group-block' : '') + '">');
                         html.push(selects.join(''));
                         html.push('<button class="oui-ddl-btn btn btn-primary btn-' + ac + (oneBtn ? ' btn-block' : '') + '" ac="' + ac + '">', texts[4], '</button>');
@@ -498,13 +508,16 @@
 
                 var arr = $N(key);
                 for (i = n; i < arr.length; i++) {
-                    var chb = arr[i];
+                    var chb = arr[i], dr = opt.items[i] || {};
                     that.nodes.push(new Node({
+                        data: dr,
+                        type: dr.type || '',
                         elem: elem,
                         id: chb.value,
                         idx: i + 1,
                         label: chb.parentNode,
                         input: chb,
+                        disabled: chb.disabled ? true : false,
                         multi: opt.multi,
                         callback: function (node) {
                             var val = node.value,
@@ -751,6 +764,22 @@
                 }
 
                 return this;
+            },
+            toValue: function (val, type, dv) {
+                if (type && type !== 'string') {
+                    switch(type) {
+                    case 'int': case 'long':
+                        val = parseInt(val, 10);
+                        break;
+                    case 'float': case 'double':
+                        val = parseFloat(val, 10);
+                        break;
+                    }
+                    if (isNaN(val)) {
+                        return dv || 0;
+                    }
+                }
+                return val;
             }
         };
 
@@ -766,7 +795,10 @@
             var that = this;
             that.id = par.id;
             that.idx = par.idx;
+            that.use = $.isBoolean(par.use, true);
             that.elem = par.elem;
+            that.data = par.data;
+            that.type = par.type;
             that.multi = par.multi;
             that.label = par.label;
             that.input = par.input;
@@ -775,6 +807,7 @@
             that.text = par.text || $.getAttribute(par.input, 'text');
             that.desc = par.desc || $.getAttribute(par.input, 'desc');
             that.checked = par.checked || par.input.checked;
+            that.disabled = $.isBoolean(par.disabled, false);
             that.dc = $.getAttribute(par.input, 'dc') === '1';
             that.callback = par.callback;
             that.childs = [];
@@ -797,6 +830,9 @@
         },
         set: function (checked, clickEvent) {
             var that = this;
+            if (that.disabled) {
+                return that;
+            }
             $.setClass(that.label, 'oui-ddl-item-cur', checked);
             that.checked = checked;
             if (that.input.type === 'checkbox') {
@@ -832,10 +868,16 @@
             title: '',
             //默认值（优先于index）
             value: undefined,
+            //是否复制ID值为desc值
+            desc: undefined,
+            //数据类型：int,float,string 默认为string
+            dataType: undefined,
             //默认选中项（单选有效）
             index: 0,
             //选项，JSON数组格式，示例： [{value|val|id:1, name|text|txt:'第1项',code:'',desc:'',use:1|0}]
             items: [],
+            //是否树形结构
+            tree: false,
             //是否获取下拉列表元素原有的options，true-表示元素原有的选项+items
             origin: undefined,
             //是否下拉框： true - 下拉框， false - 文本框
@@ -874,7 +916,7 @@
             //宽度补偿
             w: undefined,
             //按钮位置：left-左，center-中，right-右
-            buttonPosition: 'center',
+            buttonPosition: undefined,
             //当没有“全选/反选”按钮时是否显示“确定”按钮
             button: true,
             //显示的按钮数量：“确定” + “全选/反选/取消/默认”，最多5个按钮
@@ -925,7 +967,8 @@
 
         opt.maxHeight = options.maxHeight || (opt.layout === 'grid' ? Config.BoxGridMaxHeight : Config.BoxMaxHeight);
 
-        opt.buttonPosition = $.getParam(opt, 'buttonPosition,buttonPos,btnPos');
+        opt.dataType = $.getParam(opt, 'dataType,valueType');
+        opt.buttonPosition = $.getParam(opt, 'buttonPosition,buttonPos,btnPos', opt.tree ? 'right' : 'center');
         opt.buttonLimit = $.getParam(opt, 'buttonLimit,buttonLength,buttonLen,btnLimit,btnLength,btnLen');
         opt.button = $.getParam(opt, 'showButton,button');
         opt.number = $.getParam(opt, 'showNumber,number');
@@ -957,7 +1000,7 @@
             }, options.config);
 
             opt.config.maxLength = $.getParam(opt.config, 'maxLength,maxlength', 64);
-            opt.config.dataType = $.getParam(opt.config, 'dataType,datatype', 'string');
+            opt.config.dataType = $.getParam(opt.config, 'dataType,datatype', opt.dataType);
             opt.config.minValue = $.getParam(opt.config, 'minValue,minVal,min');
             opt.config.maxValue = $.getParam(opt.config, 'maxValue,maxVal,max');
         }
@@ -997,6 +1040,12 @@
                 if (elem.tagName === 'SELECT') {
                     opt.index = opt.index || elem.selectedIndex || opt.index;
                 }
+            }
+
+            if (opt.tree) {
+                opt.items = $.toTreeList(opt.items);
+                //树形结构必须是列表模式
+                opt.layout = 'list';
             }
 
             if (elem.tagName === 'SELECT') {
@@ -1197,6 +1246,10 @@
                 opt.items = items;
             }
 
+            if (opt.tree) {
+                opt.items = $.toTreeList(opt.items);
+            }
+
             Factory.buildItems(that, opt.items, key + '_list')
                 .setNodes(that)
                 .initValue(that);
@@ -1271,6 +1324,10 @@
             }
             if (!node) {
                 return that.callback(par.level);
+            }
+
+            if (node.disabled) {
+                return that;
             }
 
             if (multi) {
@@ -1424,7 +1481,8 @@
         get: function () {
             var that = this,
                 opt = that.options,
-                nodes = that.nodes,
+                nodes = [],
+                datas = [],
                 vals = [],
                 txts = [],
                 cons = [],
@@ -1434,19 +1492,21 @@
                 val = '',
                 con = '';
 
-            for (var i = 0; i < nodes.length; i++) {
-                var n = nodes[i], desc;
-                if (n.checked) {
+            for (var i = 0; i < that.nodes.length; i++) {
+                var n = that.nodes[i], desc;
+                if (!n.disabled && n.checked) {
                     val = n.value.toString().trim();
                     txt = n.text.toString().trim();
                     desc = single && n.desc && n.text !== n.desc ? ' - ' + n.desc : '';
                     if (val !== '') {
-                        vals.push(val);
+                        vals.push(Factory.toValue(val, opt.dataType));
                     }
                     if (single && opt.display && val !== txt) {
                         txt = val + ' - ' + txt;
                     }
                     txts.push(txt + desc);
+                    nodes.push(n);
+                    datas.push(n.data);
                     con = n.code.toString().trim();
                     if (con) {
                         cons.push(con);
@@ -1455,12 +1515,16 @@
                 }
             }
             if (vals.length <= 0 && !$.isUndefinedOrNull(that.elem.inputValue)) {
-                vals.push(that.elem.inputValue);
+                vals.push(Factory.toValue(that.elem.inputValue, opt.dataType));
                 txts.push(that.elem.inputValue);
             }
             txt = txts.join(opt.symbol || ',') || opt.title || '';
             val = vals.join(',');
             con = cons.join(',');
+
+            if (!opt.multi) {
+                val = Factory.toValue(val, opt.dataType);
+            }
 
             //设置值
             that.elem.options.length = 0;
@@ -1472,26 +1536,24 @@
             if (that.text) {
                 that.text.title = vals.length > 0 ? (opt.name ? opt.name + ': ' : '') + txt : '';
                 //显示文字
-                if (opt.select) {
-                    txt = val;
-                }
-                that.text.value = txt;
-                $.setAttribute(that.text, 'value', txt);
+                that.text.value = opt.select ? val : txt;
+                $.setAttribute(that.text, 'value', opt.select ? val : txt);
                 if (con) {
                     $.setAttribute(that.text, 'code', con);
                 }
             }
-            return val;
+            //return val;
+            return {value: val, text: txt, values: vals, texts: txts, datas: datas};
         },
         callback: function (callbackLevel) {
             var that = this,
                 opt = that.options,
-                vals = that.get(),
+                data = that.get(),
                 elem = opt.select ? that.elem : that.text,
                 level = !$.isNumber(callbackLevel) ? 0 :(callbackLevel || 0);
 
             if (level === Config.CallbackLevel.Initial) {
-                if (vals === '') {
+                if (data.value === '') {
                     return that;
                 }
             } else if (opt.multi) {
@@ -1501,9 +1563,9 @@
             }
             if ((opt.initial || level !== Config.CallbackLevel.Initial)) {
                 if ($.isFunction(opt.callback)) {
-                    opt.callback(vals, level === Config.CallbackLevel.Initial, that);
+                    opt.callback(data.value, level === Config.CallbackLevel.Initial, data, that);
                 } else if ($.isDebug()) {
-                    $.console.log(that.id, '[callback]', ', values:', vals, ', initial:', initial, that);
+                    $.console.log(that.id, '[callback]', ', value:', data.value, ', initial:', initial, ', data:', data, that);
                 }
                 if (opt.change) {
                     $.trigger(elem, 'change');
@@ -1514,12 +1576,12 @@
         complete: function (initial) {
             var that = this,
                 opt = that.options,
-                vals = that.get();
+                data = that.get();
 
             if ($.isFunction(opt.complete)) {
-                opt.complete(vals, $.isBoolean(initial, false), that);
+                opt.complete(data.value, $.isBoolean(initial, false), data, that);
             } else if ($.isDebug()) {
-                $.console.log(that.id, '[complete]', ', values:', vals, ', initial:', initial, that);
+                $.console.log(that.id, '[complete]', ', value:', data.value, ', initial:', initial, ', data:', data, that);
             }
             return that;
         },

@@ -1016,80 +1016,126 @@
             }
             return ini.join('\r\n');
         },
-        
         buildTreeList = function (options) {
-            var list = [], node = {}, 
-                items = $.isArray(options) ? options : [options];
+            var list = [], node = {}, items = [];
+
+            if ($.isArray(options)) {
+                items = options;
+            } else {
+                items = [options];
+            }
 
             for (var i = 0; i < items.length; i++) {
-                var dr = $.extend({}, items[i], {level: 0});
+                var dr = $.extend({}, items[i]);
+
                 if ((!dr.pid && $.isUndefined(dr.ptype)) 
                     || $.isUndefined(dr.pid) || $.isUndefined(dr.id)) {
+                    dr.level = 0;
                     node = dr;
-                    node.index = list.length;
                     list.push(node);
                 } else {
                     node = _insert(list, dr, node);
                 }
             }
 
-            function _find(o, type, parent, each, i) {
+            function _find(o, type, parent, each) {
                 if (parent) {
                     if ((!type || o.d.ptype === o.p.type) && o.d.pid === o.p.id) {
-                        o.pi = (each ? i : o.p.index) + 1;
-                        return o.pd = o.p, true;
+                        o.pi = o.p.index + 1;
+                        o.pd = o.p;
+                        return true;
                     }
                 } else {
                     if ((!type || o.d.ptype === o.p.ptype) && o.d.pid === o.p.pid) {
-                        o.bi = (each ? i : o.p.index) + 1;
-                        return o.bd = o.p, true;
+                        o.bi = o.p.index + 1;
+                        o.bd = o.p;
+                        return true;
                     }
                 }
-                return false;
             }
 
             function _each(list, o, type) {
                 var len = list.length;
                  for (var i = 0; i < len; i++) {
                     o.p = list[i];
-                    if(!(_find(o, type, true, true, i) || _find(o, type, false, true, i))) {
-                        if (o.pi > 0) {
-                            break;
-                        }
+                    if ((!type || o.d.ptype === o.p.type) && o.d.pid === o.p.id) {
+                        o.pi = i + 1;
+                        o.pd = o.p;
+                    } else if ((!type || o.d.ptype === o.p.ptype) && o.d.pid === o.p.pid) {
+                        o.bi = i + 1;
+                        o.bd = o.p;
+                    } else if (o.pi > 0) {
+                        break;
                     }
                 }
             }
 
             function _insert(list, node, lastNode) {
                 var o = {
-                    d: node || {}, p: lastNode || {},
-                    pd: null, bd: null,
+                    d: node || {},
+                    p: lastNode || {},
+                    pd: null,
+                    bd: null,
                     len: list.length,
-                    pi: 0, bi: 0
-                }, idx = list.length, i;
+                    pi: 0,
+                    bi: 0
+                }, idx, i;
 
                 if (!o.p.index) {
                     o.p.index = 0;
                 }
                 
                 if (o.d.ptype) {
+                    /*
+                    //兄弟节点
+                    if (_find(o, true, false, false)) {
+                        ;
+                    } else if (_find(o, true, true, false)) {
+                        ;
+                    } else {
+                        _each(list, o, true);                        
+                    }*/
                     _find(o, true, false, false) || _find(o, true, true, false) || _each(list, o, true);
+                    /*
+                    if (o.d.ptype === o.p.ptype && o.d.pid === o.p.pid) {
+                        o.bi = o.p.index + 1;
+                        o.bd = o.p;
+                    } 
+                    //父节点
+                    else if (o.d.ptype === o.p.type && o.d.pid === o.p.id) {
+                        o.pi = o.p.index + 1;
+                        o.pd = o.p;
+                    } else {
+                        _each(list, o, true);
+                        
+                    }*/
                 } else {
-                    _find(o, false, false, false) || _find(o, false, true, false) || _each(list, o, false);
+                    if (o.d.pid === o.p.pid) {
+                        o.bi = o.p.index + 1;
+                        o.bd = o.p;
+                    } else if (o.d.pid === o.p.id) {
+                        o.pi = o.p.index + 1;
+                        o.pd = o.p;
+                    } else {
+                        _each(list, o);
+                    }
                 }
 
                 if (o.bi || o.pi) {
                     o.d.level = o.bi ? o.bd.level : o.pd.level + 1;
-                    list.splice((idx = o.bi || o.pi), 0, o.d);
+                    list.splice(o.bi || o.pi, 0, o.d);
+                    idx = o.bi || o.pi;
                 } else {
                     o.d.level = 0;
+                    idx = list.length;
                     list.push(o.d);
                 }
                 return { id: o.d.id, pid: o.d.pid, type: o.d.type, ptype: o.d.ptype, level: o.d.level, index: idx };
+                
             }
             return list;
         };
-        
+
     var counter = 1, debug = isBoolean(isDebug(), true);
     $.extendNative = $.fn.extendNative = function (destination, source, constructor) {
         if (arguments.length < 2) {

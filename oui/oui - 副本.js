@@ -1016,80 +1016,118 @@
             }
             return ini.join('\r\n');
         },
-        
         buildTreeList = function (options) {
-            var list = [], node = {}, 
-                items = $.isArray(options) ? options : [options];
+            var list = [], node = {}, items = [];
+
+            if ($.isArray(options)) {
+                items = options;
+            } else {
+                items = [options];
+            }
 
             for (var i = 0; i < items.length; i++) {
-                var dr = $.extend({}, items[i], {level: 0});
+                var dr = $.extend({}, items[i]);
+
                 if ((!dr.pid && $.isUndefined(dr.ptype)) 
                     || $.isUndefined(dr.pid) || $.isUndefined(dr.id)) {
+                    dr.level = 0;
                     node = dr;
-                    node.index = list.length;
                     list.push(node);
+                    //$.console.log(dr.id, dr.type, i, 0);
                 } else {
+                    //$.console.log(dr.id, dr.type, i, node);
                     node = _insert(list, dr, node);
                 }
             }
 
-            function _find(o, type, parent, each, i) {
-                if (parent) {
-                    if ((!type || o.d.ptype === o.p.type) && o.d.pid === o.p.id) {
-                        o.pi = (each ? i : o.p.index) + 1;
-                        return o.pd = o.p, true;
-                    }
-                } else {
-                    if ((!type || o.d.ptype === o.p.ptype) && o.d.pid === o.p.pid) {
-                        o.bi = (each ? i : o.p.index) + 1;
-                        return o.bd = o.p, true;
-                    }
-                }
-                return false;
-            }
-
-            function _each(list, o, type) {
-                var len = list.length;
-                 for (var i = 0; i < len; i++) {
-                    o.p = list[i];
-                    if(!(_find(o, type, true, true, i) || _find(o, type, false, true, i))) {
-                        if (o.pi > 0) {
-                            break;
-                        }
+            function _each(list, len) {
+                for (var i = 0; i < len; i++) {
+                    p = list[i];
+                    if (d.ptype === p.type && d.pid === p.id) {
+                        pi = i + 1;
+                        pd = p;
+                    } else if (d.ptype === p.ptype && d.pid === p.pid) {
+                        bi = i + 1;
+                        bd = p;
+                    } else if (pi > 0) {
+                        break;
                     }
                 }
             }
 
             function _insert(list, node, lastNode) {
-                var o = {
-                    d: node || {}, p: lastNode || {},
-                    pd: null, bd: null,
-                    len: list.length,
-                    pi: 0, bi: 0
-                }, idx = list.length, i;
-
-                if (!o.p.index) {
-                    o.p.index = 0;
-                }
                 
-                if (o.d.ptype) {
-                    _find(o, true, false, false) || _find(o, true, true, false) || _each(list, o, true);
-                } else {
-                    _find(o, false, false, false) || _find(o, false, true, false) || _each(list, o, false);
-                }
+                var d = node || {},
+                    p = lastNode || {}, pd, bd,
+                    len = list.length,
+                    pi = 0, bi = 0, i = 0, n = 0;
 
-                if (o.bi || o.pi) {
-                    o.d.level = o.bi ? o.bd.level : o.pd.level + 1;
-                    list.splice((idx = o.bi || o.pi), 0, o.d);
+                if (d.ptype) {
+                    //兄弟节点
+                    if (d.ptype === p.ptype && d.pid === p.pid) {
+                        $.console.log(d.type, d.ptype, d.id, 'b');
+                        bi = p.index + 1;
+                        bd = p;
+                    } 
+                    //父节点
+                    else if (d.ptype === p.type && d.pid === p.id) {
+                        $.console.log(d.type, d.ptype, d.id, 'p');
+                        pi = p.index + 1;
+                        pd = p;
+                    } else {
+                        _each.call(this, len);
+                        /*
+                        for (i = 0; i < len; i++) {
+                            p = list[i];
+                            if (d.ptype === p.type && d.pid === p.id) {
+                                pi = i + 1;
+                                pd = p;
+                            } else if (d.ptype === p.ptype && d.pid === p.pid) {
+                                bi = i + 1;
+                                bd = p;
+                            } else if (pi > 0) {
+                                break;
+                            }
+                        }
+                        */
+                        
+                    }
                 } else {
-                    o.d.level = 0;
-                    list.push(o.d);
+                    if (d.pid === p.pid) {
+                        bi = p.index + 1;
+                        bd = p;
+                    } else if (d.pid === p.id) {
+                        pi = p.index + 1;
+                        pd = p;
+                    } else {
+                        for (i = 0; i < len; i++) {
+                            p = list[i];
+                            if (d.pid === p.id) {
+                                pi = i + 1;
+                                pd = p;
+                            } else if (d.pid === p.pid) {
+                                bi = i + 1;
+                                bd = p;
+                            } else if (pi > 0) {
+                                break;
+                            }
+                        }
+                    }
                 }
-                return { id: o.d.id, pid: o.d.pid, type: o.d.type, ptype: o.d.ptype, level: o.d.level, index: idx };
+                if (bi || pi) {
+                    d.level = bi ? bd.level : pd.level + 1;
+                    list.splice(bi || pi, 0, d);
+                    n = bi || pi;
+                } else {
+                    d.level = 0;
+                    n = list.length;
+                    list.push(d);
+                }
+                return { id: d.id, pid: d.pid, type: d.type, ptype: d.ptype, level: d.level, index: n };
             }
             return list;
         };
-        
+
     var counter = 1, debug = isBoolean(isDebug(), true);
     $.extendNative = $.fn.extendNative = function (destination, source, constructor) {
         if (arguments.length < 2) {

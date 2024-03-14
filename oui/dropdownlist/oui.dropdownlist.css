@@ -111,6 +111,21 @@ li.oui-ddl-item {
 	height: 30px;
 	border: none 0;
 }
+
+li.oui-ddl-item span.oui-ddl-item-space {
+	border: solid 1px #f00;
+	border: none;
+	box-sizing: border-box;
+	cursor: default;
+	margin: 0;
+	padding: 0;
+	background: transparent;
+	display: block;
+	float: left;
+	height: 30px;
+	width: 24px;
+}
+
 li.oui-ddl-sep {
 	border: none;
 	padding: 0;
@@ -238,6 +253,21 @@ ul.oui-ddl-flow label.oui-ddl-hover,ul.oui-ddl-grid label.oui-ddl-hover {
 ul.oui-ddl-flow label.oui-ddl-item-cur:hover,ul.oui-ddl-grid label.oui-ddl-item-cur:hover {
 	background: #d6e3f3;
 	color: #000;
+}
+
+li.oui-ddl-tree-item {
+	border-bottom: solid 1px #f8f8f8;
+}
+li.oui-ddl-tree-item:last-child {
+	border-bottom: none;
+}
+li.oui-ddl-item-disabled {
+	cursor: not-allowed;
+}
+
+li.oui-ddl-item-disabled label.oui-ddl-label {
+	cursor: not-allowed;
+	color: #999;
 }
 
 .oui-ddl-panel .oui-ddl-oper {
