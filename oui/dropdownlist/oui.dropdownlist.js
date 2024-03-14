@@ -581,7 +581,7 @@
                         _inputNewVal();
                     });
                     // 65 - A; 73 - I
-                    // shift                    
+                    // shift
                     $.addHitListener(elem, 'keyup', [65, 73], function(ev) {
                         ev.keyCode === 65 ? that.form() : that.form(true, true);
                     }, 2000, 3, true);
@@ -637,6 +637,7 @@
                     }
                     return false;
                 });
+
                 $.addListener(document, 'keyup', function (ev) {
                     if (27 === $.getKeyCode(ev)) {   // Esc键值为27
                         that.hide();
@@ -663,7 +664,7 @@
                     that.show(this);
                     this.focus();
                     Factory.closeOther(that);
-
+                    $.hidePopupPanel(that.box);
                     return true;
                 });
                 $.addListener(elem, 'keydown', function (ev) {
@@ -1105,10 +1106,16 @@
                 if (bs.min < offset.width) {
                     bs.min = offset.width;
                 }
-
                 box.className = 'oui-ddl oui-ddl-panel';
                 box.id = Config.IdPrefix + that.id;
                 $.setAttribute(elem, 'opt-id', box.id);
+
+                //设置关联关闭样式
+                box.className = box.className.addClass('oui-popup-panel');
+                //设置关联关闭函数 
+                box.hide = function () {
+                    that.hide();
+                };
 
                 var btn = Factory.buildButtons(that),
                     key = Config.ItemPrefix + that.id,
@@ -1117,7 +1124,6 @@
                 if (btn.len >= 5 && opt.shortcutKey) {
                     Factory.getSize(opt, bs);
                 }
-
 
                 if ($.isNumber(opt.minHeight)) {
                     var minH = btn.len > 0 ? Config.BoxBarHeight: 0;

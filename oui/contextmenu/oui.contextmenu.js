@@ -759,6 +759,13 @@
                         cssText += opt.radius ? 'border-radius:' + opt.radius + 'px;' : '';
                         cssText += opt.zindex ? 'z-index:' + opt.zindex + ';' : '';
                         elem.style.cssText = cssText;
+                        
+                        //设置关联关闭样式
+                        elem.className = elem.className.addClass('oui-popup-panel');
+                        //设置关联关闭函数 
+                        elem.hide = function () {
+                            menu.hide();
+                        };
 
                         $.disableEvent(elem, 'contextmenu');
 

@@ -6975,6 +6975,19 @@
         //关闭父窗口可能出现的右键菜单
         hideParentMenu: function () {
             return closeParentMenu('contextmenu', 'hideParentMenu');
+        },
+        hidePopupPanel: function (exceptElement) {
+            var panels = document.querySelectorAll('div.oui-popup-panel');
+            for (var i = 0; i < panels.length; i++) {
+                if (panels[i] !== exceptElement) {
+                    if ($.isFunction(panels[i].hide)) {
+                        panels[i].hide();
+                    } else {
+                        panels[i].style.display = 'none';
+                    }
+                }
+            }
+            return this;
         }
     });
 }(OUI);

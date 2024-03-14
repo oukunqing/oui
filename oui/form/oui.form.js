@@ -1761,7 +1761,7 @@
                         '.input-opt-ul{margin:0;padding:1px 0;}',
                         '.input-opt-ul i{font-style:normal;color:#ccc;display:inline-block;text-align:right;',
                         ' border:none;margin:0 7px 0 0;padding:0;font-size:14px;}',
-                        '.input-opt-ul li{margin:0 1px;list-style:none;line-height:29px;height:29px;overflow:hidden;font-size:14px;',
+                        '.input-opt-ul li{margin:0 1px;list-style:none;line-height:30px;height:30px;overflow:hidden;font-size:14px;',
                         '   border:none;cursor:default;}',
                         '.input-opt-ul li:last-child{border-bottom:none;}',
                         '.input-opt-ul li:hover,.input-opt-ul li.cur:hover{background:#dfe8f6;color:#000;}',
@@ -1839,6 +1839,13 @@
                 div.target = elem.tagName;
                 div.className = 'input-opt-panel-box';
                 div.id = 'input-opt-panel-' + (elem.id || new Date().getTime());
+
+                //设置关联关闭样式
+                div.className = div.className.addClass('oui-popup-panel');
+                //设置关联关闭函数 
+                div.hide = function () {
+                    $.input.hidePanel(this, elem, true);
+                };
 
                 div.style.cssText = [
                     'box-sizing:border-box;',
@@ -2445,6 +2452,7 @@
                                 $.cancelBubble(ev);
                                 this.focus();
                                 _showOption(ev, this, opt);
+                                $.hidePopupPanel(elem.optbox);
                                 return false;
                             });
                         }
