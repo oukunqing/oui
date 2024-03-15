@@ -1015,16 +1015,14 @@
                 }
             }
             return ini.join('\r\n');
-        },
-        
+        },        
         buildTreeList = function (options) {
             var list = [], node = {}, 
                 items = $.isArray(options) ? options : [options];
 
             for (var i = 0; i < items.length; i++) {
                 var dr = $.extend({}, items[i], {level: 0});
-                if ((!dr.pid && $.isUndefined(dr.ptype)) 
-                    || $.isUndefined(dr.pid) || $.isUndefined(dr.id)) {
+                if ($.isUndefinedOrNull(dr.pid) || !($.isString(dr.pid) || $.isNumber(dr.pid))) {
                     node = dr;
                     node.index = list.length;
                     list.push(node);
@@ -1032,8 +1030,9 @@
                     node = _insert(list, dr, node);
                 }
             }
-
+            //parent: true - 找父节点，false - 找兄弟节点
             function _find(o, type, parent, each, i) {
+                /*
                 if (parent) {
                     if ((!type || o.d.ptype === o.p.type) && o.d.pid === o.p.id) {
                         o.pi = (each ? i : o.p.index) + 1;
@@ -1045,6 +1044,11 @@
                         return o.bd = o.p, true;
                     }
                 }
+                */
+                if (o.d.pid === o.p[parent ? 'id' : 'pid'] && (!type || o.d.ptype === o.p[parent ? 'type' : 'ptype'])) {
+                    o[parent ? 'pi' : 'bi'] = (each ? i : o.p.index) + 1;
+                    return o[parent ? 'pd' : 'bd'] = o.p, true;
+                }
                 return false;
             }
 
@@ -1052,6 +1056,8 @@
                 var len = list.length;
                  for (var i = 0; i < len; i++) {
                     o.p = list[i];
+                    //找父节点 或 兄弟节点
+                    //父节点已找到，当前非兄弟节点，循环结束（因为已经不是同一个父节点了）
                     if(!(_find(o, type, true, true, i) || _find(o, type, false, true, i))) {
                         if (o.pi > 0) {
                             break;
@@ -1068,9 +1074,7 @@
                     pi: 0, bi: 0
                 }, idx = list.length, i;
 
-                if (!o.p.index) {
-                    o.p.index = 0;
-                }
+                o.p.index = o.p.index || 0;
                 
                 if (o.d.ptype) {
                     _find(o, true, false, false) || _find(o, true, true, false) || _each(list, o, true);
@@ -1153,7 +1157,7 @@
         setValue: setValue, getValue: getValue, isValue: isValue, getParam: getParam,
         getParamValue: getParamValue, getParVal: getParamValue, cleanSlash: cleanSlash,
         getParamCon: getParamCon, getParamContent: getParamCon, getParCon: getParamCon,
-        buildTreeList: buildTreeList, toTreeList: buildTreeList, toTreeData: buildTreeList,
+        buildTreeList: buildTreeList, toTreeList: buildTreeList,
         toGpsString: function (gps, decimalLen) {
             var con = [],
                 len = $.checkNumber(decimalLen, 3, 14) ? decimalLen : 8;

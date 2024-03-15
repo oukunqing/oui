@@ -113,17 +113,22 @@ li.oui-ddl-item {
 }
 
 li.oui-ddl-item span.oui-ddl-item-space {
-	border: solid 1px #f00;
-	border: none;
+	border: none 0;
 	box-sizing: border-box;
 	cursor: default;
 	margin: 0;
 	padding: 0;
+	outline: none;
+	overflow: hidden;
 	background: transparent;
 	display: block;
 	float: left;
 	height: 30px;
-	width: 24px;
+	width: 20px;
+}
+li.oui-ddl-item span.oui-ddl-item-space:hover {
+	border: none;
+	background: transparent;
 }
 
 li.oui-ddl-sep {
@@ -190,12 +195,15 @@ label.oui-ddl-label .i-t {
 	float: none;
 }
 
-label.oui-ddl-label-border {	
-    border: solid 1px #ddd;
+label.oui-ddl-label-border {
+    border: solid 1px #ededed;
     border-radius: 5px;
     padding: 0 5px;
     margin: 0 0 5px 0;
     line-height: 28px;
+}
+label.oui-ddl-label-border:hover {
+    border: solid 1px #d6e3f3;
 }
 label.oui-ddl-item-cur {
 	background: #eee;
@@ -254,11 +262,19 @@ ul.oui-ddl-flow label.oui-ddl-item-cur:hover,ul.oui-ddl-grid label.oui-ddl-item-
 	background: #d6e3f3;
 	color: #000;
 }
-
-li.oui-ddl-tree-item {
-	border-bottom: solid 1px #f8f8f8;
+ul.oui-ddl-list label.oui-ddl-label {
+	/*border-bottom: solid 1px #fafafa;*/
 }
-li.oui-ddl-tree-item:last-child {
+ul.oui-ddl-list label.oui-ddl-label:hover {
+	border-bottom: solid 1px #d6e3f3;
+}
+li.oui-ddl-tree-item label.oui-ddl-label {
+	border-bottom: dotted 1px #f5f5f5;
+}
+li.oui-ddl-tree-item label.oui-ddl-label:hover {
+	border-bottom: dotted 1px #d6e3f3;
+}
+li.oui-ddl-tree-item:last-child label.oui-ddl-label {
 	border-bottom: none;
 }
 li.oui-ddl-item-disabled {

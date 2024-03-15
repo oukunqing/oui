@@ -7,7 +7,7 @@
 		
 		body {font-size: 14px;}
 		select {height:34px;min-width:240px;border:solid 1px #ccc; border-radius:5px;padding:0 5px;margin:0px;}
-		input {outline:none;padding:0 5px; border-radius:5px;height:30px;min-width:240px;border:solid 1px #ccc;}
+		input {outline:none;padding:0 5px; border-radius:5px;height:34px;min-width:240px;border:solid 1px #ccc;}
 		table {}
 		table td {padding:0 10px 10px 0;}
 		
@@ -191,7 +191,7 @@ window.onload = function() {
 			value: 16,
 			append: true,
 			//更新模式下，以下参数不起作用
-			
+			/*
 			select: false,
 			layout: 'list',
 			single: true,
@@ -201,6 +201,7 @@ window.onload = function() {
 				$.console.log(ddl.id, '[callback]', ', value:', value, ', initial:', initial, ', data:', data);
 				getDeviceList();
 			}
+			*/
 			
 		});
 	}, 5000);
@@ -507,15 +508,16 @@ $.dropdownlist('tree2', {
 	items: [
 		
 		{id: 1, name: '节点1', type: 'unit'},
+		{pid: 1,name:'节点1的子节点', disabled: true},
 		{id: 2, name: '节点2', type: 'unit', pid: 1},
 		{id: 3, name: '节点3', type: 'unit', pid: 1},
 		{id: 4, name: '节点4', type: 'unit', pid: 1},
-		{id: 5, name: '节点5', type: 'unit'},
+		{id: 5, name: '节点5', type: 'unit', disabled: true},
 		{id: 6, name: '节点6', type: 'unit', pid: 3},
-		{id: 7, name: '节点7', type: 'unit'},
+		{id: 7, name: '节点7', type: 'unit', use: false },
 		{id: 8, name: '节点8', type: 'unit'},
 		{id: 9, name: '节点9', type: 'unit', pid: 6},
-		{id: 10, name: '节点10', type: 'unit'},
+		{id: 10, name: '节点10', type: 'unit', pid: 4},
 
 		{id: 1, name:'设备1', type: 'device', ptype: 'unit', pid: 2},
 		{id: 2, name:'设备2', type: 'device', ptype: 'unit', pid: 2},

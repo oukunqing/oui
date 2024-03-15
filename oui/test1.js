@@ -1927,5 +1927,5 @@ var tdata = [
   { id: 7, pid: 6 },
   { id: 10, pid: 6 }
 ];
-tdata = $.toTreeData(tdata);
+tdata = $.toTreeList(tdata);
 console.log(tdata);
