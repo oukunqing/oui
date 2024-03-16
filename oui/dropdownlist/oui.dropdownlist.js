@@ -48,8 +48,14 @@
 		ItemNumberWidth2: 10,
 		// 树形结构层级缩进宽度
 		TreeIndentWidth: 20,
+		// 选项框默认最小高度
+		BoxMinHeight: 30,
 		// 选项框默认最大高度
-		BoxMaxHeight: 360,
+		BoxMaxHeight: 363,
+		// 选项框按钮面板高度
+		BoxFormHeight: 42,
+		// 选项框默认最大宽度
+		BoxMaxWidth: 500,
 		// 选项框(网格)默认最大高度
 		BoxGridMaxHeight: 400,
 		// 选项框(网格)最小宽度
@@ -497,7 +503,7 @@
 						btnLen += 1;
 					}
 				}
-				return {html: html.join(''), len: btnLen};
+				return {html: html.join(''), len: btnLen, form: opt.editable};
 			},
 			setNodes: function (ddl, append) {
 				var that = ddl,
@@ -519,6 +525,7 @@
 						elem: elem,
 						id: chb.value,
 						idx: i + 1,
+						item: chb.parentNode.parentNode,
 						label: chb.parentNode,
 						input: chb,
 						disabled: chb.disabled ? true : false,
@@ -804,6 +811,7 @@
 			that.data = par.data;
 			that.type = par.type;
 			that.multi = par.multi;
+			that.item = par.item;
 			that.label = par.label;
 			that.input = par.input;
 			that.value = par.value || par.input.value;
@@ -837,7 +845,8 @@
 			if (that.disabled) {
 				return that;
 			}
-			$.setClass(that.label, 'oui-ddl-item-cur', checked);
+			//$.setClass(that.label, 'oui-ddl-item-cur', checked);
+			$.setClass(that.item, 'cur', checked);
 			that.checked = checked;
 			if (that.input.type === 'checkbox') {
 				//复选框 点击事件 负负得正
@@ -898,9 +907,9 @@
 			//box最小宽度
 			minWidth: Config.BoxMinWidth[0],
 			//box最大宽度
-			maxWidth: 500,
+			maxWidth: Config.BoxMaxWidth,
 			//box最小高度
-			minHeight: 30,
+			minHeight: Config.BoxMinHeight,
 			//box最大高度，默认400像素
 			maxHeight: Config.BoxMaxHeight,
 			//布局： list-下拉列表，flow-流布局，grid-网格
@@ -1197,15 +1206,17 @@
 					'max-width:', bs.max, 'px;',
 					bs.width ? 'width:' + Factory.getStyleSize(bs.width) + ';' : '',
 					'min-height:', Factory.getStyleSize(opt.minHeight), ';',
-					opt.maxHeight ? 'max-height:' + Factory.getStyleSize(opt.maxHeight) + ';' : '',
+					opt.maxHeight ? 'max-height:' + Factory.getStyleSize(opt.maxHeight + (btn.len || btn.form ? Config.BoxFormHeight : 0)) + ';' : '',
 					opt.boxStyle || ''
 				].join('');
 
 				var html = [
+					//'<div class="oui-ddl-switch oui-ddl-switch-top">top</div>',
 					'<ul class="oui-ddl-box oui-ddl-', opt.layout, '" id="', key, '_list">',
 					Factory.buildItems(that, opt.items),
 					'</ul>',
-					btn.html
+					btn.html,
+					//'<div class="oui-ddl-switch oui-ddl-switch-bottom">bottom</div>'
 				];
 				box.innerHTML = html.join('');
 				box.show = false;

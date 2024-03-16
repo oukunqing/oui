@@ -1929,3 +1929,36 @@ var tdata = [
 ];
 tdata = $.toTreeList(tdata);
 console.log(tdata);
+
+
+function buildTreeData(list) {
+    var data = [], len = list.length, i, dic = {};
+
+    for (i = 0; i < len; i++) {
+        dic[list[i].id] = list[i];
+    }
+    for (i = 0; i < len; i++) {
+        var dr = list[i], pn = dic[dr.pid];
+        if (pn) {
+            pn.childs = pn.childs || [];
+            pn.childs.push(dr);
+        } else {
+            data.push(dr);
+        }
+    }
+    return data;
+}
+
+function buildTreeHtml(list) {
+    var html = [], len = list.length, i,
+        ul = [], li = [];
+
+    for (i = 0; i < len; i++) {
+
+        html.push('<ul>');
+    }
+
+    return html.join('');
+}
+
+$.console.log($.toJsonString(buildTreeData(tdata)));

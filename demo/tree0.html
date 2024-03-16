@@ -1,0 +1,97 @@
+<html>
+	<head></head>
+	<body>
+    <ul id="test">
+        <li>test1</li>
+        <li>test1</li>
+        <li>test1</li>
+    </ul>
+
+<select style="width:400px;">    
+	<option value="1">下拉列表节点1</option>
+    <option value="2">下拉列表节点2</option>
+    <option value="3">下拉列表节点3</option>
+    <option value="4">下拉列表节点4</option>
+    <option value="5">下拉列表节点5</option>
+    <option value="6">下拉列表节点6</option>
+    <option value="7">下拉列表节点7</option>
+    <option value="8">下拉列表节点8</option>
+    <option value="9">下拉列表节点9</option>
+    <option value="10">下拉列表节点10</option>
+    <option value="11">下拉列表节点11</option>
+    <option value="12">下拉列表节点12</option>
+    <option value="13">下拉列表节点13</option>
+    <option value="14">下拉列表节点14</option>
+    <option value="15">下拉列表节点15</option>
+    <option value="16">下拉列表节点16</option>
+    <option value="17">下拉列表节点17</option>
+    <option value="18">下拉列表节点18</option>
+    <option value="19">下拉列表节点19</option>
+    <option value="20">下拉列表节点20</option>
+    <option value="21">下拉列表节点21</option>
+    <option value="22">下拉列表节点22</option>
+    <option value="23">下拉列表节点23</option>
+    <option value="24">下拉列表节点24</option>
+    <option value="25">下拉列表节点25</option>
+    <option value="26">下拉列表节点26</option>
+    <option value="27">下拉列表节点27</option>
+    <option value="28">下拉列表节点28</option>
+    <option value="29">下拉列表节点29</option>
+    <option value="30">下拉列表节点30</option>
+    <option value="31">下拉列表节点31</option>
+    <option value="32">下拉列表节点32</option>
+    <option value="33">下拉列表节点33</option>
+    <option value="34">下拉列表节点34</option>
+    <option value="35">下拉列表节点35</option>
+    <option value="36">下拉列表节点36</option>
+    <option value="37">下拉列表节点37</option>
+    <option value="38">下拉列表节点38</option>
+    <option value="39">下拉列表节点39</option>
+    <option value="40">下拉列表节点40</option>
+    <option value="41">下拉列表节点41</option>
+    <option value="42">下拉列表节点42</option>
+    <option value="43">下拉列表节点43</option>
+    <option value="44">下拉列表节点44</option>
+    <option value="45">下拉列表节点45</option>
+    <option value="46">下拉列表节点46</option>
+    <option value="47">下拉列表节点47</option>
+    <option value="48">下拉列表节点48</option>
+    <option value="49">下拉列表节点49</option>
+    <option value="50">下拉列表节点50</option>
+    <option value="51">下拉列表节点51</option>
+    <option value="52">下拉列表节点52</option>
+    <option value="53">下拉列表节点53</option>
+    <option value="54">下拉列表节点54</option>
+    <option value="55">下拉列表节点55</option>
+    <option value="56">下拉列表节点56</option>
+
+</select>
+	</body>
+</html>
+<script type="text/javascript">
+window.onload = function() {
+	updateText();
+};
+
+function updateText(){
+	const ul = document.getElementById('test');
+	// 创建fragment对象
+	const fragment = document.createDocumentFragment();
+	console.log(fragment.nodeValue); //null
+	console.log(fragment.nodeName); //#document-fragment
+	console.log(fragment.nodeType); //
+	//  取出ul中的所有子节点并保存到fragment
+	let child;
+	while(child=ul.firstChild) {
+	  fragment.appendChild(child);
+	}
+	//更新fragment中的所有节点（li的内容）
+	Array.prototype.slice.call(fragment.childNodes).forEach(node => {
+	  if (node.nodeType===1) {//取得元素节点
+	    node.textContent = 'test2' //重新赋值为test2
+	  }
+	});
+	// 将fragment插入到ul
+	ul.appendChild(fragment);
+}
+</script>

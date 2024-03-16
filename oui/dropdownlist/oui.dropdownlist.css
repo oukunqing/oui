@@ -103,7 +103,7 @@
 	border-bottom-right-radius: 0px;
 }
 
-li.oui-ddl-item {
+.oui-ddl-panel li.oui-ddl-item, .oui-ddl-panel li.cur {
 	display: block;
 	margin: 0 1px 0 1px;
 	padding: 0;
@@ -112,7 +112,7 @@ li.oui-ddl-item {
 	border: none 0;
 }
 
-li.oui-ddl-item span.oui-ddl-item-space {
+.oui-ddl-panel li.oui-ddl-item span.oui-ddl-item-space {
 	border: none 0;
 	box-sizing: border-box;
 	cursor: default;
@@ -126,12 +126,12 @@ li.oui-ddl-item span.oui-ddl-item-space {
 	height: 30px;
 	width: 20px;
 }
-li.oui-ddl-item span.oui-ddl-item-space:hover {
+.oui-ddl-panel li.oui-ddl-item span.oui-ddl-item-space:hover {
 	border: none;
 	background: transparent;
 }
 
-li.oui-ddl-sep {
+.oui-ddl-panel li.oui-ddl-sep {
 	border: none;
 	padding: 0;
 	margin: 5px 1px;
@@ -181,7 +181,7 @@ label.oui-ddl-label u{
 	font-size: 14px;
 	margin: 0 4px;
 	padding: 0;
-	border: 0;
+	border: none 0;
 	background: none;
 }
 
@@ -196,23 +196,16 @@ label.oui-ddl-label .i-t {
 }
 
 label.oui-ddl-label-border {
-    border: solid 1px #ededed;
+    border: solid 1px #f1f1f1;
     border-radius: 5px;
     padding: 0 5px;
     margin: 0 0 5px 0;
     line-height: 28px;
 }
 label.oui-ddl-label-border:hover {
-    border: solid 1px #d6e3f3;
+    border: solid 1px #f1f1f1;
 }
-label.oui-ddl-item-cur {
-	background: #eee;
-	color: #000;
-}
-label.oui-ddl-label:hover,label.oui-ddl-item-cur:hover,label.oui-ddl-hover {
-	background: #d6e3f3;
-	color: #000;
-}
+
 input.oui-ddl-chb {
 	float: left;
 	display: inline-block;
@@ -237,6 +230,16 @@ ul.oui-ddl-box {
 ul.oui-ddl-flow,ul.oui-ddl-grid {
 	padding: 4px 3px 3px;
 }
+
+ul.oui-ddl-box li.cur label.oui-ddl-label {
+	background: #dfe8f6;
+	color: #000;
+}
+ul.oui-ddl-box li.oui-ddl-item:hover label.oui-ddl-label {
+	background: #f5f5f5;
+	color: #000;
+}
+
 ul.oui-ddl-flow li.oui-ddl-item, ul.oui-ddl-grid li.oui-ddl-item {
 	float:left;
 	border: none 0;
@@ -248,31 +251,45 @@ ul.oui-ddl-flow label.oui-ddl-label,ul.oui-ddl-grid label.oui-ddl-label {
 	padding: 0 5px;
 	margin: 2px 3px 2px 2px;
 }
-ul.oui-ddl-flow label.oui-ddl-item-cur,ul.oui-ddl-grid label.oui-ddl-item-cur {
-	/*color: #f00;*/
-	background: #eee;
+ul.oui-ddl-flow li.cur label.oui-ddl-label,ul.oui-ddl-grid li.cur label.oui-ddl-label {
+	background: #dfe8f6;
+	border: none 0;
+}
+ul.oui-ddl-flow li.cur label.oui-ddl-label-border,ul.oui-ddl-grid li.cur label.oui-ddl-label-border {
+	background: #dfe8f6;
+	border: solid 1px #dfe8f6;
+}
+ul.oui-ddl-flow li.cur:hover label.oui-ddl-label-border,ul.oui-ddl-grid li.cur:hover label.oui-ddl-label-border {
+	background: #f5f5f5;
+	border: solid 1px #dfe8f6;
 }
 
 ul.oui-ddl-flow label.oui-ddl-hover,ul.oui-ddl-grid label.oui-ddl-hover {
-	background: #d6e3f3;
+	background: #f5f5f5;
 	color: #000;
 }
 
-ul.oui-ddl-flow label.oui-ddl-item-cur:hover,ul.oui-ddl-grid label.oui-ddl-item-cur:hover {
-	background: #d6e3f3;
+ul.oui-ddl-flow li.cur label.oui-ddl-label:hover,ul.oui-ddl-grid li.cur label.oui-ddl-label:hover {
+	background: #f5f5f5;
 	color: #000;
+}
+ul.oui-ddl-list li.cur label.oui-ddl-label {
+	border-bottom: solid 1px #fafafa;
 }
 ul.oui-ddl-list label.oui-ddl-label {
 	/*border-bottom: solid 1px #fafafa;*/
 }
 ul.oui-ddl-list label.oui-ddl-label:hover {
-	border-bottom: solid 1px #d6e3f3;
+	/*border-bottom: solid 1px #dfe8f6;*/
 }
 li.oui-ddl-tree-item label.oui-ddl-label {
-	border-bottom: dotted 1px #f5f5f5;
+	border-bottom: solid 1px #fcfcfc;
+}
+li.oui-ddl-tree-item li.cur label.oui-ddl-label {
+	border-bottom: solid 1px #fafafa;
 }
 li.oui-ddl-tree-item label.oui-ddl-label:hover {
-	border-bottom: dotted 1px #d6e3f3;
+	/*border-bottom: dotted 1px #dfe8f6;*/
 }
 li.oui-ddl-tree-item:last-child label.oui-ddl-label {
 	border-bottom: none;
@@ -367,6 +384,31 @@ li.oui-ddl-item-disabled label.oui-ddl-label {
 .oui-ddl-panel .btn-group-block .btn-ok,.oui-ddl-panel .btn-group-block .btn-block {
 	width: 100%;
 	border-radius: 5px;
+}
+
+.oui-ddl-panel .oui-ddl-switch {
+	position: absolute;
+	border: none 0;
+	margin: 0;
+	padding: 0;
+	background: transparent;
+	box-sizing: border-box;
+	width: 100%;
+	height: 5px;
+	max-height: 5px;
+	line-height: 5px;
+	display: block;
+	overflow: hidden;
+	cursor: n-resize;
+	z-index: 9999999;
+}
+
+.oui-ddl-panel .oui-ddl-switch-top {
+	top: 0;
+}
+
+.oui-ddl-panel .oui-ddl-switch-bottom {
+	bottom: 0;
 }
 
 /* 以下代码参考引用 bootstrap3.3.7 */
