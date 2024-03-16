@@ -22,7 +22,7 @@
 <table cellpadding="0" cellspacing="0">
 	<tr>
 		<td><select id="DeviceType" style=""></select></td>
-		<td><input type="text" id="ServerType" style="" /></td>
+		<td><input id="ServerType" style="" onchange="print1(this);" /></td>
 		<td><select id="tree1" style=""></select></td>
 	</tr>
 	<tr>
@@ -83,7 +83,7 @@
 	</tr>
 	<tr>
 		<td>
-			<select id="origin1" style="">
+			<select id="origin1" size="3">
 				<option value="-1">推送图片类型</option>
 	            <option value="0">都推送</option>
 	            <option value="1" selected="selected">仅推送抓拍图</option>
@@ -149,11 +149,12 @@ window.onload = function() {
 			{ id: 5, name: '图片采集服务', desc: '' },
 			{ id: 6, name: '平台级联服务', desc: '' },
 		],
-		select: false,
+		//select: false,
 		layout: 'list',
 		single: true,
 		display: true,
 		number: true,
+		change: true,
 		//value: '5',
 		//index: 2,
 		//boxWidth: 'follow',
@@ -401,6 +402,8 @@ window.onload = function() {
         callbackDebounce: true,
         //是否单选，默认多选
         multi: true,
+        //默认显示的列表行数
+        lines: 6,
         //是否支持按钮快捷键（默认支持）
         shortcutKey: true,
         //是否显示快捷键数字（默认不显示）

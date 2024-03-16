@@ -3584,14 +3584,14 @@
                         moveAble = true;
 
                     var par = {
-                        width: obj.offsetWidth,
-                        height: obj.offsetHeight,
                         top: obj.offsetTop,
                         left: obj.offsetLeft,
+                        width: obj.offsetWidth,
+                        height: obj.offsetHeight,
+                        minWidth: parseInt(opt.minWidth, 10),
+                        minHeight: parseInt(opt.minHeight, 10),
                         right: obj.offsetWidth + obj.offsetLeft,
                         bottom: obj.offsetHeight + obj.offsetTop,
-                        minWidth: parseInt(opt.minWidth, 10),
-                        minHeight: parseInt(opt.minHeight, 10)
                     };
 
                     if (isWap) {

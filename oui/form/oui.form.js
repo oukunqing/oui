@@ -1758,7 +1758,7 @@
                         ' -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);}',
                         '.input-opt-panel-box-top{border-bottom-left-radius:0;border-bottom-right-radius:0;margin-top:1px;}',
                         '.input-opt-panel-box-bottom{border-top-left-radius:0;border-top-right-radius:0;margin-top:-1px;}',
-                        '.input-opt-ul{margin:0;padding:1px 0;}',
+                        '.input-opt-ul{margin:0;padding:1px 0;border:none;background:transparent;}',
                         '.input-opt-ul i{font-style:normal;color:#ccc;display:inline-block;text-align:right;',
                         ' border:none;margin:0 7px 0 0;padding:0;font-size:14px;}',
                         '.input-opt-ul li{margin:0 1px;list-style:none;line-height:30px;height:30px;overflow:hidden;font-size:14px;',
@@ -2003,7 +2003,7 @@
                         value: null,            //默认值
                         config: {}              //配置项，用于options选项框
                     }, par),
-                    MAX_HEIGHT = 360,
+                    MAX_HEIGHT = 364,
                     ZINDEX = 999999999,
                     cfg = $.extend({
                         append: null,           //是否追加选项，true-表示options参数 + element属性options

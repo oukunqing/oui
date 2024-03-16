@@ -948,6 +948,8 @@
 			border: false,
 			//是否多选，默认多选
 			multi: true,
+			//默认显示行数（列表模式下有效）
+			lines: undefined,
 			//多选项分隔符号
 			symbol: ',',
 			//是否允许空值（单选模式）
@@ -986,6 +988,7 @@
 		opt.button = $.getParam(opt, 'showButton,button');
 		opt.number = $.getParam(opt, 'showNumber,number');
 		opt.display = $.getParam(opt, 'showValue,display');
+		opt.lines = parseInt('0' + $.getParam(opt, 'lines,line'), 10);
 		opt.choose = $.getParam(opt, 'chooseBox,choosebox,choose');
 		opt.border = $.getParam(opt, 'itemBorder,border,');
 		opt.value = $.getParam(opt, 'selectedValue,selectedvalue,value');
@@ -1035,7 +1038,9 @@
 				elem = opt.element,
 				offset = $.getOffset(opt.element),
 				//texts = ['-请选择-', '请选择'],
-				texts = ['\u002d\u8bf7\u9009\u62e9\u002d', '\u8bf7\u9009\u62e9'];
+				texts = ['\u002d\u8bf7\u9009\u62e9\u002d', '\u8bf7\u9009\u62e9'],
+				evchange = elem.onchange || null,
+				evblur = elem.onblur || null;
 
 			if (!$.isElement(elem)) {
 				return that;
@@ -1073,6 +1078,12 @@
 					var txt = document.createElement('INPUT');
 					txt.className = 'form-control oui-ddl-txt' + (opt.className ? ' ' + opt.className : '');
 					$.setAttribute(txt, 'readonly', 'readonly');
+					if (evchange) {
+						txt.onchange = evchange;
+					}
+					if (evblur) {
+						txt.onblur = evblur;
+					}
 					txt.style.cssText = [
 						'background-color:#fff;padding: 0 20px 0 9px;',
 						opt.textWidth === 'auto' ? '' : 'width:' + Factory.getStyleSize(opt.textWidth || offset.width) + ';',
@@ -1087,6 +1098,8 @@
 					if (opt.textWidth !== 'auto') {
 						elem.style.width = Factory.getStyleSize(opt.textWidth || offset.width);
 					}
+					//设置select默认显示的行数为1，即显示1行
+					elem.size = 1;
 				}
 				elem.className = elem.className.addClass('oui-ddl oui-ddl-elem');
 				opt.title = opt.title || (that.elem.options.length > 0 ? that.elem.options[0].text : '') || texts[0];
@@ -1113,7 +1126,12 @@
 				opt.element.parentNode.insertBefore(ddl, opt.element);
 				that.elem = ddl;
 				ddl.style.width = Factory.getStyleSize(opt.textWidth || offset.width);
-
+				if (evchange) {
+					ddl.onchange = evchange;
+				}
+				if (evblur) {
+					ddl.onblur = evblur;
+				}
 				opt.element.id = rid + '_oui_ddl_copy';
 				that.elem.id = rid;
 				//$.setAttribute(that.elem, 'id', rid);
@@ -1162,7 +1180,8 @@
 						width: parseFloat(opt.boxWidth === 'follow' ? offset.width : opt.boxWidth, 10).round(2),
 						min: opt.minWidth || (offset.width + 1),
 						max: opt.maxWidth
-					};
+					},
+					maxHeight = opt.maxHeight;
 
 				if (!isNaN(bs.width) && bs.width > opt.maxWidth) {
 					opt.maxWidth = bs.width;
@@ -1200,13 +1219,15 @@
 						opt.maxHeight = minH;
 					}
 				}
+				maxHeight = opt.lines > 0 ? Config.BoxItemHeight * opt.lines + 2 : opt.maxHeight;
+
 				box.style.cssText = [
 					'display:none;top:', offset.top + offset.height - 1, 'px;left:', offset.left, 'px;',
 					'min-width:', bs.min, 'px;',
 					'max-width:', bs.max, 'px;',
 					bs.width ? 'width:' + Factory.getStyleSize(bs.width) + ';' : '',
 					'min-height:', Factory.getStyleSize(opt.minHeight), ';',
-					opt.maxHeight ? 'max-height:' + Factory.getStyleSize(opt.maxHeight + (btn.len || btn.form ? Config.BoxFormHeight : 0)) + ';' : '',
+					opt.maxHeight ? 'max-height:' + Factory.getStyleSize(maxHeight+ (btn.len || btn.form ? Config.BoxFormHeight : 0)) + ';' : '',
 					opt.boxStyle || ''
 				].join('');
 
@@ -1618,7 +1639,7 @@
 				//先取消高度设置
 				box.style.height = 'auto';
 				//再显示下拉列表
-				box.style.display = show ? '' : 'none';
+				box.style.display = show ? 'block' : 'none';
 				box.show = show;
 				$.setClass(opt.select ? that.elem : that.text, 'oui-ddl-cur', show);
 
@@ -1847,7 +1868,7 @@
 				return that;
 			}
 			var display = opt.editable && ($.isBoolean(show) ? show : form.style.display === 'none');
-			form.style.display = display ? '' : 'none';
+			form.style.display = display ? 'block' : 'none';
 
 			if (that.box.style.display === 'none') {
 				return that;
@@ -1874,7 +1895,7 @@
 
 				for (i = 0; i < c - 1; i++) {
 					that.texts[i].style.width = tw + 'px';
-					that.texts[i].style.display = '';
+					that.texts[i].style.display = 'block';
 				}
 			}
 			return that;
