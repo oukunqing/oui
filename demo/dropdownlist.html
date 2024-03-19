@@ -76,13 +76,15 @@
 <br />
 <table cellpadding="0" cellspacing="0">
 	<tr>
-		<td>多选（不可编辑）<br /><input type="text" id="ServerType4" style="" /></td>
 		<td>不可编辑<br /><input type="text" id="ServerType50" style="" /></td>
 		<td>可编辑但默认不显示（shift + A.5）<br /><select id="ServerType51" style=""></select></td>
 		<td>可编辑<br /><select id="ServerType52" style=""></select></td>
+		<td>可编辑(并保留输入)<br /><select id="ServerType53" style=""></select></td>
 	</tr>
-	<tr>
+	<tr>		
+		<td>多选（不可编辑）<br /><input type="text" id="ServerType4" style="" /></td>
 		<td>
+			单选<br />
 			<select id="origin1" size="3">
 				<option value="-1">推送图片类型</option>
 	            <option value="0">都推送</option>
@@ -148,6 +150,15 @@ window.onload = function() {
 			{ id: 4, name: '视频设备视频设备视频设备视频设备视频设备', desc: '' },
 			{ id: 5, name: '图片采集服务', desc: '' },
 			{ id: 6, name: '平台级联服务', desc: '' },
+			{ id: 7, name: '平台级联服务7', desc: '' },
+			{ id: 8, name: '平台级联服务8', desc: '' },
+			{ id: 9, name: '平台级联服务9', desc: '' },
+			{ id: 10, name: '平台级联服务10', desc: '' },
+			{ id: 11, name: '平台级联服务11', desc: '' },
+			{ id: 12, name: '平台级联服务12', desc: '' },
+			{ id: 13, name: '平台级联服务13', desc: '' },
+			{ id: 14, name: '平台级联服务14', desc: '' },
+			{ id: 15, name: '平台级联服务15', desc: '' },
 		],
 		//select: false,
 		layout: 'list',
@@ -157,9 +168,10 @@ window.onload = function() {
 		change: true,
 		//value: '5',
 		//index: 2,
+		boxWidth: 400,
 		//boxWidth: 'follow',
 		//textWidth: 200,
-		itemWidth: '48%',
+		//itemWidth: '48%',
 		itemBorder: true,
 		//回调等级：0-选项实时回调，1-全选/反选等按钮事件回调，2-确定按钮事件回调
 		//submit: 0,
@@ -417,7 +429,7 @@ window.onload = function() {
 		}
 	});
 
-	for (var i = 0; i < 3; i++) {
+	for (var i = 0; i < 4; i++) {
 		$.dropdownlist({
 			id: 'ServerType5' + i,
 			element: 'ServerType5' + i,
@@ -455,7 +467,8 @@ window.onload = function() {
 				datatype: 'int',
 				show: i > 1,
 				min: 5,
-				max: 100
+				max: 100,
+				keep: i === 3
 			}
 		});
 	}

@@ -2647,6 +2647,7 @@
         toNum16: function (len, lower, cutoff) {
             return this.toHex(len, lower, cutoff);
         },
+        //转换进制数
         toRadixNumber: function (len, lower, cutoff, radix) {
             if ($.isNumber(lower)) {
                 radix = lower;
@@ -5178,7 +5179,7 @@
             //若子元素数量超过8个，则每次同时比较4个元素
             //比较方向：开始向右，结束向左，中间向左，中间向右
             if (c >= 8) {
-                k = parseInt(c / 4, 10) + (c % 4 !== 0 ? 1 : 0);
+                k = Math.ceil(c / 4);
                 for (i = 0; i < k; i++) {
                     j = k * 4 - 1 - i;
                     j = j >= c ? c - 1 : j;
@@ -5190,7 +5191,7 @@
                 }
             } else {
                 //每次同时比较2个元素
-                k = parseInt(c / 2, 10) + (c % 2 !== 0 ? 1 : 0);
+                k = Math.ceil(c / 2);
                 for (i = 0; i < k; i++) {
                     j = k * 2 - 1 - i;
                     j = j >= c ? c - 1 : j;
@@ -5215,7 +5216,7 @@
                 c = childs.length, k, i, j, m, n;
 
             if (c >= 8) {
-                k = parseInt(c / 4, 10) + (c % 4 !== 0 ? 1 : 0);
+                k = Math.ceil(c / 4);
                 for (i = 0; i < k; i++) {
                     j = k * 4 - 1 - i;
                     j = j >= c ? c - 1 : j;
@@ -5226,7 +5227,7 @@
                     }
                 }
             } else {
-                k = parseInt(c / 2, 10) + (c % 2 !== 0 ? 1 : 0);
+                k = Math.ceil(c / 2);
                 for (i = 0; i < k; i++) {
                     j = k * 2 - 1 - i;
                     j = j >= c ? c - 1 : j;

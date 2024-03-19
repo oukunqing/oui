@@ -42,6 +42,8 @@
 		BoxItemHeight: 30,
 		// 选项底部高度
 		BoxBarHeight: 42,
+		// 选项默认显示行数
+		ItemDisplayLines: 12,
 		// 选项序号(单个数字)宽度
 		ItemNumberWidth: 12,
 		// 选项序号(多个数字的单个数字)宽度
@@ -417,7 +419,10 @@
 							opt.number ? 'padding-left:4px;' : '', align,
 							'"',
 							'>',
-							opt.number ? '<i style="width:' + (n * (n > 1 ? Config.ItemNumberWidth2 : Config.ItemNumberWidth)) + 'px;">' + (num + i + 1)  + '</i>' : '',
+							opt.number ? [
+								'<i style="width:', (n * (n > 1 ? Config.ItemNumberWidth2 : Config.ItemNumberWidth)), 'px;">',
+								(num + i + 1), '</i>'
+							].join('') : '',
 							opt.tree ? [
 								'<span class="oui-ddl-item-space" style="',
 								dr.level ? 'width:' + dr.level * Config.TreeIndentWidth + 'px;' : 'display:none;', 
@@ -597,14 +602,14 @@
 						that.callback(opt.callbackLevel);
 					}
 					$.addListener(that.texts[0], 'keyup', function(ev) {
-						if (ev.keyCode === 13) {
+						if (ev.keyCode === 13) {	//Enter 回车键确认输入
 							_inputNewVal();
 						}
 					});
 					$.addListener(that.texts[1], 'click', function(ev) {
 						_inputNewVal();
 					});
-					// 65 - A; 73 - I
+					// 65 - A (Append) 追加选项输入， 73 - I (Insert) 追加选项并获取焦点
 					// shift
 					$.addHitListener(elem, 'keyup', [65, 73], function(ev) {
 						ev.keyCode === 65 ? that.form() : that.form(true, true);
@@ -614,6 +619,7 @@
 						ev.keyCode === 65 ? that.form() : that.form(true, true);
 					}, {times: 3, shift: true});
 					*/
+					// 69 - E (Edit), 70 - F (Focus)
 					$.addKeyListener(elem, 'keyup', [69, 70], function(ev) {
 						ev.keyCode === 69 ? that.form(null, true) : that.focus(true);
 					}, true);
@@ -692,14 +698,20 @@
 					return true;
 				});
 				$.addListener(elem, 'keydown', function (ev) {
+					if (elem.tagName !== 'SELECT' && opt.dataType === 'string') {
+						return false;
+					}
 					var kc = $.getKeyCode(ev),
 						idx = ($.getAttribute(elem, 'opt-idx') || '').toInt(),
 						div = $I($.getAttribute(elem, 'opt-id')),
-						arrowList = [37, 38, 40, 39],   //左 上 下 右
-						vimKeyList = [72, 75, 74, 76, 77],  //H  K  J  L M(中间)
-						numList = [49, 50, 51, 52, 53],
-						minList = [97, 98, 99, 100, 101];
+						arrowList = [37, 38, 40, 39],   	//左 上 下 右
+						vimArrowList = [72, 75, 74, 76],	//vim方向键 H  K  J  L
+						// 77 - M(中间); 85 - U(向上半屏); 60 - D(向下半屏）; 66 - B(向上一屏); 70 - F(向下一屏)
+						vimKeyList = [77, 85, 68, 66, 70],
+						numList = [49, 50, 51, 52, 53], 	// 数字键 1 2 3 4 5 (5个按钮位置，从1开始)
+						minList = [97, 98, 99, 100, 101]; 	// 数字键(小键盘) 1 2 3 4 5 (5个按钮位置，从1开始)
 
+					// 13 - Enter, 32 - Space, 108 - Enter(小键盘)
 					if (kc.inArray([13, 32, 108])) {
 						this.focus();
 						$.cancelBubble(ev);
@@ -710,17 +722,20 @@
 						} else {
 							that.show(this);
 						}
-					} else if (kc.inArray([9, 27])) {
+					} else if (kc.inArray([9, 27])) {	//9 - Tab, 27 - Esc
 						if(div !== null && div.style.display !== 'none') {
 							$.cancelBubble(ev);
 						}
 						that.hide();
-					} else if (kc.inArray(arrowList) || kc.inArray(vimKeyList)) {
+					} else if (kc.inArray(arrowList) || kc.inArray(vimArrowList) || kc.inArray(vimKeyList)) {
 						$.cancelBubble(ev);
-						if (kc.inArray(vimKeyList)) {
-							kc = arrowList[vimKeyList.indexOf(kc)] || kc;
+						if (kc.inArray(vimArrowList)) {
+							kc = arrowList[vimArrowList.indexOf(kc)] || kc;
 						}
 						idx = kc.inArray([37, 38]) ? idx - 1 : idx + 1;
+						if (ev.shiftKey && kc === 70) {
+							return false;
+						}
 						that.select(idx, {keyCode: kc, shortcut: false, panel: that.con});
 						return false;
 					} else if (opt.shortcutKey && ev.shiftKey && (kc.inArray(numList) || kc.inArray(minList))) {
@@ -1038,9 +1053,7 @@
 				elem = opt.element,
 				offset = $.getOffset(opt.element),
 				//texts = ['-请选择-', '请选择'],
-				texts = ['\u002d\u8bf7\u9009\u62e9\u002d', '\u8bf7\u9009\u62e9'],
-				evchange = elem.onchange || null,
-				evblur = elem.onblur || null;
+				texts = ['\u002d\u8bf7\u9009\u62e9\u002d', '\u8bf7\u9009\u62e9'];
 
 			if (!$.isElement(elem)) {
 				return that;
@@ -1065,6 +1078,9 @@
 				//树形结构必须是列表模式
 				opt.layout = 'list';
 			}
+
+			var evchange = elem.onchange || null,
+				evblur = elem.onblur || null;
 
 			if (elem.tagName === 'SELECT') {
 				that.elem = elem;
@@ -1299,6 +1315,8 @@
 				opt = that.options,
 				nodes = that.nodes,
 				len = nodes.length,
+				lines = opt.lines > 1 ? opt.lines : Config.ItemDisplayLines,
+				half = Math.ceil(lines / 2),
 				elem = opt.select ? that.elem : that.text,
 				idx = num < 0 ? 0 : num > len ? len : num,
 				cur = $.getAttribute(elem, 'opt-idx').toInt(),
@@ -1320,10 +1338,22 @@
 			} else {
 				if ($.isNumber(par.keyCode)) {
 					switch(par.keyCode) {
+						// 37 - < 左箭头
 						case 37: idx = 1; break;
+						// 39 - > 右箭头
 						case 39: idx = len; break;
-						case 77: idx = parseInt(len / 2, 10) + (len % 2 ? 1 : 0); break;
+						// 77 - M键 (middle)，跳到中间位置
+						case 77: idx = Math.ceil(len / 2); break;
+						// 68 - D (向下半屏)
+						case 68: idx = cur + half; break;
+						// 85 - U (向上半屏)
+						case 85: idx = cur - half; break;
+						// 70 - F (向下一屏)
+						case 70: idx = cur + lines; break;
+						// 66 - B (向上一屏)
+						case 66: idx = cur - lines; break;
 					}
+					idx = idx <= 0 ? 1 : idx > len ? len : idx;
 				}
 				if ((idx > 0 && idx === cur) || !nodes[idx - 1]) {
 					return that;

@@ -168,9 +168,13 @@ label.oui-ddl-label span {
 }
 
 label.oui-ddl-label i {
-	font-style:normal;color:#ccc;display:inline-block;text-align:right;
+	font-style:normal;color:#ddd;display:block;text-align:right;
     border:none;margin:0 5px 0 0;padding:0;font-size:14px;
     float: left;
+}
+
+li.cur label.oui-ddl-label i {
+	color: #999;
 }
 
 label.oui-ddl-label .del, label.oui-ddl-label .del span {

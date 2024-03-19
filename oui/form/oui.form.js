@@ -1677,7 +1677,9 @@
             selectOptionItem: function (item, keyCode, elem, div, shortcut) {
                 var that = this,
                     isArrowKey = $.isNumber(item),
-                    cur = $.getAttribute(elem, 'opt-idx').toInt();
+                    cur = $.getAttribute(elem, 'opt-idx').toInt(),
+                    lines = 12,
+                    half = Math.ceil(lines / 2);
 
                 if (!$.isElement(div = $.toElement(div))) {
                     return that;
@@ -1703,8 +1705,17 @@
                             switch(keyCode) {
                                 case 37: idx = 1; break;
                                 case 39: idx = len; break;
-                                case 77: idx = parseInt(len / 2, 10) + (len % 2 ? 1 : 0); break;
+                                case 77: idx = Math.ceil(len / 2); break;
+                                // 68 - D (向下半屏)
+                                case 68: idx = cur + half; break;
+                                // 85 - U (向上半屏)
+                                case 85: idx = cur - half; break;
+                                // 70 - F (向下一屏)
+                                case 70: idx = cur + lines; break;
+                                // 66 - B (向上一屏)
+                                case 66: idx = cur - lines; break;
                             }
+                            idx = idx <= 0 ? 1 : idx > len ? len : idx;
                         }
                         if ((idx > 0 && idx === cur) || !arr[idx - 1]) {
                             return that;
@@ -1878,7 +1889,7 @@
                             ' data-value="', val.toString().replace(/["]/g, '&quot;'), '"',
                             ' data-text="', txt.toString().replace(/["]/g, '&quot;'), '"',
                             '>',
-                            cfg.number ? ('<i style="width:' + (n * 12) + 'px;">' + idx + '</i>') : '',
+                            cfg.number ? ('<i style="width:' + (n * (n > 1 ? 10 : 12)) + 'px;">' + idx + '</i>') : '',
                             '<span>', con, '</span>',
                             '</li>'
                         ].join(''));
@@ -2321,7 +2332,9 @@
                                 typed = $.getAttribute(this, 'opt-typed', '0').toInt(),
                                 div = $I($.getAttribute(this, 'opt-id')),
                                 arrowList = [37, 38, 40, 39],   //左 上 下 右
-                                vimKeyList = [72, 75, 74, 76, 77],  //H  K  J  L M
+                                vimArrowList = [72, 75, 74, 76],    //vim方向键 H  K  J  L
+                                // 77 - M(中间); 85 - U(向上半屏); 60 - D(向下半屏）; 66 - B(向上一屏); 70 - F(向下一屏)
+                                vimKeyList = [77, 85, 68, 66, 70],
                                 shortcut = kc >= 48 && kc % 48 < 10;
 
                             if (kc.inArray([13, 108]) || ((ddl || keys.indexOf(32) < 0) && kc === 32)) {
@@ -2330,7 +2343,8 @@
                                 return false;
                             }
                             if ((kc.inArray(arrowList) || 
-                                ((ddl || opt.config.readonly || !kc.inArray(keys)) && (kc.inArray(vimKeyList) || shortcut))) && 
+                                ((ddl || opt.config.readonly || !kc.inArray(keys)) && 
+                                    (kc.inArray(vimArrowList) || kc.inArray(vimKeyList) || shortcut))) && 
                                 (ddl || opt.config.readonly || !typed)) {
                                 $.cancelBubble(ev);
                                 var idx = ($.getAttribute(this, 'opt-idx') || '').toInt(),
@@ -2347,8 +2361,8 @@
                                     if (!idx && '' === val && ps.indexOf(val) < 0) {
                                         idx = 0;
                                     }
-                                    if (kc.inArray(vimKeyList)) {
-                                        kc = arrowList[vimKeyList.indexOf(kc)] || kc;
+                                    if (kc.inArray(vimArrowList)) {
+                                        kc = arrowList[vimArrowList.indexOf(kc)] || kc;
                                     }
                                     idx = kc.inArray([37, 38]) ? idx - 1 : idx + 1;
                                 }

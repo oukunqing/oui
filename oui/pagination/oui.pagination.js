@@ -303,7 +303,8 @@
             } else if ((kc === 39 || kc === 74) && (op.pageIndex + op.minuend) < op.pageCount) {
                 pageIndex = op.pageIndex + 1 + op.minuend;
             } else if (kc === 77) {
-                pageIndex = parseInt(op.pageCount / 2, 10);// + (op.pageCount % 2 !== 0 ? 0 : 0);
+                //pageIndex = Math.ceil(op.pageCount / 2);
+                pageIndex = parseInt(op.pageCount / 2, 10);
             } else if (kc === 68 || kc === 70) {    //D-68 F-70
                 pageIndex = op.pageIndex + (kc === 68 ? 5 : 10) + op.minuend;
             } else if (kc === 66 || kc === 85) {    //B-66 U-85

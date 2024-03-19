@@ -1949,16 +1949,42 @@ function buildTreeData(list) {
     return data;
 }
 
-function buildTreeHtml(list) {
-    var html = [], len = list.length, i,
+function buildTreeHtml(data, isList) {
+    var html = [], i,
         ul = [], li = [];
 
-    for (i = 0; i < len; i++) {
+    if (isList) {
+        var len = data.length;
+        for (i = 0; i < len; i++) {
+            if (i === 0) {
+                html.push('<ul>');
+            }
 
-        html.push('<ul>');
+            html.push('<ul>');
+        }
+    } else {
+
     }
+
 
     return html.join('');
 }
 
 $.console.log($.toJsonString(buildTreeData(tdata)));
+
+
+console.log(Math.ceil(10/3));
+
+var num = 100;
+$.console.log(num.toRadixNumber(4, 2));
+$.console.log(num.toRadixNumber(4, 8));
+$.console.log(num.toRadixNumber(4, 10));
+$.console.log(num.toRadixNumber(4, 16));
+$.console.log(num.toRadixNumber(4, 24));
+$.console.log(num.toRadixNumber(4, 36));
+
+var c = 9
+var k = parseInt(c / 4, 10) + (c % 4 !== 0 ? 1 : 0);
+console.log('k:', k);
+k = Math.ceil(c / 4);
+console.log('K:', k);

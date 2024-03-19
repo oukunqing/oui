@@ -293,15 +293,19 @@ button {width:120px;height:30px;}
             $I('fmt_option2').val = 'asd';
         }, 1000);
 
+        var channels = [];
+        for (var i = 0; i <= 1000; i++) {
+            channels.push(i);
+        }
         $.setInputFormat('fmt_channel', {
             types: ['int', 'option'],
-            options: buildOptions([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,100,1000], '通道'),
+            options: buildOptions(channels, '通道'),
             config: { readonly: false, title: '请选择通道'  }
         });
 
         $.setInputFormat('fmt_channel2', {
             types: ['int', 'option'],
-            options: buildOptions([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,100,1000], '通道'),
+            options: buildOptions(channels, '通道'),
             config: { readonly: true, number: true, display: true }
         });
 
