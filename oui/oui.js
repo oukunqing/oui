@@ -168,14 +168,65 @@
             Float: /^(-?[1-9][\d]{0,15}[.]?[\d]{0,10}|-?[0]([.][\d]{0,})?)$/,
             //双精度浮点数
             Double: /^(-?[1-9][\d]{0,23}[.]?[\d]{0,10}|-?[0]([.][\d]{0,})?)$/
-
         },
-        CaseType: {
+        CASE_TYPE: {
             Camel: 0,
             Pascal: 1,
             Underline: 2
+        },
+        KEY_CODE: {
+            Backspace: 8,
+            Tab: 9,
+            Enter: 13,
+            Esc: 27,
+            Space: 32,
+            Delete: 46,
+            Arrow: {
+                Left: 37, Top: 38, Right: 39, Bottom: 40,
+                H: 72, K: 75, J: 74, L: 76
+            },
+            Char: {
+                A: 65, B: 66, C: 67, D: 68, E: 69, F: 70, G: 71,
+                H: 72, I: 73, J: 74, K: 75, L: 76, M: 77, N: 78,
+                O: 79, P: 80, Q: 81, R: 82, S: 83, T: 84, U: 85,
+                V: 86, W: 87, X: 88, Y: 89, Z: 90,
+                0: 48, 1: 49, 2: 50, 3: 51, 4: 52, 5: 53, 6: 54, 7: 55, 8: 56, 9: 57
+            },
+            Num: { 0: 48, 1: 49, 2: 50, 3: 51, 4: 52, 5: 53, 6: 54, 7: 55, 8: 56, 9: 57 },
+            NumList: [48, 49, 50, 51, 52, 53, 54, 55, 56, 57],
+            Symbol: { 
+                "*": 56, "+": 187, "-": 189, ".": 190, "/": 191, 
+                ":": 186,  
+            },
+            Min: {
+                Enter: 108,
+                0: 96, 1: 97, 2: 98, 3: 99, 4: 100, 
+                5: 101, 6: 102, 7: 103, 8: 104, 9: 105,
+                Symbol: { 
+                    "*": 106, "+": 107, "-": 109, ".": 110, "/": 111 
+                },
+                Num: { 0: 96, 1: 97, 2: 98, 3: 99, 4: 100, 5: 101, 6: 102, 7: 103, 8: 104, 9: 105 },
+                NumList: [96, 97, 98, 99, 100, 101, 102, 103, 104, 105],
+            },
+            //F1 F2 ... F12
+            Fun: {
+                1: 112, 2: 113, 3: 114, 4: 115, 5: 116, 6: 117, 
+                7: 118, 8: 119, 9: 120, 10: 121, 11: 122, 12: 123
+            },
+            FunList: [112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123]
+        },
+        POSITION: {
+            Cursor: 0, Custom: 0,
+            TopLeft: 1, TopCenter: 2, TopRight: 3,
+            MiddleLeft: 4, Center: 5, MiddleRight: 6,
+            BottomLeft: 7, BottomCenter: 8, BottomRight: 9,
+            TL: 1, TC: 2, TR: 3, ML: 4, MC: 5, MR: 6, BL: 7, BC: 8, BR: 9
         }
     });
+
+    for (var k in $.KEY_CODE) {
+        $.KEY_CODE[k.toUpperCase()] = $.KEY_CODE[k];
+    }
 
     var version = '1.0.0',
         trim = function (s) { return s.replace(/(^[\s]*)|([\s]*$)/g, ''); },
@@ -640,8 +691,8 @@
             var data = {};
             for (var k in formData) {
                 var dr = formData[k],
-                    key = caseType === $.CaseType.Pascal ? k.toPascalCase(true) : 
-                        caseType === $.CaseType.Underline ? k.toUnderlineCase(true) : 
+                    key = caseType === $.CASE_TYPE.Pascal ? k.toPascalCase(true) : 
+                        caseType === $.CASE_TYPE.Underline ? k.toUnderlineCase(true) : 
                         k.toCamelCase(true);
                 if (dr === null) {
                     data[key] = dr;

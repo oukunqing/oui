@@ -1353,6 +1353,10 @@
 
 // $.input {}, $.setInputFormat ()
 !function ($) {
+    var KC = $.KEY_CODE,
+        KCA = KC.Arrow,
+        KCC = KC.Char;
+
     // $.input
     $.extend($, {
         input: {
@@ -2122,7 +2126,7 @@
                         46,     // delete
                     ],
                     // F1-F12功能键
-                    funs = [112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123],
+                    funs = KC.FunList,
                     keys = ctls.concat(opt.codes || []).concat(funs),
                     patterns = $.extend([], opt.patterns),
                     exceptions = $.extend([], opt.exceptions),
@@ -2137,9 +2141,9 @@
                     decimalLen = $.isNumber(opt.decimalLen) ? opt.decimalLen : 8,
                     converts = [];
 
-                keys = !opt.space ? keys : keys.concat([32]);
-                keys = !opt.minus ? keys : keys.concat([109, 189]); //109是小键盘中的减号-
-                keys = !opt.dot ? keys : keys.concat([110, 190]); //110是小键盘中的点号.
+                keys = !opt.space ? keys : keys.concat([KC.Space]);
+                keys = !opt.minus ? keys : keys.concat([KC.Min.Symbol['-'], KC.Symbol['-']]);
+                keys = !opt.dot ? keys : keys.concat([KC.Min.Symbol['.'], KC.Symbol['.']]);
 
                 if (1 === types.length) {
                     if (types[0].inArray(['options', 'option']) && !opt.config.readonly) {
@@ -2162,8 +2166,8 @@
                         continue;
                     }
                     if (type.inArray(['open', 'number', 'char_number', 'int', 'float', 'word', 'ipv4', 'ipv6', 'port', 'hex', 'md5', 'angle', 'at'])) {
-                        keys = keys.concat([48, 49, 50, 51, 52, 53, 54, 55, 56, 57]);       // 0-9键
-                        keys = keys.concat([96, 97, 98, 99, 100, 101, 102, 103, 104, 105]); // 0-9键（小键盘）
+                        keys = keys.concat(KC.NumList);       // 0-9键
+                        keys = keys.concat(KC.Min.NumList); // 0-9键（小键盘）
                         if (type.inArray(['number', 'int', 'float', 'angle'])) {
                             isNum = true;
                         }
@@ -2173,7 +2177,7 @@
                     }
                     if (type.inArray(['open', 'control', 'at'])) {
                         // ;: =+ ,< -_ .> /? `~
-                        keys = keys.concat([opt.space ? 32 : 0, 186, 187, 188, 189, 190, 191, 192]);
+                        keys = keys.concat([opt.space ? KC.Space : 0, 186, 187, 188, 189, 190, 191, 192]);
                         // [{ \| ]} '"
                         keys = keys.concat([219, 220, 221, 222]);
                     }
@@ -2183,14 +2187,14 @@
                     }
 
                     if (type.inArray(['open', 'char', 'char_number', 'word', 'at'])) {
-                        for (j = 65; j <= 90; j++) { keys.push(j); } // A-Z 键
+                        for (j = KCC.A; j <= KCC.Z; j++) { keys.push(j); } // A-Z 键
                     } else if (type.inArray(['hex', 'ipv6', 'md5'])) {
-                        for (j = 65; j <= 70; j++) { keys.push(j); } // A-F 键
+                        for (j = KCC.A; j <= KCC.F; j++) { keys.push(j); } // A-F 键
                     } else if (type.inArray(['boolean', 'bool'])) {   // 0, 1
-                        keys = keys.concat([48, 49]);
+                        keys = keys.concat([KCC[0], KCC[1]]);
                         if (!opt.config.readonly) {
                             //true false yes no
-                            keys = keys.concat([65, 69, 70, 76, 78, 79, 82, 83, 84, 85, 89]);
+                            keys = keys.concat([KCC.A, KCC.E, KCC.F, KCC.L, KCC.N, KCC.O, KCC.R, KCC.S, KCC.T, KCC.U, KCC.Y]);
                         }
                         if (opt.options.length <= 0) {
                             opt.options = [{ val: 1, txt: '是' }, { val: 0, txt: '否' }];
@@ -2201,19 +2205,19 @@
                         isBool = true;
                     } else if (type === 'int') {
                         // - (小键盘) - (主键盘)
-                        //keys = keys.concat([109, 189]);
+                        //keys = keys.concat([KC.Symbol['-'], KC.Min.Symbol['-']]);
                     } else if (type === 'float') {
                         // - . (小键盘) - . (主键盘)
-                        //keys = keys.concat([109, 110, 189, 190]);
+                        //keys = keys.concat([KC.Symbol['-'], KC.Min.Symbol['-'], KC.Symbol['.'], KC.Min.Symbol['.']]);
                         // . (小键盘) . (主键盘)
-                        keys = keys.concat([110, 190]);
+                        keys = keys.concat([KC.Symbol['.'], KC.Min.Symbol['.']]);
                         patterns = patterns.concat([
                             new RegExp('^(-?[1-9][0-9]{0,23}[.]?[0-9]{0,' + decimalLen + '}|-?[0]([.][0-9]{0,' + decimalLen + '})?)$'), 
                             /^[0]?$/
                         ]);
                     } else if (type === 'angle') {
                         if (opt.dot === null || opt.dot) {
-                            keys = keys.concat([110, 190]);
+                            keys = keys.concat([KC.Symbol['.'], KC.Min.Symbol['.']]);
                         }
                         opt.maxVal = opt.maxVal || 360;
                         patterns = patterns.concat([
@@ -2226,7 +2230,7 @@
                     }
                     //ipv4 ipv6
                     if (type === 'ipv4') {
-                        keys = keys.concat([110, 190]);
+                        keys = keys.concat([KC.Symbol['.'], KC.Min.Symbol['.']]);
                         isVal = true;
                         patterns = patterns.concat([$.PATTERN.Ip, /^[0]{0}$/]);
                         //错误的IPv4输入格式
@@ -2234,7 +2238,7 @@
                         opt.maxLen = 15;
                         converts = converts.concat([{src: '127.', dest: '127.0.0.1'}, ['192.', '192.168.'], ['255.', '255.255.255.0']]);
                     } else if (type === 'ipv6') {
-                        keys = keys.concat([186]);
+                        keys = keys.concat([KC.Symbol[':']]);
                         isVal = true;
                         patterns = patterns.concat([$.isIPv6, /^[0]{0}$/]);
                         //错误的IPv6输入格式
@@ -2242,7 +2246,7 @@
                         opt.maxLen = 39;
                     }
                     if (type === 'word') {
-                        keys = keys.concat([189]);
+                        keys = keys.concat([KC.Symbol['-']]);
                     }
                     if (type==='md5' && !opt.valLen) {
                         opt.valLen = 32;
@@ -2331,20 +2335,20 @@
                                 ddl = this.tagName === 'SELECT', 
                                 typed = $.getAttribute(this, 'opt-typed', '0').toInt(),
                                 div = $I($.getAttribute(this, 'opt-id')),
-                                arrowList = [37, 38, 40, 39],   //左 上 下 右
-                                vimArrowList = [72, 75, 74, 76],    //vim方向键 H  K  J  L
+                                ArrList = [KCA.Left, KCA.Top, KCA.Bottom, KCA.Right], //左 上 下 右
+                                VimList = [KCA.H, KCA.K, KCA.J, KCA.L], //vim方向键 H  K  J  L
                                 // 77 - M(中间); 85 - U(向上半屏); 60 - D(向下半屏）; 66 - B(向上一屏); 70 - F(向下一屏)
-                                vimKeyList = [77, 85, 68, 66, 70],
-                                shortcut = kc >= 48 && kc % 48 < 10;
+                                VimKey = [KCC.M, KCC.U, KCC.D, KCC.B, KCC.F],
+                                shortcut = kc >= KCC[0] && kc % KCC[0] < 10;
 
-                            if (kc.inArray([13, 108]) || ((ddl || keys.indexOf(32) < 0) && kc === 32)) {
+                            if (kc.inArray([KC.Enter, KC.Min.Enter]) || ((ddl || keys.indexOf(KC.Space) < 0) && kc === KC.Space)) {
                                 this.focus();
                                 _showOption(ev, this, opt);
                                 return false;
                             }
-                            if ((kc.inArray(arrowList) || 
+                            if ((kc.inArray(ArrList) || 
                                 ((ddl || opt.config.readonly || !kc.inArray(keys)) && 
-                                    (kc.inArray(vimArrowList) || kc.inArray(vimKeyList) || shortcut))) && 
+                                    (kc.inArray(VimList) || kc.inArray(VimKey) || shortcut))) && 
                                 (ddl || opt.config.readonly || !typed)) {
                                 $.cancelBubble(ev);
                                 var idx = ($.getAttribute(this, 'opt-idx') || '').toInt(),
@@ -2356,22 +2360,22 @@
                                     idx = 0;
                                 }
                                 if (shortcut) {
-                                    idx = kc % 48;
+                                    idx = kc % KCC[0];
                                 } else {
                                     if (!idx && '' === val && ps.indexOf(val) < 0) {
                                         idx = 0;
                                     }
-                                    if (kc.inArray(vimArrowList)) {
-                                        kc = arrowList[vimArrowList.indexOf(kc)] || kc;
+                                    if (kc.inArray(VimList)) {
+                                        kc = ArrList[VimList.indexOf(kc)] || kc;
                                     }
-                                    idx = kc.inArray([37, 38]) ? idx - 1 : idx + 1;
+                                    idx = kc.inArray([KCA.Left, KCA.Top]) ? idx - 1 : idx + 1;
                                 }
                                 $.input.selectOptionItem(idx, kc, this, $.getAttribute(this, 'opt-id'), shortcut);
                                 return true;
                             }
                             if ($.input.checkKey(ev, ctls, excepts, opt) || $.input.checkKey(ev, funs, excepts, opt)) {
                                 //9 - tab, 27 - esc
-                                if (kc.inArray([9, 27])) {
+                                if (kc.inArray([KC.Tab, KC.Esc])) {
                                     //如果选项框弹出时，隐藏选项框，焦点不切换
                                     //如果选项框隐藏时，切换焦点
                                     if (div != null && div.style.display !== 'none') {
@@ -2379,7 +2383,7 @@
                                     }
                                     _showOption(ev, this, opt, 0);
                                     $.setTextCursorPosition(this);
-                                } else if (!ddl && opt.config.readonly && kc.inArray([8, 46])) {
+                                } else if (!ddl && opt.config.readonly && kc.inArray([KC.Backspace, KC.Delete])) {
                                     //backspace, delete键，表示选项被取消，用-1表示索引
                                     $.input.selectOptionItem(-1, null, this, $.getAttribute(this, 'opt-id'));
                                     this.value = '';
@@ -2433,7 +2437,7 @@
                                     ps = $.input.getOptionValues(opt.options),
                                     ctl;
 
-                                if (kc.inArray([37, 38, 39, 40])) {
+                                if (kc.inArray([KCA.Left, KCA.Top, KCA.Right, KCA.Bottom])) {
                                     $.setAttribute(this, 'opt-typed', $.input.isInputTyped(ps, val) ? 1 : 0);
                                     return true;
                                 }
@@ -2500,7 +2504,7 @@
                                 return true;
                             }
                             //Ctrl + A / C, Ctrl + V
-                            if ((ev.ctrlKey && (kc === 65 || kc === 67)) || (opt.paste && ev.ctrlKey && (kc === 86))) {
+                            if ((ev.ctrlKey && (kc === KCC.A || kc === KCC.C)) || (opt.paste && ev.ctrlKey && (kc === KCC.V))) {
                                 return true;
                             }
                             if (!opt.config.readonly && $.input.checkKey(ev, keys, excepts, opt)) {

@@ -68,6 +68,7 @@
 		// 隐藏但是需要占位
 		CssHidden: ';visibility:hidden;width:0px;height:0px;border:none;margin:0;padding:0;font-size:1px;line-height:0px;float:left;'
 	},
+		KC = $.KEY_CODE, KCA = KC.Arrow, KCC = KC.Char, KCM = KC.Min,
 		Cache = {
 			ids: [],
 			lists: {},
@@ -164,6 +165,8 @@
 				opt.allowEmpty = $.getParamValue(opt.allowEmpty, opt.empty);
 				opt.boxWidth = $.getParamValue(opt.boxWidth, opt.panelWidth);
 				opt.textWidth = $.getParamValue(opt.textWidth, opt.elemWidth, opt.width);
+				opt.textHeight = $.getParamValue(opt.textHeight, opt.elemHeight, opt.height);
+				opt.textMinHeight = $.getParamValue(opt.textMinHeight, opt.elemMinHeight);
 				opt.style = $.getParamValue(opt.style, opt.css);
 
 				if (opt.index < 0) {
@@ -477,8 +480,8 @@
 						'<input type="text" class="oui-ddl-val oui-ddl-new"',
 						' placeholder="', opt.config.placeholder, '" id="', key + '_val"',
 						' maxlength="', opt.config.maxLength, '" data-type="', opt.config.dataType, '"',
-						' />',
-						'<button class="btn btn-default btn-sm oui-ddl-btn oui-ddl-new">', opt.config.button, '</button>',
+						' tabindex="-1" />',
+						'<button class="btn btn-default btn-sm oui-ddl-btn oui-ddl-new" tabindex="-1">', opt.config.button, '</button>',
 						'</div>',
 						'</div>'
 					].join(''));
@@ -602,17 +605,32 @@
 						that.callback(opt.callbackLevel);
 					}
 					$.addListener(that.texts[0], 'keyup', function(ev) {
-						if (ev.keyCode === 13) {	//Enter 回车键确认输入
+						if (ev.keyCode.inArray([KC.Enter, KC.Min.Enter])) {	//Enter 回车键确认输入
 							_inputNewVal();
+						} else if (ev.keyCode.inArray([KC.Tab, KC.Esc])) {
+							$.cancelBubble(ev);
+							elem.esc = '';
 						}
+						return false;
+					});
+					$.addListener(that.texts[0], 'keydown', function(ev) {
+						$.cancelBubble(ev);
+						if (ev.keyCode.inArray([KC.Tab, KC.Esc])) {
+							//按Tab或Esc键，退出编辑框，焦点返回选项框
+							that.focus(false);
+							//设置esc按键事件，防止document esc冒泡
+							elem.esc = 1;
+						}
+						return false;
 					});
 					$.addListener(that.texts[1], 'click', function(ev) {
 						_inputNewVal();
+						return false;
 					});
 					// 65 - A (Append) 追加选项输入， 73 - I (Insert) 追加选项并获取焦点
 					// shift
-					$.addHitListener(elem, 'keyup', [65, 73], function(ev) {
-						ev.keyCode === 65 ? that.form() : that.form(true, true);
+					$.addHitListener(elem, 'keyup', [KC.Char.A, KC.Char.I], function(ev) {
+						ev.keyCode === KC.Char.A ? that.form() : that.form(true, true);
 					}, 2000, 3, true);
 					/*
 					$.addHitListener(elem, 'keyup', [65, 73], function(ev) {
@@ -620,8 +638,8 @@
 					}, {times: 3, shift: true});
 					*/
 					// 69 - E (Edit), 70 - F (Focus)
-					$.addKeyListener(elem, 'keyup', [69, 70], function(ev) {
-						ev.keyCode === 69 ? that.form(null, true) : that.focus(true);
+					$.addKeyListener(elem, 'keyup', [KC.Char.E, KC.Char.F], function(ev) {
+						ev.keyCode === KC.Char.E ? that.form(null, true) : that.focus(true);
 					}, true);
 				}
 				return this;
@@ -669,8 +687,11 @@
 				});
 
 				$.addListener(document, 'keyup', function (ev) {
-					if (27 === $.getKeyCode(ev)) {   // Esc键值为27
-						that.hide();
+					if (KC.Esc === $.getKeyCode(ev)) {   // Esc键值为27
+						//若esc按键是从编辑框触发的，则不执行，防止冒泡
+						if (!elem.esc) {
+							that.hide();
+						}
 					}
 					return false;
 				});
@@ -704,15 +725,16 @@
 					var kc = $.getKeyCode(ev),
 						idx = ($.getAttribute(elem, 'opt-idx') || '').toInt(),
 						div = $I($.getAttribute(elem, 'opt-id')),
-						arrowList = [37, 38, 40, 39],   	//左 上 下 右
-						vimArrowList = [72, 75, 74, 76],	//vim方向键 H  K  J  L
-						// 77 - M(中间); 85 - U(向上半屏); 60 - D(向下半屏）; 66 - B(向上一屏); 70 - F(向下一屏)
-						vimKeyList = [77, 85, 68, 66, 70],
-						numList = [49, 50, 51, 52, 53], 	// 数字键 1 2 3 4 5 (5个按钮位置，从1开始)
-						minList = [97, 98, 99, 100, 101]; 	// 数字键(小键盘) 1 2 3 4 5 (5个按钮位置，从1开始)
+						ArrList	= [KCA.Left, KCA.Top, KCA.Bottom, KCA.Right], //左 上 下 右
+						VimList = [KCA.H, KCA.K, KCA.J, KCA.L],	//vim方向键 H  K  J  L
+						// 77 - M(中间); 85 - U(向上半屏); 68 - D(向下半屏）; 66 - B(向上一屏); 70 - F(向下一屏)
+						// 67 - C 依次找到选中项的位置
+						VimKey = [KCC.M, KCC.U, KCC.D, KCC.B, KCC.F, KCC.C],
+						numList = [KCA[1], KCA[2], KCA[3], KCA[4], KCA[5]], 	// 数字键 1 2 3 4 5 (5个按钮位置，从1开始)
+						minList = [KCM[1], KCM[2], KCM[3], KCM[4], KCM[5]]; 	// 数字键(小键盘) 1 2 3 4 5 (5个按钮位置，从1开始)
 
 					// 13 - Enter, 32 - Space, 108 - Enter(小键盘)
-					if (kc.inArray([13, 32, 108])) {
+					if (kc.inArray([KC.Enter, KC.Space, KC.Min.Enter])) {
 						this.focus();
 						$.cancelBubble(ev);
 						var hover = $.getAttribute(elem, 'opt-hover', '0').toInt();
@@ -722,18 +744,19 @@
 						} else {
 							that.show(this);
 						}
-					} else if (kc.inArray([9, 27])) {	//9 - Tab, 27 - Esc
+					} else if (kc.inArray([KC.Tab, KC.Esc])) {
 						if(div !== null && div.style.display !== 'none') {
 							$.cancelBubble(ev);
 						}
 						that.hide();
-					} else if (kc.inArray(arrowList) || kc.inArray(vimArrowList) || kc.inArray(vimKeyList)) {
+					} else if (kc.inArray(ArrList) || kc.inArray(VimList) || kc.inArray(VimKey)) {
 						$.cancelBubble(ev);
-						if (kc.inArray(vimArrowList)) {
-							kc = arrowList[vimArrowList.indexOf(kc)] || kc;
+						if (kc.inArray(VimList)) {
+							kc = ArrList[VimList.indexOf(kc)] || kc;
 						}
-						idx = kc.inArray([37, 38]) ? idx - 1 : idx + 1;
-						if (ev.shiftKey && kc === 70) {
+						idx = kc.inArray([KCA.Left, KCA.Top]) ? idx - 1 : idx + 1;
+						//Shift + F 表示光标焦点定位到编辑框中
+						if (ev.shiftKey && kc === KCC.F) {
 							return false;
 						}
 						that.select(idx, {keyCode: kc, shortcut: false, panel: that.con});
@@ -744,8 +767,9 @@
 							i = minList.indexOf(kc);
 						}
 						$.trigger(that.buttons[i], 'click');
-					} else if (kc >= 48 && kc % 48 < 10) {
-						that.select(kc % 48, {keyCode: kc, shortcut: true, panel: that.con});
+					} else if (kc >= KCC[0] && kc % KCC[0] < 10) {
+						//数字序号定位 0 - 9 以及 10 11 123多位数组合
+						that.select(kc % KCC[0], {keyCode: kc, shortcut: true, panel: that.con});
 					}
 					return false;
 				});
@@ -806,6 +830,30 @@
 					}
 				}
 				return val;
+			},			
+			findNode: function (elem) {
+				var arr = $.getAttribute(elem, 'opt-idx-arr', '').toNumberList(),
+					cur = $.getAttribute(elem, 'opt-idx', '').toInt(),
+					idx = cur;
+
+				if (arr.length <= 0) {
+					return idx;
+				}
+
+				if (arr.indexOf(idx) < 0) {
+					idx = arr[0];
+				} else {
+					for (var i = 0; i < arr.length; i++) {
+						if (idx === arr[i]) {
+							idx = arr[i + 1];
+							break;
+						}
+					}
+					if (!idx) {
+						idx = arr[0];
+					}
+				}
+				return idx;
 			}
 		};
 
@@ -931,6 +979,10 @@
 			layout: 'list', //list, flow, grid
 			//输入框宽度，默认跟随下拉框宽度
 			textWidth: undefined,
+			//输入框高度，默认不指定
+			textHeight: undefined,
+			//输入框最小高度，默认与bootstrap form-control 高度相同
+			textMinHeight: 34,
 			//网格布局时选项宽度: auto, cell, 百分比,如：50% 33%
 			itemWidth: undefined,
 			//列数（当列数设置不正确时，自动调整显示的列数）
@@ -1082,14 +1134,16 @@
 			var evchange = elem.onchange || null,
 				evblur = elem.onblur || null;
 
+			if (!opt.textWidth && (!opt.multi || opt.layout === 'list') 
+				&& (isEditPage && elem.className.indexOf('form-control') > -1)) {
+				opt.textWidth = 'auto';
+			}
+
 			if (elem.tagName === 'SELECT') {
 				that.elem = elem;
 				var pageUrl = location.href.split('?')[0].toLowerCase(),
 					isEditPage = pageUrl.indexOf('edit') > -1 || pageUrl.indexOf('form') > -1;
-				if (!opt.textWidth && (!opt.multi || opt.layout === 'list') 
-					&& (isEditPage && elem.className.indexOf('form-control') > -1)) {
-					opt.textWidth = 'auto';
-				}
+
 				if (!opt.select) {
 					var txt = document.createElement('INPUT');
 					txt.className = 'form-control oui-ddl-txt' + (opt.className ? ' ' + opt.className : '');
@@ -1162,6 +1216,14 @@
 				opt.title = opt.title || that.text.value || texts[0];
 				
 				that.text.className = that.text.className.addClass('oui-ddl oui-ddl-txt').addClass(opt.className);
+			}
+
+			if (opt.textHeight) {
+				elem.style.height = Factory.getStyleSize(opt.textHeight);
+			}
+
+			if (parseInt('0' + $.getElementStyle(elem, 'height'), 10) <= 20) {
+				elem.style.minHeight = Factory.getStyleSize(opt.textMinHeight);
 			}
 
 			if (opt.select) {
@@ -1339,19 +1401,21 @@
 				if ($.isNumber(par.keyCode)) {
 					switch(par.keyCode) {
 						// 37 - < 左箭头
-						case 37: idx = 1; break;
+						case KC.Arrow.Left: idx = 1; break;
 						// 39 - > 右箭头
-						case 39: idx = len; break;
+						case KC.Arrow.Right: idx = len; break;
 						// 77 - M键 (middle)，跳到中间位置
-						case 77: idx = Math.ceil(len / 2); break;
+						case KC.Char.M: idx = Math.ceil(len / 2); break;
 						// 68 - D (向下半屏)
-						case 68: idx = cur + half; break;
+						case KC.Char.D: idx = cur + half; break;
 						// 85 - U (向上半屏)
-						case 85: idx = cur - half; break;
+						case KC.Char.U: idx = cur - half; break;
 						// 70 - F (向下一屏)
-						case 70: idx = cur + lines; break;
+						case KC.Char.F: idx = cur + lines; break;
 						// 66 - B (向上一屏)
-						case 66: idx = cur - lines; break;
+						case KC.Char.B: idx = cur - lines; break;
+						// 67 - C 找到选中项的位置
+						case KC.Char.C: idx = Factory.findNode(elem); break;
 					}
 					idx = idx <= 0 ? 1 : idx > len ? len : idx;
 				}
@@ -1549,16 +1613,19 @@
 		get: function () {
 			var that = this,
 				opt = that.options,
+				elem = opt.select ? that.elem : that.text,
 				nodes = [],
 				datas = [],
 				vals = [],
 				txts = [],
 				cons = [],
+				idxs = [],
 				single = !opt.multi,
 				c = 0,
 				txt = '',
 				val = '',
-				con = '';
+				con = '',
+				cur = $.getAttribute(elem, 'opt-idx', '').toInt();
 
 			for (var i = 0; i < that.nodes.length; i++) {
 				var n = that.nodes[i], desc;
@@ -1579,6 +1646,7 @@
 					if (con) {
 						cons.push(con);
 					}
+					idxs.push(n.idx);
 					c++;
 				}
 			}
@@ -1592,6 +1660,11 @@
 
 			if (!opt.multi) {
 				val = Factory.toValue(val, opt.dataType);
+			} else {
+				if (idxs.indexOf(cur) < 0) {
+					$.setAttribute(elem, 'opt-idx', idxs[0]);
+				}
+				$.setAttribute(elem, 'opt-idx-arr', idxs.join(','));			
 			}
 
 			//设置值
