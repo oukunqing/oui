@@ -6,6 +6,7 @@
     @License：MIT
 
     $.form plugin
+
     $.input 输入框控制: $.input.setFormat, $.setInputFormat
 */
 
@@ -1764,10 +1765,11 @@
                         '<style style="text/css">',
                         '.oui-input-fmt{ime-mode:disabled;}',
                         '.input-opt-elem{outline:none;}',
-                        '.input-opt-elem:focus {outline:none;border-color: #66afe9;box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);',
-                        ' -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);}',
+                        '.input-opt-elem:focus {outline:none;border-color:#66afe9;box-shadow:inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);',
+                        ' -webkit-box-shadow:inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);}',
                         '.input-opt-elem-top{border-top-left-radius:0;border-top-right-radius:0;}',
                         '.input-opt-elem-bottom{border-bottom-left-radius:0;border-bottom-right-radius:0;}',
+                        '.input-opt-elem-bottom:focus{border-bottom-color:#eee;}',
                         '.input-opt-panel-box{position:absolute;border:solid 1px #66afe9;background:#fff;border-radius:5px;overflow:auto;opacity:1;',
                         ' box-shadow:inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);margin:0;padding:0;box-sizing:border-box;',
                         ' -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);}',
@@ -2590,7 +2592,7 @@
                                 $.trigger(elem, 'blur');
                             }
                         });
-                    }            
+                    }
                 }
                 return $;
             }

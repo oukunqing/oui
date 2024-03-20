@@ -5661,6 +5661,24 @@
             }
             return html.join('');
         },
+        buildNumbers = function (list, minVal, maxVal, stepVal) {
+            var arr = [];
+            if ($.isNumber(list)) {
+                stepVal = maxVal;
+                maxVal = minVal;
+                minVal = list;
+                list = null;
+            } else if ($.isArray(list)) {
+                arr = $.extend([], list);
+            }
+            if ($.isNumber(minVal) && $.isNumber(maxVal)) {
+                stepVal = stepVal || 1;
+                for (var i = minVal; i <= maxVal; i += stepVal) {
+                    arr.push(i);
+                }
+            }
+            return arr;
+        },
         fullScreen = function (elem) {
             if (!$.isDocument(elem) && !$.isElement(elem = $.toElement(elem))) {
                 return this;
@@ -6003,6 +6021,7 @@
         fillOptions: fillOptions,
         buildOption: buildOption,
         buildOptions: buildOptions,
+        buildNumbers: buildNumbers,
         fullScreen: fullScreen,
         exitFullScreen: exitFullScreen,
         isFullScreen: isFullScreen,

@@ -770,6 +770,8 @@
 					} else if (kc >= KCC[0] && kc % KCC[0] < 10) {
 						//数字序号定位 0 - 9 以及 10 11 123多位数组合
 						that.select(kc % KCC[0], {keyCode: kc, shortcut: true, panel: that.con});
+					} else if (kc.inArray([KC.Backspace, KC.Delete])) {
+						that.set(null);
 					}
 					return false;
 				});
@@ -1387,10 +1389,13 @@
 					shortcut: null,
 					panel: null,
 					level: 0
-				}, arg);
+				}, arg),
+				isNum = opt.dataType === 'int',
+				isZero = nodes[0].value.toString() === '0';
 
 			if (par.shortcut) {
 				if (len >= 10) {
+					//若是数字型选项，则优先选择内容，而不是序号
 					var ni = cur * 10 + idx;
 					if (ni > len) {
 						ni = idx;
@@ -1423,7 +1428,8 @@
 					return that;
 				}
 			}
-			$.setAttribute(elem, 'opt-idx', idx--);
+			$.setAttribute(elem, 'opt-idx', idx);
+			idx -= isNum && isZero ? 0 : 1;
 			$.scrollTo(nodes[idx < 0 ? 0 : idx].label, par.panel);
 
 			if (opt.multi) {
@@ -1637,7 +1643,7 @@
 						vals.push(Factory.toValue(val, opt.dataType));
 					}
 					if (single && opt.display && val !== txt) {
-						txt = val + ' - ' + txt;
+						txt = (val !== '' ? val + ' - ' : '') + txt;
 					}
 					txts.push(txt + desc);
 					nodes.push(n);
@@ -2050,7 +2056,7 @@
 			}
 			return this;
 		},
-		update: function (id, par) {
+		update: function (id, par, single) {
 			if ($.isObject(id) && $.isUndefined(par)) {
 				par = id;
 				id = null;
@@ -2061,9 +2067,8 @@
 			var cache = Factory.getCache(id);
 			if (cache) {
 				return cache.ddl.update(par);
-			} else {
-				return Factory.buildList(id, par);
 			}
+			return Factory.buildList(id, par, single);
 		}
 	});
 
@@ -2075,7 +2080,7 @@
 			return $.dropdownlist.set(id, values, action, defaultChecked);
 		},
 		update: function (id, par) {
-			return $.dropdownlist.update(id, par);
+			return $.dropdownlist.update(id, par, true);
 		}
 	});
 
