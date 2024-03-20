@@ -1391,7 +1391,8 @@
 					level: 0
 				}, arg),
 				isNum = opt.dataType === 'int',
-				isZero = nodes[0].value.toString() === '0';
+				isZero = nodes[0].value.toString() === '0',
+				First = isNum && isZero ? 0 : 1;
 
 			if (par.shortcut) {
 				if (len >= 10) {
@@ -1406,7 +1407,7 @@
 				if ($.isNumber(par.keyCode)) {
 					switch(par.keyCode) {
 						// 37 - < 左箭头
-						case KC.Arrow.Left: idx = 1; break;
+						case KC.Arrow.Left: idx = First; break;
 						// 39 - > 右箭头
 						case KC.Arrow.Right: idx = len; break;
 						// 77 - M键 (middle)，跳到中间位置
@@ -1422,15 +1423,18 @@
 						// 67 - C 找到选中项的位置
 						case KC.Char.C: idx = Factory.findNode(elem); break;
 					}
-					idx = idx <= 0 ? 1 : idx > len ? len : idx;
+					idx = idx <= 0 ? First : idx > len ? len : idx;
 				}
-				if ((idx > 0 && idx === cur) || !nodes[idx - 1]) {
+				if ((idx > 0 && idx === cur) || (idx > 0 && !nodes[idx - 1])) {
+					return that;
+				}
+				if ((idx > 0 && idx === cur)) {
 					return that;
 				}
 			}
 			$.setAttribute(elem, 'opt-idx', idx);
-			idx -= isNum && isZero ? 0 : 1;
-			$.scrollTo(nodes[idx < 0 ? 0 : idx].label, par.panel);
+			idx -= isNum && isZero && idx < len ? 0 : 1;
+			$.scrollTo(nodes[idx < 0 ? 0 : idx >= len ? len - 1 : idx].label, par.panel);
 
 			if (opt.multi) {
 				for (var i = 0; i < nodes.length; i++) {
