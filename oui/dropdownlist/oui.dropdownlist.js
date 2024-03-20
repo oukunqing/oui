@@ -771,7 +771,7 @@
 						//数字序号定位 0 - 9 以及 10 11 123多位数组合
 						that.select(kc % KCC[0], {keyCode: kc, shortcut: true, panel: that.con});
 					} else if (kc.inArray([KC.Backspace, KC.Delete])) {
-						that.set(null);
+						that.select(null, {panel: that.con});
 					}
 					return false;
 				});
@@ -1382,7 +1382,7 @@
 				lines = opt.lines > 1 ? opt.lines : Config.ItemDisplayLines,
 				half = Math.ceil(lines / 2),
 				elem = opt.select ? that.elem : that.text,
-				idx = num < 0 ? 0 : num > len ? len : num,
+				idx = !$.isNumber(num) || num < 0 ? 0 : num > len ? len : num,
 				cur = $.getAttribute(elem, 'opt-idx').toInt(),
 				par = $.extend({
 					keyCode: null,
@@ -1428,13 +1428,10 @@
 				if ((idx > 0 && idx === cur) || (idx > 0 && !nodes[idx - 1])) {
 					return that;
 				}
-				if ((idx > 0 && idx === cur)) {
-					return that;
-				}
 			}
 			$.setAttribute(elem, 'opt-idx', idx);
 			idx -= isNum && isZero && idx < len ? 0 : 1;
-			$.scrollTo(nodes[idx < 0 ? 0 : idx >= len ? len - 1 : idx].label, par.panel);
+			$.scrollTo(nodes[idx < 0 ? 0 : (idx >= len ? len - 1 : idx)].label, par.panel);
 
 			if (opt.multi) {
 				for (var i = 0; i < nodes.length; i++) {

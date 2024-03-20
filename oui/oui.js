@@ -5124,6 +5124,9 @@
                 elem = $.toElement(elem);
             }
             if (!$.isElement(elem)) {
+                if ($.isElement(pnode = $.toElement(pnode))) {
+                    pnode.scrollTop = 0;
+                }
                 return $;
             }
             var parent = $.isElement(pnode = $.toElement(pnode)) ? pnode : elem.parentNode,
