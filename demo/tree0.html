@@ -1,10 +1,18 @@
+<!DOCTYPE html>
 <html>
-	<head></head>
+	<head>
+		<meta charset="utf-8">
+		<style type="text/css">
+			ul, li {list-style: none;verflow:hidden; margin:0; padding:0;font-size:14px;}
+			ul {margin: 0 0 0 20px;verflow:hidden;}
+			li {line-height: 28px; display: block;oborder:none 0; border-bottom: solid 1px #eee;}
+		</style>
+	</head>
 	<body>
     <ul id="test">
-        <li>test1</li>
-        <li>test1</li>
-        <li>test1</li>
+        <li id="li0">test1</li>
+        <li id="li1" style="color:#f00;">test1</li>
+        <li id="li2">test1</li>
     </ul>
 
 <select style="width:400px;" size="0">    
@@ -66,11 +74,23 @@
     <option value="56">下拉列表节点56</option>
 
 </select>
+	<div id="div1" style="height:400px;width:500px;overflow: auto;border:solid 1px #f00;">
+	</div>
+	<div id="div2" style="height:400px;width:500px;overflow: auto;border:solid 1px #f00;">
+	</div>
 	</body>
 </html>
+<script type="text/javascript" src="../oui/oui.js?"></script>
+<script type="text/javascript" src="dropdownlist.json"></script>
 <script type="text/javascript">
 window.onload = function() {
 	updateText();
+
+	test();
+
+	//test2($.buildTreeList(tdata));
+	test2(treedata.units);
+
 };
 
 function updateText(){
@@ -91,7 +111,52 @@ function updateText(){
 	    node.textContent = 'test2' //重新赋值为test2
 	  }
 	});
+
 	// 将fragment插入到ul
 	ul.appendChild(fragment);
 }
+
+function test() {
+	var fragment = document.createDocumentFragment();
+	var ul = document.createElement('UL');
+	
+	for (var i = 0; i < 1000; i++) {
+		var li = document.createElement('LI');
+		li.innerHTML = '下拉选项' + (i + 1);
+		ul.appendChild(li);
+	}
+
+	fragment.appendChild(ul);
+
+	document.getElementById('div1').appendChild(fragment);
+}
+
+function test2(data) {
+	$.console.log('test2:', data);
+
+	var root = document.createDocumentFragment(), ul, li;
+
+	var items = { 'tree_root': root }, boxes = { };
+	
+	for (var i = 0; i < data.length; i++) {
+		var dr = data[i], pn = items['t_' + dr.pid] || root, pb;
+
+		if (pn) {
+			if (boxes['b_' + dr.pid]) {
+				pb = boxes['b_' + dr.pid];
+			} else {
+				ul = document.createElement('UL');
+				boxes['b_' + dr.pid] = pb = ul;
+				pn.appendChild(ul);
+			}
+		}
+		items['t_' + dr.id] = li = document.createElement('LI');
+		li.innerHTML = dr.name + ' ' + dr.id;
+		pb.appendChild(li);
+	}
+
+	document.getElementById('div2').appendChild(root);
+}
+
+
 </script>

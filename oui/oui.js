@@ -2390,7 +2390,7 @@
         checkPicPath: function() {
             return $.checkFilePath(this);
         },
-        isEvenLen: function () {
+        toEvenLen: function () {
             var s = this.trim(), len = s.length;
             if (len % 2 !== 0) {
                 s = '0' + s;
@@ -2401,7 +2401,7 @@
             if(!$.isBoolean(reverse, true)) {
                 return this;
             }
-            var hex = this.isEvenLen(), arr = [], len = hex.length;
+            var hex = this.toEvenLen(), arr = [], len = hex.length;
             for (var i = 0; i < len / 2; i++) {
                 arr[len - i * 2 - 1] = hex[i * 2 + 1];
                 arr[len - i * 2 - 2] = hex[i * 2];
@@ -2416,7 +2416,7 @@
             if ($.isNumber(radix)) {
                 return this.radixToInt(reverse, radix);
             }
-            var s = this.isEvenLen().toUpperCase();
+            var s = this.toEvenLen().toUpperCase();
             if (!/^[0-9A-F]{0,}$/ig.test(s)) {
                 $.console.trace('hexToInt: [', s, '] hex内容格式错误');
                 return 0;
@@ -2430,7 +2430,7 @@
                 radix = reverse;
                 reverse = false;
             }
-            var s = this.isEvenLen().toUpperCase(), r = radix || 16;
+            var s = this.toEvenLen().toUpperCase(), r = radix || 16;
             if (!(r === 36 ? /^[0-9A-Z]{0,}$/ig : /^[0-9A-F]{0,}$/ig).test(s)) {
                 $.console.trace('radixToInt: [', s, '] ' + r + '进制内容格式错误');
                 return 0;
@@ -2456,7 +2456,7 @@
                 decimalLen = reverse;
                 reverse = false;
             }
-            var str = this.isEvenLen();
+            var str = this.toEvenLen();
             if (!/^[0-9A-F]{8}$/ig.test(str)) {
                 $.console.trace('hexToFloat: [', str, '] hex内容格式错误');
                 return 0;
@@ -2533,7 +2533,7 @@
             return $.padLeft(parseInt(signStr + exponentStr + fractionStr, 2).toString(16), 8).reverseHex(reverse);
         },
         hexToStr: function (reverse) {
-            var s = this.isEvenLen(),
+            var s = this.toEvenLen(),
                 hex = reverse ? s.reverseHex(reverse) : s,
                 len = hex.length,
                 arr = [];
@@ -2547,7 +2547,7 @@
         },
         //十六进制字符串转换成字节数组
         hexToNum: function (reverse) {
-            var s = this.isEvenLen(),
+            var s = this.toEvenLen(),
                 hex = reverse ? s.reverseHex(reverse) : s,
                 len = hex.length,
                 arr = [];

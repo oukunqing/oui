@@ -169,6 +169,26 @@
 				opt.textMinHeight = $.getParamValue(opt.textMinHeight, opt.elemMinHeight);
 				opt.style = $.getParamValue(opt.style, opt.css);
 
+				opt.maxHeight = options.maxHeight || (opt.layout === 'grid' ? Config.BoxGridMaxHeight : Config.BoxMaxHeight);
+
+				opt.dataType = $.getParam(opt, 'dataType,valueType');
+				opt.buttonPosition = $.getParam(opt, 'buttonPosition,buttonPos,btnPos', opt.tree ? 'right' : 'center');
+				opt.buttonLimit = $.getParam(opt, 'buttonLimit,buttonLength,buttonLen,btnLimit,btnLength,btnLen');
+				opt.button = $.getParam(opt, 'showButton,button');
+				opt.number = $.getParam(opt, 'showNumber,number');
+				opt.display = $.getParam(opt, 'showValue,display');
+				opt.lines = parseInt('0' + $.getParam(opt, 'lines,line'), 10);
+				opt.choose = $.getParam(opt, 'chooseBox,choosebox,choose');
+				opt.border = $.getParam(opt, 'itemBorder,border,');
+				opt.value = $.getParam(opt, 'selectedValue,selectedvalue,value');
+				opt.index = $.getParam(opt, 'selectedIndex,selectedindex,index', 0);
+				opt.origin = $.isBoolean($.getParam(opt, 'origin,original'), false);
+				opt.items = $.extend([], opt.items, opt.options);
+				opt.x = ('' + $.getParam(opt, 'left,x')).toInt();
+				opt.y = ('' + $.getParam(opt, 'margin,top,y')).toInt();
+				opt.w = ('' + $.getParam(opt, 'w')).toInt();
+				opt.change = $.isBoolean($.getParam(opt, 'onchange,change'), true);
+
 				if (opt.index < 0) {
 					opt.index = 0;
 				}
@@ -224,11 +244,15 @@
 				}
 				return Factory.setCache(opt, (ddl = new DropDownList(opt))), ddl;
 			},
-			getStyleSize: function (size) {
-				if ($.isNumber(size)) {
-					return (size < 0 ? 0 : size) + 'px';
-				} else if ($.isString(size)) {
-					return size.endWith('%') ? size : parseFloat('0' + size, 10).round(2) + 'px';
+			getStyleSize: function (size, offsetSize) {
+				if (size === 'auto' || $.isUndefinedOrNull(size)) {
+					return offsetSize + 'px';
+				} else {
+					if ($.isNumber(size)) {
+						return (size < 0 ? 0 : size) + 'px';
+					} else if ($.isString(size)) {
+						return size.endWith('%') ? size : parseFloat('0' + size, 10).round(2) + 'px';
+					}
 				}
 				return '0';
 			},
@@ -530,6 +554,7 @@
 					that.nodes.push(new Node({
 						data: dr,
 						type: dr.type || '',
+						ddl: ddl,
 						elem: elem,
 						id: chb.value,
 						idx: i + 1,
@@ -605,17 +630,22 @@
 						that.callback(opt.callbackLevel);
 					}
 					$.addListener(that.texts[0], 'keyup', function(ev) {
-						if (ev.keyCode.inArray([KC.Enter, KC.Min.Enter])) {	//Enter 回车键确认输入
+						var kc = $.getKeyCode(ev);
+						if (kc.inArray([KC.Enter, KC.Min.Enter])) {	//Enter 回车键确认输入
 							_inputNewVal();
-						} else if (ev.keyCode.inArray([KC.Tab, KC.Esc])) {
-							$.cancelBubble(ev);
+							//按Tab或Esc键，退出编辑框，焦点返回选项框
+							that.focus(false);
+						} else if (kc.inArray([KC.Tab, KC.Esc])) {
 							elem.esc = '';
+						} else if (ev.shiftKey && (kc >= KC.Char.A && kc <= KC.Char.Z)) {
+							$.cancelBubble(ev);
 						}
 						return false;
 					});
 					$.addListener(that.texts[0], 'keydown', function(ev) {
-						$.cancelBubble(ev);
-						if (ev.keyCode.inArray([KC.Tab, KC.Esc])) {
+						var kc = $.getKeyCode(ev);
+						if (kc.inArray([KC.Tab, KC.Esc])) {
+							$.cancelBubble(ev);
 							//按Tab或Esc键，退出编辑框，焦点返回选项框
 							that.focus(false);
 							//设置esc按键事件，防止document esc冒泡
@@ -627,19 +657,16 @@
 						_inputNewVal();
 						return false;
 					});
+
 					// 65 - A (Append) 追加选项输入， 73 - I (Insert) 追加选项并获取焦点
 					// shift
 					$.addHitListener(elem, 'keyup', [KC.Char.A, KC.Char.I], function(ev) {
-						ev.keyCode === KC.Char.A ? that.form() : that.form(true, true);
+						$.getKeyCode(ev) === KC.Char.A ? that.form() : that.form(true, true);
 					}, 2000, 3, true);
-					/*
-					$.addHitListener(elem, 'keyup', [65, 73], function(ev) {
-						ev.keyCode === 65 ? that.form() : that.form(true, true);
-					}, {times: 3, shift: true});
-					*/
+
 					// 69 - E (Edit), 70 - F (Focus)
 					$.addKeyListener(elem, 'keyup', [KC.Char.E, KC.Char.F], function(ev) {
-						ev.keyCode === KC.Char.E ? that.form(null, true) : that.focus(true);
+						$.getKeyCode(ev) === KC.Char.E ? that.form(null, true) : that.focus(true);
 					}, true);
 				}
 				return this;
@@ -651,6 +678,9 @@
 				
 				that.buttons = document.querySelectorAll('#' + Config.IdPrefix + opt.id + ' .oui-ddl-oper .oui-ddl-btn');
 
+				if (that.buttons.length <= 0) {
+					return this;
+				}
 				for (i = 0; i < that.buttons.length; i++) {
 					if (opt.shortcutKey) {
 						if (opt.shortcutNum) {
@@ -658,6 +688,7 @@
 						}
 						that.buttons[i].title += '快捷键: shift + ' + (i + 1);
 					}
+					/*	
 					$.addListener(that.buttons[i], 'click', function(ev) {
 						elem.focus();
 						var ac = $.getAttribute(this, 'ac');
@@ -671,7 +702,25 @@
 							that.callback(Config.CallbackLevel.Select);
 						}
 					});
+					*/
 				}
+				$.addListener(that.buttons[0].parentNode, 'click', function(ev) {
+					$.cancelBubble(ev);
+					elem.focus();
+					var btn = ev.target, tag = btn.tagName, ac;
+					if (tag !== 'BUTTON') {
+						return false;
+					}
+					if ((ac = $.getAttribute(btn, 'ac')) === 'no') {
+						that.hide();
+					} else if (ac === 'ok') {
+						that.callback(Config.CallbackLevel.Return);
+						that.hide();
+					} else {
+						that.set('', {action: parseInt(ac, 10)});
+						that.callback(Config.CallbackLevel.Select);
+					}
+				});
 				return this;
 			},
 			setElemEvent: function (ddl) {
@@ -687,11 +736,15 @@
 				});
 
 				$.addListener(document, 'keyup', function (ev) {
-					if (KC.Esc === $.getKeyCode(ev)) {   // Esc键值为27
+					var kc = $.getKeyCode(ev);
+					if (KC.Esc === kc) {   // Esc键值为27
 						//若esc按键是从编辑框触发的，则不执行，防止冒泡
 						if (!elem.esc) {
 							that.hide();
 						}
+					} else if (ev.shiftKey && kc === KCC.F) {
+						$cancelBubble(ev);
+						return false;
 					}
 					return false;
 				});
@@ -723,7 +776,7 @@
 						return false;
 					}
 					var kc = $.getKeyCode(ev),
-						idx = ($.getAttribute(elem, 'opt-idx') || '').toInt(),
+						idx = Factory.getItemIdx(elem),
 						div = $I($.getAttribute(elem, 'opt-id')),
 						ArrList	= [KCA.Left, KCA.Top, KCA.Bottom, KCA.Right], //左 上 下 右
 						VimList = [KCA.H, KCA.K, KCA.J, KCA.L],	//vim方向键 H  K  J  L
@@ -807,8 +860,7 @@
 					elem = opt.select ? that.elem : that.text,
 					len = opt.items.length;
 
-				$.setAttribute(elem, 'opt-len', len);
-				$.setAttribute(elem, 'opt-idx', 0);
+				Factory.setItemIdx(that, 0, len);
 
 				that.elem.options.length = 0;
 				if (that.text) {
@@ -834,8 +886,8 @@
 				return val;
 			},			
 			findNode: function (elem) {
-				var arr = $.getAttribute(elem, 'opt-idx-arr', '').toNumberList(),
-					cur = $.getAttribute(elem, 'opt-idx', '').toInt(),
+				var arr = Factory.getItemIdxArr(elem),
+					cur = Factory.getItemIdx(elem),
 					idx = cur;
 
 				if (arr.length <= 0) {
@@ -856,6 +908,55 @@
 					}
 				}
 				return idx;
+			},
+			hideElem: function(elem, display) {
+				if (display) {
+					elem.style.display = 'none';
+				} else {
+					elem.style.visibility = 'hidden';
+					elem.style.position = 'absolute';
+					elem.style.top = -10000 + 'px';
+					elem.style.left = -10000 + 'px';
+				}
+				return this;
+			},
+			setItemIdx: function (ddl, idx, len) {
+				var that = ddl,
+					elem = that.elem,
+					text = that.text;
+
+				if (elem) {
+					$.setAttribute(elem, 'opt-idx', idx);
+					if ($.isNumber(len)) {
+						$.setAttribute(elem, 'opt-len', len);
+					}
+				}
+				if (text) {
+					$.setAttribute(text, 'opt-idx', idx);
+					if ($.isNumber(len)) {
+						$.setAttribute(text, 'opt-len', len);
+					}
+				}
+				return this;
+			},
+			getItemIdx: function (elem) {
+				return $.getAttribute(elem, 'opt-idx').toInt();
+			},
+			setItemIdxArr: function (ddl, indexs) {
+				var that = ddl,
+					elem = that.elem,
+					text = that.text;
+
+				if (elem) {
+					$.setAttribute(elem, 'opt-idx-arr', indexs);
+				}
+				if (text) {
+					$.setAttribute(text, 'opt-idx-arr', indexs);
+				}
+				return this;
+			},
+			getItemIdxArr: function (elem) {
+				return $.getAttribute(elem, 'opt-idx-arr', '').toNumberList();
 			}
 		};
 
@@ -870,6 +971,7 @@
 		initial: function (par) {
 			var that = this;
 			that.id = par.id;
+			that.ddl = par.ddl;
 			that.idx = par.idx;
 			that.use = $.isBoolean(par.use, true);
 			that.elem = par.elem;
@@ -888,15 +990,16 @@
 			that.dc = $.getAttribute(par.input, 'dc') === '1';
 			that.callback = par.callback;
 			that.childs = [];
-
+			
 			that.label.onmousedown = function () {
 				$.cancelBubble();
 				that.elem.focus();
-				$.setAttribute(that.elem, 'opt-idx', that.idx);
+				Factory.setItemIdx(that.ddl, that.idx);
 				if ($.isFunction(that.callback)) {
 					that.callback(that);
 				}
 			};
+			
 			if (that.checked) {
 				that.set(true);
 			}
@@ -1049,26 +1152,6 @@
 			config: {}
 		}, options));
 
-		opt.maxHeight = options.maxHeight || (opt.layout === 'grid' ? Config.BoxGridMaxHeight : Config.BoxMaxHeight);
-
-		opt.dataType = $.getParam(opt, 'dataType,valueType');
-		opt.buttonPosition = $.getParam(opt, 'buttonPosition,buttonPos,btnPos', opt.tree ? 'right' : 'center');
-		opt.buttonLimit = $.getParam(opt, 'buttonLimit,buttonLength,buttonLen,btnLimit,btnLength,btnLen');
-		opt.button = $.getParam(opt, 'showButton,button');
-		opt.number = $.getParam(opt, 'showNumber,number');
-		opt.display = $.getParam(opt, 'showValue,display');
-		opt.lines = parseInt('0' + $.getParam(opt, 'lines,line'), 10);
-		opt.choose = $.getParam(opt, 'chooseBox,choosebox,choose');
-		opt.border = $.getParam(opt, 'itemBorder,border,');
-		opt.value = $.getParam(opt, 'selectedValue,selectedvalue,value');
-		opt.index = $.getParam(opt, 'selectedIndex,selectedindex,index', 0);
-		opt.origin = $.isBoolean($.getParam(opt, 'origin,original'), false);
-		opt.items = $.extend([], opt.items, opt.options);
-		opt.x = parseInt('0' + $.getParam(opt, 'left,x', 0), 10);
-		opt.y = parseInt('0' + $.getParam(opt, 'margin,top,y', 0), 10);
-		opt.w = parseInt('0' + $.getParam(opt, 'w', 0), 10);
-		opt.change = $.isBoolean($.getParam(opt, 'onchange,change'), true);
-
 		if (opt.editable) {
 			opt.config = $.extend({
 				maxLength: null,
@@ -1158,17 +1241,17 @@
 					}
 					txt.style.cssText = [
 						'background-color:#fff;padding: 0 20px 0 9px;',
-						opt.textWidth === 'auto' ? '' : 'width:' + Factory.getStyleSize(opt.textWidth || offset.width) + ';',
+						opt.textWidth === 'auto' ? '' : 'width:' + Factory.getStyleSize(opt.textWidth, offset.width) + ';',
 						opt.style ? opt.style + ';' : ''
 					].join('');
 					opt.element.parentNode.insertBefore(txt, elem);
 					that.text = elem = txt;
-					that.elem.style.display = 'none';
+					Factory.hideElem(that.elem, false);
 				} else {
 					that.text = null;
 					elem = that.elem;
 					if (opt.textWidth !== 'auto') {
-						elem.style.width = Factory.getStyleSize(opt.textWidth || offset.width);
+						elem.style.width =  Factory.getStyleSize(opt.textWidth, offset.width);
 					}
 					//设置select默认显示的行数为1，即显示1行
 					elem.size = 1;
@@ -1188,16 +1271,16 @@
 				that.text.style.cssText = (that.text.style.cssText || '') + [
 					'background-color:#fff;padding: 0 20px 0 9px;',
 					opt.style ? opt.style + ';' : '',
-					opt.textWidth === 'auto' ? '' : 'width:' + Factory.getStyleSize(opt.textWidth || offset.width) + ';',
+					opt.textWidth === 'auto' ? '' : 'width:' + Factory.getStyleSize(opt.textWidth, offset.width) + ';',
 				].join('');
 				var ddl = document.createElement('SELECT');
 				ddl.className = that.text.className.addClass('oui-ddl oui-ddl-elem');
-				if (opt.textWidth !== 'auto') {
-					ddl.style.width = Factory.getStyleSize(opt.textWidth || offset.width);
-				}
 				opt.element.parentNode.insertBefore(ddl, opt.element);
 				that.elem = ddl;
+				//标记select创建
+				that.ddl = true;
 				ddl.style.width = Factory.getStyleSize(opt.textWidth || offset.width);
+
 				if (evchange) {
 					ddl.onchange = evchange;
 				}
@@ -1206,13 +1289,12 @@
 				}
 				opt.element.id = rid + '_oui_ddl_copy';
 				that.elem.id = rid;
-				//$.setAttribute(that.elem, 'id', rid);
 
 				if (opt.select) {
-					that.text.style.display = 'none';
+					Factory.hideElem(that.text, false);
 					elem = that.elem;
 				} else {
-					that.elem.style.display = 'none';
+					Factory.hideElem(that.elem, false);
 					elem = that.text;
 				}                
 				opt.title = opt.title || that.text.value || texts[0];
@@ -1312,12 +1394,10 @@
 				].join('');
 
 				var html = [
-					//'<div class="oui-ddl-switch oui-ddl-switch-top">top</div>',
 					'<ul class="oui-ddl-box oui-ddl-', opt.layout, '" id="', key, '_list">',
 					Factory.buildItems(that, opt.items),
 					'</ul>',
 					btn.html,
-					//'<div class="oui-ddl-switch oui-ddl-switch-bottom">bottom</div>'
 				];
 				box.innerHTML = html.join('');
 				box.show = false;
@@ -1327,7 +1407,7 @@
 				that.bar = box.childNodes[1];
 
 				Factory.setNodes(that, false)
-					.initValue(that)
+					.initValue(that)				
 					.setButtonEvent(that)
 					.setElemEvent(that)
 					.setElemProperty(that)
@@ -1369,9 +1449,8 @@
 				opt.items = $.toTreeList(opt.items);
 			}
 
-			Factory.buildItems(that, opt.items, key + '_list')
-				.setNodes(that)
-				.initValue(that);
+			Factory.buildItems(that, opt.items, key + '_list').setNodes(that).initValue(that);
+
 			return that.size().position().set(par.value).complete();
 		},
 		select: function (num, arg) {
@@ -1383,7 +1462,7 @@
 				half = Math.ceil(lines / 2),
 				elem = opt.select ? that.elem : that.text,
 				idx = !$.isNumber(num) || num < 0 ? 0 : num > len ? len : num,
-				cur = $.getAttribute(elem, 'opt-idx').toInt(),
+				cur = Factory.getItemIdx(elem),
 				par = $.extend({
 					keyCode: null,
 					shortcut: null,
@@ -1429,7 +1508,7 @@
 					return that;
 				}
 			}
-			$.setAttribute(elem, 'opt-idx', idx);
+			Factory.setItemIdx(that, idx);
 			idx -= isNum && isZero && idx < len ? 0 : 1;
 			$.scrollTo(nodes[idx < 0 ? 0 : (idx >= len ? len - 1 : idx)].label, par.panel);
 
@@ -1504,7 +1583,8 @@
 				opt = that.options,
 				nodes = that.nodes,
 				elem = that.elem,
-				cur = $.getAttribute(elem, 'opt-idx', '').toInt() - 1,
+				isZero = nodes[0].value.toString() === '0',
+				cur = Factory.getItemIdx(elem) - (isZero ? 0 : 1),
 				idx = 0,
 				par = $.extend({
 					action: true,
@@ -1544,7 +1624,7 @@
 						nodes[cur].set(false, false);
 					}
 					idx = par.initial ? 1 : 0;
-					$.setAttribute(elem, 'opt-idx', idx);
+					Factory.setItemIdx(that, idx);
 					if (idx > 0) {
 						nodes[idx - 1].set(true, true);
 					}
@@ -1593,7 +1673,7 @@
 				//单选模式，如果没有指定选中项，则设置选中第1项
 				if (idx >= 0 && idx <= nodes.length) {
 					nodes[idx - (idx > 0 ? 1 : 0)].set(true, false);
-					$.setAttribute(elem, 'opt-idx', idx);
+					Factory.setItemIdx(that, idx);
 					that.get();
 					if (par.edit) {
 						return that.callback(opt.callbackLevel).hide();
@@ -1632,11 +1712,11 @@
 				txt = '',
 				val = '',
 				con = '',
-				cur = $.getAttribute(elem, 'opt-idx', '').toInt();
+				cur = Factory.getItemIdx(elem);
 
 			for (var i = 0; i < that.nodes.length; i++) {
 				var n = that.nodes[i], desc;
-				if (!n.disabled && n.checked) {
+				if (!n.disabled && n.checked) 	{
 					val = n.value.toString().trim();
 					txt = n.text.toString().trim();
 					desc = single && n.desc && n.text !== n.desc ? ' - ' + n.desc : '';
@@ -1669,9 +1749,9 @@
 				val = Factory.toValue(val, opt.dataType);
 			} else {
 				if (idxs.indexOf(cur) < 0) {
-					$.setAttribute(elem, 'opt-idx', idxs[0]);
+					Factory.setItemIdx(that, idxs[0]);
 				}
-				$.setAttribute(elem, 'opt-idx-arr', idxs.join(','));			
+				Factory.setItemIdxArr(that, idxs.join(','));
 			}
 
 			//设置值
@@ -1879,7 +1959,7 @@
 				con = that.con,
 				ds = $.getOffset(box),
 				elem = opt.select ? that.elem : that.text,
-				idx = $.getAttribute(elem, 'opt-idx').toInt(),
+				idx = Factory.getItemIdx(elem),
 				node = that.nodes[idx - 1],
 				es = $.getOffset(elem),
 				left = es.left,
@@ -2001,7 +2081,7 @@
 			if (opt.editable && that.texts.length > 0) {
 				var c = that.texts.length,
 					fw = bw - 10 - that.texts[c - 1].offsetWidth,
-					tw = parseFloat(fw / (c - 1), 10).round(2) - 1;
+					tw = parseFloat(fw / (c - 1), 10).round(2) - 4;
 
 				for (i = 0; i < c - 1; i++) {
 					that.texts[i].style.width = tw + 'px';

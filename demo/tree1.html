@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<style type="text/css">
+			.oui-tree-box {}
+			.oui-tree {
+				margin:0;padding:0;display:block;overflow:auto;width:100%;height:100%;border:none 0;
+				font-family:Arial, 宋体, 微软雅黑;font-size:14px;
+			}
+			.oui-tree ul,.oui-tree li,.oui-tree label,.oui-tree a,.oui-tree span {
+				margin:0;padding:0;display:block;font-size:14px;font-weight:normal;
+				background:transparent;border:none 0;box-sizing:border-box;width:auto;white-space:nowrap;				
+			}
+			.oui-tree ul,.oui-tree li {
+				list-style:none;clear:both;overflow:visible;
+			}
+			.oui-tree li {padding:0 0 0 24px;}
+			.oui-tree ul.level0 {margin:5px;}
+			.oui-tree ul.level0 > li {padding:0;}
+
+			.oui-tree li label {
+				float:left;display:inline-block;height:24px;overflow:hidden;margin-bottom:1px;border-radius:4px;
+				padding:0 6px 0 0;border:solid 1px transparent;
+			}
+			.oui-tree li label:hover{background: #e5f3ff;}
+			.oui-tree li.cur label{background: #cce8ff;}
+			.oui-tree li.cur label:hover{background: #cce8ff;background: #e5f3ff;border:solid 1px #99d1ff;}
+
+			.oui-tree li a,.oui-tree li span {
+				display:inline-block;height:24px;line-height:22px;
+				outline:none;overflow:hidden;
+				text-align: center;
+			}
+
+			.oui-tree li span.switch {background:#00f;width:24px;cursor:default;}
+			.oui-tree li span.check {background:#008000;width:24px;}
+			.oui-tree li a span.icon{background:#f00;width:24px;}
+			.oui-tree li a span.text{text-align:left;}
+
+			.oui-tree li a{cursor:pointer;}
+			.oui-tree li a:hover{}
+
+			/*
+			.oui-tree li a{cursor:pointer;padding:0 5px 0 0;}
+			.oui-tree li a:hover{background: #e5f3ff;}
+			.oui-tree li.cur a{background: #cce8ff;}
+			.oui-tree li.cur a:hover{background: #cce8ff;border:solid 1px #99d1ff;}
+
+			.oui-tree li span.switch {background:#00f;width:24px;cursor:default;}
+			.oui-tree li span.check {background:#008000;width:24px;}
+			.oui-tree li a span.icon{background:#f00;width:24px;}
+			.oui-tree li a span.text{text-align:left;}
+			*/
+			/*
+			.oui-tree li a{background: #cce8ff;border-color: #cce8ff;}
+			.oui-tree li a:hover{background: #cce8ff;border-color: #99d1ff;}
+			.oui-tree li.cur a{background: #cce8ff;border-color: #cce8ff;}
+			.oui-tree li.cur a:hover{background: #cce8ff;border-color: #99d1ff;}
+			*/
+
+
+		</style>
+	</head>
+	<body>
+		<button id="btn1" onclick="test();">显示树菜单</button>
+		<div id="treebox" class="oui-tree" style="width:400px;height:600px;border:solid 1px #f00;"></div>
+	</body>
+</html>
+<script type="text/javascript" src="../oui/oui.js?"></script>
+<script type="text/javascript" src="dropdownlist.json"></script>
+<script type="text/javascript">
+	window.onload = function() {		
+		var div = document.getElementById('treebox');
+
+		$.addListener(div, 'mouseup', function(ev) {
+			var elem = ev.target,
+				tag = elem.tagName,
+				css = elem.className;
+				
+			$.console.log('mouseup:', elem, tag, css, ev.keyCode);
+		});
+		$.addListener(div, 'keydown', function(ev) {
+			$.console.log('keydown:', ev.target, ev.keyCode);
+		});
+	};
+
+	function test(){
+		build('treebox', treedata);
+	}
+
+	function build(id, data) {
+		$.console.log('test2:', data);
+
+		var div = document.getElementById(id);
+		var root = document.createDocumentFragment(), ul, li;
+		var items = { 'tree_root': root }, boxes = { };
+		var ts = new Date().getTime();
+
+		document.getElementById(id).innerHTML = '';
+
+		var box = document.createElement('DIV');
+		box.className = 'oui-tree';
+
+		$.console.log(new Date().getTime());
+		function _build(list, type, ptype) {
+			for (var i = 0; i < list.length; i++) {
+				var dr = list[i];
+				if (!dr.id) {
+					continue;
+				}
+				var id = type + '_' + dr.id,
+					pid = ptype + '_' + dr.pid,
+					pn = items[pid] || root, pb;
+
+				if (pn) {
+					pb = boxes['b_' + pid];
+					if (!pb) {
+						ul = document.createElement('UL');
+						if (!dr.level && type === 'unit') {
+							ul.className = 'level0';
+						}
+						pb = ul;
+						pn.appendChild(ul);
+
+						boxes['b_' + pid] = pb;
+					}
+				}
+				li = document.createElement('LI');
+				if (i === 3) {
+					li.className = li.className.addClass('cur');
+				}
+				li.innerHTML = [
+					'<label>',
+					'<span class="switch">S</span>',
+					'<span class="check">C</span>',
+					'<a>',
+					'<span class="icon">I</span>',
+					'<span class="text">',
+					'[' + type.substr(0, 1) + ']' + dr.name + ' - ' + dr.id + (i === 0 ? ' - ' + ts : ''),
+					'</span>',
+					'</a>',
+					'</label>'
+				].join('');
+
+				pb.appendChild(li);
+
+				items[id] = li;
+			}
+		}
+		
+		_build(data.units, 'unit', 'unit');
+		_build(data.devices, 'device', 'unit');
+		_build(data.cameras, 'camera', 'device');
+
+		box.appendChild(root);
+		div.appendChild(box);
+
+		$.console.log(new Date().getTime());
+	}
+</script>

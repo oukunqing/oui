@@ -214,7 +214,7 @@ label.oui-ddl-label-border:hover {
 input.oui-ddl-chb {
 	float: left;
 	display: inline-block;
-    border: solid 1px #eee;
+    border: solid 1px #ddd;
     min-width: 14px;
     width: 14px;
     height: 14px;
@@ -237,11 +237,11 @@ ul.oui-ddl-flow,ul.oui-ddl-grid {
 }
 
 ul.oui-ddl-box li.cur label.oui-ddl-label {
-	background: #cce8ff;
+	background: #dfe8f6;
 	color: #000;
 }
 ul.oui-ddl-box li.oui-ddl-item:hover label.oui-ddl-label {
-	background: #e5f3ff;
+	background: #f5f5f5;
 	color: #000;
 }
 
@@ -257,40 +257,29 @@ ul.oui-ddl-flow label.oui-ddl-label,ul.oui-ddl-grid label.oui-ddl-label {
 	margin: 2px 3px 2px 2px;
 }
 ul.oui-ddl-flow li.cur label.oui-ddl-label,ul.oui-ddl-grid li.cur label.oui-ddl-label {
-	background: #cce8ff;
+	background: #dfe8f6;
 	border: none 0;
 }
-ul.oui-ddl-flow li label.oui-ddl-label-border,ul.oui-ddl-grid li label.oui-ddl-label-border {
-	background: none;
-	border: solid 1px #eee;
-}
-ul.oui-ddl-flow li:hover label.oui-ddl-label-border,ul.oui-ddl-grid li:hover label.oui-ddl-label-border {
-	background: #cce8ff;
-	border: solid 1px #cce8ff;
-}
 ul.oui-ddl-flow li.cur label.oui-ddl-label-border,ul.oui-ddl-grid li.cur label.oui-ddl-label-border {
-	background: #cce8ff;
-	border: solid 1px #cce8ff;
+	background: #dfe8f6;
+	border: solid 1px #dfe8f6;
 }
 ul.oui-ddl-flow li.cur:hover label.oui-ddl-label-border,ul.oui-ddl-grid li.cur:hover label.oui-ddl-label-border {
-	background: #e5f3ff;
-	border: solid 1px #99d1ff;
+	background: #f5f5f5;
+	border: solid 1px #dfe8f6;
 }
 
 ul.oui-ddl-flow label.oui-ddl-hover,ul.oui-ddl-grid label.oui-ddl-hover {
-	background: #e5f3ff;
+	background: #f5f5f5;
 	color: #000;
 }
 
 ul.oui-ddl-flow li.cur label.oui-ddl-label:hover,ul.oui-ddl-grid li.cur label.oui-ddl-label:hover {
-	background: #e5f3ff;
+	background: #f5f5f5;
 	color: #000;
 }
 ul.oui-ddl-list li.cur label.oui-ddl-label {
 	border-bottom: solid 1px #fafafa;
-}
-ul.oui-ddl-list li.cur label.oui-ddl-label:hover {
-	background: #e5f3ff;
 }
 ul.oui-ddl-list label.oui-ddl-label {
 	/*border-bottom: solid 1px #fafafa;*/
@@ -299,10 +288,10 @@ ul.oui-ddl-list label.oui-ddl-label:hover {
 	/*border-bottom: solid 1px #dfe8f6;*/
 }
 li.oui-ddl-tree-item label.oui-ddl-label {
-	/*border-bottom: solid 1px #fcfcfc;*/
+	border-bottom: solid 1px #fcfcfc;
 }
 li.oui-ddl-tree-item li.cur label.oui-ddl-label {
-	/*border-bottom: solid 1px #fafafa;*/
+	border-bottom: solid 1px #fafafa;
 }
 li.oui-ddl-tree-item label.oui-ddl-label:hover {
 	/*border-bottom: dotted 1px #dfe8f6;*/
@@ -331,11 +320,6 @@ li.oui-ddl-item-disabled label.oui-ddl-label {
 	display: block;
 	overflow: hidden;
 	text-align: center;
-	
-    -moz-user-select: none;
-    -khtml-user-select: none;
-    user-select: none;
-    -ms-user-select: none;
 }
 .oui-ddl-panel .oui-ddl-oper-list {
 	padding-top:4px;
@@ -407,6 +391,31 @@ li.oui-ddl-item-disabled label.oui-ddl-label {
 	border-radius: 5px;
 }
 
+.oui-ddl-panel .oui-ddl-switch {
+	position: absolute;
+	border: none 0;
+	margin: 0;
+	padding: 0;
+	background: transparent;
+	box-sizing: border-box;
+	width: 100%;
+	height: 5px;
+	max-height: 5px;
+	line-height: 5px;
+	display: block;
+	overflow: hidden;
+	cursor: n-resize;
+	z-index: 9999999;
+}
+
+.oui-ddl-panel .oui-ddl-switch-top {
+	top: 0;
+}
+
+.oui-ddl-panel .oui-ddl-switch-bottom {
+	bottom: 0;
+}
+
 /* 以下代码参考引用 bootstrap3.3.7 */
 .oui-ddl-panel .btn-group {
   	position: relative;
@@ -459,7 +468,6 @@ li.oui-ddl-item-disabled label.oui-ddl-label {
   	border-bottom-left-radius: 0;
 }
 
-/*以下代码用于自定义内容输入框*/
 
 .oui-ddl-edit {
 	width: 100%;
@@ -483,7 +491,7 @@ li.oui-ddl-item-disabled label.oui-ddl-label {
 	min-width: 30px;
 
 	height: 30px;
-	margin: 0 2px 0 0;
+	margin: 0 -1px 0 0;
 	padding: 0 5px;
 	box-sizing: border-box;
 	border: solid 1px #ccc;
@@ -513,15 +521,10 @@ li.oui-ddl-item-disabled label.oui-ddl-label {
 	height: 30px;
 	margin: 0;
 	padding: 0;
-	border-left: none 0;
 	box-sizing: border-box;
 	border-top-left-radius: 0;
 	border-bottom-left-radius: 0;
 	top: 6px;
 	right: 5px;
 	position: absolute;
-}
-
-.oui-ddl-edit .btn:hover {
-	border-left: none 0;
 }

@@ -1983,57 +1983,9 @@ $.console.log(num.toRadixNumber(4, 16));
 $.console.log(num.toRadixNumber(4, 24));
 $.console.log(num.toRadixNumber(4, 36));
 
-var c = 9
-var k = parseInt(c / 4, 10) + (c % 4 !== 0 ? 1 : 0);
-console.log('k:', k);
-k = Math.ceil(c / 4);
-console.log('K:', k);
+var css = 'oui';
 
-var  KeyCode= {
-            Backspace: 8,
-            Tab: 9,
-            Enter: 13,
-            Esc: 27,
-            Space: 32,
-            Delete: 46,
-            Arrow: {
-                Left: 37, Top: 38, Right: 39, Bottom: 40,
-                H: 72, K: 75, J: 74, L: 76
-            },
-            Char: {
-                A: 65, B: 66, C: 67, D: 68, E: 69, F: 70, G: 71,
-                H: 72, I: 73, J: 74, K: 75, L: 76, M: 77, N: 78,
-                O: 79, P: 80, Q: 81, R: 82, S: 83, T: 84, U: 85,
-                V: 86, W: 87, X: 88, Y: 89, Z: 90,
-                0: 48, 1: 49, 2: 50, 3: 51, 4: 52, 
-                5: 53, 6: 54, 7: 55, 8: 56, 9: 57
-            },
-            Symbol: {
-                "-": 189, ".": 190, 
-            },
-            Min: {
-                Enter: 108,
-                0: 96, 1: 97, 2: 98, 3: 99, 4: 100, 
-                5: 101, 6: 102, 7: 103, 8: 104, 9: 105,
-                Symbol: {},
-            },
-            //F1 F2 ... F12
-            Fun: {
-                1: 112, 2: 113, 3: 114, 4: 115, 5: 116, 6: 117, 
-                7: 118, 8: 119, 9: 120, 10: 121, 11: 122, 12: 123
-            }
-        },
-    Position= {
-        Cursor: 0, Custom: 0,
-        TopLeft: 1, TopCenter: 2, TopRight: 3,
-        MiddleLeft: 4, Center: 5, MiddleRight: 6,
-        BottomLeft: 7, BottomCenter: 8, BottomRight: 9
-    };
+css.addClass('tree', true);
 
-$.console.log(KeyCode.Char.A);
-$.console.log(KeyCode.Char['A']);
-$.console.log(KeyCode.Char[9]);
-$.console.log(KeyCode.Min[9]);
-
-$.console.log(KeyCode.Symbol['.']);
-
+console.log(css);
+console.log(css.addClass('tree', true));
