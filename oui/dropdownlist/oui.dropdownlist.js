@@ -14,7 +14,18 @@
 
 	var Config = {
 		FilePath: SelfPath,
-		FileDir: $.getFilePath(SelfPath),
+		FileDir: $.getFilePath(SelfPath),		
+        DefaultSkin: 'default',
+        IsDefaultSkin: function (skin) {
+            return (!$.isUndefined(skin) ? skin : Config.GetSkin()) === Config.DefaultSkin;
+        },
+        Skin: '',
+        GetSkin: function () {
+            if (!Config.Skin) {
+                Config.Skin = $.getQueryString(Config.FilePath, 'skin') || Config.DefaultSkin;
+            }
+            return Config.Skin;
+        },
 		IdPrefix: 'oui_ddl_panel_id_',
 		ItemPrefix: 'oui_ddl_chb_item_',
 		Layout: {
@@ -140,6 +151,14 @@
 				if ((!opt.id && !opt.id.toString()) && $.isElement(opt.element)) {
 					opt.id = opt.element.id;
 				}
+
+                if ($.isString(opt.skin, true)) {
+                    opt.skin = opt.skin.toLowerCase();
+                } else {
+                    //opt.skin = Config.DefaultSkin;
+                    //指定默认样式
+                    opt.skin = Config.GetSkin();
+                }
 
 				if ($.isBoolean(opt.single)) {
 					opt.multi = !opt.single;
@@ -976,11 +995,21 @@
 			},
 			getItemIdxArr: function (elem) {
 				return $.getAttribute(elem, 'opt-idx-arr', '').toNumberList();
+			},
+			buildSkinClass: function (skin, prefix) {
+				if (Config.IsDefaultSkin(skin)) {
+					return '';
+				}
+				return prefix + '-' + skin;
 			}
 		};
 
-	//先加载样式文件
-	Factory.loadCss();
+    //先加载(默认)样式文件
+    Factory.loadCss(Config.DefaultSkin);
+    //加载指定的(默认)样式文件
+    if (!Config.IsDefaultSkin()) {
+        Factory.loadCss(Config.GetSkin());
+    }
 
 	function Node(par) {
 		this.initial(par);
@@ -1046,6 +1075,7 @@
 	function DropDownList(options) {
 		var opt = Factory.checkOptions($.extend({
 			id: '',
+            skin: Config.DefaultSkin,       //样式: default, blue等
 			element: undefined,
 			//指定Id/Value字段，有时需要用别的字段当id字段来用，比如用 code 表示 id
 			field: '',
@@ -1276,7 +1306,9 @@
 					//设置select默认显示的行数为1，即显示1行
 					elem.size = 1;
 				}
-				elem.className = elem.className.addClass('oui-ddl oui-ddl-elem');
+				elem.className = elem.className.addClass('oui-ddl oui-ddl-elem')
+					.addClass(Factory.buildSkinClass(opt.skin, 'oui-ddl-elem'));
+
 				opt.title = opt.title || (that.elem.options.length > 0 ? that.elem.options[0].text : '') || texts[0];
 				//宽度补偿，用于input-group样式中的下拉列表框
 				if (opt.w === 0 && (opt.boxWidth === 'follow' || !opt.boxWidth) && 
@@ -1294,7 +1326,9 @@
 					opt.textWidth === 'auto' ? '' : 'width:' + Factory.getStyleSize(opt.textWidth, offset.width) + ';',
 				].join('');
 				var ddl = document.createElement('SELECT');
-				ddl.className = that.text.className.addClass('oui-ddl oui-ddl-elem');
+				ddl.className = that.text.className.addClass('oui-ddl oui-ddl-elem')
+					.addClass(Factory.buildSkinClass(opt.skin, 'oui-ddl-elem'));
+
 				opt.element.parentNode.insertBefore(ddl, opt.element);
 				that.elem = ddl;
 				//标记select创建
@@ -1319,7 +1353,9 @@
 				}                
 				opt.title = opt.title || that.text.value || texts[0];
 				
-				that.text.className = that.text.className.addClass('oui-ddl oui-ddl-txt').addClass(opt.className);
+				that.text.className = that.text.className.addClass('oui-ddl oui-ddl-txt')
+					.addClass(Factory.buildSkinClass(opt.skin, 'oui-ddl-txt'))
+					.addClass(opt.className);
 			}
 
 			if (opt.textHeight) {
@@ -1348,6 +1384,10 @@
 				opt.itemWidth = 'auto';
 			}
 
+			if (!Config.IsDefaultSkin(opt.skin)) {
+                Factory.loadCss(opt.skin);
+                return that.build(elem);
+            }
 			return that.build(elem);
 		},
 		build: function (element) {
@@ -1363,7 +1403,8 @@
 						min: opt.minWidth || (offset.width + 1),
 						max: opt.maxWidth
 					},
-					maxHeight = opt.maxHeight;
+					maxHeight = opt.maxHeight,
+					className = 'oui-ddl oui-ddl-panel'.addClass(Factory.buildSkinClass(opt.skin, 'oui-ddl-panel'));
 
 				if (!isNaN(bs.width) && bs.width > opt.maxWidth) {
 					opt.maxWidth = bs.width;
@@ -1372,7 +1413,7 @@
 				if (bs.min < offset.width) {
 					bs.min = offset.width;
 				}
-				box.className = 'oui-ddl oui-ddl-panel';
+				box.className = className;
 				box.id = Config.IdPrefix + that.id;
 				$.setAttribute(elem, 'opt-id', box.id);
 
@@ -1868,6 +1909,9 @@
 				box.style.display = show ? 'block' : 'none';
 				box.show = show;
 				$.setClass(opt.select ? that.elem : that.text, 'oui-ddl-cur', show);
+				if (!Config.IsDefaultSkin(opt.skin)) {
+					$.setClass(opt.select ? that.elem : that.text, 'oui-ddl-cur-' + opt.skin, show);
+				}
 
 				that.get();
 				//下拉列表位置停靠

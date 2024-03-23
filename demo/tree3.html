@@ -42,6 +42,8 @@
 			.oui-tree li .icon{width:24px;float:left;background:transparent url("imgs/tree/folder.gif") no-repeat center;}
 			.oui-tree li .text{text-align:left;}
 
+			.oui-tree li .icon-open{background:transparent url("imgs/tree/folderopen.gif") no-repeat center;}
+
 			.oui-tree li a{cursor:pointer;}
 			.oui-tree li a:hover{}
 
@@ -76,6 +78,7 @@
 	function getElem(tid, sw) {
 		if (!sw) {
 			sw = $I(buildId(tid, '-switch'));
+			tid = $.getAttribute(sw, 'tid');
 		}
 		var box = sw.parentNode.nextSibling;
 		if (!box) {
@@ -84,6 +87,11 @@
 		var show = box.style.display === 'none';
 		box.style.display = show ? 'block' : 'none';
 		sw.innerHTML = show ? '-' : '+';
+
+		var icon = $I(buildId(tid, '-icon'));
+		if (icon) {
+			$.setClass(icon, 'icon-open', show);
+		}
 
 		var item = getItem(tid);
 	}
@@ -238,9 +246,9 @@
 				li.innerHTML = [
 					'<div class="item" id="', _id(tid, '-label'), '" tid="', tid, '">',
 					'<span class="switch" id="', _id(tid, '-switch'), '" tid="', tid, '"></span>',
-					//'<input type="checkbox" class="check" id="', _id(tid, '-check'), '" tid="', tid, '" />',
+					'<input type="checkbox" class="check" id="', _id(tid, '-check'), '" tid="', tid, '" />',
 					'<a class="name" id="', _id(tid, '-name'), '" tid="', tid, '">',
-					'<span class="icon" id="', _id(tid, '-icon'), '" tid="', tid, '"></span>',
+					'<span class="icon', type ? ' icon-' + type : '', '" id="', _id(tid, '-icon'), '" tid="', tid, '"></span>',
 					'<span class="text" id="', _id(tid, '-text'), '" tid="', tid, '">',
 					type, ' ', dr.name, ' - ', dr.id, (i === 0 ? ' - ' + ts : ''),
 					'</span>',

@@ -114,6 +114,7 @@
 window.onload = function() {
 
 	$.singlelist('Enable', {
+		skin: 'blue',
 		debounce: true,
 		callback: function (value, initial, data, ddl) {
 			$.console.log(ddl.id, '[callback]', ', value:', value, ', initial:', initial, ', data:', data);
@@ -431,11 +432,10 @@ window.onload = function() {
 		//maxHeight: 'auto',
 		itemBorder: true,
         //callbackLevel: 0,
-        
         //是否单选，默认多选
         multi: true,
-        //默认显示的列表行数
-        lines: 6,
+        //显示的列表行数设置为10行，默认为显示12行
+        lines: 10,
         //是否支持按钮快捷键（默认支持）
         shortcutKey: true,
         //是否显示快捷键数字（默认不显示）
