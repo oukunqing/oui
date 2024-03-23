@@ -7253,7 +7253,9 @@ $.debounce
             if (!$.isFunction(func)) {
                 return _;
             }
-            if (Factory.isChange(_, opt.key) || Factory.isFirst(_, opt.timeout)) {
+            if (!opt.delay || !opt.timeout 
+                || Factory.isChange(_, opt.key) 
+                || Factory.isFirst(_, opt.timeout)) {
                 return func(), _;
             }
             if (_.timer) {

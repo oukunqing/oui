@@ -36,6 +36,8 @@
 			//初始化
 			Initial: 999,
 		},
+		DebounceDelay: 150,
+		DebounceTimeout: 3000,
 		// 当高度超过浏览器窗口大小时，保留边距
 		BodyPadding: 10,
 		// 选项高度
@@ -154,7 +156,10 @@
 				opt.columns = $.getParam(opt, 'columns,cells,column,cell');
 				opt.textAlign = $.getParam(opt, 'itemAlign,textAlign,align');
 
-				opt.callbackDebounce = $.getParam(opt, 'callbackDebounce,debounce');
+				//默认需要防抖回调
+				opt.callbackDebounce = $.isBoolean($.getParam(opt, 'callbackDebounce,debounce'), true);
+				opt.debounceDelay = parseInt('0' + $.getParamCon(opt, 'debounceDelay,debouncedelay,delay')) || Config.DebounceDelay;
+				opt.debounceTimeout = parseInt('0' + $.getParamCon(opt, 'debounceTimeout,debouncetimeout,timeout')) || Config.DebounceTimeout;
 
 				//是否显示选框,默认情况下：单选框不显示，复选框显示
 				//若指定display为true或false，则按指定规则显示
@@ -1137,7 +1142,11 @@
 			//回调等级：0-选项实时回调，1-全选/反选等按钮事件回调，2-确定按钮事件回调
 			callbackLevel: 1,
 			//是否防抖，多选模式下，点击选项时有效
-			callbackDebounce: false,
+			callbackDebounce: null,
+			//防抖延迟，默认150毫秒
+			debounceDelay: Config.DebounceDelay,
+			//防抖间隔，默认3000毫秒(即3秒)
+			debounceTimeout: Config.DebounceTimeout,
 			//回调函数
 			callback: undefined,
 			//初始化时是否回调，默认不回调
@@ -1584,14 +1593,7 @@
 					that.hide();
 				}
 			}
-			if (multi && nodes.length > 1 && opt.callbackDebounce) {
-				$.debounce({}, function() {
-					that.callback(par.level);
-				});
-			} else {
-				return that.callback(par.level);
-			}
-			return that;
+			return that.callback(par.level);
 		},
 		msg: function() {
 			var that = this, opt = that.options;
@@ -1810,7 +1812,8 @@
 					return that;
 				}
 			}
-			if ((opt.initial || level !== Config.CallbackLevel.Initial)) {
+
+			function __callback () {
 				if ($.isFunction(opt.callback)) {
 					opt.callback(data.value, level === Config.CallbackLevel.Initial, data, that);
 				} else if ($.isDebug()) {
@@ -1818,6 +1821,18 @@
 				}
 				if (opt.change) {
 					$.trigger(elem, 'change');
+				}
+			}
+
+			if ((opt.initial || level !== Config.CallbackLevel.Initial)) {
+				if (opt.callbackDebounce) {
+					$.debounce({
+						delay: opt.debounceDelay, timeout: opt.debounceTimeout
+					}, function() {
+						__callback();
+					});
+				} else {
+					__callback();
 				}
 			}
 			return that;
