@@ -21,8 +21,19 @@
 <br />
 <table cellpadding="0" cellspacing="0">
 	<tr>
+		<td>
+			<select id="Enable" class="form-control select" data-type="int">
+                <option value="-1">是否启用</option>
+                <option value="1" selected="selected">启用</option>
+                <option value="0">禁用</option>
+            </select>
+		</td>
+	</tr>
+	<tr>
 		<td><select id="DeviceType" style=""></select></td>
-		<td><input id="ServerType" style="" onchange="print1(this);" /></td>
+		<td><select id="ServerType" style="" onchange="print1(this);">
+			<option value="">请选择服务类型</option>
+		</select></td>
 		<td><select id="tree1" style=""></select></td>
 	</tr>
 	<tr>
@@ -101,6 +112,13 @@
 <script type="text/javascript" src="dropdownlist.json"></script>
 <script type="text/javascript">
 window.onload = function() {
+
+	$.singlelist('Enable', {
+		callback: function (value, initial, data, ddl) {
+			$.console.log(ddl.id, '[callback]', ', value:', value, ', initial:', initial, ', data:', data);
+		}
+	});
+
 	var types = [
 		{ id: 1, name: '视频设备', desc: '400万像素高清摄像机' },
 		{ id: 2, name: 'DTU设备', desc: '' },
@@ -135,7 +153,7 @@ window.onload = function() {
 		//按钮位置： left,center,right
 		buttonPosition: 'right',
 		callback: function (value, initial, data, ddl) {
-			$.console.log('initial11:', value, initial, ddl);
+			$.console.log(ddl.id, '[callback]', ', value:', value, ', initial:', initial, ', data:', data);
 			getDeviceList();
 		}
 	});
@@ -166,6 +184,7 @@ window.onload = function() {
 		display: true,
 		number: true,
 		change: true,
+		origin: true,
 		//value: '5',
 		//index: 2,
 		boxWidth: 400,

@@ -1914,7 +1914,8 @@
             return this.contains(obj);
         },
         inArray: function (strArray) {
-            return $.isArray(strArray) ? strArray.indexOf(this) > -1 : false;
+            var arr = $.isArray(strArray) ? strArray : $.isString(strArray) ? strArray.split(/[,;|]/) : [strArray];
+            return arr.length > 0 ? arr.indexOf(this) > -1 : false;
         },
         replaceAll: function (pattern, v) {
             return this.replace($.isRegexp(pattern) ? pattern : new RegExp(pattern, 'gm'), v);
@@ -2881,7 +2882,8 @@
             return this.setNumber(min, max);
         },
         inArray: function (numArray) {
-            return $.isArray(numArray) ? numArray.indexOf(this) > -1 : false;
+            var arr = $.isArray(numArray) ? numArray : $.isNumber(numArray) ? [numArray] : [];
+            return arr.length > 0 ? arr.indexOf(this) > -1 : false;
         }
     }, 'Number.prototype');
 

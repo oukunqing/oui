@@ -177,7 +177,7 @@ li.cur label.oui-ddl-label i {
 	color: #999;
 }
 
-label.oui-ddl-label .del, label.oui-ddl-label .del span {
+label.del {
     text-decoration:line-through;
 }
 label.oui-ddl-label u{
@@ -277,7 +277,12 @@ ul.oui-ddl-flow li.cur:hover label.oui-ddl-label-border,ul.oui-ddl-grid li.cur:h
 	border: solid 1px #99d1ff;
 }
 
-ul.oui-ddl-flow label.oui-ddl-hover,ul.oui-ddl-grid label.oui-ddl-hover {
+ul.oui-ddl-list li label.oui-ddl-hover,
+ul.oui-ddl-flow li label.oui-ddl-hover,
+ul.oui-ddl-grid li label.oui-ddl-hover,
+ul.oui-ddl-list li.cur label.oui-ddl-hover,
+ul.oui-ddl-flow li.cur label.oui-ddl-hover,
+ul.oui-ddl-grid li.cur label.oui-ddl-hover {
 	background: #e5f3ff;
 	color: #000;
 }

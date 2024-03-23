@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<style type="text/css">
+			.oui-tree-box {}
+			.oui-tree {
+				margin:0;padding:0;display:block;overflow:auto;width:100%;height:100%;border:none 0;
+				font-family:Arial, 宋体, 微软雅黑;font-size:14px;
+			    -moz-user-select: none;
+			    -khtml-user-select: none;
+			    user-select: none;
+			    -ms-user-select: none;
+			}
+			.oui-tree ul,.oui-tree li,.oui-tree .item,.oui-tree a,.oui-tree span {
+				margin:0;padding:0;display:block;font-size:14px;font-weight:normal; visibility: ;
+				background:transparent;border:none 0;box-sizing:border-box;width:auto;white-space:nowrap;				
+			}
+			.oui-tree ul,.oui-tree li {
+				list-style:none;clear:both;overflow:visible;
+			}
+			.oui-tree li {padding:0 0 0 24px;}
+			.oui-tree ul.level0 {margin:5px;}
+			.oui-tree ul.level0 > li {padding:0;}
+			
+			.oui-tree li .item {
+				float:left;display:inline-block;height:24px;overflow:hidden;margin-bottom:1px;
+			}
+			.oui-tree li .item:hover{}
+			.oui-tree li.cur .item{}
+			.oui-tree li.cur .item:hover{}
+			
+			.oui-tree li a.name,.oui-tree li span {
+				display:inline-block;height:24px;line-height:22px;
+				outline:none;overflow:hidden;
+				text-align: center;
+			}
+
+			.oui-tree li .switch {background:transparent;width:24px;cursor:default;float:left;}
+			.oui-tree li .check {background:transparent;width:24px;border:solid 1px #008000;float:left;}
+			.oui-tree li .check {width:14px;height:14px;margin:4px 4px 0 3px;float:left;display:block;overflow:hidden;}
+			.oui-tree li .icon{width:24px;float:left;background:transparent url("imgs/tree/folder.gif") no-repeat center;}
+			.oui-tree li .text{text-align:left;}
+
+			.oui-tree li a{cursor:pointer;}
+			.oui-tree li a:hover{}
+
+			.oui-tree li a{border:solid 1px transparent;cursor:pointer;margin:0 1px;padding:0 6px 0 1px;border-radius:4px;}
+			.oui-tree li a:hover{background: #e5f3ff;}
+			.oui-tree li.cur a{background: #cce8ff;border-color: #cce8ff;}
+			.oui-tree li.cur a:hover{background: #cce8ff;border-color: #99d1ff;}
+			
+		</style>
+	</head>
+	<body>
+		<button id="btn1" onclick="test();">显示树菜单</button>
+		<button id="btn2" onclick="test(2);">显示树菜单2</button>
+		<div id="treebox" class="oui-tree" style="margin-top:10px;width:500px;height:700px;border:solid 1px #f00;"></div>
+		<div id="div2"></div>
+	</body>
+</html>
+<script type="text/javascript" src="../oui/oui.js?"></script>
+<script type="text/javascript" src="dropdownlist.json"></script>
+<script type="text/javascript">
+
+	var items = { }, boxes = { };
+
+	function getItem(tid) {
+		var item = items[tid] || {};
+
+		$.console.log('item:', tid, item);
+
+		return item;
+	}
+
+	function getElem(tid, sw) {
+		if (!sw) {
+			sw = $I(buildId(tid, '-switch'));
+		}
+		var box = sw.parentNode.nextSibling;
+		if (!box) {
+			return false;
+		}
+		var show = box.style.display === 'none';
+		box.style.display = show ? 'block' : 'none';
+		sw.innerHTML = show ? '-' : '+';
+
+		var item = getItem(tid);
+	}
+
+	window.onload = function() {		
+		var div = document.getElementById('treebox');
+		
+		$.addListener(div, 'mouseup', function(ev) {
+			$.cancelBubble(ev);
+			var elem = ev.target,
+				tag = elem.tagName.toLowerCase(),
+				css = elem.className,
+				sw;
+
+			$.console.log('click:', elem, tag, css, ev.keyCode);
+			if (tag.inArray(['label','span','a'])) {				
+				if (css.indexOf('switch') > -1) {
+					sw = elem;
+				} else {
+					getItem($.getAttribute(elem, 'tid'));
+					return false;
+				}				
+				sw = elem;
+
+				getElem($.getAttribute(elem, 'tid'), sw);
+
+				return false;
+			} else if (tag.inArray(['input'])) {
+				$.cancelBubble(ev);
+			$.console.log('click22:', elem, tag, css, ev.keyCode);
+				//elem.checked = !elem.checked;
+				return false;
+			}
+		});
+		$.addListener(div, 'dblclick', function(ev) {
+			$.cancelBubble(ev);
+			var elem = ev.target,
+				tag = elem.tagName.toLowerCase(),
+				css = elem.className,
+				sw;
+			$.console.log('dblclick:', elem, tag, css, ev.keyCode);
+
+			if (tag.inArray(['label','span','a']) && css.indexOf('switch') < 0) {
+				getElem($.getAttribute(elem, 'tid'));
+			} else if (tag.inArray(['input'])) {
+				$.cancelBubble(ev);
+			$.console.log('click22:', elem, tag, css, ev.keyCode);
+				//elem.checked = !elem.checked;
+				return false;
+			}
+		});
+		$.addListener(div, 'keydown', function(ev) {
+			$.console.log('keydown:', ev.target, ev.keyCode);
+		});
+	
+	};
+
+	function test(id){
+		$.console.log('test2:', new Date().getTime());
+		build('treebox', id ? treedata2 : treedata);
+		$.console.log('test3:', new Date().getTime());
+
+		setTimeout(function () {
+		    $.console.log('3000');
+		}, 3000);
+		$.console.log('1000');
+	}
+
+	function buildId(id, postfix) {
+		return 'oui-tree-' + id + (postfix || '');
+	}
+
+	function build(id, data) {
+		//$.console.log('test2:', data);
+		$.console.log('build start');
+
+		items = {};
+		boxes = {};
+
+		var div = document.getElementById(id);
+
+		var root = document.createDocumentFragment(), ul, li;
+		var ts = new Date().getTime();
+
+		document.getElementById(id).innerHTML = '';
+
+		var box = $I('oui-tree-' + id);
+		if (!box) {
+			box = document.createElement('DIV');
+			box.className = 'oui-tree';
+			box.id = 'oui-tree-' + id;
+		}
+
+		items['tree_root'] = {elem:box, level: 0};
+
+		var last = {};
+
+		var cc = 0;
+
+		function _id(id, postfix) {
+			return buildId(id, postfix);
+		}
+
+		function _build(list, type, ptype) {
+			for (var i = 0; i < list.length; i++) {
+				var dr = list[i], level = 0;
+				if (!dr.id) {
+					continue;
+				}
+				cc++;
+				var tid = type + '_' + dr.id,
+					pid = ptype + '_' + dr.pid,
+					pn = items[pid], pb;
+
+				if (!pn) {
+					pn = items['tree_root'];
+					level = 0;
+				} else {
+					level = pn.level + 1;
+				}
+
+				if (pn) {
+					if (last.pid === pid) {
+						pb = last.pb;
+					} else {
+						pb = boxes['b_' + pid];
+						if (!pb) {
+							ul = document.createElement('UL');
+							ul.className = 'level' + level + ' ul-' + ptype;
+							ul.id = pid + '-ul';
+							if (type === 'camera' && ul.style.display !== 'none') {
+								ul.style.display = 'none';
+							}
+							/*
+							if (level > 2) {
+								ul.style.display = 'none';
+							}
+							*/
+							pb = ul;
+							pn.elem.appendChild(ul);
+
+							boxes['b_' + pid] = pb;
+						}
+						last = {pid: pid, pb: pb};
+					}
+				}
+				li = document.createElement('LI');
+	
+				li.id = tid + '-li';
+				li.className = 'level' + level;
+				
+				li.innerHTML = [
+					'<div class="item" id="', _id(tid, '-label'), '" tid="', tid, '">',
+					'<span class="switch" id="', _id(tid, '-switch'), '" tid="', tid, '"></span>',
+					//'<input type="checkbox" class="check" id="', _id(tid, '-check'), '" tid="', tid, '" />',
+					'<a class="name" id="', _id(tid, '-name'), '" tid="', tid, '">',
+					'<span class="icon" id="', _id(tid, '-icon'), '" tid="', tid, '"></span>',
+					'<span class="text" id="', _id(tid, '-text'), '" tid="', tid, '">',
+					type, ' ', dr.name, ' - ', dr.id, (i === 0 ? ' - ' + ts : ''),
+					'</span>',
+					'</a>',
+					'</div>'
+				].join('');
+
+				pb.appendChild(li);
+
+				items[tid] = {elem:li, level:level, data: dr};
+			}
+		}
+		
+		var ts = new Date().getTime();
+		$.console.log('build begin', ts);
+
+		_build(data.units, 'unit', 'unit');
+		_build(data.devices, 'device', 'unit');
+		_build(data.cameras, 'camera', 'device');
+
+		root.appendChild(box);
+		div.appendChild(root);
+
+		var ts2 = new Date().getTime();
+		$.console.log('build finish', ts2, ts2 - ts, 'cc:', cc);
+
+		$('#div2').html('加载' + cc + '个节点，耗时' + (ts2 - ts) + '毫秒');
+
+		var labels = box.querySelectorAll('div'),
+			tmpbox = document.createDocumentFragment();
+
+		$.console.log('labels:', labels.length);
+		for (var i = 0; i < labels.length; i++) {
+			var lbl = labels[i], childs = lbl.childNodes, ul = lbl.nextSibling;
+			if (ul) {
+				childs[0].innerHTML = ul.style.display === 'none' ? '+' : '-';
+			}
+		}
+	}
+</script>

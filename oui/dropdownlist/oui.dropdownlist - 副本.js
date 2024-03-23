@@ -430,7 +430,7 @@
 							disabled = dr.disabled ? ' disabled="disabled"' : '',
 							desc = dr.desc || (opt.desc ? val.toString() : ''),
 							title = '<span class="oui-ddl-li-txt">' + 
-								(opt.display && val !== '' && val !== txt ? val + '<u>-</u>' + txt : txt === '' ? val : txt) + 
+								(opt.display && val !== txt ? val + '<u>-</u>' + txt : txt === '' ? val : txt) + 
 								'</span>' +
 								(desc && txt !== desc ? '<span class="oui-ddl-li-txt i-t">' + desc + '</span>' : '');
 
@@ -556,6 +556,7 @@
 					that.nodes.push(new Node({
 						data: dr,
 						type: dr.type || '',
+						ddl: ddl,
 						elem: elem,
 						id: chb.value,
 						idx: i + 1,
@@ -563,11 +564,61 @@
 						label: chb.parentNode,
 						input: chb,
 						disabled: chb.disabled ? true : false,
-						multi: opt.multi
+						multi: opt.multi,
+						/*callback: function (node) {
+							var val = node.value,
+								txt = node.text + (node.desc ? ' - ' + node.desc : '');
+							if ($.isFunction(opt.beforeChange)) {
+								opt.beforeChange(val, txt, function() {
+									$.setAttribute(elem, 'opt-hover', 0);
+									that.action(node, {click: true});
+								});
+							} else {
+								$.setAttribute(elem, 'opt-hover', 0);
+								that.action(node, {click: true});
+							}
+						}*/
 					}));
 					that.indexs[chb.id] = i;
 				}
 				that.items = document.querySelectorAll('#' + Config.IdPrefix + opt.id + ' li');
+
+				if (!this.isRepeat(that.id + '-mousedown')) {
+					$.addListener(that.box, 'mousedown', function(ev) {
+						var elem = ev.target,
+							tag = elem.tagName.toLowerCase(),
+							css = elem.className,
+							lbl = elem;
+
+						that.elem.focus();
+
+						if (tag !== 'label' || css.indexOf('oui-ddl-label') < 0) {
+							lbl = elem.parentNode;
+						}
+						if (lbl.className.indexOf('oui-ddl-label') < 0) {
+							return false;
+						}
+						var idx = ($.getAttribute(lbl, 'opt-idx') || '').toInt(),
+							node = that.nodes[idx - 1];
+
+						if(node) {
+							Factory.setItemIdx(that, idx);
+
+							var val = node.value,
+								txt = node.text + (node.desc ? ' - ' + node.desc : '');
+							if ($.isFunction(opt.beforeChange)) {
+								opt.beforeChange(val, txt, function() {
+									$.setAttribute(elem, 'opt-hover', 0);
+									that.action(node, {click: true});
+								});
+							} else {
+								$.setAttribute(elem, 'opt-hover', 0);
+								that.action(node, {click: true});
+							}
+						}
+						$.console.log('mousedown:', that.id, ev.target, lbl, idx);
+					});
+				}
 
 				return this;
 			},
@@ -676,6 +727,21 @@
 						}
 						that.buttons[i].title += '快捷键: shift + ' + (i + 1);
 					}
+					/*	
+					$.addListener(that.buttons[i], 'click', function(ev) {
+						elem.focus();
+						var ac = $.getAttribute(this, 'ac');
+						if (ac === 'no') {
+							that.hide();
+						} else if (ac === 'ok') {
+							that.callback(Config.CallbackLevel.Return);
+							that.hide();
+						} else {
+							that.set('', {action: parseInt(ac, 10)});
+							that.callback(Config.CallbackLevel.Select);
+						}
+					});
+					*/
 				}
 				$.addListener(that.buttons[0].parentNode, 'click', function(ev) {
 					$.cancelBubble(ev);
@@ -797,51 +863,10 @@
 						//数字序号定位 0 - 9 以及 10 11 123多位数组合
 						that.select(kc % KCC[0], {keyCode: kc, shortcut: true, panel: that.con});
 					} else if (kc.inArray([KC.Backspace, KC.Delete])) {
-						that.select(null, {panel: that.con, delete: true});
+						that.select(null, {panel: that.con});
 					}
 					return false;
 				});
-				return this;
-			},
-			setItemEvent: function (ddl) {
-				var that = ddl,
-					opt = that.options;
-
-				if (!this.isRepeat(that.id + '-mousedown')) {
-					$.addListener(that.box, 'mousedown', function(ev) {
-						var elem = ev.target,
-							tag = elem.tagName.toLowerCase(),
-							css = elem.className,
-							lbl = elem;
-
-						if (tag !== 'label' || css.indexOf('oui-ddl-label') < 0) {
-							lbl = elem.parentNode;
-						}
-						if (lbl.className.indexOf('oui-ddl-label') < 0) {
-							return false;
-						}
-						var idx = ($.getAttribute(lbl, 'opt-idx') || '').toInt(),
-							node = that.nodes[idx - 1];
-
-						if(node) {
-							Factory.setItemIdx(that, idx);
-
-							var val = node.value,
-								txt = node.text + (node.desc ? ' - ' + node.desc : '');
-							if ($.isFunction(opt.beforeChange)) {
-								opt.beforeChange(val, txt, function() {
-									$.setAttribute(that.elem, 'opt-hover', 0);
-									that.action(node, {click: true});
-								});
-							} else {
-								$.setAttribute(that.elem, 'opt-hover', 0);
-								that.action(node, {click: true});
-							}
-						}
-
-						that.elem.focus();
-					});
-				}
 				return this;
 			},
 			setElemProperty: function (ddl) {
@@ -985,6 +1010,7 @@
 		initial: function (par) {
 			var that = this;
 			that.id = par.id;
+			that.ddl = par.ddl;
 			that.idx = par.idx;
 			that.use = $.isBoolean(par.use, true);
 			that.elem = par.elem;
@@ -1001,8 +1027,18 @@
 			that.checked = par.checked || par.input.checked;
 			that.disabled = $.isBoolean(par.disabled, false);
 			that.dc = $.getAttribute(par.input, 'dc') === '1';
+			that.callback = par.callback;
 			that.childs = [];
-
+			/*
+			that.label.onmousedown = function () {
+				$.cancelBubble();
+				that.elem.focus();
+				Factory.setItemIdx(that.ddl, that.idx);
+				if ($.isFunction(that.callback)) {
+					that.callback(that);
+				}
+			};
+			*/
 			if (that.checked) {
 				that.set(true);
 			}
@@ -1016,11 +1052,13 @@
 			if (that.disabled) {
 				return that;
 			}
+			//$.setClass(that.label, 'oui-ddl-item-cur', checked);
 			$.setClass(that.item, 'cur', checked);
 			that.checked = checked;
 			if (that.input.type === 'checkbox') {
 				//复选框 点击事件 负负得正
 				that.input.checked = clickEvent ? !that.checked : that.checked;
+				//that.input.checked = !that.checked;
 			} else {
 				that.input.checked = that.checked;
 			}
@@ -1190,8 +1228,8 @@
 				opt = that.options,
 				elem = opt.element,
 				offset = $.getOffset(opt.element),
-				//texts = ['请选择'],
-				texts = ['\u8bf7\u9009\u62e9'];
+				//texts = ['-请选择-', '请选择'],
+				texts = ['\u002d\u8bf7\u9009\u62e9\u002d', '\u8bf7\u9009\u62e9'];
 
 			if (!$.isElement(elem)) {
 				return that;
@@ -1201,10 +1239,6 @@
 			//下拉列表或文本框有效
 			if (!tag.inArray('select,input') || (tag === 'input' && !type.inArray('text'))) {
 				return that;
-			}
-
-			if (!opt.dataType) {
-				opt.dataType = $.getAttribute(elem, 'data-type,dataType,datatype');
 			}
 
 			if (!$.isArray(opt.items)) {
@@ -1332,7 +1366,7 @@
 			}
 
 			if (!opt.name) {
-				opt.name = opt.title.replace(texts[0], '');
+				opt.name = opt.title.replace(texts[0], '').replace(texts[1], '');
 			}
 
 			if (opt.layout === Config.Layout.Grid && opt.itemWidth === '') {
@@ -1418,10 +1452,9 @@
 				that.bar = box.childNodes[1];
 
 				Factory.setNodes(that, false)
-					.initValue(that)
+					.initValue(that)				
 					.setButtonEvent(that)
 					.setElemEvent(that)
-					.setItemEvent(that)
 					.setElemProperty(that)
 					.setEditEvent(that);
 
@@ -1479,20 +1512,11 @@
 					keyCode: null,
 					shortcut: null,
 					panel: null,
-					level: 0,
-					delete: null
+					level: 0
 				}, arg),
 				isNum = opt.dataType === 'int',
 				isZero = nodes[0].value.toString() === '0',
 				First = isNum && isZero ? 0 : 1;
-
-			//backspace 或 delete，单选模式时，若首选项为空或0，则选中首选项
-			if (!opt.multi && par.delete && nodes.length > 0 && idx <= 0) {
-				var v = idx === 0 ? nodes[idx].value.toString() : null;
-				if (v !== null && v.inArray(['','0', isNum ? '-1' : ''])) {
-					idx = First;
-				}
-			}
 
 			if (par.shortcut) {
 				if (len >= 10) {
@@ -1530,17 +1554,17 @@
 				}
 			}
 			Factory.setItemIdx(that, idx);
-			var nidx = idx - (isNum && isZero && idx < len ? 0 : 1);
-			$.scrollTo(nodes[nidx < 0 ? 0 : nidx].label, par.panel);
+			idx -= isNum && isZero && idx < len ? 0 : 1;
+			$.scrollTo(nodes[idx < 0 ? 0 : (idx >= len ? len - 1 : idx)].label, par.panel);
 
 			if (opt.multi) {
 				for (var i = 0; i < nodes.length; i++) {
-					$.setClass(nodes[i].label, 'oui-ddl-hover', i === nidx);
+					$.setClass(nodes[i].label, 'oui-ddl-hover', nodes[i] === nodes[idx]);
 				}
-				$.setAttribute(elem, 'opt-hover', idx);
+				$.setAttribute(elem, 'opt-hover', 1);
 			} else {
-				that.action(nodes[nidx], {level: par.level});
-				if (nidx < 0 && cur > 0) {
+				that.action(nodes[idx], {level: par.level});
+				if (idx < 0 && cur > 0) {
 					nodes[cur - 1].set(false, false);
 					that.get();
 				}
