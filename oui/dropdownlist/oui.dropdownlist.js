@@ -47,8 +47,8 @@
 			//初始化
 			Initial: 999,
 		},
-		DebounceDelay: 150,
-		DebounceTimeout: 3000,
+		DebounceDelay: 256,
+		DebounceTimeout: 4000,
 		// 当高度超过浏览器窗口大小时，保留边距
 		BodyPadding: 10,
 		// 选项高度
@@ -1006,6 +1006,7 @@
 
     //先加载(默认)样式文件
     Factory.loadCss(Config.DefaultSkin);
+
     //加载指定的(默认)样式文件
     if (!Config.IsDefaultSkin()) {
         Factory.loadCss(Config.GetSkin());
@@ -1173,9 +1174,9 @@
 			callbackLevel: 1,
 			//是否防抖，多选模式下，点击选项时有效
 			callbackDebounce: null,
-			//防抖延迟，默认150毫秒
+			//防抖延迟，单位：毫秒
 			debounceDelay: Config.DebounceDelay,
-			//防抖间隔，默认3000毫秒(即3秒)
+			//防抖间隔，单位：毫秒
 			debounceTimeout: Config.DebounceTimeout,
 			//回调函数
 			callback: undefined,
@@ -1454,11 +1455,12 @@
 					opt.boxStyle || ''
 				].join('');
 
+
 				var html = [
 					'<ul class="oui-ddl-box oui-ddl-', opt.layout, '" id="', key, '_list">',
 					Factory.buildItems(that, opt.items),
 					'</ul>',
-					btn.html,
+					btn.html
 				];
 				box.innerHTML = html.join('');
 				box.show = false;

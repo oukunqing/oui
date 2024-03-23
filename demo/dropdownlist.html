@@ -30,7 +30,7 @@
 		</td>
 	</tr>
 	<tr>
-		<td><select id="DeviceType" style=""></select></td>
+		<td><select id="DeviceType" style="" data-type="int"></select></td>
 		<td><select id="ServerType" style="" onchange="print1(this);">
 			<option value="">请选择服务类型</option>
 		</select></td>
@@ -114,7 +114,6 @@
 window.onload = function() {
 
 	$.singlelist('Enable', {
-		skin: 'blue',
 		debounce: true,
 		callback: function (value, initial, data, ddl) {
 			$.console.log(ddl.id, '[callback]', ', value:', value, ', initial:', initial, ', data:', data);
@@ -132,7 +131,6 @@ window.onload = function() {
 	var k = 'DeviceType';
 	$.dropdownlist({
 		id: k,
-		element: k,
 		items: types,
 		//single: true,
 		value: '2,3',
@@ -244,7 +242,6 @@ window.onload = function() {
 	
 	$.dropdownlist({
 		id: 'ServerType1',
-		element: 'ServerType1',
 		items: [
 			{ id: 1, name: 'WEB服务', desc: '' },
 			{ id: 2, name: '设备服务', desc: '' },
@@ -296,7 +293,6 @@ window.onload = function() {
 
 	$.dropdownlist({
 		id: 'ServerType2',
-		element: 'ServerType2',
 		items: [
 			{ id: 1, name: 'WEB服务WEB服务', desc: '' },
 			{ id: 2, name: '设备服务', desc: '' },
