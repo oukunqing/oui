@@ -1356,7 +1356,8 @@
 !function ($) {
     var KC = $.KEY_CODE,
         KCA = KC.Arrow,
-        KCC = KC.Char;
+        KCC = KC.Char,
+        CloseLinkageClassName = 'oui-popup-panel';
 
     // $.input
     $.extend($, {
@@ -1858,7 +1859,7 @@
                 div.id = 'input-opt-panel-' + (elem.id || new Date().getTime());
 
                 //设置关联关闭样式
-                div.className = div.className.addClass('oui-popup-panel');
+                div.className = div.className.addClass(CloseLinkageClassName);
                 //设置关联关闭函数 
                 div.hide = function () {
                     $.input.hidePanel(this, elem, true);
@@ -2157,7 +2158,8 @@
                         opt.config.readonly = $.isBoolean(par.config.readonly, true);
                     }
                 }
-                
+                var _minus = opt.minus ? '[-]?' : '';
+
                 for (i = 0; i < types.length; i++) {
                     var type = (types[i] || '').toLowerCase();
                     if (keyTypes.indexOf(type) > -1) {
@@ -2214,8 +2216,8 @@
                         // . (小键盘) . (主键盘)
                         keys = keys.concat([KC.Symbol['.'], KC.Min.Symbol['.']]);
                         patterns = patterns.concat([
-                            new RegExp('^(-?[1-9][0-9]{0,23}[.]?[0-9]{0,' + decimalLen + '}|-?[0]([.][0-9]{0,' + decimalLen + '})?)$'), 
-                            /^[0]?$/
+                            new RegExp('^(' + _minus + '[1-9][0-9]{0,23}[.]?[0-9]{0,' + decimalLen + '}|' + _minus + '[0]([.][0-9]{0,' + decimalLen + '})?)$'), 
+                            opt.minus ? /^([0]?|[-])$/ : /^[0]?$/
                         ]);
                     } else if (type === 'angle') {
                         if (opt.dot === null || opt.dot) {

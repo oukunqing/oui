@@ -123,7 +123,7 @@
 	window.onload = function() {		
 		var div = document.getElementById('treebox');
 		
-		$.addListener(div, 'mouseup', function(ev) {
+		$.addListener(div, 'mousedown', function(ev) {
 			$.cancelBubble(ev);
 			var elem = ev.target,
 				tag = elem.tagName.toLowerCase(),
@@ -144,13 +144,13 @@
 					var chb = elem;
 					if (css.indexOf('check-disabled') > -1) {
 						return false;
-					}
+					}					
 					var checked = css.indexOf('check-true') < 0;
 					$.setClass(chb, 'check-true', checked);
 					if (!checked) {
 						$.setClass(chb, 'check-true-part', false);
 					}
-					items[tid].checked = checked;
+					items[tid].checked = !checked;
 
 					getChilds(tid);
 					getParents(tid);
@@ -168,7 +168,7 @@
 			} else if (tag.inArray(['input']) && css.indexOf('chb') > -1) {
 				$.cancelBubble(ev);
 				$.console.log('click22:', elem, tag, css, ev.keyCode);
-				//elem.checked = !elem.checked;
+				elem.checked = true;// !elem.checked;
 				return false;
 			}
 		});
@@ -316,8 +316,8 @@
 					'<div class="item" id="', _id(tid, '-item'), '" tid="', tid, '">',
 					'<span class="switch" id="', _id(tid, '-switch'), '" tid="', tid, '"></span>',
 					'<label class="label" id="', _id(tid, '-label'), '" tid="', tid, '">',
-					//'<input type="checkbox" class="chb" disabled="disabled" id="', _id(tid, '-chb'), '" tid="', tid, '" />',
-					'<span class="check" id="', _id(tid, '-check'), '" tid="', tid, '"></span>',
+					'<input type="checkbox" class="chb" id="', _id(tid, '-chb'), '" tid="', tid, '" />',
+					//'<span class="check" id="', _id(tid, '-check'), '" tid="', tid, '"></span>',
 					'</label>',
 					'<span class="icon', type === 'camera' ? ' icon-page' : '', 
 						type ? ' icon-' + type + '' : '',

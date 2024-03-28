@@ -26,6 +26,7 @@
 	            }
 	            return Config.Skin;
 	        },
+			CloseLinkageClassName: 'oui-popup-panel',
 			IdPrefix: 'oui_ddl_panel_id_',
 			ItemPrefix: 'oui_ddl_chb_item_',
 			Layout: {
@@ -415,7 +416,7 @@
 					].join(''));
 				}
 				var align = opt.textAlign ? 'text-align:' + opt.textAlign + ';' : '';
-				for (i = 0; i < len; i++) {
+				for (var i = 0; i < len; i++) {
 					var dr = items[i], p;
 					if (dr === 'sep' || dr.sep || dr.type === 'sep') {
 						html.push(['<li class="oui-ddl-item oui-ddl-sep"></li>'].join(''));
@@ -568,7 +569,7 @@
 					opt = that.options,
 					elem = that.elem,
 					key = Config.ItemPrefix + that.id,
-					n = 0;
+					n = 0, i;
 
 				if (!append) {
 					that.nodes = [];
@@ -693,7 +694,7 @@
 				if (that.buttons.length <= 0) {
 					return this;
 				}
-				for (i = 0; i < that.buttons.length; i++) {
+				for (var i = 0; i < that.buttons.length; i++) {
 					if (opt.shortcutKey) {
 						if (opt.shortcutNum) {
 							that.buttons[i].innerHTML += '<em>(<u>' + (i + 1) + '</u>)</em>';
@@ -1419,7 +1420,7 @@
 				$.setAttribute(elem, 'opt-id', box.id);
 
 				//设置关联关闭样式
-				box.className = box.className.addClass('oui-popup-panel');
+				box.className = box.className.addClass(Config.CloseLinkageClassName);
 				//设置关联关闭函数 
 				box.hide = function () {
 					that.hide();
@@ -1896,7 +1897,8 @@
 			var that = this,
 				opt = that.options,
 				show = true,
-				box = that.box;
+				box = that.box,
+				i;
 
 			if (elem) {
 				show = !box.show;
@@ -2165,7 +2167,7 @@
 					fw = bw - 10 - that.texts[c - 1].offsetWidth,
 					tw = parseFloat(fw / (c - 1), 10).round(2) - 4;
 
-				for (i = 0; i < c - 1; i++) {
+				for (var i = 0; i < c - 1; i++) {
 					that.texts[i].style.width = tw + 'px';
 					that.texts[i].style.display = 'block';
 				}

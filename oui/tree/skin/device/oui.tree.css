@@ -4,9 +4,12 @@
 .oui-tree-device li .switch-none {background:none;}
 .oui-tree-device li .switch-none:hover {background:none;}
 
-.oui-tree-device li .icon-unit{background:url("imgs/tree-device.png") no-repeat 0 -24px;}
-.oui-tree-device li .icon-device,.oui-tree-device li .icon-device-on{background:url("imgs/tree-device.png") no-repeat -48px -24px;}
-.oui-tree-device li .icon-device-off{background:url("imgs/tree-device.png") no-repeat -72px -24px;}
-.oui-tree-device li .icon-camera,.oui-tree-device li .icon-camera-on{background:url("imgs/tree-device.png") no-repeat -96px -24px;}
-.oui-tree-device li .icon-camera-off{background:url("imgs/tree-device.png") no-repeat -120px -24px;}
-.oui-tree-device li .icon-camera-play{background:url("imgs/tree-device.png") no-repeat -144px -24px;}
+.oui-tree-device li span.unit{background:url("imgs/tree-device.png") no-repeat 0 -24px;}
+.oui-tree-device li span.unit-open{background:url("imgs/tree-device.png") no-repeat -24px -24px;}
+.oui-tree-device li span.device,
+.oui-tree-device li span.device-open,
+.oui-tree-device li span.device-on{background:url("imgs/tree-device.png") no-repeat -48px -24px;}
+.oui-tree-device li span.device-off{background:url("imgs/tree-device.png") no-repeat -72px -24px;}
+.oui-tree-device li span.camera,.oui-tree-device li span.camera-on{background:url("imgs/tree-device.png") no-repeat -96px -24px;}
+.oui-tree-device li span.camera-off{background:url("imgs/tree-device.png") no-repeat -120px -24px;}
+.oui-tree-device li span.camera-play{background:url("imgs/tree-device.png") no-repeat -144px -24px;}

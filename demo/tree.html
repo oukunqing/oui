@@ -4,7 +4,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>树形菜单</title>
     <script type="text/javascript" src="../oui/oui.js?1"></script>
-    <script type="text/javascript" src="../oui/tree/oui.tree.min.js?123"></script>
+    <script type="text/javascript" src="../oui/tree/oui.tree.js?123"></script>
 </head>
 <body>
 <label><input type="checkbox" value="unit:units" name="chbData" checked="checked" /><span>目录</span></label>
@@ -12,8 +12,8 @@
 <label><input type="checkbox" value="camera:cameras" name="chbData" /><span>通道</span></label>
 <button onclick="test();">加载树菜单</button>
 <button onclick="test(2);">加载树菜单2</button>
-<div id="tree1" style="display:block;border:solid 1px #00f;overflow:auto;width:400px;height:700px;margin:10px 0 0;"></div>
-<div id="text1"></div>
+<div id="otr" style="display:block;border:solid 1px #00f;overflow:auto;width:400px;height:700px;margin:10px 0 0;"></div>
+<div id="txt"></div>
 </body>
 </html>
 <script type="text/javascript" src="dropdownlist.json"></script>
@@ -40,36 +40,74 @@
         var arr = $N('chbData'), trees = [];
         for (var i = 0; i < arr.length; i++) {
             if (arr[i].checked) {
-                trees.push(arr[i].value);
+                trees.push(arr[i].value.split(':'));
             }
         }
-        $.tree('tree1', {
+        //trees = [{key:'unit',val:'units'},{key:'device',val:'devices'},{key:'camera',val:'cameras'}];
+
+        $.tree('otr', {
+            skin: 'device', 
+            async: true, 
+            trees: trees,
+            data: type ? treedata2 : treedata,
+            leaf: 'camera', dynamic: 2,
+            checkbox: true,
+            complete: function (tree) {
+                $('#txt').html([
+                    'nodes:', tree.cache.count, ', level:', tree.cache.level, ', timeout:', tree.cache.timeout, 'ms'
+                ].join(''));
+
+                window.setTimeout(function() {
+                    tree.updateIcon('7280,7155', 'device', {status:'off'});
+                    tree.icon(7151, 'device', {status:'off'});
+                    $.tree('otr').updateIcon('7759', 'camera', {status:'play'});
+                    $.tree.updateIcon('otr', '7760', 'camera', {status:'play'});
+                    tree.text(7153, 'device', '204488设备');
+                }, 1000);
+            },
+            expandCallback: function (node, tree) {
+                $.console.log('expandCallback:', node, tree.id);
+            }
+        });
+        /*
+        $.tree('otree', {
             skin: 'device',
             async: true,
             data: type ? treedata2 : treedata,
-            //tree: 'unit:units,device:devices,camera:cameras'
-            tree: trees,
+            //trees: 'unit:units,device:devices,camera:cameras'
+            trees: trees,
             leaf: 'camera',
             //dynamic: true,
-            //dynamic: 2,
+            dynamic: 2,
+            showIcon: true,
             //showCheck: 'checkbox',
             //showCheck: true,
             //single: true,
             checkbox: true,
             complete: function (tree) {
-                $.console.log('complete:', tree);
-                /*
+                //$.console.log('complete:', tree);
+                
                 $.tree.position('tree1', 829, 'unit');
                 window.setTimeout(function() {
                     tree.position('881', 'unit'); 
                 }, 2000);
-                */
-                $('#text1').html(tree.cache.count + ', ' + tree.cache.timeout + 'ms');
+                window.setTimeout(function() {
+                    tree.select([826, 343, 780], 'unit', true)
+                        .checked(826, 'unit')
+                        //.position(343, 'unit')
+                        .collapse(2, 'unit');
+                }, 200);
+                
+
+                $('#text1').html([
+                    'nodes:', tree.cache.count, ', level:', tree.cache.level, ', timeout:', tree.cache.timeout, 'ms'
+                ].join(''));
             },
             expandCallback: function (node, tree) {
                 $.console.log('expandCallback:', node, tree.id);
             }
-        });  
+        });
+        */
         $.console.log('test finish:');
     }
   
