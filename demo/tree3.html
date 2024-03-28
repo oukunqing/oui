@@ -3,7 +3,6 @@
 	<head>
 		<meta charset="utf-8">
 		<style type="text/css">
-			.oui-tree-box {}
 			.oui-tree {
 				margin:0;padding:0;display:block;overflow:auto;width:100%;height:100%;border:none 0;
 				font-family:Arial, 宋体, 微软雅黑;font-size:14px;
@@ -12,19 +11,20 @@
 			    user-select: none;
 			    -ms-user-select: none;
 			}
-			.oui-tree ul,.oui-tree li,.oui-tree .item,.oui-tree a,.oui-tree span {
+			.oui-tree ul,.oui-tree li,.oui-tree .item,.oui-tree label,.oui-tree a,.oui-tree span {
 				margin:0;padding:0;display:block;font-size:14px;font-weight:normal; visibility: ;
 				background:transparent;border:none 0;box-sizing:border-box;width:auto;white-space:nowrap;				
 			}
 			.oui-tree ul,.oui-tree li {
 				list-style:none;clear:both;overflow:visible;
 			}
-			.oui-tree li {padding:0 0 0 24px;}
-			.oui-tree ul.level0 {margin:5px;}
-			.oui-tree ul.level0 > li {padding:0;}
+			.oui-tree li {padding:0 0 0 16px;}
+			.oui-tree ul.level-root {margin:5px 5px 5px 5px;}
+			.oui-tree ul.level-root > li {padding:0;}
 			
 			.oui-tree li .item {
-				float:left;display:inline-block;height:24px;overflow:hidden;margin-bottom:1px;
+				float:left;display:inline-block;height:24px;overflow:visible;margin-bottom:1px;
+				border-radius:4px;
 			}
 			.oui-tree li .item:hover{}
 			.oui-tree li.cur .item{}
@@ -32,32 +32,84 @@
 			
 			.oui-tree li a.name,.oui-tree li span {
 				display:inline-block;height:24px;line-height:22px;
-				outline:none;overflow:hidden;
-				text-align: center;
+				outline:none;overflow:visible;
+				text-align: center; font-size:14px;
 			}
+			.oui-tree li .switch {visibility:hidden;visibility:visible;}
+			.oui-tree:hover li .switch {visibility:visible;}
 
-			.oui-tree li .switch {background:transparent;width:24px;cursor:default;float:left;}
-			.oui-tree li .check {background:transparent;width:24px;border:solid 1px #008000;float:left;}
-			.oui-tree li .check {width:14px;height:14px;margin:4px 4px 0 3px;float:left;display:block;overflow:hidden;}
-			.oui-tree li .icon{width:24px;float:left;background:transparent url("imgs/tree/folder.gif") no-repeat center;}
+			.oui-tree li .switch{width:24px;cursor:pointer;float:left;background:transparent url("imgs/tree/tree.png") no-repeat 0 0;}
+			.oui-tree li .switch:hover{background-color:#e5f3ff;border-radius:4px;}
+			.oui-tree li .switch-open {background:url("imgs/tree/tree.png") no-repeat -24px 0;}
+			.oui-tree li .switch-none {background:none;}
+			.oui-tree li .switch-none:hover {background:none;}
+
+			.oui-tree li .label{background:transparent;float:left;width:24px;height:24px;}
+			.oui-tree li .label:hover{background-color:none;}
+			.oui-tree li .chb {width:14px;height:14px;margin:5px 0 0 5px;float:left;display:block;overflow:hidden;}
+			
+			.oui-tree li .check{width:24px;height:24px;border:none;box-sizing:border-box;background-color:transparent;}
+			.oui-tree li .check{background:url("imgs/tree/tree.png") no-repeat 0 -48px;}
+			.oui-tree li .check-true{background:url("imgs/tree/tree.png") no-repeat -48px -48px;}
+			.oui-tree li .check-true-part{background:url("imgs/tree/tree.png") no-repeat -96px -48px;}
+			.oui-tree li .check-disabled{background:url("imgs/tree/tree.png") no-repeat 0 -72px;cursor:not-allowed;}
+			.oui-tree li .check-disabled-true{background:url("imgs/tree/tree.png") no-repeat -24px -72px;cursor:not-allowed;}
+
+			.oui-tree li .label:hover .check {background:url("imgs/tree/tree.png") no-repeat -24px -48px;}
+			.oui-tree li .label:hover .check-disabled{background:url("imgs/tree/tree.png") no-repeat 0 -72px;}
+			.oui-tree li .label:hover .check-true {background:url("imgs/tree/tree.png") no-repeat -72px -48px;}
+			.oui-tree li .label:hover .check-true-part {background:url("imgs/tree/tree.png") no-repeat -120px -48px;}
+
+			.oui-tree li .icon{width:24px;float:left;cursor:pointer;background:transparent url("imgs/tree/tree.png") no-repeat 0 -24px;}
+			.oui-tree li .icon:hover{background-color:none;}
+			.oui-tree li .icon-open{background:url("imgs/tree/tree.png") no-repeat -24px -24px;}
+			.oui-tree li .icon-page{background:transparent url("imgs/tree/tree.png") no-repeat -48px -24px;}
+			.oui-tree li .icon-none{background:none;}
 			.oui-tree li .text{text-align:left;}
+			.oui-tree li .desc{color:#999;margin:0 0 0 10px;padding:0;}
+			.oui-tree li .len{color:#f00;margin:0 0 0 10px;padding:0;}
+			.oui-tree li .info{color: #00f;}
 
-			.oui-tree li .icon-open{background:transparent url("imgs/tree/folderopen.gif") no-repeat center;}
-
-			.oui-tree li a{cursor:pointer;}
-			.oui-tree li a:hover{}
-
-			.oui-tree li a{border:solid 1px transparent;cursor:pointer;margin:0 1px;padding:0 6px 0 1px;border-radius:4px;}
+			.oui-tree li a{cursor:pointer;border:solid 1px transparent;cursor:pointer;margin:0 1px;padding:0 6px 0 1px;border-radius:4px;}
 			.oui-tree li a:hover{background: #e5f3ff;}
 			.oui-tree li.cur a{background: #cce8ff;border-color: #cce8ff;}
 			.oui-tree li.cur a:hover{background: #cce8ff;border-color: #99d1ff;}
+
+			.oui-tree li .item .info{display: none;}
+			.oui-tree:hover li .item .info{display:inline-block;}
+
+			.oui-tree-device li .switch{width:24px;cursor:pointer;float:left;background:transparent url("imgs/tree/tree-device.png") no-repeat 0 0;}
+			.oui-tree-device li .switch:hover{background-color:#e5f3ff;border-radius:4px;}
+			.oui-tree-device li .switch-open {background:url("imgs/tree/tree-device.png") no-repeat -24px 0;}
+			.oui-tree-device li .switch-none {background:none;}
+			.oui-tree-device li .switch-none:hover {background:none;}
+
+			.oui-tree-device li .icon-unit{background:url("imgs/tree/tree-device.png") no-repeat 0 -24px;}
+			.oui-tree-device li .icon-device,.oui-tree-device li .icon-device-on{background:url("imgs/tree/tree-device.png") no-repeat -48px -24px;}
+			.oui-tree-device li .icon-device-off{background:url("imgs/tree/tree-device.png") no-repeat -72px -24px;}
+			.oui-tree-device li .icon-camera,.oui-tree-device li .icon-camera-on{background:url("imgs/tree/tree-device.png") no-repeat -96px -24px;}
+			.oui-tree-device li .icon-camera-off{background:url("imgs/tree/tree-device.png") no-repeat -120px -24px;}
+			.oui-tree-device li .icon-camera-play{background:url("imgs/tree/tree-device.png") no-repeat -144px -24px;}
 			
 		</style>
 	</head>
 	<body>
 		<button id="btn1" onclick="test();">显示树菜单</button>
 		<button id="btn2" onclick="test(2);">显示树菜单2</button>
-		<div id="treebox" class="oui-tree" style="margin-top:10px;width:500px;height:700px;border:solid 1px #f00;"></div>
+		<button id="btncollapse" onclick="collapseLevel($I('ddlLevel').value.toInt());">收缩到</button>
+		<select id="ddlLevel">
+			<option value="0">0级</option>
+			<option value="1">1级</option>
+			<option value="2">2级</option>
+			<option value="3">3级</option>
+			<option value="4">4级</option>
+			<option value="5">5级</option>
+			<option value="6">6级</option>
+			<option value="7">7级</option>
+		</select>
+		<button id="btncollapse" onclick="collapseType('unit');">收缩目录</button>
+		<button id="btncollapse" onclick="collapseType('device');">收缩设备</button>
+		<div id="treebox" class="oui-tree" style="margin-top:10px;width:500px;height:800px;border:solid 1px #f00;"></div>
 		<div id="div2"></div>
 	</body>
 </html>
@@ -65,36 +117,8 @@
 <script type="text/javascript" src="dropdownlist.json"></script>
 <script type="text/javascript">
 
+	var cache = { box: null, level: 0 };
 	var items = { }, boxes = { };
-
-	function getItem(tid) {
-		var item = items[tid] || {};
-
-		$.console.log('item:', tid, item);
-
-		return item;
-	}
-
-	function getElem(tid, sw) {
-		if (!sw) {
-			sw = $I(buildId(tid, '-switch'));
-			tid = $.getAttribute(sw, 'tid');
-		}
-		var box = sw.parentNode.nextSibling;
-		if (!box) {
-			return false;
-		}
-		var show = box.style.display === 'none';
-		box.style.display = show ? 'block' : 'none';
-		sw.innerHTML = show ? '-' : '+';
-
-		var icon = $I(buildId(tid, '-icon'));
-		if (icon) {
-			$.setClass(icon, 'icon-open', show);
-		}
-
-		var item = getItem(tid);
-	}
 
 	window.onload = function() {		
 		var div = document.getElementById('treebox');
@@ -104,27 +128,59 @@
 			var elem = ev.target,
 				tag = elem.tagName.toLowerCase(),
 				css = elem.className,
-				sw;
+				sw,
+				tid = $.getAttribute(elem, 'tid');
 
-			$.console.log('click:', elem, tag, css, ev.keyCode);
-			if (tag.inArray(['label','span','a'])) {				
+			if (!tid) {
+				return false;
+			}
+
+			$.console.log('mouseup:', elem, tag, css, ev.keyCode);
+			if (tag.inArray(['label','span','a'])) {
 				if (css.indexOf('switch') > -1) {
 					sw = elem;
+					setItemOpen(sw.parentNode);
+				} else if (css.indexOf('check') > -1) {
+					var chb = elem;
+					if (css.indexOf('check-disabled') > -1) {
+						return false;
+					}
+					var checked = css.indexOf('check-true') < 0;
+					$.setClass(chb, 'check-true', checked);
+					if (!checked) {
+						$.setClass(chb, 'check-true-part', false);
+					}
+					items[tid].checked = checked;
+
+					getChilds(tid);
+					getParents(tid);
+
+					return false;
 				} else {
-					getItem($.getAttribute(elem, 'tid'));
+					getItem(tid);
 					return false;
 				}				
 				sw = elem;
 
-				getElem($.getAttribute(elem, 'tid'), sw);
+				setItemStatus(elem.parentNode);
 
 				return false;
-			} else if (tag.inArray(['input'])) {
+			} else if (tag.inArray(['input']) && css.indexOf('chb') > -1) {
 				$.cancelBubble(ev);
-			$.console.log('click22:', elem, tag, css, ev.keyCode);
+				$.console.log('click22:', elem, tag, css, ev.keyCode);
 				//elem.checked = !elem.checked;
 				return false;
 			}
+		});
+
+		$.addListener(div, 'contextmenu', function(ev) {
+			$.console.log('contextmenu:', ev, ev.target);
+			var elem = ev.target, tag = elem.tagName.toLowerCase(), css = elem.className;
+			if (tag === 'li') {
+
+				$.cancelBubble(ev);
+			}
+			return false;
 		});
 		$.addListener(div, 'dblclick', function(ev) {
 			$.cancelBubble(ev);
@@ -135,7 +191,8 @@
 			$.console.log('dblclick:', elem, tag, css, ev.keyCode);
 
 			if (tag.inArray(['label','span','a']) && css.indexOf('switch') < 0) {
-				getElem($.getAttribute(elem, 'tid'));
+				setItemOpen($.getAttribute(elem, 'tid'));
+				setItemStatus($.getAttribute(elem, 'tid'));
 			} else if (tag.inArray(['input'])) {
 				$.cancelBubble(ev);
 			$.console.log('click22:', elem, tag, css, ev.keyCode);
@@ -151,7 +208,9 @@
 
 	function test(id){
 		$.console.log('test2:', new Date().getTime());
-		build('treebox', id ? treedata2 : treedata);
+		build('treebox', id ? treedata2 : treedata, 'unit:units,device:devices,camera:cameras');
+		//build('treebox', id ? treedata2 : treedata, 'unit:units,device:devices,camera:cameras');
+		//build('treebox', (id ? treedata2 : treedata).units, '');
 		$.console.log('test3:', new Date().getTime());
 
 		setTimeout(function () {
@@ -164,7 +223,7 @@
 		return 'oui-tree-' + id + (postfix || '');
 	}
 
-	function build(id, data) {
+	function build(id, data, trees) {
 		//$.console.log('test2:', data);
 		$.console.log('build start');
 
@@ -182,10 +241,13 @@
 		if (!box) {
 			box = document.createElement('DIV');
 			box.className = 'oui-tree';
+			box.className = 'oui-tree oui-tree-device';
 			box.id = 'oui-tree-' + id;
+
+			cache.box = box;
 		}
 
-		items['tree_root'] = {elem:box, level: 0};
+		items['tree_root'] = {elem:box, level: 0, pid: null, childs: [], checked: false};
 
 		var last = {};
 
@@ -202,9 +264,10 @@
 					continue;
 				}
 				cc++;
-				var tid = type + '_' + dr.id,
-					pid = ptype + '_' + dr.pid,
-					pn = items[pid], pb;
+				var tid = (type ? type + '_' : '') + dr.id,
+					pid = (ptype ? ptype + '_' : '') + dr.pid,
+					pn = items[pid], pb,
+					text = dr.name + ' - ' + dr.id + (i === 0 ? ' - ' + ts : '');
 
 				if (!pn) {
 					pn = items['tree_root'];
@@ -220,8 +283,8 @@
 						pb = boxes['b_' + pid];
 						if (!pb) {
 							ul = document.createElement('UL');
-							ul.className = 'level' + level + ' ul-' + ptype;
-							ul.id = pid + '-ul';
+							ul.className = 'level' + (!pn.level && !level ? '-root' : pn.level + ' box' + (ptype ? ' box-' + ptype : ''));
+							ul.id = _id(pid, '-ul');
 							if (type === 'camera' && ul.style.display !== 'none') {
 								ul.style.display = 'none';
 							}
@@ -237,37 +300,67 @@
 						}
 						last = {pid: pid, pb: pb};
 					}
+					pn.childs.push(tid);
+					pn.ul = pb;
 				}
 				li = document.createElement('LI');
 	
-				li.id = tid + '-li';
+				li.id = _id(tid, '-li');
 				li.className = 'level' + level;
+
+				if (level > cache.level) {
+					cache.level = level;
+				}
 				
 				li.innerHTML = [
-					'<div class="item" id="', _id(tid, '-label'), '" tid="', tid, '">',
+					'<div class="item" id="', _id(tid, '-item'), '" tid="', tid, '">',
 					'<span class="switch" id="', _id(tid, '-switch'), '" tid="', tid, '"></span>',
-					'<input type="checkbox" class="check" id="', _id(tid, '-check'), '" tid="', tid, '" />',
-					'<a class="name" id="', _id(tid, '-name'), '" tid="', tid, '">',
-					'<span class="icon', type ? ' icon-' + type : '', '" id="', _id(tid, '-icon'), '" tid="', tid, '"></span>',
-					'<span class="text" id="', _id(tid, '-text'), '" tid="', tid, '">',
-					type, ' ', dr.name, ' - ', dr.id, (i === 0 ? ' - ' + ts : ''),
+					'<label class="label" id="', _id(tid, '-label'), '" tid="', tid, '">',
+					//'<input type="checkbox" class="chb" disabled="disabled" id="', _id(tid, '-chb'), '" tid="', tid, '" />',
+					'<span class="check" id="', _id(tid, '-check'), '" tid="', tid, '"></span>',
+					'</label>',
+					'<span class="icon', type === 'camera' ? ' icon-page' : '', 
+						type ? ' icon-' + type + '' : '',
+						'"',
+						' id="', _id(tid, '-icon'), '" tid="', tid, '">',
 					'</span>',
+					'<a class="name" id="', _id(tid, '-name'), '" tid="', tid, '">',
+					'<span class="text" id="', _id(tid, '-text'), '" tid="', tid, '">', text, '</span>',
+					type ? ['<span class="desc" id="', _id(tid, '-desc'), '" tid="', tid, '">', type || '&nbsp;', '</span>'].join('') : '',
+					'<span class="len" id="', _id(tid, '-len'), '" tid="', tid, '" style="display:none;">', '</span>',
 					'</a>',
+					//'<span class="info" id="', _id(tid, '-info'), '" tid="', tid, '">', '类型：', type, ' 编号：', dr.code, '</span>',
 					'</div>'
 				].join('');
 
 				pb.appendChild(li);
 
-				items[tid] = {elem:li, level:level, data: dr};
+				items[tid] = {elem:li, level:level, data: dr, tid: tid, pid: pid, childs: [], checked: false};
 			}
 		}
 		
 		var ts = new Date().getTime();
 		$.console.log('build begin', ts);
 
-		_build(data.units, 'unit', 'unit');
-		_build(data.devices, 'device', 'unit');
-		_build(data.cameras, 'camera', 'device');
+		if (!$.isArray(trees)) {
+			if ($.isString(trees)) {
+				trees = trees.split(/[,;|]/);
+			}
+		}
+		$.console.log('trees.length:', trees.length);
+		if (trees.length > 0 && trees[0]) {			
+			var tr = '', ptr = '';
+			for (var k = 0; k < trees.length; k++) {
+				tr = trees[k].split(':');
+				ptr = (trees[k - 1] || trees[k]).split(':');
+
+				_build(data[tr[1] || tr[0]], tr[0], ptr[0]);
+			}
+		} else {
+			_build(data, '', '');
+		}
+
+		setItemStatus(box.querySelectorAll('div.item'));
 
 		root.appendChild(box);
 		div.appendChild(root);
@@ -277,15 +370,182 @@
 
 		$('#div2').html('加载' + cc + '个节点，耗时' + (ts2 - ts) + '毫秒');
 
-		var labels = box.querySelectorAll('div'),
-			tmpbox = document.createDocumentFragment();
+		$.console.log('items:', items);
+	}
 
-		$.console.log('labels:', labels.length);
-		for (var i = 0; i < labels.length; i++) {
-			var lbl = labels[i], childs = lbl.childNodes, ul = lbl.nextSibling;
-			if (ul) {
-				childs[0].innerHTML = ul.style.display === 'none' ? '+' : '-';
+	function setItemOpen (item, open) {
+		if ($.isString(item)) {
+			item = $.toElement(item) || $.toElement(buildId(item, '-item'));
+			$.console.log('setItemOpen:', item);
+		}
+		if (!$.isElement(item)) {
+			return false;
+		}
+			$.console.log('setItemOpen:', item);
+		var box = item.nextSibling;
+		if (!box) {
+			return false;
+		}
+		var show = $.isBoolean(open, box.style.display === 'none');
+		box.style.display = show ? 'block' : 'none';
+	}
+
+	function setItemStatus (items) {
+		if ($.isElement(items)) {
+			items = [items];
+		} else if ($.isString(items)) {
+			var item = $.toElement(items) || $.toElement(buildId(items, '-item'));
+			items = item ? [item] : [];
+		}
+		for (var i = 0; i < items.length; i++) {
+			var item = items[i], childs = item.childNodes, ul = item.nextSibling,
+				tid = $.getAttribute(item, 'tid'),
+				icon = item.querySelectorAll('.icon')[0],
+				sw = item.childNodes[0];// item.querySelectorAll('.switch')[0];
+
+			if (ul && tid) {
+				var show = ul.style.display !== 'none';
+
+				$.setClass(icon, 'icon-open', show);
+				$.setClass(sw, 'switch-open', show);
+			} else {
+				$.setClass(sw, 'switch-none', true);
 			}
 		}
 	}
+
+	function setChildChecked (tid, checked) {
+
+	}
+
+	function setParentChecked (pid, checked) {
+		$.console.log('setParentChecked:', pid, checked);
+		var pn = items[pid];
+		if (!pn) {
+			return false;
+		}
+		var check = $I(buildId(pid, '-check'));
+		if (!check) {
+			return false;
+		}
+		var len = pn.childs.length, c = 0;
+		for (var i = 0; i < len; i++) {
+			var cn = items[pn.childs[i]];
+			//$.console.log('pn.childs[i]:', cn, cn.checked);
+			if (cn.checked) {
+				c++;
+			}
+		}
+		var full = c === len, part = c > 0 && c !== len;
+		//$.console.log('setParentChecked:', pid, pn.childs, ',full:', full, ',part:', part);
+		$.setClass(check, 'check-true', false);
+		$.setClass(check, 'check-true-part', false);
+
+		if (full) {
+			$.setClass(check, 'check-true', true);
+		} else if (part) {
+			$.setClass(check, 'check-true-part', true);
+		}
+
+		items[pid].checked = part || checked;
+	}
+
+	function setItemChecked (tid, checked) {
+		var check = $.isElement(tid) ? tid : $I(buildId(tid, '-check'));
+		if (!check) {
+			return false;
+		}
+		$.setClass(check, 'check-true', checked);
+		if (!checked) {
+			$.setClass(check, 'check-true-part', false);
+		}
+	}
+
+	function getParents (tid) {
+		var item = items[tid], pn, check;
+		$.console.log('getParents:', tid, item);
+		if (!item) {
+			return false;
+		}
+		check = $I(buildId(tid, '-check'));
+
+		for (var i = item.level; i >= 0; i--) {
+			pn = items[item.pid];
+			if (!pn) {
+				break;
+			}
+			setParentChecked(pn.tid, check.className.indexOf('check-true') > -1);
+			item = pn;
+			$.console.log('getParents:', i, item);
+		}
+	}
+
+	function getChilds (tid) {
+		var item = items[tid];
+		$.console.log('getChilds:', tid, item);
+		if (!item) {
+			return false;
+		}
+		if (!item.ul) {
+			return false;
+		}
+		$.console.log('getChilds 2:', tid);
+
+		var arr = item.ul.querySelectorAll('span.check'),
+			len = arr.length;
+
+		for (var i = 0; i < len; i++) {
+			setItemChecked(arr[i], item.checked);
+		}
+
+		$.console.log('getChilds:', tid, len);
+
+		$.console.log('getChilds 3:', tid);
+	}
+
+	function getItem(tid) {
+		var item = items[tid] || {};
+
+		$.console.log('item:', tid, item);
+
+		return item;
+	}
+
+	function collapseLevel (level) {
+		collapse({level: level});
+	}
+	function collapseType (type) {
+		collapse({type: type});
+	}
+
+	function collapse (par) {
+		var boxes, i;
+		if (!cache.box) {
+			return false;
+		}
+		if ($.isNumber(par.level)) {
+			for (i = 0; i < par.level; i++) {
+				boxes = cache.box.querySelectorAll('ul.level' + i);
+				$.console.log('collapse:', i, boxes.length, boxes);
+				boxes.forEach((elem) => {
+					elem.style.display = 'block';
+				});
+			}
+			for (i = par.level; i < cache.level; i++) {
+				boxes = document.querySelectorAll('ul.level' + i);
+				$.console.log('collapse:', i, boxes.length, boxes);
+				boxes.forEach((elem) => {
+					elem.style.display = 'none';
+				});
+			}
+		} else if ($.isString(par.type)) {
+			boxes = cache.box.querySelectorAll('ul.box-' + par.type);
+				$.console.log('collapse:', par.type, boxes.length, boxes);
+			boxes.forEach((elem) => {
+				elem.style.display = 'none';
+			});
+		}
+		setItemStatus(cache.box.querySelectorAll('div.item'));
+	}
+
 </script>

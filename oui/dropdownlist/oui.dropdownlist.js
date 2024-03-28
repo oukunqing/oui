@@ -9,78 +9,78 @@
 */
 
 !function ($) {
+    'use strict';
 
-	var SelfPath = $.getScriptSelfPath(true);
-
-	var Config = {
-		FilePath: SelfPath,
-		FileDir: $.getFilePath(SelfPath),		
-        DefaultSkin: 'default',
-        IsDefaultSkin: function (skin) {
-            return (!$.isUndefined(skin) ? skin : Config.GetSkin()) === Config.DefaultSkin;
-        },
-        Skin: '',
-        GetSkin: function () {
-            if (!Config.Skin) {
-                Config.Skin = $.getQueryString(Config.FilePath, 'skin') || Config.DefaultSkin;
-            }
-            return Config.Skin;
-        },
-		IdPrefix: 'oui_ddl_panel_id_',
-		ItemPrefix: 'oui_ddl_chb_item_',
-		Layout: {
-			List: 'list',
-			Flow: 'flow',
-			Grid: 'grid'
+	var SelfPath = $.getScriptSelfPath(true),
+		Config = {
+			FilePath: SelfPath,
+			FileDir: $.getFilePath(SelfPath),
+	        DefaultSkin: 'default',
+	        IsDefaultSkin: function (skin) {
+	            return (!$.isUndefined(skin) ? skin : Config.GetSkin()) === Config.DefaultSkin;
+	        },
+	        Skin: '',
+	        GetSkin: function () {
+	            if (!Config.Skin) {
+	                Config.Skin = $.getQueryString(Config.FilePath, 'skin') || Config.DefaultSkin;
+	            }
+	            return Config.Skin;
+	        },
+			IdPrefix: 'oui_ddl_panel_id_',
+			ItemPrefix: 'oui_ddl_chb_item_',
+			Layout: {
+				List: 'list',
+				Flow: 'flow',
+				Grid: 'grid'
+			},
+			Position: {
+				Left: 'left',
+				Right: 'right'
+			},
+			CallbackLevel: {
+				//选项
+				Normal: 0,
+				//全选按钮
+				Select: 1,
+				//确定按钮
+				Return: 2,
+				//初始化
+				Initial: 999,
+			},
+			DebounceDelay: 256,
+			DebounceTimeout: 4000,
+			// 当高度超过浏览器窗口大小时，保留边距
+			BodyPadding: 10,
+			// 选项高度
+			BoxItemHeight: 30,
+			// 选项底部高度
+			BoxBarHeight: 42,
+			// 选项默认显示行数
+			ItemDisplayLines: 12,
+			// 选项序号(单个数字)宽度
+			ItemNumberWidth: 12,
+			// 选项序号(多个数字的单个数字)宽度
+			ItemNumberWidth2: 10,
+			// 树形结构层级缩进宽度
+			TreeIndentWidth: 20,
+			// 选项框默认最小高度
+			BoxMinHeight: 30,
+			// 选项框默认最大高度
+			BoxMaxHeight: 363,
+			// 选项框按钮面板高度
+			BoxFormHeight: 42,
+			// 选项框默认最大宽度
+			BoxMaxWidth: 500,
+			// 选项框(网格)默认最大高度
+			BoxGridMaxHeight: 400,
+			// 选项框(网格)最小宽度
+			BoxGridMinWidth: 456,
+			// 选项框最小宽度设置
+			BoxMinWidth: [40, 245, 345],
+			BoxMinHeight: [64, 90, 140],
+			// 隐藏但是需要占位
+			CssHidden: ';visibility:hidden;width:0px;height:0px;border:none;margin:0;padding:0;font-size:1px;line-height:0px;float:left;'
 		},
-		Position: {
-			Left: 'left',
-			Right: 'right'
-		},
-		CallbackLevel: {
-			//选项
-			Normal: 0,
-			//全选按钮
-			Select: 1,
-			//确定按钮
-			Return: 2,
-			//初始化
-			Initial: 999,
-		},
-		DebounceDelay: 256,
-		DebounceTimeout: 4000,
-		// 当高度超过浏览器窗口大小时，保留边距
-		BodyPadding: 10,
-		// 选项高度
-		BoxItemHeight: 30,
-		// 选项底部高度
-		BoxBarHeight: 42,
-		// 选项默认显示行数
-		ItemDisplayLines: 12,
-		// 选项序号(单个数字)宽度
-		ItemNumberWidth: 12,
-		// 选项序号(多个数字的单个数字)宽度
-		ItemNumberWidth2: 10,
-		// 树形结构层级缩进宽度
-		TreeIndentWidth: 20,
-		// 选项框默认最小高度
-		BoxMinHeight: 30,
-		// 选项框默认最大高度
-		BoxMaxHeight: 363,
-		// 选项框按钮面板高度
-		BoxFormHeight: 42,
-		// 选项框默认最大宽度
-		BoxMaxWidth: 500,
-		// 选项框(网格)默认最大高度
-		BoxGridMaxHeight: 400,
-		// 选项框(网格)最小宽度
-		BoxGridMinWidth: 456,
-		// 选项框最小宽度设置
-		BoxMinWidth: [40, 245, 345],
-		BoxMinHeight: [64, 90, 140],
-		// 隐藏但是需要占位
-		CssHidden: ';visibility:hidden;width:0px;height:0px;border:none;margin:0;padding:0;font-size:1px;line-height:0px;float:left;'
-	},
 		KC = $.KEY_CODE, KCA = KC.Arrow, KCC = KC.Char, KCM = KC.Min,
 		Cache = {
 			ids: [],

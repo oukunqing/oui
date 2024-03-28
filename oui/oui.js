@@ -2626,9 +2626,12 @@
             }
             return '';
         },
-        addClass: function(className) {
+        addClass: function(className, append) {
             var s = this;
-            return s + (s ? ' ' : '') + className;
+            if ($.isBoolean(append, true)) {
+                return s + (s ? ' ' : '') + className;
+            }
+            return s;
         }
     }, 'String.prototype');
 
@@ -3968,6 +3971,9 @@
             } else {
                 return filePath.replace(/[\/]{2,}/g, '/');
             }
+        },
+        createFragment = function () {
+            return doc.createDocumentFragment();
         },
         createElement = function (nodeName, id, func, parent, options) {
             if ($.isFunction(id)) {
@@ -5914,6 +5920,7 @@
         isDisplay: isDisplay,
         isStyleUnit: isStyleUnit,
         isNumberSize: isNumberSize,
+        createFragment: createFragment,
         createElement: createElement,
         createIframe: createIframe,
         loadIframe: loadIframe,

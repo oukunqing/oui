@@ -24,7 +24,7 @@
 			.oui-tree ul.level0 > li {padding:0;}
 			
 			.oui-tree li .item {
-				float:left;display:inline-block;height:24px;overflow:hidden;margin-bottom:1px;
+				float:left;display:inline-block;height:24px;overflow:visible;margin-bottom:1px;
 			}
 			.oui-tree li .item:hover{}
 			.oui-tree li.cur .item{}
@@ -32,7 +32,7 @@
 			
 			.oui-tree li a.name,.oui-tree li span {
 				display:inline-block;height:24px;line-height:22px;
-				outline:none;overflow:hidden;
+				outline:none;overflow:visible;
 				text-align: center;
 			}
 
@@ -42,8 +42,10 @@
 			.oui-tree li .icon{width:24px;float:left;background:transparent url("imgs/tree/folder.gif") no-repeat center;}
 			.oui-tree li .text{text-align:left;}
 
-			.oui-tree li a{cursor:pointer;}
+			.oui-tree li a{cursor:pointer;display:block;overflow:visible;}
 			.oui-tree li a:hover{}
+			.oui-tree li a span {display:block;}
+
 
 			.oui-tree li a{border:solid 1px transparent;cursor:pointer;margin:0 1px;padding:0 6px 0 1px;border-radius:4px;}
 			.oui-tree li a:hover{background: #e5f3ff;}
