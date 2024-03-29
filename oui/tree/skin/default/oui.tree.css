@@ -15,18 +15,20 @@
 .oui-tree ul,.oui-tree li {
 	list-style:none;clear:both;overflow:visible;
 }
-.oui-tree li {padding:0 0 0 16px;}
+.oui-tree li {padding:0 0 0 18px;overflow:hidden;}
 .oui-tree ul.levelroot {margin:5px 5px 5px 5px;}
 .oui-tree ul.levelroot > li {padding:0;}
 
-.oui-tree .box {}
-.oui-tree .node {}
+.oui-tree ul.box {}
+.oui-tree ul.box > li.node {}
+
+.oui-tree li.cur {}
+.oui-tree li.disabled {}
 
 .oui-tree li .item {
 	float:left;display:inline-block;height:24px;overflow:visible;margin-bottom:1px;
 	border-radius:4px;
 }
-
 .oui-tree li .item:hover{}
 .oui-tree li.cur .item{}
 .oui-tree li.cur .item:hover{}
@@ -42,7 +44,7 @@
 .oui-tree li .switch{width:24px;cursor:pointer;float:left;background:transparent url("imgs/tree.png") no-repeat 0 0;}
 .oui-tree li .switch:hover{background-color:#e5f3ff;border-radius:4px;}
 .oui-tree li .switch-open {background:url("imgs/tree.png") no-repeat -24px 0;}
-.oui-tree li .switch-none {background:none;}
+.oui-tree li .switch-none {background:none;cursor:default;}
 .oui-tree li .switch-none:hover {background:none;}
 
 .oui-tree li .check{float:left;width:24px;height:24px;border:none;box-sizing:border-box;background-color:transparent;}
@@ -65,7 +67,7 @@
 .oui-tree li .text{text-align:left;}
 .oui-tree li .desc{color:#999;margin:0 0 0 5px;}
 
-.oui-tree li a{cursor:pointer;border:solid 1px transparent;cursor:pointer;margin:0 1px;padding:0 6px 0 1px;border-radius:4px;}
+.oui-tree li a{cursor:pointer;margin:0 1px;padding:0 5px 0 2px;border:solid 1px transparent;border-radius:4px;}
 .oui-tree li a:hover{background: #e5f3ff;}
-.oui-tree li.cur a{background: #cce8ff;border-color: #cce8ff;}
-.oui-tree li.cur a:hover{background: #cce8ff;border-color: #99d1ff;}
+.oui-tree li.cur > .item a{background: #cce8ff;border-color: #cce8ff;}
+.oui-tree li.cur > .item a:hover{background: #cce8ff;border-color: #99d1ff;}

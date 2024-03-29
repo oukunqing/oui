@@ -1989,3 +1989,7 @@ css.addClass('tree', true);
 
 console.log(css);
 console.log(css.addClass('tree', true));
+
+var arr = [''];
+
+console.log(arr && arr[0] ? 1 : 0);

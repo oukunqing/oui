@@ -4,7 +4,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>树形菜单</title>
     <script type="text/javascript" src="../oui/oui.js?1"></script>
-    <script type="text/javascript" src="../oui/tree/oui.tree.js?123"></script>
+    <script type="text/javascript" src="../oui/tree/oui.tree.min.js?123"></script>
 </head>
 <body>
 <label><input type="checkbox" value="unit:units" name="chbData" checked="checked" /><span>目录</span></label>
@@ -50,9 +50,17 @@
             async: true, 
             trees: trees,
             data: type ? treedata2 : treedata,
-            leaf: 'camera', dynamic: 2,
+            //leaf: true,
+            //leafType: 'device',
+            //dynamic: true,
+            dynamicType: 'device',
+            //openLevel: 1,
+            openType: 'unit',
+            openLevel: 1,
+            dynamic: 3,
             checkbox: true,
             complete: function (tree) {
+                $.console.log('complete:', tree.id, tree);
                 $('#txt').html([
                     'nodes:', tree.cache.count, ', level:', tree.cache.level, ', timeout:', tree.cache.timeout, 'ms'
                 ].join(''));
@@ -64,6 +72,12 @@
                     $.tree.updateIcon('otr', '7760', 'camera', {status:'play'});
                     tree.text(7153, 'device', '204488设备');
                 }, 1000);
+                window.setTimeout(function() {
+                    tree.selected([826, 343, 780], 'unit', true)
+                        .checked([826, 343], 'unit')
+                        //.position(343, 'unit')
+                        //.collapse(2, 'unit');
+                }, 2000);
             },
             expandCallback: function (node, tree) {
                 $.console.log('expandCallback:', node, tree.id);
