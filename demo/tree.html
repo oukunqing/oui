@@ -3,10 +3,15 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>树形菜单</title>
+    <style type="text/css">
+        body {background:#333;}
+        .form{background: #fff;overflow: hidden;width:520px;}
+    </style>
     <script type="text/javascript" src="../oui/oui.js?1"></script>
-    <script type="text/javascript" src="../oui/tree/oui.tree.min.js?123"></script>
+    <script type="text/javascript" src="../oui/tree/oui.tree.js?123"></script>
 </head>
 <body>
+<div class="form">
 <label><input type="checkbox" value="unit:units" name="chbData" checked="checked" /><span>目录</span></label>
 <label><input type="checkbox" value="device:devices" name="chbData" /><span>设备</span></label>
 <label><input type="checkbox" value="camera:cameras" name="chbData" /><span>通道</span></label>
@@ -14,6 +19,7 @@
 <button onclick="test(2);">加载树菜单2</button>
 <div id="otr" style="display:block;border:solid 1px #00f;overflow:auto;width:400px;height:700px;margin:10px 0 0;"></div>
 <div id="txt"></div>
+</div>
 </body>
 </html>
 <script type="text/javascript" src="dropdownlist.json"></script>
@@ -47,20 +53,21 @@
 
         $.tree('otr', {
             skin: 'device', 
-            async: true, 
+            //async: true, 
+            debug: true,
             trees: trees,
             data: type ? treedata2 : treedata,
             //leaf: true,
             //leafType: 'device',
             //dynamic: true,
-            dynamicType: 'device',
+            //dynamicType: 'device',
             //openLevel: 1,
-            openType: 'unit',
+            //openType: 'unit',
             openLevel: 1,
-            dynamic: 3,
+            //dynamic: 3,
             checkbox: true,
             complete: function (tree) {
-                $.console.log('complete:', tree.id, tree);
+                //$.console.log('complete:', tree.id, tree);
                 $('#txt').html([
                     'nodes:', tree.cache.count, ', level:', tree.cache.level, ', timeout:', tree.cache.timeout, 'ms'
                 ].join(''));

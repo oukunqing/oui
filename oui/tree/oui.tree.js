@@ -27,9 +27,8 @@
 				return Config.Skin;
 			},
 			CloseLinkageClassName: 'oui-popup-panel',
-			IdPrefix: 'oui_tree_id_',
-			NodePrefix: 'oui_tree_node_',
-			RootNodeId: 'OUI_TREE_ROOT_NODE',
+			IdPrefix: 'otree_',
+			RootNodeId: 'otree_root_node',
 		},
 		Cache = {
 			trees: {},
@@ -53,22 +52,19 @@
 				return this;
 			},
 			buildTreeId: function (id) {
-				return 'ot_' + id;
+				return Config.IdPrefix + id;
 			},
 			buildElemId: function (id, nodeId, postfix) {
-				return 'ot_' + id + '_' + nodeId + (postfix || '');
-			},
-			buildItemId: function (id, type, dataId, postfix) {
-				return 'ot_' + id + (type ? '_' + type : '') + '_' + dataId + (postfix || '');
+				return Config.IdPrefix + id + '_' + nodeId + (postfix || '');
 			},
 			buildNodeId: function (type, dataId) {
-				return 'otn_' + (type ? type + '_' : '') + (dataId || 'root');
+				return (type || '') + '_' + (dataId || 'root');
 			},
 			getTreeCache: function (id) {
-				return Cache.trees['ot_' + id] || null;
+				return Cache.trees[Config.IdPrefix + id] || null;
 			},
 			setTreeCache: function(id, tree) {
-				Cache.trees['ot_' + id] = {
+				Cache.trees[Config.IdPrefix + id] = {
 					id: id,
 					tree: tree
 				};
@@ -189,6 +185,8 @@
 				var showCheck = $.getParam(opt, 'showCheck,showcheck,checkbox');
 				opt.showCheck = $.isBoolean(showCheck, false) || showCheck === 'checkbox';
 
+				opt.showCount = $.isBoolean($.getParam(opt, 'showCount,showcount'), false);
+
 				opt.linkage = $.isBoolean(opt.linkage, true);
 				opt.maxCount = parseInt('0' + $.getParam(opt, 'maxCount,maxcount'));
 
@@ -260,7 +258,7 @@
 						return false;
 					}
 
-					$.console.log('event:', tree.id, elem, 'nid:', nid, node, tree.cache);
+					$.console.log('event:', tree.id, elem, 'nid:', nid, node, ev);
 
 					if (tag.inArray(['label','span','a'])) {
 						if (css.indexOf('switch') > -1) {
@@ -377,37 +375,43 @@
 				return this;
 			},
 			buildUl: function (tree, p, isRoot, displayNone) {
-				var ul = p.pnode.getBox();
+				var ul = p.pnode.getBox(), css = [];
 				if (ul) {
 					return ul;
 				}
 				ul = document.createElement('UL');
-				ul.className = 'level' + (isRoot ? 'root' : p.pnode.level) + ' box' + (p.ptype ? ' box-' + p.ptype : '');
-				ul.id = p.pid + '_box';
-				ul.setAttribute('nid', p.pnid);
-
+				var css = [
+					'level', isRoot ? 'root' : p.pnode.level, ' box', p.ptype ? ' box-' + p.ptype : ''
+				];
 				if ((!isRoot && !p.pnode.expanded) || displayNone) {
-					ul.style.cssText = 'display:none;';
+					css.push('hide');
 				}
+
+				ul.id = (p.pid + '_box');
+				ul.className = css.join(' ');
+				//ul.setAttribute('nid', p.pnid);
+
 				return ul;
 			},
-			buildLi: function (tree, p, node) {
-				var opt = tree.options;
-
-				var li = document.createElement('LI');	
+			buildLi: function (tree, p, node, targetLi) {
+				//var li = document.createElement('LI');
+				var li = targetLi.cloneNode(false);
 				li.id = p.id + '_item';
-				li.setAttribute('nid', p.nid);
+				//li.setAttribute('nid', p.nid);
 				li.className = 'node level' + p.level;
 
 				var hide = ' style="display:none;"',
-					check = opt.showCheck ? [
+					check = tree.options.showCheck ? [
 						'<span class="check" id="', p.id, '_check', '" nid="', p.nid, '"></span>',
 					] : [],
-					icon = opt.showIcon ? [
+					icon = tree.options.showIcon ? [
 						'<span class="', node.getIconClass(), '" id="', p.id, '_icon', '" nid="', p.nid, '"', '></span>'
 					] : [],
 					desc = p.desc ? [
 						'<span class="desc" id="', p.id, '_desc', '" nid="', p.nid, '">', p.desc, '</span>'
+					] : [],
+					count = tree.options.showCount ? [
+						'<span class="count" id="', p.id, '_count', '" nid="', p.nid, '"', hide, '>', '</span>'
 					] : [],
 					info = false ? [
 						'<span class="info" id="', p.id, '_info', '" nid="', p.nid, '">',
@@ -421,20 +425,17 @@
 				].concat(check).concat(icon).concat([
 					'<a class="name" id="', p.id, '_name', '" nid="', p.nid, '">',
 					'<span class="text" id="', p.id, '_text', '" nid="', p.nid, '">', p.text, '</span>'
-				]).concat(desc).concat([
-					'<span class="len" id="', p.id, '_len', '" nid="', p.nid, '"', hide, '>', '</span>',
-					'</a>']).concat(info).concat([
+				]).concat(desc).concat(count).concat(['</a>']).concat(info).concat([
 					'</div>'
 				]).join('');
 
 				return li;
 			},
 			buildItem: function (tree, root, list, arg) {
-				var cache = tree.cache,
-					opt = tree.options,
-					tid = tree.id,
+				var tid = tree.id,
 					par = $.extend({type: '', ptype: '', iconType: ''}, arg),
-					ts = new Date().getTime();
+					ts = new Date().getTime(),
+					targetLi = document.createElement('LI');
 
 				if (!$.isArray(list) || list.length <= 0) {
 					return this;
@@ -455,22 +456,19 @@
 							nid: nid, pnid: pnid, type: type, ptype: ptype,
 							id: Factory.buildElemId(tid, nid),
 							pid: Factory.buildElemId(tid, pnid),
-							desc: d.desc || (opt.debug ? type + '-' + d.id + ' ' + ts : ''),
-							pnode: cache.nodes[pnid],
+							desc: d.desc,
+							pnode: tree.cache.nodes[pnid],
 							expanded: false
 						};
 
-					if (!p.pnode) {
+					if (p.pnode) {
+						p.level = p.pnode.level + 1;
+					} else {						
 						p.root = true;
 						p.pnode = root;
 						p.level = 0;
-					} else {
-						p.level = p.pnode.level + 1;
 					}
-
-					if (tree.isDefaultOpen(p.type, p.level)) {
-						p.expanded = true;
-					}
+					p.expanded = tree.isDefaultOpen(p.type, p.level);
 
 					var node = new Node({
 						tree: tree,
@@ -486,35 +484,33 @@
 					});
 
 					node.setParent(p.pnode.setBox(Factory.buildUl(tree, p, p.root)))
-						.setParam('element', Factory.buildLi(tree, p, node));
+						.setParam('element', Factory.buildLi(tree, p, node, targetLi));
 
 					p.pnode.addChild(node);
 
-					cache.nodes[p.nid] = node;
-					cache.count++;
+					tree.cache.nodes[p.nid] = node;
+					tree.cache.count++;
 
 					//记录最大层级
-					if (p.level > cache.level) {
-						cache.level = p.level;
+					if (p.level > tree.cache.level) {
+						tree.cache.level = p.level;
 					}
 				}
 				return this;
 			},
 			initStatus: function (tree) {
-				var that = tree,
-					nodes = that.cache.nodes,
-					node, i = 0;
+				var node, i = 0;
 
-				for (var k in nodes) {
-					var node = nodes[k], child = node.hasChild();
-					if (!child) {
+				for (var k in tree.cache.nodes) {
+					node = tree.cache.nodes[k];
+					if (!node.hasChild()) {
 						//node.setParam('expanded', false);
 
 						//动态加载子节点，先创建子节点容器
 						if (node.dynamic) {
 							node.setBox(Factory.buildUl(tree, {
 								pnode: node,
-								pid: Factory.buildElemId(that.id, node.id),
+								pid: Factory.buildElemId(tree.id, node.id),
 								pnid: node.id,
 								ptype: node.type
 							}, false, true));
@@ -535,11 +531,10 @@
 				if (!$.isArray(nodeIds)) {
 					nodeIds = $.isString(nodeIds) ? nodeIds.split(/[,;|]/) : [nodeIds];
 				}
-				var c = nodeIds.length;
+				var c = nodeIds.length, nid, node;
 				for (var i = 0; i < c; i++) {
-					var nid = Factory.buildNodeId(nodeType, nodeIds[i]),
-						node = nodes[nid];
-					if (node) {
+					nid = Factory.buildNodeId(nodeType, nodeIds[i]);
+					if ((node = nodes[nid])) {
 						if ($.isFunction(funcName)) {
 							funcName(node, i, c);
 						} else if ($.isFunction(node[funcName])) {
@@ -583,35 +578,34 @@
 
 	Node.prototype = {
 		initial: function(par) {
-			var that = this;
-			that.tree = par.tree;
-			that.element = par.element;
+			this.tree = par.tree;
+			this.element = par.element;
 
 			if (par.root) {
-				that.root = true;
-				that.fragment = par.fragment;
+				this.root = true;
+				this.fragment = par.fragment;
 			} else {
-				that.level = par.level;
+				this.level = par.level;
 				//节点ID
-				that.id = par.id;
+				this.id = par.id;
 				//节点类型（可以为空）
-				that.type = par.type;
+				this.type = par.type;
 				//节点Dom元素
-				that.items = {};
+				this.items = {};
 				//节点数据
-				that.data = $.extend({
+				this.data = $.extend({
 					id: 0,			//ID
 					name: '',		//名称
 					code: ''		//编码
 				}, par.data);
 				//节点图标样式
-				that.icon = $.extend({
+				this.icon = $.extend({
 					type: '',		//类型，示例: unit,device,camera 等
 					status: '',		//状态，示例: on,off,play 等
 					path: ''		//自定义图标URL
 				}, par.icon);
 
-				that.initParam('dynamic', par)		//是否动态加载
+				this.initParam('dynamic', par)		//是否动态加载
 					.initParam('loaded', par)		//动态加载次数，0:表示未加载
 					.initParam('expanded', par)		//是否展开
 					.initParam('checked', par)		//是否选中复选框
@@ -621,7 +615,7 @@
 					.initParam('childs', par)		//子节点数组
 					.initParam('childbox', par);	//子节点容器DOM元素
 			}
-			return that;
+			return this;
 		},
 		initParam: function (key, par) {
 			if (!$.isUndefined(par[key])) {
@@ -642,15 +636,12 @@
 			return this.items[key] = elem, elem;
 		},
 		getItem: function (key) {
-			var that = this, item = that.items[key];
-			return item ? item : that.setItem(key, that.element.querySelector('.' + key));
+			return this.items[key] ? this.items[key] : this.setItem(key, this.element.querySelector('.' + key));
 		},
 		setChecked: function (checked) {
-			var that = this,
-				tree = that.tree,
-				opt = tree.options;
+			var that = this;
 
-			if (!tree.isShowCheck()) {
+			if (!that.tree.isShowCheck()) {
 				return that;
 			}
 
@@ -658,7 +649,7 @@
 				.setParam('part', false)
 				.setCheckedClass();
 
-			if (opt.linkage) {
+			if (that.tree.options.linkage) {
 				that.setParentChecked(that.checked).setChildChecked(that.checked, true);
 			}
 
@@ -696,21 +687,20 @@
 			return that;
 		},
 		setChildChecked: function (checked, self) {
-			var that = this;
-			if (!that.tree.isShowCheck()) {
-				return that;
+			if (!this.tree.isShowCheck()) {
+				return this;
 			}
 			if (!self) {
-				that.setParam('part', false)
+				this.setParam('part', false)
 					.setParam('checked', checked)
 					.setCheckedClass();
 			}
-			if (that.hasChild()) {
-				for (var i = 0, c = that.childs.length; i < c; i++) {
-					that.childs[i].setChildChecked(checked);
+			if (this.hasChild()) {
+				for (var i = 0, c = this.childs.length; i < c; i++) {
+					this.childs[i].setChildChecked(checked);
 				}
 			}
-			return that;
+			return this;
 		},
 		setSelected: function (selected) {
 			return this.setParam('selected', selected).setSelectedClass();
@@ -725,45 +715,43 @@
 			return this.childbox;
 		},
 		setBox: function (childbox) {
-			var that = this;
-			that[that.root ? 'fragment' : 'element'].appendChild(childbox);
-			return that.setParam('childbox', childbox);
+			this[this.root ? 'fragment' : 'element'].appendChild(childbox);
+			return this.setParam('childbox', childbox);
 		},
 		addChild: function (node, clear) {
-			var that = this;
-			if (!that.childs || clear) {
-				that.childs = [];
+			if (!this.childs || clear) {
+				this.childs = [];
 			}
-			that.childs.push(node);
-			if (that.childbox) {
-				that.childbox.appendChild(node.element);
+			this.childs.push(node);
+			if (this.childbox) {
+				this.childbox.appendChild(node.element);
 			}
-			return that;
+			return this;
 		},
 		position: function () {
 			return $.scrollTo(this.element, this.tree.panel), this;
 		},
 		setExpand: function (expanded) {
-			var that = this;
-			if (!that.isDynamic() && !that.hasChild()) {
-				return that;
+			if (!this.isDynamic() && !this.hasChild()) {
+				return this;
 			}
-			var box = that.childbox, tree = that.tree, opt = tree.options;
-			if (box) {				
-				expanded = $.isBoolean(expanded, box.style.display === 'none');
-				box.style.display = expanded ? 'block' : 'none';
+			if (this.childbox) {				
+				//expanded = $.isBoolean(expanded, this.childbox.style.display === 'none');
+				expanded = $.isBoolean(expanded, !this.expanded);
+				$.setClass(this.childbox, 'hide', !expanded);
+				//this.childbox.style.display = expanded ? 'block' : 'none';
 				//动态加载，默认只加载1次
-				if (expanded && !that.hasChild()) {
-					if (!that.loaded) {
-						that.loaded = 0;
+				if (expanded && !this.hasChild()) {
+					if (!this.loaded) {
+						this.loaded = 0;
 					}
-					if (that.loaded < opt.loadCount) {
-						tree.expandCallback(that);
+					if (this.loaded < this.tree.options.loadCount) {
+						this.tree.expandCallback(this);
 					}
-					that.loaded++;
+					this.loaded++;
 				}
 			}
-			return that.setParam('expanded', expanded).setExpandClass();
+			return this.setParam('expanded', expanded).setExpandClass();
 		},
 		expand: function () {
 			return this.setExpand(true);
@@ -772,40 +760,38 @@
 			return this.setExpand(false);
 		},
 		getSwitchClass: function () {
-			var that = this, css = ['switch'];
-			if (!that.isLeaf() && that.isExpand()) {
-			//if (that.isExpand()) {
+			var css = ['switch'];
+			if (!this.isLeaf() && this.isExpand()) {
 				css.push('switch-open');
 			}
 			return css.join(' ');
 		},
 		getIconClass: function () {
-			var that = this, icon = that.icon, css = ['icon'],
-				open = that.expanded && !that.isLeaf(),
-				openCss = open ? '-open' : '';
+			var css = ['icon'],
+				open = this.expanded && !this.isLeaf() ? '-open' : '';
 
-			if (icon.type) {
-				if (icon.status) {
-					css.push(icon.type + '-' + icon.status + openCss);
+			if (this.icon.type) {
+				if (this.icon.status) {
+					css.push(this.icon.type + '-' + this.icon.status + open);
 				} else if (open) {
-					css.push(icon.type + openCss);
+					css.push(this.icon.type + open);
 				} else {
-					css.push(icon.type);
+					css.push(this.icon.type);
 				}
-			} else if (icon.path) {
+			} else if (this.icon.path) {
 
 			}  else if (open) {
-				css.push('icon' + openCss);
+				css.push('icon' + open);
 			}
 
 			return css.join(' ');
 		},
 		setIconClass: function () {
-			var that = this, tree = that.tree, icon;
-			if (tree.isShowIcon() && (icon = that.getItem('icon'))) {
-				icon.className = that.getIconClass();
+			var icon;
+			if (this.tree.isShowIcon() && (icon = this.getItem('icon'))) {
+				icon.className = this.getIconClass();
 			}
-			return that;
+			return this;
 		},
 		setIcon: function (par) {
 			return $.extend(this.icon, par), this;
@@ -814,52 +800,50 @@
 			return this.setIcon(par).setIconClass();
 		},
 		updateData: function (data) {
-			var that = this;
-			$.extend({}, that.data, data);
-			return that;
+			$.extend({}, this.data, data);
+			return this;
 		},
 		updateText: function (str) {
-			var that = this, item;
-			if ($.isString(str, true) && (item = that.getItem('text'))) {
+			var item;
+			if ($.isString(str, true) && (item = this.getItem('text'))) {
 				item.innerHTML = str;
 			}
-			return that;
+			return this;
 		},
 		updateDesc: function (str) {
-			var that = this, item;
-			if ((item = that.getItem('desc'))) {
+			var item;
+			if ((item = this.getItem('desc'))) {
 				item.innerHTML = str || '';
 			}
-			return that;
+			return this;
 		},
 		setExpandClass: function (initial) {
-			var that = this, handle = that.getItem('switch');
-
+			var handle = this.getItem('switch');
 			//if (that.isLeaf()) {
 			//虽然被指定为叶子节点类型，但当前已经有子节点加入，那就不能再算是叶子节点了
-			if (that.isLeaf() && !that.hasChild()) {
-				that.setParam('expanded', false);
+			if (this.isLeaf() && !this.hasChild()) {
+				this.setParam('expanded', false);
 				$.setClass(handle, 'switch-none', true);
 			} else {
-				if (!that.hasChild()) {
-					if (!that.isDynamic()) {
-						that.setParam('expanded', false);
+				if (!this.hasChild()) {
+					if (!this.isDynamic()) {
+						this.setParam('expanded', false);
 						$.setClass(handle, 'switch-none', true);
-					} else if (that.isExpanded() && !that.loaded) {
-						that.setParam('expanded', false);
+					} else if (this.isExpanded() && !this.loaded) {
+						this.setParam('expanded', false);
 					}
 				}
-				$.setClass(handle, 'switch-open', that.isExpanded());
+				$.setClass(handle, 'switch-open', this.isExpanded());
 			}
-			return that.setIconClass();
+			return this.setIconClass();
 		},
 		setCheckedClass: function () {
-			var that = this, tree = that.tree, check = that.getItem('check');
-			if (tree.options.showCheck && check) {
-				$.setClass(check, 'check-true', that.checked);
-				$.setClass(check, 'check-true-part', that.part && that.checked);
+			var check = this.getItem('check');
+			if (this.tree.options.showCheck && check) {
+				$.setClass(check, 'check-true', this.checked);
+				$.setClass(check, 'check-true-part', this.part && this.checked);
 			}
-			return that;
+			return this;
 		},
 		setItemClass: function (type, initial) {
 			switch(type) {
@@ -869,14 +853,12 @@
 			return this;
 		},
 		setSelectedClass: function () {
-			var that = this, elem = that.element;
-			$.setClass(elem, 'cur', that.selected);
-			return that;
+			$.setClass(this.element, 'cur', this.selected);
+			return this;
 		},
 		setDisabledClass: function() {
-			var that = this, elem = that.element;
-			$.setClass(elem, 'disabled', that.disabled);
-			return that;
+			$.setClass(this.element, 'disabled', this.disabled);
+			return this;
 		},
 		setNodeClass: function (type) {
 			switch(type) {				
@@ -889,13 +871,13 @@
 			return this.childs && this.childs.length > 0;
 		},
 		isLeaf: function () {
-			var that = this, leaf = that.tree.isLeafType(that.type);
+			var leaf = this.tree.isLeafType(this.type);
 			//判断是否指定叶子节点类型
 			//0: 未指定，1: 指定，是叶子，-1: 指定，非叶子
 			if (leaf !== 0) {
 				return leaf === 1;
 			}
-			return !that.dynamic && !that.hasChild();
+			return !this.dynamic && !this.hasChild();
 		},
 		isDynamic: function () {
 			return this.dynamic;
@@ -926,8 +908,7 @@
 
 	Tree.prototype = {
 		initial: function (options) {
-			var that = this,
-				opt = Factory.checkOptions($.extend({
+			var opt = Factory.checkOptions($.extend({
 					id: 'otree001',
 					element: undefined,
 					//是否异步加载节点
@@ -962,6 +943,8 @@
 					showDesc: undefined,
 					//是否显示节点信息
 					showInfo: undefined,
+					//是否显示子节点数量
+					showCount: undefined,
 					//是否级联选中复选框
 					linkage: undefined,
 					//非级联模式下最大选中数量，0-表示不限数量，默认为0
@@ -973,26 +956,26 @@
 					expandCallback: undefined
 				}, options));
 
-			that.id = opt.id;
-			that.tid = Factory.buildTreeId(opt.id);
-			that.options = opt;
+			this.id = opt.id;
+			this.tid = Factory.buildTreeId(opt.id);
+			this.options = opt;
 
 			if (!Config.IsDefaultSkin(opt.skin)) {
 				Factory.loadCss(opt.skin);
 			}
 
 			if (!$.isElement(opt.element)) {
-				return that;
+				return this;
 			}
 
-			Factory.initCache(that, {
+			Factory.initCache(this, {
 				dynamic: opt.dynamic,
 				dynamicTypes: opt.dynamicTypes,
 				leaf: opt.leaf,
 				leafTypes: opt.leafTypes
-			}, true).buildPanel(that, opt);
+			}, true).buildPanel(this, opt);
 
-			return that;
+			return this;
 		},
 		complete: function () {
 			var that = this,
@@ -1116,26 +1099,24 @@
 		},
 		//是否需要动态加载子节点
 		isDynamicType: function (nodeType) {
-			var opt = this.options;
 			if (!this.isDynamicLoad() || this.isLeafType(nodeType) > 0) {
 				return false;
 			}
-			return !opt.dynamicTypes[0] || opt.dynamicTypes.indexOf(nodeType) > -1;
+			return !this.options.dynamicTypes[0] || this.options.dynamicTypes.indexOf(nodeType) > -1;
 		},
 		isOpenType: function (nodeType) {
-			var opt = this.options;
-			return opt.openTypes.indexOf(nodeType) > -1;
+			return this.options.openTypes.indexOf(nodeType) > -1;
 		},
 		isOpenLevel: function (nodeLevel) {
-			var opt = this.options;
-			return opt.openLevel < 0 || opt.openLevel >= nodeLevel;
+			return this.options.openLevel < 0 || this.options.openLevel >= nodeLevel;
 		},
 		isDefaultOpen: function (nodeType, nodeLevel) {
-			var opt = this.options, type = $.isString(nodeType, true);
-			if (opt.openLevel >= 0) {
-				return opt.openLevel > nodeLevel;
-			} else if (type && opt.openTypes[0]) {
-				return opt.openTypes.indexOf(nodeType) > -1;
+			if (this.options.openLevel >= 0) {
+				return this.options.openLevel > nodeLevel;
+			}
+			var type = $.isString(nodeType, true);
+			if (type && this.options.openTypes[0]) {
+				return this.options.openTypes.indexOf(nodeType) > -1;
 			}
 			return true;
 		},
