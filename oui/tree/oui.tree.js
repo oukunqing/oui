@@ -26,6 +26,8 @@
 				}
 				return Config.Skin;
 			},
+			MouseWhichLeft: 1,
+			MouseWhichRight: 3,
 			CloseLinkageClassName: 'oui-popup-panel',
 			IdPrefix: 'otree_',
 			RootNodeId: 'otree_root_node',
@@ -58,7 +60,7 @@
 				return Config.IdPrefix + id + '_' + nodeId + (postfix || '');
 			},
 			buildNodeId: function (type, dataId) {
-				return (type || '') + '_' + (dataId || 'root');
+				return (type || '') + '_' + dataId;
 			},
 			getTreeCache: function (id) {
 				return Cache.trees[Config.IdPrefix + id] || null;
@@ -81,14 +83,16 @@
 					pc = $.extend({
 						//本次节点数量
 						count: 0,
-						//开始时间
-						begin: 0,
-						//完成时间
-						finish: 0,
 						//层级深度
 						level: 0,
 						//总的节点数量
 						total: 0,
+						//开始时间
+						begin: 0,
+						//完成时间
+						finish: 0,
+						//节点类型（层级）
+						nodeTypes: [],
 						//是否指定叶子节点类型
 						leaf: false,
 						//指定叶子节点类型
@@ -97,8 +101,14 @@
 						dynamic: false,
 						//指定动态加载类型
 						dynamicTypes: [],
-						//节点数据结构
+						//节点字典
 						nodes: {},
+						//按类型存储节点ID
+						types: {},
+						//按层级存储节点ID
+						levels: [],
+						//离线存储
+						store: {}
 					}, p);
 				}
 				return tree.cache = pc, this;
@@ -121,23 +131,34 @@
 				return this;
 			},
 			parseTrees: function (trees) {
-				var ot = [], p, k, v;
+				var ot = [], p,
+					type,		//节点类型
+					key,		//节点数据字段
+					ptype,		//父节点类型
+					icon;		//图标类型
+
 				for (var i = 0; i < trees.length; i++) {
                     p = trees[i];
                     if ($.isArray(p)) {
-                        k = p[0];
-                        v = p[1] || p[0];
+                    	type = p[0];
+                    	key = p[1] || p[0];
+                        ptype = p[2] || p[0];
+                        icon = p[3] || p[0];
                     } else if ($.isObject(p)) {
-                        k = $.getParam(p, 'key,k');
-                        v = $.getParam(p, 'list,value,val,v');
+                        type = $.getParam(p, 'type');
+                        key = $.getParam(p, 'key,type');
+                        ptype = $.getParam(p, 'parent,ptype,type');
+                        icon = $.getParam(p, 'iconType,icon,type');
                     } else if ($.isString(p, true)) {
                         var ps = p.split(/[:\|]/);
-                        k = ps[0];
-                        v = ps[1] || ps[0];
+                    	type = p[0];
+                    	key = p[1] || p[0];
+                        ptype = p[2] || p[0];
+                        icon = p[3] || p[0];
                     } else {
-                        k = v = p;
+                        type = key = ptype = icon = p[0];
                     }
-                    ot.push({ key: k, val: v });
+                    ot.push({ type: type, key: key, ptype: ptype });
                 }
 				return ot;
 			},
@@ -221,6 +242,28 @@
 
 				return opt;
 			},
+			setNodeCache: function (tree, node) {
+				tree.cache.nodes[node.id] = node;
+
+				if (!tree.cache.types[node.type]) {
+					tree.cache.types[node.type] = [];
+				}
+				tree.cache.types[node.type].push(node);
+
+				if(!tree.cache.levels[node.level]) {
+					tree.cache.levels[node.level] = [];
+				}
+				tree.cache.levels[node.level].push(node);
+
+				tree.cache.level = Math.max(tree.cache.level, node.level);
+				tree.cache.count += 1;
+				tree.cache.total += 1;
+					
+				return this;
+			},
+			getNodeCache: function (nodeId) {
+				return tree.cache.nodes[nodeId];
+			},
 			buildTree: function (id, par) {
 				var cache, tree;
 
@@ -248,6 +291,12 @@
 			buildEvent: function (tree) {
 				$.addListener(tree.panel, 'mouseup', function(ev) {
 					$.cancelBubble(ev);
+					var which = ev.which;
+					if (which === Config.MouseWhichRight) {
+						return false;
+					} else if (which !== Config.MouseWhichLeft) {
+
+					}
 					var elem = ev.target,
 						tag = elem.tagName.toLowerCase(),
 						css = elem.className,
@@ -258,7 +307,7 @@
 						return false;
 					}
 
-					$.console.log('event:', tree.id, elem, 'nid:', nid, node, ev);
+					$.console.log('event:', tree.id, tag, css, 'nid:', nid, node, ev);
 
 					if (tag.inArray(['label','span','a'])) {
 						if (css.indexOf('switch') > -1) {
@@ -266,7 +315,8 @@
 						} else if (css.indexOf('check') > -1) {
 							node.setChecked();
 						} else {
-
+							$.console.log('event123', tree.id, tag, css);
+							node.setSelected();
 						}
 					}
 				});
@@ -279,6 +329,7 @@
 				$.addListener(tree.panel, 'contextmenu', function(ev) {
 					$.cancelBubble(ev);
 					$.console.log('contextmenu:', ev.target, ev);
+					tree.contextmenu(ev);
 				});
 
 				return this;
@@ -289,7 +340,10 @@
 					cache = that.cache,
 					elem = opt.element,
 					tag = elem.tagName.toLowerCase(),
-					div = document.getElementById(that.tid);
+					//div = document.getElementById(that.tid),
+					div = document.querySelector('#' + that.tid);
+
+				cache.start = new Date().getTime();
 
 				if (!div) {
 					div = document.createElement('div');
@@ -342,35 +396,35 @@
 					var dts = opt.trees, p = {};
 
 					if (dts.length > 0 && dts[0]) {
-						var list = [], t, pt;
+						var list = [], t, k;
 						//遍历数据结构注解，并按顺序指定上下级关系
-						for (var k = 0; k < dts.length; k++) {
+						for (k = 0; k < dts.length; k++) {
 							t = dts[k];
-							pt = dts[k - 1] || dts[k];
-
-							list = opt.data[t.val || t.key];
-							p = {type: t.key, ptype: pt.key, iconType: t.key};
-							Factory.buildItem(tree, root, list, p);
+							list = opt.data[t.key];
+							p = {type: t.type, ptype: t.ptype, iconType: t.icon || t.type};
+							if ($.isArray(list)) {
+								cache.nodeTypes.push(p.type);
+								Factory.buildItem(tree, root, list, p);
+							}
 						}
 					} else {
 						//遍历参数字段，并获取第1个数组字段
 						for (var k in opt.data) {
 							if ($.isArray(opt.data[k])) {
+								cache.nodeTypes.push(k);
 								Factory.buildItem(tree, root, opt.data[k]);
 								break;
 							}
 						}
 					}
 				}
-
 				Factory.initStatus(tree);
 
 				tree.panel.appendChild(root.fragment);
 				delete root.fragment;
 
 				cache.finish = new Date().getTime();
-				cache.timeout = cache.finish - cache.begin;
-				cache.total += cache.count;
+				cache.timeout = cache.finish - cache.start;
 
 				return this;
 			},
@@ -381,7 +435,7 @@
 				}
 				ul = document.createElement('UL');
 				var css = [
-					'level', isRoot ? 'root' : p.pnode.level, ' box', p.ptype ? ' box-' + p.ptype : ''
+					'level' + (isRoot ? 'root' : p.pnode.level), ' box', p.ptype ? ' box-' + p.ptype : ''
 				];
 				if ((!isRoot && !p.pnode.expanded) || displayNone) {
 					css.push('hide');
@@ -393,9 +447,8 @@
 
 				return ul;
 			},
-			buildLi: function (tree, p, node, targetLi) {
-				//var li = document.createElement('LI');
-				var li = targetLi.cloneNode(false);
+			buildLi: function (tree, p, node) {
+				var li = document.createElement('LI');
 				li.id = p.id + '_item';
 				//li.setAttribute('nid', p.nid);
 				li.className = 'node level' + p.level;
@@ -433,33 +486,33 @@
 			},
 			buildItem: function (tree, root, list, arg) {
 				var tid = tree.id,
-					par = $.extend({type: '', ptype: '', iconType: ''}, arg),
-					ts = new Date().getTime(),
-					targetLi = document.createElement('LI');
+					opt = tree.options,
+					par = $.extend({type: '', ptype: '', iconType: ''}, arg);
 
 				if (!$.isArray(list) || list.length <= 0) {
 					return this;
 				}
+				var i, d, type, ptype, iconType, nid, pnid, p, node;
 
-				for (var i = 0; i < list.length; i++) {
-					var d = list[i];
-					if (typeof d.id === 'undefined') {
+				for (i = 0; i < list.length; i++) {
+					if (typeof (d = list[i]).id === 'undefined') {
 						continue;
 					}
-					var type = d.type || par.type,
-						ptype = d.ptype || par.ptype,
-						iconType = d.iconType || par.iconType,
-						nid = Factory.buildNodeId(type, d.id),
-						pnid = Factory.buildNodeId(ptype, d.pid),
-						p = {
-							data: d, text: d.name,
-							nid: nid, pnid: pnid, type: type, ptype: ptype,
-							id: Factory.buildElemId(tid, nid),
-							pid: Factory.buildElemId(tid, pnid),
-							desc: d.desc,
-							pnode: tree.cache.nodes[pnid],
-							expanded: false
-						};
+					type = d.type || par.type;
+					ptype = d.ptype || par.ptype;
+					iconType = d.iconType || par.iconType;
+					nid = Factory.buildNodeId(type, d.id);
+					pnid = Factory.buildNodeId(ptype, d.pid);
+					p = {
+						data: d, text: d.name,
+						nid: nid, pnid: pnid, type: type, ptype: ptype,
+						id: Factory.buildElemId(tid, nid),
+						pid: Factory.buildElemId(tid, pnid),
+						//desc: d.desc,
+						desc: [d.desc, (opt.debug ? d.id : '')].join(''),
+						pnode: tree.cache.nodes[pnid],
+						expanded: false
+					};
 
 					if (p.pnode) {
 						p.level = p.pnode.level + 1;
@@ -470,7 +523,7 @@
 					}
 					p.expanded = tree.isDefaultOpen(p.type, p.level);
 
-					var node = new Node({
+					node = new Node({
 						tree: tree,
 						data: p.data,
 						id: p.nid,
@@ -484,23 +537,17 @@
 					});
 
 					node.setParent(p.pnode.setBox(Factory.buildUl(tree, p, p.root)))
-						.setParam('element', Factory.buildLi(tree, p, node, targetLi));
+						.setParam('element', Factory.buildLi(tree, p, node));
 
 					p.pnode.addChild(node);
 
-					tree.cache.nodes[p.nid] = node;
-					tree.cache.count++;
-
-					//记录最大层级
-					if (p.level > tree.cache.level) {
-						tree.cache.level = p.level;
-					}
+					Factory.setNodeCache(tree, node);
 				}
+
 				return this;
 			},
 			initStatus: function (tree) {
 				var node, i = 0;
-
 				for (var k in tree.cache.nodes) {
 					node = tree.cache.nodes[k];
 					if (!node.hasChild()) {
@@ -524,7 +571,6 @@
 					}
 					node.setExpandClass(true);
 				}
-
 				return this;
 			},
 			eachNodeIds: function (nodes, nodeIds, nodeType, funcName, funcParam) {
@@ -544,23 +590,124 @@
 				}
 				return this;
 			},
-			expandLevel: function (tree, levels) {
+			expandType: function (tree, types, linkage, collapse) {
+				var cache = tree.cache;
 
+				types = Factory.parseArrayParam(types);
+				linkage = $.isBoolean(linkage, false);
+				collapse = $.isBoolean(collapse, false);
+
+				var i, j, p, c = types.length, nc = cache.nodeTypes.length,
+					cc, k, arr, node;
+
+				//如果类型参数数量超出，则截断数组长度
+				if (c > nc) {
+					types = types.slice(0, nc);
+					c = nc;
+				}
+				//如果只操作一个类型，且级联控制，则按顺序操作节点类型
+				//展开：从最低层开始; 收缩：从最顶层开始
+				if (c === 1 && linkage && nc > 1) {
+					p = cache.nodeTypes.indexOf(types[0]);
+					if (p >= 0) {
+						types = collapse ? cache.nodeTypes.slice(p, nc) : cache.nodeTypes.slice(0, p + 1);
+						c = types.length;
+					}
+				}
+
+				for (i = 0; i < c; i++) {
+					k = types[i];
+					if (cache.nodeTypes.indexOf(k) < 0 || !(arr = cache.types[k])) {
+						continue;
+					}
+					for (j = 0, cc = arr.length; j < cc; j++) {
+						//节点按照层级顺序添加到缓存中，展开和收缩的顺序是相反的
+						//展开：从最低层开始; 收缩：从最顶层开始
+						if (node = arr[collapse ? j : cc - j - 1]) {
+							node.setExpand(!collapse);
+						}
+					}
+				}
+				return this;
 			},
-			expandType: function (tree, types) {
-
+			expandToType: function (tree, types) {
+				return Factory.expandType(tree, types, true);
 			},
-			expandNode: function (tree, ids) {
-
+			collapseType: function (tree, types, linkage) {
+				return Factory.expandType(tree, types, linkage, true);
 			},
-			collapseLevel: function (tree, level) {
-
+			collapseToType: function (tree, types) {
+				return Factory.expandType(tree, types, true, true);
 			},
-			collapseType: function (tree, types) {
-
+			expandEach: function (nodes, collapse) {
+				var j, c = nodes.length, node;
+				for (j = 0; j < c; j++) {
+					if (node = nodes[j]) {
+						node.setExpand(!collapse);
+					}
+				}
+				return this;
 			},
-			collapseNode: function (tree, ids) {
+			expandLevel: function (tree, levels, linkage, collapse) {
+				var i, j, c, nc = tree.cache.levels.length,
+					cur, n;
 
+				levels = $.toIdList(Factory.parseArrayParam(levels), 0);
+				collapse = $.isBoolean(collapse, false);
+				c = levels.sort().length;
+
+				$.console.log('expandLevel0:', levels, linkage, collapse);
+				if (c > nc) {					
+					levels = levels.slice(0, nc);
+					c = nc;
+				$.console.log('expandLevel1:', levels, linkage, collapse);
+				}
+
+				$.console.log('expandLevel2:', levels, linkage, collapse);
+
+				if (linkage) {
+					cur = collapse ? levels[0] : levels[c - 1];
+					$.console.log('expandLevel3:', cur);
+					for (i = 0; i < nc; i++) {
+						n = collapse ? nc - i - 1 : i;
+					$.console.log('expandLevel4:', n);
+						Factory.expandEach(tree.cache.levels[n], collapse);
+						if (n === cur) {
+							break;
+						}
+					}
+				} else {
+					for(i = 0; i < c; i++) {
+						n = levels[collapse ? i : c - i - 1];
+						Factory.expandEach(tree.cache.levels[n], collapse);
+					}
+				}
+				return this;
+			},
+			expandToLevel: function (tree, levels) {
+				return Factory.expandLevel(tree, levels, true);
+			},
+			collapseLevel: function (tree, levels, linkage) {
+				return Factory.expandLevel(tree, levels, linkage, true);
+			},
+			collapseToLevel: function (tree, levels) {
+				return Factory.expandLevel(tree, levels, true, true);
+			},
+			expandAll: function (tree, collapse) {
+				collapse = $.isBoolean(collapse, false);
+				var	levels = tree.cache.levels,
+					i, j, c = levels.length, arr;
+
+				//收缩，从最顶层开始
+				//展开，从最低层开始
+				for (i = 0; i < c; i++) {
+					arr = tree.cache.levels[collapse ? i : c - i - 1];
+					Factory.expandEach(arr, collapse);
+				}
+				return this;
+			},
+			collapseAll: function (tree) {
+				return Factory.expandAll(tree, true);
 			}
 		};
 
@@ -638,23 +785,6 @@
 		getItem: function (key) {
 			return this.items[key] ? this.items[key] : this.setItem(key, this.element.querySelector('.' + key));
 		},
-		setChecked: function (checked) {
-			var that = this;
-
-			if (!that.tree.isShowCheck()) {
-				return that;
-			}
-
-			that.setParam('checked', $.isBoolean(checked, !that.checked))
-				.setParam('part', false)
-				.setCheckedClass();
-
-			if (that.tree.options.linkage) {
-				that.setParentChecked(that.checked).setChildChecked(that.checked, true);
-			}
-
-			return that;
-		},
 		isPartChecked: function (childs, checked) {
 			var len = childs.length, i;
 			for (i = 0; i < len; i++) {
@@ -702,11 +832,24 @@
 			}
 			return this;
 		},
+		setChecked: function (checked) {
+			if (!this.tree.isShowCheck()) {
+				return this;
+			}
+			this.setParam('checked', $.isBoolean(checked, !this.checked))
+				.setParam('part', false)
+				.setCheckedClass();
+
+			if (this.tree.options.linkage) {
+				this.setParentChecked(this.checked).setChildChecked(this.checked, true);
+			}
+			return this;
+		},
 		setSelected: function (selected) {
-			return this.setParam('selected', selected).setSelectedClass();
+			return this.setParam('selected', $.isBoolean(selected, !this.selected)).setSelectedClass();
 		},
 		setDisabled: function (disabled) {
-			return this.setParam('disabled', disabled).setDisabledClass();
+			return this.setParam('disabled', $.isBoolean(disabled, !this.disabled)).setDisabledClass();
 		},
 		setParent: function (parentNode) {
 			return this.setParam('parent', parentNode);
@@ -735,11 +878,12 @@
 			if (!this.isDynamic() && !this.hasChild()) {
 				return this;
 			}
-			if (this.childbox) {				
-				//expanded = $.isBoolean(expanded, this.childbox.style.display === 'none');
+			if ($.isBoolean(expanded) && expanded === this.expanded) {
+				return this;
+			}
+			if (this.childbox) {
 				expanded = $.isBoolean(expanded, !this.expanded);
-				$.setClass(this.childbox, 'hide', !expanded);
-				//this.childbox.style.display = expanded ? 'block' : 'none';
+				this.childbox.style.display = expanded ? 'block' : 'none';
 				//动态加载，默认只加载1次
 				if (expanded && !this.hasChild()) {
 					if (!this.loaded) {
@@ -977,10 +1121,26 @@
 
 			return this;
 		},
+		insert: function (items, pid, nid) {
+
+		},
+		add: function (items, pid, nid) {
+
+		},
+		//更新节点图标、文字
+		update: function (items) {
+			var that = this;
+
+			return that;
+		},
+		clear: function () {
+			var that = this;
+
+			return that;
+		},
 		complete: function () {
 			var that = this,
-				opt = that.options,
-				cache = that.cache;
+				opt = that.options;
 
 			if ($.isFunction(opt.complete)) {
 				opt.complete(that);
@@ -1005,23 +1165,6 @@
 			if ($.isFunction(opt.expandCallback)) {
 				opt.expandCallback(node, that);
 			}
-			return that;
-		},
-		insert: function (items, pid, nid) {
-
-		},
-		add: function (items, pid, nid) {
-
-		},
-		//更新节点图标、文字
-		update: function (items) {
-			var that = this;
-
-			return that;
-		},
-		clear: function () {
-			var that = this;
-
 			return that;
 		},
 		updateIcon: function (nodeIds, nodeType, par) {
@@ -1072,9 +1215,35 @@
 		collapse: function (nodeIds, nodeType) {
 			return Factory.eachNodeIds(this.cache.nodes, nodeIds, nodeType, 'collapse'), this;
 		},
-		expandLevel: function (arg, action) {
-
-			return that;
+		expandAll: function () {
+			return Factory.expandAll(this), this;
+		},
+		collapseAll: function () {
+			return Factory.expandAll(this, true), this;
+		},
+		expandLevel: function (levels, linkage, collapse) {
+			return Factory.expandLevel(this, levels, linkage, collapse), this;
+		},
+		expandToLevel: function (levels, collapse) {
+			return Factory.expandLevel(this, levels, true, collapse), this;
+		},
+		collapseLevel: function (levels, linkage) {
+			return Factory.collapseLevel(this, levels, linkage), this;
+		},
+		collapseToLevel: function (levels) {
+			return Factory.collapseLevel(this, levels, true), this;
+		},
+		expandType: function (types, linkage, collapse) {
+			return Factory.expandType(this, types, linkage, collapse), this;
+		},
+		expandToType: function (types, collapse) {
+			return Factory.expandType(this, types, true, collapse), this;
+		},
+		collapseType: function (types, linkage) {
+			return Factory.collapseType(this, types, linkage), this;
+		},
+		collapseToType: function (types) {
+			return Factory.collapseType(this, types, true), this;
 		},
 		isShowCheck: function () {
 			return this.options.showCheck;
@@ -1119,16 +1288,23 @@
 				return this.options.openTypes.indexOf(nodeType) > -1;
 			}
 			return true;
-		},
-		getChecked: function () {
-			var that = this,
-				list = [];
-
-			return list;
-		},
-		getCheckedValue: function () {
-
 		}
+	};
+
+	Factory.func = function (treeId, ids, type, funcName, funcParam) {
+		var tree = $.tree.get(treeId);
+		if (tree && $.isFunction(tree[funcName])) {
+			tree[funcName](ids, type, funcParam);
+		}
+		return $.tree;
+	};
+
+	Factory.action = function (treeId, funcName, arg0, arg1, arg2, arg3) {
+		var tree = $.tree.get(treeId);
+		if (tree && $.isFunction(tree[funcName])) {
+			tree[funcName](arg0, arg1, arg2, arg3);
+		}
+		return $.tree;
 	};
 
 	$.extend({
@@ -1159,48 +1335,65 @@
 			}
 			return this;
 		},
-		action: function (treeId, ids, type, funcName, funcParam) {
-			var tree = $.tree.get(treeId);
-			if (tree && $.isFunction(tree[funcName])) {
-				tree[funcName](ids, type, funcParam);
-			}
-			return this;
-		},
 		icon: function (treeId, ids, type, par) {
-			return $.tree.action(treeId, ids, type, 'updateIcon', par);
+			return Factory.func(treeId, ids, type, 'updateIcon', par);
 		},
 		updateIcon: function (treeId, ids, type, par) {
-			return $.tree.action(treeId, ids, type, 'updateIcon', par);
+			return Factory.func(treeId, ids, type, 'updateIcon', par);
 		},
 		text: function (treeId, ids, type, texts) {
-			return $.tree.action(treeId, ids, type, 'updateText', texts);
+			return Factory.func(treeId, ids, type, 'updateText', texts);
 		},
 		updateText: function (treeId, ids, type, texts) {
-			return $.tree.action(treeId, ids, type, 'updateText', texts);
+			return Factory.func(treeId, ids, type, 'updateText', texts);
 		},
 		desc: function (treeId, ids, type, texts) {
-			return $.tree.action(treeId, ids, type, 'updateDesc', texts);
+			return Factory.func(treeId, ids, type, 'updateDesc', texts);
 		},
 		updateDesc: function (treeId, ids, type, texts) {
-			return $.tree.action(treeId, ids, type, 'updateDesc', texts);
+			return Factory.func(treeId, ids, type, 'updateDesc', texts);
 		},
 		select: function (treeId, ids, type, selected) {
-			return $.tree.action(treeId, ids, type, 'select', selected);
+			return Factory.func(treeId, ids, type, 'select', selected);
 		},
 		delete: function (treeId, ids, type) {
-			return $.tree.action(treeId, ids, type, 'delete');
+			return Factory.func(treeId, ids, type, 'delete');
 		},
 		selected: function (treeId, ids, type, selected) {
-			return $.tree.action(treeId, ids, type, 'select', selected);
+			return Factory.func(treeId, ids, type, 'select', selected);
 		},
 		checked: function (treeId, ids, type, checked) {
-			return $.tree.action(treeId, ids, type, 'checked', checked);
+			return Factory.func(treeId, ids, type, 'checked', checked);
 		},
 		disabled: function (treeId, ids, type, disabled) {
-			return $.tree.action(treeId, ids, type, 'disabled', disabled);
+			return Factory.func(treeId, ids, type, 'disabled', disabled);
 		},
 		position: function (treeId, id, type) {
-			return $.tree.action(treeId, id, type, 'position');
+			return Factory.func(treeId, id, type, 'position');
+		},
+		expand: function (treeId, ids, type) {
+			return Factory.func(treeId, ids, type, 'expand');
+		},
+		collapse: function (treeId, ids, type) {
+			return Factory.func(treeId, ids, type, 'collapse');
+		},
+		expandAll: function (treeId) {
+			return Factory.action(treeId, 'expandAll');
+		},
+		collapseAll: function (treeId) {
+			return Factory.action(treeId, 'collapseAll');
+		},
+		expandLevel: function (treeId, levels, linkage, collapse) {
+			return Factory.action(treeId, 'expandLevel', levels, linkage, collapse);
+		},
+		collapseLevel: function (treeId, levels, linkage) {
+			return Factory.action(treeId, 'expandLevel', levels, linkage, true);
+		},
+		expandType: function (treeId, types, linkage, collapse) {
+			return Factory.action(treeId, 'expandType', types, linkage, collapse);
+		},
+		collapseType: function (treeId, types, linkage) {
+			return Factory.action(treeId, 'expandType', types, linkage, true);
 		}
 	})
 

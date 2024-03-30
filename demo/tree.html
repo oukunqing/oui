@@ -4,8 +4,8 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>树形菜单</title>
     <style type="text/css">
-        body {background:#333;}
-        .form{background: #fff;overflow: hidden;width:520px;}
+        body {background:#fff;}
+        .form{background: #fff;overflow: hidden;width:520px; padding: 10px; border-radius:5px;}
     </style>
     <script type="text/javascript" src="../oui/oui.js?1"></script>
     <script type="text/javascript" src="../oui/tree/oui.tree.js?123"></script>
@@ -26,9 +26,12 @@
 <script type="text/javascript">
 
     var data = {
+        datas: [{id:0,name:'数据',type:'data'}],
         units: [
-            {id:1,name:'主控制中心'}, 
-            {id:2,pid:1,name:'中言科技'},{id:3,pid:1,name:'浙江'},{id:4,pid:1,name:'江苏'},
+            {id:1,pid:0,name:'主控制中心',ptype:'data'},
+            {id:2,pid:1,name:'中言科技'},
+            {id:3,pid:1,name:'浙江'},
+            {id:4,pid:1,name:'江苏'},
             {id:5,pid:2,name:'演示测试'},
             {id:6,pid:5,name:'演示测试1'},
             {id:7,pid:5,name:'演示测试2'},
@@ -43,14 +46,17 @@
     };
 
     function test(type) {   
-        var arr = $N('chbData'), trees = [];
-        for (var i = 0; i < arr.length; i++) {
-            if (arr[i].checked) {
-                trees.push(arr[i].value.split(':'));
-            }
-        }
-        //trees = [{key:'unit',val:'units'},{key:'device',val:'devices'},{key:'camera',val:'cameras'}];
+        var arr = $N('chbData'), 
+            trees = [];
 
+        trees = [
+            {type:'root',key:'datas'},
+            {type:'unit',key:'units'},
+            {type:'device',key:'devices',ptype:'unit'},
+            {type:'camera',key:'cameras',ptype:'device'}
+        ];
+
+        var html = ['begin: ' + new Date().format('HHmmss.fff') + ', '];
         $.tree('otr', {
             skin: 'device', 
             //async: true, 
@@ -67,10 +73,11 @@
             //dynamic: 3,
             checkbox: true,
             complete: function (tree) {
-                //$.console.log('complete:', tree.id, tree);
-                $('#txt').html([
+                html.push('finish: ' + new Date().format('HHmmss.fff') + '<br />');
+                console.log('complete:', tree.id, tree.cache);
+                $('#txt').html(html.concat([
                     'nodes:', tree.cache.count, ', level:', tree.cache.level, ', timeout:', tree.cache.timeout, 'ms'
-                ].join(''));
+                ]).join(''));
 
                 window.setTimeout(function() {
                     tree.updateIcon('7280,7155', 'device', {status:'off'});
@@ -78,57 +85,30 @@
                     $.tree('otr').updateIcon('7759', 'camera', {status:'play'});
                     $.tree.updateIcon('otr', '7760', 'camera', {status:'play'});
                     tree.text(7153, 'device', '204488设备');
-                }, 1000);
+                }, 10);
                 window.setTimeout(function() {
                     tree.selected([826, 343, 780], 'unit', true)
                         .checked([826, 343], 'unit')
                         //.position(343, 'unit')
                         //.collapse(2, 'unit');
-                }, 2000);
-            },
-            expandCallback: function (node, tree) {
-                $.console.log('expandCallback:', node, tree.id);
-            }
-        });
-        /*
-        $.tree('otree', {
-            skin: 'device',
-            async: true,
-            data: type ? treedata2 : treedata,
-            //trees: 'unit:units,device:devices,camera:cameras'
-            trees: trees,
-            leaf: 'camera',
-            //dynamic: true,
-            dynamic: 2,
-            showIcon: true,
-            //showCheck: 'checkbox',
-            //showCheck: true,
-            //single: true,
-            checkbox: true,
-            complete: function (tree) {
-                //$.console.log('complete:', tree);
-                
-                $.tree.position('tree1', 829, 'unit');
-                window.setTimeout(function() {
-                    tree.position('881', 'unit'); 
-                }, 2000);
-                window.setTimeout(function() {
-                    tree.select([826, 343, 780], 'unit', true)
-                        .checked(826, 'unit')
-                        //.position(343, 'unit')
-                        .collapse(2, 'unit');
-                }, 200);
-                
+                }, 20);
 
-                $('#text1').html([
-                    'nodes:', tree.cache.count, ', level:', tree.cache.level, ', timeout:', tree.cache.timeout, 'ms'
-                ].join(''));
+                //window.setTimeout(function() { tree.expandType('unit', true); }, 20);
+                //window.setTimeout(function() { tree.collapseType('device', true); }, 20);
+
+                //window.setTimeout(function() { $.tree.expandAll('otr'); }, 20);
+                //window.setTimeout(function() { tree.expandAll(); }, 20);
+                //window.setTimeout(function() { tree.collapseAll(); }, 20);
+
+                //window.setTimeout(function() { $.tree.expand('otr', 290, 'unit'); }, 20);
+                //window.setTimeout(function() { tree.expand(190, 'unit'); }, 20);
+
+                window.setTimeout(function() { tree.expandLevel(2, true); }, 20);
             },
             expandCallback: function (node, tree) {
                 $.console.log('expandCallback:', node, tree.id);
             }
         });
-        */
         $.console.log('test finish:');
     }
   

@@ -206,9 +206,25 @@
 	
 	};
 
+
+    var data = {            
+        units: [
+            {id:1,name:'主控制中心',pid:0}, 
+            {id:2,pid:1,name:'中言科技'},{id:3,pid:1,name:'浙江'},{id:4,pid:1,name:'江苏'},
+            {id:5,pid:2,name:'演示测试'},
+            {id:6,pid:5,name:'演示测试1'},
+            {id:7,pid:5,name:'演示测试2'},
+            {id:8,pid:2,name:'出厂检测'},
+            {id:9,pid:8,name:'出厂检测1'},
+            {id:10,pid:8,name:'出厂检测2'}
+        ]
+    };
+
+
 	function test(id){
 		$.console.log('test2:', new Date().getTime());
-		build('treebox', id ? treedata2 : treedata, 'unit:units,device:devices,camera:cameras');
+		//	build('treebox', id ? treedata2 : treedata, 'unit:units,device:devices,camera:cameras');
+		build('treebox', data, 'unit:units');
 		//build('treebox', id ? treedata2 : treedata, 'unit:units,device:devices,camera:cameras');
 		//build('treebox', (id ? treedata2 : treedata).units, '');
 		$.console.log('test3:', new Date().getTime());

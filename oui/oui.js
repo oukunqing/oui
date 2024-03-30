@@ -373,6 +373,43 @@
             }
             return !isNaN(v) ? v : Number(dv) || 0;
         },
+        toIntList = function (numbers, separator) {
+            if (isString(numbers)) {
+                numbers = numbers.split(separator || /[,;|]/);
+            }
+            if (!isArray(numbers)) {
+                return [];
+            }            
+            var list = [], num;
+            for (var i = 0; i < numbers.length; i++) {
+                if (!isNaN(num = parseInt(numbers[i], 10))) {
+                    list.push(num);
+                }
+            }
+            return list;
+        },
+        toIdList = function (numbers, separator, minVal) {
+            if ($.isNumber(separator)) {
+                minVal = separator;
+                separator = undefined;
+            }
+            if (!$.isNumber(minVal)) {
+                minVal = 1;
+            }
+            if (isString(numbers)) {
+                numbers = numbers.split(separator || /[,;|]/);
+            }
+            if (!isArray(numbers)) {
+                return [];
+            }            
+            var list = [], num;
+            for (var i = 0; i < numbers.length; i++) {
+                if (!isNaN(num = parseInt(numbers[i], 10)) && num >= minVal) {
+                    list.push(num);
+                }
+            }
+            return list;
+        },
         toNumberList = function (numbers, separator, decimalLen) {
             if (isNumber(separator)) {
                 decimalLen = separator;
@@ -382,16 +419,15 @@
                 decimalLen = -1;
             }
             if (isString(numbers)) {
-                numbers = numbers.split(separator || ',');
+                numbers = numbers.split(separator || /[,;|]/);
             }
             if (!isArray(numbers)) {
                 return [];
             }
 
-            var list = [];
+            var list = [], num;
             for (var i = 0; i < numbers.length; i++) {
-                var num = parseFloat(numbers[i], 10);
-                if (!isNaN(num)) {
+                if (!isNaN(num = parseFloat(numbers[i], 10))) {
                     if (decimalLen >= 0) {
                         num = num.round(decimalLen);
                     }
@@ -1143,6 +1179,24 @@
                 return { id: o.d.id, pid: o.d.pid, type: o.d.type, ptype: o.d.ptype, level: o.d.level, index: idx };
             }
             return list;
+        },
+        buildTreeData = function (list) {
+            //TODO:
+            var data = [], len = list.length, i, dic = {};
+
+            for (i = 0; i < len; i++) {
+                dic[list[i].id] = list[i];
+            }
+            for (i = 0; i < len; i++) {
+                var dr = list[i], pn = dic[dr.pid];
+                if (pn) {
+                    pn.childs = pn.childs || [];
+                    pn.childs.push(dr);
+                } else {
+                    data.push(dr);
+                }
+            }
+            return data;
         };
         
     var counter = 1, debug = isBoolean(isDebug(), true);
@@ -1191,7 +1245,8 @@
             return padLeft(s, totalWidth, paddingChar, true);
         },
         toDecimal: toDecimal, toFloat: toDecimal, checkNumber: checkNumber, setNumber: setNumber,
-        toInteger: toInteger, toInt: toInteger, toNumber: toNumber, toNumberList: toNumberList,
+        toInteger: toInteger, toInt: toInteger, toNumber: toNumber, 
+        toNumberList: toNumberList, toIdList: toIdList, toIntList: toIntList,
         toBoolean: toBoolean, toBool: toBoolean, iniToJson: iniToJson, jsonToIni: jsonToIni, toIniJson: toIniJson,
         containsKey: containsKey, containsValue: containsValue, contains: contains, distinctList: distinctList,
         collapseNumberList: collapseNumberList, expandNumberList: expandNumberList,
@@ -2110,6 +2165,8 @@
         toBool: function (val) { return $.toBoolean(this, typeof val === 'undefined' ? this : val); },
         toNumber: function (defaultValue, isFloat, decimalLen) { return $.toNumber(this, defaultValue, isFloat, decimalLen); },
         toNumberList: function (separator, decimalLen) { return $.toNumberList(this, separator, decimalLen); },
+        toIntList: function (separator) { return $.toIntList(this, separator); },
+        toIdList: function (separator, minVal) { return $.toIdList(this, separator, minVal); },
         toInt: function (defaultValue) { return $.toInteger(this, defaultValue); },
         toInteger: function (defaultValue) { return $.toInteger(this, defaultValue); },
         toFloat: function (defaultValue, decimalLen) { return $.toDecimal(this, defaultValue, decimalLen); },
@@ -2683,6 +2740,9 @@
         round: function (len) {
             var m = Math.pow(10, len || 0);
             return Math.round(this * m) / m;
+        },
+        max: function (num) {
+            return Math.max(this, num);
         },
         padLeft: function (totalWidth, paddingChar) { return this.toString().padLeft(totalWidth, paddingChar); },
         padRight: function (totalWidth, paddingChar) { return this.toString().padRight(totalWidth, paddingChar); },

@@ -1903,7 +1903,7 @@ for (var i=0; i<5;i++) {
 }
 
 console.log(types);
-console.log($.toTreeList(types));
+console.log('toTreeList:', $.toTreeList(types));
 
 var tdata = [
   { id: 1, name: '视频设备', desc: '400万像素高清摄像机' },
@@ -1949,6 +1949,24 @@ function buildTreeData(list) {
     return data;
 }
 
+function buildTreeData2(list) {
+    var data = {}, len = list.length, i, dic = {};
+
+    for (i = 0; i < len; i++) {
+        dic[list[i].id] = list[i];
+    }
+    for (i = 0; i < len; i++) {
+        var dr = list[i], pn = dic[dr.pid];
+        data[dr.id] = dr;
+
+        if (pn) {
+            pn.childs = pn.childs || [];
+            pn.childs.push(dr);
+        }
+    }
+    return data;
+}
+
 function buildTreeHtml(data, isList) {
     var html = [], i,
         ul = [], li = [];
@@ -1970,26 +1988,21 @@ function buildTreeHtml(data, isList) {
     return html.join('');
 }
 
-$.console.log($.toJsonString(buildTreeData(tdata)));
+$.console.log($.toJsonString(buildTreeData2(tdata)));
+$.console.log(buildTreeData2(tdata));
 
 
-console.log(Math.ceil(10/3));
+var td = buildTreeData2(tdata);
+for(var k in td) {
+    console.log(k, td[k]);
+}
 
-var num = 100;
-$.console.log(num.toRadixNumber(4, 2));
-$.console.log(num.toRadixNumber(4, 8));
-$.console.log(num.toRadixNumber(4, 10));
-$.console.log(num.toRadixNumber(4, 16));
-$.console.log(num.toRadixNumber(4, 24));
-$.console.log(num.toRadixNumber(4, 36));
+const animals = ['ant', 'bison', 'camel', 'duck', 'elephant'];
 
-var css = 'oui';
+console.log(animals.slice(0, 5));
 
-css.addClass('tree', true);
+var levels = [3,2,5,1,0];
 
-console.log(css);
-console.log(css.addClass('tree', true));
+ levels.sort();
 
-var arr = [''];
-
-console.log(arr && arr[0] ? 1 : 0);
+console.log(levels);
