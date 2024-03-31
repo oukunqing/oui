@@ -2001,6 +2001,8 @@ const animals = ['ant', 'bison', 'camel', 'duck', 'elephant'];
 
 console.log(animals.slice(0, 5));
 
+$.console.log(animals.splice(2, 1), animals);
+
 var levels = [3,2,5,1,0];
 
  levels.sort();

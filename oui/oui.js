@@ -4725,16 +4725,29 @@
             return false;
         },
         setClassValue = function (cur, css, action) {
-            if ('add' === action || action === true || action === 1) {
-                if (cur.indexOf(css.space()) < 0) {
-                    cur += css + ' ';
+            var arr = cur.trim().split(' '), p;            
+            if (action === true || action === 1 || 'add' === action) {
+                if (arr.indexOf(css) < 0) {
+                    arr.push(css);
                 }
-            } else if ('remove' === action || action === false || action === 0) {
-                while (cur.indexOf(css.space()) > -1) {
-                    cur = cur.replace(css.space(), ' ');
-                }
+            } else if ((p = arr.indexOf(css)) > -1) {
+                arr.splice(p, 1);
             }
-            return cur;
+            return arr.join(' ');
+        },
+        setElemClass = function (elem, css, action) {
+            if (!$.isElement(elem) || '' === css) {
+                return this;
+            }
+            var arr = elem.className.trim().split(' '), p;
+            if (action) {
+                if (arr.indexOf(css) < 0) {
+                    arr.push(css);
+                }
+            } else if ((p = arr.indexOf(css)) > -1) {
+                arr.splice(p, 1);
+            }
+            return elem.className = arr.join(' '), this;
         },
         setClass = function (elem, value, action) {
             if ($.isNullOrUndefined(elem)) {
@@ -6021,6 +6034,7 @@
         delAttribute: removeAttribute,
         toCssText: toCssText,
         setStyle: setStyle,
+        setElemClass: setElemClass,
         setClass: setClass,
         addClass: addClass,
         removeClass: removeClass,

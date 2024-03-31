@@ -4,20 +4,26 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>树形菜单</title>
     <style type="text/css">
-        body {background:#fff;}
-        .form{background: #fff;overflow: hidden;width:520px; padding: 10px; border-radius:5px;}
+        body {background:#666;margin:0;padding:0;font-size: 14px;font-family: 宋体;}
+        .form{background: #eee;overflow: hidden;width:520px; padding:5px; border-radius:5px;}
+        button{ height:30px;line-height:24px; padding:0 10px;font-family: 宋体;font-size:14px;}
     </style>
     <script type="text/javascript" src="../oui/oui.js?1"></script>
-    <script type="text/javascript" src="../oui/tree/oui.tree.js?123"></script>
+    <script type="text/javascript" src="../oui/tree/oui.tree.min.js?123"></script>
 </head>
 <body>
 <div class="form">
-<label><input type="checkbox" value="unit:units" name="chbData" checked="checked" /><span>目录</span></label>
-<label><input type="checkbox" value="device:devices" name="chbData" /><span>设备</span></label>
-<label><input type="checkbox" value="camera:cameras" name="chbData" /><span>通道</span></label>
+<div style="padding:0 0 10px 0;">
+<label><input type="checkbox" value="root" name="chbData" checked="checked" /><span>根目录</span></label>
+<label><input type="checkbox" value="unit" name="chbData" checked="checked" /><span>组织目录</span></label>
+<label><input type="checkbox" value="device" name="chbData" /><span>设备</span></label>
+<label><input type="checkbox" value="camera" name="chbData" /><span>通道</span></label>
+<label><input type="checkbox" value="department" name="chbData" /><span>部门</span></label>
+<label><input type="checkbox" value="person" name="chbData" /><span>人员</span></label>
+</div>
 <button onclick="test();">加载树菜单</button>
 <button onclick="test(2);">加载树菜单2</button>
-<div id="otr" style="display:block;border:solid 1px #00f;overflow:auto;width:400px;height:700px;margin:10px 0 0;"></div>
+<div id="otr" style="display:block;border:solid 1px #00f;overflow:auto;width:400px;height:800px;margin:10px 0 0;"></div>
 <div id="txt"></div>
 </div>
 </body>
@@ -46,15 +52,23 @@
     };
 
     function test(type) {   
-        var arr = $N('chbData'), 
-            trees = [];
+        var arr = $N('chbData'), keys = {};
+        for (var i = 0; i < arr.length; i++) {
+            if (arr[i].checked) {
+                keys[arr[i].value] = 1;
+            }
+        }
 
-        trees = [
-            {type:'root',key:'datas'},
-            {type:'unit',key:'units'},
-            {type:'device',key:'devices',ptype:'unit'},
-            {type:'camera',key:'cameras',ptype:'device'}
+        var trees = [
+            keys['root'] ? {type:'root',key:'datas'} : undefined,
+            keys['unit'] ? {type:'unit',key:'units'} : undefined,
+            keys['device'] ? {type:'device',key:'devices',ptype:'unit'} : undefined,
+            keys['camera'] ? {type:'camera',key:'cameras',ptype:'device'} : undefined,
+            keys['department'] ? {type:'department',key:'departments'} : undefined,
+            keys['person'] ? {type:'person',key:'persons',ptype:'department'} : undefined
         ];
+
+        $.console.log('trees:', trees);
 
         var html = ['begin: ' + new Date().format('HHmmss.fff') + ', '];
         $.tree('otr', {
@@ -69,7 +83,7 @@
             //dynamicType: 'device',
             //openLevel: 1,
             //openType: 'unit',
-            openLevel: 1,
+            openLevel: 2,
             //dynamic: 3,
             checkbox: true,
             complete: function (tree) {
@@ -93,7 +107,7 @@
                         //.collapse(2, 'unit');
                 }, 20);
 
-                //window.setTimeout(function() { tree.expandType('unit', true); }, 20);
+                //window.setTimeout(function() { tree.expandType('device', true, true); }, 200);
                 //window.setTimeout(function() { tree.collapseType('device', true); }, 20);
 
                 //window.setTimeout(function() { $.tree.expandAll('otr'); }, 20);
@@ -103,7 +117,7 @@
                 //window.setTimeout(function() { $.tree.expand('otr', 290, 'unit'); }, 20);
                 //window.setTimeout(function() { tree.expand(190, 'unit'); }, 20);
 
-                window.setTimeout(function() { tree.expandLevel(2, true); }, 20);
+                //window.setTimeout(function() { tree.expandLevel(2, true, false); }, 20);
             },
             expandCallback: function (node, tree) {
                 $.console.log('expandCallback:', node, tree.id);

@@ -101,6 +101,8 @@
 						dynamic: false,
 						//指定动态加载类型
 						dynamicTypes: [],
+						//节点类型字典
+						trees: {},
 						//节点字典
 						nodes: {},
 						//按类型存储节点ID
@@ -130,6 +132,21 @@
 				}
 				return this;
 			},
+			initParam: function (key, par) {
+				if (!$.isUndefined(par[key])) {
+					this[key] = par[key];
+				}
+				return this;
+			},
+			setParam: function (key, val, strict) {
+				if (strict) {
+					if (!$.isUndefinedOrNull(val)) {
+						this[key] = val;
+					}
+					return this;
+				}
+				return this[key] = val, this;
+			},
 			parseTrees: function (trees) {
 				var ot = [], p,
 					type,		//节点类型
@@ -139,6 +156,9 @@
 
 				for (var i = 0; i < trees.length; i++) {
                     p = trees[i];
+                    if ($.isUndefinedOrNull(p)) {
+                    	continue;
+                    }
                     if ($.isArray(p)) {
                     	type = p[0];
                     	key = p[1] || p[0];
@@ -334,6 +354,22 @@
 
 				return this;
 			},
+			setTypeCache: function (tree, type, ptype) {
+				if (tree.cache.trees[type]) {
+					return this;
+				}
+				var t = new Type({type: type, level: 0}),
+					pt = tree.cache.trees[ptype];
+				if (pt) {
+					t.level = pt.level + 1;
+					t.parent = pt;
+					pt.addChild(t);
+				}
+				return tree.cache.trees[type] = t, this;
+			},
+			getTypeCache: function (type) {
+				return tree.cache.trees[type] || null;
+			},
 			buildPanel: function (tree, par) {
 				var that = tree,
 					opt = that.options,
@@ -377,14 +413,18 @@
 				}
 				return this;
 			},
+			buildRootNode: function (tree, elem, root) {
+				var node = new Node({
+					tree: tree,
+					root: root,
+					element: elem,
+					fragment: $.createFragment()
+				});
+				return node;
+			},
 			buildNode: function (tree, opt) {
 				var cache = tree.cache,
-					root = new Node({
-						tree: tree,
-						root: true,
-						element: tree.panel,
-						fragment: $.createFragment()
-					});
+					root = Factory.buildRootNode(tree, tree.panel, true);
 
 				cache.begin = new Date().getTime();
 				cache.count = 0;
@@ -403,7 +443,8 @@
 							list = opt.data[t.key];
 							p = {type: t.type, ptype: t.ptype, iconType: t.icon || t.type};
 							if ($.isArray(list)) {
-								cache.nodeTypes.push(p.type);
+								//cache.nodeTypes.push(p.type);
+								//Factory.setTreeType(tree, p.type, p.ptype);
 								Factory.buildItem(tree, root, list, p);
 							}
 						}
@@ -412,6 +453,7 @@
 						for (var k in opt.data) {
 							if ($.isArray(opt.data[k])) {
 								cache.nodeTypes.push(k);
+								//Factory.setTreeType(tree, k);
 								Factory.buildItem(tree, root, opt.data[k]);
 								break;
 							}
@@ -542,6 +584,7 @@
 					p.pnode.addChild(node);
 
 					Factory.setNodeCache(tree, node);
+					Factory.setTypeCache(tree, p.type, p.ptype);
 				}
 
 				return this;
@@ -590,44 +633,71 @@
 				}
 				return this;
 			},
+			findType: function (trees, type, linkage, collapse, keys) {
+				var t, pt, ct, k;
+
+				if (!(t = trees[type])) {
+					return this;
+				}
+				keys.push(t.type);
+
+				if (!linkage) {
+					return this;
+				}
+
+				if (collapse) {
+					//找子节点类型
+					function _findChildType (t, keys) {
+						if (!t.childs) {
+							return false;
+						}
+						for (k in t.childs) {
+							keys.push((ct = t.childs[k]).type);
+							if (ct.childs) {
+								_findChildType(ct, keys);
+							}
+						}
+					}
+					_findChildType(t, keys);
+				} else {
+					//找父节点类型
+					while(t && (pt = t.parent)) {
+						keys.push(pt.type);
+						t = pt;
+					}
+				}
+				return this;
+			},
 			expandType: function (tree, types, linkage, collapse) {
-				var cache = tree.cache;
+				var cache = tree.cache, keys = [];
 
 				types = Factory.parseArrayParam(types);
 				linkage = $.isBoolean(linkage, false);
 				collapse = $.isBoolean(collapse, false);
 
-				var i, j, p, c = types.length, nc = cache.nodeTypes.length,
-					cc, k, arr, node;
+				//根据规则找出所有要展开或收缩的类型
+				var i, j, k, c = types.length, cc, nodes = [], node;
+				for (i = 0; i < c; i++) {
+					Factory.findType(cache.trees, types[i], linkage, collapse, keys);
+				}				
+				c = keys.length;
 
-				//如果类型参数数量超出，则截断数组长度
-				if (c > nc) {
-					types = types.slice(0, nc);
-					c = nc;
-				}
-				//如果只操作一个类型，且级联控制，则按顺序操作节点类型
-				//展开：从最低层开始; 收缩：从最顶层开始
-				if (c === 1 && linkage && nc > 1) {
-					p = cache.nodeTypes.indexOf(types[0]);
-					if (p >= 0) {
-						types = collapse ? cache.nodeTypes.slice(p, nc) : cache.nodeTypes.slice(0, p + 1);
-						c = types.length;
-					}
-				}
+				$.console.log('expandType:', types, keys);
 
 				for (i = 0; i < c; i++) {
-					k = types[i];
-					if (cache.nodeTypes.indexOf(k) < 0 || !(arr = cache.types[k])) {
-						continue;
-					}
-					for (j = 0, cc = arr.length; j < cc; j++) {
-						//节点按照层级顺序添加到缓存中，展开和收缩的顺序是相反的
-						//展开：从最低层开始; 收缩：从最顶层开始
-						if (node = arr[collapse ? j : cc - j - 1]) {
-							node.setExpand(!collapse);
+					k = keys[collapse ? i : c - i - 1];
+					if (nodes = cache.types[k]) {
+						for (j = 0, cc = nodes.length; j < cc; j++) {
+							//节点按照层级顺序添加到缓存中，展开和收缩的顺序是相反的
+							//展开：从最低层开始; 收缩：从最顶层开始
+							if (node = nodes[collapse ? j : cc - j - 1]) {
+								node.setExpand(!collapse);
+							}
 						}
 					}
 				}
+				$.console.log('expandType:', types, keys);
+
 				return this;
 			},
 			expandToType: function (tree, types) {
@@ -656,21 +726,15 @@
 				collapse = $.isBoolean(collapse, false);
 				c = levels.sort().length;
 
-				$.console.log('expandLevel0:', levels, linkage, collapse);
 				if (c > nc) {					
 					levels = levels.slice(0, nc);
 					c = nc;
-				$.console.log('expandLevel1:', levels, linkage, collapse);
 				}
-
-				$.console.log('expandLevel2:', levels, linkage, collapse);
 
 				if (linkage) {
 					cur = collapse ? levels[0] : levels[c - 1];
-					$.console.log('expandLevel3:', cur);
 					for (i = 0; i < nc; i++) {
 						n = collapse ? nc - i - 1 : i;
-					$.console.log('expandLevel4:', n);
 						Factory.expandEach(tree.cache.levels[n], collapse);
 						if (n === cur) {
 							break;
@@ -719,12 +783,36 @@
 		Factory.loadCss(Config.GetSkin());
 	}
 
+	function Type(par) {
+		this.initial(par);
+	}
+
+	Type.prototype = {
+		initial: function (par) {
+			this.type = par.type;
+			this.level = par.level;
+			this.childs = {};
+			this.initParam('parent', par);
+		},
+		addChild: function (obj) {
+			if (!this.childs[obj.type]) {
+				this.childs[obj.type] = obj;
+			}
+			return this;
+		},
+		initParam: function (key, par) {
+			return Factory.initParam.call(this, key, par);
+		},
+	};
+
 	function Node(par) {
 		this.initial(par);
 	}
 
 	Node.prototype = {
 		initial: function(par) {
+			par = $.extend({}, par);
+
 			this.tree = par.tree;
 			this.element = par.element;
 
@@ -765,19 +853,10 @@
 			return this;
 		},
 		initParam: function (key, par) {
-			if (!$.isUndefined(par[key])) {
-				this[key] = par[key];
-			}
-			return this;
+			return Factory.initParam.call(this, key, par);
 		},
 		setParam: function (key, val, strict) {
-			if (strict) {
-				if (!$.isUndefinedOrNull(val)) {
-					this[key] = val;
-				}
-				return this;
-			}
-			return this[key] = val, this;
+			return Factory.setParam.call(this, key, val, strict);
 		},
 		setItem: function (key, elem) {
 			return this.items[key] = elem, elem;
@@ -967,25 +1046,25 @@
 			//虽然被指定为叶子节点类型，但当前已经有子节点加入，那就不能再算是叶子节点了
 			if (this.isLeaf() && !this.hasChild()) {
 				this.setParam('expanded', false);
-				$.setClass(handle, 'switch-none', true);
+				$.setElemClass(handle, 'switch-none', true);
 			} else {
 				if (!this.hasChild()) {
 					if (!this.isDynamic()) {
 						this.setParam('expanded', false);
-						$.setClass(handle, 'switch-none', true);
+						$.setElemClass(handle, 'switch-none', true);
 					} else if (this.isExpanded() && !this.loaded) {
 						this.setParam('expanded', false);
 					}
 				}
-				$.setClass(handle, 'switch-open', this.isExpanded());
+				$.setElemClass(handle, 'switch-open', this.isExpanded());
 			}
 			return this.setIconClass();
 		},
 		setCheckedClass: function () {
 			var check = this.getItem('check');
 			if (this.tree.options.showCheck && check) {
-				$.setClass(check, 'check-true', this.checked);
-				$.setClass(check, 'check-true-part', this.part && this.checked);
+				$.setElemClass(check, 'check-true', this.checked);
+				$.setElemClass(check, 'check-true-part', this.part && this.checked);
 			}
 			return this;
 		},
@@ -997,11 +1076,11 @@
 			return this;
 		},
 		setSelectedClass: function () {
-			$.setClass(this.element, 'cur', this.selected);
+			$.setElemClass(this.element, 'cur', this.selected);
 			return this;
 		},
 		setDisabledClass: function() {
-			$.setClass(this.element, 'disabled', this.disabled);
+			$.setElemClass(this.element, 'disabled', this.disabled);
 			return this;
 		},
 		setNodeClass: function (type) {
@@ -1053,52 +1132,52 @@
 	Tree.prototype = {
 		initial: function (options) {
 			var opt = Factory.checkOptions($.extend({
-					id: 'otree001',
-					element: undefined,
-					//是否异步加载节点
-					async: undefined,
-					//是否调试模式
-					debug: false,
-					//data如果不是数组，是对象结构，则需要指定trees
-					data: [],
-					//data数据结构注解，示例：[{key:'unit',val:'units'}]
-					//用于获取data{}数据中的数组字段以及指定节点类型
-					//若未指定结构注解，则取data[]或data{}中第一个字段数组
-					trees: undefined,
-					//指定叶子节点类型，字符串数组或字符串，示例：['camera'] 或 'camera'
-					//指定为叶子节点的，不能动态加载子节点，但可以初始化加载子节点
-					leafTypes: undefined,
-					//动态加载子节点(非叶子节点)
-					dynamic: undefined,
-					//指定动态加载的节点类型，字符串数组或字符串，示例：['device'] 或 'device'
-					//若未指定，则非叶子都可以动态加载
-					dynamicTypes: undefined,
-					//动态加载次数，默认为1次
-					loadCount: undefined,
-					//指定默认要展开的节点类型
-					openTypes: undefined,
-					//指定默认要展开的节点层级
-					openLevel: undefined,
-					//是否显示图标
-					showIcon: undefined,
-					//是否显示复选框
-					showCheck: undefined,
-					//是否显示描述
-					showDesc: undefined,
-					//是否显示节点信息
-					showInfo: undefined,
-					//是否显示子节点数量
-					showCount: undefined,
-					//是否级联选中复选框
-					linkage: undefined,
-					//非级联模式下最大选中数量，0-表示不限数量，默认为0
-					maxCount: undefined,
-					//是否单选模式
-					single: undefined,
-					callback: undefined,
-					complete: undefined,
-					expandCallback: undefined
-				}, options));
+				id: 'otree001',
+				element: undefined,
+				//是否异步加载节点
+				async: undefined,
+				//是否调试模式
+				debug: false,
+				//data如果不是数组，是对象结构，则需要指定trees
+				data: [],
+				//data数据结构注解，示例：[{key:'unit',val:'units'}]
+				//用于获取data{}数据中的数组字段以及指定节点类型
+				//若未指定结构注解，则取data[]或data{}中第一个字段数组
+				trees: undefined,
+				//指定叶子节点类型，字符串数组或字符串，示例：['camera'] 或 'camera'
+				//指定为叶子节点的，不能动态加载子节点，但可以初始化加载子节点
+				leafTypes: undefined,
+				//动态加载子节点(非叶子节点)
+				dynamic: undefined,
+				//指定动态加载的节点类型，字符串数组或字符串，示例：['device'] 或 'device'
+				//若未指定，则非叶子都可以动态加载
+				dynamicTypes: undefined,
+				//动态加载次数，默认为1次
+				loadCount: undefined,
+				//指定默认要展开的节点类型
+				openTypes: undefined,
+				//指定默认要展开的节点层级
+				openLevel: undefined,
+				//是否显示图标
+				showIcon: undefined,
+				//是否显示复选框
+				showCheck: undefined,
+				//是否显示描述
+				showDesc: undefined,
+				//是否显示节点信息
+				showInfo: undefined,
+				//是否显示子节点数量
+				showCount: undefined,
+				//是否级联选中复选框
+				linkage: undefined,
+				//非级联模式下最大选中数量，0-表示不限数量，默认为0
+				maxCount: undefined,
+				//是否单选模式
+				single: undefined,
+				callback: undefined,
+				complete: undefined,
+				expandCallback: undefined
+			}, options));
 
 			this.id = opt.id;
 			this.tid = Factory.buildTreeId(opt.id);
@@ -1120,6 +1199,13 @@
 			}, true).buildPanel(this, opt);
 
 			return this;
+		},
+		node: function (id, type) {
+			var nid = Factory.buildNodeId(type, id);
+			return this.cache.nodes[nid] || new Node({tree: this});
+		},
+		get: function (id, type) {
+			
 		},
 		insert: function (items, pid, nid) {
 
