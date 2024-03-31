@@ -15,6 +15,7 @@
             display:inline-block;overflow:hidden;float:left;margin:0 8px 8px 0;}
         .chb-label input{float:left;}
         .chb-label span{line-height:18px;}
+        .txt {height:26px;line-height:26px;border:solid 1px #ccc;text-align:center;font-size:14px;}
     </style>
     <script type="text/javascript" src="../oui/oui.js?1"></script>
     <script type="text/javascript" src="../oui/tree/oui.tree.js?123"></script>
@@ -85,6 +86,18 @@
                 <button onclick="expandType();">按类型展开</button>
                 <button onclick="expandType(false);">按类型收缩</button>
             </div>
+            <div>
+                <div style="padding:0 0 10px 0;">
+                    父级ID:
+                    <input type="text" id="txtPid" class="txt" style="width:100px;" />
+                    数量：
+                    <input type="text" id="txtLen" class="txt" style="width:50px;" maxlength="6" />
+                    ID:
+                    <input type="text" id="txtId" class="txt" style="width:50px;" maxlength="6" />
+                </div>
+                <button onclick="addNode2();">新增预置点</button>
+                <button onclick="addNode1();">新增子节点</button>
+            </div>
         </div>
     </div>
 </div>
@@ -132,6 +145,29 @@
         $.tree(TreeId).expandAll(expand);
     }
 
+    function addNode1() {
+        var items = [{id:5,name:'部门五',pid:1},{id:6,name:'部门六',pid:1},{id:7,name:"部门七",pid:5}],
+            par = {ptype: 'department',type: 'department'};
+
+        $.tree(TreeId).add(items, par);
+    }
+    function addNode2() {
+        var id = $('#txtId').val().toInt(),
+            pid = $('#txtPid').val().toInt(),
+            len = $('#txtLen').val().toInt(),
+            par = {type: 'preset', ptype: 'camera'},
+            items = [];
+
+        if (!pid || !len) {
+            return false;
+        }
+
+        for (var i = 0; i < len; i++) {
+            items.push({id: id + i + 1, name: '预置点' + (i + 1), pid: pid});
+        }
+        $.tree(TreeId).add(items, par);
+    }
+
     function test(type) {   
         var arr = $N('chbData'), keys = {};
         for (var i = 0; i < arr.length; i++) {
@@ -165,8 +201,6 @@
             debug: true,
             trees: trees,
             data: data,
-            showCheck: showCheck,
-            showIcon: showIcon,
             //leaf: true,
             //leafType: 'device',
             //dynamic: true,
@@ -175,7 +209,9 @@
             //openType: 'unit',
             openLevel: level,
             //dynamic: 3,
-            checkbox: true,
+            //checkbox: true,
+            showCheck: showCheck,
+            showIcon: showIcon,
             complete: function (tree) {
                 $('#divOper').show();
 

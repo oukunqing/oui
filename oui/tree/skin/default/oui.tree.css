@@ -1,24 +1,19 @@
 .oui-tree {
-	display:block;overflow:auto;
-	width:100%;height:100%;
-	border:none 0;box-sizing:border-box;
-	font-size:14px;font-family:Arial,宋体,微软雅黑;
+	margin:0;padding:0;display:block;overflow:auto;width:100%;height:100%;border:none 0;
+	font-family:Arial, 宋体, 微软雅黑;font-size:14px;
     -moz-user-select: none;
     -khtml-user-select: none;
     user-select: none;
     -ms-user-select: none;
-    margin:0;
-    padding: 0 0 45px 0;
-    background:#fafafa;
 }
 .oui-tree ul,.oui-tree li,.oui-tree .item,.oui-tree label,.oui-tree a,.oui-tree span {
-	margin:0;padding:0;display:block;font-size:14px;font-weight:normal;
-	background:transparent;border:none 0;box-sizing:border-box;width:auto;white-space:nowrap;
+	margin:0;padding:0;display:block;font-size:14px;font-weight:normal; visibility: ;
+	background:transparent;border:none 0;box-sizing:border-box;width:auto;white-space:nowrap;				
 }
 .oui-tree ul,.oui-tree li {
 	list-style:none;clear:both;overflow:visible;
 }
-.oui-tree li {padding:0 0 0 18px;overflow:hidden;}
+.oui-tree li {padding:0 0 0 16px;}
 .oui-tree ul.levelroot {margin:5px 5px 5px 5px;}
 .oui-tree ul.levelroot > li {padding:0;}
 
@@ -41,6 +36,7 @@
 	outline:none;overflow:visible;
 	text-align: center; font-size:14px;
 }
+
 .oui-tree li .switch {visibility:hidden;visibility:visible;}
 .oui-tree:hover li .switch {visibility:visible;}
 

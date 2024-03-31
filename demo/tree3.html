@@ -223,8 +223,8 @@
 
 	function test(id){
 		$.console.log('test2:', new Date().getTime());
-		//	build('treebox', id ? treedata2 : treedata, 'unit:units,device:devices,camera:cameras');
-		build('treebox', data, 'unit:units');
+		build('treebox', id ? treedata2 : treedata, 'unit:units,device:devices,camera:cameras');
+		//build('treebox', data, 'unit:units');
 		//build('treebox', id ? treedata2 : treedata, 'unit:units,device:devices,camera:cameras');
 		//build('treebox', (id ? treedata2 : treedata).units, '');
 		$.console.log('test3:', new Date().getTime());

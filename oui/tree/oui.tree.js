@@ -413,18 +413,18 @@
 				}
 				return this;
 			},
-			buildRootNode: function (tree, elem, root) {
+			buildRootNode: function (tree, root, elem, fragment) {
 				var node = new Node({
 					tree: tree,
 					root: root,
 					element: elem,
-					fragment: $.createFragment()
+					fragment: fragment || $.createFragment()
 				});
 				return node;
 			},
 			buildNode: function (tree, opt) {
 				var cache = tree.cache,
-					root = Factory.buildRootNode(tree, tree.panel, true);
+					root = Factory.buildRootNode(tree, true, tree.panel);
 
 				cache.begin = new Date().getTime();
 				cache.count = 0;
@@ -443,8 +443,6 @@
 							list = opt.data[t.key];
 							p = {type: t.type, ptype: t.ptype, iconType: t.icon || t.type};
 							if ($.isArray(list)) {
-								//cache.nodeTypes.push(p.type);
-								//Factory.setTreeType(tree, p.type, p.ptype);
 								Factory.buildItem(tree, root, list, p);
 							}
 						}
@@ -453,20 +451,31 @@
 						for (var k in opt.data) {
 							if ($.isArray(opt.data[k])) {
 								cache.nodeTypes.push(k);
-								//Factory.setTreeType(tree, k);
 								Factory.buildItem(tree, root, opt.data[k]);
 								break;
 							}
 						}
 					}
 				}
-				Factory.initStatus(tree);
+				Factory.initStatus(tree, true);
 
 				tree.panel.appendChild(root.fragment);
 				delete root.fragment;
 
 				cache.finish = new Date().getTime();
 				cache.timeout = cache.finish - cache.start;
+
+				return this;
+			},
+			addNode: function (tree, items, par) {
+				var p = $.extend({}, par),
+					root = Factory.buildRootNode(tree, false, tree.panel),
+					nodes = [];
+
+					$.console.log('addNode:', p, root, items);
+
+				Factory.buildItem(tree, root, items, p, nodes)
+					.initStatus(tree, false, nodes);
 
 				return this;
 			},
@@ -492,8 +501,8 @@
 			buildLi: function (tree, p, node) {
 				var li = document.createElement('LI');
 				li.id = p.id + '_item';
+				li.className = ('node level' + p.level);
 				//li.setAttribute('nid', p.nid);
-				li.className = 'node level' + p.level;
 
 				var hide = ' style="display:none;"',
 					check = tree.options.showCheck ? [
@@ -526,7 +535,7 @@
 
 				return li;
 			},
-			buildItem: function (tree, root, list, arg) {
+			buildItem: function (tree, root, list, arg, nodes) {
 				var tid = tree.id,
 					opt = tree.options,
 					par = $.extend({type: '', ptype: '', iconType: ''}, arg);
@@ -585,14 +594,31 @@
 
 					Factory.setNodeCache(tree, node);
 					Factory.setTypeCache(tree, p.type, p.ptype);
+					
+					if (nodes) {
+						nodes.push(node);
+					}
 				}
 
 				return this;
 			},
-			initStatus: function (tree) {
-				var node, i = 0;
-				for (var k in tree.cache.nodes) {
-					node = tree.cache.nodes[k];
+			initStatus: function (tree, initial, nodes) {
+				var node, pnode, i, c, k, dic = {};
+				if ($.isUndefinedOrNull(nodes || (nodes = tree.cache.nodes))) {
+					return this;
+				}
+				if ($.isArray(nodes)) {
+					c = nodes.length;
+					for (i = 0; i < c; i++) {
+						_init(nodes[i], initial, dic);
+					}
+				} else if ($.isObject(nodes)) {
+					for (k in nodes) {
+						_init(nodes[k], initial, dic);
+					}
+				}
+
+				function _init (node, initial, dic) {
 					if (!node.hasChild()) {
 						//node.setParam('expanded', false);
 
@@ -613,15 +639,23 @@
 						}
 					}
 					node.setExpandClass(true);
+
+					if (!initial) {
+						if (node.parent && !dic[node.parent.id]) {
+							node.parent.setExpandClass(false);
+							dic[node.parent.id] = 1;
+						}
+					}
 				}
+
 				return this;
 			},
 			eachNodeIds: function (nodes, nodeIds, nodeType, funcName, funcParam) {
 				if (!$.isArray(nodeIds)) {
 					nodeIds = $.isString(nodeIds) ? nodeIds.split(/[,;|]/) : [nodeIds];
 				}
-				var c = nodeIds.length, nid, node;
-				for (var i = 0; i < c; i++) {
+				var i, c = nodeIds.length, nid, node;
+				for (i = 0; i < c; i++) {
 					nid = Factory.buildNodeId(nodeType, nodeIds[i]);
 					if ((node = nodes[nid])) {
 						if ($.isFunction(funcName)) {
@@ -751,14 +785,11 @@
 			},
 			expandAll: function (tree, expand) {
 				expand = $.isBoolean(expand, true);
-				var	levels = tree.cache.levels,
-					i, j, c = levels.length, arr;
+				var	i, j, c = tree.cache.levels.length;
 
-				//收缩，从最顶层开始
-				//展开，从最低层开始
+				//收缩:从最顶层开始; 展开:从最低层开始
 				for (i = 0; i < c; i++) {
-					arr = tree.cache.levels[expand ? c - i - 1 : i];
-					Factory.expandEach(arr, expand);
+					Factory.expandEach(tree.cache.levels[expand ? c - i - 1 : i], expand);
 				}
 				return this;
 			},
@@ -1047,6 +1078,8 @@
 					} else if (this.isExpanded() && !this.loaded) {
 						this.setParam('expanded', false);
 					}
+				} else {
+					$.setElemClass(handle, 'switch-none', false);
 				}
 				$.setElemClass(handle, 'switch-open', this.isExpanded());
 			}
@@ -1203,7 +1236,8 @@
 
 		},
 		add: function (items, par) {
-
+			Factory.addNode(this, items, par);
+			return this;
 		},
 		//更新节点图标、文字
 		update: function (items, par) {
@@ -1399,17 +1433,17 @@
 			var cache = Factory.getTreeCache(treeId);
 			return cache ? cache.tree : null;
 		},
-		add: function (treeId, items, type, ptype) {
+		add: function (treeId, items, par) {
 			var tree = $.tree.get(treeId);
 			if (tree) {
-				tree.add(items, type, ptype);
+				tree.add(items, par);
 			}
 			return this;
 		},
-		update: function (treeId, items, type, ptype) {
+		update: function (treeId, items, par) {
 			var tree = $.tree.get(treeId);
 			if (tree) {
-				tree.update(items, type, ptype);
+				tree.update(items, par);
 			}
 			return this;
 		},
