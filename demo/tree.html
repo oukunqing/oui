@@ -4,27 +4,89 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>树形菜单</title>
     <style type="text/css">
-        body {background:#666;margin:0;padding:0;font-size: 14px;font-family: 宋体;}
-        .form{background: #eee;overflow: hidden;width:520px; padding:5px; border-radius:5px;}
-        button{ height:30px;line-height:24px; padding:0 10px;font-family: 宋体;font-size:14px;}
+        body {background:#fff;margin:0;padding:0;font-size: 14px;font-family: 宋体;}
+        .form{background: #fff;overflow: hidden;width:1000px; padding:0}
+        div{clear:both;overflow:hidden;}
+        div.box {border:solid 1px #ccc;border-radius:4px;padding:8px 8px 0;margin:0 0 10px 0;}
+        button{ height:30px;line-height:24px; padding:0 10px;font-family: 宋体;font-size:14px;
+            display:inline-block;float:left;margin:0 8px 8px 0;}
+        select {height:30px;border:solid 1px #ccc;border-radius: 4px;float:left;margin:0 8px 8px 0;}
+        .chb-label {border:solid 1px #ccc;border-radius:4px;box-sizing:border-box;padding:5px 10px 0 2px;height:30px;
+            display:inline-block;overflow:hidden;float:left;margin:0 8px 8px 0;}
+        .chb-label input{float:left;}
+        .chb-label span{line-height:18px;}
     </style>
     <script type="text/javascript" src="../oui/oui.js?1"></script>
-    <script type="text/javascript" src="../oui/tree/oui.tree.min.js?123"></script>
+    <script type="text/javascript" src="../oui/tree/oui.tree.js?123"></script>
 </head>
 <body>
 <div class="form">
-<div style="padding:0 0 10px 0;">
-<label><input type="checkbox" value="root" name="chbData" checked="checked" /><span>根目录</span></label>
-<label><input type="checkbox" value="unit" name="chbData" checked="checked" /><span>组织目录</span></label>
-<label><input type="checkbox" value="device" name="chbData" /><span>设备</span></label>
-<label><input type="checkbox" value="camera" name="chbData" /><span>通道</span></label>
-<label><input type="checkbox" value="department" name="chbData" /><span>部门</span></label>
-<label><input type="checkbox" value="person" name="chbData" /><span>人员</span></label>
-</div>
-<button onclick="test();">加载树菜单</button>
-<button onclick="test(2);">加载树菜单2</button>
-<div id="otr" style="display:block;border:solid 1px #00f;overflow:auto;width:400px;height:800px;margin:10px 0 0;"></div>
-<div id="txt"></div>
+    <div style="float:left;padding:10px;clear:none;">
+        <div id="otr" style="display:block;border:solid 1px #00f;border-radius:4px;overflow:auto;width:400px;height:800px;margin:0;"></div>
+        <div id="txt" style="margin:0;padding: 10px 0;"></div>
+    </div>
+    <div style="float:left;padding:0;margin:10px 0 0;clear:none;">
+        <div class="box">  
+            <div>
+                <label class="chb-label"><input type="checkbox" value="root" name="chbData" checked="checked" /><span>根节点</span></label>
+                <label class="chb-label"><input type="checkbox" value="unit" name="chbData" checked="checked" /><span>目录</span></label>
+                <label class="chb-label"><input type="checkbox" value="device" name="chbData" /><span>设备</span></label>
+                <label class="chb-label"><input type="checkbox" value="camera" name="chbData" /><span>通道</span></label>
+                <label class="chb-label"><input type="checkbox" value="department" name="chbData" /><span>部门</span></label>
+                <label class="chb-label"><input type="checkbox" value="person" name="chbData" /><span>人员</span></label>
+            </div>
+            <div>
+                <select id="ddlLevel">
+                    <option value="-1">全部展开</option>
+                    <option value="0">全部收缩</option>
+                    <option value="1" selected="selected">展开到1级</option>
+                    <option value="2">展开到2级</option>
+                    <option value="3">展开到3级</option>
+                    <option value="4">展开到4级</option>
+                    <option value="5">展开到5级</option>
+                    <option value="6">展开到6级</option>
+                </select>
+                <label class="chb-label"><input type="checkbox" id="chbCheck" checked="checked" /><span>显示选框</span></label>
+                <label class="chb-label"><input type="checkbox" id="chbIcon" checked="checked" /><span>显示图标</span></label>
+                <div>
+                    <button onclick="test();">加载树菜单</button>
+                    <button onclick="test(2);">加载树菜单2</button>
+                </div>
+            </div>
+        </div>
+        <div id="divOper" class="box" style="display:none;">
+            <div>                
+                <label class="chb-label">
+                    <input type="checkbox" value="1" id="chbLinkage" checked="checked" />
+                    <span>级联</span>
+                </label>
+            </div>
+            <div>
+                <select id="ddlLevel2" style="width:62px;">
+                    <option value="0">0级</option>
+                    <option value="1">1级</option>
+                    <option value="2">2级</option>
+                    <option value="3">3级</option>
+                    <option value="4">4级</option>
+                </select>
+                <button onclick="expandLevel();">按层级展开</button>
+                <button onclick="expandLevel(false);">按层级收缩</button>
+                <button onclick="expandAll();">全部展开</button>
+                <button onclick="expandAll(false);">全部收缩</button>
+            </div>
+            <div>
+                <select id="ddlType2" style="width:62px;">
+                    <option value="unit">目录</option>
+                    <option value="device">设备</option>
+                    <option value="camera">通道</option>
+                    <option value="department">部门</option>
+                    <option value="person">人员</option>
+                </select>
+                <button onclick="expandType();">按类型展开</button>
+                <button onclick="expandType(false);">按类型收缩</button>
+            </div>
+        </div>
+    </div>
 </div>
 </body>
 </html>
@@ -51,6 +113,25 @@
 
     };
 
+    var TreeId = 'otr';
+
+    function expandLevel(expand) {
+        var linkage = $('#chbLinkage').checked(),
+            level = $('#ddlLevel2').val().toInt();
+        $.console.log('expandLevel:', level, linkage, expand);
+        $.tree(TreeId).expandLevel(level, linkage, expand);
+    }
+
+    function expandType(expand) {
+        var linkage = $('#chbLinkage').checked(),
+            type = $('#ddlType2').val();
+        $.tree(TreeId).expandType(type, linkage, expand);
+    }
+
+    function expandAll(expand) {
+        $.tree(TreeId).expandAll(expand);
+    }
+
     function test(type) {   
         var arr = $N('chbData'), keys = {};
         for (var i = 0; i < arr.length; i++) {
@@ -70,34 +151,45 @@
 
         $.console.log('trees:', trees);
 
-        var html = ['begin: ' + new Date().format('HHmmss.fff') + ', '];
-        $.tree('otr', {
+        var html = ['begin: ' + new Date().format('HHmmss.fff') + ', '],
+            data = type ? treedata2 : treedata,
+            level = $('#ddlLevel').val().toInt(),
+            showCheck = $('#chbCheck').checked(),
+            showIcon = $('#chbIcon').checked();
+
+        data.units[0].desc = new Date().getTime();
+
+        $.tree(TreeId, {
             skin: 'device', 
             //async: true, 
             debug: true,
             trees: trees,
-            data: type ? treedata2 : treedata,
+            data: data,
+            showCheck: showCheck,
+            showIcon: showIcon,
             //leaf: true,
             //leafType: 'device',
             //dynamic: true,
             //dynamicType: 'device',
             //openLevel: 1,
             //openType: 'unit',
-            openLevel: 2,
+            openLevel: level,
             //dynamic: 3,
             checkbox: true,
             complete: function (tree) {
+                $('#divOper').show();
+
                 html.push('finish: ' + new Date().format('HHmmss.fff') + '<br />');
-                console.log('complete:', tree.id, tree.cache);
+                //console.log('complete:', tree.id, tree.cache);
                 $('#txt').html(html.concat([
                     'nodes:', tree.cache.count, ', level:', tree.cache.level, ', timeout:', tree.cache.timeout, 'ms'
                 ]).join(''));
-
+                /*
                 window.setTimeout(function() {
                     tree.updateIcon('7280,7155', 'device', {status:'off'});
                     tree.icon(7151, 'device', {status:'off'});
-                    $.tree('otr').updateIcon('7759', 'camera', {status:'play'});
-                    $.tree.updateIcon('otr', '7760', 'camera', {status:'play'});
+                    $.tree(TreeId).updateIcon('7759', 'camera', {status:'play'});
+                    $.tree.updateIcon(TreeId, '7760', 'camera', {status:'play'});
                     tree.text(7153, 'device', '204488设备');
                 }, 10);
                 window.setTimeout(function() {
@@ -106,18 +198,18 @@
                         //.position(343, 'unit')
                         //.collapse(2, 'unit');
                 }, 20);
-
-                //window.setTimeout(function() { tree.expandType('device', true, true); }, 200);
+                */
+                //window.setTimeout(function() { tree.expandType('unit', true, true); }, 200);
                 //window.setTimeout(function() { tree.collapseType('device', true); }, 20);
 
-                //window.setTimeout(function() { $.tree.expandAll('otr'); }, 20);
+                //window.setTimeout(function() { $.tree.expandAll(TreeId); }, 20);
                 //window.setTimeout(function() { tree.expandAll(); }, 20);
                 //window.setTimeout(function() { tree.collapseAll(); }, 20);
 
-                //window.setTimeout(function() { $.tree.expand('otr', 290, 'unit'); }, 20);
+                //window.setTimeout(function() { $.tree.expand(TreeId, 290, 'unit'); }, 20);
                 //window.setTimeout(function() { tree.expand(190, 'unit'); }, 20);
 
-                //window.setTimeout(function() { tree.expandLevel(2, true, false); }, 20);
+                //window.setTimeout(function() { tree.expandLevel(2, true, true); }, 20);
             },
             expandCallback: function (node, tree) {
                 $.console.log('expandCallback:', node, tree.id);

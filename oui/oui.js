@@ -6988,6 +6988,17 @@
         val: function (value) {
             return this.prop('value', value);
         },
+        checked: function (checked) {
+            var elem = this[0] || {},
+                chb = elem.tagName === 'INPUT' && ['checkbox', 'radio'].indexOf(elem.type) > -1;
+            if ($.isBoolean(checked)) {
+                if (chb) {
+                    elem.checked = checked;
+                }
+                return this;
+            }
+            return chb ? elem.checked : false;
+        },
         show: function () {
             return this[0] ? this[0].style.display = '' : null, this;
         },

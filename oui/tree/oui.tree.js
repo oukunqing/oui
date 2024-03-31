@@ -187,7 +187,7 @@
 					if ($.isString(arr, true)) {
 						arr = arr.split(/[,;|]/);
 					} else {
-						arr = arr ? [arr] : [];
+						arr = !$.isUndefinedOrNull(arr) ? [arr] : [];
 					}
 				}
 				return arr;
@@ -633,7 +633,7 @@
 				}
 				return this;
 			},
-			findType: function (trees, type, linkage, collapse, keys) {
+			findType: function (trees, type, linkage, expand, keys) {
 				var t, pt, ct, k;
 
 				if (!(t = trees[type])) {
@@ -645,7 +645,13 @@
 					return this;
 				}
 
-				if (collapse) {
+				if (expand) {
+					//找父节点类型
+					while(t && (pt = t.parent)) {
+						keys.push(pt.type);
+						t = pt;
+					}
+				} else {
 					//找子节点类型
 					function _findChildType (t, keys) {
 						if (!t.childs) {
@@ -659,71 +665,57 @@
 						}
 					}
 					_findChildType(t, keys);
-				} else {
-					//找父节点类型
-					while(t && (pt = t.parent)) {
-						keys.push(pt.type);
-						t = pt;
-					}
 				}
 				return this;
 			},
-			expandType: function (tree, types, linkage, collapse) {
+			expandType: function (tree, types, linkage, expand) {
 				var cache = tree.cache, keys = [];
 
 				types = Factory.parseArrayParam(types);
 				linkage = $.isBoolean(linkage, false);
-				collapse = $.isBoolean(collapse, false);
+				expand = $.isBoolean(expand, true);
 
 				//根据规则找出所有要展开或收缩的类型
-				var i, j, k, c = types.length, cc, nodes = [], node;
+				var i, j, k, c = types.length, nodes = [];
 				for (i = 0; i < c; i++) {
-					Factory.findType(cache.trees, types[i], linkage, collapse, keys);
+					Factory.findType(cache.trees, types[i], linkage, expand, keys);
 				}				
 				c = keys.length;
 
-				$.console.log('expandType:', types, keys);
-
 				for (i = 0; i < c; i++) {
-					k = keys[collapse ? i : c - i - 1];
+					k = keys[expand ? c - i - 1 : i];
 					if (nodes = cache.types[k]) {
-						for (j = 0, cc = nodes.length; j < cc; j++) {
-							//节点按照层级顺序添加到缓存中，展开和收缩的顺序是相反的
-							//展开：从最低层开始; 收缩：从最顶层开始
-							if (node = nodes[collapse ? j : cc - j - 1]) {
-								node.setExpand(!collapse);
-							}
-						}
+						Factory.expandEach(nodes, expand, false);
 					}
 				}
-				$.console.log('expandType:', types, keys);
-
 				return this;
 			},
 			expandToType: function (tree, types) {
 				return Factory.expandType(tree, types, true);
 			},
 			collapseType: function (tree, types, linkage) {
-				return Factory.expandType(tree, types, linkage, true);
+				return Factory.expandType(tree, types, linkage, false);
 			},
 			collapseToType: function (tree, types) {
-				return Factory.expandType(tree, types, true, true);
+				return Factory.expandType(tree, types, true, false);
 			},
-			expandEach: function (nodes, collapse) {
+			expandEach: function (nodes, expand, sameLevel) {
 				var j, c = nodes.length, node;
 				for (j = 0; j < c; j++) {
-					if (node = nodes[j]) {
-						node.setExpand(!collapse);
+					//节点按照层级顺序添加到缓存中，展开和收缩的顺序是相反的
+					//不同层级的节点，展开：从最低层开始; 收缩：从最顶层开始
+					if (node = nodes[sameLevel || !expand ? j : c - j - 1]) {
+						node.setExpand(expand);
 					}
 				}
 				return this;
 			},
-			expandLevel: function (tree, levels, linkage, collapse) {
+			expandLevel: function (tree, levels, linkage, expand) {
 				var i, j, c, nc = tree.cache.levels.length,
 					cur, n;
 
 				levels = $.toIdList(Factory.parseArrayParam(levels), 0);
-				collapse = $.isBoolean(collapse, false);
+				expand = $.isBoolean(expand, true);
 				c = levels.sort().length;
 
 				if (c > nc) {					
@@ -732,18 +724,18 @@
 				}
 
 				if (linkage) {
-					cur = collapse ? levels[0] : levels[c - 1];
+					cur = expand ? levels[c - 1] : levels[0];
 					for (i = 0; i < nc; i++) {
-						n = collapse ? nc - i - 1 : i;
-						Factory.expandEach(tree.cache.levels[n], collapse);
+						n = expand ? i : nc - i - 1;
+						Factory.expandEach(tree.cache.levels[n], expand, true);
 						if (n === cur) {
 							break;
 						}
 					}
 				} else {
 					for(i = 0; i < c; i++) {
-						n = levels[collapse ? i : c - i - 1];
-						Factory.expandEach(tree.cache.levels[n], collapse);
+						n = levels[expand ? c - i - 1 : i];
+						Factory.expandEach(tree.cache.levels[n], expand, true);
 					}
 				}
 				return this;
@@ -752,26 +744,26 @@
 				return Factory.expandLevel(tree, levels, true);
 			},
 			collapseLevel: function (tree, levels, linkage) {
-				return Factory.expandLevel(tree, levels, linkage, true);
+				return Factory.expandLevel(tree, levels, linkage, false);
 			},
 			collapseToLevel: function (tree, levels) {
-				return Factory.expandLevel(tree, levels, true, true);
+				return Factory.expandLevel(tree, levels, true, false);
 			},
-			expandAll: function (tree, collapse) {
-				collapse = $.isBoolean(collapse, false);
+			expandAll: function (tree, expand) {
+				expand = $.isBoolean(expand, true);
 				var	levels = tree.cache.levels,
 					i, j, c = levels.length, arr;
 
 				//收缩，从最顶层开始
 				//展开，从最低层开始
 				for (i = 0; i < c; i++) {
-					arr = tree.cache.levels[collapse ? i : c - i - 1];
-					Factory.expandEach(arr, collapse);
+					arr = tree.cache.levels[expand ? c - i - 1 : i];
+					Factory.expandEach(arr, expand);
 				}
 				return this;
 			},
 			collapseAll: function (tree) {
-				return Factory.expandAll(tree, true);
+				return Factory.expandAll(tree, false);
 			}
 		};
 
@@ -802,7 +794,7 @@
 		},
 		initParam: function (key, par) {
 			return Factory.initParam.call(this, key, par);
-		},
+		}
 	};
 
 	function Node(par) {
@@ -1205,16 +1197,16 @@
 			return this.cache.nodes[nid] || new Node({tree: this});
 		},
 		get: function (id, type) {
-			
-		},
-		insert: function (items, pid, nid) {
 
 		},
-		add: function (items, pid, nid) {
+		insert: function (items, par) {
+
+		},
+		add: function (items, par) {
 
 		},
 		//更新节点图标、文字
-		update: function (items) {
+		update: function (items, par) {
 			var that = this;
 
 			return that;
@@ -1233,14 +1225,14 @@
 			}
 			return that;
 		},
-		callback: function (par) {
+		callback: function (node, par) {
 			var that = this,
 				opt = that.options,
 				data = {};
 			//TODO:
 
 			if ($.isFunction(opt.callback)) {
-				opt.callback(data, par, that);
+				opt.callback(node, data, that);
 			}
 			return that;
 		},
@@ -1301,17 +1293,17 @@
 		collapse: function (nodeIds, nodeType) {
 			return Factory.eachNodeIds(this.cache.nodes, nodeIds, nodeType, 'collapse'), this;
 		},
-		expandAll: function () {
-			return Factory.expandAll(this), this;
+		expandAll: function (expand) {
+			return Factory.expandAll(this, expand), this;
 		},
 		collapseAll: function () {
-			return Factory.expandAll(this, true), this;
+			return Factory.expandAll(this, false), this;
 		},
-		expandLevel: function (levels, linkage, collapse) {
-			return Factory.expandLevel(this, levels, linkage, collapse), this;
+		expandLevel: function (levels, linkage, expand) {
+			return Factory.expandLevel(this, levels, linkage, expand), this;
 		},
-		expandToLevel: function (levels, collapse) {
-			return Factory.expandLevel(this, levels, true, collapse), this;
+		expandToLevel: function (levels, expand) {
+			return Factory.expandLevel(this, levels, true, expand), this;
 		},
 		collapseLevel: function (levels, linkage) {
 			return Factory.collapseLevel(this, levels, linkage), this;
@@ -1319,11 +1311,11 @@
 		collapseToLevel: function (levels) {
 			return Factory.collapseLevel(this, levels, true), this;
 		},
-		expandType: function (types, linkage, collapse) {
-			return Factory.expandType(this, types, linkage, collapse), this;
+		expandType: function (types, linkage, expand) {
+			return Factory.expandType(this, types, linkage, expand), this;
 		},
-		expandToType: function (types, collapse) {
-			return Factory.expandType(this, types, true, collapse), this;
+		expandToType: function (types, expand) {
+			return Factory.expandType(this, types, true, expand), this;
 		},
 		collapseType: function (types, linkage) {
 			return Factory.collapseType(this, types, linkage), this;
@@ -1463,23 +1455,23 @@
 		collapse: function (treeId, ids, type) {
 			return Factory.func(treeId, ids, type, 'collapse');
 		},
-		expandAll: function (treeId) {
-			return Factory.action(treeId, 'expandAll');
+		expandAll: function (treeId, collapse) {
+			return Factory.action(treeId, 'expandAll', collapse);
 		},
 		collapseAll: function (treeId) {
 			return Factory.action(treeId, 'collapseAll');
 		},
-		expandLevel: function (treeId, levels, linkage, collapse) {
-			return Factory.action(treeId, 'expandLevel', levels, linkage, collapse);
+		expandLevel: function (treeId, levels, linkage, expand) {
+			return Factory.action(treeId, 'expandLevel', levels, linkage, expand);
 		},
 		collapseLevel: function (treeId, levels, linkage) {
-			return Factory.action(treeId, 'expandLevel', levels, linkage, true);
+			return Factory.action(treeId, 'expandLevel', levels, linkage, false);
 		},
-		expandType: function (treeId, types, linkage, collapse) {
-			return Factory.action(treeId, 'expandType', types, linkage, collapse);
+		expandType: function (treeId, types, linkage, expand) {
+			return Factory.action(treeId, 'expandType', types, linkage, expand);
 		},
 		collapseType: function (treeId, types, linkage) {
-			return Factory.action(treeId, 'expandType', types, linkage, true);
+			return Factory.action(treeId, 'expandType', types, linkage, false);
 		}
 	})
 
