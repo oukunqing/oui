@@ -5153,7 +5153,7 @@
         },
         removeEventListener = function (elem, evName, func, useCapture) {
             var isRemove = true;
-            return addEventListener(elem, evName, func, useCapture, isRemove);
+            return addEventListener(elem, evName, func, useCapture, isRemove), this;
         },
         bind = function (obj, func, args) {
             return function () {

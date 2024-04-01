@@ -123,7 +123,7 @@
 	window.onload = function() {		
 		var div = document.getElementById('treebox');
 		
-		$.addListener(div, 'mousedown', function(ev) {
+		$.addListener(div, 'mouseup', function(ev) {
 			$.cancelBubble(ev);
 			var elem = ev.target,
 				tag = elem.tagName.toLowerCase(),

@@ -18,7 +18,7 @@
         .txt {height:26px;line-height:26px;border:solid 1px #ccc;text-align:center;font-size:14px;}
     </style>
     <script type="text/javascript" src="../oui/oui.js?1"></script>
-    <script type="text/javascript" src="../oui/tree/oui.tree.js?123"></script>
+    <script type="text/javascript" src="../oui/tree/oui.tree.min.js?123"></script>
 </head>
 <body>
 <div class="form">
@@ -46,6 +46,10 @@
                     <option value="4">展开到4级</option>
                     <option value="5">展开到5级</option>
                     <option value="6">展开到6级</option>
+                </select>
+                <select id="ddlSkin">
+                    <option value="">default</option>
+                    <option value="device">device</option>
                 </select>
                 <label class="chb-label"><input type="checkbox" id="chbCheck" checked="checked" /><span>显示选框</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbIcon" checked="checked" /><span>显示图标</span></label>
@@ -189,14 +193,15 @@
 
         var html = ['begin: ' + new Date().format('HHmmss.fff') + ', '],
             data = type ? treedata2 : treedata,
-            level = $('#ddlLevel').val().toInt(),
+            skin = $('#ddlSkin').val(),
+            openLevel = $('#ddlLevel').val().toInt(),
             showCheck = $('#chbCheck').checked(),
             showIcon = $('#chbIcon').checked();
 
         data.units[0].desc = new Date().getTime();
 
         $.tree(TreeId, {
-            skin: 'device', 
+            skin: skin, 
             //async: true, 
             debug: true,
             trees: trees,
@@ -207,8 +212,8 @@
             //dynamicType: 'device',
             //openLevel: 1,
             //openType: 'unit',
-            openLevel: level,
-            //dynamic: 3,
+            openLevel: openLevel,
+            dynamic: 3,
             //checkbox: true,
             showCheck: showCheck,
             showIcon: showIcon,
@@ -216,7 +221,7 @@
                 $('#divOper').show();
 
                 html.push('finish: ' + new Date().format('HHmmss.fff') + '<br />');
-                //console.log('complete:', tree.id, tree.cache);
+                console.log('complete:', tree.id, tree.cache);
                 $('#txt').html(html.concat([
                     'nodes:', tree.cache.count, ', level:', tree.cache.level, ', timeout:', tree.cache.timeout, 'ms'
                 ]).join(''));
@@ -235,6 +240,14 @@
                         //.collapse(2, 'unit');
                 }, 20);
                 */
+                window.setTimeout(function() {
+                    tree//.selected([826, 343, 780], 'unit', true)
+                        .checked([826, 343], 'unit')
+                        .expand(2, 'unit')
+                        .position(567, 'unit', true)
+                        //.collapse(2, 'unit');
+                }, 20);
+
                 //window.setTimeout(function() { tree.expandType('unit', true, true); }, 200);
                 //window.setTimeout(function() { tree.collapseType('device', true); }, 20);
 
@@ -247,8 +260,26 @@
 
                 //window.setTimeout(function() { tree.expandLevel(2, true, true); }, 20);
             },
+            callback: function () {
+
+            },
+            onclick: function (ev, node, tree) {
+                $.console.log('onclick', tree.id, ev, node);
+            },
+            ondblclick: function (ev, node, tree) {
+                $.console.log('ondblclick', tree.id, ev, node);
+            },
+            oncontextmenu: function (ev, node, tree) {
+                $.console.log('oncontextmenu', tree.id, ev, node);
+            },
+            onchecked: function (node, tree) {
+                $.console.log('onchecked:', tree.id, node);
+            },
+            onexpand: function (node, tree) {
+                $.console.log('onexpand:', tree.id, node);
+            },
             expandCallback: function (node, tree) {
-                $.console.log('expandCallback:', node, tree.id);
+                $.console.log('expandCallback:', tree.id, node);
             }
         });
         $.console.log('test finish:');
