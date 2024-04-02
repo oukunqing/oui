@@ -2008,3 +2008,7 @@ var levels = [3,2,5,1,0];
  levels.sort();
 
 console.log(levels);
+
+var arr = ['', 16];
+
+console.log(arr.join('_'));

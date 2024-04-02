@@ -76,12 +76,14 @@
 </select>
 	<div id="div1" style="height:400px;width:500px;overflow: auto;border:solid 1px #f00;">
 	</div>
+	<button onclick="document.getElementById('div1').style.display='block';">显示</button>
+	<button onclick="document.getElementById('div1').style.display='none';">隐藏</button>
 	<div id="div2" style="height:400px;width:500px;overflow: auto;border:solid 1px #f00;">
 	</div>
 	</body>
 </html>
-<script type="text/javascript" src="../oui/oui.js?"></script>
-<script type="text/javascript" src="dropdownlist.json"></script>
+<script type="text/javascript" src="../../oui/oui.js?"></script>
+<script type="text/javascript" src="../dropdownlist.json"></script>
 <script type="text/javascript">
 window.onload = function() {
 	updateText();
@@ -120,7 +122,7 @@ function test() {
 	var fragment = document.createDocumentFragment();
 	var ul = document.createElement('UL');
 	
-	for (var i = 0; i < 5000; i++) {
+	for (var i = 0; i < 20000; i++) {
 		var li = document.createElement('LI');
 		li.innerHTML = '下拉选项' + (i + 1);
 		ul.appendChild(li);

@@ -63,20 +63,25 @@
 				if (!p.node) {
 					return false;
 				}
-				if (p.tag.inArray(['label','span','a'])) {
+				if (p.tag.inArray(['a', 'span'])) {
 					if (p.css.inArray(['switch'])) {
 						//p.node.setExpand();
 						//switch事件迁移到mousedown
 						return this;
 					}
-
-					$.console.log(name, tree.id, p.tag, p.css, 'nid:', p.nid, p.node, ev);
-
 					if (p.css.inArray(['check'])) {
 						p.node.setChecked(null, ev);
-					} else if (p.css.inArray(['name', 'text'])) {
-						p.node.setSelected(true, ev);
-						Factory.clickCallback(ev, tree, p.node);
+					} /*else if (p.css.inArray(['name', 'text'])) {
+						if (Factory.isReturnType(tree, p.node.type)) {
+							p.node.setSelected(true, ev);
+							Factory.clickCallback(ev, tree, p.node);
+						}
+					}*/ else if (Factory.isNodeBody(p)) {
+						$.console.log('click22:', ev.target);
+						if (Factory.isReturnType(tree, p.node.type)) {
+							p.node.setSelected(true, ev);
+							Factory.clickCallback(ev, tree, p.node);
+						}
 					}
 				}
 				return this;
@@ -88,7 +93,9 @@
 				var p = Event.target(ev, tree);
 				if (p.node && Factory.isNodeBody(p)) {
 					p.node.setExpand(null, ev);
-					Factory.dblclickCallback(ev, tree, p.node);
+					if (Factory.isReturnType(tree, p.node.type)) {
+						Factory.dblclickCallback(ev, tree, p.node);
+					}
 				}
 			},
 			contextmenu: function (ev, tree) {
@@ -153,16 +160,20 @@
 						begin: 0,
 						//完成时间
 						finish: 0,
-						//节点类型（层级）
-						nodeTypes: [],
 						//是否指定叶子节点类型
 						leaf: false,
 						//指定叶子节点类型
 						leafTypes: [],
+						//指定可返回的节点类型
+						returnTypes: [],
 						//是否动态加载
 						dynamic: false,
-						//指定动态加载类型
+						//动态加载的数据类型
 						dynamicTypes: [],
+						//被动态加载的数据类型
+						dynamicDatas: [],
+						//动态加载的备用数据
+						reserveDatas: {},
 						//节点类型字典
 						trees: {},
 						//节点字典
@@ -277,6 +288,13 @@
 					opt.skin = Config.GetSkin();
 				}
 
+				opt.switch = $.getParam(opt, 'switchType,switchIcon,switch');
+				if (Config.IsDefaultSkin(opt.skin)) {
+					opt.switch = $.isString(opt.switch, true) ? '-' + opt.switch.toLowerCase() : '';
+				} else {
+					opt.switch = '';
+				}
+
 				opt.data = opt.data || opt.items || opt.list;
 				opt.trees = $.getParam(opt, 'trees,tree');
 				if (!$.isArray(opt.trees)) {
@@ -311,6 +329,7 @@
 					opt.dynamic = $.isBoolean(opt.dynamic, false);
 				}
 				opt.dynamicTypes = Factory.parseArrayParam($.getParam(opt, 'dynamicTypes,dynamicType'));
+				opt.dynamicDatas = Factory.parseArrayParam($.getParam(opt, 'dynamicDatas,dynamicData'));
 
 				opt.loadCount = parseInt($.getParam(opt, 'loadCount,loadcount'), 10);
 				if (isNaN(opt.loadCount)) {
@@ -320,6 +339,8 @@
 				opt.leaf = $.isBoolean(opt.leaf, false);
 				opt.leafTypes = Factory.parseArrayParam($.getParam(opt, 'leafTypes,leafType'));
 
+				opt.returnTypes = Factory.parseArrayParam($.getParam(opt, 'returnTypes,returnType'));
+
 				opt.openTypes = Factory.parseArrayParam($.getParam(opt, 'openTypes,openType'));
 
 				opt.openLevel = parseInt(opt.openLevel, 10);
@@ -327,8 +348,8 @@
 					opt.openLevel = -1;
 				}
 
-				opt.callback = $.getParam(opt, 'callback');
 				opt.complete = $.getParam(opt, 'oncomplete,complete,completeCallback');
+				opt.callback = $.getParam(opt, 'callback');
 				opt.clickCallback = $.getParam(opt, 'onclick,clickCallback');
 				opt.expandCallback = $.getParam(opt, 'onexpand,expandCallback');
 				opt.checkedCallback = $.getParam(opt, 'onchecked,checkedCallback');
@@ -440,6 +461,48 @@
 			getTypeCache: function (type) {
 				return tree.cache.trees[type] || null;
 			},
+			isReturnType: function (tree, type) {
+				var types = tree.cache.returnTypes || [];
+				return types.length <= 0 || types.indexOf(type) > -1;
+			},
+			isDynamicData: function (tree, type) {
+				return tree.cache.dynamicDatas.indexOf(type) > -1;
+			},
+			setDynamicData: function (tree, items, par) {
+				var dr = $.extend({}, data), i, c = items.length,
+					p = $.extend({type: '', ptype: '', iconType: ''}, par),
+					datas = tree.cache.reserveDatas,
+					pnid, ptype, type, dr;
+
+				for (i = 0; i < c; i++) {
+					dr = items[i];
+					type = dr.type || p.type;
+					ptype = dr.ptype || p.ptype || type;
+					pnid =  Factory.buildNodeId(ptype, dr.pid);
+
+					if (!datas[pnid]) {
+						datas[pnid] = {
+							par: { type: p.type, ptype: p.ptype },
+							items: []
+						};
+					}
+					datas[pnid].items.push(dr);
+				}
+
+				return this;
+			},
+			getReserveData: function (tree, node) {
+				var pnid = node.id,
+					data = tree.cache.reserveDatas[pnid];
+				return data || null;
+			},
+			addDynamicNode: function (tree, node) {
+				var data = Factory.getReserveData(tree, node);
+				if (!data || data.items.length <= 0) {
+					return false;
+				}
+				return Factory.addNode(tree, data.items, data.par, node), this;
+			},
 			setCurrentCache: function (tree, key, node) {
 				return tree.cache.current[key] = node, this;
 			},
@@ -517,15 +580,15 @@
 			buildRootNode: function (tree, root, elem, fragment) {
 				var node = new Node({
 					tree: tree,
-					root: root,
-					element: elem,
+					root: root || false,
+					element: elem || tree.panel,
 					fragment: fragment || $.createFragment()
 				});
 				return node;
 			},
 			buildNode: function (tree, opt) {
 				var cache = tree.cache,
-					root = Factory.buildRootNode(tree, true, tree.panel);
+					root = Factory.buildRootNode(tree, true);
 
 				cache.begin = new Date().getTime();
 				cache.count = 0;
@@ -544,14 +607,17 @@
 							list = opt.data[t.key];
 							p = {type: t.type, ptype: t.ptype, iconType: t.icon || t.type};
 							if ($.isArray(list)) {
-								Factory.buildItem(tree, root, list, p);
+								if (Factory.isDynamicData(tree, p.type)) {
+									Factory.setDynamicData(tree, list, p);
+								} else {
+									Factory.buildItem(tree, root, list, p);
+								}
 							}
 						}
 					} else {
 						//遍历参数字段，并获取第1个数组字段
 						for (var k in opt.data) {
 							if ($.isArray(opt.data[k])) {
-								cache.nodeTypes.push(k);
 								Factory.buildItem(tree, root, opt.data[k]);
 								break;
 							}
@@ -568,14 +634,46 @@
 
 				return this;
 			},
-			addNode: function (tree, items, par) {
+			addNode: function (tree, items, par, pnode) {
 				var p = $.extend({}, par),
-					root = Factory.buildRootNode(tree, false, tree.panel),
-					nodes = [];
+					root = Factory.buildRootNode(tree),
+					nodes = [],
+					fragment;
 
-				Factory.buildItem(tree, root, items, p, nodes)
-					.initStatus(tree, false, nodes);
+				if (pnode && pnode.tree === tree) {
+					fragment = $.createFragment();
+					Factory.buildItem(tree, root, items, p, nodes, fragment)
+						.initStatus(tree, false, nodes);
+					pnode.childbox.appendChild(fragment);
+				} else {
+					var data = _filter(tree, items, p), dr;
+					for (var k in data) {
+						dr = data[k];
+						nodes = [];
+						fragment = dr.items.length > 3 ? $.createFragment() : null;
+						
+						Factory.buildItem(tree, root, dr.items, p, nodes, fragment)
+							.initStatus(tree, false, nodes);
 
+						if (fragment) {
+							dr.pnode.childbox.appendChild(fragment);
+						}						
+					}
+				}
+				function _filter (tree, items, p) {
+					var dic = {}, d, i, c = items.length, pnid, node;
+					for (i = 0; i < c; i++) {
+						d = items[i];
+						pnid = Factory.buildNodeId((d.ptype || p.ptype), d.pid);
+						if (node = tree.cache.nodes[pnid]) {
+							dic[pnid] = dic[pnid] || { pnid: pnid, pnode: node, items:[] };
+							dic[pnid].items.push(d);
+						} else {
+							//TODO:
+						}
+					}
+					return dic;
+				}
 				return this;
 			},
 			buildUl: function (tree, p, isRoot, displayNone) {
@@ -645,7 +743,7 @@
 			isNodeSwitch: function (par) {
 				return par.tag.inArray(['span']) && par.css.inArray(['switch']);
 			},
-			buildItem: function (tree, root, list, arg, nodes) {
+			buildItem: function (tree, root, list, arg, nodes, fragment) {
 				var tid = tree.id,
 					opt = tree.options,
 					par = $.extend({type: '', ptype: '', iconType: ''}, arg);
@@ -660,8 +758,8 @@
 						continue;
 					}
 					type = d.type || par.type;
-					ptype = d.ptype || par.ptype;
-					iconType = d.iconType || par.iconType;
+					ptype = d.ptype || par.ptype || type;
+					iconType = d.iconType || par.iconType || type;
 					nid = Factory.buildNodeId(type, d.id);
 					pnid = Factory.buildNodeId(ptype, d.pid);
 					p = {
@@ -700,7 +798,7 @@
 					node.setParent(p.pnode.setBox(Factory.buildUl(tree, p, p.root)))
 						.setParam('element', Factory.buildLi(tree, p, node));
 
-					p.pnode.addChild(node);
+					p.pnode.addChild(node, false, fragment);
 
 					Factory.setNodeCache(tree, node);
 					Factory.setTypeCache(tree, p.type, p.ptype);
@@ -729,6 +827,8 @@
 				}
 
 				function _init (node, initial, dic) {
+					var expanded = false;
+
 					if (!node.hasChild()) {
 						//node.setParam('expanded', false);
 
@@ -745,11 +845,12 @@
 						//(动态加载 或者 已展开)，需要设置节点展开状态
 						//目的是为了收缩或隐藏节点“展开/收缩”图标
 						if (node.dynamic || node.isExpanded()) {
-							node.setExpandClass(true);
+							node.setExpandClass(expanded = true);
 						}
 					}
-					node.setExpandClass(true);
-
+					if (!expanded) {
+						node.setExpandClass(true);
+					}
 					if (!initial) {
 						if (node.parent && !dic[node.parent.id]) {
 							node.parent.setExpandClass(false);
@@ -834,7 +935,6 @@
 					var n = node, pn;
 					//找父节点类型
 					while(n && (pn = n.parent) && !pn.root) {
-						$.console.log('expandNode:', n, pn);
 						pn.setExpand(true);
 						n = pn;
 					}
@@ -881,7 +981,7 @@
 				for (j = 0; j < c; j++) {
 					//节点按照层级顺序添加到缓存中，展开和收缩的顺序是相反的
 					//不同层级的节点，展开：从最低层开始; 收缩：从最顶层开始
-					if (node = nodes[sameLevel || !expand ? j : c - j - 1]) {
+					if ((node = nodes[sameLevel || !expand ? j : c - j - 1]) && !node.isLeaf()) {
 						node.setExpand(expand);
 					}
 				}
@@ -930,10 +1030,17 @@
 				expand = $.isBoolean(expand, true);
 				var	i, j, c = tree.cache.levels.length;
 
+				var dt = new Date().getTime();
 				//收缩:从最顶层开始; 展开:从最低层开始
 				for (i = 0; i < c; i++) {
-					Factory.expandEach(tree.cache.levels[expand ? c - i - 1 : i], expand);
+					j = expand ? c - i - 1 : i;
+					Factory.expandEach(tree.cache.levels[j], expand);
 				}
+				$.console.log('expandAll2', new Date().getTime() - dt);
+				window.setTimeout(()=>{
+			    	$.console.log('expandAll3', new Date().getTime() - dt);
+			    },0);
+
 				return this;
 			},
 			collapseAll: function (tree) {
@@ -951,9 +1058,9 @@
 				}
 				return this;
 			},
-			expandCallback: function (tree, node) {
+			expandCallback: function (tree, node, func) {
 				if ($.isFunction(tree.options.expandCallback)) {
-					tree.options.expandCallback(node, tree);
+					tree.options.expandCallback(node, tree, func);
 				}
 				return this;
 			},
@@ -1049,7 +1156,6 @@
 				}, par.icon);
 
 				this.initParam('dynamic', par)		//是否动态加载
-					.initParam('loaded', par)		//动态加载次数，0:表示未加载
 					.initParam('expanded', par)		//是否展开
 					.initParam('checked', par)		//是否选中复选框
 					.initParam('selected', par)		//是否选中节点
@@ -1057,6 +1163,11 @@
 					.initParam('parent', par)		//父节点
 					.initParam('childs', par)		//子节点数组
 					.initParam('childbox', par);	//子节点容器DOM元素
+
+				if (this.dynamic) {					
+					//动态加载子节点的次数，0:表示未加载
+					this.loaded = 0;
+				}
 			}
 			return this;
 		},
@@ -1142,7 +1253,7 @@
 		},
 		setSelected: function (selected, ev) {
 			selected = $.isBoolean(selected, !this.selected);
-			if (selected && this.disabled) {
+			if (selected && (this.disabled || !Factory.isReturnType(this.tree, this.type))) {
 				return this;
 			}
 			if (selected) {
@@ -1172,12 +1283,15 @@
 			this[this.root ? 'fragment' : 'element'].appendChild(childbox);
 			return this.setParam('childbox', childbox);
 		},
-		addChild: function (node, clear) {
+		addChild: function (node, clear, fragment) {
 			if (!this.childs || clear) {
 				this.childs = [];
 			}
 			this.childs.push(node);
-			if (this.childbox) {
+
+			if (fragment) {
+				fragment.appendChild(node.element);
+			} else if (this.childbox) {
 				this.childbox.appendChild(node.element);
 			}
 			return this;
@@ -1188,6 +1302,7 @@
 			return selected ? this.setSelected(true) : this;
 		},
 		setExpand: function (expanded, ev) {
+			var node = this, tree = this.tree;
 			if (!this.isDynamic() && !this.hasChild()) {
 				return this;
 			}
@@ -1197,13 +1312,20 @@
 			if (this.childbox) {
 				expanded = $.isBoolean(expanded, !this.expanded);
 				this.childbox.style.display = expanded ? 'block' : 'none';
-				//动态加载，默认只加载1次
-				if (expanded && !this.hasChild()) {
-					if (!this.loaded) {
-						this.loaded = 0;
-					}
-					if (this.loaded < this.tree.options.loadCount && ev && ev.target) {
-						Factory.expandCallback(this.tree, this);
+
+				//动态加载，默认可加载多次，若已加载子节点，则不再动态加载
+				if (expanded && !this.hasChild() && ev && ev.target) {
+					if (this.loaded < tree.options.loadCount) {
+						//先添加缓存数据中的动态节点数据
+						if (!Factory.addDynamicNode(tree, this)) {
+							//缓存数据中没有节点数据，则回调展开事件，用于获取动态数据
+							//并将获取到的数据通过回调函数返回并添加到节点中
+							//动态加载的数据需要指定数据类型
+							Factory.expandCallback(tree, this, function (items, par) {
+								par = $.isString(par) ? {type: par} : par;
+								Factory.addNode(tree, items, $.extend({ptype: node.type}, par), node);
+							});
+						}
 					}
 					this.loaded++;
 				}
@@ -1217,9 +1339,14 @@
 			return this.setExpand(false);
 		},
 		getSwitchClass: function () {
-			var css = ['switch'];
+			var opt = this.tree.options,
+				css = ['switch'];
+
+			if (opt.switch) {
+				css.push('switch' + opt.switch);
+			}
 			if (!this.isLeaf() && this.isExpand()) {
-				css.push('switch-open');
+				css.push('switch' + opt.switch + '-open');
 			}
 			return css.join(' ');
 		},
@@ -1276,7 +1403,8 @@
 			return this;
 		},
 		setExpandClass: function (initial) {
-			var handle = this.getItem('switch');
+			var handle = this.getItem('switch'),
+				opt = this.tree.options;
 			//if (that.isLeaf()) {
 			//虽然被指定为叶子节点类型，但当前已经有子节点加入，那就不能再算是叶子节点了
 			if (this.isLeaf() && !this.hasChild()) {
@@ -1292,8 +1420,11 @@
 					}
 				} else {
 					$.setElemClass(handle, 'switch-none', false);
+					if (opt.switch) {
+						$.setElemClass(handle, 'switch' + opt.switch, true);
+					}
 				}
-				$.setElemClass(handle, 'switch-open', this.isExpanded());
+				$.setElemClass(handle, 'switch' + opt.switch + '-open', this.isExpanded());
 			}
 			return this.setIconClass();
 		},
@@ -1377,6 +1508,10 @@
 				debug: false,
 				//data如果不是数组，是对象结构，则需要指定trees
 				data: [],
+				//关联元素
+				target: undefined,
+				//switch图标类型（默认样式时有效）
+				switch: undefined,
 				//data数据结构注解，示例：[{key:'unit',val:'units'}]
 				//用于获取data{}数据中的数组字段以及指定节点类型
 				//若未指定结构注解，则取data[]或data{}中第一个字段数组
@@ -1386,9 +1521,13 @@
 				leafTypes: undefined,
 				//动态加载子节点(非叶子节点)
 				dynamic: undefined,
-				//指定动态加载的节点类型，字符串数组或字符串，示例：['device'] 或 'device'
+				//指定为动态加载子节点的数据类型，字符串数组或字符串，示例：['device'] 或 'device'
 				//若未指定，则非叶子都可以动态加载
 				dynamicTypes: undefined,
+				//指定为需动态加载的数据类型，字符串数组或字符串，示例：['camera'] 或 'camera'
+				dynamicDatas: undefined,
+            	//指定可选中/返回的数据类型，若未指定，则所有都可返回
+				returnTypes: undefined,
 				//动态加载次数，默认为1次
 				loadCount: undefined,
 				//指定默认要展开的节点类型
@@ -1433,8 +1572,10 @@
 			Factory.initCache(this, {
 				dynamic: opt.dynamic,
 				dynamicTypes: opt.dynamicTypes,
+				dynamicDatas: opt.dynamicDatas,
 				leaf: opt.leaf,
-				leafTypes: opt.leafTypes
+				leafTypes: opt.leafTypes,
+				returnTypes: opt.returnTypes
 			}, true).buildPanel(this, opt);
 
 			return this;
@@ -1449,11 +1590,8 @@
 		insert: function (items, par) {
 
 		},
-		add: function (items, par) {
-			$.console.log('add1:', this.id, par);
-			Factory.addNode(this, items, par);
-			$.console.log('add2:', this.id, par);
-			return this;
+		add: function (items, par, pnode) {
+			return Factory.addNode(this, items, par, pnode), this;
 		},
 		//更新节点图标、文字
 		update: function (items, par) {

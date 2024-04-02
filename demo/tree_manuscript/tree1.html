@@ -12,7 +12,7 @@
 			    user-select: none;
 			    -ms-user-select: none;
 			}
-			.oui-tree ul,.oui-tree li,.oui-tree .item,.oui-tree a,.oui-tree span {
+			.oui-tree ul,.oui-tree li,.oui-tree label,.oui-tree a,.oui-tree span {
 				margin:0;padding:0;display:block;font-size:14px;font-weight:normal; visibility: ;
 				background:transparent;border:none 0;box-sizing:border-box;width:auto;white-space:nowrap;				
 			}
@@ -22,36 +22,48 @@
 			.oui-tree li {padding:0 0 0 24px;}
 			.oui-tree ul.level0 {margin:5px;}
 			.oui-tree ul.level0 > li {padding:0;}
-			
-			.oui-tree li .item {
-				float:left;display:inline-block;height:24px;overflow:visible;margin-bottom:1px;
+
+			.oui-tree li label {
+				float:left;display:inline-block;height:24px;overflow:hidden;border-radius:4px;
+				padding:0 6px 0 0;border:solid 1px transparent;margin-bottom:1px;
 			}
-			.oui-tree li .item:hover{}
-			.oui-tree li.cur .item{}
-			.oui-tree li.cur .item:hover{}
-			
+			.oui-tree li label:hover{background: #e5f3ff;}
+			.oui-tree li.cur label{background: #cce8ff;}
+			.oui-tree li.cur label:hover{background: #cce8ff;background: #e5f3ff;border:solid 1px #99d1ff;}
+
 			.oui-tree li a.name,.oui-tree li span {
 				display:inline-block;height:24px;line-height:22px;
-				outline:none;overflow:visible;
+				outline:none;overflow:hidden;
 				text-align: center;
 			}
 
-			.oui-tree li .switch {background:transparent;width:24px;cursor:default;float:left;}
-			.oui-tree li .check {background:transparent;width:24px;border:solid 1px #008000;float:left;}
-			.oui-tree li .check {width:14px;height:14px;margin:4px 4px 0 3px;float:left;display:block;overflow:hidden;}
-			.oui-tree li .icon{width:24px;float:left;background:transparent url("imgs/tree/folder.gif") no-repeat center;}
-			.oui-tree li .text{text-align:left;}
+			.oui-tree li span.switch {background:#00f;background:transparent;width:24px;cursor:default;}
+			.oui-tree li span.check {background:#008000;width:24px;}
+			.oui-tree li a span.icon{background:#f00;width:24px;}
+			.oui-tree li a span.text{text-align:left;}
 
-			.oui-tree li a{cursor:pointer;display:block;overflow:visible;}
+			.oui-tree li a{cursor:pointer;}
 			.oui-tree li a:hover{}
-			.oui-tree li a span {display:block;}
 
-
-			.oui-tree li a{border:solid 1px transparent;cursor:pointer;margin:0 1px;padding:0 6px 0 1px;border-radius:4px;}
+			/*
+			.oui-tree li a{cursor:pointer;padding:0 5px 0 0;}
 			.oui-tree li a:hover{background: #e5f3ff;}
+			.oui-tree li.cur a{background: #cce8ff;}
+			.oui-tree li.cur a:hover{background: #cce8ff;border:solid 1px #99d1ff;}
+
+			.oui-tree li span.switch {background:#00f;width:24px;cursor:default;}
+			.oui-tree li span.check {background:#008000;width:24px;}
+			.oui-tree li a span.icon{background:#f00;width:24px;}
+			.oui-tree li a span.text{text-align:left;}
+			*/
+			/*
+			.oui-tree li a{background: #cce8ff;border-color: #cce8ff;}
+			.oui-tree li a:hover{background: #cce8ff;border-color: #99d1ff;}
 			.oui-tree li.cur a{background: #cce8ff;border-color: #cce8ff;}
 			.oui-tree li.cur a:hover{background: #cce8ff;border-color: #99d1ff;}
-			
+			*/
+
+
 		</style>
 	</head>
 	<body>
@@ -61,8 +73,8 @@
 		<div id="div2"></div>
 	</body>
 </html>
-<script type="text/javascript" src="../oui/oui.js?"></script>
-<script type="text/javascript" src="dropdownlist.json"></script>
+<script type="text/javascript" src="../../oui/oui.js?"></script>
+<script type="text/javascript" src="../dropdownlist.json"></script>
 <script type="text/javascript">
 
 	var items = { }, boxes = { };
@@ -92,8 +104,8 @@
 
 	window.onload = function() {		
 		var div = document.getElementById('treebox');
-		
-		$.addListener(div, 'mouseup', function(ev) {
+
+		$.addListener(div, 'click', function(ev) {
 			$.cancelBubble(ev);
 			var elem = ev.target,
 				tag = elem.tagName.toLowerCase(),
@@ -113,11 +125,6 @@
 				getElem($.getAttribute(elem, 'tid'), sw);
 
 				return false;
-			} else if (tag.inArray(['input'])) {
-				$.cancelBubble(ev);
-			$.console.log('click22:', elem, tag, css, ev.keyCode);
-				//elem.checked = !elem.checked;
-				return false;
 			}
 		});
 		$.addListener(div, 'dblclick', function(ev) {
@@ -130,17 +137,11 @@
 
 			if (tag.inArray(['label','span','a']) && css.indexOf('switch') < 0) {
 				getElem($.getAttribute(elem, 'tid'));
-			} else if (tag.inArray(['input'])) {
-				$.cancelBubble(ev);
-			$.console.log('click22:', elem, tag, css, ev.keyCode);
-				//elem.checked = !elem.checked;
-				return false;
 			}
 		});
 		$.addListener(div, 'keydown', function(ev) {
 			$.console.log('keydown:', ev.target, ev.keyCode);
 		});
-	
 	};
 
 	function test(id){
@@ -235,19 +236,18 @@
 				li = document.createElement('LI');
 	
 				li.id = tid + '-li';
-				li.className = 'level' + level;
 				
 				li.innerHTML = [
-					'<div class="item" id="', _id(tid, '-label'), '" tid="', tid, '">',
+					'<label id="', _id(tid, '-label'), '" tid="', tid, '">',
 					'<span class="switch" id="', _id(tid, '-switch'), '" tid="', tid, '"></span>',
-					'<input type="checkbox" class="check" id="', _id(tid, '-check'), '" tid="', tid, '" />',
+					'<span class="check" id="', _id(tid, '-check'), '" tid="', tid, '">C</span>',
 					'<a class="name" id="', _id(tid, '-name'), '" tid="', tid, '">',
-					'<span class="icon" id="', _id(tid, '-icon'), '" tid="', tid, '"></span>',
+					'<span class="icon" id="', _id(tid, '-icon'), '" tid="', tid, '">I</span>',
 					'<span class="text" id="', _id(tid, '-text'), '" tid="', tid, '">',
-					type, ' ', dr.name, ' - ', dr.id, (i === 0 ? ' - ' + ts : ''),
+					'[', type, ']', dr.name, ' - ', dr.id, (i === 0 ? ' - ' + ts : ''),
 					'</span>',
 					'</a>',
-					'</div>'
+					'</label>'
 				].join('');
 
 				pb.appendChild(li);
@@ -271,7 +271,7 @@
 
 		$('#div2').html('加载' + cc + '个节点，耗时' + (ts2 - ts) + '毫秒');
 
-		var labels = box.querySelectorAll('div'),
+		var labels = box.querySelectorAll('label'),
 			tmpbox = document.createDocumentFragment();
 
 		$.console.log('labels:', labels.length);

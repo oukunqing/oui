@@ -11,14 +11,15 @@
         button{ height:30px;line-height:24px; padding:0 10px;font-family: 宋体;font-size:14px;
             display:inline-block;float:left;margin:0 8px 8px 0;}
         select {height:30px;border:solid 1px #ccc;border-radius: 4px;float:left;margin:0 8px 8px 0;}
+        .txt {height:26px;line-height:26px;border:solid 1px #ccc;text-align:center;font-size:14px;border-radius:4px;}
+        .item {}
+        .item span,.item button,.item input {float:left;margin:0 10px 5px 0;}
+        .item span{line-height:28px;}
         .chb-label {border:solid 1px #ccc;border-radius:4px;box-sizing:border-box;padding:5px 10px 0 2px;height:30px;
             display:inline-block;overflow:hidden;float:left;margin:0 8px 8px 0;}
-        .chb-label input{float:left;}
-        .chb-label span{line-height:18px;}
-        .txt {height:26px;line-height:26px;border:solid 1px #ccc;text-align:center;font-size:14px;}
+        .chb-label input{float:left;margin:3px 5px 0 2px;}
+        .chb-label span{line-height:18px;margin:0;}
     </style>
-    <script type="text/javascript" src="../oui/oui.js?1"></script>
-    <script type="text/javascript" src="../oui/tree/oui.tree.min.js?123"></script>
 </head>
 <body>
 <div class="form">
@@ -36,7 +37,7 @@
                 <label class="chb-label"><input type="checkbox" value="department" name="chbData" /><span>部门</span></label>
                 <label class="chb-label"><input type="checkbox" value="person" name="chbData" /><span>人员</span></label>
             </div>
-            <div>
+            <div class="item">
                 <select id="ddlLevel">
                     <option value="-1">全部展开</option>
                     <option value="0">全部收缩</option>
@@ -47,9 +48,16 @@
                     <option value="5">展开到5级</option>
                     <option value="6">展开到6级</option>
                 </select>
-                <select id="ddlSkin">
-                    <option value="">default</option>
-                    <option value="device">device</option>
+                <span>Skin</span>
+                <select id="ddlSkin" style="font-size:14px;">
+                    <option value="">Default</option>
+                    <option value="device">Device</option>
+                </select>
+                <span>Switch</span>
+                <select id="ddlSwitch" style="font-size:14px;">
+                    <option value="">Default</option>
+                    <option value="device">Device</option>
+                    <option value="arrow">Arrow</option>
                 </select>
                 <label class="chb-label"><input type="checkbox" id="chbCheck" checked="checked" /><span>显示选框</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbIcon" checked="checked" /><span>显示图标</span></label>
@@ -73,6 +81,9 @@
                     <option value="2">2级</option>
                     <option value="3">3级</option>
                     <option value="4">4级</option>
+                    <option value="5">5级</option>
+                    <option value="6">6级</option>
+                    <option value="7">7级</option>
                 </select>
                 <button onclick="expandLevel();">按层级展开</button>
                 <button onclick="expandLevel(false);">按层级收缩</button>
@@ -91,15 +102,14 @@
                 <button onclick="expandType(false);">按类型收缩</button>
             </div>
             <div>
-                <div style="padding:0 0 10px 0;">
-                    父级ID:
-                    <input type="text" id="txtPid" class="txt" style="width:100px;" />
-                    数量：
+                <div style="padding:0 0 10px 0;" class="item">
+                    <span>通道ID:</span>
+                    <input type="text" id="txtPid" class="txt" style="width:60px;" />
+                    <span>数量:</span>
                     <input type="text" id="txtLen" class="txt" style="width:50px;" maxlength="6" />
-                    ID:
-                    <input type="text" id="txtId" class="txt" style="width:50px;" maxlength="6" />
+                    <button onclick="addNode2();">新增预置点</button>
                 </div>
-                <button onclick="addNode2();">新增预置点</button>
+                
                 <button onclick="addNode1();">新增子节点</button>
             </div>
         </div>
@@ -107,6 +117,8 @@
 </div>
 </body>
 </html>
+<script type="text/javascript" src="../oui/oui.js?1"></script>
+<script type="text/javascript" src="../oui/tree/oui.tree.min.js?123"></script>
 <script type="text/javascript" src="dropdownlist.json"></script>
 <script type="text/javascript">
 
@@ -156,8 +168,7 @@
         $.tree(TreeId).add(items, par);
     }
     function addNode2() {
-        var id = $('#txtId').val().toInt(),
-            pid = $('#txtPid').val().toInt(),
+        var pid = $('#txtPid').val().toInt(),
             len = $('#txtLen').val().toInt(),
             par = {type: 'preset', ptype: 'camera'},
             items = [];
@@ -167,7 +178,7 @@
         }
 
         for (var i = 0; i < len; i++) {
-            items.push({id: id + i + 1, name: '预置点' + (i + 1), pid: pid});
+            items.push({id: pid + '_' + (i + 1), name: '预置点' + (i + 1), pid: pid});
         }
         $.tree(TreeId).add(items, par);
     }
@@ -196,7 +207,8 @@
             skin = $('#ddlSkin').val(),
             openLevel = $('#ddlLevel').val().toInt(),
             showCheck = $('#chbCheck').checked(),
-            showIcon = $('#chbIcon').checked();
+            showIcon = $('#chbIcon').checked(),
+            switchIcon = $('#ddlSwitch').val();
 
         data.units[0].desc = new Date().getTime();
 
@@ -206,14 +218,20 @@
             debug: true,
             trees: trees,
             data: data,
+            switch: switchIcon,
             //leaf: true,
-            //leafType: 'device',
+            //leafType: 'camera',
+            dynamic: 3,
             //dynamic: true,
-            //dynamicType: 'device',
+            //指定要动态加载子节点的数据类型
+            dynamicType: 'device',
+            //指定为被动态加载的数据类型
+            dynamicData: 'camera',
+            //指定可选中/返回的数据类型，若未指定，则所有都可返回
+            returnType: ['device', 'camera'],
             //openLevel: 1,
             //openType: 'unit',
             openLevel: openLevel,
-            dynamic: 3,
             //checkbox: true,
             showCheck: showCheck,
             showIcon: showIcon,
@@ -244,7 +262,7 @@
                     tree//.selected([826, 343, 780], 'unit', true)
                         .checked([826, 343], 'unit')
                         .expand(2, 'unit')
-                        .position(567, 'unit', true)
+                        //.position(567, 'unit', true)
                         //.collapse(2, 'unit');
                 }, 20);
 
@@ -275,8 +293,24 @@
             onchecked: function (node, tree) {
                 $.console.log('onchecked:', tree.id, node);
             },
-            onexpand: function (node, tree) {
+            onexpand: function (node, tree, func) {
                 $.console.log('onexpand:', tree.id, node);
+
+                if (node.type === 'device' && !node.hasChild()) {
+                //if (node.type === 'device') {
+                    var cameras = [];
+                    var pid = node.data.id;
+                    for (var i = 0; i < 4; i++) {
+                        cameras.push({id: pid + '_' + (i + 1), name:'监控点' + (i + 1), pid: pid });
+                    }
+
+                    //tree.add(cameras, {type:'camera', ptype:'device'});
+
+                    if ($.isFunction(func)) {
+                        //func(cameras, {type: 'camera'});
+                        func(cameras, 'camera');
+                    }
+                }
             },
             expandCallback: function (node, tree) {
                 $.console.log('expandCallback:', tree.id, node);
