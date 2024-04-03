@@ -7,7 +7,7 @@
     -ms-user-select: none;
 }
 .oui-tree ul,.oui-tree li,.oui-tree .item,.oui-tree label,.oui-tree a,.oui-tree span {
-	margin:0;padding:0;display:block;font-size:14px;font-weight:normal; visibility: ;
+	margin:0;padding:0;display:block;font-size:14px;font-weight:normal;
 	background:transparent;border:none 0;box-sizing:border-box;width:auto;white-space:nowrap;				
 }
 .oui-tree ul,.oui-tree li {
@@ -37,8 +37,8 @@
 	text-align: center; font-size:14px;
 }
 
-.oui-tree li .switch {visibility:hidden;visibility:visible;}
-.oui-tree:hover li .switch {visibility:visible;}
+.oui-tree li .switch {}
+.oui-tree:hover li .switch {}
 
 .oui-tree li .switch {width:25px;cursor:pointer;float:left;}
 .oui-tree li .switch:hover {background-color:#e5f3ff;background-color:transparent;border-radius:4px;}
@@ -85,3 +85,20 @@
 .oui-tree li.cur > .item a:hover{background: #cce8ff;border-color: #99d1ff;}
 
 .oui-tree ul.hide,.oui-tree li.hide,.oui-tree span.hide{display:none;}
+
+.oui-tree-box {
+	display:block;position:absolute;overflow:hidden;box-sizing:border-box;border-radius:5px;
+	border:solid 1px #ccc;margin:0;padding:0;
+	height:200px;
+}
+.oui-tree-elem {
+
+}
+.oui-tree-elem-bottom {
+	border-bottom-left-radius:0;
+	border-bottom-right-radius:0;
+}
+.oui-tree-elem-top {
+	border-top-left-radius:0;
+	border-top-right-radius:0;
+}

@@ -23,9 +23,9 @@
 </head>
 <body>
 <div class="form">
-    <div style="float:left;padding:10px;clear:none;">
-        <div id="otr" style="display:block;border:solid 1px #00f;border-radius:4px;overflow:auto;width:400px;height:800px;margin:0;"></div>
-        <div id="txt" style="margin:0;padding: 10px 0;"></div>
+    <div style="width:50%;float:left;padding:400px 0 1000px 10px;clear:none;">
+        <select id="ddlUnit" style="width:90%;height:34px;" onchange="$.console.log('changed:', this.value);"></select>
+        <input id="txtDevice" style="width:90%;height:28px;" onchange="$.console.log('changed:', this.value);" />
     </div>
     <div style="float:left;padding:0;margin:10px 0 0;clear:none;">
         <div class="box">  
@@ -42,7 +42,7 @@
                     <option value="-1">全部展开</option>
                     <option value="0">全部收缩</option>
                     <option value="1">展开到1级</option>
-                    <option value="2">展开到2级</option>
+                    <option value="2" selected="selected">展开到2级</option>
                     <option value="3">展开到3级</option>
                     <option value="4">展开到4级</option>
                     <option value="5">展开到5级</option>
@@ -218,29 +218,33 @@
         data.units[0].desc = new Date().getTime();
 
         $.tree(TreeId, {
+            element: TreeId,
+            //target: 'ddlUnit',
+            target: 'txtDevice',
+            targetConfig: {},
             skin: skin, 
-            async: true, 
+            //async: true, 
             debug: true,
             trees: trees,
             data: data,
+            valueFields: [],
             switch: switchIcon,
             //leaf: true,
             //leafType: 'camera',
             dynamic: 3,
             //dynamic: true,
             //指定要动态加载子节点的数据类型
-            dynamicTypes: ['device'],
+            dynamicType: 'device',
             //指定为被动态加载的数据类型
-            dynamicDatas: 'camera',
+            dynamicData: 'camera',
             //指定可选中/返回的数据类型，若未指定，则所有都可返回
-            returnTypes: ['device', 'camera'],
-            //返回的数据值字段
-            valueFields: ['type', 'id', 'code'],
+            returnType: ['device', 'camera'],
             //openLevel: 1,
             //openType: 'unit',
             openLevel: openLevel,
             //checkbox: true,
             showCheck: showCheck,
+            linkage: false,
             showIcon: showIcon,
             clickExpand: clickExpand,
             //clickChecked: clickChecked,
@@ -252,55 +256,12 @@
                 $('#txt').html(html.concat([
                     'nodes:', tree.cache.count, ', level:', tree.cache.level, ', timeout:', tree.cache.timeout, 'ms'
                 ]).join(''));
-
-                window.setTimeout(function() {
-                    tree.updateIcon('7280,7155', 'device', {status:'off'});
-                    tree.icon(7151, 'device', {status:'off'});
-                    $.tree(TreeId).updateIcon('7759', 'camera', {status:'play'});
-                    $.tree.updateIcon(TreeId, '7760', 'camera', {status:'play'});
-                    tree.text(7153, 'device', '204488设备');
-                }, 10);
-                /*
-                window.setTimeout(function() {
-                    tree.selected([826, 343, 780], 'unit', true)
-                        .checked([826, 343], 'unit')
-                        //.position(343, 'unit')
-                        //.collapse(2, 'unit');
-                }, 20);
-                */
-                window.setTimeout(function() {
-                    tree//.selected([826, 343, 780], 'unit', true)
-                        .checked([826, 343], 'unit')
-                        .expand(2, 'unit')
-                        //.position(567, 'unit', true)
-                        //.collapse(2, 'unit');
-                }, 20);
-
-                //window.setTimeout(function() { tree.expandType('unit', true, true); }, 200);
-                //window.setTimeout(function() { tree.collapseType('device', true); }, 20);
-
-                //window.setTimeout(function() { $.tree.expandAll(TreeId); }, 20);
-                //window.setTimeout(function() { tree.expandAll(); }, 20);
-                //window.setTimeout(function() { tree.collapseAll(); }, 20);
-
-                //window.setTimeout(function() { $.tree.expand(TreeId, 290, 'unit'); }, 20);
-                //window.setTimeout(function() { tree.expand(190, 'unit'); }, 20);
-
-                //window.setTimeout(function() { tree.expandLevel(2, true, true); }, 20);
             },
             callback: function () {
 
             },
             onclick: function (ev, node, tree) {
                 $.console.log('onclick', tree.id, ev, node);
-                $.console.log('getChecked0:', tree.getChecked());
-                $.console.log('getChecked1:', tree.getChecked('data'));
-                $.console.log('getChecked2:', tree.getChecked('value'));
-                $.console.log('getChecked3:', tree.getChecked('value', 'device'));
-                $.console.log('getValue0:', tree.getValue());
-                $.console.log('getValue1:', tree.getValue('value'));
-                $.console.log('getValue2:', tree.getValue('data'));
-                $.console.log('getValue3:', tree.getValue('node'));
             },
             ondblclick: function (ev, node, tree) {
                 $.console.log('ondblclick', tree.id, ev, node);
@@ -311,8 +272,7 @@
             onchecked: function (node, tree) {
                 $.console.log('onchecked:', tree.id, node);
             },
-            //onexpand: function (node, tree, resolve) {
-            onexpand: function (node, tree, resolve, reject) {
+            onexpand: function (node, tree, func) {
                 $.console.log('onexpand:', tree.id, node);
 
                 if (node.type === 'device' && !node.hasChild()) {
@@ -325,9 +285,9 @@
 
                     //tree.add(cameras, {type:'camera', ptype:'device'});
 
-                    if ($.isFunction(resolve)) {
-                        //resolve(cameras, {type: 'camera'});
-                        resolve(cameras, 'camera');
+                    if ($.isFunction(func)) {
+                        //func(cameras, {type: 'camera'});
+                        func(cameras, 'camera');
                     }
                 }
             },

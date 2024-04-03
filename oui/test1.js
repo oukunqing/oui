@@ -1855,18 +1855,7 @@ var names =  [
             console.log('//', names[i], names[i].toUnicode());
         }
 
-new Promise(function (resolve, reject) {
-    var a = 0;
-    var b = 1;
-    if (b == 0) reject("Divide zero");
-    else resolve(a / b);
-}).then(function (value) {
-    console.log("a / b = " + value);
-}).catch(function (err) {
-    console.log(err);
-}).finally(function () {
-    console.log("End");
-});
+
 
 
 console.log(null ?? 'printA')
@@ -1997,18 +1986,23 @@ for(var k in td) {
     console.log(k, td[k]);
 }
 
-const animals = ['ant', 'bison', 'camel', 'duck', 'elephant'];
+var obj = {id: 12345};
+console.log('${obj.id}');
 
-console.log(animals.slice(0, 5));
+var arr2 = {}, kv;
+function test22(arr) {
+    console.log(arr, typeof arr);
+    arr['key'] = 'key1';
+}test22(arr2)
+console.log('arr2:', arr2);
 
-$.console.log(animals.splice(2, 1), animals);
+function Node() {
+    this.id = 1;
+    this.name = "Node1";
+}
 
-var levels = [3,2,5,1,0];
+var node = new Node();
+var node1 = {id:2, name:'node1'};
 
- levels.sort();
-
-console.log(levels);
-
-var arr = ['', 16];
-
-console.log(arr.join('_'));
+$.console.log(node, node instanceof(Node));
+$.console.log(node1, node1 instanceof(Node));

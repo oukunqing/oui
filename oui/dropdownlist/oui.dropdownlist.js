@@ -77,8 +77,8 @@
 			// 选项框(网格)最小宽度
 			BoxGridMinWidth: 456,
 			// 选项框最小宽度设置
-			BoxMinWidth: [40, 245, 345],
-			BoxMinHeight: [64, 90, 140],
+			BoxMinWidths: [40, 245, 345],
+			BoxMinHeights: [64, 90, 140],
 			// 隐藏但是需要占位
 			CssHidden: ';visibility:hidden;width:0px;height:0px;border:none;margin:0;padding:0;font-size:1px;line-height:0px;float:left;'
 		},
@@ -322,8 +322,8 @@
 				return this;
 			},
 			getSize: function(opt, bs) {
-				var min1 = opt.layout === 'grid' ? Config.BoxGridMinWidth : Config.BoxMinWidth[1],
-					min2 = opt.layout === 'grid' ? Config.BoxGridMinWidth : Config.BoxMinWidth[2],
+				var min1 = opt.layout === 'grid' ? Config.BoxGridMinWidth : Config.BoxMinWidths[1],
+					min2 = opt.layout === 'grid' ? Config.BoxGridMinWidth : Config.BoxMinWidths[2],
 					min = 0,
 					num = opt.shortcutNum;
 
@@ -1111,7 +1111,7 @@
 			//follow - 表示固定跟随源控件宽度
 			boxWidth: undefined,
 			//box最小宽度
-			minWidth: Config.BoxMinWidth[0],
+			minWidth: Config.BoxMinWidths[0],
 			//box最大宽度
 			maxWidth: Config.BoxMaxWidth,
 			//box最小高度
@@ -1436,7 +1436,7 @@
 
 				if ($.isNumber(opt.minHeight)) {
 					var minH = btn.len > 0 ? Config.BoxBarHeight: 0;
-					minH += (len >= 3 ? Config.BoxMinHeight[1] : len * Config.BoxItemHeight);
+					minH += (len >= 3 ? Config.BoxMinHeights[1] : len * Config.BoxItemHeight);
 					if (opt.minHeight < minH) {
 						opt.minHeight = minH;
 					}
