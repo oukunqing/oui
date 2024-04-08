@@ -961,8 +961,8 @@
         return param;
     },
     filterData = function (options, formData) {
-        if (!$.isObject(formData)) {
-            formData = options.formData || options.datas || options.data;
+        if ($.isObject(options) && !$.isObject(formData)) {
+            formData = options.formData || options.datas || options.data || options;
         }
         return formData;
     },

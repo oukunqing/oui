@@ -257,6 +257,17 @@
             var bool = typeof b === 'boolean';
             return typeof dv === 'boolean' ? (bool ? b : dv) : bool;
         },
+        isBooleans = function (bs, dv) {
+            var bool = false, b, dvb = typeof dv === 'boolean';
+            for (var i = 0; i < bs.length; i++) {
+                bool = typeof bs[i] === 'boolean';
+                if (bool) {
+                    b = bs[i];
+                    break;
+                }
+            }
+            return dvb ? (bool ? b : dv) : bool;
+        },
         isDate = function (obj) {
             return obj instanceof Date && !isNaN(obj.getFullYear());
         },
@@ -1230,13 +1241,14 @@
         trim: trim, isUndefined: isUndefined, isUndef: isUndefined, isString: isString, isNumber: isNumber,
         isFunction: isFunction, isFunc: isFunction, isObject: isObject, isArray: isArray, isDate: isDate, 
         isDateString: isDateString, isDateStr: isDateString,
-        isBoolean: isBoolean, isBool: isBoolean, isTrue: isTrue, isFalse: isFalse, isNull: isNull, isEmpty: isEmpty,
+        isBoolean: isBoolean, isBool: isBoolean, isBooleans: isBooleans, isBools: isBooleans,
+        isTrue: isTrue, isFalse: isFalse, isNull: isNull, isEmpty: isEmpty,
         isProperty: isProperty, isPercent: isPercent, isPercentSize: isPercent, version: version,
         isNumeric: isNumeric, isDecimal: isDecimal, isInteger: isInteger, isFloat: isDecimal, isInt: isInteger,
         isHexNumeric: isHexNumeric, isHexNumber: isHexNumber,
         isMobile: isMobile, isTelephone: isTelephone, isIdentity: isIdentity, isEmail: isEmail,
         isRegexp: isRegexp, isNullOrUndefined: isNullOrUndefined, isNullOrUndef: isNullOrUndefined,
-        isUndefinedOrNull: isNullOrUndefined, isUndefOrNull: isNullOrUndefined,        
+        isUndefinedOrNull: isNullOrUndefined, isUndefOrNull: isNullOrUndefined,
         isIPv4: isIPv4, isIPv6: isIPv6, isIP: isIP, isIp: isIP,
         padLeft: function (s, totalWidth, paddingChar) {
             return padLeft(s, totalWidth, paddingChar, false);
@@ -2664,6 +2676,12 @@
         },
         decodeHtml: function () {
             return $.decodeHtml(this);
+        },
+        escapeHtml: function () {
+            return $.escapeHtml(this);
+        },
+        unescapeHtml: function () {
+            return $.unescapeHtml(this);
         },
         isTrue: function (strict) {
             var s = this;
@@ -4527,14 +4545,12 @@
             //return this;
         },
         isArrayLike = function (obj) {
-            if ($.isString(obj)) {
+            if ($.isUndefinedOrNull(obj) || $.isString(obj) || $.isElement(obj)) {
                 return false;
             } else if ($.isFunction(obj) || isWindow(obj)) {
                 return false;
             }
-            var length = !!obj && 'length' in obj && obj.length,
-                type = typeof obj;
-
+            var length = !!obj && 'length' in obj && obj.length;
             return $.isArray(obj) || length === 0 || $.isNumber(length) && length > 0 && (length - 1) in obj;
         },
         merge = function (first, second) {
@@ -5851,6 +5867,16 @@
             }
             return arr;
         },
+        escapeHtml = function (str, singleQuote) {
+            if (!str) { return str; }
+            var keys = { '<': 'lt', '>': 'gt', ' ': 'nbsp', '&': 'amp', '"': 'quot', '\'': '#39' };
+            return str.replace(/([<>\s&"'])/ig, function (all, t) { return '&' + keys[t] + ';'; });
+        },
+        unescapeHtml = function (str) {
+            if (!str || !/[&;]/g.test(str)) { return str; }
+            var keys = { 'lt': '<', 'gt': '>', 'nbsp': ' ', 'amp': '&', 'quot': '"', '#39': '\'' };
+            return str.replace(/&(lt|gt|nbsp|amp|quot);/ig, function (all, t) { return keys[t]; });
+        },
         encodeHtml = function (str, keys) {
             if (!str || (!$.isString(str, true) && !$.isObject(str))) {
                 return str;
@@ -5889,6 +5915,7 @@
             if (!str || (!$.isString(str, true) && !$.isObject(str))) {
                 return str;
             }
+            /*
             function _decode (s) {
                 if (!s || !/[&;]/g.test(s)) {
                     return s;
@@ -5901,6 +5928,7 @@
                 s = s.replace(/&quot;/g, '\"');
                 return s;
             }
+            */
             if ($.isString(str)) {
                 return _decode(str);
             } else if ($.isObject(str)) {
@@ -5910,7 +5938,7 @@
                 var hasKey = keys.length > 0 && keys[0];
                 for (var k in str) {
                     if ((!hasKey || keys.indexOf(k) > -1) && $.isString(str[k], true)) {
-                        str[k] = _decode(str[k]);
+                        str[k] = unescapeHtml(str[k]);
                     }
                 }
                 return str;
@@ -6119,7 +6147,9 @@
         filterHtmlCode: filterHtmlCode,
         filterHtml: filterHtmlCode,
         encodeHtml: encodeHtml,
-        decodeHtml: decodeHtml
+        decodeHtml: decodeHtml,
+        escapeHtml: escapeHtml,
+        unescapeHtml: unescapeHtml
     }, '$');
 }(OUI);
 

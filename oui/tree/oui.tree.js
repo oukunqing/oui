@@ -16,11 +16,6 @@
 			FilePath: SelfPath,
 			FileDir: $.getFilePath(SelfPath),
 			DefaultSkin: 'default',
-			IsDefaultSkin: function (skin) {
-				//return (!$.isUndefined(skin) ? skin : Config.GetSkin()) === Config.DefaultSkin;
-				skin = skin || Config.GetSkin();
-				return !skin || skin === Config.DefaultSkin;
-			},
 			Skin: '',
 			GetSkin: function () {
 				if (!Config.Skin) {
@@ -33,7 +28,6 @@
 			CloseLinkageClassName: 'oui-popup-panel',
 			IdPrefix: 'otree_',
 			RootNodeId: 'otree_root_node',
-
 			CallbackLevel: {
 				//直接返回
 				Normal: 0,
@@ -42,7 +36,12 @@
 			},
 			DebounceDelay: 256,
 			DebounceTimeout: 4000,
+			//需要显示title的最小层级
+			TitleTextLevel: 2,
+			//需要显示title的最小文字长度
+			TitleTextLength: 12
 		},
+		KC = $.KEY_CODE, KCA = KC.Arrow, KCC = KC.Char, KCM = KC.Min,
 		Cache = {
 			ids: [],
 			trees: {},
@@ -86,17 +85,16 @@
 					} /*else if (ep.css.inArray(['name', 'text'])) {
 						if (Factory.isReturnType(tree, ep.node.type)) {
 							ep.node.setSelected(true, ev);
-							Factory.clickCallback(ev, tree, ep.node);
+							Factory.clickCallback(ep.node, tree, ev);
 						}
 					}*/ else if (Factory.isNodeBody(ep)) {
 						$.console.log('click-12345:', ep.node.id, ep.node.type);
 						if (Factory.isReturnType(tree, ep.node.type)) {
+							Factory.setTargetValue(ep.node, tree).clickCallback(ep.node, tree, ev);
 							ep.node.setSelected(true, ev);
 							if (op.clickChecked) {
 								ep.node.setChecked(null, ev);
 							}
-							Factory.setTargetValue(tree, ep.node)
-								.clickCallback(ev, tree, ep.node);
 						} else if (op.clickExpand) {
 							ep.node.setExpand(null, ev);
 						}
@@ -112,7 +110,7 @@
 				if (p.node && Factory.isNodeBody(p)) {
 					p.node.setExpand(null, ev);
 					if (Factory.isReturnType(tree, p.node.type)) {
-						Factory.dblclickCallback(ev, tree, p.node);
+						Factory.dblclickCallback(p.node, tree, ev);
 					}
 				}
 			},
@@ -121,24 +119,31 @@
 				if (p.node && Factory.isNodeBody(p)) {
 					node = p.node;
 				}
-				Factory.contextmenuCallback(ev, tree, node);
+				Factory.contextmenuCallback(node, tree, ev);
 			}
 		},
 		Factory = {
 			loadCss: function (skin, func) {
 				var path = Config.FilePath,
 					name = $.getFileName(path, true),
-					dir = $.getFilePath(path);
+					arr = skin.split(','),
+					dirRoot = $.getFilePath(path),
+					dir = '';
 
-				if ($.isString(skin, true)) {
-					dir += 'skin/' + skin + '/';
-				}
-				$.loadLinkStyle(dir + name.replace('.min', '') + '.css', function () {
-					if ($.isFunction(func)) {
-						func();
+				for (var i = 0; i < arr.length; i++) {
+					if (arr[i] !== '') {
+						dir = dirRoot + 'skin/' + arr[i] + '/';
+						$.loadLinkStyle(dir + name.replace('.min', '') + '.css', function () {
+							if ($.isFunction(func)) {
+								func();
+							}
+						});
 					}
-				});
+				}
 				return this;
+			},
+			isDefaultSkin: function (skin) {
+				return !skin || skin === Config.DefaultSkin;
 			},
 			isTree: function (tree) {
 				return tree && tree instanceof(Tree);
@@ -284,7 +289,7 @@
                         icon = p[3] || p[0];
                     } else if ($.isObject(p)) {
                         type = $.getParam(p, 'type');
-                        key = $.getParam(p, 'key,type');
+                        key = $.getParam(p, 'key,data,type');
                         ptype = $.getParam(p, 'parent,ptype,type');
                         icon = $.getParam(p, 'iconType,icon,type');
                     } else if ($.isString(p, true)) {
@@ -330,11 +335,11 @@
 					opt.skin = opt.skin.toLowerCase();
 				} else {
 					//指定默认样式
-					opt.skin = Config.GetSkin();
+					opt.skin = Config.GetSkin().split(',')[0];
 				}
 
 				opt.switch = $.getParam(opt, 'switchType,switchIcon,switch');
-				if (Config.IsDefaultSkin(opt.skin)) {
+				if (Factory.isDefaultSkin(opt.skin)) {
 					opt.switch = $.isString(opt.switch, true) ? '-' + opt.switch.toLowerCase() : '';
 				} else {
 					opt.switch = '';
@@ -357,6 +362,19 @@
 				opt.showCheck = $.isBoolean(showCheck, false) || showCheck === 'checkbox';
 
 				opt.showCount = $.isBoolean($.getParam(opt, 'showCount,showcount'), false);
+
+				opt.showTitle = $.isBoolean($.getParam(opt, 'showTitle,showtitle'), false);
+
+				opt.showType = $.isBoolean($.getParam(opt, 'showType,showtype'), true);
+				opt.showStatus = $.isBoolean($.getParam(opt, 'showStatus,showstatus'), true);
+				opt.statusField = $.getParam(opt, 'statusField', 'status');
+
+				//默认样式时，默认不显示节点类型和状态图标
+				//但可以由具体的节点来指定是否显示
+				if (Factory.isDefaultSkin(opt.skin)) {
+					opt.showType = false;
+					opt.showStatus = false;
+				}
 
 				opt.linkage = $.isBoolean(opt.linkage, true);
 				opt.maxCount = parseInt('0' + $.getParam(opt, 'maxCount,maxcount'));
@@ -399,6 +417,12 @@
 
 				opt.clickChecked = $.isBoolean($.getParam(opt, 'clickChecked'), false);
 				opt.clickExpand = $.isBoolean($.getParam(opt, 'clickExpand'), false);
+
+
+				//默认需要防抖回调
+				opt.callbackDebounce = $.isBoolean($.getParam(opt, 'callbackDebounce,debounce'), false);
+				opt.debounceDelay = parseInt('0' + $.getParamCon(opt, 'debounceDelay,debouncedelay,delay')) || Config.DebounceDelay;
+				opt.debounceTimeout = parseInt('0' + $.getParamCon(opt, 'debounceTimeout,debouncetimeout,timeout')) || Config.DebounceTimeout;
 
 				opt.complete = $.getParam(opt, 'oncomplete,complete,completeCallback');
 				opt.callback = $.getParam(opt, 'callback');
@@ -530,11 +554,10 @@
 				if ((cache = Factory.getTreeCache(opt.id))) {
 					return cache.tree.initial(opt);
 				} 
-				return Factory.setTreeCache(opt.id, (tree = new Tree(opt))), tree;		
+				return Factory.setTreeCache(opt.id, (tree = new Tree(opt))), tree;
 			},
 			buildEvent: function (tree) {
 				var div = tree.target ? tree.element : tree.panel;
-				$.console.log('buildEvent', tree.target, div);
 				$.addListener(div, 'mousedown', function(ev) {
 					Factory.dealEvent(ev, tree, ev.type);
 				});
@@ -551,8 +574,6 @@
 				return this;
 			},
 			dealEvent: function (ev, tree, evType) {
-				$.cancelBubble(ev);
-
 				if (!evType && (ev && ev.type)) {
 					evType = ev.type;
 				}
@@ -593,6 +614,31 @@
 				});
 				return this;
 			},
+			findNodes: function(tree, value) {
+				var nodes = [], values = [],
+					node, type, nid,
+					opt = tree.options,
+					cache = tree.cache.nodes;
+
+				if ($.isArray(value)) {
+					values = value;
+				} else if ($.isString(value, true)) {
+					values = value.split(/[,|;]/);
+				} else {
+					values = [value];
+				}
+
+				for (var i = 0; i < values.length; i++) {
+					for (var j = 0; j < opt.returnTypes.length; j++) {
+						type = opt.returnTypes[j];
+						nid = type + '_' + values[i];
+						if (node = cache[nid]) {
+							nodes.push(node);
+						}
+					}
+				}
+				return nodes;
+			},
 			buildTargetEvent: function (tree, opt) {
 				if (!tree.target) {
 					return this;
@@ -600,7 +646,9 @@
 				if (document.querySelector('#' + tree.bid)) {
 					return this;
 				}
-
+				if (this.isRepeat('target-event-' + (tree.target.id || tree.id))) {
+					return this;
+				}
 				var elem = tree.target,
 					tag = elem.tagName.toLowerCase(),
 					type = elem.type.toLowerCase(),
@@ -608,7 +656,8 @@
 
 				if (tag !== 'select' && (tag !== 'input' || !type.inArray(['text']))) {
 					return this;
-				}
+				}				
+				$.addClass(elem, 'oui-tree-elem');
 
 				$.addListener(document, 'mousedown', function (ev) {
 					if (!$.isInElement(tree.panel, ev) && !$.isInElement(elem, ev)) {
@@ -617,29 +666,69 @@
 					return false;
 				});
 
-				if (tag !== 'select') {
+				if (tag === 'select') {
+					$.addListener(elem, 'keydown', function (ev) {
+						var kc = $.getKeyCode(ev);
+						if (kc.inArray([KC.Enter, KC.Space, KC.Min.Enter])) {
+							this.focus();
+							$.cancelBubble(ev);
+							Factory.setBoxDisplay(tree, null, ev, this);
+						} else if (kc.inArray([KC.Tab, KC.Esc])) {
+							if(tree.element !== null && tree.element.style.display !== 'none') {
+								$.cancelBubble(ev);
+							}
+							Factory.setBoxDisplay(tree, false, ev, this);
+						}
+					});
+				} else {
 					evName = 'focus';
 				}
-
 				$.addListener(elem, evName, function (ev) {
 					$.cancelBubble(ev);
 					Factory.setBoxDisplay(tree, null, ev, this);
 					$.hidePopupPanel(tree.element);
-					return true;
 				});
 
 				return Factory.setWindowResize();
 			},
-			setTargetValue: function (tree, node) {
-				var opt = tree.options;
+			initTargetValue: function (tree) {
+				var elem = tree.target;
+				if (!$.isElement(elem)) {
+					return this;
+				}
+				if (!elem.tagName.toLowerCase().inArray(['select', 'input'])) {
+					return this;
+				}
+				var val = elem.value.trim(),
+					nodes = Factory.findNodes(tree, val);
+				if (nodes.length > 0) {
+					for (var i = 0; i < nodes.length; i++) {
+						nodes[i].setSelected(true).setChecked(true).position();
+					}
+				}
+				return this;
+			},
+			setTargetValue: function (node, tree, checked) {
 				if (!tree.target) {
 					return this;
 				}
-				var tag = tree.target.tagName.toLowerCase(),
-					txt = node.getText(),
-					val = node.getValue();
+				var opt = tree.options,
+					cfg = opt.targetConfig,
+					tag = tree.target.tagName.toLowerCase(),
+					txt, val;
 
-				$.console.log('setTargetValue-0:');
+				if (checked) {
+					var txts = [], vals = [], cache = tree.cache.current.checked;
+					for (var k in cache) {
+						txts.push(cache[k].getText());
+						vals.push(cache[k].getValue());
+					}
+					txt = txts.join(cfg.separator || ',');
+					val = vals.join(',');
+				} else {
+					txt = node.getText();
+					val = node.getValue();
+				}
 
 				switch(tag) {
 				case 'select':
@@ -653,45 +742,98 @@
 
 				$.trigger(tree.target, 'change');
 
+				tree.target.focus();
+
 				return this;
 			},
 			setBoxDisplay: function (tree, show, ev, elem) {
-				if (!tree.options.target) {
+				if (!tree.target) {
 					return this;
 				}
 				var box = document.querySelector('#' + tree.bid),
-					display = !box, val;
+					first = !box,
+					display = first;
 
 				if (!box) {
+					if (!$.isBoolean(show, true)) {
+						return this;
+					}
 					box = document.createElement('div');
 					box.className = 'oui-tree-box'.addClass(Config.CloseLinkageClassName);
 					box.id = tree.bid;
 					tree.element = box;
 					document.body.appendChild(box);
-					Factory.buildPanel(tree, tree.options);
+					Factory.buildPanel(tree, tree.options, true);
 				} else {
 					display = $.isBoolean(show, box.style.display === 'none');
 				}
-				tree.element.style.display = display ? 'block' : 'none';
-				if (elem) {
-					val = elem.value.trim();
-					//TODO:
 
+				tree.element.style.display = display ? 'block' : 'none';
+
+				if ($.isElement(elem)) {
+					elem.focus();
+				} else {
+					elem = tree.target;
 				}
-				return display ? this.setBoxPosition(tree) : this;
+				$.setClass(elem, 'oui-tree-elem-cur', display);
+
+				if (!display) {
+					$.removeClass(elem, 'oui-tree-elem-top,oui-tree-elem-bottom');
+					$.removeClass(elem, 'oui-tree-box-top,oui-tree-box-bottom');
+				}
+
+				return display ? this.setBoxPosition(tree, first) : this;
 			},
-			setBoxPosition: function (tree) {
+			setBoxPosition: function (tree, first) {
 				var opt = tree.options,
 					cfg = opt.targetConfig,
-					offset = $.getOffset(tree.target),
+					obj = tree.target,
+					box = tree.element,
+					es = $.getOffset(tree.target),
+					bs = $.getBodySize(),
+					pos = 'bottom',
 					p = {
-						left: offset.left,
-						top: offset.height + offset.top,
-						width: offset.width,
-						height: cfg.height
+						left: es.left,
+						top: es.height + es.top,
+						width: es.width,
+						height: cfg.height || 400
 					};
 
-				tree.element.style.cssText = 'left:{left}px;top:{top}px;width:{width}px;height:{height}px;'.format(p);
+				if (p.height > bs.height) {
+					p.height = bs.height - 6;
+				}
+
+				var offset = p.top + p.height - (bs.height + bs.scrollTop);
+				//如果选项框位置高度超过窗口高度，则显示在目标控件的上方
+				if (offset > 0) {
+					p.top = es.top - p.height;
+					pos = 'top';
+
+					//如果选项框位置窗口小于滚动高度，需要设置选项框位置和位置偏移
+					if (p.top < bs.scrollTop) {
+						var whiteSpace = 4;
+						//默认显示在目标控件下方，并向上偏移，偏移量即之前超出窗口高度的值
+						p.top = es.top + es.height - offset - whiteSpace;
+						pos = 'middle';
+					}
+				}
+
+				switch(pos) {
+				case 'bottom':
+					$.addClass(obj, 'oui-tree-elem-bottom');
+					$.addClass(box, 'oui-tree-box-bottom');
+					break;
+				case 'top':
+					$.addClass(obj, 'oui-tree-elem-top');
+					$.addClass(box, 'oui-tree-box-top');
+					break;
+				default:
+					break;
+				}
+
+				box.style.cssText = [
+					'left:{left}px;top:{top}px;width:{width}px;', 'height:{height}px;'
+				].join('').format(p);
 
 				return this.setBoxSize(tree);
 			},
@@ -722,7 +864,7 @@
 				return tree.cache.dynamicDatas.indexOf(type) > -1;
 			},
 			setDynamicData: function (tree, items, par) {
-				var dr = $.extend({}, data), i, c = items.length,
+				var i, c = items.length,
 					p = $.extend({type: '', ptype: '', iconType: ''}, par),
 					datas = tree.cache.reserveDatas,
 					pnid, ptype, type, dr;
@@ -758,7 +900,7 @@
 			},
 			getPanelClass: function (opt) {
 				var css = 'oui-tree';
-				if (!Config.IsDefaultSkin(opt.skin)) {
+				if (!Factory.isDefaultSkin(opt.skin)) {
 					css += ' oui-tree-';
 					css += opt.skin;
 				}
@@ -768,7 +910,7 @@
 				div.className = Factory.getPanelClass(opt);
 				return this;
 			},
-			buildPanel: function (tree, par) {
+			buildPanel: function (tree, par, initial) {
 				var that = tree,
 					opt = that.options,
 					cache = that.cache,
@@ -799,10 +941,10 @@
 					elem.appendChild(div);
 					if (opt.async) {
 						window.setTimeout(function() {
-							Factory.buildNode(tree, opt).completeCallback(tree);
+							Factory.buildNode(tree, opt).initTargetValue(tree).completeCallback(tree);
 						}, 1);
 					} else {
-						Factory.buildNode(tree, opt).completeCallback(tree);
+						Factory.buildNode(tree, opt).initTargetValue(tree).completeCallback(tree);
 					}
 				}
 				return this;
@@ -824,48 +966,65 @@
 				cache.count = 0;
 
 				if (!opt.data || (!$.isArray(opt.data) && !$.isObject(opt.data))) {
+					if ($.isFunction(opt.data)) {
+						var func = function (data) {
+							opt.data = data;
+							if ($.isArray(data) || $.isObject(data)) {
+								_build(opt);
+							}
+						};
+						if (Factory.isPromise()) {
+							new Promise(function (resolve, reject) { opt.data(func); });
+						} else {
+							window.setTimeout(function() { opt.data(func); }, 0);
+						}
+					}
 					return this;
+				} else {
+					_build(opt);
 				}
 
-				if ($.isArray(opt.data)) {
-					Factory.buildItem(tree, root, opt.data);
-				} else {
-					//数据结构注解，用于多种类型节点
-					var dts = opt.trees, p = {};
+				function _build (opt) {
+					if ($.isArray(opt.data)) {
+						Factory.buildItem(tree, root, opt.data);
+					} else {
+						//数据结构注解，用于多种类型节点
+						var dts = opt.trees, p = {};
 
-					if (dts.length > 0 && dts[0]) {
-						var list = [], t, k;
-						//遍历数据结构注解，并按顺序指定上下级关系
-						for (k = 0; k < dts.length; k++) {
-							t = dts[k];
-							list = opt.data[t.key];
-							p = {type: t.type, ptype: t.ptype, iconType: t.icon || t.type};
-							if ($.isArray(list)) {
-								if (Factory.isDynamicData(tree, p.type)) {
-									Factory.setDynamicData(tree, list, p);
-								} else {
-									Factory.buildItem(tree, root, list, p);
+						if (dts.length > 0 && dts[0]) {
+							var list = [], t, k;
+							//遍历数据结构注解，并按顺序指定上下级关系
+							for (k = 0; k < dts.length; k++) {
+								t = dts[k];
+								list = opt.data[t.key];
+								p = {type: t.type, ptype: t.ptype, iconType: t.icon || t.type};
+								if ($.isArray(list)) {
+									if (Factory.isDynamicData(tree, p.type)) {
+										Factory.setDynamicData(tree, list, p);
+									} else {
+										Factory.buildItem(tree, root, list, p);
+									}
+								}
+							}
+						} else {
+							//遍历参数字段，并获取第1个数组字段
+							for (var k in opt.data) {
+								if ($.isArray(opt.data[k])) {
+									Factory.buildItem(tree, root, opt.data[k]);
+									break;
 								}
 							}
 						}
-					} else {
-						//遍历参数字段，并获取第1个数组字段
-						for (var k in opt.data) {
-							if ($.isArray(opt.data[k])) {
-								Factory.buildItem(tree, root, opt.data[k]);
-								break;
-							}
-						}
 					}
+					Factory.initStatus(tree, true);
+
+					tree.panel.appendChild(root.fragment);
+					delete root.fragment;
+
+					cache.finish = new Date().getTime();
+					cache.timeout = cache.finish - cache.start;
 				}
-				Factory.initStatus(tree, true);
-
-				tree.panel.appendChild(root.fragment);
-				delete root.fragment;
-
-				cache.finish = new Date().getTime();
-				cache.timeout = cache.finish - cache.start;
-
+				
 				return this;
 			},
 			addNode: function (tree, items, par, pnode) {
@@ -878,7 +1037,7 @@
 					return this;
 				}
 
-				if (pnode && pnode.tree === tree) {
+				if (Factory.isNode(pnode) && pnode.tree === tree) {
 					fragment = $.createFragment();
 					Factory.buildItem(tree, root, items, p, nodes, fragment)
 						.initStatus(tree, false, nodes);
@@ -895,7 +1054,7 @@
 
 						if (fragment) {
 							dr.pnode.childbox.appendChild(fragment);
-						}						
+						}
 					}
 				}
 				function _filter (tree, items, p) {
@@ -934,23 +1093,24 @@
 
 				return ul;
 			},
-			buildLi: function (tree, p, node) {
+			buildLi: function (tree, p, node, opt) {
 				var li = document.createElement('LI');
 				li.id = p.id + '_item';
 				li.className = ('node level' + p.level);
 				//li.setAttribute('nid', p.nid);
 
 				var hide = ' style="display:none;"',
-					check = tree.options.showCheck ? [
+					title = opt.showTitle && p.level >= Config.TitleTextLevel && p.text.length > Config.TitleTextLength ? ' title="' + p.text + '"' : '',
+					check = opt.showCheck ? [
 						'<span class="check" id="', p.id, '_check', '" nid="', p.nid, '"></span>',
 					] : [],
-					icon = tree.options.showIcon ? [
+					icon = opt.showIcon ? [
 						'<span class="', node.getIconClass(), '" id="', p.id, '_icon', '" nid="', p.nid, '"', '></span>'
 					] : [],
 					desc = p.desc ? [
 						'<span class="desc" id="', p.id, '_desc', '" nid="', p.nid, '">', p.desc, '</span>'
 					] : [],
-					count = tree.options.showCount ? [
+					count = opt.showCount ? [
 						'<span class="count" id="', p.id, '_count', '" nid="', p.nid, '"', hide, '>', '</span>'
 					] : [],
 					info = false ? [
@@ -963,7 +1123,7 @@
 					'<div class="item" id="', p.id, '_item', '" nid="', p.nid, '">',
 					'<span class="', node.getSwitchClass(), '" id="', p.id, '_switch', '" nid="', p.nid, '"></span>'
 				].concat(check).concat(icon).concat([
-					'<a class="name" id="', p.id, '_name', '" nid="', p.nid, '">',
+					'<a class="name" id="', p.id, '_name', '" nid="', p.nid, '"', title, '>',
 					'<span class="text" id="', p.id, '_text', '" nid="', p.nid, '">', p.text, '</span>'
 				]).concat(desc).concat(count).concat(['</a>']).concat(info).concat([
 					'</div>'
@@ -990,7 +1150,8 @@
 				if (!$.isArray(list) || list.length <= 0) {
 					return this;
 				}
-				var i, d, type, ptype, iconType, nid, pnid, p, node;
+				var i, d, type, ptype, iconType, nid, pnid, text, desc, p, node, 
+					showStatus, showType;
 
 				for (i = 0; i < list.length; i++) {
 					if (typeof (d = list[i]).id === 'undefined') {
@@ -1001,20 +1162,27 @@
 					iconType = d.iconType || par.iconType || type;
 					nid = Factory.buildNodeId(type, d.id);
 					pnid = Factory.buildNodeId(ptype, d.pid);
+					text = d.name || '',
+					desc = d.desc || '',
 					p = {
-						data: d, text: d.name,
+						data: d, text: text.toString().escapeHtml(),
 						nid: nid, pnid: pnid, type: type, ptype: ptype,
 						id: Factory.buildElemId(tid, nid),
 						pid: Factory.buildElemId(tid, pnid),
-						//desc: d.desc,
-						desc: [d.desc, (opt.debug ? d.id : '')].join(''),
+						//desc: desc.toString().escapeHtml(),
+						desc: [desc.toString().escapeHtml(), (opt.debug ? d.id : '')].join(''),
 						pnode: tree.cache.nodes[pnid],
 						expanded: false
 					};
+					showStatus = $.isBooleans([d.showStatus, opt.showStatus], false);
+					showType = $.isBooleans([d.showType, opt.showType], false);
 
+					if (showStatus && !$.isUndefined(d.status)) {
+						d.icon = $.extend({}, {status: d[opt.statusField] ? 'on' : 'off'}, d.icon);
+					}
 					if (p.pnode) {
 						p.level = p.pnode.level + 1;
-					} else {						
+					} else {
 						p.root = true;
 						p.pnode = root;
 						p.level = 0;
@@ -1031,11 +1199,14 @@
 						checked: d.checked || false,
 						disabled: d.disabled || false,
 						dynamic: tree.isDynamicType(p.type),
-						icon: $.extend({ type: iconType }, d.icon)
+						icon: $.extend({ type: iconType }, d.icon),
+						showStatus: showStatus,
+						showType: showType,
+						expandCallback: d.expandCallback
 					});
 
 					node.setParent(p.pnode.setBox(Factory.buildUl(tree, p, p.root)))
-						.setParam('element', Factory.buildLi(tree, p, node));
+						.setParam('element', Factory.buildLi(tree, p, node, opt));
 
 					p.pnode.addChild(node, false, fragment);
 
@@ -1243,7 +1414,7 @@
 				expand = $.isBoolean(expand, true);
 				c = levels.sort().length;
 
-				if (c > nc) {					
+				if (c > nc) {
 					levels = levels.slice(0, nc);
 					c = nc;
 				}
@@ -1296,9 +1467,22 @@
 			collapseAll: function (tree) {
 				return Factory.expandAll(tree, false);
 			},
-			callback: function (tree, node) {
+			debounceCallback: function (callback, node, tree, ev) {
+				if (tree.options.callbackDebounce) {
+					$.debounce({
+						id: 'otree-callback-' + tree.id,
+						delay: tree.options.debounceDelay, timeout: tree.options.debounceTimeout
+					}, function() {
+						callback(node, tree, ev);
+					});
+				} else {
+					callback(node, tree, ev);
+				}
+				return this;	
+			},
+			callback: function (node, tree, ev) {
 				if ($.isFunction(tree.options.callback)) {
-					tree.options.callback(node, tree);
+					Factory.debounceCallback(tree.options.callback, node, tree, ev);
 				}
 				return this;
 			},
@@ -1308,40 +1492,53 @@
 				}
 				return this;
 			},
-			expandCallback: function (tree, node, func) {
-				if ($.isFunction(tree.options.expandCallback)) {
+			expandCallback: function (node, tree, func) {
+				var callback = tree.options.expandCallback;
+				if ($.isFunction(node.expandCallback)) {
+					callback = node.expandCallback;
+				}
+				if ($.isFunction(callback)) {
 					if ($.isFunction(func) && Factory.isPromise()) {
 						new Promise(function (resolve, reject) {
-				            tree.options.expandCallback(node, tree, func);
-				        }).catch(function (err) {}).finally(function () {});
+				            callback(node, tree, func);
+				        });
 					} else {
-						tree.options.expandCallback(node, tree, func);
+						callback(node, tree, func);
 					}
 				}
 				return this;
 			},
-			checkedCallback: function (tree, node, ev) {
-				if ($.isFunction(tree.options.checkedCallback)) {
-					return tree.options.checkedCallback(node, tree), this;
+			checkedCallback: function (node, tree, ev) {
+				var callback = tree.options.checkedCallback;
+				if ($.isFunction(node.checkedCallback)) {
+					callback = node.checkedCallback;
 				}
-				return Factory.callback(tree, node);
+				if ($.isFunction(callback)) {;
+					return Factory.debounceCallback(callback, node, tree, ev);
+				}
+				return Factory.callback(node, tree, ev);
 			},
-			clickCallback: function (ev, tree, node) {
+			clickCallback: function (node, tree, ev) {
 				if ($.isFunction(tree.options.clickCallback)) {
-					return tree.options.clickCallback(ev, node, tree), this;
+					return Factory.debounceCallback(tree.options.clickCallback, node, tree, ev);
 				}
-				return Factory.callback(tree, node);
+				return Factory.callback(node, tree, ev);
 			},
-			dblclickCallback: function (ev, tree, node) {
+			dblclickCallback: function (node, tree, ev) {
 				if ($.isFunction(tree.options.dblclickCallback)) {
-					tree.options.dblclickCallback(ev, node, tree);
-				}				
+					tree.options.dblclickCallback(node, tree, ev);
+				}
 				return this;
 			},
-			contextmenuCallback: function (ev, tree, node) {
-				if ($.isFunction(tree.options.contextmenuCallback)) {
-					tree.options.contextmenuCallback(ev, node, tree);
-				}	
+			contextmenuCallback: function (node, tree, ev) {
+				var callback = tree.options.contextmenuCallback;
+				if (Factory.isNode(node) && $.isFunction(node.contextmenuCallback)) {
+					callback = node.contextmenuCallback;
+				}
+				if ($.isFunction(callback)) {
+					$.cancelBubble(ev);
+					callback(node, tree, ev);
+				}
 				return this;
 			}
 		};
@@ -1350,8 +1547,9 @@
 	Factory.loadCss(Config.DefaultSkin);
 
 	//加载指定的(默认)样式文件
-	if (!Config.IsDefaultSkin()) {
-		Factory.loadCss(Config.GetSkin());
+	var appointSkin = Config.GetSkin();
+	if (!Factory.isDefaultSkin(appointSkin)) {
+		Factory.loadCss(appointSkin);
 	}
 
 	function Type(par) {
@@ -1418,9 +1616,20 @@
 					.initParam('disabled', par)		//是否禁用节点
 					.initParam('parent', par)		//父节点
 					.initParam('childs', par)		//子节点数组
-					.initParam('childbox', par);	//子节点容器DOM元素
+					.initParam('childbox', par)		//子节点容器DOM元素
+					.initParam('showType', par)
+					.initParam('showStatus', par);
 
-				if (this.dynamic) {					
+				var func = par.expandCallback;
+				if ($.isFunction(func)) {
+					this.expandCallback = func;
+				}
+				func = par.contextmenuCallback || par.contextmenu;
+				if ($.isFunction(func)) {
+					this.contextmenuCallback = func;
+				}
+
+				if (this.dynamic) {
 					//动态加载子节点的次数，0:表示未加载
 					this.loaded = 0;
 				}
@@ -1539,8 +1748,7 @@
 				this.setParentChecked(this.checked).setChildChecked(this.checked, true);
 			}
 
-			Factory.checkedCallback(this.tree, this, ev)
-				.setTargetValue(this.tree, this);
+			Factory.checkedCallback(this, this.tree, ev).setTargetValue(this, this.tree, true);
 
 			return this;
 		},
@@ -1600,22 +1808,21 @@
 			}
 			if (this.childbox) {
 				expanded = $.isBoolean(expanded, !this.expanded);
-				this.childbox.style.display = expanded ? 'block' : 'none';
-				//$.setElemClass(this.childbox, 'hide', !expanded);
+				//$.setElemClass(this.childbox, 'hide', false);
+				//this.childbox.style.display = expanded ? 'block' : 'none';
+				$.setElemClass(this.childbox, 'hide', !expanded);
 
 				//动态加载，默认可加载多次，若已加载子节点，则不再动态加载
 				if (expanded && !this.hasChild() && ev && ev.target) {
-					if (this.loaded < tree.options.loadCount) {
-						//先添加缓存数据中的动态节点数据
-						if (!Factory.addDynamicNode(tree, this)) {
-							//缓存数据中没有节点数据，则回调展开事件，用于获取动态数据
-							//并将获取到的数据通过回调函数返回并添加到节点中
-							//动态加载的数据需要指定数据类型
-							Factory.expandCallback(tree, this, function (items, par) {
-								par = $.extend({}, {type:par}, par);
-								Factory.addNode(tree, items, $.extend({ptype: node.type}, par), node);
-							});
-						}
+					//先添加缓存数据中的动态节点数据
+					if (this.loaded < tree.options.loadCount && !Factory.addDynamicNode(tree, this)) {
+						//缓存数据中没有节点数据，则回调展开事件，用于获取动态数据
+						//并将获取到的数据通过回调函数返回并添加到节点中
+						//动态加载的数据需要指定数据类型
+						Factory.expandCallback(this, tree, function (items, par) {
+							par = $.extend({}, {type:par}, par);
+							Factory.addNode(tree, items, $.extend({ptype: node.type}, par), node);
+						});
 					}
 					this.loaded++;
 				}
@@ -1642,9 +1849,10 @@
 		},
 		getIconClass: function () {
 			var css = ['icon'],
+				opt = this.tree.options,
 				open = this.expanded && !this.isLeaf() ? '-open' : '';
 
-			if (this.icon.type && !this.tree.isDefaultSkin()) {
+			if (this.showType && this.icon.type) {
 				if (this.icon.status) {
 					css.push(this.icon.type + '-' + this.icon.status + open);
 				} else if (open) {
@@ -1652,19 +1860,32 @@
 				} else {
 					css.push(this.icon.type);
 				}
-			} else if (open) {
-				css.push('icon' + open);
+			} else {
+				if (this.isLeaf() || (!this.tree.isAppointLeaf() && !this.hasChild())) {
+					css.push('icon-page');
+				}
+				if (open) {
+					css.push('icon' + open);
+				}
 			}
-			if (this.icon.path) {
-
-			}
-
 			return css.join(' ');
 		},
+		getIconStyle: function () {
+			var style = [];
+
+			if (this.icon.path) {
+				style = ['background:url(\'', this.icon.path, '\') no-repeat center;'];
+			}
+
+			return style.join('');
+		},
 		setIconClass: function () {
-			var icon;
+			var icon, style;
 			if (this.tree.isShowIcon() && (icon = this.getItem('icon'))) {
 				icon.className = this.getIconClass();
+				if (style = this.getIconStyle()) {
+					icon.style.cssText = style;
+				}
 			}
 			return this;
 		},
@@ -1795,6 +2016,8 @@
 		initial: function (options) {
 			var opt = Factory.checkOptions($.extend({
 				id: 'otree001',
+				//样式
+				skin: '',
 				//树菜单容器
 				element: undefined,
 				//是否异步加载节点
@@ -1839,6 +2062,14 @@
 				showInfo: undefined,
 				//是否显示子节点数量
 				showCount: undefined,
+				//是否显示节点类型图标
+				showType: undefined,
+				//是否显示节点状态
+				showStatus: undefined,
+				//是否显示title
+				showTitle: undefined,
+				//节点状态字段
+				statusField: 'status',
 				//是否级联选中复选框
 				linkage: undefined,
 				//非级联模式下最大选中数量，0-表示不限数量，默认为0
@@ -1853,6 +2084,8 @@
 				target: undefined,
 				//关联弹出层配置
 				targetConfig: undefined,
+				//是否触发式显示，例如点击<a>
+				trigger: undefined,
 				//回调等级：0-实时回调，1-点击“确定”按钮后回调
 				callbackLevel: 0,
 				//是否防抖，多选模式下，点击选项时有效
@@ -1874,6 +2107,7 @@
 					height: 500,
 					//
 					defaultValue: undefined,
+					separator: ','
 				}, opt.targetConfig);
 			}
 
@@ -1881,10 +2115,9 @@
 			this.tid = Factory.buildTreeId(opt.id, 'panel_');
 			this.options = opt;
 
-			if (!Config.IsDefaultSkin(opt.skin)) {
+			if (!Factory.isDefaultSkin(opt.skin)) {
 				Factory.loadCss(opt.skin);
 			}
-
 			if (!$.isElement(opt.element) && !opt.target) {
 				return this;
 			}
@@ -1903,14 +2136,18 @@
 				this.target = opt.target;
 				Factory.buildTargetEvent(this, opt);
 				if (this.panel) {
-					Factory.buildPanel(this, this.options);
+					Factory.buildPanel(this, this.options, true);					
 				}
 			} else {
 				this.element = opt.element;
 				Factory.buildPanel(this, opt);
 			}
+			//$.console.log('initial:', this.id, this);
 
 			return this;
+		},
+		display: function (show) {
+			return Factory.setBoxDisplay(this, show), this;
 		},
 		show: function (show) {
 			return Factory.setBoxDisplay(this, $.isBoolean(show, true)), this;
@@ -1950,16 +2187,18 @@
 			return Factory.addNode(this, items, par, pnode), this;
 		},
 		insert: function (items, par) {
-
+			//TODO:
 		},
 		//更新节点图标、文字
 		update: function (items, par) {
 			var that = this;
+			//TODO:
 
 			return that;
 		},
 		clear: function () {
 			var that = this;
+			//TODO:
 
 			return that;
 		},
@@ -2042,7 +2281,7 @@
 			return Factory.collapseType(this, types, true), this;
 		},
 		isDefaultSkin: function () {
-			return Config.IsDefaultSkin(this.options.skin);
+			return Factory.isDefaultSkin(this.options.skin);
 		},
 		isShowCheck: function () {
 			return this.options.showCheck;

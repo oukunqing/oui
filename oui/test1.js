@@ -393,16 +393,6 @@ var s = 'http://122.227.7.1/dev/';
 console.log(del(s));
 
 
-function escape2Html(str) {
-    var arrEntities = { 'lt': '<', 'gt': '>', 'nbsp': ' ', 'amp': '&', 'quot': '"' };
-    return str.replace(/&(lt|gt|nbsp|amp|quot);/ig, function (all, t) { return arrEntities[t]; });
-}
-
-function escape2Html(str) {
-    return str.replace(/&(amp);/ig, '&');
-}
-
-console.log(escape2Html('http://&amp;'))
 
 function getDomain(s) {
     var pattern = /[a-z\d\.\-\_](^[a-z\d\-\_]+\.[a-z]{2,4}$)/i;
@@ -1986,23 +1976,48 @@ for(var k in td) {
     console.log(k, td[k]);
 }
 
-var obj = {id: 12345};
-console.log('${obj.id}');
+new Promise(function (resolve, reject) {
+    var a = 0;
+    var b = 0;
+    if (b == 0) reject("Divide zero");
+    else resolve(a / b);
+}).then(function (value) {
+    console.log("a / b = " + value);
+}).catch(function (err) {
+    console.log(err);
+}).finally(function () {
+    console.log("End");
+});
 
-var arr2 = {}, kv;
-function test22(arr) {
-    console.log(arr, typeof arr);
-    arr['key'] = 'key1';
-}test22(arr2)
-console.log('arr2:', arr2);
+var func = function(){}
+console.log(typeof func === 'object');
 
-function Node() {
-    this.id = 1;
-    this.name = "Node1";
+var d = {showType:undefined},
+    opt = {showType:true};
+
+var b  = $.isBooleans([d.showType, opt.showType], false);
+$.console.log('b:',b);
+
+$.console.log(escape2Html('abc"'));
+
+function escapeHtml(str) {
+    var keys = { '<': 'lt', '>': 'gt', ' ': 'nbsp', '&': 'amp', '"': 'quot', '\'': '#39' };
+    return str.replace(/([<>\s&"'])/ig, function (all, t) { return '&' + keys[t] + ';'; });
 }
 
-var node = new Node();
-var node1 = {id:2, name:'node1'};
+function unescapeHtml (str) {
+    var keys = { 'lt': '<', 'gt': '>', 'nbsp': ' ', 'amp': '&', 'quot': '"', '#39': '\'' };
+    return str.replace(/&(lt|gt|nbsp|amp|quot);/ig, function (all, t) { return keys[t]; });
+}
 
-$.console.log(node, node instanceof(Node));
-$.console.log(node1, node1 instanceof(Node));
+function escape2Html(str) {
+    var arrEntities = { 'lt': '<', 'gt': '>', 'nbsp': ' ', 'amp': '&', 'quot': '"' };
+    return str.replace(/&(lt|gt|nbsp|amp|quot);/ig, function (all, t) { return arrEntities[t]; });
+}
+
+function escape2Html(str) {
+    return str.replace(/&(amp);/ig, '&');
+}
+
+console.log($.escapeHtml('abc"123\''))
+console.log($.unescapeHtml('http://&amp;'))

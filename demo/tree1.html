@@ -23,16 +23,18 @@
 </head>
 <body>
 <div class="form">
-    <div style="width:50%;float:left;padding:400px 0 1000px 10px;clear:none;">
-        <select id="ddlUnit" style="width:90%;height:34px;" onchange="$.console.log('changed:', this.value);"></select>
+    <div style="width:50%;float:left;padding:550px 0 1000px 10px;clear:none;">
+        <select id="ddlUnit" style="width:90%;height:34px;" onchange="$.console.log('changed:', this.value);">
+            <option value="7155,8366">205428,866804050921863</option>
+        </select>
         <input id="txtDevice" style="width:90%;height:28px;" onchange="$.console.log('changed:', this.value);" />
     </div>
     <div style="float:left;padding:0;margin:10px 0 0;clear:none;">
         <div class="box">  
             <div>
-                <label class="chb-label"><input type="checkbox" value="root" name="chbData" checked="checked" /><span>根节点</span></label>
+                <label class="chb-label"><input type="checkbox" value="root" name="chbData" /><span>根节点</span></label>
                 <label class="chb-label"><input type="checkbox" value="unit" name="chbData" checked="checked" /><span>目录</span></label>
-                <label class="chb-label"><input type="checkbox" value="device" name="chbData" /><span>设备</span></label>
+                <label class="chb-label"><input type="checkbox" value="device" name="chbData" checked="checked" /><span>设备</span></label>
                 <label class="chb-label"><input type="checkbox" value="camera" name="chbData" /><span>通道</span></label>
                 <label class="chb-label"><input type="checkbox" value="department" name="chbData" /><span>部门</span></label>
                 <label class="chb-label"><input type="checkbox" value="person" name="chbData" /><span>人员</span></label>
@@ -65,8 +67,9 @@
                 <label class="chb-label"><input type="checkbox" id="chbClickExpand" checked="checked" /><span>点击切换</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbClickChecked" checked="checked" /><span>点击选中</span></label>
                 <div>
-                    <button onclick="test();">加载树菜单</button>
-                    <button onclick="test(2);">加载树菜单2</button>
+                    <button onclick="test(0);">加载树菜单</button>
+                    <button onclick="test(1);">加载树菜单1</button>
+                    <button onclick="test(2);">实时加载树菜单</button>
                 </div>
             </div>
         </div>
@@ -121,6 +124,7 @@
 </body>
 </html>
 <script type="text/javascript" src="../oui/oui.js?1"></script>
+<script type="text/javascript" src="../oui/contextmenu/oui.contextmenu.min.js"></script>
 <script type="text/javascript" src="../oui/tree/oui.tree.js?123"></script>
 <script type="text/javascript" src="dropdownlist.json"></script>
 <script type="text/javascript">
@@ -186,116 +190,155 @@
         $.tree(TreeId).add(items, par);
     }
 
-    function test(type) {   
-        var arr = $N('chbData'), keys = {};
-        for (var i = 0; i < arr.length; i++) {
-            if (arr[i].checked) {
-                keys[arr[i].value] = 1;
-            }
+
+    function getTestData(resolve) {
+        $.console.log('getTestData:0');
+        var data = treedata;
+        if ($.isFunction(resolve)) {
+            $.console.log('getTestData:1');
+            resolve(data);
         }
+        $.console.log('getTestData:2');
+    }
 
-        var trees = [
-            keys['root'] ? {type:'root',key:'datas'} : undefined,
-            keys['unit'] ? {type:'unit',key:'units'} : undefined,
-            keys['device'] ? {type:'device',key:'devices',ptype:'unit'} : undefined,
-            keys['camera'] ? {type:'camera',key:'cameras',ptype:'device'} : undefined,
-            keys['department'] ? {type:'department',key:'departments'} : undefined,
-            keys['person'] ? {type:'person',key:'persons',ptype:'department'} : undefined
-        ];
+    function test(type) {   
 
-        $.console.log('trees:', trees);
+        _loadTree();
 
-        var html = ['begin: ' + new Date().format('HHmmss.fff') + ', '],
-            data = type ? treedata2 : treedata,
-            skin = $('#ddlSkin').val(),
-            openLevel = $('#ddlLevel').val().toInt(),
-            showCheck = $('#chbCheck').checked(),
-            showIcon = $('#chbIcon').checked(),
-            switchIcon = $('#ddlSwitch').val(),
-            clickExpand = $('#chbClickExpand').checked(),
-            clickChecked = $('#chbClickChecked').checked();
+        function _loadTree() {
 
-        data.units[0].desc = new Date().getTime();
-
-        $.tree(TreeId, {
-            element: TreeId,
-            //target: 'ddlUnit',
-            target: 'txtDevice',
-            targetConfig: {},
-            skin: skin, 
-            //async: true, 
-            debug: true,
-            trees: trees,
-            data: data,
-            valueFields: [],
-            switch: switchIcon,
-            //leaf: true,
-            //leafType: 'camera',
-            dynamic: 3,
-            //dynamic: true,
-            //指定要动态加载子节点的数据类型
-            dynamicType: 'device',
-            //指定为被动态加载的数据类型
-            dynamicData: 'camera',
-            //指定可选中/返回的数据类型，若未指定，则所有都可返回
-            returnType: ['device', 'camera'],
-            //openLevel: 1,
-            //openType: 'unit',
-            openLevel: openLevel,
-            //checkbox: true,
-            showCheck: showCheck,
-            linkage: false,
-            showIcon: showIcon,
-            clickExpand: clickExpand,
-            //clickChecked: clickChecked,
-            complete: function (tree) {
-                $('#divOper').show();
-
-                html.push('finish: ' + new Date().format('HHmmss.fff') + '<br />');
-                console.log('complete:', tree.id, tree.cache);
-                $('#txt').html(html.concat([
-                    'nodes:', tree.cache.count, ', level:', tree.cache.level, ', timeout:', tree.cache.timeout, 'ms'
-                ]).join(''));
-            },
-            callback: function () {
-
-            },
-            onclick: function (ev, node, tree) {
-                $.console.log('onclick', tree.id, ev, node);
-            },
-            ondblclick: function (ev, node, tree) {
-                $.console.log('ondblclick', tree.id, ev, node);
-            },
-            oncontextmenu: function (ev, node, tree) {
-                $.console.log('oncontextmenu', tree.id, ev, node);
-            },
-            onchecked: function (node, tree) {
-                $.console.log('onchecked:', tree.id, node);
-            },
-            onexpand: function (node, tree, func) {
-                $.console.log('onexpand:', tree.id, node);
-
-                if (node.type === 'device' && !node.hasChild()) {
-                //if (node.type === 'device') {
-                    var cameras = [];
-                    var pid = node.data.id;
-                    for (var i = 0; i < 4; i++) {
-                        cameras.push({id: pid + '_' + (i + 1), name:'监控点' + (i + 1), pid: pid });
-                    }
-
-                    //tree.add(cameras, {type:'camera', ptype:'device'});
-
-                    if ($.isFunction(func)) {
-                        //func(cameras, {type: 'camera'});
-                        func(cameras, 'camera');
-                    }
+            var arr = $N('chbData'), keys = {};
+            for (var i = 0; i < arr.length; i++) {
+                if (arr[i].checked) {
+                    keys[arr[i].value] = 1;
                 }
-            },
-            expandCallback: function (node, tree) {
-                $.console.log('expandCallback:', tree.id, node);
             }
-        });
-        $.console.log('test finish:');
+
+            var trees = [
+                keys['root'] ? {type:'root',key:'datas'} : undefined,
+                keys['unit'] ? {type:'unit',key:'units'} : undefined,
+                keys['device'] ? {type:'device',key:'devices',ptype:'unit'} : undefined,
+                keys['camera'] ? {type:'camera',key:'cameras',ptype:'device'} : undefined,
+                keys['department'] ? {type:'department',key:'departments'} : undefined,
+                keys['person'] ? {type:'person',key:'persons',ptype:'department'} : undefined
+            ];
+
+            $.console.log('trees:', trees);
+
+            var datas = [treedata, treedata2, getTestData];
+            
+            var html = ['begin: ' + new Date().format('HHmmss.fff') + ', '],
+                data = datas[type],
+                skin = $('#ddlSkin').val(),
+                openLevel = $('#ddlLevel').val().toInt(),
+                showCheck = $('#chbCheck').checked(),
+                showIcon = $('#chbIcon').checked(),
+                switchIcon = $('#ddlSwitch').val(),
+                clickExpand = $('#chbClickExpand').checked(),
+                clickChecked = $('#chbClickChecked').checked();
+
+            if ($.isObject(data)) {
+                data.units[0].desc = new Date().getTime();
+            }
+            
+            $.tree(TreeId, {
+                element: TreeId,
+                target: 'ddlUnit',
+                //target: 'txtDevice',
+                targetConfig: {},
+                skin: skin, 
+                //async: true, 
+                debug: true,
+                trees: trees,
+                data: data,
+                valueFields: [],
+                switch: switchIcon,
+                //leaf: true,
+                //leafType: 'camera',
+                //dynamic: 3,
+                //dynamic: true,
+                //指定要动态加载子节点的数据类型
+                //dynamicType: 'device',
+                //指定为被动态加载的数据类型
+                //dynamicData: 'camera',
+                //指定可选中/返回的数据类型，若未指定，则所有都可返回
+                returnType: ['device'],
+                //openLevel: 1,
+                //openType: 'unit',
+                openLevel: openLevel,
+                //checkbox: true,
+                showCheck: showCheck,
+                //linkage: false,
+                showIcon: showIcon,
+                clickExpand: clickExpand,
+                clickChecked: clickChecked,
+                complete: function (tree) {
+                    $('#divOper').show();
+
+                    html.push('finish: ' + new Date().format('HHmmss.fff') + '<br />');
+                    console.log('complete:', tree.id, tree.cache);
+                    $('#txt').html(html.concat([
+                        'nodes:', tree.cache.count, ', level:', tree.cache.level, ', timeout:', tree.cache.timeout, 'ms'
+                    ]).join(''));
+                },
+                callback: function () {
+
+                },
+                onclick: function (node, tree, ev) {
+                    $.console.log('onclick', tree.id, ev, node);
+                },
+                ondblclick: function (node, tree, ev) {
+                    $.console.log('ondblclick', tree.id, ev, node);
+                },
+                oncontextmenu: function (node, tree, ev) {
+                    $.console.log('oncontextmenu', tree.id, ev, node);
+                    $.cmenu({
+                        id: 'treemenu',
+                        obj: 'tree',
+                        width: 150,
+                        items: [
+                            { name: '全部展开', func: function () { tree.expandAll(); } },
+                            { name: '全部收缩', func: function () { tree.collapseAll(); } },
+                            { sep: 1 },
+                            { name: '展开至一级', func: function () { tree.expandToLevel(0); } },
+                            { name: '展开至二级', func: function () { tree.expandToLevel(1); } },
+                            { name: '展开所有目录', func: function () { tree.expandToType('unit'); } },
+                            { name: '收缩至一级', func: function () { tree.collapseToLevel(1); } },
+                            { name: '收缩至二级', func: function () { tree.collapseToLevel(2); } },
+                            { sep: 1 },
+                            { name: '重新加载', func: function () { _loadTree(); } },
+                        ]
+                    }).show(ev);
+                },
+                onchecked: function (node, tree) {
+                    $.console.log('onchecked:', tree.id, node);
+                },
+                onexpand: function (node, tree, func) {
+                    $.console.log('onexpand:', tree.id, node);
+
+                    if (node.type === 'device' && !node.hasChild()) {
+                    //if (node.type === 'device') {
+                        var cameras = [];
+                        var pid = node.data.id;
+                        for (var i = 0; i < 4; i++) {
+                            cameras.push({id: pid + '_' + (i + 1), name:'监控点' + (i + 1), pid: pid });
+                        }
+
+                        //tree.add(cameras, {type:'camera', ptype:'device'});
+
+                        if ($.isFunction(func)) {
+                            //func(cameras, {type: 'camera'});
+                            func(cameras, 'camera');
+                        }
+                    }
+                },
+                expandCallback: function (node, tree) {
+                    $.console.log('expandCallback:', tree.id, node);
+                }
+            });
+            $.console.log('test finish:');
+        }
+        
     }
   
 </script>

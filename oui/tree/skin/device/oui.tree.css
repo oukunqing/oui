@@ -3,23 +3,60 @@
 .oui-tree-device li span.switch-none {background:none;}
 .oui-tree-device li span.switch-none:hover {background:none;}
 
+.oui-tree li span.unit,
 .oui-tree-device li span.unit{background:url("imgs/tree-device.png") no-repeat 0 -25px;}
+.oui-tree li span.unit-open,
 .oui-tree-device li span.unit-open{background:url("imgs/tree-device.png") no-repeat -25px -25px;}
+
+.oui-tree li span.device,
+.oui-tree li span.device-on,
 .oui-tree-device li span.device,
 .oui-tree-device li span.device-on{background:url("imgs/tree-device.png") no-repeat -50px -25px;}
+
+.oui-tree li span.device-open,
+.oui-tree li span.device-on-open,
 .oui-tree-device li span.device-open,
 .oui-tree-device li span.device-on-open{background:url("imgs/tree-device.png") no-repeat -75px -25px;}
+
+.oui-tree li span.device-off,
 .oui-tree-device li span.device-off{background:url("imgs/tree-device.png") no-repeat -100px -25px;}
+
+.oui-tree li span.device-off-open,
 .oui-tree-device li span.device-off-open{background:url("imgs/tree-device.png") no-repeat -125px -25px;}
+
+.oui-tree li span.camera,
+.oui-tree li span.camera-on,
+.oui-tree li span.camera-open,
+.oui-tree li span.camera-on-open,
 .oui-tree-device li span.camera,
 .oui-tree-device li span.camera-on,
 .oui-tree-device li span.camera-open,
 .oui-tree-device li span.camera-on-open{background:url("imgs/tree-device.png") no-repeat -150px -25px;}
+
+.oui-tree li span.camera-off,
+.oui-tree li span.camera-off-open,
 .oui-tree-device li span.camera-off,
 .oui-tree-device li span.camera-off-open{background:url("imgs/tree-device.png") no-repeat -175px -25px;}
+
+.oui-tree li span.camera-play,
+.oui-tree li span.camera-play-open,
 .oui-tree-device li span.camera-play,
 .oui-tree-device li span.camera-play-open{background:url("imgs/tree-device.png") no-repeat -200px -25px;}
+
+.oui-tree li span.preset,
+.oui-tree li span.camera-on,
+.oui-tree li span.preset-open,
+.oui-tree li span.camera-off,
 .oui-tree-device li span.preset,
 .oui-tree-device li span.camera-on,
 .oui-tree-device li span.preset-open,
 .oui-tree-device li span.camera-off{background:url("imgs/tree-device.png") no-repeat -225px -25px;}
+
+
+.oui-tree li span.helmet,
+.oui-tree li span.helmet-on,
+.oui-tree-device li span.helmet,
+.oui-tree-device li span.helmet-on{background:url("imgs/tree-device.png") no-repeat -150px -50px;}
+
+.oui-tree li span.helmet-off,
+.oui-tree-device li span.helmet-off{background:url("imgs/tree-device.png") no-repeat -175px -50px;}

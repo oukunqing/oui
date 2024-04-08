@@ -1,0 +1,34 @@
+<html>
+	<head>
+		
+	</head>
+	<body>
+		<div style="float:left;">
+			<textarea id="content" style="width:1000px;height:400px;"></textarea>
+			<br />
+			<button id="btncheck" onclick="check();">检测</button>
+		</div>
+		<div id="result" style="float:right;">
+
+		</div>
+	</body>
+</html>
+<script type="text/javascript" src="oui/oui.min.js"></script>
+<script type="text/javascript">
+function check() {
+	var con = $I('content').value.split(/\r\n|\n/g),
+		len = con.length, i, c, lines = [], char;
+
+	for (i = 0; i < len; i++) {
+		var s = con[i].trim(), c = s.length;
+		if (c > 0) {
+			char = s[c - 1];
+			if (s.indexOf('//') > -1 || s.indexOf('case ') > -1 || char.inArray(['{', '}',';','[',','])) {
+				continue;
+			}
+			lines.push(i + 1);
+		}
+	}
+	$('#result').html(lines.join('<br />'));
+}
+</script>

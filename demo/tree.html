@@ -24,7 +24,7 @@
 <body>
 <div class="form">
     <div style="float:left;padding:10px;clear:none;">
-        <div id="otr" style="display:block;border:solid 1px #00f;border-radius:4px;overflow:auto;width:400px;height:800px;margin:0;"></div>
+        <div id="tree" style="display:block;border:solid 1px #00f;border-radius:4px;overflow:auto;width:400px;height:800px;margin:0;"></div>
         <div id="txt" style="margin:0;padding: 10px 0;"></div>
     </div>
     <div style="float:left;padding:0;margin:10px 0 0;clear:none;">
@@ -50,12 +50,12 @@
                 </select>
                 <span>Skin</span>
                 <select id="ddlSkin" style="font-size:14px;">
-                    <option value="">Default</option>
+                    <option value="default">Default</option>
                     <option value="device" selected="selected">Device</option>
                 </select>
                 <span>Switch</span>
                 <select id="ddlSwitch" style="font-size:14px;">
-                    <option value="">Default</option>
+                    <option value="default">Default</option>
                     <option value="device">Device</option>
                     <option value="arrow">Arrow</option>
                 </select>
@@ -65,8 +65,10 @@
                 <label class="chb-label"><input type="checkbox" id="chbClickExpand" checked="checked" /><span>点击切换</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbClickChecked" checked="checked" /><span>点击选中</span></label>
                 <div>
-                    <button onclick="test();">加载树菜单</button>
-                    <button onclick="test(2);">加载树菜单2</button>
+                    <button onclick="test(0);">加载树菜单</button>
+                    <button onclick="test(1);">加载树菜单1</button>
+                    <button onclick="test(2);">实时加载树菜单</button>
+                    <button onclick="test(3);">加载树菜单(测试)</button>
                 </div>
             </div>
         </div>
@@ -121,15 +123,16 @@
 </body>
 </html>
 <script type="text/javascript" src="../oui/oui.js?1"></script>
-<script type="text/javascript" src="../oui/tree/oui.tree.js?123"></script>
+<script type="text/javascript" src="../oui/contextmenu/oui.contextmenu.min.js"></script>
+<script type="text/javascript" src="../oui/tree/oui.tree.js?123&skin=device"></script>
 <script type="text/javascript" src="dropdownlist.json"></script>
 <script type="text/javascript">
 
-    var data = {
+    var testData1 = {
         datas: [{id:0,name:'数据',type:'data'}],
         units: [
-            {id:1,pid:0,name:'主控制中心',ptype:'data'},
-            {id:2,pid:1,name:'中言科技'},
+            {id:1,pid:0,name:'主控制中心<',ptype:'data'},
+            {id:2,pid:1,name:'中言科技<"'},
             {id:3,pid:1,name:'浙江'},
             {id:4,pid:1,name:'江苏'},
             {id:5,pid:2,name:'演示测试'},
@@ -145,7 +148,7 @@
 
     };
 
-    var TreeId = 'otr';
+    var TreeId = 'tree';
 
     function expandLevel(expand) {
         var linkage = $('#chbLinkage').checked(),
@@ -186,6 +189,16 @@
         $.tree(TreeId).add(items, par);
     }
 
+    function getTestData(resolve) {
+        $.console.log('getTestData:0');
+        var data = treedata;
+        if ($.isFunction(resolve)) {
+            $.console.log('getTestData:1');
+            resolve(data);
+        }
+        $.console.log('getTestData:2');
+    }
+
     function test(type) {   
         var arr = $N('chbData'), keys = {};
         for (var i = 0; i < arr.length; i++) {
@@ -200,13 +213,15 @@
             keys['device'] ? {type:'device',key:'devices',ptype:'unit'} : undefined,
             keys['camera'] ? {type:'camera',key:'cameras',ptype:'device'} : undefined,
             keys['department'] ? {type:'department',key:'departments'} : undefined,
-            keys['person'] ? {type:'person',key:'persons',ptype:'department'} : undefined
+            keys['person'] ? {type:'helmet',key:'persons',ptype:'department'} : undefined
         ];
 
         $.console.log('trees:', trees);
 
+        var datas = [treedata, treedata2, getTestData, testData1];
+
         var html = ['begin: ' + new Date().format('HHmmss.fff') + ', '],
-            data = type ? treedata2 : treedata,
+            data = datas[type],
             skin = $('#ddlSkin').val(),
             openLevel = $('#ddlLevel').val().toInt(),
             showCheck = $('#chbCheck').checked(),
@@ -215,8 +230,11 @@
             clickExpand = $('#chbClickExpand').checked(),
             clickChecked = $('#chbClickChecked').checked();
 
-        data.units[0].desc = new Date().getTime();
-
+        if ($.isObject(data)) {
+            data.units[0].desc = new Date().getTime();
+            data.units[0].showType = true;
+            //data.units[0].icon = {path: 'imgs/tree/area.png'};
+        }
         $.tree(TreeId, {
             skin: skin, 
             async: true, 
@@ -224,16 +242,16 @@
             trees: trees,
             data: data,
             switch: switchIcon,
-            //leaf: true,
-            //leafType: 'camera',
+            leaf: true,
+            leafType: 'camera',
             dynamic: 3,
             //dynamic: true,
             //指定要动态加载子节点的数据类型
-            dynamicTypes: ['device'],
+            dynamicTypes: ['device', 'camera'],
             //指定为被动态加载的数据类型
             dynamicDatas: 'camera',
             //指定可选中/返回的数据类型，若未指定，则所有都可返回
-            returnTypes: ['device', 'camera'],
+            returnTypes: ['unit', 'device', 'camera'],
             //返回的数据值字段
             valueFields: ['type', 'id', 'code'],
             //openLevel: 1,
@@ -242,8 +260,11 @@
             //checkbox: true,
             showCheck: showCheck,
             showIcon: showIcon,
+            showTitle: true,
+            //showType: false,
+            //showStatus: false,
             clickExpand: clickExpand,
-            //clickChecked: clickChecked,
+            clickChecked: clickChecked,
             complete: function (tree) {
                 $('#divOper').show();
 
@@ -291,7 +312,7 @@
             callback: function () {
 
             },
-            onclick: function (ev, node, tree) {
+            onclick: function (node, tree, ev) {
                 $.console.log('onclick', tree.id, ev, node);
                 $.console.log('getChecked0:', tree.getChecked());
                 $.console.log('getChecked1:', tree.getChecked('data'));
@@ -302,11 +323,26 @@
                 $.console.log('getValue2:', tree.getValue('data'));
                 $.console.log('getValue3:', tree.getValue('node'));
             },
-            ondblclick: function (ev, node, tree) {
+            ondblclick: function (node, tree, ev) {
                 $.console.log('ondblclick', tree.id, ev, node);
             },
-            oncontextmenu: function (ev, node, tree) {
+            oncontextmenu: function (node, tree, ev) {
                 $.console.log('oncontextmenu', tree.id, ev, node);
+                $.cmenu({
+                    id: 'treemenu',
+                    obj: 'tree',
+                    width: 150,
+                    items: [
+                        { name: '全部展开', func: function () { tree.expandAll(); } },
+                        { name: '全部收缩', func: function () { tree.collapseAll(); } },
+                        { sep: 1 },
+                        { name: '展开至一级', func: function () { tree.expandToLevel(0); } },
+                        { name: '展开至二级', func: function () { tree.expandToLevel(1); } },
+                        { name: '展开所有目录', func: function () { tree.expandToType('unit'); } },
+                        { name: '收缩至一级', func: function () { tree.collapseToLevel(1); } },
+                        { name: '收缩至二级', func: function () { tree.collapseToLevel(2); } },
+                    ]
+                }).show(ev);
             },
             onchecked: function (node, tree) {
                 $.console.log('onchecked:', tree.id, node);
@@ -314,20 +350,28 @@
             //onexpand: function (node, tree, resolve) {
             onexpand: function (node, tree, resolve, reject) {
                 $.console.log('onexpand:', tree.id, node);
+                if (!node.hasChild()) {                    
+                    if (node.type === 'device') {
+                        var cameras = [];
+                        var pid = node.data.id;
+                        for (var i = 0; i < 4; i++) {
+                            cameras.push({id: pid + '_' + (i + 1), name:'监控点' + (i + 1), pid: pid });
+                        }
 
-                if (node.type === 'device' && !node.hasChild()) {
-                //if (node.type === 'device') {
-                    var cameras = [];
-                    var pid = node.data.id;
-                    for (var i = 0; i < 4; i++) {
-                        cameras.push({id: pid + '_' + (i + 1), name:'监控点' + (i + 1), pid: pid });
-                    }
-
-                    //tree.add(cameras, {type:'camera', ptype:'device'});
-
-                    if ($.isFunction(resolve)) {
-                        //resolve(cameras, {type: 'camera'});
-                        resolve(cameras, 'camera');
+                        //tree.add(cameras, {type:'camera', ptype:'device'});
+                        if ($.isFunction(resolve)) {
+                            //resolve(cameras, {type: 'camera'});
+                            resolve(cameras, 'camera');
+                        }
+                    } else if (node.type === 'camera') {
+                        var presets = [];
+                        var pid = node.data.id;
+                        for (var i = 0; i < 4; i++) {
+                            presets.push({id: pid + '_' + (i + 1), name:'预置点' + (i + 1), pid: pid });
+                        }
+                        if ($.isFunction(resolve)) {
+                            resolve(presets, 'preset');
+                        }
                     }
                 }
             },
