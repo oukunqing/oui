@@ -4369,6 +4369,9 @@
                     break;
                 }
                 computedStyle = getElementStyle(elem);
+                if (!computedStyle) {
+                    break;
+                }
                 top -= elem.scrollTop;
                 left -= elem.scrollLeft;
 
@@ -5216,7 +5219,7 @@
                 y: e.clientY + scroll.top - document.body.clientTop
             };
         },
-        scrollTo = function (elem, pnode) {
+        scrollTo = function (elem, pnode, offsetY) {
             if ($.isString(elem, true)) {
                 elem = $.toElement(elem);
             }
@@ -5226,12 +5229,16 @@
                 }
                 return $;
             }
-            var parent = $.isElement(pnode = $.toElement(pnode)) ? pnode : elem.parentNode,
+            pnode = $.toElement(pnode);
+
+            var parent = $.isElement(pnode) ? pnode : elem.parentNode,
                 offset = $.getOffset(elem),
                 offsetP = $.getOffset(parent),
                 posH = offset.top - offsetP.top;
 
-            parent.scrollTop += posH;
+            //$.console.log('scrollTo:', elem, parent, offset, offsetP, 'posH', posH);
+
+            parent.scrollTop += posH + (offsetY || 0);
 
             return $;
         },
@@ -5597,7 +5604,9 @@
                 document.cookie = name + '=' + escape(value) + ';';
             } else {
                 var dt = new Date();
-                dt.setTime(dt.getTime() + (8 * 60 * 60 * 1000) + expireMinutes * 60 * 1000);
+                //dt.setTime(dt.getTime() + (8 * 60 * 60 * 1000) + expireMinutes * 60 * 1000);
+                dt.setTime(dt.getTime() + expireMinutes * 60 * 1000);
+                //$.console.log('setCookie:', name, dt, dt.toGMTString());
                 document.cookie = name + "=" + escape(value) + ";expires=" + dt.toGMTString();
             }
             return this;

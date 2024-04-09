@@ -39,7 +39,9 @@
 			//需要显示title的最小层级
 			TitleTextLevel: 2,
 			//需要显示title的最小文字长度
-			TitleTextLength: 12
+			TitleTextLength: 12,
+			//缓存Cookie过期时间，单位：分钟
+			CacheCookieExpire: 10
 		},
 		KC = $.KEY_CODE, KCA = KC.Arrow, KCC = KC.Char, KCM = KC.Min,
 		Cache = {
@@ -187,10 +189,19 @@
 				var tid = tree.tid || Factory.buildTreeId(tree.id);
 				var opt = tree.options,
 					pa = $.extend({}, par),
-					pc = Cache.caches[tid];
+					pc = Cache.caches[tid],
+					store = {
+						expanded: {},
+						selected: {},
+						position: {}
+					};
 
-				if (pc && opt.keepStatus) {
-					pa.store = $.extend({}, pc.store);
+				if (opt.keepStatus) {
+					if (pc) {
+						pa.store = $.extend(store, pc.store);
+					} else if (opt.keepCookie) {
+						pa.store = $.extend(store, Factory.getCookieCache(tree));
+					}
 				}
 
 				if (!pc || force) {
@@ -234,11 +245,7 @@
 							checked: {},
 						},
 						//离线存储
-						store: {
-							expanded: {},
-							selected: {},
-							position: {}
-						}
+						store: store
 					}, pa);
 
 					Cache.caches[tid] = pc;
@@ -368,6 +375,13 @@
 
 				//重新加载时，是否保持之前的展开状态
 				opt.keepStatus = $.isBoolean($.getParam(opt, 'keepStatus,keep'), false);
+				//是否将状态保存到cookie中
+				opt.keepCookie = $.isBoolean($.getParam(opt, 'keepCookie,cookie'), false);
+
+				opt.cookieExpire = $.getParam(opt, 'cookieExpire');
+				if (!$.isNumber(opt.cookieExpire) || opt.cookieExpire < 0) {
+					opt.cookieExpire = Config.CacheCookieExpire;
+				}
 
 				opt.showIcon = $.isBoolean($.getParam(opt, 'showIcon,showicon'), true);
 
@@ -483,6 +497,9 @@
 
 				for (i = 0; i < c; i++) {
 					nid = nodes[i].id;
+					if (!data[key] || !$.isObject(data[key])) {
+						data[key] = {};
+					}
 					if (key === 'expanded') {
 						data[key][nid] = action ? 1 : 0;
 					} else if (action) {
@@ -491,7 +508,20 @@
 						delete data[key][nid];
 					}
 				}
+				if (tree.options.keepCookie) {
+					$.setCookie('TREE_STATUS_' + tree.id, $.toJsonString(data), tree.options.cookieExpire);
+				}
 				return this;
+			},
+			getCookieCache: function (tree) {
+				var store = {};
+				if (tree.options.keepCookie) {
+					var data = $.getCookie('TREE_STATUS_' + tree.id);
+					if (data) {
+						store = data.toJson();
+					}
+				}
+				return store;
 			},
 			setCurrentCache: function (tree, key, nodes, action) {
 				if (!$.isArray(nodes)) {
@@ -1058,6 +1088,9 @@
 					tree.panel.appendChild(root.fragment);
 					delete root.fragment;
 
+					//DOM定位需要DOM渲染之后
+					Factory.keepStatus(tree, true);
+
 					cache.finish = new Date().getTime();
 					cache.timeout = cache.finish - cache.start;
 				}
@@ -1304,16 +1337,16 @@
 					}
 				}
 
-				return this.keepStatus(tree);
+				return this.keepStatus(tree, false);
 			},
-			keepStatus: function (tree) {
+			keepStatus: function (tree, isPosition) {
 				if (!tree.options.keepStatus) {
 					return this;
 				}
 				var nodes = tree.cache.nodes,
 					store = tree.cache.store,
-					keys = ['expanded', 'selected', 'position'],
-					func = ['setExpand', 'setSelected', 'position'],
+					keys = isPosition ? ['position'] : ['expanded', 'selected'],
+					func = isPosition ? ['position'] : ['setExpand', 'setSelected'],
 					dic, action, node;
 
 				for (var i = 0; i < keys.length; i++) {
@@ -1809,7 +1842,6 @@
 
 			Factory.checkedCallback(that, that.tree, ev).setTargetValue(that, that.tree, true);
 
-			//return that.setStoreCache('checked', that, that.checked);
 			return that;
 		},
 		setSelected: function (selected, ev) {
@@ -1823,10 +1855,12 @@
 				Factory.setCurrentCache(that.tree, 'selected', that, selected);
 
 				if (ev && ev.target) {
-					Factory.setCurrentCache(that.tree, 'position', that);
+					Factory.setCurrentCache(that.tree, 'position', that)
+						.setStoreCache(that.tree, 'position', that, selected);
 				}
 			}
-			return that.setParam('selected', selected).setSelectedClass().setStoreCache('selected', that, that.selected);
+			return that.setParam('selected', selected).setSelectedClass()
+				.setStoreCache('selected', that, selected);
 		},
 		setDisabled: function (disabled) {
 			var that = this.self();
@@ -1858,9 +1892,9 @@
 			return that;
 		},
 		position: function (selected) {
-			var that = this.self();
+			var that = this.self(), offsetY = -50;
 			Factory.setCurrentCache(that.tree, 'position', that).expandTo(that.tree, that);
-			$.scrollTo(that.element, that.tree.panel);
+			$.scrollTo(that.element, that.tree.panel, offsetY);
 			return selected ? that.setSelected(true) : that;
 		},
 		setExpand: function (expanded, ev, linkage) {
@@ -2116,6 +2150,12 @@
 				element: undefined,
 				//是否异步加载节点
 				async: undefined,
+				//是否保持状态
+				keepStatus: undefined,
+				//是否保存状态到cookie
+				keepCookie: undefined,
+				//cookie过期时间，单位：分钟
+				cookieExpire: undefined,
 				//是否调试模式
 				debug: false,
 				//data如果不是数组，是对象结构，则需要指定trees

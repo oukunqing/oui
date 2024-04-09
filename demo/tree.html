@@ -63,6 +63,7 @@
                 <label class="chb-label"><input type="checkbox" id="chbCheck" checked="checked" /><span>显示选框</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbIcon" checked="checked" /><span>显示图标</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbStatus" checked="checked" /><span>保持状态</span></label>
+                <label class="chb-label"><input type="checkbox" id="chbCookie" checked="checked" /><span>保存COOKIE</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbClickExpand" checked="checked" /><span>点击切换</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbClickChecked" /><span>点击选中</span></label>
                 <div>
@@ -227,6 +228,7 @@
             skin = $('#ddlSkin').val(),
             openLevel = $('#ddlLevel').val().toInt(),
             keepStatus = $('#chbStatus').checked(),
+            keepCookie = $('#chbCookie').checked(),
             showCheck = $('#chbCheck').checked(),
             showIcon = $('#chbIcon').checked(),
             switchIcon = $('#ddlSwitch').val(),
@@ -242,6 +244,7 @@
             skin: skin, 
             async: true, 
             keepStatus: keepStatus,
+            keepCookie: keepCookie,
             debug: true,
             trees: trees,
             data: data,
@@ -277,29 +280,30 @@
                 $('#txt').html(html.concat([
                     'nodes:', tree.cache.count, ', level:', tree.cache.level, ', timeout:', tree.cache.timeout, 'ms'
                 ]).join(''));
-
-                window.setTimeout(function() {
-                    tree.updateIcon('7280,7155', 'device', {status:'off'});
-                    tree.icon(7151, 'device', {status:'off'});
-                    $.tree(TreeId).updateIcon('7759', 'camera', {status:'play'});
-                    $.tree.updateIcon(TreeId, '7760', 'camera', {status:'play'});
-                    tree.text(7153, 'device', '204488设备');
-                }, 10);
                 /*
                 window.setTimeout(function() {
-                    tree.selected([826, 343, 780], 'unit', true)
-                        .checked([826, 343], 'unit')
-                        //.position(343, 'unit')
+                    tree.updateIcon('7280,7155', 'device', {status:'off'});
+                    tree.icon('device_7151', {status:'off'});
+                    $.tree(TreeId).updateIcon('7759', 'camera', {status:'play'});
+                    $.tree.updateIcon(TreeId, '7760', 'camera', {status:'play'});
+                    tree.text('device_7153', '204488设备');
+                }, 10);
+                
+                window.setTimeout(function() {
+                    tree.selected(['unit_826', 'unit_343', 'unit_780'], true)
+                        .checked(['unit_826', 'unit_343'])
+                        //.position('unit_343')
+                        //.collapse(2, 'unit');
+                }, 20);
+                
+                window.setTimeout(function() {
+                    tree//.selected([826, 343, 780], 'unit', true)
+                        .checked(['unit_826', 'unit_343'])
+                        .expand(2, 'unit')
+                        //.position('unit_567', true)
                         //.collapse(2, 'unit');
                 }, 20);
                 */
-                window.setTimeout(function() {
-                    tree//.selected([826, 343, 780], 'unit', true)
-                        .checked([826, 343], 'unit')
-                        .expand(2, 'unit')
-                        //.position(567, 'unit', true)
-                        //.collapse(2, 'unit');
-                }, 20);
 
                 //window.setTimeout(function() { tree.expandType('unit', true, true); }, 200);
                 //window.setTimeout(function() { tree.collapseType('device', true); }, 20);
