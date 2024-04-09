@@ -2021,3 +2021,12 @@ function escape2Html(str) {
 
 console.log($.escapeHtml('abc"123\''))
 console.log($.unescapeHtml('http://&amp;'))
+
+console.log(''.indexOf())
+
+
+var arr = ['abc', 'acc'];
+ arr.concat(['123', '456']);
+
+console.log(arr);
+

@@ -62,8 +62,9 @@
                 <div></div>
                 <label class="chb-label"><input type="checkbox" id="chbCheck" checked="checked" /><span>显示选框</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbIcon" checked="checked" /><span>显示图标</span></label>
+                <label class="chb-label"><input type="checkbox" id="chbStatus" checked="checked" /><span>保持状态</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbClickExpand" checked="checked" /><span>点击切换</span></label>
-                <label class="chb-label"><input type="checkbox" id="chbClickChecked" checked="checked" /><span>点击选中</span></label>
+                <label class="chb-label"><input type="checkbox" id="chbClickChecked" /><span>点击选中</span></label>
                 <div>
                     <button onclick="test(0);">加载树菜单</button>
                     <button onclick="test(1);">加载树菜单1</button>
@@ -129,9 +130,8 @@
 <script type="text/javascript">
 
     var testData1 = {
-        datas: [{id:0,name:'数据',type:'data'}],
         units: [
-            {id:1,pid:0,name:'主控制中心<',ptype:'data'},
+            {id:1,pid:0,name:'主控制中心<'},
             {id:2,pid:1,name:'中言科技<"'},
             {id:3,pid:1,name:'浙江'},
             {id:4,pid:1,name:'江苏'},
@@ -199,6 +199,8 @@
         $.console.log('getTestData:2');
     }
 
+    var cache = {};
+
     function test(type) {   
         var arr = $N('chbData'), keys = {};
         for (var i = 0; i < arr.length; i++) {
@@ -224,13 +226,14 @@
             data = datas[type],
             skin = $('#ddlSkin').val(),
             openLevel = $('#ddlLevel').val().toInt(),
+            keepStatus = $('#chbStatus').checked(),
             showCheck = $('#chbCheck').checked(),
             showIcon = $('#chbIcon').checked(),
             switchIcon = $('#ddlSwitch').val(),
             clickExpand = $('#chbClickExpand').checked(),
             clickChecked = $('#chbClickChecked').checked();
 
-        if ($.isObject(data)) {
+        if ($.isObject(data) && data.units) {
             data.units[0].desc = new Date().getTime();
             data.units[0].showType = true;
             //data.units[0].icon = {path: 'imgs/tree/area.png'};
@@ -238,6 +241,7 @@
         $.tree(TreeId, {
             skin: skin, 
             async: true, 
+            keepStatus: keepStatus,
             debug: true,
             trees: trees,
             data: data,
@@ -313,6 +317,13 @@
 
             },
             onclick: function (node, tree, ev) {
+                node.self();
+                if (!cache['node']) {
+                    cache['node'] = node;
+                } else {
+                    cache['node'].self();
+                }
+
                 $.console.log('onclick', tree.id, ev, node);
                 $.console.log('getChecked0:', tree.getChecked());
                 $.console.log('getChecked1:', tree.getChecked('data'));
@@ -328,21 +339,32 @@
             },
             oncontextmenu: function (node, tree, ev) {
                 $.console.log('oncontextmenu', tree.id, ev, node);
-                $.cmenu({
-                    id: 'treemenu',
-                    obj: 'tree',
-                    width: 150,
-                    items: [
-                        { name: '全部展开', func: function () { tree.expandAll(); } },
-                        { name: '全部收缩', func: function () { tree.collapseAll(); } },
-                        { sep: 1 },
-                        { name: '展开至一级', func: function () { tree.expandToLevel(0); } },
-                        { name: '展开至二级', func: function () { tree.expandToLevel(1); } },
-                        { name: '展开所有目录', func: function () { tree.expandToType('unit'); } },
-                        { name: '收缩至一级', func: function () { tree.collapseToLevel(1); } },
-                        { name: '收缩至二级', func: function () { tree.collapseToLevel(2); } },
-                    ]
-                }).show(ev);
+                if (node) {
+                    $.cmenu({
+                        id: 'nodemenu',
+                        obj: 'tree',
+                        width: 150,
+                        items: [
+                            { name: '新增子目录', func: function () { } },
+                        ]
+                    }).show(ev);
+                } else {
+                    $.cmenu({
+                        id: 'treemenu',
+                        obj: 'tree',
+                        width: 150,
+                        items: [
+                            { name: '全部展开', func: function () { tree.expandAll(); } },
+                            { name: '全部收缩', func: function () { tree.collapseAll(); } },
+                            { sep: 1 },
+                            { name: '展开至一级', func: function () { tree.expandToLevel(0); } },
+                            { name: '展开至二级', func: function () { tree.expandToLevel(1); } },
+                            { name: '展开所有目录', func: function () { tree.expandToType('unit'); } },
+                            { name: '收缩至一级', func: function () { tree.collapseToLevel(1); } },
+                            { name: '收缩至二级', func: function () { tree.collapseToLevel(2); } },
+                        ]
+                    }).show(ev);
+                }
             },
             onchecked: function (node, tree) {
                 $.console.log('onchecked:', tree.id, node);
