@@ -114,6 +114,12 @@
             </div>
             <div>
                 <div style="padding:0 0 10px 0;" class="item">
+                    <span>节点ID:</span>
+                    <input type="text" id="txtNodeId" class="txt" style="width:120px;" />
+                    <button onclick="position();">定位</button>
+                    <button onclick="position(true);">定位并选中</button>
+                </div>
+                <div style="padding:0 0 10px 0;" class="item">
                     <span>通道ID:</span>
                     <input type="text" id="txtPid" class="txt" style="width:60px;" />
                     <span>数量:</span>
@@ -123,7 +129,7 @@
                     <button onclick="addNode2();">新增预置点</button>
                 </div>
                 
-                <button onclick="addNode1();">新增子节点</button>
+                <!--<button onclick="addNode1();">新增子节点</button>-->
             </div>
         </div>
     </div>
@@ -195,6 +201,11 @@
             items.push({id: pid + '_' + (num + i + 1), name: '预置点' + (num + i + 1), pid: pid});
         }
         $.tree(TreeId).add(items, par);
+    }
+
+    function position(selected) {
+        var nid = $('#txtNodeId').val().trim();
+        $.tree(TreeId).position(nid, selected);
     }
 
     function getTestData(resolve) {

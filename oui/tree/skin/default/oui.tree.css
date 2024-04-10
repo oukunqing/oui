@@ -15,15 +15,22 @@
 .oui-tree a,
 .oui-tree span,
 .oui-tree .item {
-	margin:0;padding:0;display:block;font-size:14px;font-weight:normal;color:#000;
-	background:transparent;border:none 0;box-sizing:border-box;width:auto;white-space:nowrap;
+	margin:0;padding:0;display:block;
+	font-size:14px;font-weight:normal;
+	background:transparent;color:#000;
+	border:none 0;box-sizing:border-box;
+	width:auto;white-space:nowrap;
+	width:-moz-max-content;
+  	width:-webkit-max-content;
 }
 .oui-tree ul,
 .oui-tree li {
-	list-style:none;clear:both;overflow:visible;
-	padding: 0;margin: 0; border: none;
+	list-style:none;clear:both;overflow:visible;display:block;
+	padding:0;margin:0;border:none;
 }
-.oui-tree ul.levelroot {margin:5px 5px 5px 5px;padding:3px 0 80px;overflow:visible;display:block;}
+.oui-tree ul.levelroot {
+	margin:5px 5px 5px 5px;padding:3px 100px 80px 0;overflow:visible;display:block;
+}
 .oui-tree ul.levelroot > li {padding:0;}
 
 .oui-tree ul.box {}
@@ -32,26 +39,33 @@
 .oui-tree li.cur {}
 .oui-tree li.disabled {}
 
-.oui-tree li {padding:0 0 0 16px;}
+.oui-tree li {padding:0 0 0 16px;display:block;}
 
 .oui-tree li .item {
-	float:left;display:inline-block;height:25px;overflow:visible;margin-bottom:1px;
-	border-radius:4px;
+	display:inline-block;height:25px;overflow:visible;margin-bottom:1px;
+	border-radius:4px;width:auto;clear:both;
 }
 .oui-tree li .item:hover{}
 .oui-tree li.cur .item{}
 .oui-tree li.cur .item:hover{}
 
-.oui-tree li a.name,.oui-tree li a span,.oui-tree li span {
+.oui-tree li .item a.name,.oui-tree li a.name span,.oui-tree li span {
 	display:inline-block;height:25px;line-height:23px;
-	outline:none;overflow:visible;float:left;
-	text-align: center; font-size:14px;
+	outline:none;overflow:visible;white-space:nowrap;
+	text-align:center; font-size:14px;
 }
+.oui-tree li a.name span {float:left;display:inline-block;}
 
-.oui-tree li a{cursor:pointer;margin:0 1px;padding:0 5px 0 2px;border:solid 1px transparent;border-radius:4px;}
-.oui-tree li a:hover{background: #e5f3ff;}
-.oui-tree li.cur > .item a{background: #cce8ff;border-color: #cce8ff;}
-.oui-tree li.cur > .item a:hover{background: #cce8ff;border-color: #99d1ff;}
+.oui-tree li a.name{
+	cursor:pointer;margin:0 1px;padding:0 3px 0 2px;
+	border:solid 1px transparent;border-radius:4px;
+	width:auto;white-space:nowrap;
+}
+.oui-tree li a.name:hover{background: #e5f3ff;}
+.oui-tree li.cur > .item a.name{background: #cce8ff;border-color: #cce8ff;}
+.oui-tree li.cur > .item a.name:hover{background: #cce8ff;border-color: #99d1ff;}
+
+.oui-tree li span i,.oui-tree li span b {display:inline-block;white-space:nowrap;}
 
 .oui-tree li .switch {}
 .oui-tree:hover li .switch {}
@@ -92,9 +106,14 @@
 .oui-tree li .icon-open{background:url("imgs/tree.png") no-repeat -25px -25px;}
 .oui-tree li .icon-page{background:transparent url("imgs/tree.png") no-repeat -50px -25px;}
 .oui-tree li .icon-none{background:none;}
-.oui-tree li .text{text-align:left;margin:0;padding:0;}
-.oui-tree li .desc{color:#999;padding:0 0 0 5px;}
-.oui-tree li .count{padding:0 0 0 5px;color:#f50;font-family:'Courier New';font-weight: bold;}
+
+.oui-tree li .text{text-align:left;}
+
+.oui-tree li .desc{color:#999;}
+.oui-tree li .desc b{padding:0 0 0 5px;font-weight:normal;}
+
+.oui-tree li .count{color:#f50;font-family:'Courier New';font-weight:bold;}
+.oui-tree li .count i{padding:0 0 0 5px;font-style:normal;}
 
 .oui-tree ul.hide,.oui-tree li.hide,.oui-tree span.hide{display:none;}
 

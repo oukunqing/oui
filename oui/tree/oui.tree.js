@@ -23,6 +23,7 @@
 				}
 				return Config.Skin;
 			},
+			Localhost: $.isLocalhost(),
 			MouseWhichLeft: 1,
 			MouseWhichRight: 3,
 			CloseLinkageClassName: 'oui-popup-panel',
@@ -144,6 +145,9 @@
 					}
 				}
 				return this;
+			},
+			isLocalhost: function () {
+				return Config.Localhost || location.href.startWith('file://');
 			},
 			isDefaultSkin: function (skin) {
 				return !skin || skin === Config.DefaultSkin;
@@ -533,7 +537,7 @@
 				Cache.timers[key] = window.setTimeout(function() {
 					data = $.toJsonString(tree.cache.store);
 					if (data.length > 2) {
-						if ($.isLocalhost()) {
+						if (Factory.isLocalhost()) {
 							$.console.log('setCookieCache:', tree.id, data);
 						}
 						$.setCookie('TREE_STATUS_' + tree.id, data, tree.options.cookieExpire);
@@ -549,7 +553,7 @@
 					//从外部客户端获取的内容，严谨原则来看，都需要经过验证
 					try {
 						if (data = $.getCookie('TREE_STATUS_' + tree.id)) {
-							if ($.isLocalhost()) {
+							if (Factory.isLocalhost()) {
 								$.console.log('getCookieCache:', tree.id, data);
 							}
 							store = data.toJson();
@@ -1133,6 +1137,12 @@
 
 					cache.finish = new Date().getTime();
 					cache.timeout = cache.finish - cache.start;
+
+					if (Factory.isLocalhost()) {
+						$.console.log('buildNode:', tree.id, [
+							'nodes:', cache.count, ', level:', cache.level, ', timeout:', cache.timeout, 'ms'
+						].join(''));
+					}
 				}
 				
 				return this;
@@ -1183,9 +1193,6 @@
 				}
 				return this;
 			},
-			buildCount: function (count) {
-				return ['[', count || 0, ']'].join('');
-			},
 			buildUl: function (tree, p, isRoot, displayNone) {
 				var ul = p.pnode.getBox(), css = [];
 				if (ul) {
@@ -1202,7 +1209,7 @@
 				ul.id = (p.pid + '_box');
 				ul.className = css.join(' ');
 				//ul.setAttribute('nid', p.pnid);
-
+				
 				return ul;
 			},
 			buildLi: function (tree, p, node, opt) {
@@ -1220,10 +1227,12 @@
 						'<span class="', node.getIconClass(), '" id="', p.id, '_icon', '" nid="', p.nid, '"', '></span>'
 					] : [],
 					count = opt.showCount ? [
-						'<span class="count" id="', p.id, '_count', '" nid="', p.nid, '"', '></span>'
+						'<span class="count" id="', p.id, '_count', '" nid="', p.nid, '"></span>'
 					] : [],
-					desc = opt.showDesc && p.desc ? [
-						'<span class="desc" id="', p.id, '_desc', '" nid="', p.nid, '">', p.desc, '</span>'
+					desc = opt.showDesc ? [
+						'<span class="desc" id="', p.id, '_desc', '" nid="', p.nid, '">', 
+						p.desc ? '<b>' + p.desc + '</b>' : '', 
+						'</span>'
 					] : [],
 					info = opt.showInfo ? [
 						'<span class="info" id="', p.id, '_info', '" nid="', p.nid, '">',
@@ -1236,6 +1245,7 @@
 					'<span class="', node.getSwitchClass(), '" id="', p.id, '_switch', '" nid="', p.nid, '"></span>'
 				].concat(check).concat(icon).concat([
 					'<a class="name" id="', p.id, '_name', '" nid="', p.nid, '"', title, '>',
+					'',
 					'<span class="text" id="', p.id, '_text', '" nid="', p.nid, '">', p.text, '</span>'
 				]).concat(count).concat(desc).concat(['</a>']).concat(info).concat([
 					'</div>'
@@ -1575,6 +1585,9 @@
 			},
 			expandAll: function (tree, expand) {
 				window.setTimeout(function() {
+					if (Factory.isLocalhost()) {
+						$.console.log('expandAll:', 0, tree.id, expand);
+					}
 					var	i, j, c = tree.cache.levels.length,
 						expanded = $.isBoolean(expand, true);
 
@@ -1582,6 +1595,9 @@
 					for (i = 0; i < c; i++) {
 						j = expanded ? c - i - 1 : i;
 						Factory.expandEach(tree.cache.levels[j], expanded);
+					}
+					if (Factory.isLocalhost()) {
+						$.console.log('expandAll:', 1, tree.id, expand);
 					}
 				}, 1);
 				return this;
@@ -2099,13 +2115,14 @@
 			return that;
 		},
 		updateCount: function (count) {
-			var that = this.self(), item, c;
+			var that = this.self(), item, c, str;
 			if (!that.tree.options.showCount) {
 				return that;
 			}
 			if ($.isNumber(c = count)) {
+				str = '<i>(' + c + ')</i>';
 				if (item = that.getItem('count')) {
-					item.innerHTML = '(' + c + ')';
+					item.innerHTML = str;
 				}
 			} else {
 				c = that.childs.length;
@@ -2114,8 +2131,9 @@
 					window.clearTimeout(Cache.timers[key]);
 				}
 				Cache.timers[key] = window.setTimeout(function() {
+					str = '<i>(' + c + ')</i>';
 					if (item = that.getItem('count')) {
-						item.innerHTML = '(' + c + ')';
+						item.innerHTML = str;
 					}
 				}, 5);
 			}
