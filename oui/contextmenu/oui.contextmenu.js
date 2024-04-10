@@ -562,9 +562,9 @@
             buildMenuPar: function (dr, opt, chbId) {
                 var par = $.extend({
                     menu_chb_id: chbId,
-                    key: dr.key || '',
+                    key: $.getParam(dr, 'key', ''),
                     val: dr.val,
-                    action: dr.action || dr.key || '',
+                    action: $.getParam(dr, 'action,key', ''),
                     name: dr.name || dr.text || dr.txt
                 }, dr.par);
 

@@ -52,6 +52,7 @@
                 <select id="ddlSkin" style="font-size:14px;">
                     <option value="default">Default</option>
                     <option value="device" selected="selected">Device</option>
+                    <option value="list">List</option>
                 </select>
                 <span>Switch</span>
                 <select id="ddlSwitch" style="font-size:14px;">
@@ -59,9 +60,12 @@
                     <option value="device">Device</option>
                     <option value="arrow">Arrow</option>
                 </select>
+                <label class="chb-label"><input type="checkbox" id="chbCamera" checked="checked" /><span>动态加载通道</span></label>
                 <div></div>
                 <label class="chb-label"><input type="checkbox" id="chbCheck" checked="checked" /><span>显示选框</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbIcon" checked="checked" /><span>显示图标</span></label>
+                <label class="chb-label"><input type="checkbox" id="chbCount" /><span>显示数量</span></label>
+                <label class="chb-label"><input type="checkbox" id="chbDesc" /><span>显示备注</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbStatus" checked="checked" /><span>保持状态</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbCookie" checked="checked" /><span>保存COOKIE</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbClickExpand" checked="checked" /><span>点击切换</span></label>
@@ -114,6 +118,8 @@
                     <input type="text" id="txtPid" class="txt" style="width:60px;" />
                     <span>数量:</span>
                     <input type="text" id="txtLen" class="txt" style="width:50px;" maxlength="6" />
+                    <span>ID:</span>
+                    <input type="text" id="txtNum" class="txt" style="width:50px;" maxlength="6" />
                     <button onclick="addNode2();">新增预置点</button>
                 </div>
                 
@@ -126,7 +132,7 @@
 </html>
 <script type="text/javascript" src="../oui/oui.js?1"></script>
 <script type="text/javascript" src="../oui/contextmenu/oui.contextmenu.min.js"></script>
-<script type="text/javascript" src="../oui/tree/oui.tree.js?123&skin=device"></script>
+<script type="text/javascript" src="../oui/tree/oui.tree.js?123"></script>
 <script type="text/javascript" src="dropdownlist.json"></script>
 <script type="text/javascript">
 
@@ -175,8 +181,9 @@
         $.tree(TreeId).add(items, par);
     }
     function addNode2() {
-        var pid = $('#txtPid').val().toInt(),
+        var pid = $('#txtPid').val(),
             len = $('#txtLen').val().toInt(),
+            num = $('#txtNum').val().toInt(),
             par = {type: 'preset', ptype: 'camera'},
             items = [];
 
@@ -185,7 +192,7 @@
         }
 
         for (var i = 0; i < len; i++) {
-            items.push({id: pid + '_' + (i + 1), name: '预置点' + (i + 1), pid: pid});
+            items.push({id: pid + '_' + (num + i + 1), name: '预置点' + (num + i + 1), pid: pid});
         }
         $.tree(TreeId).add(items, par);
     }
@@ -231,9 +238,12 @@
             keepCookie = $('#chbCookie').checked(),
             showCheck = $('#chbCheck').checked(),
             showIcon = $('#chbIcon').checked(),
+            showCount = $('#chbCount').checked(),
+            showDesc = $('#chbDesc').checked(),
             switchIcon = $('#ddlSwitch').val(),
             clickExpand = $('#chbClickExpand').checked(),
-            clickChecked = $('#chbClickChecked').checked();
+            clickChecked = $('#chbClickChecked').checked(),
+            dynamicCamera = $('#chbCamera').checked();
 
         if ($.isObject(data) && data.units) {
             data.units[0].desc = new Date().getTime();
@@ -256,7 +266,7 @@
             //指定要动态加载子节点的数据类型
             dynamicTypes: ['device', 'camera'],
             //指定为被动态加载的数据类型
-            dynamicDatas: 'camera',
+            dynamicDatas: dynamicCamera ? 'camera' : '',
             //指定可选中/返回的数据类型，若未指定，则所有都可返回
             returnTypes: ['unit', 'device', 'camera'],
             //返回的数据值字段
@@ -267,6 +277,8 @@
             //checkbox: true,
             showCheck: showCheck,
             showIcon: showIcon,
+            showCount: showCount,
+            showDesc: showDesc,
             showTitle: true,
             //showType: false,
             //showStatus: false,
@@ -358,14 +370,14 @@
                         obj: 'tree',
                         width: 150,
                         items: [
-                            { name: '全部展开', func: function () { tree.expandAll(); } },
-                            { name: '全部收缩', func: function () { tree.collapseAll(); } },
-                            { sep: 1 },
                             { name: '展开至一级', func: function () { tree.expandToLevel(0); } },
                             { name: '展开至二级', func: function () { tree.expandToLevel(1); } },
                             { name: '展开所有目录', func: function () { tree.expandToType('unit'); } },
                             { name: '收缩至一级', func: function () { tree.collapseToLevel(1); } },
                             { name: '收缩至二级', func: function () { tree.collapseToLevel(2); } },
+                            { sep: 1 },
+                            { name: '全部展开', func: function () { tree.expandAll(); } },
+                            { name: '全部收缩', func: function () { tree.collapseAll(); } },
                         ]
                     }).show(ev);
                 }

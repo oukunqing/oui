@@ -48,7 +48,8 @@
 			ids: [],
 			trees: {},
 			caches: {},
-			events: {}
+			events: {},
+			timers: {}
 		},
 		Event = {
 			target: function (ev, tree) {
@@ -90,7 +91,7 @@
 							Factory.clickCallback(ep.node, tree, ev);
 						}
 					}*/ else if (Factory.isNodeBody(ep)) {
-						$.console.log('click-12345:', ep.node.id, ep.node.type);
+						//$.console.log('click-12345:', ep.node.id, ep.node.type);
 						if (Factory.isReturnType(tree, ep.node.type)) {
 							Factory.setTargetValue(ep.node, tree).clickCallback(ep.node, tree, ev);
 							ep.node.setSelected(true, ev);
@@ -320,7 +321,7 @@
 				return ot;
 			},
 			parseArrayParam: function (arr) {
-				if (!$.isArray(arr)) {					
+				if (!$.isArray(arr)) {
 					if ($.isString(arr, true)) {
 						arr = arr.split(/[,;|]/);
 					} else {
@@ -371,10 +372,12 @@
 				opt.trees = Factory.parseTrees(opt.trees);
 
 				//是否异步加载节点DOM
-				opt.async = $.isBoolean(opt.async, false);
+				opt.async = $.isBoolean(opt.async, true);
 
-				//重新加载时，是否保持之前的展开状态
+				//重新加载时，是否保持节点展开状态
 				opt.keepStatus = $.isBoolean($.getParam(opt, 'keepStatus,keep'), false);
+				//是否保持节点收缩状态
+				opt.keepCollapse = $.isBoolean($.getParam(opt, 'keepCollapse'), false);
 				//是否将状态保存到cookie中
 				opt.keepCookie = $.isBoolean($.getParam(opt, 'keepCookie,cookie'), false);
 
@@ -389,6 +392,8 @@
 				opt.showCheck = $.isBoolean(showCheck, false) || showCheck === 'checkbox';
 
 				opt.showCount = $.isBoolean($.getParam(opt, 'showCount,showcount'), false);
+				opt.showDesc = $.isBoolean($.getParam(opt, 'showDesc,showdesc'), false);
+				opt.showInfo = $.isBoolean($.getParam(opt, 'showInfo,showinfo'), false);
 
 				opt.showTitle = $.isBoolean($.getParam(opt, 'showTitle,showtitle'), false);
 
@@ -485,40 +490,75 @@
 				return tree.cache.nodes[nodeId];
 			},
 			setStoreCache: function (tree, key, nodes, action) {
-				if (!tree.options.keepStatus) {
+				var opt = tree.options;
+				if (!opt.keepStatus) {
 					return this;
 				}
 				if (!$.isArray(nodes)) {
 					nodes = [nodes];
 				}
-				action = $.isBoolean(action, true);
 				var data = tree.cache.store,
+					able = $.isBoolean(action, true),
 					node, nid, i, c = nodes.length;
 
 				for (i = 0; i < c; i++) {
-					nid = nodes[i].id;
-					if (!data[key] || !$.isObject(data[key])) {
+					nid = nodes[i].id.toString();
+
+					//定位信息只记录最后一个
+					if (!data[key] || !$.isObject(data[key]) || key === 'position') {
 						data[key] = {};
 					}
-					if (key === 'expanded') {
-						data[key][nid] = action ? 1 : 0;
-					} else if (action) {
+
+					if (key === 'expanded' && opt.keepCollapse) {
+						data[key][nid] = able ? 1 : 0;
+					} else if (able) {
 						data[key][nid] = 1;
 					} else if (data[key][nid]) {
 						delete data[key][nid];
 					}
 				}
-				if (tree.options.keepCookie) {
-					$.setCookie('TREE_STATUS_' + tree.id, $.toJsonString(data), tree.options.cookieExpire);
+				return this.setCookieCache(tree);
+			},
+			setCookieCache: function (tree) {
+				if (!tree.options.keepCookie) {
+					return this;
 				}
+				//将展开/收缩状态写入cookie保存，只是一个辅助功能，
+				//写入cookie相对比较耗时
+				//为了防止指展开时循环写入cookie，增加防抖操作
+				var key = 'tree_timer_' + tree.id, data;
+				if (Cache.timers[key]) {
+					window.clearTimeout(Cache.timers[key]);
+				}
+				Cache.timers[key] = window.setTimeout(function() {
+					data = $.toJsonString(tree.cache.store);
+					if (data.length > 2) {
+						if ($.isLocalhost()) {
+							$.console.log('setCookieCache:', tree.id, data);
+						}
+						$.setCookie('TREE_STATUS_' + tree.id, data, tree.options.cookieExpire);
+					}
+				}, 2000);
+
 				return this;
 			},
 			getCookieCache: function (tree) {
-				var store = {};
+				var store = {}, data;
 				if (tree.options.keepCookie) {
-					var data = $.getCookie('TREE_STATUS_' + tree.id);
-					if (data) {
-						store = data.toJson();
+					//从cookie获取的内容格式可能异常，所以需要捕获异常，防止程序异常中断
+					//从外部客户端获取的内容，严谨原则来看，都需要经过验证
+					try {
+						if (data = $.getCookie('TREE_STATUS_' + tree.id)) {
+							if ($.isLocalhost()) {
+								$.console.log('getCookieCache:', tree.id, data);
+							}
+							store = data.toJson();
+						}
+					} catch (e) {
+						store = {};
+						if ($.isLocalhost()) {
+							$.console.warn('getCookieCache:', data, e);
+						}
 					}
 				}
 				return store;
@@ -580,7 +620,7 @@
 				}
 				return this;
 			},
-			getNodeValue: function (node, dataKey, nodeType, kv) {				
+			getNodeValue: function (node, dataKey, nodeType, kv) {
 				if (Factory.isNode(node) && (!nodeType || nodeType === node.getType())) {
 					kv.key = dataKey;
 					switch(dataKey) {
@@ -723,7 +763,7 @@
 
 				if (tag !== 'select' && (tag !== 'input' || !type.inArray(['text']))) {
 					return this;
-				}				
+				}
 				$.addClass(elem, 'oui-tree-elem');
 
 				$.addListener(document, 'mousedown', function (ev) {
@@ -1043,7 +1083,7 @@
 						if (Factory.isPromise()) {
 							new Promise(function (resolve, reject) { opt.data(func); });
 						} else {
-							window.setTimeout(function() { opt.data(func); }, 0);
+							window.setTimeout(function() { opt.data(func); }, 1);
 						}
 					}
 					return this;
@@ -1109,8 +1149,7 @@
 
 				if (Factory.isNode(pnode) && pnode.tree === tree) {
 					fragment = $.createFragment();
-					Factory.buildItem(tree, root, items, p, nodes, fragment)
-						.initStatus(tree, false, nodes);
+					Factory.buildItem(tree, root, items, p, nodes, fragment).initStatus(tree, false, nodes);
 					pnode.childbox.appendChild(fragment);
 				} else {
 					var data = _filter(tree, items, p), dr;
@@ -1144,6 +1183,9 @@
 				}
 				return this;
 			},
+			buildCount: function (count) {
+				return ['[', count || 0, ']'].join('');
+			},
 			buildUl: function (tree, p, isRoot, displayNone) {
 				var ul = p.pnode.getBox(), css = [];
 				if (ul) {
@@ -1170,20 +1212,20 @@
 				//li.setAttribute('nid', p.nid);
 
 				var hide = ' style="display:none;"',
-					title = opt.showTitle && p.level >= Config.TitleTextLevel && p.text.length > Config.TitleTextLength ? ' title="' + p.text + '"' : '',
+					title = opt.showTitle && p.text.length > Config.TitleTextLength ? ' title="' + p.text + '"' : '',
 					check = opt.showCheck ? [
 						'<span class="check" id="', p.id, '_check', '" nid="', p.nid, '"></span>',
 					] : [],
 					icon = opt.showIcon ? [
 						'<span class="', node.getIconClass(), '" id="', p.id, '_icon', '" nid="', p.nid, '"', '></span>'
 					] : [],
-					desc = p.desc ? [
+					count = opt.showCount ? [
+						'<span class="count" id="', p.id, '_count', '" nid="', p.nid, '"', '></span>'
+					] : [],
+					desc = opt.showDesc && p.desc ? [
 						'<span class="desc" id="', p.id, '_desc', '" nid="', p.nid, '">', p.desc, '</span>'
 					] : [],
-					count = opt.showCount ? [
-						'<span class="count" id="', p.id, '_count', '" nid="', p.nid, '"', hide, '>', '</span>'
-					] : [],
-					info = false ? [
+					info = opt.showInfo ? [
 						'<span class="info" id="', p.id, '_info', '" nid="', p.nid, '">',
 						//'类型：', p.type, ' 编号：', dr.code, 
 						'</span>'
@@ -1195,7 +1237,7 @@
 				].concat(check).concat(icon).concat([
 					'<a class="name" id="', p.id, '_name', '" nid="', p.nid, '"', title, '>',
 					'<span class="text" id="', p.id, '_text', '" nid="', p.nid, '">', p.text, '</span>'
-				]).concat(desc).concat(count).concat(['</a>']).concat(info).concat([
+				]).concat(count).concat(desc).concat(['</a>']).concat(info).concat([
 					'</div>'
 				]).join('');
 
@@ -1275,8 +1317,10 @@
 
 					node.setParent(p.pnode.setBox(Factory.buildUl(tree, p, p.root)))
 						.setParam('element', Factory.buildLi(tree, p, node, opt));
-
-					p.pnode.addChild(node, false, fragment);
+					
+					if (p.pnode) {
+						p.pnode.addChild(node, false, fragment);
+					}
 
 					Factory.setNodeCache(tree, node);
 					Factory.setTypeCache(tree, p.type, p.ptype);
@@ -1355,7 +1399,8 @@
 						for (var nid in dic) {
 							action = dic[nid] === 1 ? true : false;
 							if (node = nodes[nid]) {
-								node[func[i]](action);
+								//状态保持时模拟点击事件，以加载之前已经加载的动态节点
+								node[func[i]](action, {target:'keep'});
 							}
 						}
 					}
@@ -1448,7 +1493,7 @@
 				var i, j, k, c = types.length, nodes = [];
 				for (i = 0; i < c; i++) {
 					Factory.findType(cache.trees, types[i], linkage, expand, keys);
-				}				
+				}
 				c = keys.length;
 
 				for (i = 0; i < c; i++) {
@@ -1479,12 +1524,15 @@
 				}
 				return this;
 			},
-			expandLevel: function (tree, levels, linkage, expand) {
-				var i, j, c, nc = tree.cache.levels.length,
-					cur, n;
+			//reverse: 是否反转操作
+			//反转的意思是：如果展开到2级节点，则2级以下（大于2级）的节点全部收缩
+			expandLevel: function (tree, levels, linkage, reverse, expand) {
+				var i, j, c, cur, n, nc = tree.cache.levels.length;
 
 				levels = $.toIdList(Factory.parseArrayParam(levels), 0);
+				linkage = $.isBoolean(linkage, false);
 				expand = $.isBoolean(expand, true);
+				reverse = $.isBoolean(reverse, false);
 				c = levels.sort().length;
 
 				if (c > nc) {
@@ -1501,6 +1549,13 @@
 							break;
 						}
 					}
+					if (reverse) {
+						j = expand ? cur + 1 : 0;
+						c = expand ? nc : cur;
+						for (j; j < c; j++) {
+							Factory.expandEach(tree.cache.levels[j], !expand, true);
+						}
+					}
 				} else {
 					for(i = 0; i < c; i++) {
 						n = levels[expand ? c - i - 1 : i];
@@ -1509,32 +1564,26 @@
 				}
 				return this;
 			},
-			expandToLevel: function (tree, levels) {
-				return Factory.expandLevel(tree, levels, true);
+			expandToLevel: function (tree, levels, reverse) {
+				return Factory.expandLevel(tree, levels, true, reverse, true);
 			},
-			collapseLevel: function (tree, levels, linkage) {
-				return Factory.expandLevel(tree, levels, linkage, false);
+			collapseLevel: function (tree, levels, linkage, reverse) {
+				return Factory.expandLevel(tree, levels, linkage, reverse, false);
 			},
-			collapseToLevel: function (tree, levels) {
-				return Factory.expandLevel(tree, levels, true, false);
+			collapseToLevel: function (tree, levels, reverse) {
+				return Factory.expandLevel(tree, levels, true, reverse, false);
 			},
 			expandAll: function (tree, expand) {
-				var	i, j, c = tree.cache.levels.length,
-					fragment = $.createFragment();
+				window.setTimeout(function() {
+					var	i, j, c = tree.cache.levels.length,
+						expanded = $.isBoolean(expand, true);
 
-				if (expand = $.isBoolean(expand, true)) {
-					fragment.appendChild(tree.panel.children[0]);
-				}
-
-				//收缩:从最顶层开始; 展开:从最低层开始
-				for (i = 0; i < c; i++) {
-					j = expand ? c - i - 1 : i;
-					Factory.expandEach(tree.cache.levels[j], expand);
-				}
-
-				if (expand) {
-					tree.panel.appendChild(fragment);
-				}
+					//收缩:从最顶层开始; 展开:从最低层开始
+					for (i = 0; i < c; i++) {
+						j = expanded ? c - i - 1 : i;
+						Factory.expandEach(tree.cache.levels[j], expanded);
+					}
+				}, 1);
 				return this;
 			},
 			collapseAll: function (tree) {
@@ -1544,14 +1593,15 @@
 				if (tree.options.callbackDebounce) {
 					$.debounce({
 						id: 'otree-callback-' + tree.id,
-						delay: tree.options.debounceDelay, timeout: tree.options.debounceTimeout
+						delay: tree.options.debounceDelay,
+						timeout: tree.options.debounceTimeout
 					}, function() {
 						callback(node, tree, ev);
 					});
 				} else {
 					callback(node, tree, ev);
 				}
-				return this;	
+				return this;
 			},
 			callback: function (node, tree, ev) {
 				if ($.isFunction(tree.options.callback)) {
@@ -1576,7 +1626,9 @@
 				            callback(node, tree, func);
 				        });
 					} else {
-						callback(node, tree, func);
+						window.setTimeout(function() {
+							callback(node, tree, func);
+						}, 1);
 					}
 				}
 				return this;
@@ -1586,7 +1638,7 @@
 				if ($.isFunction(node.checkedCallback)) {
 					callback = node.checkedCallback;
 				}
-				if ($.isFunction(callback)) {;
+				if ($.isFunction(callback)) {
 					return Factory.debounceCallback(callback, node, tree, ev);
 				}
 				return Factory.callback(node, tree, ev);
@@ -1768,8 +1820,18 @@
 			return this.self().items[key] = elem, elem;
 		},
 		getItem: function (key) {
-			var that = this.self();
-			return that.items[key] ? that.items[key] : that.setItem(key, that.element.querySelector('.' + key));
+			var that = this.self(), elem;
+			if (!that.items) {
+				return null;
+			} else if (that.items[key]) {
+				return that.items[key];
+			} else if (that.element) {
+				if (elem = that.element.querySelector('.' + key)) {
+					that.setItem(key, elem);
+					return elem;
+				}
+			}
+			return null;
 		},
 		isPartChecked: function (childs, checked) {
 			var len = childs.length, i;
@@ -1882,6 +1944,9 @@
 			if (!that.childs || clear) {
 				that.childs = [];
 			}
+			if (!node.element) {
+				return that;
+			}
 			that.childs.push(node);
 
 			if (fragment) {
@@ -1889,7 +1954,7 @@
 			} else if (that.childbox) {
 				that.childbox.appendChild(node.element);
 			}
-			return that;
+			return that.updateCount();
 		},
 		position: function (selected) {
 			var that = this.self(), offsetY = -50;
@@ -2028,8 +2093,31 @@
 		},
 		updateDesc: function (str) {
 			var that = this.self(), item;
-			if ((item = that.getItem('desc'))) {
+			if (item = that.getItem('desc')) {
 				item.innerHTML = str || '';
+			}
+			return that;
+		},
+		updateCount: function (count) {
+			var that = this.self(), item, c;
+			if (!that.tree.options.showCount) {
+				return that;
+			}
+			if ($.isNumber(c = count)) {
+				if (item = that.getItem('count')) {
+					item.innerHTML = '(' + c + ')';
+				}
+			} else {
+				c = that.childs.length;
+				var key = 'node_count_' + that.tree.id + '-' + that.id;			
+				if (Cache.timers[key]) {
+					window.clearTimeout(Cache.timers[key]);
+				}
+				Cache.timers[key] = window.setTimeout(function() {
+					if (item = that.getItem('count')) {
+						item.innerHTML = '(' + c + ')';
+					}
+				}, 5);
 			}
 			return that;
 		},
@@ -2093,7 +2181,7 @@
 		},
 		setNodeClass: function (type) {
 			var that = this.self();
-			switch(type) {				
+			switch(type) {
 				case 'select': that.setSelectedClass(); break;
 				case 'disabled': that.setDisabledClass(); break;
 			}
@@ -2133,7 +2221,7 @@
 	function Tree(id, options) {
 		if ($.isObject(id) && $.isUndefined(options)) {
 			options = id;
-			id = null;			
+			id = null;
 		}
 		var opt = $.extend({}, options, id ? {id: id} : null);
 
@@ -2150,8 +2238,10 @@
 				element: undefined,
 				//是否异步加载节点
 				async: undefined,
-				//是否保持状态
+				//是否保持节点展开、定位状态
 				keepStatus: undefined,
+				//是否保持收缩状态
+				keepCollapse: undefined,
 				//是否保存状态到cookie
 				keepCookie: undefined,
 				//cookie过期时间，单位：分钟
@@ -2393,17 +2483,17 @@
 		collapseAll: function () {
 			return Factory.expandAll(this, false), this;
 		},
-		expandLevel: function (levels, linkage, expand) {
-			return Factory.expandLevel(this, levels, linkage, expand), this;
+		expandLevel: function (levels, linkage, reverse, expand) {
+			return Factory.expandLevel(this, levels, linkage, reverse, expand), this;
 		},
-		expandToLevel: function (levels, expand) {
-			return Factory.expandLevel(this, levels, true, expand), this;
+		expandToLevel: function (levels, reverse, expand) {
+			return Factory.expandLevel(this, levels, true, $.isBoolean(reverse, true), expand), this;
 		},
-		collapseLevel: function (levels, linkage) {
-			return Factory.collapseLevel(this, levels, linkage), this;
+		collapseLevel: function (levels, linkage, reverse) {
+			return Factory.collapseLevel(this, levels, linkage, reverse), this;
 		},
-		collapseToLevel: function (levels) {
-			return Factory.collapseLevel(this, levels, true), this;
+		collapseToLevel: function (levels, reverse) {
+			return Factory.collapseLevel(this, levels, true, $.isBoolean(reverse, true)), this;
 		},
 		expandNode: function (nodeIds, linkage) {
 			return Factory.expandNode(this, nodeIds, linkage);
@@ -2572,11 +2662,17 @@
 		collapseAll: function (treeId) {
 			return Factory.action(treeId, 'collapseAll');
 		},
-		expandLevel: function (treeId, levels, linkage, expand) {
-			return Factory.action(treeId, 'expandLevel', levels, linkage, expand);
+		expandLevel: function (treeId, levels, linkage, reverse, expand) {
+			return Factory.action(treeId, 'expandLevel', levels, linkage, reverse, expand);
 		},
-		collapseLevel: function (treeId, levels, linkage) {
-			return Factory.action(treeId, 'expandLevel', levels, linkage, false);
+		expandToLevel: function (treeId, levels, reverse, expand) {
+			return Factory.action(treeId, 'expandToLevel', levels, reverse, expand);
+		},
+		collapseLevel: function (treeId, levels, linkage, reverse) {
+			return Factory.action(treeId, 'expandLevel', levels, linkage, reverse, false);
+		},
+		collapseToLevel: function (treeId, levels, reverse) {
+			return Factory.action(treeId, 'collapseToLevel', levels, reverse, false);
 		},
 		expandType: function (treeId, types, linkage, expand) {
 			return Factory.action(treeId, 'expandType', types, linkage, expand);

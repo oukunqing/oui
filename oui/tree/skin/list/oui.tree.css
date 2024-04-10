@@ -1,6 +1,6 @@
 .oui-tree {
 	width:100%;height:100%;border:none 0;
-	font-size:14px;font-family:Arial,宋体,微软雅黑;
+	font-family:Arial, 宋体, 微软雅黑;font-size:14px;
 	display:block;overflow:auto;
 	padding:0;margin:0;
     background: #fff;
@@ -42,9 +42,9 @@
 .oui-tree li.cur .item{}
 .oui-tree li.cur .item:hover{}
 
-.oui-tree li a.name,.oui-tree li a span,.oui-tree li span {
+.oui-tree li a.name,.oui-tree li span {
 	display:inline-block;height:25px;line-height:23px;
-	outline:none;overflow:visible;float:left;
+	outline:none;overflow:visible;
 	text-align: center; font-size:14px;
 }
 
@@ -92,9 +92,9 @@
 .oui-tree li .icon-open{background:url("imgs/tree.png") no-repeat -25px -25px;}
 .oui-tree li .icon-page{background:transparent url("imgs/tree.png") no-repeat -50px -25px;}
 .oui-tree li .icon-none{background:none;}
-.oui-tree li .text{text-align:left;margin:0;padding:0;}
-.oui-tree li .desc{color:#999;padding:0 0 0 5px;}
-.oui-tree li .count{padding:0 0 0 5px;color:#f50;font-family:'Courier New';font-weight: bold;}
+.oui-tree li .text{text-align:left;}
+.oui-tree li .desc{color:#999;margin:0 0 0 5px;}
+.oui-tree li .count{color:#f00;}
 
 .oui-tree ul.hide,.oui-tree li.hide,.oui-tree span.hide{display:none;}
 

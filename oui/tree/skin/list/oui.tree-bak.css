@@ -1,6 +1,6 @@
 .oui-tree {
 	width:100%;height:100%;border:none 0;
-	font-size:14px;font-family:Arial,宋体,微软雅黑;
+	font-family:Arial, 宋体, 微软雅黑;font-size:14px;
 	display:block;overflow:auto;
 	padding:0;margin:0;
     background: #fff;
@@ -16,13 +16,58 @@
 .oui-tree span,
 .oui-tree .item {
 	margin:0;padding:0;display:block;font-size:14px;font-weight:normal;color:#000;
-	background:transparent;border:none 0;box-sizing:border-box;width:auto;white-space:nowrap;
+	background:transparent;border:none 0;box-sizing:border-box;width:auto;white-space:nowrap;				
 }
 .oui-tree ul,
 .oui-tree li {
 	list-style:none;clear:both;overflow:visible;
 	padding: 0;margin: 0; border: none;
 }
+.oui-tree li {padding:0;}
+
+.oui-tree li.level1 .item {padding-left:16px;}
+.oui-tree li.level2 .item {padding-left:32px;}
+.oui-tree li.level3 .item {padding-left:48px;}
+.oui-tree li.level4 .item {padding-left:64px;}
+.oui-tree li.level5 .item {padding-left:80px;}
+.oui-tree li.level6 .item {padding-left:96px;}
+.oui-tree li.level7 .item {padding-left:112px;}
+.oui-tree li.level8 .item {padding-left:128px;}
+.oui-tree li.level9 .item {padding-left:144px;}
+.oui-tree li.level10 .item {padding-left:160px;}
+.oui-tree li.level11 .item {padding-left:176px;}
+.oui-tree li.level12 .item {padding-left:192px;}
+.oui-tree li.level13 .item {padding-left:208px;}
+.oui-tree li.level14 .item {padding-left:224px;}
+.oui-tree li.level15 .item {padding-left:240px;}
+.oui-tree li.level16 .item {padding-left:256px;}
+.oui-tree li.level17 .item {padding-left:272px;}
+.oui-tree li.level18 .item {padding-left:288px;}
+.oui-tree li.level19 .item {padding-left:304px;}
+.oui-tree li.level20 .item {padding-left:320px;}
+
+.oui-tree li .item {
+	display:inline-block;
+	height:27px;overflow:visible;margin-bottom:1px;
+	border-radius:4px;border:solid 1px transparent;box-sizing:border-box;
+	display:block;
+}
+.oui-tree li > .item:hover{background: #e5f3ff;}
+.oui-tree li.cur > .item{background: #cce8ff;border-color: #cce8ff;}
+.oui-tree li.cur > .item:hover{background: #cce8ff;border-color: #99d1ff;}
+
+.oui-tree li a.name,.oui-tree li span {
+	display:inline-block;height:25px;line-height:23px;
+	outline:none;overflow:visible;
+	text-align: center; font-size:14px; display: inline-table;
+}
+
+.oui-tree li a{cursor:pointer;margin:0 1px;padding:0 5px 0 2px;/*border:solid 1px transparent;border-radius:4px;*/}
+.oui-tree li a:hover{/*background: #e5f3ff;*/}
+.oui-tree li.cur > .item a{/*background: #cce8ff;border-color: #cce8ff;*/}
+.oui-tree li.cur > .item a:hover{/*background: #cce8ff;border-color: #99d1ff;*/}
+
+
 .oui-tree ul.levelroot {margin:5px 5px 5px 5px;padding:3px 0 80px;overflow:visible;display:block;}
 .oui-tree ul.levelroot > li {padding:0;}
 
@@ -31,27 +76,6 @@
 
 .oui-tree li.cur {}
 .oui-tree li.disabled {}
-
-.oui-tree li {padding:0 0 0 16px;}
-
-.oui-tree li .item {
-	float:left;display:inline-block;height:25px;overflow:visible;margin-bottom:1px;
-	border-radius:4px;
-}
-.oui-tree li .item:hover{}
-.oui-tree li.cur .item{}
-.oui-tree li.cur .item:hover{}
-
-.oui-tree li a.name,.oui-tree li a span,.oui-tree li span {
-	display:inline-block;height:25px;line-height:23px;
-	outline:none;overflow:visible;float:left;
-	text-align: center; font-size:14px;
-}
-
-.oui-tree li a{cursor:pointer;margin:0 1px;padding:0 5px 0 2px;border:solid 1px transparent;border-radius:4px;}
-.oui-tree li a:hover{background: #e5f3ff;}
-.oui-tree li.cur > .item a{background: #cce8ff;border-color: #cce8ff;}
-.oui-tree li.cur > .item a:hover{background: #cce8ff;border-color: #99d1ff;}
 
 .oui-tree li .switch {}
 .oui-tree:hover li .switch {}
@@ -92,9 +116,9 @@
 .oui-tree li .icon-open{background:url("imgs/tree.png") no-repeat -25px -25px;}
 .oui-tree li .icon-page{background:transparent url("imgs/tree.png") no-repeat -50px -25px;}
 .oui-tree li .icon-none{background:none;}
-.oui-tree li .text{text-align:left;margin:0;padding:0;}
-.oui-tree li .desc{color:#999;padding:0 0 0 5px;}
-.oui-tree li .count{padding:0 0 0 5px;color:#f50;font-family:'Courier New';font-weight: bold;}
+.oui-tree li .text{text-align:left;}
+.oui-tree li .desc{color:#999;margin:0 0 0 5px;}
+.oui-tree li .count{color:#f00;}
 
 .oui-tree ul.hide,.oui-tree li.hide,.oui-tree span.hide{display:none;}
 
