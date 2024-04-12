@@ -1,6 +1,6 @@
 .oui-tree {
 	width:100%;height:100%;border:none 0;
-	font-family:Arial, 宋体, 微软雅黑;font-size:14px;
+	font-size:14px;font-family:Arial,宋体,微软雅黑;
 	display:block;overflow:auto;
 	padding:0;margin:0;
     background: #fff;
@@ -15,14 +15,78 @@
 .oui-tree a,
 .oui-tree span,
 .oui-tree .item {
-	margin:0;padding:0;display:block;font-size:14px;font-weight:normal;color:#000;
-	background:transparent;border:none 0;box-sizing:border-box;width:auto;white-space:nowrap;
+	margin:0;padding:0;display:block;
+	font-size:14px;font-weight:normal;
+	background:transparent;color:#000;
+	border:none 0;box-sizing:border-box;
+	width:auto;white-space:nowrap;
+	width:-moz-max-content;
+  	width:-webkit-max-content;
 }
 .oui-tree ul,
 .oui-tree li {
-	list-style:none;clear:both;overflow:visible;
-	padding: 0;margin: 0; border: none;
+	list-style:none;clear:both;overflow:visible;display:block;
+	padding:0;margin:0;border:none;
 }
+.oui-tree ul.levelroot {
+	margin:5px 5px 5px 5px;padding:3px 20px 80px 0;overflow:visible;display:block;
+}
+.oui-tree ul.levelroot > li {padding:0;}
+
+.oui-tree ul.box {}
+.oui-tree ul.box > li.node {width:100%; display:block;
+	width:-moz-max-content;
+  	width:-webkit-max-content;}
+
+.oui-tree li.cur {}
+.oui-tree li.disabled {}
+
+.oui-tree li {padding:0;}
+
+.oui-tree li.level1 .item {padding-left:16px;}
+.oui-tree li.level2 .item {padding-left:32px;}
+.oui-tree li.level3 .item {padding-left:48px;}
+.oui-tree li.level4 .item {padding-left:64px;}
+.oui-tree li.level5 .item {padding-left:80px;}
+.oui-tree li.level6 .item {padding-left:96px;}
+.oui-tree li.level7 .item {padding-left:112px;}
+.oui-tree li.level8 .item {padding-left:128px;}
+.oui-tree li.level9 .item {padding-left:144px;}
+.oui-tree li.level10 .item {padding-left:160px;}
+.oui-tree li.level11 .item {padding-left:176px;}
+.oui-tree li.level12 .item {padding-left:192px;}
+.oui-tree li.level13 .item {padding-left:208px;}
+.oui-tree li.level14 .item {padding-left:224px;}
+.oui-tree li.level15 .item {padding-left:240px;}
+.oui-tree li.level16 .item {padding-left:256px;}
+.oui-tree li.level17 .item {padding-left:272px;}
+.oui-tree li.level18 .item {padding-left:288px;}
+.oui-tree li.level19 .item {padding-left:304px;}
+.oui-tree li.level20 .item {padding-left:320px;}
+
+.oui-tree li .item {
+	display:block;
+	height:27px;overflow:hidden;margin-bottom:1px;
+	border-radius:4px;border:solid 1px transparent;box-sizing:border-box;
+	display:block;width:100%;
+}
+.oui-tree li > .item:hover{background: #e5f3ff;}
+.oui-tree li.cur > .item{background: #cce8ff;border-color: #cce8ff;}
+.oui-tree li.cur > .item:hover{background: #cce8ff;border-color: #99d1ff;}
+
+
+.oui-tree li a.name,.oui-tree li span {
+	display:inline-block;height:25px;line-height:23px;
+	outline:none;overflow:visible;
+	text-align: center; font-size:14px; display: inline-table;
+}
+
+.oui-tree li a{cursor:pointer;margin:0 1px;padding:0 5px 0 2px;/*border:solid 1px transparent;border-radius:4px;*/}
+.oui-tree li a:hover{/*background: #e5f3ff;*/}
+.oui-tree li.cur > .item a{/*background: #cce8ff;border-color: #cce8ff;*/}
+.oui-tree li.cur > .item a:hover{/*background: #cce8ff;border-color: #99d1ff;*/}
+
+
 .oui-tree ul.levelroot {margin:5px 5px 5px 5px;padding:3px 0 80px;overflow:visible;display:block;}
 .oui-tree ul.levelroot > li {padding:0;}
 
@@ -31,27 +95,6 @@
 
 .oui-tree li.cur {}
 .oui-tree li.disabled {}
-
-.oui-tree li {padding:0 0 0 16px;}
-
-.oui-tree li .item {
-	float:left;display:inline-block;height:25px;overflow:visible;margin-bottom:1px;
-	border-radius:4px;
-}
-.oui-tree li .item:hover{}
-.oui-tree li.cur .item{}
-.oui-tree li.cur .item:hover{}
-
-.oui-tree li a.name,.oui-tree li span {
-	display:inline-block;height:25px;line-height:23px;
-	outline:none;overflow:visible;
-	text-align: center; font-size:14px;
-}
-
-.oui-tree li a{cursor:pointer;margin:0 1px;padding:0 5px 0 2px;border:solid 1px transparent;border-radius:4px;}
-.oui-tree li a:hover{background: #e5f3ff;}
-.oui-tree li.cur > .item a{background: #cce8ff;border-color: #cce8ff;}
-.oui-tree li.cur > .item a:hover{background: #cce8ff;border-color: #99d1ff;}
 
 .oui-tree li .switch {}
 .oui-tree:hover li .switch {}
@@ -140,3 +183,102 @@
 	border-top-left-radius:0;
 	border-top-right-radius:0;
 }
+
+
+/* 以下代码参考引用 bootstrap3.3.7 */
+/*
+
+.oui-tree li .item .btn-primary {
+	background-color: #337ab7; border-color: #2e6da4;
+}
+
+.oui-tree li .item .btn-primary:hover {
+	background-color: #286090; border-color: #204d74;
+}
+
+.oui-tree li .item .btn-default {
+	color: #333;
+	background-color: #fff; border: solid 1px #ccc;
+}
+
+.oui-tree li .item .btn-default:hover {
+	color: #333;
+	background-color: #e6e6e6; border-color: #adadad;
+}
+
+.oui-tree li .item .btn-success {
+	background-color: #5cb85c; border: solid 1px #4cae4c;
+}
+
+.oui-tree li .item .btn-success:hover {
+	background-color: #449d44; border-color: #398439;
+}
+
+.oui-tree li .item .btn-warning {
+	background-color: #f0ad4e; border: solid 1px #eea236;
+}
+
+.oui-tree li .item .btn-warning:hover {
+	background-color: #ec971f; border-color: #d58512;
+}
+
+.oui-tree li .item .btn-danger {
+	background-color: #d9534f; border: solid 1px #d43f3a;
+}
+
+.oui-tree li .item .btn-danger:hover {
+	background-color: #c9302c; border-color: #c9302c;
+}
+
+
+.oui-tree .btn-group {
+  	position: relative;
+  	display: inline-block;
+  	vertical-align: middle;
+}
+.oui-tree .btn-group > .btn {
+  	position: relative;
+  	float: left;
+}
+.oui-tree .btn-group > .btn:hover,
+.oui-tree .btn-group > .btn:focus,
+.oui-tree .btn-group > .btn:active,
+.oui-tree .btn-group > .btn.active {
+  	z-index: 2;
+}
+.oui-tree .btn-group .btn + .btn,
+.oui-tree .btn-group .btn + .btn-group,
+.oui-tree .btn-group .btn-group + .btn,
+.oui-tree .btn-group .btn-group + .btn-group {
+  	margin-left: -1px;
+}
+
+.oui-tree .btn-group > .btn:not(:first-child):not(:last-child) {
+  	border-radius: 0;
+}
+.oui-tree .btn-group > .btn:first-child {
+  	margin-left: 0;
+}
+.oui-tree .btn-group > .btn:first-child:not(:last-child) {
+  	border-top-right-radius: 0;
+  	border-bottom-right-radius: 0;
+}
+.oui-tree .btn-group > .btn:last-child:not(:first-child) {
+  	border-top-left-radius: 0;
+  	border-bottom-left-radius: 0;
+}
+.oui-tree .btn-group > .btn-group {
+  	float: left;
+}
+.oui-tree .btn-group > .btn-group:not(:first-child):not(:last-child) > .btn {
+  	border-radius: 0;
+}
+.oui-tree .btn-group > .btn-group:first-child:not(:last-child) > .btn:last-child{
+  	border-top-right-radius: 0;
+  	border-bottom-right-radius: 0;
+}
+.oui-tree .btn-group > .btn-group:last-child:not(:first-child) > .btn:first-child {
+  	border-top-left-radius: 0;
+  	border-bottom-left-radius: 0;
+}
+*/

@@ -24,8 +24,9 @@
 <body>
 <div class="form">
     <div style="float:left;padding:10px;clear:none;">
-        <div id="tree" style="display:block;border:solid 1px #00f;border-radius:4px;overflow:auto;width:400px;height:800px;margin:0;"></div>
+        <div id="tree" style="display:block;border:solid 1px #00f;border-radius:4px;overflow:auto;width:400px;height:600px;margin:0;"></div>
         <div id="txt" style="margin:0;padding: 10px 0;"></div>
+        <div id="tree1" style="display:block;border:solid 1px #00f;border-radius:4px;overflow:auto;width:400px;height:200px;margin:0;"></div>
     </div>
     <div style="float:left;padding:0;margin:10px 0 0;clear:none;">
         <div class="box">  
@@ -66,6 +67,8 @@
                 <label class="chb-label"><input type="checkbox" id="chbIcon" checked="checked" /><span>显示图标</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbCount" /><span>显示数量</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbDesc" /><span>显示备注</span></label>
+                <label class="chb-label"><input type="checkbox" id="chbButton" /><span>显示按钮</span></label>
+                <br />
                 <label class="chb-label"><input type="checkbox" id="chbStatus" checked="checked" /><span>保持状态</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbCookie" checked="checked" /><span>保存COOKIE</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbClickExpand" checked="checked" /><span>点击切换</span></label>
@@ -118,14 +121,13 @@
                     <input type="text" id="txtNodeId" class="txt" style="width:120px;" />
                     <button onclick="position();">定位</button>
                     <button onclick="position(true);">定位并选中</button>
+                    <button onclick="deleteNode(true);">删除节点</button>
                 </div>
                 <div style="padding:0 0 10px 0;" class="item">
                     <span>通道ID:</span>
                     <input type="text" id="txtPid" class="txt" style="width:60px;" />
                     <span>数量:</span>
-                    <input type="text" id="txtLen" class="txt" style="width:50px;" maxlength="6" />
-                    <span>ID:</span>
-                    <input type="text" id="txtNum" class="txt" style="width:50px;" maxlength="6" />
+                    <input type="text" id="txtPresetLen" class="txt" style="width:50px;" maxlength="6" />
                     <button onclick="addNode2();">新增预置点</button>
                 </div>
                 
@@ -167,6 +169,7 @@
         var linkage = $('#chbLinkage').checked(),
             level = $('#ddlLevel2').val().toInt();
         $.console.log('expandLevel:', level, linkage, expand);
+        //$.tree() 空参数 可以获取到第一个非空的树，如果当前页面只有一个树，可以这样获取
         $.tree(TreeId).expandLevel(level, linkage, expand);
     }
 
@@ -188,14 +191,18 @@
     }
     function addNode2() {
         var pid = $('#txtPid').val(),
-            len = $('#txtLen').val().toInt(),
-            num = $('#txtNum').val().toInt(),
+            len = $('#txtPresetLen').val().toInt(1),
+            num,
             par = {type: 'preset', ptype: 'camera'},
-            items = [];
+            items = [],
+            nid = $.tree(TreeId).nid(pid, 'camera'),
+            node = $.tree(TreeId).node(nid);
 
-        if (!pid || !len) {
+        if (!pid || !len || !node) {
             return false;
         }
+
+        num = node.childs.length;
 
         for (var i = 0; i < len; i++) {
             items.push({id: pid + '_' + (num + i + 1), name: '预置点' + (num + i + 1), pid: pid});
@@ -206,6 +213,11 @@
     function position(selected) {
         var nid = $('#txtNodeId').val().trim();
         $.tree(TreeId).position(nid, selected);
+    }
+
+    function deleteNode() {
+        var nid = $('#txtNodeId').val().trim();
+        $.tree(TreeId).delete(nid);
     }
 
     function getTestData(resolve) {
@@ -251,6 +263,7 @@
             showIcon = $('#chbIcon').checked(),
             showCount = $('#chbCount').checked(),
             showDesc = $('#chbDesc').checked(),
+            showButton = $('#chbButton').checked(),
             switchIcon = $('#ddlSwitch').val(),
             clickExpand = $('#chbClickExpand').checked(),
             clickChecked = $('#chbClickChecked').checked(),
@@ -290,13 +303,24 @@
             showIcon: showIcon,
             showCount: showCount,
             showDesc: showDesc,
+            showButton: showButton,
+            buttonConfig: {
+                //types: ['unit']
+                types: ['camera']
+            },
             showTitle: true,
+            showInfo: true,
             //showType: false,
             //showStatus: false,
             clickExpand: clickExpand,
             clickChecked: clickChecked,
             complete: function (tree) {
                 $('#divOper').show();
+
+                console.log('$.tree(undefined):', $.tree());
+                console.log('$.tree(0):', $.tree(0));
+                console.log('$.tree(1):', $.tree(1));
+                console.log('$.tree(2):', $.tree(2));
 
                 html.push('finish: ' + new Date().format('HHmmss.fff') + '<br />');
                 console.log('complete:', tree.id, tree.cache);
@@ -398,12 +422,12 @@
             },
             //onexpand: function (node, tree, resolve) {
             onexpand: function (node, tree, resolve, reject) {
-                $.console.log('onexpand:', tree.id, node);
-                if (!node.hasChild()) {                    
+                $.console.log('onexpand:', tree.id, node, node.childs);
+                if (!node.hasChild()) {
                     if (node.type === 'device') {
                         var cameras = [];
                         var pid = node.data.id;
-                        for (var i = 0; i < 4; i++) {
+                        for (var i = 0; i < 2; i++) {
                             cameras.push({id: pid + '_' + (i + 1), name:'监控点' + (i + 1), pid: pid });
                         }
 
@@ -415,7 +439,7 @@
                     } else if (node.type === 'camera') {
                         var presets = [];
                         var pid = node.data.id;
-                        for (var i = 0; i < 4; i++) {
+                        for (var i = 0; i < 3; i++) {
                             presets.push({id: pid + '_' + (i + 1), name:'预置点' + (i + 1), pid: pid });
                         }
                         if ($.isFunction(resolve)) {
@@ -424,11 +448,44 @@
                     }
                 }
             },
-            expandCallback: function (node, tree) {
+            /*expandCallback: function (node, tree) {
                 $.console.log('expandCallback:', tree.id, node);
+            },
+            */
+            buttonCallback: function (node, tree, ev, key) {
+                $.console.log('buttonCallback:', tree.id, node, key);
+                if (node.type === 'camera') {
+                    var pid = node.data.id,
+                        par = {type: 'preset', ptype: 'camera'},
+                        items = [],
+                        num = node.childs.length,
+                        len = $('#txtPresetLen').val().toInt(1);
+
+                    switch(key) {
+                    case 'add':
+                        for (var i = 0; i < len; i++) {
+                            items.push({id: pid + '_' + (num + i + 1), name: '预置点' + (num + i + 1), pid: pid});
+                        }
+                        $.tree(TreeId).add(items, par).expand(node);
+                        break;
+                    case 'edit':
+                        break;
+                    case 'del':
+                        $.tree(TreeId).del(node);
+                        break;
+                    }
+                }
+            },
+            onbutton: function (node, tree, ev, key) {
+
             }
         });
         $.console.log('test finish:');
+
+        $.tree('tree1', {
+            skin: skin, 
+            data: testData1
+        });
     }
   
 </script>

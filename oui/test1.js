@@ -1826,7 +1826,6 @@ console.log((1205).toDurationStr(true, false));
 console.log('a.aspx?a=1&b=2&c=3'.getQueryString('d|b'));
 
 console.log('d|b'.split(/[,\|]/g));
-
 var names =  [
             '限时预览倒计时',
             '重新开始倒计时',
@@ -1839,7 +1838,12 @@ var names =  [
             '确定',
             '选项不存在？',
             '找不到选项？',
-            '请输入：'
+            '请输入：',
+            '新建',
+            '编辑',
+            '删除',
+            '更新',
+            '修改'
             ];;
         for(var i =0; i<names.length;i++){
             console.log('//', names[i], names[i].toUnicode());
@@ -2016,17 +2020,8 @@ function escape2Html(str) {
 }
 
 function escape2Html(str) {
-    return str.replace(/&(amp);/ig, '&');
+    str.replace(/&(amp);/ig, '&');
+    //return;
 }
 
-console.log($.escapeHtml('abc"123\''))
-console.log($.unescapeHtml('http://&amp;'))
-
-console.log(''.indexOf())
-
-
-var arr = ['abc', 'acc'];
- arr.concat(['123', '456']);
-
-console.log(arr);
-
+console.log('eacape:', escape2Html('abc"123\''))
