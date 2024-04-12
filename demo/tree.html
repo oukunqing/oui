@@ -116,14 +116,19 @@
                 <button onclick="expandType(false);">按类型收缩</button>
             </div>
             <div>
-                <div style="padding:0 0 10px 0;" class="item">
+                <div style="padding:0 0 5px 0;" class="item">                    
                     <span>节点ID:</span>
-                    <input type="text" id="txtNodeId" class="txt" style="width:120px;" />
+                    <input type="text" id="txtNodeId" class="txt" style="width:180px;" placeholder="是NodeId 不是DataId" />
+                </div>
+                <div style="padding:0 0 5px 0;" class="item">
                     <button onclick="position();">定位</button>
                     <button onclick="position(true);">定位并选中</button>
-                    <button onclick="deleteNode(true);">删除节点</button>
+                    <button onclick="deleteNode();">删除节点</button>
+                    <button onclick="moveNode();">移动到</button>
+                    <button onclick="moveNode(true);">插入到</button>
+                    <input type="text" id="txtDestId" class="txt" style="width:150px;" placeholder="目标NodeId" />
                 </div>
-                <div style="padding:0 0 10px 0;" class="item">
+                <div style="padding:0 0 5px 0;" class="item">
                     <span>通道ID:</span>
                     <input type="text" id="txtPid" class="txt" style="width:60px;" />
                     <span>数量:</span>
@@ -220,6 +225,14 @@
         $.tree(TreeId).delete(nid);
     }
 
+    function moveNode(insert) {
+        var nid = $('#txtNodeId').val().trim(),
+            dest = $('#txtDestId').val().trim();
+
+        //$.tree(TreeId).moveChild(nid, dest, insert);
+        $.tree(TreeId).move(nid, dest, insert);
+    }
+
     function getTestData(resolve) {
         $.console.log('getTestData:0');
         var data = treedata;
@@ -306,7 +319,7 @@
             showButton: showButton,
             buttonConfig: {
                 //types: ['unit']
-                types: ['camera']
+                //types: ['camera']
             },
             showTitle: true,
             showInfo: true,

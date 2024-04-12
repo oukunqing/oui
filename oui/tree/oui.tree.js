@@ -533,8 +533,35 @@
 					
 				return this;
 			},
-			getNodeCache: function (nodeId) {
+			deleteNodeCache: function (tree, node) {
+				var cache = tree.cache,
+					nid = node.id,
+					type = node.type, 
+					level = node.level;
+
+				//删除levels数据
+				if (cache.levels[level] && cache.levels[level][nid]) {
+					delete cache.levels[level][nid];
+				}
+				//删除types数据
+				if (cache.types[type] && cache.types[type][nid]) {
+					delete cache.types[type][nid];
+				}
+				//删除nodes数据
+				if (cache.nodes[nid]) {
+					delete cache.nodes[nid];
+				}
+
+				return this;
+			},
+			getNodeCache: function (tree, nodeId) {
 				return tree.cache.nodes[nodeId];
+			},
+			getNode: function (tree, node) {
+				if (Factory.isNode(node)) {
+					return node;
+				}
+				return tree.cache.nodes[node];
 			},
 			setStoreCache: function (tree, key, nodes, action) {
 				var opt = tree.options;
@@ -1207,7 +1234,7 @@
 				
 				return this;
 			},
-			addNode: function (tree, items, par, pnode) {
+			addNode: function (tree, items, par, dest, insert) {
 				var p = $.extend({}, par),
 					root = Factory.buildRootNode(tree),
 					nodes = [],
@@ -1216,11 +1243,17 @@
 				if (!items || !$.isArray(items)) {
 					return this;
 				}
-
-				if (Factory.isNode(pnode) && pnode.tree === tree) {
+				//TODO:
+				
+				if (Factory.isNode(dest) && dest.tree === tree) {
 					fragment = $.createFragment();
 					Factory.buildItem(tree, root, items, p, nodes, fragment).initStatus(tree, false, nodes);
-					pnode.childbox.appendChild(fragment);
+					if (insert) {
+						var sibling = dest, parent = dest;
+						parent.childbox.insertBefore(fragment, sibling);
+					} else {
+						dest.childbox.appendChild(fragment);
+					}
 				} else {
 					var data = _filter(tree, items, p), dr;
 					for (var k in data) {
@@ -1231,6 +1264,7 @@
 						Factory.buildItem(tree, root, dr.items, p, nodes, fragment)
 							.initStatus(tree, false, nodes);
 
+				//TODO:
 						if (fragment) {
 							dr.pnode.childbox.appendChild(fragment);
 						}
@@ -1253,24 +1287,35 @@
 				}
 				return this;
 			},
-			deleteNode: function (tree, node) {
-				var cache = tree.cache,
+			moveNode: function (tree, node, dest, sibling) {
+				var src = node.parent;
+				if (Factory.isNode(dest) && node !== dest) {
+					if (src !== dest) {
+						dest.addChild(node, sibling).setExpandClass();
+						node.setParent(dest).updateLevel(dest.getLevel() + 1);
+						src.deleteChild(node).setBoxDisplay().setExpandClass().updateCount();
+					} else if (Factory.isNode(sibling) && !sibling.root) {
+						dest.childbox.insertBefore(node.element, sibling.element);
+					}
+				}
+				return this;
+			},
+			updateLevelCache: function (tree, node, srcLevel) {
+				var dest = node.getLevel(),
+					src = srcLevel,
 					nid = node.id,
-					type = node.type, 
-					level = node.level;
+					cache = tree.cache.levels;
 
-				//删除levels数据
-				if (cache.levels[level] && cache.levels[level][nid]) {
-					delete cache.levels[level][nid];
+				if (dest === src) {
+					return this;
 				}
-				//删除types数据
-				if (cache.types[type] && cache.types[type][nid]) {
-					delete cache.types[type][nid];
+				if (cache[src] && cache[src][nid]) {
+					delete cache[src][nid];
 				}
-				//删除nodes数据
-				if (cache.nodes[nid]) {
-					delete cache.nodes[nid];
+				if (!cache[dest]) {
+					cache[dest] = {};
 				}
+				cache[dest][nid] = node;
 
 				return this;
 			},
@@ -1473,7 +1518,7 @@
 						.setParam('element', Factory.buildLi(tree, p, node, opt));
 					
 					if (p.pnode) {
-						p.pnode.addChild(node, false, fragment);
+						p.pnode.addChild(node, null, fragment);
 					}
 
 					Factory.setNodeCache(tree, node);
@@ -1510,12 +1555,7 @@
 
 						//动态加载子节点，先创建子节点容器
 						if (node.dynamic) {
-							node.setBox(Factory.buildUl(tree, {
-								pnode: node,
-								pid: Factory.buildElemId(tree.id, node.id),
-								pnid: node.id,
-								ptype: node.type
-							}, false, true));
+							node.setBox(node.buildBox());
 						}
 
 						//(动态加载 或者 已展开)，需要设置节点展开状态
@@ -1674,15 +1714,6 @@
 						node.setExpand(expand);
 					}
 				}
-				/*
-				for (j = 0; j < c; j++) {
-					//节点按照层级顺序添加到缓存中，展开和收缩的顺序是相反的
-					//不同层级的节点，展开：从最低层开始; 收缩：从最顶层开始
-					if ((node = nodes[sameLevel || !expand ? j : c - j - 1]) && !node.isLeaf()) {
-						node.setExpand(expand);
-					}
-				}
-				*/
 				return this;
 			},
 			//reverse: 是否反转操作
@@ -2078,7 +2109,24 @@
 
 			return that;
 		},
-		deleteChild: function () {
+		deleteChild: function (node) {
+			var that = this.self(),
+				childs = that.childs,
+				i = childs.length - 1;
+
+			while(i >= 0) {
+				if (childs[i].id === node.id) {
+					childs.splice(i, 1);
+					break;
+				}
+				i--;
+			}
+			if (childs.length <= 0) {
+				that.setParam('expanded', false);
+			}
+			return that;
+		},
+		deleteChildNode: function () {
 			var that = this.self(), c = that.childs.length;
 			for (var i = 0; i < c; i++) {
 				that.childs[i].delete();
@@ -2088,11 +2136,66 @@
 		delete: function () {
 			var that = this.self();
 
-			Factory.deleteNode(that.tree, that.deleteChild());
+			Factory.deleteNodeCache(that.tree, that.deleteChildNode());
 
 			//删除节点DOM元素
 			$.removeElement(that.element);
 
+			return that;
+		},
+		getLevel: function () {
+			return this.self().level;
+		},
+		setLevel: function (level) {
+			var that = this.self();
+			if ($.isNumber(level) && level >= 0) {
+				that.level = level;
+			}
+			return that;
+		},
+		updateLevel: function (level) {
+			var that = this.self(),
+				srcLevel = that.getLevel();
+
+			if (!$.isNumber(level) || level < 0 || srcLevel === level) {
+				return that;
+			}
+			Factory.updateLevelCache(that.tree, that.setLevel(level), srcLevel);
+
+			return that;
+		},
+		moveChild: function (destNode, insert) {
+			var that = this.self(),
+				childs = that.childs,
+				c = childs.length;
+
+			if (c <= 0) {
+				return that;
+			}
+
+			while(c > 0) {
+				childs[0].move(destNode, insert);
+				c--;
+			}
+
+			return that;
+		},
+		move: function (destNode, insert) {
+			if (insert) {
+				return this.insert(destNode);
+			}
+			var that = this.self(),
+				dest = Factory.getNode(that.tree, destNode);
+
+			return Factory.moveNode(tree, that, dest), that;
+		},
+		insert: function (siblingNode) {
+			var that = this.self(),
+				sibling = Factory.getNode(that.tree, siblingNode);
+
+			if (Factory.isNode(sibling)) {
+				Factory.moveNode(tree, that, sibling.parent, sibling);
+			}
 			return that;
 		},
 		setStoreCache: function (key, node, action) {
@@ -2128,12 +2231,27 @@
 		},
 		setBox: function (childbox) {
 			var that = this.self();
+			if (!childbox) {
+				return that;
+			}
 			that[that.root ? 'fragment' : 'element'].appendChild(childbox);
 			return that.setParam('childbox', childbox);
 		},
-		addChild: function (node, clear, fragment) {
+		buildBox: function (displayNone) {
 			var that = this.self();
-			if (!that.childs || clear) {
+			if ($.isElement(that.childbox)) {
+				return null;
+			}
+			return Factory.buildUl(that.tree, {
+				pnode: that,
+				pid: Factory.buildElemId(that.tree.id, that.id),
+				pnid: that.id,
+				ptype: that.type
+			}, false, displayNone);
+		},
+		addChild: function (node, sibling, fragment) {
+			var that = this.self();
+			if (!that.childs) {
 				that.childs = [];
 			}
 			if (!node.element) {
@@ -2143,8 +2261,15 @@
 
 			if (fragment) {
 				fragment.appendChild(node.element);
-			} else if (that.childbox) {
-				that.childbox.appendChild(node.element);
+			} else {
+				if (!that.childbox) {
+					that.setBox(that.buildBox(!that.expanded)).setExpand(that.expanded);
+				}
+				if (Factory.isNode(sibling) && sibling.element) {
+					that.childbox.insertBefore(node.element, sibling.element);
+				} else {
+					that.childbox.appendChild(node.element);
+				}
 			}
 			return that.updateCount();
 		},
@@ -2153,6 +2278,16 @@
 			Factory.setCurrentCache(that.tree, 'position', that).expandTo(that.tree, that);
 			$.scrollTo(that.element, that.tree.panel, offsetY);
 			return selected ? that.setSelected(true) : that;
+		},
+		setBoxDisplay: function (display) {
+			var that = this.self();
+			if (!that.childbox) {
+				return that;
+			}
+			if (!$.isBoolean(display)) {
+				display = that.expanded;
+			}
+			return $.setElemClass(that.childbox, 'hide', !display), that;
 		},
 		setExpand: function (expanded, ev, linkage) {
 			var that = this.self(),
@@ -2167,9 +2302,8 @@
 			}
 			if (that.childbox) {
 				expanded = $.isBoolean(expanded, !that.expanded);
-				//$.setElemClass(that.childbox, 'hide', false);
-				//that.childbox.style.display = expanded ? 'block' : 'none';
-				$.setElemClass(that.childbox, 'hide', !expanded);
+				//$.setElemClass(that.childbox, 'hide', !expanded);
+				that.setBoxDisplay(expanded);
 
 				//动态加载，默认可加载多次，若已加载子节点，则不再动态加载
 				if (!linkage && expanded && !that.hasChild() && ev && ev.target) {
@@ -2324,14 +2458,15 @@
 		setExpandClass: function (initial) {
 			var that = this.self(),
 				handle = that.getItem('switch'),
+				nochild = !that.hasChild(),
 				opt = that.tree.options;
-			//if (that.isLeaf()) {
+
 			//虽然被指定为叶子节点类型，但当前已经有子节点加入，那就不能再算是叶子节点了
-			if (that.isLeaf() && !that.hasChild()) {
+			if (that.isLeaf() && nochild) {
 				that.setParam('expanded', false);
 				$.setElemClass(handle, 'switch-none', true);
 			} else {
-				if (!that.hasChild()) {
+				if (nochild) {
 					if (!that.isDynamic()) {
 						that.setParam('expanded', false);
 						$.setElemClass(handle, 'switch-none', true);
@@ -2346,6 +2481,12 @@
 				}
 				$.setElemClass(handle, 'switch' + opt.switch + '-open', that.isExpanded());
 			}
+			/*
+			if (!that.expanded) {
+				if (that.childbox && that.childbox.className.indexOf('hide') < 0) {
+					$.setElemClass(that.childbox, 'hide', true);
+				}
+			}*/			
 			return that.setIconClass();
 		},
 		setCheckedClass: function () {
@@ -2627,8 +2768,8 @@
 		add: function (items, par, pnode) {
 			return Factory.addNode(this, items, par, pnode), this;
 		},
-		insert: function (items, par) {
-			//TODO:
+		insert: function (items, par, pnode) {
+			return Factory.addNode(this, items, par, pnode, true), this;
 		},
 		//更新节点图标、文字
 		update: function (items, par) {
@@ -2637,59 +2778,64 @@
 
 			return that;
 		},
-		clear: function () {
-			var that = this;
-			//TODO:
-
-			return that;
-		},
-		updateIcon: function (nodeIds, par) {
-			return Factory.eachNodeIds(this.cache.nodes, nodeIds, function(node, i, c) {
+		updateIcon: function (nodes, par) {
+			return Factory.eachNodeIds(this.cache.nodes, nodes, function(node, i, c) {
 				node.updateIcon(par);
 			}), this;
 		},
-		icon: function (nodeIds, par) {
-			return this.updateIcon(nodeIds, par);
+		icon: function (nodes, par) {
+			return this.updateIcon(nodes, par);
 		},
-		updateText: function (nodeIds, texts) {
-			return Factory.eachNodeIds(this.cache.nodes, nodeIds, function(node, i, c) {
+		updateText: function (nodes, texts) {
+			return Factory.eachNodeIds(this.cache.nodes, nodes, function(node, i, c) {
 				node.updateText(c === 1 ? texts : texts[i]);
 			}), this;
 		},
-		text: function (nodeIds, texts) {
-			return this.updateText(nodeIds, texts);
+		text: function (nodes, texts) {
+			return this.updateText(nodes, texts);
 		},
-		updateDesc: function (nodeIds, texts) {
-			return Factory.eachNodeIds(this.cache.nodes, nodeIds, function(node, i, c) {
+		updateDesc: function (nodes, texts) {
+			return Factory.eachNodeIds(this.cache.nodes, nodes, function(node, i, c) {
 				node.updateDesc(c === 1 ? texts : texts[i]);
 			}), this;
 		},
-		desc: function (nodeIds, texts) {
+		desc: function (nodes, texts) {
 			return this.updateDesc(nodeIds, texts);
 		},
-		delete: function (nodeIds) {
-			return Factory.eachNodeIds(this.cache.nodes, nodeIds, 'delete'), this;
+		delete: function (nodes) {
+			return Factory.eachNodeIds(this.cache.nodes, nodes, 'delete'), this;
 		},
-		checked: function (nodeIds, checked) {
-			return Factory.eachNodeIds(this.cache.nodes, nodeIds, 'setChecked', $.isBoolean(checked, true)), this;
+		move: function (nodes, dest, insert) {
+			return Factory.eachNodeIds(this.cache.nodes, nodes, 'move', dest, insert), this;
 		},
-		disabled: function (nodeIds, disabled) {
-			return Factory.eachNodeIds(this.cache.nodes, nodeIds, 'setDisabled', $.isBoolean(disabled, true)), this;
+		/*
+		insert: function (nodes, dest) {
+			return Factory.eachNodeIds(this.cache.nodes, nodes, 'insert', dest), this;
 		},
-		expand: function (nodeIds, linkage) {
-			return Factory.eachNodeIds(this.cache.nodes, nodeIds, 'expand', linkage), this;
+		*/
+		moveChild: function (nodes, dest, insert) {
+			return Factory.eachNodeIds(this.cache.nodes, nodes, 'moveChild', dest, insert), this;
 		},
-		collapse: function (nodeIds) {
-			return Factory.eachNodeIds(this.cache.nodes, nodeIds, 'collapse'), this;
+		checked: function (nodes, checked) {
+			return Factory.eachNodeIds(this.cache.nodes, nodes, 'setChecked', $.isBoolean(checked, true)), this;
 		},
-		selected: function (nodeIds, selected, position) {
-			return Factory.callNodeFunc(this.cache.nodes, nodeIds, 'setSelected', $.isBoolean(selected, true), position), this;
+		disabled: function (nodes, disabled) {
+			return Factory.eachNodeIds(this.cache.nodes, nodes, 'setDisabled', $.isBoolean(disabled, true)), this;
 		},
-		select: function (nodeIds, selected, position) {
-			return this.selected(nodeIds, selected, position);
+		expand: function (nodes, linkage) {
+			return Factory.eachNodeIds(this.cache.nodes, nodes, 'expand', linkage), this;
 		},
-		position: function (nodeIds, selected) {
-			return Factory.callNodeFunc(this.cache.nodes, nodeIds, 'position', selected), this;
+		collapse: function (nodes) {
+			return Factory.eachNodeIds(this.cache.nodes, nodes, 'collapse'), this;
+		},
+		selected: function (nodes, selected, position) {
+			return Factory.callNodeFunc(this.cache.nodes, nodes, 'setSelected', $.isBoolean(selected, true), position), this;
+		},
+		select: function (nodes, selected, position) {
+			return this.selected(nodes, selected, position);
+		},
+		position: function (nodes, selected) {
+			return Factory.callNodeFunc(this.cache.nodes, nodes, 'position', selected), this;
 		},
 		expandAll: function (expand) {
 			return Factory.expandAll(this, expand), this;
@@ -2709,11 +2855,11 @@
 		collapseToLevel: function (levels, reverse) {
 			return Factory.collapseLevel(this, levels, true, $.isBoolean(reverse, true)), this;
 		},
-		expandNode: function (nodeIds, linkage) {
-			return Factory.expandNode(this, nodeIds, linkage);
+		expandNode: function (nodes, linkage) {
+			return Factory.expandNode(this, nodes, linkage);
 		},
-		expandToNode: function (nodeIds) {
-			return Factory.expandToNode(this, nodeIds);
+		expandToNode: function (nodes) {
+			return Factory.expandToNode(this, nodes);
 		},
 		expandType: function (types, linkage, expand) {
 			return Factory.expandType(this, types, linkage, expand), this;
@@ -2776,16 +2922,16 @@
 		}
 	};
 
-	Factory.func = function (treeId, nodeIds, funcName, funcParam) {
-		var tree = $.tree.get(treeId);
+	Factory.func = function (id, nodes, funcName, funcParam) {
+		var tree = $.tree.get(id);
 		if (tree && $.isFunction(tree[funcName])) {
-			tree[funcName](nodeIds, funcParam);
+			tree[funcName](nodes, funcParam);
 		}
 		return $.tree;
 	};
 
-	Factory.action = function (treeId, funcName, arg0, arg1, arg2, arg3) {
-		var tree = $.tree.get(treeId);
+	Factory.action = function (id, funcName, arg0, arg1, arg2, arg3) {
+		var tree = $.tree.get(id);
 		if (tree && $.isFunction(tree[funcName])) {
 			tree[funcName](arg0, arg1, arg2, arg3);
 		}
@@ -2793,106 +2939,103 @@
 	};
 
 	$.extend({
-		tree: function (treeId, par) {
-			return Factory.buildTree(treeId, par);
+		tree: function (id, par) {
+			return Factory.buildTree(id, par);
 		}
 	});
 
 	$.extend($.tree, {
-		id: function (dataId, dataType) {
-			return Factory.buildNodeId(dataId, dataType);
-		},
-		get: function (treeId) {
-			var cache = Factory.getTreeCache(treeId);
+		get: function (id) {
+			var cache = Factory.getTreeCache(id);
 			return cache ? cache.tree : null;
 		},
-		show: function (treeId, show) {
-			var cache = Factory.getTreeCache(treeId);
+		show: function (id, show) {
+			var cache = Factory.getTreeCache(id);
 			return cache ? cache.tree.show(show) : null;
 		},
-		hide: function (treeId) {
-			var cache = Factory.getTreeCache(treeId);
+		hide: function (id) {
+			var cache = Factory.getTreeCache(id);
 			return cache ? cache.tree.hide() : null;
 		},
-		add: function (treeId, items, par) {
-			var tree = $.tree.get(treeId);
+		add: function (id, items, par) {
+			var tree = $.tree.get(id);
 			if (tree) {
 				tree.add(items, par);
 			}
 			return this;
 		},
-		update: function (treeId, items, par) {
-			var tree = $.tree.get(treeId);
+		update: function (id, items, par) {
+			var tree = $.tree.get(id);
 			if (tree) {
 				tree.update(items, par);
 			}
 			return this;
 		},
-		icon: function (treeId, nodeIds, par) {
-			return Factory.func(treeId, nodeIds, 'updateIcon', par);
+		icon: function (id, nodes, par) {
+			return Factory.func(id, nodes, 'updateIcon', par);
 		},
-		updateIcon: function (treeId, nodeIds, par) {
-			return Factory.func(treeId, nodeIds, 'updateIcon', par);
+		updateIcon: function (id, nodes, par) {
+			return Factory.func(id, nodes, 'updateIcon', par);
 		},
-		text: function (treeId, nodeIds, texts) {
-			return Factory.func(treeId, nodeIds, 'updateText', texts);
+		text: function (id, nodes, texts) {
+			return Factory.func(id, nodes, 'updateText', texts);
 		},
-		updateText: function (treeId, nodeIds, texts) {
-			return Factory.func(treeId, nodeIds, 'updateText', texts);
+		updateText: function (treeId, nodes, texts) {
+			return Factory.func(id, nodes, 'updateText', texts);
 		},
-		desc: function (treeId, nodeIds, texts) {
-			return Factory.func(treeId, nodeIds, 'updateDesc', texts);
+		desc: function (id, nodes, texts) {
+			return Factory.func(id, nodes, 'updateDesc', texts);
 		},
-		updateDesc: function (treeId, nodeIds, texts) {
-			return Factory.func(treeId, nodeIds, 'updateDesc', texts);
+		updateDesc: function (id, nodes, texts) {
+			return Factory.func(id, nodes, 'updateDesc', texts);
 		},
-		select: function (treeId, nodeIds, selected) {
-			return Factory.func(treeId, nodeIds, 'select', selected);
+		select: function (id, nodes, selected) {
+			return Factory.func(id, nodes, 'select', selected);
 		},
-		delete: function (treeId, nodeIds) {
-			return Factory.func(treeId, nodeIds, 'delete');
+		delete: function (id, nodes) {
+			return Factory.func(id, nodes, 'delete');
 		},
-		selected: function (treeId, nodeIds, selected) {
-			return Factory.func(treeId, nodeIds, 'select', selected);
+		selected: function (id, nodes, selected) {
+			return Factory.func(id, nodes, 'select', selected);
 		},
-		checked: function (treeId, nodeIds, checked) {
-			return Factory.func(treeId, nodeIds, 'checked', checked);
+		checked: function (id, nodes, checked) {
+			return Factory.func(id, nodes, 'checked', checked);
 		},
-		disabled: function (treeId, nodeIds, disabled) {
-			return Factory.func(treeId, nodeIds, 'disabled', disabled);
+		disabled: function (id, nodes, disabled) {
+			return Factory.func(id, nodes, 'disabled', disabled);
 		},
-		position: function (treeId, nodeId) {
-			return Factory.func(treeId, nodeId, 'position');
+		position: function (id, node) {
+			return Factory.func(id, node, 'position');
 		},
-		expand: function (treeId, nodeIds) {
-			return Factory.func(treeId, nodeIds, 'expand');
+		expand: function (id, nodes) {
+			return Factory.func(id, nodes, 'expand');
 		},
-		collapse: function (treeId, nodeIds) {
-			return Factory.func(treeId, nodeIds, 'collapse');
+		collapse: function (id, nodes) {
+			return Factory.func(id, nodes, 'collapse');
 		},
-		expandAll: function (treeId, collapse) {
-			return Factory.action(treeId, 'expandAll', collapse);
+		expandAll: function (id, collapse) {
+			return Factory.action(id, 'expandAll', collapse);
 		},
-		collapseAll: function (treeId) {
-			return Factory.action(treeId, 'collapseAll');
+		collapseAll: function (id) {
+			return Factory.action(id, 'collapseAll');
 		},
-		expandLevel: function (treeId, levels, linkage, reverse, expand) {
-			return Factory.action(treeId, 'expandLevel', levels, linkage, reverse, expand);
+		expandLevel: function (id, levels, linkage, reverse, expand) {
+			return Factory.action(id, 'expandLevel', levels, linkage, reverse, expand);
 		},
-		expandToLevel: function (treeId, levels, reverse, expand) {
-			return Factory.action(treeId, 'expandToLevel', levels, reverse, expand);
+		expandToLevel: function (id, levels, reverse, expand) {
+			return Factory.action(id, 'expandToLevel', levels, reverse, expand);
 		},
-		collapseLevel: function (treeId, levels, linkage, reverse) {
-			return Factory.action(treeId, 'expandLevel', levels, linkage, reverse, false);
+		collapseLevel: function (id, levels, linkage, reverse) {
+			return Factory.action(id, 'expandLevel', levels, linkage, reverse, false);
 		},
-		collapseToLevel: function (treeId, levels, reverse) {
-			return Factory.action(treeId, 'collapseToLevel', levels, reverse, false);
+		collapseToLevel: function (id, levels, reverse) {
+			return Factory.action(id, 'collapseToLevel', levels, reverse, false);
 		},
-		expandType: function (treeId, types, linkage, expand) {
-			return Factory.action(treeId, 'expandType', types, linkage, expand);
+		expandType: function (id, types, linkage, expand) {
+			return Factory.action(id, 'expandType', types, linkage, expand);
 		},
-		collapseType: function (treeId, types, linkage) {
-			return Factory.action(treeId, 'expandType', types, linkage, false);
+		collapseType: function (id, types, linkage) {
+			return Factory.action(id, 'expandType', types, linkage, false);
 		}
 	});
 
