@@ -1843,7 +1843,9 @@ var names =  [
             '编辑',
             '删除',
             '更新',
-            '修改'
+            '修改',
+            '上移',
+            '下移'
             ];;
         for(var i =0; i<names.length;i++){
             console.log('//', names[i], names[i].toUnicode());
@@ -2021,7 +2023,11 @@ function escape2Html(str) {
 
 function escape2Html(str) {
     str.replace(/&(amp);/ig, '&');
-    //return;
+    return;
 }
 
 console.log('eacape:', escape2Html('abc"123\''))
+
+var arr = [3,5,1,2,4];
+
+console.log(arr.sort());

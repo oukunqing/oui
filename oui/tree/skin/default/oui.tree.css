@@ -136,8 +136,32 @@
 .oui-tree li .item .button .btn-edit {
 	background:transparent url("imgs/tree.png") no-repeat -25px -75px;
 }
-.oui-tree li .item .button .btn-del {
+.oui-tree li .item .button .btn-del,
+.oui-tree li .item .button .btn-delete,
+.oui-tree li .item .button .btn-wrong {
 	background:transparent url("imgs/tree.png") no-repeat -50px -75px;
+}
+.oui-tree li .item .button .btn-enable,
+.oui-tree li .item .button .btn-enabled,
+.oui-tree li .item .button .btn-right {
+	background:transparent url("imgs/tree.png") no-repeat -75px -75px;
+}
+.oui-tree li .item .button .btn-disable,
+.oui-tree li .item .button .btn-disabled {
+	background:transparent url("imgs/tree.png") no-repeat -100px -75px;
+}
+.oui-tree li .item .button .btn-up {
+	background:transparent url("imgs/tree.png") no-repeat -125px -75px;
+}
+.oui-tree li .item .button .btn-down {
+	background:transparent url("imgs/tree.png") no-repeat -150px -75px;
+}
+.oui-tree li .item .button .btn-reload,
+.oui-tree li .item .button .btn-refurbish {
+	background:transparent url("imgs/tree.png") no-repeat -175px -75px;
+}
+.oui-tree li .item .button .btn-config {
+	background:transparent url("imgs/tree.png") no-repeat -200px -75px;
 }
 
 .oui-tree li .item .button .btn:hover {

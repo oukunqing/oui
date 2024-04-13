@@ -7,29 +7,29 @@
         body {background:#fff;margin:0;padding:0;font-size: 14px;font-family: 宋体;}
         .form{background: #fff;overflow: hidden;}
         div{clear:both;overflow:hidden;}
-        div.box {border:solid 1px #ccc;border-radius:4px;padding:8px 8px 0;margin:0 0 10px 0;}
-        button{ height:30px;line-height:24px; padding:0 10px;font-family: 宋体;font-size:14px;
-            display:inline-block;float:left;margin:0 8px 8px 0;}
-        select {height:30px;border:solid 1px #ccc;border-radius: 4px;float:left;margin:0 8px 8px 0;}
+        div.box {border:solid 1px #ccc;border-radius:4px;padding:8px 8px 0;margin:0 0 6px 0;}
+        button{ height:30px;line-height:24px; padding:0 6px;font-family: 宋体;font-size:14px;
+            display:inline-block;float:left;margin:0 6px 6px 0;cursor: pointer;}
+        select {height:30px;border:solid 1px #ccc;border-radius: 4px;float:left;margin:0 6px 6px 0;}
         .txt {height:26px;line-height:26px;border:solid 1px #ccc;text-align:center;font-size:14px;border-radius:4px;}
-        .item { padding:0 0 10px 0;}
-        .item span,.item button,.item input {float:left;margin:0 10px 5px 0;}
+        .item { padding:0 0 6px 0;}
+        .item span,.item button,.item input {float:left;margin:0 6px 6px 0;}
         .item span{line-height:28px;}
-        .chb-label {border:solid 1px #ccc;border-radius:4px;box-sizing:border-box;padding:5px 10px 0 2px;height:30px;
-            display:inline-block;overflow:hidden;float:left;margin:0 8px 8px 0;}
+        .chb-label {border:solid 1px #ccc;border-radius:4px;box-sizing:border-box;padding:5px 6px 0 2px;height:30px;
+            display:inline-block;overflow:hidden;float:left;margin:0 6px 6px 0;}
         .chb-label input{float:left;margin:3px 5px 0 2px;}
         .chb-label span{line-height:18px;margin:0;}
     </style>
 </head>
 <body>
 <div class="form">
-    <div style="float:left;padding:10px;clear:none;">
-        <div id="tree" style="display:block;border:solid 1px #00f;border-radius:4px;overflow:auto;width:400px;height:600px;margin:0;"></div>
-        <div id="txt" style="margin:0;padding: 10px 0;"></div>
-        <div id="tree1" style="display:block;border:solid 1px #00f;border-radius:4px;overflow:auto;width:400px;height:200px;margin:0;"></div>
+    <div style="float:left;padding:6px;clear:none;">
+        <div id="tree" style="display:block;border:solid 1px #00f;border-radius:4px;overflow:auto;width:500px;height:600px;margin:0;"></div>
+        <div id="txt" style="margin:0;padding:5px 0;"></div>
+        <div id="tree1" style="display:block;border:solid 1px #00f;border-radius:4px;overflow:auto;width:500px;height:200px;margin:0;"></div>
     </div>
-    <div style="float:left;padding:0;margin:10px 0 0;clear:none;">
-        <div class="box">  
+    <div style="float:left;padding:0;margin:6px 0 0;clear:none;">
+        <div class="box">
             <div>
                 <label class="chb-label"><input type="checkbox" value="root" name="chbData" checked="checked" /><span>根节点</span></label>
                 <label class="chb-label"><input type="checkbox" value="unit" name="chbData" checked="checked" /><span>目录</span></label>
@@ -65,10 +65,14 @@
                 <div></div>
                 <label class="chb-label"><input type="checkbox" id="chbCheck" checked="checked" /><span>显示选框</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbIcon" checked="checked" /><span>显示图标</span></label>
-                <label class="chb-label"><input type="checkbox" id="chbCount" /><span>显示数量</span></label>
-                <label class="chb-label"><input type="checkbox" id="chbDesc" /><span>显示备注</span></label>
+                <label class="chb-label"><input type="checkbox" id="chbCount" checked="checked" /><span>显示数量</span></label>
+                <label class="chb-label"><input type="checkbox" id="chbDesc" checked="checked" /><span>显示备注</span></label>
+                <div></div>
                 <label class="chb-label"><input type="checkbox" id="chbButton" /><span>显示按钮</span></label>
-                <br />
+                <label class="chb-label"><input type="checkbox" id="chbMoveAble" /><span>允许移动</span></label>
+                <label class="chb-label"><input type="checkbox" id="chbMove" /><span>显示移动</span></label>
+                <label class="chb-label"><input type="checkbox" id="chbDragAble" /><span>允许拖动</span></label>
+                <div></div>
                 <label class="chb-label"><input type="checkbox" id="chbStatus" checked="checked" /><span>保持状态</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbCookie" checked="checked" /><span>保存COOKIE</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbClickExpand" checked="checked" /><span>点击切换</span></label>
@@ -82,10 +86,14 @@
             </div>
         </div>
         <div id="divOper" class="box" style="display:none;">
-            <div>                
+            <div>
                 <label class="chb-label">
                     <input type="checkbox" value="1" id="chbLinkage" checked="checked" />
                     <span>级联</span>
+                </label>
+                <label class="chb-label">
+                    <input type="checkbox" value="1" id="chbReverse" checked="checked" />
+                    <span>反转（层级）</span>
                 </label>
             </div>
             <div>
@@ -116,17 +124,31 @@
                 <button onclick="expandType(false);">按类型收缩</button>
             </div>
             <div>
-                <div style="padding:0 0 5px 0;" class="item">                    
-                    <span>节点ID:</span>
+                <div style="padding:0 0 5px 0;" class="item">
+                    <span>原节点ID:</span>
                     <input type="text" id="txtNodeId" class="txt" style="width:180px;" placeholder="是NodeId 不是DataId" />
+                    <span>目标节点ID:</span>
+                    <input type="text" id="txtDestId" class="txt" style="width:180px;" placeholder="目标NodeId" />
                 </div>
                 <div style="padding:0 0 5px 0;" class="item">
                     <button onclick="position();">定位</button>
                     <button onclick="position(true);">定位并选中</button>
                     <button onclick="deleteNode();">删除节点</button>
-                    <button onclick="moveNode();">移动到</button>
-                    <button onclick="moveNode(true);">插入到</button>
-                    <input type="text" id="txtDestId" class="txt" style="width:150px;" placeholder="目标NodeId" />
+                    <select id="ddlChild">
+                        <option value="0">节点</option>
+                        <option value="1">子节点</option>
+                    </select>
+                    <button onclick="moveNode();">移动节点到</button>
+                    <button onclick="moveNode(true);">插入节点到</button>
+                </div>
+                <div style="padding:0 0 5px 0;" class="item">
+                    <button onclick="sortUp();">上移</button>
+                    <button onclick="sortDown();">下移</button>
+                    <label class="chb-label">
+                        <input type="checkbox" value="1" id="chbDrag2" />
+                        <span>模拟拖动</span>
+                    </label>
+                    <button onclick="sortNode();">移动位置到</button>
                 </div>
                 <div style="padding:0 0 5px 0;" class="item">
                     <span>通道ID:</span>
@@ -160,7 +182,12 @@
             {id:7,pid:5,name:'演示测试2'},
             {id:8,pid:2,name:'出厂检测'},
             {id:9,pid:8,name:'出厂检测1'},
-            {id:10,pid:8,name:'出厂检测2'}
+            {id:10,pid:8,name:'出厂检测2'},
+            {id:12,pid:8,name:'出厂检测3'},
+            {id:13,pid:8,name:'出厂检测4'},
+            {id:14,pid:8,name:'出厂检测5'},
+            {id:15,pid:8,name:'出厂检测6'},
+            {id:16,pid:8,name:'出厂检测7'}
         ]
     };
 
@@ -172,10 +199,11 @@
 
     function expandLevel(expand) {
         var linkage = $('#chbLinkage').checked(),
+            reverse = $('#chbReverse').checked(),
             level = $('#ddlLevel2').val().toInt();
-        $.console.log('expandLevel:', level, linkage, expand);
+        $.console.log('expandLevel:', level, linkage, reverse, expand);
         //$.tree() 空参数 可以获取到第一个非空的树，如果当前页面只有一个树，可以这样获取
-        $.tree(TreeId).expandLevel(level, linkage, expand);
+        $.tree(TreeId).expandLevel(level, linkage, reverse, expand);
     }
 
     function expandType(expand) {
@@ -221,16 +249,37 @@
     }
 
     function deleteNode() {
-        var nid = $('#txtNodeId').val().trim();
-        $.tree(TreeId).delete(nid);
+        var nid = $('#txtNodeId').val().trim(),
+            child = $('#ddlChild').val().toInt();
+
+        $.tree(TreeId)[child ? 'deleteChild' : 'delete'](nid);
     }
 
     function moveNode(insert) {
         var nid = $('#txtNodeId').val().trim(),
-            dest = $('#txtDestId').val().trim();
+            dest = $('#txtDestId').val().trim(),
+            child = $('#ddlChild').val().toInt();
 
-        //$.tree(TreeId).moveChild(nid, dest, insert);
-        $.tree(TreeId).move(nid, dest, insert);
+        $.tree(TreeId)[child ? 'moveChild' : 'move'](nid, dest, insert);
+    }
+
+    function sortUp() {
+        var nid = $('#txtNodeId').val().trim();
+        $.tree(TreeId).sortUp(nid);
+    }
+
+    function sortDown() {
+        var nid = $('#txtNodeId').val().trim();
+        $.tree(TreeId).sortDown(nid);
+    }
+    function sortNode() {
+        var nid = $('#txtNodeId').val().trim(),
+            dest = $('#txtDestId').val().trim(),
+            drag = $('#chbDrag2').checked();
+
+        $.tree(TreeId).sortNode(nid, dest, function (node, num, idx) {
+            $.console.log('sortNode', node, num, idx);
+        }, drag);
     }
 
     function getTestData(resolve) {
@@ -277,6 +326,9 @@
             showCount = $('#chbCount').checked(),
             showDesc = $('#chbDesc').checked(),
             showButton = $('#chbButton').checked(),
+            showMove = $('#chbMove').checked(),
+            moveAble = $('#chbMoveAble').checked(),
+            dragAble = $('#chbDragAble').checked(),
             switchIcon = $('#ddlSwitch').val(),
             clickExpand = $('#chbClickExpand').checked(),
             clickChecked = $('#chbClickChecked').checked(),
@@ -317,6 +369,9 @@
             showCount: showCount,
             showDesc: showDesc,
             showButton: showButton,
+            showMove: showMove,
+            moveAble: moveAble,
+            dragAble: dragAble,
             buttonConfig: {
                 //types: ['unit']
                 //types: ['camera']
@@ -388,7 +443,8 @@
                     cache['node'].self();
                 }
 
-                $.console.log('onclick', tree.id, ev, node);
+                $.console.log('onclick', tree.id, ev, node, node.childs);
+                /*
                 $.console.log('getChecked0:', tree.getChecked());
                 $.console.log('getChecked1:', tree.getChecked('data'));
                 $.console.log('getChecked2:', tree.getChecked('value'));
@@ -397,6 +453,7 @@
                 $.console.log('getValue1:', tree.getValue('value'));
                 $.console.log('getValue2:', tree.getValue('data'));
                 $.console.log('getValue3:', tree.getValue('node'));
+                */
             },
             ondblclick: function (node, tree, ev) {
                 $.console.log('ondblclick', tree.id, ev, node);
@@ -467,26 +524,33 @@
             */
             buttonCallback: function (node, tree, ev, key) {
                 $.console.log('buttonCallback:', tree.id, node, key);
-                if (node.type === 'camera') {
-                    var pid = node.data.id,
-                        par = {type: 'preset', ptype: 'camera'},
-                        items = [],
-                        num = node.childs.length,
-                        len = $('#txtPresetLen').val().toInt(1);
+                var pid = node.data.id,
+                    par = {type: 'preset', ptype: 'camera'},
+                    items = [],
+                    num = node.childs.length,
+                    len = $('#txtPresetLen').val().toInt(1);
 
-                    switch(key) {
-                    case 'add':
+                switch(key) {
+                case 'add':                    
+                    if (node.type === 'camera') {
                         for (var i = 0; i < len; i++) {
                             items.push({id: pid + '_' + (num + i + 1), name: '预置点' + (num + i + 1), pid: pid});
                         }
                         $.tree(TreeId).add(items, par).expand(node);
-                        break;
-                    case 'edit':
-                        break;
-                    case 'del':
-                        $.tree(TreeId).del(node);
-                        break;
                     }
+                    break;
+                case 'edit':
+                    break;
+                case 'del':
+                    $.tree(TreeId).del(node);
+                    break;
+                case 'up':
+                case 'down':
+                    var num = key === 'up' ? -1 : 1;
+                    $.tree(TreeId).sortIndex(node, num, function(node, num, idx) {
+                        $.console.log('sortIndex:', node.id, key, num, idx);
+                    });
+                    break;
                 }
             },
             onbutton: function (node, tree, ev, key) {

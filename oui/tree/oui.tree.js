@@ -47,6 +47,8 @@
 				Add: '\u65b0\u5efa', 		//新建
 				Edit: '\u7f16\u8f91', 		//编辑
 				Del: '\u5220\u9664',		//删除
+				Up: '\u4e0a\u79fb',			//上移
+				Down: '\u4e0b\u79fb',		//下移
 				Update: '\u66f4\u65b0',		//更新
 				Modify: '\u4fee\u6539'		//修改
 			},
@@ -136,6 +138,17 @@
 					node = p.node;
 				}
 				Factory.contextmenuCallback(node, tree, ev);
+			},			
+			drag: function (ev, tree) {
+				//当前节点
+				var node,
+					//兄弟节点
+					sibling,
+					callback = function() {
+
+					};
+
+				//node.moveNode(sibling, callback, true);
 			}
 		},
 		Factory = {
@@ -420,6 +433,8 @@
 					opt.cookieExpire = Config.CacheCookieExpire;
 				}
 
+				opt.showType = $.isBoolean($.getParam(opt, 'showType,showtype'), true);
+				opt.showStatus = $.isBoolean($.getParam(opt, 'showStatus,showstatus'), true);
 				opt.showIcon = $.isBoolean($.getParam(opt, 'showIcon,showicon'), true);
 
 				var showCheck = $.getParam(opt, 'showCheck,showcheck,checkbox');
@@ -427,7 +442,12 @@
 
 				opt.showCount = $.isBoolean($.getParam(opt, 'showCount,showcount'), false);
 				opt.showDesc = $.isBoolean($.getParam(opt, 'showDesc,showdesc'), false);
+
 				opt.showButton = $.isBoolean($.getParam(opt, 'showButton,showbutton'), false);
+				opt.moveAble = $.isBoolean($.getParam(opt, 'moveAble,moveable'), true);
+				opt.showMove = $.isBoolean($.getParam(opt, 'showMove,showmove'), opt.showButton);
+				opt.dragAble = $.isBoolean($.getParam(opt, 'dragAble,draggable,dragable'), false);
+				opt.dragTypes = Factory.parseArrayParam($.getParam(opt, 'dragTypes,dragType'));
 				
 				opt.buttonConfig = $.extend({types:[], buttons:[]}, opt.buttonConfig);
 				var types = opt.buttonConfig.types, buttons = opt.buttonConfig.buttons;
@@ -442,8 +462,6 @@
 
 				opt.showTitle = $.isBoolean($.getParam(opt, 'showTitle,showtitle'), false);
 
-				opt.showType = $.isBoolean($.getParam(opt, 'showType,showtype'), true);
-				opt.showStatus = $.isBoolean($.getParam(opt, 'showStatus,showstatus'), true);
 				opt.statusField = $.getParam(opt, 'statusField', 'status');
 
 				//默认样式时，默认不显示节点类型和状态图标
@@ -755,7 +773,9 @@
 				}
 			},
 			buildEvent: function (tree) {
-				var div = tree.target ? tree.element : tree.panel;
+				var opt = tree.options,
+					div = tree.target ? tree.element : tree.panel;
+
 				$.addListener(div, 'mousedown', function(ev) {
 					Factory.dealEvent(ev, tree, ev.type);
 				});
@@ -768,6 +788,10 @@
 				$.addListener(div, 'contextmenu', function(ev) {
 					Factory.dealEvent(ev, tree, ev.type);
 				});
+				if (!opt.moveAble || !opt.dragAble) {
+					return this;
+				}
+				//TODO:
 
 				return this;
 			},
@@ -1243,7 +1267,6 @@
 				if (!items || !$.isArray(items)) {
 					return this;
 				}
-				//TODO:
 				
 				if (Factory.isNode(dest) && dest.tree === tree) {
 					fragment = $.createFragment();
@@ -1261,10 +1284,8 @@
 						nodes = [];
 						fragment = dr.items.length > 3 ? $.createFragment() : null;
 						
-						Factory.buildItem(tree, root, dr.items, p, nodes, fragment)
-							.initStatus(tree, false, nodes);
+						Factory.buildItem(tree, root, dr.items, p, nodes, fragment).initStatus(tree, false, nodes);
 
-				//TODO:
 						if (fragment) {
 							dr.pnode.childbox.appendChild(fragment);
 						}
@@ -1287,18 +1308,75 @@
 				}
 				return this;
 			},
+			getChildIndex: function (parent, nodes) {
+				var m = parent.childs.length,
+					n = nodes.length,
+					indexs = [], i, j, c;
+
+				for (i = 0; i < m; i++) {
+					for (j = 0; j < n; j++) {
+						if (parent.childs[i].id === nodes[j].id) {
+							indexs[j] = i;
+							c++;
+						}
+					}
+					if (c >= n) {
+						break;
+					}
+				}
+				return indexs;
+			},
 			moveNode: function (tree, node, dest, sibling) {
 				var src = node.parent;
 				if (Factory.isNode(dest) && node !== dest) {
 					if (src !== dest) {
 						dest.addChild(node, sibling).setExpandClass();
 						node.setParent(dest).updateLevel(dest.getLevel() + 1);
-						src.deleteChild(node).setBoxDisplay().setExpandClass().updateCount();
+						src.deleteChildData(node).setBoxDisplay().setExpandClass().updateCount();
 					} else if (Factory.isNode(sibling) && !sibling.root) {
 						dest.childbox.insertBefore(node.element, sibling.element);
+						dest.setChild(node, sibling, 2);
 					}
 				}
 				return this;
+			},
+			changeNodePos: function (tree, node, sibling, drag, callback) {
+				var nodes = [node], num = $.isNumber(sibling), obj = Factory.isNode(sibling);
+				if (!Factory.isNode(node)
+					|| (obj && node.parent !== sibling.parent)
+					|| (num && !sibling)) {
+					return this;
+				}
+				if (obj) {
+					nodes.push(sibling);
+				} else if (num) {
+					num = sibling;
+					sibling = undefined;
+				}
+				var parent = node.parent, c = parent.childs.length,
+					indexs = Factory.getChildIndex(parent, nodes),
+					src = indexs[0], dest = num ? src + num : indexs[1],
+					down = drag || num ? src < dest : false;
+
+				if (src < 0 || dest < 0 || src === dest || dest >= c) {
+					return this;
+				}
+				sibling = down ? parent.childs[dest + 1] : sibling || parent.childs[dest];
+
+				if (sibling) {
+					parent.childbox.insertBefore(node.element, sibling.element);
+				} else {
+					parent.childbox.appendChild(node.element);
+				}
+				parent.childs.splice(src, 1);
+				parent.childs.splice(dest, 0, node);
+
+				function _callback(node, num, idx) {
+					if ($.isFunction(callback)) {
+						callback(node, num, idx);
+					}
+				}
+				return _callback(node, num, dest), this;
 			},
 			updateLevelCache: function (tree, node, srcLevel) {
 				var dest = node.getLevel(),
@@ -1330,6 +1408,10 @@
 						'<a class="btn btn-add" key="add" nid="', p.nid, '" title="', Config.Lang.Add, '"></a>',
 						'<a class="btn btn-edit" key="edit" nid="', p.nid, '" title="', Config.Lang.Edit, '"></a>',
 						'<a class="btn btn-del" key="del" nid="', p.nid, '" title="', Config.Lang.Del, '"></a>',
+						opt.showMove ? [
+							'<a class="btn btn-up" key="up" nid="', p.nid, '" title="', Config.Lang.Up, '"></a>',
+							'<a class="btn btn-down" key="down" nid="', p.nid, '" title="', Config.Lang.Down, '"></a>',
+						].join('') : '',
 						'</div>'
 					];
 				}
@@ -1408,7 +1490,9 @@
 			buildLi: function (tree, p, node, opt) {
 				var li = document.createElement('LI');
 				li.className = ('node level' + p.level);
-
+				if (opt.dragAble && Factory.isDragType(opt, p.type)) {
+					li.draggable = true;
+				}
 				var hide = ' style="display:none;"',
 					title = opt.showTitle && p.text.length > Config.TitleTextLength ? ' title="' + p.text + '"' : '',
 					check = opt.showCheck ? [
@@ -1441,6 +1525,12 @@
 				]).join('');
 
 				return li;
+			},
+			isDragType: function (opt, type) {
+				if (opt.dragTypes.length <= 0) {
+					return true;
+				}
+				return opt.dragTypes.indexOf(type) > -1;
 			},
 			isNodeBody: function (par) {
 				return par.tag.inArray(['a', 'span']) && par.css.inArray(['icon', 'name', 'text', 'count', 'desc']);
@@ -1601,7 +1691,7 @@
 				}
 				return this;
 			},
-			eachNodeIds: function (nodes, nodeIds, funcName, arg0, arg1) {
+			eachNodeIds: function (nodes, nodeIds, funcName, arg0, arg1, arg2, arg3) {
 				if (!$.isArray(nodeIds)) {
 					nodeIds = $.isString(nodeIds) ? nodeIds.split(/[,;|]/) : [nodeIds];
 				}
@@ -1613,19 +1703,19 @@
 						if ($.isFunction(funcName)) {
 							funcName(node, i, c);
 						} else if ($.isFunction(node[funcName])) {
-							node[funcName](arg0, arg1);
+							node[funcName](arg0, arg1, arg2, arg3);
 						}
 					}
 				}
 				return this;
 			},
-			callNodeFunc: function (nodes, nodeId, funcName, arg0, arg1) {
+			callNodeFunc: function (nodes, nodeId, funcName, arg0, arg1, arg2, arg3) {
 				if ($.isArray(nodeId)) {
 					nodeId = nodeId[0];
 				}
 				var node, nid = Factory.isNode(nodeId) ? nodeId.id : Factory.buildNodeId(nodeId);
 				if ((node = nodes[nid]) && $.isFunction(node[funcName])) {
-					node[funcName](arg0, arg1);
+					node[funcName](arg0, arg1, arg2, arg3);
 				}
 				return this;
 			},
@@ -2109,7 +2199,7 @@
 
 			return that;
 		},
-		deleteChild: function (node) {
+		deleteChildData: function (node) {
 			var that = this.self(),
 				childs = that.childs,
 				i = childs.length - 1;
@@ -2126,21 +2216,32 @@
 			}
 			return that;
 		},
-		deleteChildNode: function () {
+		eachDeleteChild: function (removeElem) {
+			var that = this.self(), c = that.childs.length;
+			for (var i = 0; i < c; i++) {
+				that.childs[i].delete(removeElem);
+			}
+			return that;
+		},
+		deleteChild: function () {
 			var that = this.self(), c = that.childs.length;
 			for (var i = 0; i < c; i++) {
 				that.childs[i].delete();
 			}
-			return that;
+			that.childs = [];
+			return that.checkCollapse();
 		},
-		delete: function () {
-			var that = this.self();
+		delete: function (removeElem) {
+			var that = this.self(), parent = that.parent;
 
-			Factory.deleteNodeCache(that.tree, that.deleteChildNode());
+			Factory.deleteNodeCache(that.tree, that.eachDeleteChild(false));
 
-			//删除节点DOM元素
-			$.removeElement(that.element);
+			if ($.isBoolean(removeElem, true)) {
+				//删除节点DOM元素
+				$.removeElement(that.element);
 
+				parent.checkCollapse();
+			}
 			return that;
 		},
 		getLevel: function () {
@@ -2172,31 +2273,68 @@
 			if (c <= 0) {
 				return that;
 			}
-
 			while(c > 0) {
 				childs[0].move(destNode, insert);
 				c--;
 			}
-
 			return that;
 		},
 		move: function (destNode, insert) {
+			var that = this.self(), dest, sibling;
 			if (insert) {
-				return this.insert(destNode);
-			}
-			var that = this.self(),
+				sibling = Factory.getNode(that.tree, destNode);
+				if (Factory.isNode(sibling)) {
+					dest = sibling.parent;
+				}
+			} else {
 				dest = Factory.getNode(that.tree, destNode);
+			}
+			return Factory.moveNode(tree, that, dest, sibling), that;
+		},
+		sortIndex: function (num, callback, defNum) {
+			var that = this.self();
 
-			return Factory.moveNode(tree, that, dest), that;
+			if (!that.tree.options.moveAble) {
+				return that;
+			}
+			if (Factory.isNode(num) || $.isString(num, true)) {
+				num = Factory.getNode(that.tree, num);
+			} else if (!$.isNumber(num) || !num) {
+				num = $.isNumber(defNum) && defNum ? defNum : -1;
+			}
+			Factory.changeNodePos(that.tree, that, num, false, callback);
+
+			return that;
+		},
+		sortUp: function (num, callback, defNum) {
+			var that = this.self();
+			if ($.isFunction(num)) {
+				callback = num;
+				num = undefined;
+			}
+			if (!$.isNumber(defNum) || !defNum) {
+				defNum = -1;
+			}
+			return that.sortIndex(num, callback, defNum);
+		},
+		sortDown: function (num, callback) {
+			return this.self().sortUp(num, callback, 1);
+		},
+		sortNode: function (destNode, callback, drag) {
+			var that = this.self();
+
+			if (!that.tree.options.moveAble || !destNode) {
+				return that;
+			}
+			if (Factory.isNode(destNode) || $.isString(destNode, true)) {
+				destNode = Factory.getNode(that.tree, destNode);
+			}
+			Factory.changeNodePos(that.tree, that, destNode, drag, callback);
+
+			return that;
 		},
 		insert: function (siblingNode) {
-			var that = this.self(),
-				sibling = Factory.getNode(that.tree, siblingNode);
-
-			if (Factory.isNode(sibling)) {
-				Factory.moveNode(tree, that, sibling.parent, sibling);
-			}
-			return that;
+			return that.move(siblingNode, true);
 		},
 		setStoreCache: function (key, node, action) {
 			return Factory.setStoreCache(this.tree, key, node, action), this;
@@ -2249,15 +2387,33 @@
 				ptype: that.type
 			}, false, displayNone);
 		},
+		setChild: function (node, sibling, action) {
+			var that = this.self(), indexs = [];
+			switch(action) {
+			case 0: //append
+				that.childs.push(node);
+				break;
+			case 1: //insert
+				indexs = Factory.getChildIndex(that, [sibling]);
+				that.childs.splice(indexs[0], 0, node);
+				break;
+			case 2: //move
+				indexs = Factory.getChildIndex(that, [node, sibling]);
+				that.childs.splice(indexs[0], 1);
+				that.childs.splice(indexs[1], 0, node);
+				break;
+			}
+			return that;
+		},
 		addChild: function (node, sibling, fragment) {
-			var that = this.self();
+			var that = this.self(), action = 0;
 			if (!that.childs) {
 				that.childs = [];
 			}
 			if (!node.element) {
 				return that;
 			}
-			that.childs.push(node);
+			//that.childs.push(node);
 
 			if (fragment) {
 				fragment.appendChild(node.element);
@@ -2267,11 +2423,12 @@
 				}
 				if (Factory.isNode(sibling) && sibling.element) {
 					that.childbox.insertBefore(node.element, sibling.element);
+					action = 1;
 				} else {
 					that.childbox.appendChild(node.element);
 				}
 			}
-			return that.updateCount();
+			return that.setChild(node, sibling, action).updateCount();
 		},
 		position: function (selected) {
 			var that = this.self(), offsetY = -50;
@@ -2289,16 +2446,25 @@
 			}
 			return $.setElemClass(that.childbox, 'hide', !display), that;
 		},
-		setExpand: function (expanded, ev, linkage) {
+		checkCollapse: function () {
+			var that = this.self(),
+				collapsed = that.childs.length <= 0;
+
+			if (collapsed) {
+				that.setParam('expanded', false).setExpandClass();
+			}
+			return that;
+		},
+		setExpand: function (expanded, ev, linkage, callback) {
 			var that = this.self(),
 				node = that,
 				tree = that.tree;
 
 			if (!that.isDynamic() && !that.hasChild()) {
-				return that;
+				return _callback(that);
 			}
 			if ($.isBoolean(expanded) && expanded === that.expanded) {
-				return that;
+				return _callback(that);
 			}
 			if (that.childbox) {
 				expanded = $.isBoolean(expanded, !that.expanded);
@@ -2326,13 +2492,20 @@
 			if (ev && ev.target && ev.target.tagName) {
 				that.setStoreCache('expanded', that, that.expanded);
 			}
-			return that;
+
+			function _callback(that) {
+				if ($.isFunction(callback) && that.expanded) {
+					callback(that);
+				}
+				return that;
+			}
+			return _callback(that);
 		},
-		expand: function (linkage) {
+		expand: function (linkage, callback) {
 			var that = this.self(),
 				expanded = true;
 
-			that.setExpand(expanded);
+			that.setExpand(expanded, null, false, callback);
 
 			if (linkage) {
 				var n = that, pn;
@@ -2625,6 +2798,14 @@
 				showDesc: undefined,
 				//是否显示按钮
 				showButton: undefined,
+				//是否显示上移/下移按钮
+				showMove: undefined,
+				//是否允许移动节点
+				moveAble: undefined,
+				//是否允许拖动节点
+				dragAble: undefined,
+				//允许拖动的节点类型，字符串数组或字符串，示例：['unit','device'] 或 'unit'
+				dragTypes: undefined,
 				//按钮配置
 				buttonConfig: undefined,
 				//是否显示节点信息
@@ -2805,16 +2986,26 @@
 		delete: function (nodes) {
 			return Factory.eachNodeIds(this.cache.nodes, nodes, 'delete'), this;
 		},
+		deleteChild: function (nodes) {
+			return Factory.eachNodeIds(this.cache.nodes, nodes, 'deleteChild'), this;
+		},
 		move: function (nodes, dest, insert) {
 			return Factory.eachNodeIds(this.cache.nodes, nodes, 'move', dest, insert), this;
 		},
-		/*
-		insert: function (nodes, dest) {
-			return Factory.eachNodeIds(this.cache.nodes, nodes, 'insert', dest), this;
-		},
-		*/
 		moveChild: function (nodes, dest, insert) {
 			return Factory.eachNodeIds(this.cache.nodes, nodes, 'moveChild', dest, insert), this;
+		},
+		sortIndex: function (nodes, num, callback) {
+			return Factory.eachNodeIds(this.cache.nodes, nodes, 'sortIndex', num, callback), this;
+		},
+		sortNode: function (nodes, dest, callback, drag) {
+			return Factory.eachNodeIds(this.cache.nodes, nodes, 'sortNode', dest, callback, drag), this;
+		},
+		sortUp: function (nodes, num, callback) {
+			return Factory.eachNodeIds(this.cache.nodes, nodes, 'sortUp', num, callback), this;
+		},
+		sortDown: function (nodes, num, callback) {
+			return Factory.eachNodeIds(this.cache.nodes, nodes, 'sortDown', num, callback), this;
 		},
 		checked: function (nodes, checked) {
 			return Factory.eachNodeIds(this.cache.nodes, nodes, 'setChecked', $.isBoolean(checked, true)), this;
