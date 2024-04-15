@@ -67,6 +67,7 @@
                 <label class="chb-label"><input type="checkbox" id="chbIcon" checked="checked" /><span>显示图标</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbCount" checked="checked" /><span>显示数量</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbDesc" checked="checked" /><span>显示备注</span></label>
+                <label class="chb-label"><input type="checkbox" id="chbSearch" checked="checked" /><span>显示搜索</span></label>
                 <div></div>
                 <label class="chb-label"><input type="checkbox" id="chbButton" /><span>显示按钮</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbMoveAble" /><span>允许移动</span></label>
@@ -157,6 +158,9 @@
                     <input type="text" id="txtPresetLen" class="txt" style="width:50px;" maxlength="6" />
                     <button onclick="addNode2();">新增预置点</button>
                 </div>
+                <div>
+                    <button onclick="setHeight();">增加高度</button>
+                </div>
                 
                 <!--<button onclick="addNode1();">新增子节点</button>-->
             </div>
@@ -243,6 +247,11 @@
         $.tree(TreeId).add(items, par);
     }
 
+    function setHeight() {
+        $('#tree').height($('#tree').height() + 50);
+        $.tree().resize();
+    }
+
     function position(selected) {
         var nid = $('#txtNodeId').val().trim();
         $.tree(TreeId).position(nid, selected);
@@ -304,9 +313,9 @@
 
         var trees = [
             keys['root'] ? {type:'root',key:'datas'} : undefined,
-            keys['unit'] ? {type:'unit',key:'units'} : undefined,
-            keys['device'] ? {type:'device',key:'devices',ptype:'unit'} : undefined,
-            keys['camera'] ? {type:'camera',key:'cameras',ptype:'device'} : undefined,
+            keys['unit'] ? {type:'unit',key:'units',name:'目录'} : undefined,
+            keys['device'] ? {type:'device',key:'devices',ptype:'unit',name:'设备'} : undefined,
+            keys['camera'] ? {type:'camera',key:'cameras',ptype:'device',name:'通道'} : undefined,
             keys['department'] ? {type:'department',key:'departments'} : undefined,
             keys['person'] ? {type:'helmet',key:'persons',ptype:'department'} : undefined
         ];
@@ -327,6 +336,7 @@
             showDesc = $('#chbDesc').checked(),
             showButton = $('#chbButton').checked(),
             showMove = $('#chbMove').checked(),
+            showSearch = $('#chbSearch').checked(),
             moveAble = $('#chbMoveAble').checked(),
             dragAble = $('#chbDragAble').checked(),
             switchIcon = $('#ddlSwitch').val(),
@@ -378,10 +388,12 @@
             },
             showTitle: true,
             showInfo: true,
+            showSearch: showSearch,
             //showType: false,
             //showStatus: false,
             clickExpand: clickExpand,
             clickChecked: clickChecked,
+            callbackLevel: 1,
             complete: function (tree) {
                 $('#divOper').show();
 
@@ -444,7 +456,7 @@
                 }
 
                 $.console.log('onclick', tree.id, ev, node, node.childs);
-                /*
+                
                 $.console.log('getChecked0:', tree.getChecked());
                 $.console.log('getChecked1:', tree.getChecked('data'));
                 $.console.log('getChecked2:', tree.getChecked('value'));
@@ -453,7 +465,7 @@
                 $.console.log('getValue1:', tree.getValue('value'));
                 $.console.log('getValue2:', tree.getValue('data'));
                 $.console.log('getValue3:', tree.getValue('node'));
-                */
+                
             },
             ondblclick: function (node, tree, ev) {
                 $.console.log('ondblclick', tree.id, ev, node);

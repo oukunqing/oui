@@ -60,7 +60,9 @@
 			trees: {},
 			caches: {},
 			events: {},
-			timers: {}
+			timers: {},
+			drags: {},
+			search: {}
 		},
 		Event = {
 			target: function (ev, tree) {
@@ -77,11 +79,14 @@
 
 				return node ? { 
 					node: node, elem: elem, nid: nid,
+					element: node.element,
 					tag: elem.tagName.toLowerCase(), 
 					css: elem.className.trim().split(' ')[0]
 				} : {};
 			},
 			mousedown: function (ev, tree) {
+				Factory.showSearchPanel(tree, false);
+
 				var p = Event.target(ev, tree);
 				if (p.node && Factory.isNodeSwitch(p)) {
 					p.node.setExpand(null, ev);	
@@ -95,6 +100,7 @@
 				if (!ep.node) {
 					return false;
 				}
+
 				if (ep.tag.inArray(['a', 'span'])) {
 					if (ep.css.inArray(['switch'])) {
 						//ep.node.setExpand();
@@ -139,16 +145,89 @@
 				}
 				Factory.contextmenuCallback(node, tree, ev);
 			},			
-			drag: function (ev, tree) {
-				//当前节点
-				var node,
-					//兄弟节点
-					sibling,
-					callback = function() {
+			dragstart: function (ev, tree) {
+				var ep = Event.target(ev, tree),
+					op = tree.options;
 
-					};
+				if (!ep.node) {
+					return false;
+				}
+				Factory.setDragNode(tree, ep.node, ev);
+				$.console.log('dragstart:', ev);
+				$.setElemClass(ep.element, 'node-drag', true);
 
-				//node.moveNode(sibling, callback, true);
+				//firefox hack
+				//ev.dataTransfer.setData('text','drag');
+
+				//清除默认的预览图
+				ev.dataTransfer.setDragImage(new Image(), 0, 0);
+			},
+			drop: function (ev, tree) {
+				ev.preventDefault();
+				var ep = Event.target(ev, tree),
+					op = tree.options,
+					par = Factory.getDragNode(tree),
+					node = par.node,
+					dest = ep.node;
+
+				Factory.delDragNode(tree);
+
+				if (!dest || !node) {
+					return false;
+				}
+				if (node.parent === dest && dest.childs.length > 1) {
+					dest = dest.childs[0];
+				}
+				node.sortNode(dest, null, true);
+
+				$.setElemClass(node.element, 'node-drag', false);
+				$.setClass(ep.element, 'node-drop,drop-up,drop-down', false);
+			},
+			dragover: function (ev, tree) {
+				ev.preventDefault();
+				var par = Factory.getDragNode(tree), x, y;
+				if (par && par.clone) {
+					x = ev.clientX - par.offset.left;
+					y = ev.clientY - par.offset.top;
+					par.clone.style.transform = 'translate3d( ' + x + 'px ,' + y + 'px,0)'; 
+				}
+			},
+			dragenter: function (ev, tree) {
+				var key = 'tree_drag_enter_' + tree.id, data;
+				if (Cache.timers[key]) {
+					window.clearTimeout(Cache.timers[key]);
+				}
+				Cache.timers[key] = window.setTimeout(function() {
+					var ep = Event.target(ev, tree), obj = Factory.getDragNode(tree);
+					if (!ep.node 
+						//判断是否是同组节点（或父节点）
+						//这里只实现同组上下拖动排序，不改变节点父级关系
+						//若拖动改变父级关系，随意拖动之后，极易引起节点混乱
+						|| !Factory.isSameTeam(obj.node, ep.node) 
+						|| ep.element.className.indexOf('node') < 0) {
+						return false;
+					}
+					if (obj.node !== ep.node) {
+						var dir = obj.pos.top < ev.clientY || obj.node.parent === ep.node ? 'drop-down' : 'drop-up';
+						$.setClass(ep.element, ['node-drop', dir].join(','), true);
+					}
+				}, 50);
+			},
+			dragleave: function (ev, tree) {
+				var ep = Event.target(ev, tree), obj = Factory.getDragNode(tree);
+				if (!ep.node 
+					|| !Factory.isSameTeam(obj.node, ep.node)
+					|| ep.element.className.indexOf('node-drop') < 0) {
+					return false;
+				}
+				$.setClass(ep.element, 'node-drop,drop-up,drop-down', false);
+			},
+			dragend: function (ev, tree) {
+				var obj = Factory.getDragNode(tree);
+				if (obj && obj.node) {
+					$.setElemClass(obj.node.element, 'node-drag', false);
+				}
+				Factory.delDragNode(tree);
 			}
 		},
 		Factory = {
@@ -182,6 +261,9 @@
 			},
 			isNode: function (node) {
 				return node && node instanceof(Node);
+			},
+			isSameTeam: function (node, dest) {
+				return node.parent === dest.parent || node.parent === dest;
 			},
 			isPromise: function () {
 				return typeof Promise !== 'undefined';
@@ -332,6 +414,44 @@
 				}
 				return this[key] = val, this;
 			},
+			setDragNode: function (tree, node, ev) {
+				var obj = node.element.cloneNode(true),
+					div = document.createElement('div'),
+					pad = $.getPaddingSize(node.element);
+
+				obj.className = 'node-clone';
+				div.className= 'oui-tree oui-tree-clone';
+				div.appendChild(obj);
+
+				div.style.cssText = [
+					'transform:translate3d(-1000px,-1000px,0);'
+				].join('');
+
+				document.body.appendChild(div);
+
+				Cache.drags['drag' + tree.id] = {
+					node: node,
+					clone: div,
+					offset: { top: ev.offsetY, left:ev.offsetX - pad.left },
+					pos: { top: ev.clientY, left:ev.clientX }
+				};
+
+				return this;
+			},
+			getDragNode: function (tree, node) {
+				if (Cache.drags['drag' + tree.id]) {
+					return Cache.drags['drag' + tree.id];
+				}
+				return;
+			},
+			delDragNode: function (tree) {
+				var obj = Cache.drags['drag' + tree.id];
+				if (obj) {
+					obj.clone.parentNode.removeChild(obj.clone);
+					delete Cache.drags['drag' + tree.id];
+				}
+				return this;
+			},
 			parseTrees: function (trees) {
 				var ot = [], p,
 					type,		//节点类型
@@ -462,6 +582,8 @@
 
 				opt.showTitle = $.isBoolean($.getParam(opt, 'showTitle,showtitle'), false);
 
+				opt.showSearch = $.isBoolean($.getParam(opt, 'showSearch,showForm,showsearch'), false);
+
 				opt.statusField = $.getParam(opt, 'statusField', 'status');
 
 				//默认样式时，默认不显示节点类型和状态图标
@@ -514,7 +636,10 @@
 				opt.clickChecked = $.isBoolean($.getParam(opt, 'clickChecked'), false);
 				opt.clickExpand = $.isBoolean($.getParam(opt, 'clickExpand'), false);
 
-
+				opt.callbackLevel = parseInt($.getParam(opt, 'callbackLevel'));
+				if (isNaN(opt.callbackLevel) || !opt.target) {
+					opt.callbackLevel = 0;
+				}
 				//默认需要防抖回调
 				opt.callbackDebounce = $.isBoolean($.getParam(opt, 'callbackDebounce,debounce'), false);
 				opt.debounceDelay = parseInt('0' + $.getParamCon(opt, 'debounceDelay,debouncedelay,delay')) || Config.DebounceDelay;
@@ -531,6 +656,111 @@
 				opt.buttonCallback = $.getParam(opt, 'buttonCallback,onbutton');
 
 				return opt;
+			},
+			buildTree: function (id, par) {
+				if (Factory.isTree(id)) {
+					return id;
+				}
+				var empty = $.isEmpty(par), cache, opt;
+				if ($.isObject(id)) {
+					opt = $.extend(id, par);
+				} else if ($.isString(id, true) || $.isNumber(id)) {
+					opt = $.extend({}, par, {id: id});
+				} else {
+					opt = $.extend({}, par);
+				}
+
+				//若par为空，则表示只获取缓存;
+				//若id也为空，则表示获取第一个非空的树（缓存）;
+				//若id为数字，则按缓存索引获取非空（对应索引或最后一个索引）的树缓存，索引从0开始
+				//若都获取不到则创建一个空的树
+				//创建空树的目的是为了容错
+				if (empty && !(cache = Factory.getTreeCache(opt.id, true))) {
+					opt = { id: Config.EmptyTreeId };
+				} else {
+					//判断是否指定ID
+					if ($.isUndefinedOrNull(opt.id) || ($.isNumber(opt.id) && !$.isString(opt.id, true))) {
+						var elem = opt.target || opt.element;
+						//未指定ID，则获取控件元素ID
+						if ($.isElement(elem)) {
+							opt.id = elem.id;
+						} else if ($.isString(elem, true)) {
+							opt.id = elem;
+						}
+					}
+				}
+				if (cache) {
+					//这里获取的树，可能是目标树，也可能是空树
+					return cache.tree;
+				} else if ((cache = Factory.getTreeCache(opt.id))) {
+					return cache.tree.initial(opt);
+				} else {
+					return Factory.setTreeCache(new Tree(opt), empty).tree;
+				}
+			},
+			buildEvent: function (tree) {
+				//var div = tree.target ? tree.element : tree.panel;
+				var div = tree.target ? tree.panel : tree.panel;
+
+				$.addListener(div, 'mousedown', function(ev) {
+					Factory.dealEvent(ev, tree, ev.type);
+				});
+				$.addListener(div, 'click', function(ev) {
+					Factory.dealEvent(ev, tree, ev.type);
+				});
+				$.addListener(div,'dblclick', function(ev) {
+					Factory.dealEvent(ev, tree, ev.type);
+				});
+				$.addListener(div, 'contextmenu', function(ev) {
+					Factory.dealEvent(ev, tree, ev.type);
+				});
+
+				$.addListener(div, 'dragstart', function(ev) {
+					Factory.dealEvent(ev, tree, ev.type);
+				});
+				$.addListener(div, 'dragover', function(ev) {
+					Factory.dealEvent(ev, tree, ev.type);
+				});
+				$.addListener(div, 'drop', function(ev) {
+					Factory.dealEvent(ev, tree, ev.type);
+				});
+				
+				$.addListener(div, 'dragenter', function(ev) {
+					Factory.dealEvent(ev, tree, ev.type);
+				});
+				$.addListener(div, 'dragend', function(ev) {
+					Factory.dealEvent(ev, tree, ev.type);
+				});
+				$.addListener(div, 'dragleave', function(ev) {
+					Factory.dealEvent(ev, tree, ev.type);
+				});				
+
+				return this;
+			},
+			dealEvent: function (ev, tree, evType, opt) {
+				if (!evType && (ev && ev.type)) {
+					evType = ev.type;
+				}
+
+				var which = ev.which, type = evType.toLowerCase();
+				if ((which !== Config.MouseWhichLeft) 
+					&& (which !== Config.MouseWhichRight && type === 'contextmenu')) {
+					return this;
+				}
+
+				if (['mousedown', 'mouseup', 'click', 'dblclick', 'contextmenu'].indexOf(type) > -1) {
+					if ($.isFunction(Event[type])) {
+						Event[type](ev, tree);
+					}
+					return this;
+				} else if (!tree.options.moveAble || !tree.options.dragAble) {
+					return this;
+				} else if (['dragstart', 'dragover', 'drop', 'dragenter', 'dragleave', 'dragend'].indexOf(type) > -1) {
+					if ($.isFunction(Event[type])) {
+						Event[type](ev, tree);
+					}
+				}
+				return this;
 			},
 			setNodeCache: function (tree, node) {
 				tree.cache.nodes[node.id] = node;
@@ -731,94 +961,6 @@
 				}
 				return false;
 			},
-			buildTree: function (id, par) {
-				if (Factory.isTree(id)) {
-					return id;
-				}
-				var empty = $.isEmpty(par), cache, opt;
-				if ($.isObject(id)) {
-					opt = $.extend(id, par);
-				} else if ($.isString(id, true) || $.isNumber(id)) {
-					opt = $.extend({}, par, {id: id});
-				} else {
-					opt = $.extend({}, par);
-				}
-
-				//若par为空，则表示只获取缓存;
-				//若id也为空，则表示获取第一个非空的树（缓存）;
-				//若id为数字，则按缓存索引获取非空（对应索引或最后一个索引）的树缓存，索引从0开始
-				//若都获取不到则创建一个空的树
-				//创建空树的目的是为了容错
-				if (empty && !(cache = Factory.getTreeCache(opt.id, true))) {
-					opt = { id: Config.EmptyTreeId };
-				} else {
-					//判断是否指定ID
-					if ($.isUndefinedOrNull(opt.id) || ($.isNumber(opt.id) && !$.isString(opt.id, true))) {
-						var elem = opt.target || opt.element;
-						//未指定ID，则获取控件元素ID
-						if ($.isElement(elem)) {
-							opt.id = elem.id;
-						} else if ($.isString(elem, true)) {
-							opt.id = elem;
-						}
-					}
-				}
-				if (cache) {
-					//这里获取的树，可能是目标树，也可能是空树
-					return cache.tree;
-				} else if ((cache = Factory.getTreeCache(opt.id))) {
-					return cache.tree.initial(opt);
-				} else {
-					return Factory.setTreeCache(new Tree(opt), empty).tree;
-				}
-			},
-			buildEvent: function (tree) {
-				var opt = tree.options,
-					div = tree.target ? tree.element : tree.panel;
-
-				$.addListener(div, 'mousedown', function(ev) {
-					Factory.dealEvent(ev, tree, ev.type);
-				});
-				$.addListener(div, 'click', function(ev) {
-					Factory.dealEvent(ev, tree, ev.type);
-				});
-				$.addListener(div,'dblclick', function(ev) {
-					Factory.dealEvent(ev, tree, ev.type);
-				});
-				$.addListener(div, 'contextmenu', function(ev) {
-					Factory.dealEvent(ev, tree, ev.type);
-				});
-				if (!opt.moveAble || !opt.dragAble) {
-					return this;
-				}
-				//TODO:
-
-				return this;
-			},
-			dealEvent: function (ev, tree, evType) {
-				if (!evType && (ev && ev.type)) {
-					evType = ev.type;
-				}
-
-				var which = ev.which, type = evType.toLowerCase();
-				if ((which !== Config.MouseWhichLeft) 
-					&& (which !== Config.MouseWhichRight && type === 'contextmenu')) {
-					return this;
-				}
-
-				switch(type) {
-				case 'mousedown':
-				case 'mouseup':
-				case 'click':
-				case 'dblclick':
-				case 'contextmenu':
-					if ($.isFunction(Event[type])) {
-						Event[type](ev, tree);
-					}
-					break;
-				}
-				return this;
-			},
 			isRepeat: function (name) {
 				return Cache.events[name] ? true : (Cache.events[name] = true, false);
 			},
@@ -826,11 +968,21 @@
 				if (this.isRepeat('resize')) {
 					return this;
 				}
-				$.addListener(window, 'resize', function (e) {
+				$.addListener(window, 'resize', function (ev) {
+					/*var key = 'oui-win-resize';
+					if (Cache.timers[key]) {
+						window.clearTimeout(Cache.timers[key]);
+					}
+					Cache.timers[key] = window.setTimeout(function() {
+						
+					}, 50);*/
 					for (var i = 0; i < Cache.ids.length; i++) {
 						var d = Factory.getTreeCache(Cache.ids[i].id);
-						if (d && d.tree && d.tree.target) {
-							d.tree.hide();
+						if (d && d.tree) {
+							if (d.tree.target) {
+								d.tree.hide();
+							}
+						 	Factory.setPanelSize(d.tree, ev);
 						}
 					}
 				});
@@ -861,6 +1013,37 @@
 				}
 				return nodes;
 			},
+			setSearchCache: function (tree, par) {
+				var key = 'oui-search-' + tree.id,
+					cache = Cache.search[key];
+				Cache.search[key] = $.extend({}, cache, par);
+				return this;
+			},
+			getSearchCache: function (tree) {
+				return Cache.search['oui-search-' + tree.id] || {};
+			},
+			searchNodes: function (tree, txt) {
+				var nodes = [], cfg = Factory.getSearchCache(tree),
+					key = txt.value.trim();
+
+				if (!$.isString(key, true)) {
+					Factory.setSearchCache(tree, { key: '', search: false });
+					return Factory.showSearchPanel(tree, false);
+				}
+				if (cfg.key === key) {
+					return Factory.showSearchPanel(true);
+				}
+				$.console.log('searchNodes', 'start');
+				for (var k in tree.cache.nodes) {
+					var n = tree.cache.nodes[k];
+					if (n.data.name.indexOf(key) > -1) {
+						nodes.push(n);
+					}
+				}
+				Factory.setSearchCache(tree, { key: key, elem: txt, search: true });
+				$.console.log('searchNodes', 'end', nodes);
+				return Factory.showSearchResult(tree, nodes, key);
+			},
 			buildTargetEvent: function (tree, opt) {
 				if (!tree.target) {
 					return this;
@@ -882,7 +1065,7 @@
 				$.addClass(elem, 'oui-tree-elem');
 
 				$.addListener(document, 'mousedown', function (ev) {
-					if (!$.isInElement(tree.panel, ev) && !$.isInElement(elem, ev)) {
+					if (!$.isInElement(tree.element, ev) && !$.isInElement(elem, ev)) {
 						tree.hide();
 					}
 					return false;
@@ -911,7 +1094,7 @@
 					$.hidePopupPanel(tree.element);
 				});
 
-				return Factory.setWindowResize();
+				return this;
 			},
 			initTargetValue: function (tree) {
 				var elem = tree.target;
@@ -979,12 +1162,20 @@
 				if (!box) {
 					if (!$.isBoolean(show, true)) {
 						return this;
-					}
+					}/*
 					box = document.createElement('div');
-					box.className = 'oui-tree-box'.addClass(Config.CloseLinkageClassName);
+					box.className = 'oui-tree-box oui-tree-popup'.addClass(Config.CloseLinkageClassName);
 					box.id = tree.bid;
+					box.innerHTML = [
+						'<div style="border:solid 1px #f00;height:50px;">',
+						'<input type="text" class="keywords" />',
+						'<button>搜索</button>',
+						'</div>'
+					].join('');
+
 					tree.element = box;
 					document.body.appendChild(box);
+					*/
 					Factory.buildPanel(tree, tree.options, true);
 				} else {
 					display = $.isBoolean(show, box.style.display === 'none');
@@ -1057,7 +1248,7 @@
 					'left:{left}px;top:{top}px;width:{width}px;', 'height:{height}px;'
 				].join('').format(p);
 
-				return this.setBoxSize(tree);
+				return this.setBoxSize(tree).setPanelSize(tree);
 			},
 			setBoxSize: function (tree) {
 				return this;
@@ -1132,25 +1323,211 @@
 				div.className = Factory.getPanelClass(opt);
 				return this;
 			},
+			buildForm: function (tree, box) {
+				if (!tree.options.showSearch) {
+					return this;
+				}
+				var div = document.createElement('div');
+				div.innerHTML = [
+					'<div class="form oui-tree-form">',
+					'<input type="text" class="keywords oui-tree-keywords" />',
+					'<button class="search oui-tree-search">搜索</button>',
+					'</div>'
+				].join('');
+
+				box.appendChild(div);
+
+				var txt = box.querySelector('input.keywords'),
+					btn = box.querySelector('button.search');
+
+				Factory.setSearchCache(tree, { elem: txt, btn: btn });
+
+				$.addListener(btn, 'mousedown', function(ev) {
+					Factory.searchNodes(tree, txt);
+				});
+				$.addListener(txt, 'mousedown', function(ev) {
+					Factory.showSearchPanel(tree, true);
+				});
+				$.addListener(txt, 'keyup', function(ev) {
+					var kc = $.getKeyCode(ev);
+					if (kc === KC.Enter) {
+						Factory.searchNodes(tree, txt);
+					}
+				});
+				return this;
+			},
+			showSearchPanel: function (tree, show, force) {
+				$.console.log('showSearchPanel2:', show);
+				if (!tree.box) {
+					return this;
+				}
+				var cfg = Factory.getSearchCache(tree),
+					div = tree.box.querySelector('div.search-result-panel');
+
+				if (!div) {
+					return this;
+				} else if (!cfg.search) {
+					show = false;
+				}
+				if (!$.isBoolean(show, true) && force) {
+					if (cfg && cfg.elem) {
+						cfg.elem.value = '';
+					}
+					Factory.setSearchCache(tree, { search: false, key: '' });
+				}
+				var display = $.isBoolean(show, div.style.display === 'none');
+				div.style.display = display ? 'block' : 'none';
+
+				if (display && cfg.elem) {
+					div.style.width = cfg.elem.offsetWidth + 'px';
+				}
+
+				return this;
+			},
+			showSearchResult: function (tree, nodes, key) {
+				var div = tree.box.querySelector('div.search-result-panel'),
+					show = nodes ? true : undefined,
+					i, c = nodes.length, node, html = ['<ul>'];
+
+				if (!div) {
+					div = document.createElement('div');
+					div.className = 'search-result-panel';
+					div.innerHTML = [
+						'<div class="search-title">', 
+						'<span class="title"></span>',
+						'<a class="close">关闭</a>',
+						'</div>',
+						'<div class="search-list"></div>'
+					].join('');
+
+					var elems = div.childNodes;
+					Factory.setSearchCache(tree, { title: elems[0], panel: elems[1] });
+
+					$.addListener(elems[0].childNodes[1], 'click', function(ev) {
+						Factory.showSearchPanel(tree, false);
+					});
+
+					tree.box.appendChild(div);
+
+					elems[1].style.height = (div.offsetHeight - elems[0].offsetHeight - 5) + 'px';
+
+					$.addListener(div, 'mouseup,dblclick', function (ev) {
+						$.console.log(ev.type);
+						var elem = ev.target, tag = elem.tagName.toLowerCase();
+						if (tag != 'li' && elem.parentNode) {
+							elem = elem.parentNode;
+						}
+						var nid = $.getAttribute(elem, 'nid');
+						if (nid) {
+							var node = Factory.getNodeCache(tree, nid);
+							if (node) {
+								node.position().select();
+								//TODO:
+								if (ev.type === 'dblclick') {
+									Factory.showSearchPanel(tree, false);
+								}
+							}
+						}
+					});
+				}
+				var cache = Factory.getSearchCache(tree);
+				if (cache.elem) {
+					div.style.width = cache.elem.offsetWidth + 'px';
+				}
+
+				if (nodes) {
+					for (var i = 0; i < c; i++) {
+						node = nodes[i];
+						html.push([
+							'<li nid="', node.id, '">',
+							//'<i>', i + 1, '</i>',
+							node.data.name.replace(key, '<b>' + key + '</b>'),
+							'</li>'
+						].join(''));
+					}
+					html.push('</ul>');
+					cache.panel.innerHTML = html.join('');
+					Factory.setSearchCache(tree, { search: true });
+				}
+				cache.title.childNodes[0].innerHTML = '找到<b>' + c + '</b>个结果' ;
+
+				var display = $.isBoolean(show, div.style.display === 'none');
+				div.style.display = display ? 'block' : 'none';
+
+				return this;
+			},
+			setPanelSize: function (tree, ev) {
+				if (!tree.panel || !tree.options.showSearch) {
+					return this;
+				}
+				if (!ev) {
+					_resize();
+				} else {
+					$.debounce({
+						id: 'oui-resize' + tree.id,
+						delay: 100,
+						timeout: 5000
+					}, function() {
+						_resize();
+					});
+				}
+				function _resize() {
+					var bh = $.getOffset(tree.box).height,
+						form = tree.box.querySelector('div.form'),
+						fh = form ? form.offsetHeight : 0,
+						ph = bh - fh,
+						cache = Factory.getSearchCache(tree);
+
+					tree.panel.style.cssText = [
+						'height:', ph, 'px;', 'margin-top:', fh, 'px;'
+					].join('');
+
+					if (cache && cache.elem) {
+						cache.elem.style.width = (form.clientWidth - cache.btn.offsetWidth - 20) + 'px';
+					}
+				}
+
+				return this;
+			},
 			buildPanel: function (tree, par, initial) {
 				var that = tree,
 					opt = that.options,
 					cache = that.cache,
-					elem = that.element,
-					tag = elem.tagName.toLowerCase(),
-					//div = document.getElementById(that.tid),
+					css = ['oui-tree-box'], tag,
+					box = document.querySelector('#' + that.bid),
 					div = document.querySelector('#' + that.tid);
 
 				cache.start = new Date().getTime();
 
+				if (!box) {
+					that.box = box = document.createElement('div');
+					box.id = that.bid;
+
+					Factory.buildForm(that, box);
+
+					if ($.isElement(opt.target)) {
+						css.push('oui-tree-popup');
+						css.push(Config.CloseLinkageClassName);
+
+						that.element = box;
+						document.body.appendChild(box);
+					} else {						
+						that.element.appendChild(box);
+					}
+					box.className = css.join(' ');
+				}
+
 				if (!div) {
-					tree.panel = div = document.createElement('div');
+					that.panel = div = document.createElement('div');
 					div.id = that.tid;
+					box.appendChild(div);
 					Factory.buildEvent(tree);
 				} else {
 					div.innerHTML = '';
 				}
-				Factory.setPanelClass(div, opt);
+				Factory.setPanelClass(div, opt).setPanelSize(that);
+
+				tag = that.element.tagName.toLowerCase();
 
 				if (opt.trigger || tag.inArray(['input', 'select', 'button', 'a'])) {
 					var events = $.isBoolean(opt.trigger) ? ['mousedown'] : opt.trigger.split(/[,;|]/);
@@ -1160,13 +1537,12 @@
 						});
 					}
 				} else {
-					elem.appendChild(div);
 					if (opt.async) {
 						window.setTimeout(function() {
-							Factory.buildNode(tree, opt).initTargetValue(tree).completeCallback(tree);
+							Factory.buildNode(tree, opt).initTargetValue(that).completeCallback(that);
 						}, 1);
 					} else {
-						Factory.buildNode(tree, opt).initTargetValue(tree).completeCallback(tree);
+						Factory.buildNode(tree, opt).initTargetValue(that).completeCallback(that);
 					}
 				}
 				return this;
@@ -1343,7 +1719,7 @@
 			changeNodePos: function (tree, node, sibling, drag, callback) {
 				var nodes = [node], num = $.isNumber(sibling), obj = Factory.isNode(sibling);
 				if (!Factory.isNode(node)
-					|| (obj && node.parent !== sibling.parent)
+					|| (obj && (node === obj || node.parent !== sibling.parent))
 					|| (num && !sibling)) {
 					return this;
 				}
@@ -1442,8 +1818,8 @@
 				}
 
 				ul.className = css.join(' ');
+				ul.setAttribute('nid', p.pnid);
 				//ul.id = (p.pid + '_box');
-				//ul.setAttribute('nid', p.pnid);
 				
 				return ul;
 			},
@@ -1490,6 +1866,8 @@
 			buildLi: function (tree, p, node, opt) {
 				var li = document.createElement('LI');
 				li.className = ('node level' + p.level);
+				li.setAttribute('nid', p.nid);
+
 				if (opt.dragAble && Factory.isDragType(opt, p.type)) {
 					li.draggable = true;
 				}
@@ -1886,8 +2264,14 @@
 					}, function() {
 						callback(node, tree, ev);
 					});
+				} else if (Factory.isPromise()) {
+					new Promise(function (resolve, reject) {
+						callback(node, tree, ev);
+					});
 				} else {
-					callback(node, tree, ev);
+					window.setTimeout(function() {
+						callback(node, tree, ev);
+					}, 1);
 				}
 				return this;
 			},
@@ -1911,8 +2295,8 @@
 				if ($.isFunction(callback)) {
 					if ($.isFunction(func) && Factory.isPromise()) {
 						new Promise(function (resolve, reject) {
-				            callback(node, tree, func);
-				        });
+							callback(node, tree, func);
+						});
 					} else {
 						window.setTimeout(function() {
 							callback(node, tree, func);
@@ -1922,6 +2306,9 @@
 				return this;
 			},
 			checkedCallback: function (node, tree, ev) {
+				if (tree.options.callbackLevel) {
+					return this;
+				}
 				var callback = tree.options.checkedCallback;
 				if ($.isFunction(node.checkedCallback)) {
 					callback = node.checkedCallback;
@@ -1932,12 +2319,18 @@
 				return Factory.callback(node, tree, ev);
 			},
 			clickCallback: function (node, tree, ev) {
+				if (tree.options.callbackLevel) {
+					return this;
+				}
 				if ($.isFunction(tree.options.clickCallback)) {
 					return Factory.debounceCallback(tree.options.clickCallback, node, tree, ev);
 				}
 				return Factory.callback(node, tree, ev);
 			},
 			dblclickCallback: function (node, tree, ev) {
+				if (tree.options.callbackLevel) {
+					return this;
+				}
 				if ($.isFunction(tree.options.dblclickCallback)) {
 					tree.options.dblclickCallback(node, tree, ev);
 				}
@@ -2430,12 +2823,6 @@
 			}
 			return that.setChild(node, sibling, action).updateCount();
 		},
-		position: function (selected) {
-			var that = this.self(), offsetY = -50;
-			Factory.setCurrentCache(that.tree, 'position', that).expandTo(that.tree, that);
-			$.scrollTo(that.element, that.tree.panel, offsetY);
-			return selected ? that.setSelected(true) : that;
-		},
 		setBoxDisplay: function (display) {
 			var that = this.self();
 			if (!that.childbox) {
@@ -2519,6 +2906,18 @@
 		},
 		collapse: function () {
 			return this.self().setExpand(false);
+		},
+		position: function (selected) {
+			var that = this.self(), offsetY = -50;
+			Factory.setCurrentCache(that.tree, 'position', that).expandTo(that.tree, that);
+			$.scrollTo(that.element, that.tree.panel, offsetY);
+			return selected ? that.setSelected(true) : that;
+		},
+		select: function (selected) {
+			return this.self().setSelected($.isBoolean(selected, true));
+		},
+		check: function (checked) {
+			return this.self().setChecked($.isBoolean(checked, true));
 		},
 		getSwitchClass: function () {
 			var that = this.self(),
@@ -2818,6 +3217,8 @@
 				showStatus: undefined,
 				//是否显示title
 				showTitle: undefined,
+				//是否显示搜索
+				showSearch: undefined,
 				//节点状态字段
 				statusField: 'status',
 				//是否级联选中复选框
@@ -2869,6 +3270,7 @@
 			}
 
 			this.id = opt.id;
+			this.bid = Factory.buildTreeId(opt.id, 'box_');
 			this.tid = Factory.buildTreeId(opt.id, 'panel_');
 			this.options = opt;
 
@@ -2886,10 +3288,11 @@
 				leaf: opt.leaf,
 				leafTypes: opt.leafTypes,
 				returnTypes: opt.returnTypes
-			}, true);
+			}, true).setWindowResize();
+
+			Factory.showSearchPanel(this, false, true);
 
 			if (opt.target) {
-				this.bid = Factory.buildTreeId(opt.id, 'box_');
 				this.target = opt.target;
 				Factory.buildTargetEvent(this, opt);
 				if (this.panel) {
@@ -2911,6 +3314,9 @@
 		},
 		hide: function () {
 			return Factory.setBoxDisplay(this, false), this;
+		},
+		resize: function () {
+			return Factory.setPanelSize(this), this;
 		},
 		nid: function (id, type) {
 			return Factory.buildNodeId(id, type);
@@ -3009,6 +3415,9 @@
 		},
 		checked: function (nodes, checked) {
 			return Factory.eachNodeIds(this.cache.nodes, nodes, 'setChecked', $.isBoolean(checked, true)), this;
+		},
+		check: function (nodes, selected, position) {
+			return this.checked(nodes, selected);
 		},
 		disabled: function (nodes, disabled) {
 			return Factory.eachNodeIds(this.cache.nodes, nodes, 'setDisabled', $.isBoolean(disabled, true)), this;
