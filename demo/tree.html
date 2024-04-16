@@ -68,7 +68,9 @@
                 <label class="chb-label"><input type="checkbox" id="chbCount" checked="checked" /><span>显示数量</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbDesc" checked="checked" /><span>显示备注</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbSearch" checked="checked" /><span>显示搜索</span></label>
+                <label class="chb-label"><input type="checkbox" id="chbTitle" checked="checked" /><span>显示标题</span></label>
                 <div></div>
+                <label class="chb-label"><input type="checkbox" id="chbInfo" /><span>显示信息</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbButton" /><span>显示按钮</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbMoveAble" /><span>允许移动</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbMove" /><span>显示移动</span></label>
@@ -337,6 +339,8 @@
             showButton = $('#chbButton').checked(),
             showMove = $('#chbMove').checked(),
             showSearch = $('#chbSearch').checked(),
+            showTitle = $('#chbTitle').checked(),
+            showInfo = $('#chbInfo').checked(),
             moveAble = $('#chbMoveAble').checked(),
             dragAble = $('#chbDragAble').checked(),
             switchIcon = $('#ddlSwitch').val(),
@@ -383,11 +387,11 @@
             moveAble: moveAble,
             dragAble: dragAble,
             buttonConfig: {
-                //types: ['unit']
+                types: ['unit','device','camera']
                 //types: ['camera']
             },
-            showTitle: true,
-            showInfo: true,
+            showTitle: showTitle,
+            showInfo: showInfo,
             showSearch: showSearch,
             /*searchCallback: function (tree, keywords, resolve) {
                 var nodes = [], j = 0;

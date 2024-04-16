@@ -127,15 +127,16 @@
 .oui-tree li .item span.text{text-align:left;}
 
 .oui-tree li .item span.desc{color:#999;}
-.oui-tree li .item span.desc b{padding:0 0 0 5px;font-weight:normal;}
+.oui-tree li .item span.desc b{margin:0 0 0 5px;font-weight:normal;}
 
 .oui-tree li .item span.count{color:#f50;font-family:'Courier New';font-weight:bold;}
-.oui-tree li .item span.count b{padding:0 0 0 5px;font-style:normal;}
+.oui-tree li .item span.count b{margin:0 0 0 5px;font-style:normal;}
 
 .oui-tree li .item .button{
-	margin:0;padding:0 0 0 5px;height:25px;
+	margin:0 0 0 5px;padding:0;height:25px;
 	display:inline-block;overflow:hidden;border:none;background:transparent;
-	box-sizing:border-box;visibility:hidden;;
+	box-sizing:border-box;visibility:hidden;
+	width: 125px;
 }
 .oui-tree li > .item:hover .button {visibility:visible;}
 

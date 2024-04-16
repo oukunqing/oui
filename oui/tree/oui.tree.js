@@ -87,6 +87,19 @@
 					css: elem.className.trim().split(' ')[0]
 				} : {};
 			},
+			mouseover: function (ev, tree) {
+				var key = 'tree_node_over_' + tree.id;
+				if (Cache.timers[key]) {
+					window.clearTimeout(Cache.timers[key]);
+				}
+				Cache.timers[key] = window.setTimeout(function() {					
+					var p = Event.target(ev, tree);
+					if (p.node) {
+						Factory.buildButton(tree, p.node);
+					}
+				}, 30);
+				return this;
+			},
 			mousedown: function (ev, tree) {
 				Factory.showSearchPanel(tree, false);
 
@@ -156,7 +169,6 @@
 					return false;
 				}
 				Factory.setDragNode(tree, ep.node, ev);
-				$.console.log('dragstart:', ev);
 				$.setElemClass(ep.element, 'node-drag', true);
 
 				//firefox hack
@@ -581,8 +593,6 @@
 					opt.buttonConfig.types = types;
 				}
 
-				$.console.log('opt.buttonConfig:', opt.buttonConfig);
-
 				opt.showInfo = $.isBoolean($.getParam(opt, 'showInfo,showinfo'), false);
 
 				opt.showTitle = $.isBoolean($.getParam(opt, 'showTitle,showtitle'), false);
@@ -708,8 +718,11 @@
 			},
 			buildEvent: function (tree) {
 				//var div = tree.target ? tree.element : tree.panel;
-				var div = tree.target ? tree.panel : tree.panel;
+				var div = tree.panel;
 
+				$.addListener(div, 'mouseover', function(ev) {
+					Factory.dealEvent(ev, tree, ev.type);
+				});
 				$.addListener(div, 'mousedown', function(ev) {
 					Factory.dealEvent(ev, tree, ev.type);
 				});
@@ -756,7 +769,7 @@
 					return this;
 				}
 
-				if (['mousedown', 'mouseup', 'click', 'dblclick', 'contextmenu'].indexOf(type) > -1) {
+				if (['mouseover', 'mousedown', 'mouseup', 'click', 'dblclick', 'contextmenu'].indexOf(type) > -1) {
 					if ($.isFunction(Event[type])) {
 						Event[type](ev, tree);
 					}
@@ -1047,7 +1060,6 @@
 				if (cfg.key === key) {
 					return Factory.showSearchPanel(tree, true);
 				}
-				$.console.log('searchNodes', 'start');
 				if ($.isFunction(opt.searchCallback)) {
 					opt.searchCallback(tree, key, function (tree, results) {
 						nodes = $.extend([], results);
@@ -1062,7 +1074,6 @@
 				}
 				Factory.setSearchCache(tree, { key: key, elem: txt, search: true, nodes: nodes });
 
-				$.console.log('searchNodes', 'end', nodes);
 				return Factory.showSearchResult(tree, nodes, key);
 			},
 			buildTargetEvent: function (tree, opt) {
@@ -1453,7 +1464,6 @@
 					tree.box.appendChild(div);
 
 					$.addListener(div, 'mouseup,dblclick', function (ev) {
-						$.console.log(ev.type);
 						var elem = ev.target, tag = elem.tagName.toLowerCase(), nid, node;
 						if (tag != 'li' && elem.parentNode) {
 							elem = elem.parentNode;
@@ -1492,7 +1502,7 @@
 
 				Factory.setSearchCache(tree, { search: true });
 
-				var height = c * Config.SearchResultItemHeight + Config.SearchResultTitleHeight,
+				var height = c * Config.SearchResultItemHeight + Config.SearchResultTitleHeight + 2,
 					//title = c > 0 ? '找到<b>' + c + '</b>个相关的结果' : '没有找到相关的结果',
 					title = c > 0 ? 
 						'\u627e\u5230<b>' + c + '</b>\u4e2a\u76f8\u5173\u7684\u7ed3\u679c' 
@@ -1505,7 +1515,7 @@
 				}
 				div.style.height = height + 'px';
 				elems = div.childNodes;
-				elems[1].style.height = (height - Config.SearchResultTitleHeight - 2) + 'px';
+				elems[1].style.height = (height - Config.SearchResultTitleHeight) + 'px';
 
 				cache.title.childNodes[0].innerHTML = title;
 				cache.panel.innerHTML = c > 0 ? html.join('') : '';
@@ -1831,25 +1841,31 @@
 
 				return this;
 			},
-			buildButton: function (tree, p, opt) {
-				var html = [], cfg = opt.buttonConfig, btns = [];
-				if (opt.showButton) {
-					if (cfg.types.length > 0 && cfg.types.indexOf(p.type) < 0) {
-						return html;
-					}
-					html = [
-						'<div class="button" nid="', p.nid, '">',
-						'<a class="btn btn-add" key="add" nid="', p.nid, '" title="', Config.Lang.Add, '"></a>',
-						'<a class="btn btn-edit" key="edit" nid="', p.nid, '" title="', Config.Lang.Edit, '"></a>',
-						'<a class="btn btn-del" key="del" nid="', p.nid, '" title="', Config.Lang.Del, '"></a>',
-						opt.showMove ? [
-							'<a class="btn btn-up" key="up" nid="', p.nid, '" title="', Config.Lang.Up, '"></a>',
-							'<a class="btn btn-down" key="down" nid="', p.nid, '" title="', Config.Lang.Down, '"></a>',
-						].join('') : '',
-						'</div>'
-					];
+			buildButton: function (tree, node) {
+				var opt = tree.options;
+				if (!opt.showButton) {
+					return this;
 				}
-				return html;
+				var box = node.getItem('button');
+				if (!box || box.childNodes[0]) {
+					return this;
+				}
+				var cfg = opt.buttonConfig, p = {nid: node.id};
+				if (cfg.types.length > 0 && cfg.types.indexOf(node.type) < 0) {
+					return this;
+				}
+				var html = [
+					'<a class="btn btn-add" key="add" nid="', p.nid, '" title="', Config.Lang.Add, '"></a>',
+					'<a class="btn btn-edit" key="edit" nid="', p.nid, '" title="', Config.Lang.Edit, '"></a>',
+					'<a class="btn btn-del" key="del" nid="', p.nid, '" title="', Config.Lang.Del, '"></a>',
+					opt.showMove ? [
+						'<a class="btn btn-up" key="up" nid="', p.nid, '" title="', Config.Lang.Up, '"></a>',
+						'<a class="btn btn-down" key="down" nid="', p.nid, '" title="', Config.Lang.Down, '"></a>',
+					].join('') : ''
+				];
+				box.innerHTML = html.join('');
+
+				return this;
 			},
 			buildInfo: function (tree, p, opt) {
 				var html = [];
@@ -1945,20 +1961,23 @@
 						p.desc ? '<b>' + p.desc + '</b>' : '', 
 						'</span>'
 					] : [],
-					button = Factory.buildButton(tree, p, opt),
-					info = Factory.buildInfo(tree, p, opt);
+					button = opt.showButton ? [
+						'<div class="button" nid="', p.nid, '"></div>'
+					] : [],
+					info = Factory.buildInfo(tree, p, opt),
+					html = [
+						'<div class="item" nid="', p.nid, '">',
+						'<span class="', node.getSwitchClass(), '" nid="', p.nid, '"></span>'
+					].concat(check).concat(icon).concat([
+						'<a class="name" nid="', p.nid, '"', title, '>',
+						'<span class="text" nid="', p.nid, '">', p.text, '</span>'
+					]).concat(count).concat(desc).concat([
+						'</a>'
+					]).concat(button).concat(info).concat([
+						'</div>'
+					]);
 
-				li.innerHTML = [
-					'<div class="item" nid="', p.nid, '">',
-					'<span class="', node.getSwitchClass(), '" nid="', p.nid, '"></span>'
-				].concat(check).concat(icon).concat([
-					'<a class="name" nid="', p.nid, '"', title, '>',
-					'<span class="text" nid="', p.nid, '">', p.text, '</span>'
-				]).concat(count).concat(desc).concat([
-					'</a>'
-				]).concat(button).concat(info).concat([
-					'</div>'
-				]).join('');
+				li.innerHTML = html.join('');
 
 				return li;
 			},
