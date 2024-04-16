@@ -161,7 +161,8 @@
                     <button onclick="addNode2();">新增预置点</button>
                 </div>
                 <div>
-                    <button onclick="setHeight();">增加高度</button>
+                    <button onclick="setHeight(1);">增加高度</button>
+                    <button onclick="setHeight(-1);">减少高度</button>
                 </div>
                 
                 <!--<button onclick="addNode1();">新增子节点</button>-->
@@ -173,7 +174,7 @@
 </html>
 <script type="text/javascript" src="../oui/oui.js?1"></script>
 <script type="text/javascript" src="../oui/contextmenu/oui.contextmenu.min.js"></script>
-<script type="text/javascript" src="../oui/tree/oui.tree.min.js?123"></script>
+<script type="text/javascript" src="../oui/tree/oui.tree.js?123"></script>
 <script type="text/javascript" src="dropdownlist.json"></script>
 <script type="text/javascript">
 
@@ -249,8 +250,8 @@
         $.tree(TreeId).add(items, par);
     }
 
-    function setHeight() {
-        $('#tree').height($('#tree').height() + 50);
+    function setHeight(rate) {
+        $('#tree').height($('#tree').height() + 50 * rate);
         $.tree().resize();
     }
 
@@ -387,7 +388,7 @@
             moveAble: moveAble,
             dragAble: dragAble,
             buttonConfig: {
-                types: ['unit','device','camera']
+                types: ['unit','device']
                 //types: ['camera']
             },
             showTitle: showTitle,

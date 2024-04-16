@@ -538,11 +538,11 @@
 				}
 
 				opt.switch = $.getParam(opt, 'switchType,switchIcon,switch');
-				if (Factory.isDefaultSkin(opt.skin)) {
-					opt.switch = $.isString(opt.switch, true) ? '-' + opt.switch.toLowerCase() : '';
-				} else {
-					opt.switch = '';
+				var sw = (opt.switch || '').toLowerCase();
+				if (!$.isString(sw, true) && opt.skin === 'device') {
+					sw = 'device';
 				}
+				opt.switch = $.isString(sw, true) && sw !== 'default' ? '-' + sw : '';
 
 				opt.data = opt.data || opt.items || opt.list;
 				opt.trees = $.getParam(opt, 'trees,tree');
@@ -1897,46 +1897,6 @@
 				
 				return ul;
 			},
-			/*
-			buildLi: function (tree, p, node, opt) {
-				var li = document.createElement('LI');
-				li.id = p.id + '_item';
-				li.className = ('node level' + p.level);
-				//li.setAttribute('nid', p.nid);
-
-				var hide = ' style="display:none;"',
-					title = opt.showTitle && p.text.length > Config.TitleTextLength ? ' title="' + p.text + '"' : '',
-					check = opt.showCheck ? [
-						'<span class="check" id="', p.id, '_check', '" nid="', p.nid, '"></span>',
-					] : [],
-					icon = opt.showIcon ? [
-						'<span class="', node.getIconClass(), '" id="', p.id, '_icon', '" nid="', p.nid, '"', '></span>'
-					] : [],
-					count = opt.showCount ? [
-						'<span class="count" id="', p.id, '_count', '" nid="', p.nid, '"></span>'
-					] : [],
-					desc = opt.showDesc ? [
-						'<span class="desc" id="', p.id, '_desc', '" nid="', p.nid, '">', 
-						p.desc ? '<b>' + p.desc + '</b>' : '', 
-						'</span>'
-					] : [],
-					button = Factory.buildButton(tree, p, opt),
-					info = Factory.buildInfo(tree, p, opt);
-
-				li.innerHTML = [
-					'<div class="item" id="', p.id, '_item', '" nid="', p.nid, '">',
-					'<span class="', node.getSwitchClass(), '" id="', p.id, '_switch', '" nid="', p.nid, '"></span>'
-				].concat(check).concat(icon).concat([
-					'<a class="name" id="', p.id, '_name', '" nid="', p.nid, '"', title, '>',
-					'',
-					'<span class="text" id="', p.id, '_text', '" nid="', p.nid, '">', p.text, '</span>'
-				]).concat(count).concat(desc).concat(['</a>']).concat(button).concat(info).concat([
-					'</div>'
-				]).join('');
-
-				return li;
-			},
-			*/
 			buildLi: function (tree, p, node, opt) {
 				var li = document.createElement('LI');
 				li.className = ('node level' + p.level);
