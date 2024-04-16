@@ -1826,30 +1826,6 @@ console.log((1205).toDurationStr(true, false));
 console.log('a.aspx?a=1&b=2&c=3'.getQueryString('d|b'));
 
 console.log('d|b'.split(/[,\|]/g));
-var names =  [
-            '限时预览倒计时',
-            '重新开始倒计时',
-            '重置', 
-            '后关闭',
-            '可选项：',
-            '内容格式错误',
-            '端口数值应介于',
-            '之间',
-            '确定',
-            '选项不存在？',
-            '找不到选项？',
-            '请输入：',
-            '新建',
-            '编辑',
-            '删除',
-            '更新',
-            '修改',
-            '上移',
-            '下移'
-            ];;
-        for(var i =0; i<names.length;i++){
-            console.log('//', names[i], names[i].toUnicode());
-        }
 
 
 
@@ -2031,3 +2007,35 @@ console.log('eacape:', escape2Html('abc"123\''))
 var arr = [3,5,1,2,4];
 
 console.log(arr.sort());
+
+
+var names =  [
+            '限时预览倒计时',
+            '重新开始倒计时',
+            '重置', 
+            '后关闭',
+            '可选项：',
+            '内容格式错误',
+            '端口数值应介于',
+            '之间',
+            '确定',
+            '选项不存在？',
+            '找不到选项？',
+            '请输入：',
+            '新建',
+            '编辑',
+            '删除',
+            '更新',
+            '修改',
+            '上移',
+            '下移',
+            '关闭',
+            '找到',
+            '个相关的结果',
+            '没有找到相关的结果',
+            '搜索',
+            '请输入名称关键字'
+            ];;
+        for(var i =0; i<names.length;i++){
+            console.log('//', names[i], names[i].toUnicode());
+        }

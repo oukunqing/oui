@@ -321,7 +321,7 @@
 	height: 28px;
 	line-height: 26px;
 	outline: none;
-	padding: 0 5px;
+	padding: 0 8px;
 	border: solid 1px #ccc;
 	border-radius: 4px;
 	border-top-right-radius: 0;
@@ -335,6 +335,9 @@
 
 .oui-tree-form .keywords-popup{
 	border-bottom-left-radius: 0;
+	border-color: #66afe9;
+	box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);
+	-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);
 }
 
 .oui-tree-form .search {
@@ -372,7 +375,7 @@
 	display: block;
 	margin: 0 4px;
 	min-height: 30px;
-	overflow: auto;
+	overflow: hidden;
 
 	border:solid 1px #66afe9;
 	box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);
@@ -385,7 +388,7 @@
 	height: 29px;
 	line-height:29px;
 	margin: 0;
-	padding: 0 2px 0 8px;
+	padding: 0 3px 0 8px;
 }
 .oui-tree-box .search-result-panel .search-title b{
 	color: #f00;marign:0 2px;font-weight: normal;
@@ -393,11 +396,19 @@
 .oui-tree-box .search-result-panel .search-title .title{
 	
 }
-.oui-tree-box .search-result-panel .search-title .close{
+.oui-tree-box .search-result-panel .search-title a {
 	float:right; cursor: pointer; 
-	margin:0; padding: 0 5px;
+	margin:0; padding: 0 3px 0 4px;
 	border: none; background: transparent;
 	outline: none;
+}
+.oui-tree-box .search-result-panel .search-title i {
+	float: right;
+	font-style: normal;
+	font-family: 宋体;
+	font-size: 12px;
+	line-height: 30px;
+	color: #999;
 }
 
 .oui-tree-box .search-result-panel .search-list {
@@ -408,8 +419,12 @@
 .oui-tree-box .search-result-panel li {
 	height: 29px;
 	line-height: 28px;
-	padding: 0 8px;
+	padding: 0 8px 0 3px;
 	border-bottom: dotted 1px #cce8ff;
+	cursor: default;
+	clear: both;
+	overflow: hidden;
+	white-space:nowrap;
 }
 .oui-tree-box .search-result-panel li:last-child {
 	border-bottom: none;
@@ -420,3 +435,17 @@
 .oui-tree-box .search-result-panel li b {
 	color: #f00; font-weight: normal;
 }
+.oui-tree-box .search-result-panel li .icon {
+	width: 25px;
+	height: 25px;
+	border: none;
+	box-sizing: border-box;
+	float:left;
+	margin: 1px 1px 0 0;
+	padding: 0;
+	cursor: default;
+}
+
+/*用于搜索列表*/
+.oui-tree-box .search-result-panel li .icon{background:transparent url("imgs/tree.png") no-repeat 0 -25px;}
+.oui-tree-box .search-result-panel li .icon-page{background:transparent url("imgs/tree.png") no-repeat -50px -25px;}

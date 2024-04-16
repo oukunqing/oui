@@ -60,3 +60,10 @@
 
 .oui-tree li .item span.helmet-off,
 .oui-tree-device li .item span.helmet-off{background:url("imgs/tree-device.png") no-repeat -175px -50px;}
+
+
+/*用于搜索列表*/
+.oui-tree-box .search-result-panel li span.unit{background:url("imgs/tree-device.png") no-repeat 0 -25px;}
+.oui-tree-box .search-result-panel li span.device{background:url("imgs/tree-device.png") no-repeat -50px -25px;}
+.oui-tree-box .search-result-panel li span.camera{background:url("imgs/tree-device.png") no-repeat -150px -25px;}
+.oui-tree-box .search-result-panel li span.preset-off{background:url("imgs/tree-device.png") no-repeat -225px -25px;}
