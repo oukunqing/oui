@@ -563,7 +563,7 @@
 				//是否保持节点收缩状态
 				opt.keepCollapse = $.isBoolean($.getParam(opt, 'keepCollapse'), false);
 				//是否将状态保存到cookie中
-				opt.keepCookie = $.isBoolean($.getParam(opt, 'keepCookie,cookie'), false);
+				opt.keepCookie = $.isBoolean($.getParam(opt, 'keepCookie,saveCookie,cookie'), false);
 
 				opt.cookieExpire = $.getParam(opt, 'cookieExpire');
 				if (!$.isNumber(opt.cookieExpire) || opt.cookieExpire < 0) {
@@ -1352,11 +1352,13 @@
 				div.innerHTML = [
 					'<div class="form oui-tree-form">',
 					'<input type="text" class="keywords oui-tree-keywords" placeholder="', 
-					//opt.searchPrompt || '请输入名称关键字',
-					opt.searchPrompt || '\u8bf7\u8f93\u5165\u540d\u79f0\u5173\u952e\u5b57',
+					//opt.searchPrompt || '请输入关键字',
+					opt.searchPrompt || '\u8bf7\u8f93\u5165\u5173\u952e\u5b57',
 					'" />',
-					//'<button class="search oui-tree-search">\u641c\u7d22</button>',		//搜索
-					'<button class="search oui-tree-search">', opt.searchText || '\u67e5\u627e', '</button>',		//查找
+					//搜索
+					//'<button class="search oui-tree-search" title="', opt.searchText || '\u641c\u7d22', '"></button>',
+					//查找
+					'<button class="search oui-tree-search" title="', opt.searchText || '\u67e5\u627e', '"></button>',
 					'</div>'
 				].join('');
 
@@ -1366,14 +1368,13 @@
 					box.appendChild(div);
 				}
 
-				var txt = box.querySelector('input.keywords'),
-					btn = box.querySelector('button.search');
+				var txt = box.querySelector('input.keywords');
 
-				Factory.setSearchCache(tree, { form: div, elem: txt, btn: btn });
-
+				var btn = box.querySelector('button.search');
 				$.addListener(btn, 'mousedown', function(ev) {
 					Factory.searchNodes(tree, txt);
 				});
+				
 				$.addListener(txt, 'mousedown', function(ev) {
 					Factory.showSearchPanel(tree, true);
 				});
@@ -1383,6 +1384,9 @@
 						Factory.searchNodes(tree, txt);
 					}
 				});
+
+				Factory.setSearchCache(tree, { form: div, elem: txt, btn: btn });
+
 				return this;
 			},
 			showSearchForm: function (tree) {
@@ -1443,10 +1447,10 @@
 					div.className = 'search-result-panel';
 					div.innerHTML = [
 						'<div class="search-title">', 
-						'<span class="title"></span>',
-						'<a class="close">\u5173\u95ed</a>',		//关闭
+						'<span class="ots-title"></span>',
+						'<span class="ots-close">\u5173\u95ed</span>',		//关闭
 						'<i>|</i>',
-						'<a class="clear">\u6e05\u9664</a>',		//清除
+						'<span class="ots-clear">\u6e05\u9664</span>',		//清除
 						'</div>',
 						'<div class="search-list"></div>'
 					].join('');
@@ -1492,7 +1496,7 @@
 						css.push('icon-page');
 					}
 					html.push([
-						'<li nid="', node.id, '">',
+						'<li nid="', node.id, '" title="', node.data.name, '">',
 						'<span class="', css.join(' '), '"></span>',
 						node.data.name.replace(key, '<b>' + key + '</b>'),
 						'</li>'
@@ -1503,10 +1507,10 @@
 				Factory.setSearchCache(tree, { search: true });
 
 				var height = c * Config.SearchResultItemHeight + Config.SearchResultTitleHeight + 2,
-					//title = c > 0 ? '找到<b>' + c + '</b>个相关的结果' : '没有找到相关的结果',
+					//title = c > 0 ? '找到<b>' + c + '</b>个结果' : '没有找到结果',
 					title = c > 0 ? 
-						'\u627e\u5230<b>' + c + '</b>\u4e2a\u76f8\u5173\u7684\u7ed3\u679c' 
-						: '\u6ca1\u6709\u627e\u5230\u76f8\u5173\u7684\u7ed3\u679c',
+						'\u627e\u5230<b>' + c + '</b>\u4e2a\u7ed3\u679c' 
+						: '\u6ca1\u6709\u627e\u5230\u7ed3\u679c',
 					max = Config.SearchResultBoxHeight,
 					display = $.isBoolean(show, div.style.display === 'none');
 
@@ -1549,7 +1553,7 @@
 					].join('');
 
 					if (cache && cache.elem) {
-						cache.elem.style.width = (form.clientWidth - cache.btn.offsetWidth - 25) + 'px';
+						cache.elem.style.width = (form.clientWidth - 8) + 'px';
 					}
 				}
 

@@ -65,19 +65,22 @@
                 <div></div>
                 <label class="chb-label"><input type="checkbox" id="chbCheck" checked="checked" /><span>显示选框</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbIcon" checked="checked" /><span>显示图标</span></label>
+                <label class="chb-label"><input type="checkbox" id="chbType" checked="checked" /><span>显示类型</span></label>
+                <label class="chb-label"><input type="checkbox" id="chbStatus" checked="checked" /><span>显示状态</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbCount" checked="checked" /><span>显示数量</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbDesc" checked="checked" /><span>显示备注</span></label>
+                <div></div>
                 <label class="chb-label"><input type="checkbox" id="chbSearch" checked="checked" /><span>显示搜索</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbTitle" checked="checked" /><span>显示标题</span></label>
-                <div></div>
-                <label class="chb-label"><input type="checkbox" id="chbInfo" /><span>显示信息</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbButton" /><span>显示按钮</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbMoveAble" /><span>允许移动</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbMove" /><span>显示移动</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbDragAble" /><span>允许拖动</span></label>
                 <div></div>
-                <label class="chb-label"><input type="checkbox" id="chbStatus" checked="checked" /><span>保持状态</span></label>
-                <label class="chb-label"><input type="checkbox" id="chbCookie" checked="checked" /><span>保存COOKIE</span></label>
+                <label class="chb-label"><input type="checkbox" id="chbInfo" /><span>显示信息</span></label>
+                <div></div>
+                <label class="chb-label"><input type="checkbox" id="chbKeepStatus" checked="checked" /><span>保持状态</span></label>
+                <label class="chb-label"><input type="checkbox" id="chbKeepCookie" checked="checked" /><span>保存COOKIE</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbClickExpand" checked="checked" /><span>点击切换</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbClickChecked" /><span>点击选中</span></label>
                 <div>
@@ -163,6 +166,8 @@
                 <div>
                     <button onclick="setHeight(1);">增加高度</button>
                     <button onclick="setHeight(-1);">减少高度</button>
+                    <button onclick="setWidth(1);">增加宽度</button>
+                    <button onclick="setWidth(-1);">减少宽度</button>
                 </div>
                 
                 <!--<button onclick="addNode1();">新增子节点</button>-->
@@ -254,6 +259,10 @@
         $('#tree').height($('#tree').height() + 50 * rate);
         $.tree().resize();
     }
+    function setWidth(rate) {
+        $('#tree').width($('#tree').width() + 50 * rate);
+        $.tree().resize();
+    }
 
     function position(selected) {
         var nid = $('#txtNodeId').val().trim();
@@ -331,10 +340,12 @@
             data = datas[type],
             skin = $('#ddlSkin').val(),
             openLevel = $('#ddlLevel').val().toInt(),
-            keepStatus = $('#chbStatus').checked(),
-            keepCookie = $('#chbCookie').checked(),
+            keepStatus = $('#chbKeepStatus').checked(),
+            keepCookie = $('#chbKeepCookie').checked(),
             showCheck = $('#chbCheck').checked(),
             showIcon = $('#chbIcon').checked(),
+            showType = $('#chbType').checked(),
+            showStatus = $('#chbStatus').checked(),
             showCount = $('#chbCount').checked(),
             showDesc = $('#chbDesc').checked(),
             showButton = $('#chbButton').checked(),
@@ -348,6 +359,8 @@
             clickExpand = $('#chbClickExpand').checked(),
             clickChecked = $('#chbClickChecked').checked(),
             dynamicCamera = $('#chbCamera').checked();
+
+            $.console.log('showStatus:', showStatus);
 
         if ($.isObject(data) && data.units) {
             data.units[0].desc = new Date().getTime();
@@ -381,6 +394,8 @@
             //checkbox: true,
             showCheck: showCheck,
             showIcon: showIcon,
+            showType: showType,
+            showStatus: showStatus,
             showCount: showCount,
             showDesc: showDesc,
             showButton: showButton,
@@ -408,8 +423,6 @@
                 }
                 resolve(tree, nodes);
             },*/
-            //showType: false,
-            //showStatus: false,
             clickExpand: clickExpand,
             clickChecked: clickChecked,
             callbackLevel: 1,
