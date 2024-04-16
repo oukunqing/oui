@@ -52,7 +52,10 @@
 				Update: '\u66f4\u65b0',		//更新
 				Modify: '\u4fee\u6539'		//修改
 			},
-			EmptyTreeId: 'OuiTreeNone'
+			EmptyTreeId: 'OuiTreeNone',
+			SearchResultBoxHeight: 390, 	//12 * 30 + 30
+			SearchResultItemHeight: 30,
+			SearchResultTitleHeight: 30
 		},
 		KC = $.KEY_CODE, KCA = KC.Arrow, KCC = KC.Char, KCM = KC.Min,
 		Cache = {
@@ -583,6 +586,7 @@
 				opt.showTitle = $.isBoolean($.getParam(opt, 'showTitle,showtitle'), false);
 
 				opt.showSearch = $.isBoolean($.getParam(opt, 'showSearch,showForm,showsearch'), false);
+				opt.searchCallback = $.getParam(opt, 'searchCallback');
 
 				opt.statusField = $.getParam(opt, 'statusField', 'status');
 
@@ -733,7 +737,7 @@
 				});
 				$.addListener(div, 'dragleave', function(ev) {
 					Factory.dealEvent(ev, tree, ev.type);
-				});				
+				});
 
 				return this;
 			},
@@ -1023,7 +1027,9 @@
 				return Cache.search['oui-search-' + tree.id] || {};
 			},
 			searchNodes: function (tree, txt) {
-				var nodes = [], cfg = Factory.getSearchCache(tree),
+				var nodes = [], 
+					opt = tree.options,
+					cfg = Factory.getSearchCache(tree),
 					key = txt.value.trim();
 
 				if (!$.isString(key, true)) {
@@ -1034,10 +1040,16 @@
 					return Factory.showSearchPanel(true);
 				}
 				$.console.log('searchNodes', 'start');
-				for (var k in tree.cache.nodes) {
-					var n = tree.cache.nodes[k];
-					if (n.data.name.indexOf(key) > -1) {
-						nodes.push(n);
+				if ($.isFunction(opt.searchCallback)) {
+					opt.searchCallback(tree, key, function (tree, results) {
+						nodes = $.extend([], results);
+					});
+				} else {
+					for (var k in tree.cache.nodes) {
+						var n = tree.cache.nodes[k];
+						if (n.data.name.indexOf(key) > -1) {
+							nodes.push(n);
+						}
 					}
 				}
 				Factory.setSearchCache(tree, { key: key, elem: txt, search: true });
@@ -1162,20 +1174,7 @@
 				if (!box) {
 					if (!$.isBoolean(show, true)) {
 						return this;
-					}/*
-					box = document.createElement('div');
-					box.className = 'oui-tree-box oui-tree-popup'.addClass(Config.CloseLinkageClassName);
-					box.id = tree.bid;
-					box.innerHTML = [
-						'<div style="border:solid 1px #f00;height:50px;">',
-						'<input type="text" class="keywords" />',
-						'<button>搜索</button>',
-						'</div>'
-					].join('');
-
-					tree.element = box;
-					document.body.appendChild(box);
-					*/
+					}
 					Factory.buildPanel(tree, tree.options, true);
 				} else {
 					display = $.isBoolean(show, box.style.display === 'none');
@@ -1380,13 +1379,15 @@
 
 				if (display && cfg.elem) {
 					div.style.width = cfg.elem.offsetWidth + 'px';
+					$.setElemClass(cfg.elem, 'keywords-popup', true);
+				} else {
+					$.setElemClass(cfg.elem, 'keywords-popup', false);
 				}
-
 				return this;
 			},
 			showSearchResult: function (tree, nodes, key) {
 				var div = tree.box.querySelector('div.search-result-panel'),
-					show = nodes ? true : undefined,
+					show = nodes ? true : undefined, elems,
 					i, c = nodes.length, node, html = ['<ul>'];
 
 				if (!div) {
@@ -1400,7 +1401,7 @@
 						'<div class="search-list"></div>'
 					].join('');
 
-					var elems = div.childNodes;
+					elems = div.childNodes;
 					Factory.setSearchCache(tree, { title: elems[0], panel: elems[1] });
 
 					$.addListener(elems[0].childNodes[1], 'click', function(ev) {
@@ -1409,20 +1410,15 @@
 
 					tree.box.appendChild(div);
 
-					elems[1].style.height = (div.offsetHeight - elems[0].offsetHeight - 5) + 'px';
-
 					$.addListener(div, 'mouseup,dblclick', function (ev) {
 						$.console.log(ev.type);
-						var elem = ev.target, tag = elem.tagName.toLowerCase();
+						var elem = ev.target, tag = elem.tagName.toLowerCase(), nid, node;
 						if (tag != 'li' && elem.parentNode) {
 							elem = elem.parentNode;
 						}
-						var nid = $.getAttribute(elem, 'nid');
-						if (nid) {
-							var node = Factory.getNodeCache(tree, nid);
-							if (node) {
+						if (nid = $.getAttribute(elem, 'nid')) {
+							if (node = Factory.getNodeCache(tree, nid)) {
 								node.position().select();
-								//TODO:
 								if (ev.type === 'dblclick') {
 									Factory.showSearchPanel(tree, false);
 								}
@@ -1434,8 +1430,7 @@
 				if (cache.elem) {
 					div.style.width = cache.elem.offsetWidth + 'px';
 				}
-
-				if (nodes) {
+				if (c > 0) {
 					for (var i = 0; i < c; i++) {
 						node = nodes[i];
 						html.push([
@@ -1448,11 +1443,20 @@
 					html.push('</ul>');
 					cache.panel.innerHTML = html.join('');
 					Factory.setSearchCache(tree, { search: true });
-				}
-				cache.title.childNodes[0].innerHTML = '找到<b>' + c + '</b>个结果' ;
 
-				var display = $.isBoolean(show, div.style.display === 'none');
-				div.style.display = display ? 'block' : 'none';
+					var height = c * Config.SearchResultItemHeight + Config.SearchResultTitleHeight,
+						max = Config.SearchResultBoxHeight;
+					if (height > max) {
+						height = max;
+					}
+					div.style.height = height + 'px';
+					elems = div.childNodes;
+					elems[1].style.height = (div.offsetHeight - elems[0].offsetHeight - 2) + 'px';
+				}
+				var title = c > 0 ? '找到<b>' + c + '</b>个相关的结果' : '没有找到相关的结果';
+				cache.title.childNodes[0].innerHTML = title ;
+
+				Factory.showSearchPanel(tree, $.isBoolean(show, div.style.display === 'none'));
 
 				return this;
 			},
@@ -3219,6 +3223,8 @@
 				showTitle: undefined,
 				//是否显示搜索
 				showSearch: undefined,
+				//搜索回调（用于复杂搜索）
+				searchCallback: undefined,
 				//节点状态字段
 				statusField: 'status',
 				//是否级联选中复选框
@@ -3263,7 +3269,6 @@
 			if (opt.target) {
 				opt.targetConfig = $.extend({
 					height: 500,
-					//
 					defaultValue: undefined,
 					separator: ','
 				}, opt.targetConfig);
