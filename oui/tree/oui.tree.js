@@ -66,6 +66,7 @@
 			trees: {},
 			caches: {},
 			events: {},
+			clicks: {},
 			timers: {},
 			drags: {},
 			search: {}
@@ -105,27 +106,31 @@
 
 				if (!ep.node) {
 					return false;
-				}
-
+				}				
 				if (ep.tag.inArray(['a', 'span'])) {
 					if (ep.css.inArray(['switch'])) {
 						//ep.node.setExpand();
 						//switch事件迁移到mousedown
-						return this;
+						return false;
 					}
 					if (ep.css.inArray(['check'])) {
 						ep.node.setChecked(null, ev);
 					} else if (ep.css.inArray(['button', 'btn'])) {
 						Factory.buttonCallback(ep.node, tree, ev, $.getAttribute(ep.elem, 'key'));
 					} else if (Factory.isNodeBody(ep)) {
+						if (Factory.isDblclick(tree, ep.node)) {
+							return false;
+						}
 						if (Factory.isReturnType(tree, ep.node.type)) {
 							Factory.setTargetValue(ep.node, tree).clickCallback(ep.node, tree, ev);
 							ep.node.setSelected(true, ev);
 							if (op.clickChecked) {
 								ep.node.setChecked(null, ev);
 							}
-						} else if (op.clickExpand) {
-							ep.node.setExpand(null, ev);
+						}
+						if (op.clickExpand) {
+							//clickExpanded 与 clickExpand 是两个不同的参数
+							ep.node.setExpand(op.clickExpanded, ev);
 						}
 					}
 				}
@@ -332,6 +337,21 @@
 			},
 			isDefaultSkin: function (skin) {
 				return !skin || skin === Config.DefaultSkin;
+			},
+			isDblclick: function (tree, node) {				
+				var last = Cache.clicks[tree.id],
+					cur = {id: node.id, ts: new Date().getTime()};
+
+				if (last && last.id === cur.id && cur.ts - last.ts <= 500) {
+					return true;
+				}
+				return Cache.clicks[tree.id] = cur, false;
+			},
+			isEmpty: function (par) {
+				if (typeof par === 'object') { 
+					for (var k in par) { return false; } 
+				}
+				return true;
 			},
 			isTree: function (tree) {
 				return tree && tree instanceof(Tree);
@@ -730,7 +750,11 @@
 				}
 
 				opt.clickChecked = $.isBoolean($.getParam(opt, 'clickChecked'), false);
+				//点击节点时切换节点false-只收缩, undefined-切换
 				opt.clickExpand = $.isBoolean($.getParam(opt, 'clickExpand'), false);
+				//点击节点时切换的方式，true-只展开，false-只收缩, undefined-切换
+				var expanded = $.getParam(opt, 'clickExpanded');
+				opt.clickExpanded = $.isBoolean(expanded) ? expanded : undefined;
 
 				var level = $.getParam(opt, 'callbackLevel');
 				if ($.isBoolean(level)) {
@@ -2953,7 +2977,6 @@
 		},
 		sortIndex: function (num, callback, defNum) {
 			var that = this.self();
-
 			if (!that.tree.options.moveAble) {
 				return that;
 			}
@@ -3000,13 +3023,11 @@
 			return Factory.setStoreCache(this.tree, key, node, action), this;
 		},
 		setSelected: function (selected, ev) {
-			//var that = this.self();
-			var that = this;
+			var that = this.self();
 			selected = $.isBoolean(selected, !that.selected);
 			if (selected && (that.disabled || !Factory.isReturnType(that.tree, that.type))) {
 				return that;
 			}
-			$.console.log('setSelected:', that.id, selected);
 			if (selected) {
 				//设置当前选中的节点状态
 				Factory.setCurrentCache(that.tree, 'selected', that, selected);
@@ -3183,7 +3204,6 @@
 			return selected ? that.setSelected(true) : that;
 		},
 		select: function (selected) {
-			$.console.log('select:', this.id, selected);
 			return this.self().setSelected($.isBoolean(selected, true));
 		},
 		check: function (checked) {
@@ -3250,8 +3270,29 @@
 			var that = this.self();
 			return $.extend(that.icon, par), that;
 		},
-		updateIcon: function (par) {
-			return this.self().setIcon(par).setIconClass();
+		updateIcon: function (par, linkage) {
+			var that = this.self(),
+				i, c = that.childs.length;
+
+			if (Factory.isEmpty(par = $.extend({}, par))) {
+				return that;
+			}
+
+			that.setIcon(par).setIconClass();
+
+			if (linkage && c > 0) {
+				for (i = 0; i < c; i++) {
+					that.childs[i].setIcon(par).setIconClass();
+				}
+			}
+			return that;
+		},
+		updateStatus: function (status, linkage) {
+			var that = this.self(),
+				i, c = that.childs.length,
+				par = {status: $.isString(status, true) ? status : status ? 'on' : 'off'};
+
+			return that.updateIcon(par, linkage);
 		},
 		updateData: function (data) {
 			var that = this.self();
@@ -3295,6 +3336,27 @@
 					}
 				}, 5);
 			}
+			return that;
+		},
+		update: function (par, linkage) {
+			var that = this.self(),
+				opt = $.extend({}, par),
+				icon = $.extend({}, par.icon);
+
+			if (!$.isUndefinedOrNull(opt.status)) {
+				icon.status = opt.status;
+			}
+
+			if (!Factory.isEmpty(icon)) {
+				that.updateIcon(icon, linkage);
+			}
+
+			var name = $.getParam(opt, 'name,text');
+			if ($.isString(name)) {
+				that.updateText(name);
+			}
+
+			//TODO:
 			return that;
 		},
 		setExpandClass: function (initial) {
@@ -3640,20 +3702,46 @@
 		insert: function (items, par, pnode) {
 			return Factory.addNode(this, items, par, pnode, true), this;
 		},
-		//更新节点图标、文字
-		update: function (items, par) {
-			var that = this;
-			//TODO:
+		update: function (items, par, linkage) {
+			var that = this,
+				arr = $.extend([], items),
+				i, c = arr.length,
+				list = [];
 
+			for (i = 0; i < c; i++) {
+				var dr = $.extend({}, arr[i], par),
+					nid = Factory.buildNodeId(dr.id, dr.type),
+					node = Factory.getNode(nid);
+
+				if (node) {
+					node.update(dr, linkage);
+				} else {
+					list.push(dr);
+				}
+			}
+			if (list.length > 0) {
+				Factory.addNode(that, list);
+			}
 			return that;
 		},
-		updateIcon: function (nodes, par) {
+		updateIcon: function (nodes, par, linkage) {
+			par = $.extend({}, par);
 			return Factory.eachNodeIds(this.cache.nodes, nodes, function(node, i, c) {
-				node.updateIcon(par);
+				node.updateIcon(par, linkage);
 			}), this;
 		},
-		icon: function (nodes, par) {
-			return this.updateIcon(nodes, par);
+		icon: function (nodes, par, linkage) {
+			return this.updateIcon(nodes, par, linkage);
+		},
+		//status: on, off, play
+		updateStatus: function (nodes, status, linkage) {
+			if (!$.isString(status, true)) {
+				status = status ? 'on' : 'off';
+			}
+			var par = {status: status };
+			return Factory.eachNodeIds(this.cache.nodes, nodes, function(node, i, c) {
+				node.updateIcon(par, linkage);
+			}), this;
 		},
 		updateText: function (nodes, texts) {
 			return Factory.eachNodeIds(this.cache.nodes, nodes, function(node, i, c) {
@@ -3672,6 +3760,9 @@
 			return this.updateDesc(nodeIds, texts);
 		},
 		delete: function (nodes) {
+			return Factory.eachNodeIds(this.cache.nodes, nodes, 'delete'), this;
+		},
+		del: function (nodes) {
 			return Factory.eachNodeIds(this.cache.nodes, nodes, 'delete'), this;
 		},
 		deleteChild: function (nodes) {
@@ -3804,10 +3895,10 @@
 		}
 	};
 
-	Factory.func = function (id, nodes, funcName, funcParam) {
+	Factory.func = function (id, nodes, funcName, arg0, arg1, arg2, arg3) {
 		var tree = $.tree.get(id);
 		if (tree && $.isFunction(tree[funcName])) {
-			tree[funcName](nodes, funcParam);
+			tree[funcName](nodes, arg0, arg1, arg2, arg3);
 		}
 		return $.tree;
 	};
@@ -3846,18 +3937,18 @@
 			}
 			return this;
 		},
-		update: function (id, items, par) {
+		update: function (id, items, par, linkage) {
 			var tree = $.tree.get(id);
 			if (tree) {
-				tree.update(items, par);
+				tree.update(items, par, linkage);
 			}
 			return this;
 		},
-		icon: function (id, nodes, par) {
-			return Factory.func(id, nodes, 'updateIcon', par);
+		icon: function (id, nodes, par, linkage) {
+			return Factory.func(id, nodes, 'updateIcon', par, linkage);
 		},
-		updateIcon: function (id, nodes, par) {
-			return Factory.func(id, nodes, 'updateIcon', par);
+		updateIcon: function (id, nodes, par, linkage) {
+			return Factory.func(id, nodes, 'updateIcon', par, linkage);
 		},
 		text: function (id, nodes, texts) {
 			return Factory.func(id, nodes, 'updateText', texts);

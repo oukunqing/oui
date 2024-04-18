@@ -2039,3 +2039,13 @@ var names =  [
         for(var i =0; i<names.length;i++){
             console.log('//', names[i], names[i].toUnicode());
         }
+
+
+        function isempty(o) {
+            if (typeof o === 'object') { 
+                for (var name in o) { return false; } 
+            }
+            return true;
+        }
+
+        $.console.log(isempty({}));

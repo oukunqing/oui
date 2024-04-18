@@ -80,8 +80,8 @@
                 <label class="chb-label"><input type="checkbox" id="chbBottom" /><span>显示底部</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbInfo" /><span>显示信息</span></label>
                 <div></div>
-                <label class="chb-label"><input type="checkbox" id="chbKeepStatus" checked="checked" /><span>保持状态</span></label>
-                <label class="chb-label"><input type="checkbox" id="chbKeepCookie" checked="checked" /><span>保存COOKIE</span></label>
+                <label class="chb-label"><input type="checkbox" id="chbKeepStatus" /><span>保持状态</span></label>
+                <label class="chb-label"><input type="checkbox" id="chbKeepCookie" /><span>保存COOKIE</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbClickExpand" checked="checked" /><span>点击切换</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbClickChecked" /><span>点击选中</span></label>
                 <div>
@@ -395,7 +395,8 @@
             //指定为被动态加载的数据类型
             dynamicDatas: dynamicCamera ? 'camera' : '',
             //指定可选中/返回的数据类型，若未指定，则所有都可返回
-            returnTypes: ['unit', 'device', 'camera'],
+            //returnTypes: ['unit', 'device', 'camera'],
+            returnTypes: ['device', 'camera'],
             //返回的数据值字段
             valueFields: ['type', 'id', 'code'],
             //默认值，用于还原
@@ -438,6 +439,9 @@
                 resolve(tree, nodes);
             },*/
             clickExpand: clickExpand,
+            //点击切换时，切换的方式：toggle, true, false
+            //toggle等同于undefined
+            clickExpanded: 'toggle',
             clickChecked: clickChecked,
             complete: function (tree) {
                 $('#divOper').show();
@@ -452,21 +456,22 @@
                 $('#txt').html(html.concat([
                     'nodes:', tree.cache.count, ', level:', tree.cache.level, ', timeout:', tree.cache.timeout, 'ms'
                 ]).join(''));
-                /*
+                
                 window.setTimeout(function() {
-                    tree.updateIcon('7280,7155', 'device', {status:'off'});
-                    tree.icon('device_7151', {status:'off'});
-                    $.tree(TreeId).updateIcon('7759', 'camera', {status:'play'});
-                    $.tree.updateIcon(TreeId, '7760', 'camera', {status:'play'});
+                    tree.updateIcon('device_7280,device_7155', {status:'on'}, true);
+                    tree.icon('device_7151', {status:'on'}, true);
+                    tree.updateStatus('device_7152', 'on', true);
+                    $.tree(TreeId).updateIcon('camera_7759', {status:'play'});
+                    $.tree.updateIcon(TreeId, 'camera_7760', {status:'play'});
                     tree.text('device_7153', '204488设备');
-                }, 10);
+                }, 2000);
                 
                 window.setTimeout(function() {
                     tree.selected(['unit_826', 'unit_343', 'unit_780'], true)
                         .checked(['unit_826', 'unit_343'])
                         //.position('unit_343')
                         //.collapse(2, 'unit');
-                }, 20);
+                }, 2500);
                 
                 window.setTimeout(function() {
                     tree//.selected([826, 343, 780], 'unit', true)
@@ -474,8 +479,8 @@
                         .expand(2, 'unit')
                         //.position('unit_567', true)
                         //.collapse(2, 'unit');
-                }, 20);
-                */
+                }, 3000);
+                
 
                 //window.setTimeout(function() { tree.expandType('unit', true, true); }, 200);
                 //window.setTimeout(function() { tree.collapseType('device', true); }, 20);

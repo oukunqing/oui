@@ -300,7 +300,7 @@
             if (isUndefined(o) || null === o) { return true; }
             else if (isString(o)) { return '' === trim(o); }
             else if (isArray(o)) { return 0 === o.length  || 1 === o.length && '' === o[0]; }
-            else if (isObject(o)) { for (var name in o) { return false; } return true; }
+            else if (isObject(o)) { for (var k in o) { return false; } return true; }
             return false;
         },
         isProperty = function (o, property) { return o.hasOwnProperty(property) && (property in o); },
