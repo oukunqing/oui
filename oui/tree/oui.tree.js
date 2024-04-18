@@ -55,7 +55,10 @@
 			EmptyTreeId: 'OuiTreeNone',
 			SearchResultBoxHeight: 390, 	//12 * 30 + 30
 			SearchResultItemHeight: 30,
-			SearchResultTitleHeight: 30
+			SearchResultTitleHeight: 30,
+			//“返回顶部”图标停留时长，单位：毫秒，0表示不限制时间
+			GotoTopButtonKeepTimes: 10 * 1000,
+
 		},
 		KC = $.KEY_CODE, KCA = KC.Arrow, KCC = KC.Char, KCM = KC.Min,
 		Cache = {
@@ -185,20 +188,35 @@
 			},
 			scroll: function (ev, tree) {
 				var key = 'tree_scroll_' + tree.id,
+					key2 = 'tree_arrow_' + tree.id,
 					div = ev.target, 
 					top, height, rate, pos;
+
+				if (!tree.options.showScrollIcon) {
+					return this;
+				}
 
 				if (Cache.timers[key]) {
 					window.clearTimeout(Cache.timers[key]);
 				}
 				Cache.timers[key] = window.setTimeout(function() {
 					top = div.scrollTop;
-					height = div.scrollHeight;
+					height = div.scrollHeight - div.clientHeight;
+					//滚动位置到2/5时，显示按钮
 					if (top >= height / 5 * 2) {
 						rate = top / height;
-						//计算火箭位置，跟随滚动位置（按比例）
-						pos = (rate * div.offsetHeight).round(1) - (rate * 25 / 2).round(1) + div.offsetTop;
+						//计算火箭位置，跟随滚动位置（按比例）, 按钮的高度是25px
+						pos = rate * (div.offsetHeight + 25 * (1 - rate));
 						Factory.showReturnTop(tree, div, true, pos);
+
+						if (Config.GotoTopButtonKeepTimes > 0) {
+							if (Cache.timers[key2]) {
+								window.clearTimeout(Cache.timers[key2]);
+							}
+							Cache.timers[key2] = window.setTimeout(function() {
+								Factory.showReturnTop(tree, div, false, pos);
+							}, Config.GotoTopButtonKeepTimes);
+						}
 					} else {
 						Factory.showReturnTop(tree, div, false, pos);
 					}
@@ -729,6 +747,9 @@
 				if (opt.callbackLevel > 0 && opt.target) {
 					opt.showBottom = true;
 				}
+
+				//是否显示滚动时的小火箭图标（用于返回顶部）
+				opt.showScrollIcon = $.isBoolean($.getParam(opt, 'showScrollIcon,showFireArrow,showReturnTop,fireArrow'), true);
 
 				//默认需要防抖回调
 				opt.callbackDebounce = $.isBoolean($.getParam(opt, 'callbackDebounce,debounce'), false);
@@ -3478,6 +3499,8 @@
 				searchCallback: undefined,
 				//是否显示底部栏
 				showBottom: undefined,
+				//是否显示滚动图标（小火箭）
+				showScrollIcon: undefined,
 				//节点状态字段
 				statusField: 'status',
 				//是否级联选中复选框

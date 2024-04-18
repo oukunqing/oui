@@ -142,7 +142,7 @@
 
 .oui-tree li .item .button .btn{
 	margin:0;padding:0;display:inline-block;
-	border:none;box-sizing:border-box;border-radius:4px;
+	border:none;box-sizing:border-box;border-radius:5px;
 	cursor:pointer;width:25px; height:25px;
 	background-color: transparent;
 }
@@ -500,7 +500,7 @@
 .oui-tree-box .goto-tree-top {
 	width: 25px; height: 25px;
 	position: absolute;
-	bottom: 20px; right: 18px;
+	bottom: 0px; right: 18px;
 	border: solid 1px #f00;
 	border: none;
 	box-sizing: border-box;
