@@ -79,6 +79,11 @@
                 <label class="chb-label"><input type="checkbox" id="chbDragAble" /><span>允许拖动</span></label>
                 <div></div>
                 <label class="chb-label"><input type="checkbox" id="chbBottom" /><span>显示底部</span></label>
+                <select id="ddlBottomAlign" style="font-size:14px;">
+                    <option value="left">左对齐</option>
+                    <option value="center" selected="selected">居中</option>
+                    <option value="right">右对齐</option>
+                </select>
                 <label class="chb-label"><input type="checkbox" id="chbInfo" /><span>显示信息</span></label>
                 <div></div>
                 <label class="chb-label"><input type="checkbox" id="chbKeepStatus" checked="checked" /><span>保持状态</span></label>
@@ -360,6 +365,7 @@
             showDesc = $('#chbDesc').checked(),
             showButton = $('#chbButton').checked(),
             showBottom = $('#chbBottom').checked(),
+            bottomAlign = $('#ddlBottomAlign').val(),
             showMove = $('#chbMove').checked(),
             showSearch = $('#chbSearch').checked(),
             showTitle = $('#chbTitle').checked(),
@@ -415,6 +421,7 @@
             showDesc: showDesc,
             showButton: showButton,
             showBottom: showBottom,
+            bottomAlign: bottomAlign,
             showMove: showMove,
             moveAble: moveAble,
             dragAble: dragAble,

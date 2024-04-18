@@ -771,6 +771,10 @@
 				if (opt.callbackLevel > 0 && opt.target) {
 					opt.showBottom = true;
 				}
+				opt.bottomAlign = $.getParam(opt, 'bottomAlign');
+				if (['center', 'left', 'right'].indexOf(opt.bottomAlign) < 0) {
+					opt.bottomAlign = 'center';
+				}
 
 				//是否显示滚动时的小火箭图标（用于返回顶部）
 				opt.showScrollIcon = $.isBoolean($.getParam(opt, 'showScrollIcon,showFireArrow,showReturnTop,fireArrow'), true);
@@ -1608,6 +1612,7 @@
 				}
 				var div = document.createElement('div');
 				div.className = 'bottom oui-tree-bottom';
+				div.style.cssText = ['text-align:', opt.bottomAlign, ';'].join('');
 
 				div.innerHTML = [
 					'<button class="btn btn-return btn-primary">确定</button>',
@@ -1615,7 +1620,7 @@
 					'<button class="btn btn-origin">还原</button>',
 				].join('');
 
-				box.appendChild(div);
+				box.appendChild(tree.bottom = div);
 
 				$.addListener(div, 'click', function (ev) {
 					Event.buttonClick(ev, tree);
@@ -1631,10 +1636,12 @@
 				if (show) {
 					if (!bar) {
 						Factory.buildBottomForm(tree, tree.box);
-					} else if (bar.style.display === 'none') {
-						bar.style.display = 'block';
+					} else {
+						bar.style.cssText = [
+							'display:block;', 'text-align:', opt.bottomAlign, ';'
+						].join('');
 					}
-				} else if (bar && box.style.display !== 'none') {
+				} else if (bar && bar.style.display !== 'none') {
 					bar.style.display = 'none';
 				}
 
@@ -3314,7 +3321,10 @@
 			return that;
 		},
 		updateCount: function (count) {
-			var that = this.self(), item, c, str;
+			var that = this.self(),
+				dr = that.data || {},
+				item, c, str;
+				
 			if (!that.tree.options.showCount) {
 				return that;
 			}
@@ -3324,7 +3334,11 @@
 					item.innerHTML = str;
 				}
 			} else {
-				c = that.childs.length;
+				if ($.isNumber(dr.count)) {
+					c = dr.count < 0 ? 0 : dr.count;
+				} else {
+					c = that.childs.length;
+				}
 				var key = 'node_count_' + that.tree.id + '-' + that.id;
 				if (Cache.timers[key]) {
 					window.clearTimeout(Cache.timers[key]);
@@ -3475,6 +3489,8 @@
 
 	Tree.prototype = {
 		initial: function (options) {
+			$.console.log('initial:', options);
+
 			var opt = Factory.checkOptions($.extend({
 				id: 'otree001',
 				//样式
@@ -3561,6 +3577,8 @@
 				searchCallback: undefined,
 				//是否显示底部栏
 				showBottom: undefined,
+				//底部栏对齐方式 center, left, right
+				bottomAlign: undefined,
 				//是否显示滚动图标（小火箭）
 				showScrollIcon: undefined,
 				//节点状态字段
