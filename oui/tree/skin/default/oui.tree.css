@@ -144,55 +144,57 @@
 	margin:0;padding:0;display:inline-block;
 	border:none;box-sizing:border-box;border-radius:4px;
 	cursor:pointer;width:25px; height:25px;
+	background-color: transparent;
 }
 
 .oui-tree li .item .button .btn-add {
-	background:transparent url("imgs/tree.png") no-repeat 0px -75px;
+	background:url("imgs/tree.png") no-repeat 0px -75px;
 }
 .oui-tree li .item .button .btn-edit {
-	background:transparent url("imgs/tree.png") no-repeat -25px -75px;
+	background:url("imgs/tree.png") no-repeat -25px -75px;
 }
 .oui-tree li .item .button .btn-del,
 .oui-tree li .item .button .btn-delete,
 .oui-tree li .item .button .btn-wrong {
-	background:transparent url("imgs/tree.png") no-repeat -50px -75px;
+	background:url("imgs/tree.png") no-repeat -50px -75px;
 }
 .oui-tree li .item .button .btn-enable,
 .oui-tree li .item .button .btn-enabled,
 .oui-tree li .item .button .btn-right {
-	background:transparent url("imgs/tree.png") no-repeat -75px -75px;
+	background:url("imgs/tree.png") no-repeat -75px -75px;
 }
 .oui-tree li .item .button .btn-disable,
 .oui-tree li .item .button .btn-disabled {
-	background:transparent url("imgs/tree.png") no-repeat -100px -75px;
+	background:url("imgs/tree.png") no-repeat -100px -75px;
 }
 .oui-tree li .item .button .btn-up {
-	background:transparent url("imgs/tree.png") no-repeat -125px -75px;
+	background:url("imgs/tree.png") no-repeat -125px -75px;
 }
 .oui-tree li .item .button .btn-down {
-	background:transparent url("imgs/tree.png") no-repeat -150px -75px;
+	background:url("imgs/tree.png") no-repeat -150px -75px;
 }
 .oui-tree li .item .button .btn-moveup {
-	background:transparent url("imgs/tree.png") no-repeat -175px -75px;
+	background:url("imgs/tree.png") no-repeat -175px -75px;
 }
 .oui-tree li .item .button .btn-movedown {
-	background:transparent url("imgs/tree.png") no-repeat -200px -75px;
+	background:url("imgs/tree.png") no-repeat -200px -75px;
 }
 .oui-tree li .item .button .btn-goto,
 .oui-tree li .item .button .btn-return {
-	background:transparent url("imgs/tree.png") no-repeat -225px -75px;
+	background:url("imgs/tree.png") no-repeat -225px -75px;
 }
 .oui-tree li .item .button .btn-reload,
 .oui-tree li .item .button .btn-refurbish {
-	background:transparent url("imgs/tree.png") no-repeat -250px -75px;
+	background:url("imgs/tree.png") no-repeat -250px -75px;
 }
 .oui-tree li .item .button .btn-config {
-	background:transparent url("imgs/tree.png") no-repeat -275px -75px;
+	background:url("imgs/tree.png") no-repeat -275px -75px;
 }
 
 .oui-tree li .item .button .btn:hover {
-	border: none;
+	background-color: transparent;
 	background-color: #e5f3ff;
+	background-position-y: -100px;
 }
 
 .oui-tree ul.hide,.oui-tree li.hide,.oui-tree span.hide{display:none;}
@@ -210,7 +212,7 @@
 }
 .oui-tree li.node-drop > .item .switch {
 	opacity: 1;
-	background:url("imgs/tree.png") no-repeat -200px -75px
+	background:url("imgs/tree.png") no-repeat -200px -100px
 }
 .oui-tree li.drop-up > .item {	
 	border-top: dotted 2px #008000;
@@ -221,10 +223,10 @@
 	border-radius: 0;
 }
 .oui-tree li.drop-up > .item .switch {
-	background:url("imgs/tree.png") no-repeat -200px -75px
+	background:url("imgs/tree.png") no-repeat -200px -100px
 }
 .oui-tree li.drop-down > .item .switch {
-	background:url("imgs/tree.png") no-repeat -225px -75px
+	background:url("imgs/tree.png") no-repeat -225px -100px
 }
 .oui-tree li.node-drop .button {
 	visibility: hidden;
@@ -239,7 +241,7 @@
 }
 .oui-tree-clone li.node-clone .switch{
 	/*visibility: hidden;*/
-	background:#cce8ff url("imgs/tree.png") no-repeat -175px -75px
+	background:#cce8ff url("imgs/tree.png") no-repeat -175px -100px
 }
 .oui-tree-clone li.node-clone .button {
 	display: none;
@@ -300,7 +302,6 @@
 /*用于搜索*/
 
 .oui-tree-form {
-	position: absolute;
 	border: none;
 	box-sizing: border-box;
 	border-bottom:solid 1px #99bbe8;
@@ -321,6 +322,7 @@
 .oui-tree-form .search {
 	width:25px;height:25px;
 	position: absolute;
+	cursor: pointer;
 	top: 2px;
 	right: 7px;
 	border:solid 1px #f00;
@@ -328,8 +330,12 @@
 	outline: none;
 	margin: 5px 0 0 0;
 	padding: 0;
-	background: url("imgs/tree.png") no-repeat -275px -50px;
+	background:transparent url("imgs/tree.png") no-repeat -275px -25px;
 }
+.oui-tree-form .search:hover {
+	background-position-y: -50px;
+}
+
 .oui-tree-form .keywords {
 	height: 30px;
 	line-height: 28px;
@@ -490,3 +496,65 @@
 /*用于搜索列表*/
 .oui-tree-box .search-result-panel li .icon{background:transparent url("imgs/tree.png") no-repeat 0 -25px;}
 .oui-tree-box .search-result-panel li .icon-page{background:transparent url("imgs/tree.png") no-repeat -50px -25px;}
+
+.oui-tree-box .goto-tree-top {
+	width: 25px; height: 25px;
+	position: absolute;
+	bottom: 20px; right: 18px;
+	border: solid 1px #f00;
+	border: none;
+	box-sizing: border-box;
+	overflow: hidden;
+	cursor: pointer;
+	background:transparent url("imgs/tree.png") no-repeat -250px -25px;
+}
+.oui-tree-box .goto-tree-top:hover {
+	background-position-y: -50px;
+}
+
+.oui-tree-bottom {
+	border: none;
+	box-sizing: border-box;
+	border-top:solid 1px #99bbe8;
+	width: 100%;
+	height: 37px;
+	padding:0 0 0 2px;
+	margin:0;
+	text-align: left;
+}
+
+.oui-tree-popup .oui-tree-bottom {
+	height: 39px;
+}
+
+.oui-tree-bottom .btn,
+.oui-tree-bottom .btn-default {
+	float: none;
+	border:solid 1px #ccc;
+	box-sizing: border-box;
+	height: 28px;
+	width: auto;
+	line-height: 20px;
+	margin: 4px 2px 0;
+	padding: 3px 10px;
+	font-size: 14px;
+	font-family: Arial,宋体;
+  	border-radius: 5px;
+  	cursor: pointer;
+}
+.oui-tree-bottom .btn:hover,
+.oui-tree-bottom .btn-default:hover {
+	background: #e6e6e6;
+	border: solid 1px #adadad;
+}
+
+.oui-tree-bottom .btn-primary {
+	border: solid 1px #2e6da4;
+	background: #337ab7;
+	color: #fff;
+}
+
+.oui-tree-bottom .btn-primary:hover {
+	background: #286090;
+	border: solid 1px #204d74;
+}

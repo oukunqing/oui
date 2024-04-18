@@ -87,19 +87,6 @@
 					css: elem.className.trim().split(' ')[0]
 				} : {};
 			},
-			mouseover: function (ev, tree) {
-				var key = 'tree_node_over_' + tree.id;
-				if (Cache.timers[key]) {
-					window.clearTimeout(Cache.timers[key]);
-				}
-				Cache.timers[key] = window.setTimeout(function() {					
-					var p = Event.target(ev, tree);
-					if (p.node) {
-						Factory.buildButton(tree, p.node);
-					}
-				}, 30);
-				return this;
-			},
 			mousedown: function (ev, tree) {
 				Factory.showSearchPanel(tree, false);
 
@@ -128,7 +115,6 @@
 					} else if (ep.css.inArray(['button', 'btn'])) {
 						Factory.buttonCallback(ep.node, tree, ev, $.getAttribute(ep.elem, 'key'));
 					} else if (Factory.isNodeBody(ep)) {
-						$.console.log('click-12345:', ep.node.id, ep.node.type);
 						if (Factory.isReturnType(tree, ep.node.type)) {
 							Factory.setTargetValue(ep.node, tree).clickCallback(ep.node, tree, ev);
 							ep.node.setSelected(true, ev);
@@ -160,7 +146,65 @@
 					node = p.node;
 				}
 				Factory.contextmenuCallback(node, tree, ev);
-			},			
+			},
+			mouseover: function (ev, tree) {
+				var key = 'tree_node_over_' + tree.id;
+				if (Cache.timers[key]) {
+					window.clearTimeout(Cache.timers[key]);
+				}
+				Cache.timers[key] = window.setTimeout(function() {
+					var p = Event.target(ev, tree);
+					if (p.node) {
+						Factory.buildButton(tree, p.node);
+					}
+				}, 30);
+				return this;
+			},
+			buttonClick: function (ev, tree) {
+				var opt = tree.options,
+					tag = ev.target.tagName.toLowerCase(),
+					css = ev.target.className.split(' ');
+
+				if (css[0] !== 'btn' || !opt.target) {
+					return false;
+				}
+				$.console.log('click:', ev.target, ev.type);
+
+				switch(css[1]) {
+				case 'btn-return':
+					Factory.callback(null, tree, ev);;
+					break;
+				case 'btn-cancel':
+					Factory.setBoxDisplay(tree, false);
+					break;
+				case 'btn-origin':
+					Factory.setDefaultValue(tree, true);
+					break;
+				}
+				return this;
+			},
+			scroll: function (ev, tree) {
+				var key = 'tree_scroll_' + tree.id,
+					div = ev.target, 
+					top, height, rate, pos;
+
+				if (Cache.timers[key]) {
+					window.clearTimeout(Cache.timers[key]);
+				}
+				Cache.timers[key] = window.setTimeout(function() {
+					top = div.scrollTop;
+					height = div.scrollHeight;
+					if (top >= height / 5 * 2) {
+						rate = top / height;
+						//计算火箭位置，跟随滚动位置（按比例）
+						pos = (rate * div.offsetHeight).round(1) - (rate * 25 / 2).round(1) + div.offsetTop;
+						Factory.showReturnTop(tree, div, true, pos);
+					} else {
+						Factory.showReturnTop(tree, div, false, pos);
+					}
+				}, 10);
+				return this;
+			},
 			dragstart: function (ev, tree) {
 				var ep = Event.target(ev, tree),
 					op = tree.options;
@@ -375,6 +419,11 @@
 						dynamicDatas: [],
 						//动态加载的备用数据
 						reserveDatas: {},
+						//默认值（原始值）
+						defaultValues: {
+							value: null,
+							nodes: []
+						},
 						//节点类型字典
 						trees: {},
 						//所有节点
@@ -468,6 +517,15 @@
 					delete Cache.drags['drag' + tree.id];
 				}
 				return this;
+			},
+			toArray: function (nodes) {
+				var arr = [];
+				for (var k in nodes) {
+					if (Factory.isNode(nodes[k])) {
+						arr.push(nodes[k]);
+					}
+				}
+				return arr;
 			},
 			parseTrees: function (trees) {
 				var ot = [], p,
@@ -643,6 +701,8 @@
 				if (opt.valueFields.length <= 0) {
 					opt.valueFields.push('id');
 				}
+				//默认值(原始值)，用于值的还原
+				opt.defaultValue = $.getParam(opt, 'defaultValue,originalValue,originValue');
 
 				opt.openTypes = Factory.parseArrayParam($.getParam(opt, 'openTypes,openType'));
 
@@ -654,10 +714,22 @@
 				opt.clickChecked = $.isBoolean($.getParam(opt, 'clickChecked'), false);
 				opt.clickExpand = $.isBoolean($.getParam(opt, 'clickExpand'), false);
 
-				opt.callbackLevel = parseInt($.getParam(opt, 'callbackLevel'));
-				if (isNaN(opt.callbackLevel) || !opt.target) {
-					opt.callbackLevel = 0;
+				var level = $.getParam(opt, 'callbackLevel');
+				if ($.isBoolean(level)) {
+					level = level ? 1 : 0;
+				} else {
+					level = parseInt(level);
+					if (isNaN(level) || level < 0) {
+						level = 0;
+					}
 				}
+				opt.callbackLevel = level;
+
+				opt.showBottom = $.isBoolean($.getParam(opt, 'showBottom,showFoot'), false);
+				if (opt.callbackLevel > 0 && opt.target) {
+					opt.showBottom = true;
+				}
+
 				//默认需要防抖回调
 				opt.callbackDebounce = $.isBoolean($.getParam(opt, 'callbackDebounce,debounce'), false);
 				opt.debounceDelay = parseInt('0' + $.getParamCon(opt, 'debounceDelay,debouncedelay,delay')) || Config.DebounceDelay;
@@ -720,9 +792,6 @@
 				//var div = tree.target ? tree.element : tree.panel;
 				var div = tree.panel;
 
-				$.addListener(div, 'mouseover', function(ev) {
-					Factory.dealEvent(ev, tree, ev.type);
-				});
 				$.addListener(div, 'mousedown', function(ev) {
 					Factory.dealEvent(ev, tree, ev.type);
 				});
@@ -736,6 +805,12 @@
 					Factory.dealEvent(ev, tree, ev.type);
 				});
 
+				/*用于悬停显示“操作按钮”*/
+				$.addListener(div, 'mouseover', function(ev) {
+					Factory.dealEvent(ev, tree, ev.type);
+				});
+
+				/*用于拖动（同级）节点排序*/
 				$.addListener(div, 'dragstart', function(ev) {
 					Factory.dealEvent(ev, tree, ev.type);
 				});
@@ -756,6 +831,10 @@
 					Factory.dealEvent(ev, tree, ev.type);
 				});
 
+				$.addListener(div, 'scroll', function (ev) {
+					Factory.dealEvent(ev, tree, ev.type);
+				});
+
 				return this;
 			},
 			dealEvent: function (ev, tree, evType, opt) {
@@ -768,15 +847,22 @@
 					&& (which !== Config.MouseWhichRight && type === 'contextmenu')) {
 					return this;
 				}
+				var events = [
+					'mousedown', 'mouseup', 'click', 'dblclick', 'contextmenu', 
+					'mouseover', 'scroll'
+				];
 
-				if (['mouseover', 'mousedown', 'mouseup', 'click', 'dblclick', 'contextmenu'].indexOf(type) > -1) {
+				if (events.indexOf(type) > -1) {
 					if ($.isFunction(Event[type])) {
 						Event[type](ev, tree);
 					}
 					return this;
 				} else if (!tree.options.moveAble || !tree.options.dragAble) {
 					return this;
-				} else if (['dragstart', 'dragover', 'drop', 'dragenter', 'dragleave', 'dragend'].indexOf(type) > -1) {
+				}
+
+				events = ['dragstart', 'dragover', 'drop', 'dragenter', 'dragleave', 'dragend'];
+				if (events.indexOf(type) > -1) {
 					if ($.isFunction(Event[type])) {
 						Event[type](ev, tree);
 					}
@@ -990,22 +1076,21 @@
 					return this;
 				}
 				$.addListener(window, 'resize', function (ev) {
-					/*var key = 'oui-win-resize';
+					var key = 'oui-win-resize';
 					if (Cache.timers[key]) {
 						window.clearTimeout(Cache.timers[key]);
 					}
 					Cache.timers[key] = window.setTimeout(function() {
-						
-					}, 50);*/
-					for (var i = 0; i < Cache.ids.length; i++) {
-						var d = Factory.getTreeCache(Cache.ids[i].id);
-						if (d && d.tree) {
-							if (d.tree.target) {
-								d.tree.hide();
+						for (var i = 0; i < Cache.ids.length; i++) {
+							var d = Factory.getTreeCache(Cache.ids[i].id);
+							if (d && d.tree) {
+								if (d.tree.target) {
+									d.tree.hide();
+								}
+							 	Factory.setPanelSize(d.tree, ev);
 							}
-						 	Factory.setPanelSize(d.tree, ev);
 						}
-					}
+					}, 10);
 				});
 				return this;
 			},
@@ -1128,6 +1213,39 @@
 
 				return this;
 			},
+			setDefaultValue: function (tree, par) {
+				if ($.isBoolean(par, false)) {
+					var par = Factory.getDefaultValue(tree),
+						nodes = $.extend([], par.nodes);
+
+					Factory.showDefaultValue(tree).callback(nodes[0], tree, null, nodes);
+				} else {
+					$.extend(tree.cache.defaultValues, par);
+				}
+				return this;
+			},
+			getDefaultValue: function (tree) {
+				return tree.cache.defaultValues;
+			},
+			showDefaultValue: function (tree) {
+				var cache = tree.cache.current,
+					nodes = $.extend([], Factory.getDefaultValue(tree).nodes),
+					node = nodes[0];
+
+				if (node) {
+					node.position(true);
+				}
+				if (!tree.options.showCheck) {
+					return this;
+				}
+				for (var k in cache.checked) {
+					cache.checked[k].check(false);
+				}
+				for (var i = 0; i < nodes.length; i++) {
+					nodes[i].check();
+				}
+				return this;
+			},
 			initTargetValue: function (tree) {
 				var elem = tree.target;
 				if (!$.isElement(elem)) {
@@ -1142,27 +1260,35 @@
 					for (var i = 0; i < nodes.length; i++) {
 						nodes[i].setSelected(true).setChecked(true).position();
 					}
+					Factory.setDefaultValue(tree, {value: val, nodes: nodes});
 				}
 				return this;
 			},
-			setTargetValue: function (node, tree, checked) {
+			setTargetValue: function (node, tree, checked, force, nodes) {
 				if (!tree.target) {
 					return this;
 				}
 				var opt = tree.options,
 					cfg = opt.targetConfig,
 					tag = tree.target.tagName.toLowerCase(),
-					txt, val;
+					txt = '', val = '';
+
+				if (!force && opt.callbackLevel && opt.showBottom) {
+					return this;
+				}
 
 				if (checked) {
-					var txts = [], vals = [], cache = tree.cache.current.checked;
-					for (var k in cache) {
-						txts.push(cache[k].getText());
-						vals.push(cache[k].getValue());
+					var txts = [], vals = [], i, c;
+					if (!$.isArray(nodes)) {
+						nodes = Factory.toArray(tree.cache.current.checked);
+					}
+					for (i = 0, c = nodes.length; i < c; i++) {
+						txts.push(nodes[i].getText());
+						vals.push(nodes[i].getValue());
 					}
 					txt = txts.join(cfg.separator || ',');
 					val = vals.join(',');
-				} else {
+				} else if (node) {
 					txt = node.getText();
 					val = node.getValue();
 				}
@@ -1342,6 +1468,29 @@
 				div.className = Factory.getPanelClass(opt);
 				return this;
 			},
+			showReturnTop: function (tree, div, show, top) {
+				var btn = div.querySelector('.goto-tree-top');
+				if ($.isBoolean(show, true)) {
+					if (!btn) {
+						btn = document.createElement('span');
+						btn.className = 'goto-tree-top';
+						div.appendChild(btn);
+
+						$.addListener(btn, 'mousedown', function (ev) {
+							div.scrollTop = 0;
+						});
+						btn.style.display = 'block';
+					} else if (btn.style.display === 'none') {
+						btn.style.display = 'block';
+					}
+					if (top) {
+						btn.style.top = top + 'px';
+					}
+				} else if (btn && btn.style.display !== 'none') {
+					btn.style.display = 'none';
+				}
+				return this;
+			},
 			buildForm: function (tree, box) {
 				var opt = tree.options;
 
@@ -1349,8 +1498,8 @@
 					return this;
 				}
 				var div = document.createElement('div'), first = box.childNodes[0];
+				div.className = 'form oui-tree-form';
 				div.innerHTML = [
-					'<div class="form oui-tree-form">',
 					'<input type="text" class="keywords oui-tree-keywords" placeholder="', 
 					//opt.searchPrompt || '请输入关键字',
 					opt.searchPrompt || '\u8bf7\u8f93\u5165\u5173\u952e\u5b57',
@@ -1358,8 +1507,7 @@
 					//搜索
 					//'<button class="search oui-tree-search" title="', opt.searchText || '\u641c\u7d22', '"></button>',
 					//查找
-					'<button class="search oui-tree-search" title="', opt.searchText || '\u67e5\u627e', '"></button>',
-					'</div>'
+					'<button class="search oui-tree-search" title="', opt.searchText || '\u67e5\u627e', '"></button>'
 				].join('');
 
 				if (first) {
@@ -1368,9 +1516,9 @@
 					box.appendChild(div);
 				}
 
-				var txt = box.querySelector('input.keywords');
+				var txt = box.querySelector('input.keywords'),
+					btn = box.querySelector('button.search');
 
-				var btn = box.querySelector('button.search');
 				$.addListener(btn, 'mousedown', function(ev) {
 					Factory.searchNodes(tree, txt);
 				});
@@ -1405,6 +1553,45 @@
 				}
 
 				Factory.setPanelSize(tree, null, true);
+
+				return this;
+			},
+			buildBottomForm: function (tree, box) {
+				var opt = tree.options;
+				if (!opt.showBottom) {
+					return this;
+				}
+				var div = document.createElement('div');
+				div.className = 'bottom oui-tree-bottom';
+
+				div.innerHTML = [
+					'<button class="btn btn-return btn-primary">确定</button>',
+					'<button class="btn btn-cancel">取消</button>',
+					'<button class="btn btn-origin">还原</button>',
+				].join('');
+
+				box.appendChild(div);
+
+				$.addListener(div, 'click', function (ev) {
+					Event.buttonClick(ev, tree);
+				});
+
+				return this;
+			},
+			showBottomForm: function (tree) {
+				var opt = tree.options,
+					show = opt.showBottom,
+					bar = tree.bottom;
+
+				if (show) {
+					if (!bar) {
+						Factory.buildBottomForm(tree, tree.box);
+					} else if (bar.style.display === 'none') {
+						bar.style.display = 'block';
+					}
+				} else if (bar && box.style.display !== 'none') {
+					bar.style.display = 'none';
+				}
 
 				return this;
 			},
@@ -1542,16 +1729,18 @@
 					});
 				}
 				function _resize() {
-					var bh = $.getOffset(tree.box).height,
+					var dh = $.getOffset(tree.box).height,
+						opt = tree.options,
 						form = tree.box.querySelector('div.form'),
-						fh = tree.options.showSearch && form ? form.offsetHeight : 0,
-						ph = bh - fh,
+						bottom = tree.box.querySelector('div.bottom'),
+						fh = opt.showSearch && form ? form.offsetHeight : 0,
+						bh = opt.showBottom && bottom ? bottom.offsetHeight : 0,
+						ph = dh - fh - bh,
 						cache = Factory.getSearchCache(tree);
 
-					tree.panel.style.cssText = [
-						'height:', ph, 'px;', 'margin-top:', fh, 'px;'
-					].join('');
-
+					if (ph !== dh) {
+						tree.panel.style.cssText = ['height:', ph, 'px;'].join('');
+					}
 					if (cache && cache.elem) {
 						cache.elem.style.width = (form.clientWidth - 8) + 'px';
 					}
@@ -1585,8 +1774,6 @@
 						that.element.appendChild(box);
 					}
 					box.className = css.join(' ');
-				} else {
-					Factory.showSearchForm(tree);
 				}
 
 				if (!div) {
@@ -1597,7 +1784,9 @@
 				} else {
 					div.innerHTML = '';
 				}
-				Factory.setPanelClass(div, opt).setPanelSize(that);
+
+				Factory.showSearchForm(tree).showBottomForm(tree)
+					.setPanelClass(div, opt).setPanelSize(that);
 
 				tag = that.element.tagName.toLowerCase();
 
@@ -2296,29 +2485,43 @@
 			collapseAll: function (tree) {
 				return Factory.expandAll(tree, false);
 			},
-			debounceCallback: function (callback, node, tree, ev) {
+			debounceCallback: function (callback, node, tree, ev, nodes) {
 				if (tree.options.callbackDebounce) {
 					$.debounce({
 						id: 'otree-callback-' + tree.id,
 						delay: tree.options.debounceDelay,
 						timeout: tree.options.debounceTimeout
 					}, function() {
-						callback(node, tree, ev);
+						callback(node, tree, ev, nodes);
 					});
 				} else if (Factory.isPromise()) {
 					new Promise(function (resolve, reject) {
-						callback(node, tree, ev);
+						callback(node, tree, ev, nodes);
 					});
 				} else {
 					window.setTimeout(function() {
-						callback(node, tree, ev);
+						callback(node, tree, ev, nodes);
 					}, 1);
 				}
 				return this;
 			},
-			callback: function (node, tree, ev) {
+			callback: function (node, tree, ev, nodes) {
+				var checked = tree.options.showCheck,
+					force = true;
+
+				if (!$.isArray(nodes) && checked) {
+					nodes = Factory.toArray(tree.cache.current.checked);
+				}
+
+				if (node === null) {
+					node = tree.cache.current.selected;
+				}
+
+				if (node && tree.target) {
+					Factory.setTargetValue(node, tree, checked, force, nodes);
+				}
 				if ($.isFunction(tree.options.callback)) {
-					Factory.debounceCallback(tree.options.callback, node, tree, ev);
+					Factory.debounceCallback(tree.options.callback, node, tree, ev, nodes);
 				}
 				return this;
 			},
@@ -2350,12 +2553,14 @@
 				if (tree.options.callbackLevel) {
 					return this;
 				}
-				var callback = tree.options.checkedCallback;
+				var callback = tree.options.checkedCallback,
+					nodes = Factory.toArray(tree.cache.current.checked);
+
 				if ($.isFunction(node.checkedCallback)) {
 					callback = node.checkedCallback;
 				}
 				if ($.isFunction(callback)) {
-					return Factory.debounceCallback(callback, node, tree, ev);
+					return Factory.debounceCallback(callback, node, tree, ev, nodes);
 				}
 				return Factory.callback(node, tree, ev);
 			},
@@ -2774,11 +2979,13 @@
 			return Factory.setStoreCache(this.tree, key, node, action), this;
 		},
 		setSelected: function (selected, ev) {
-			var that = this.self();
+			//var that = this.self();
+			var that = this;
 			selected = $.isBoolean(selected, !that.selected);
 			if (selected && (that.disabled || !Factory.isReturnType(that.tree, that.type))) {
 				return that;
 			}
+			$.console.log('setSelected:', that.id, selected);
 			if (selected) {
 				//设置当前选中的节点状态
 				Factory.setCurrentCache(that.tree, 'selected', that, selected);
@@ -2955,6 +3162,7 @@
 			return selected ? that.setSelected(true) : that;
 		},
 		select: function (selected) {
+			$.console.log('select:', this.id, selected);
 			return this.self().setSelected($.isBoolean(selected, true));
 		},
 		check: function (checked) {
@@ -3206,6 +3414,8 @@
 				data: [],
 				//值字段，默认为 ['id']
 				valueFields: [],
+				//默认值，用于值还原
+				defaultValue: undefined,
 				//switch图标类型（默认样式时有效）
 				switch: undefined,
 				//data数据结构注解，示例：[{key:'unit',val:'units'}]
@@ -3266,6 +3476,8 @@
 				searchPrompt: undefined,
 				//搜索回调（用于复杂搜索，内部搜索只搜索名称关键字）
 				searchCallback: undefined,
+				//是否显示底部栏
+				showBottom: undefined,
 				//节点状态字段
 				statusField: 'status',
 				//是否级联选中复选框
@@ -3334,9 +3546,10 @@
 				leaf: opt.leaf,
 				leafTypes: opt.leafTypes,
 				returnTypes: opt.returnTypes
-			}, true).setWindowResize();
-
-			Factory.showSearchPanel(this, false, true);
+			}, true)
+				.setWindowResize()
+				.showSearchPanel(this, false, true)
+				.setDefaultValue(this, {value: opt.defaultValue});
 
 			if (opt.target) {
 				this.target = opt.target;

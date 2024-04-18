@@ -23,17 +23,18 @@
 </head>
 <body>
 <div class="form">
-    <div style="float:left;padding:6px;clear:none;">
-        <div id="tree" style="display:block;border:solid 1px #00f;border-radius:4px;overflow:auto;width:500px;height:600px;margin:0;"></div>
-        <div id="txt" style="margin:0;padding:5px 0;"></div>
-        <div id="tree1" style="display:block;border:solid 1px #00f;border-radius:4px;overflow:auto;width:500px;height:200px;margin:0;"></div>
+    <div style="width:50%;float:left;padding:550px 0 1000px 10px;clear:none;">
+        <select id="ddlUnit" style="width:90%;height:34px;" onchange="$.console.log('changed:', this.value);">
+            <option value="7155,8366">205428,866804050921863</option>
+        </select>
+        <input id="txtDevice" style="width:90%;height:28px;" onchange="$.console.log('changed:', this.value);" />
     </div>
     <div style="float:left;padding:0;margin:6px 0 0;clear:none;">
         <div class="box">
             <div>
-                <label class="chb-label"><input type="checkbox" value="root" name="chbData" checked="checked" /><span>根节点</span></label>
+                <label class="chb-label"><input type="checkbox" value="root" name="chbData" /><span>根节点</span></label>
                 <label class="chb-label"><input type="checkbox" value="unit" name="chbData" checked="checked" /><span>目录</span></label>
-                <label class="chb-label"><input type="checkbox" value="device" name="chbData" /><span>设备</span></label>
+                <label class="chb-label"><input type="checkbox" value="device" name="chbData" checked="checked"/><span>设备</span></label>
                 <label class="chb-label"><input type="checkbox" value="camera" name="chbData" /><span>通道</span></label>
                 <label class="chb-label"><input type="checkbox" value="department" name="chbData" /><span>部门</span></label>
                 <label class="chb-label"><input type="checkbox" value="person" name="chbData" /><span>人员</span></label>
@@ -84,6 +85,7 @@
                 <label class="chb-label"><input type="checkbox" id="chbKeepCookie" checked="checked" /><span>保存COOKIE</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbClickExpand" checked="checked" /><span>点击切换</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbClickChecked" /><span>点击选中</span></label>
+                <label class="chb-label"><input type="checkbox" id="chbCallbackLevel" /><span>确认再返回</span></label>
                 <div>
                     <button onclick="test(0);">加载树菜单</button>
                     <button onclick="test(1);">加载树菜单1</button>
@@ -210,7 +212,7 @@
 
     };
 
-    var TreeId = 'tree';
+    var TreeId = 'ddlUnit';
 
     function expandLevel(expand) {
         var linkage = $('#chbLinkage').checked(),
@@ -367,7 +369,8 @@
             switchIcon = $('#ddlSwitch').val(),
             clickExpand = $('#chbClickExpand').checked(),
             clickChecked = $('#chbClickChecked').checked(),
-            dynamicCamera = $('#chbCamera').checked();
+            dynamicCamera = $('#chbCamera').checked(),
+            callbackLevel = $('#chbCallbackLevel').checked();
 
             $.console.log('showStatus:', showStatus);
 
@@ -377,6 +380,7 @@
             //data.units[0].icon = {path: 'imgs/tree/area.png'};
         }
         $.tree(TreeId, {
+            target: TreeId,
             skin: skin, 
             async: true, 
             keepStatus: keepStatus,
@@ -437,6 +441,7 @@
             },*/
             clickExpand: clickExpand,
             clickChecked: clickChecked,
+            callbackLevel: callbackLevel,
             complete: function (tree) {
                 $('#divOper').show();
 
@@ -613,11 +618,6 @@
             }
         });
         $.console.log('test finish:');
-
-        $.tree('tree1', {
-            skin: skin, 
-            data: testData1
-        });
     }
   
 </script>

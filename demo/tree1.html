@@ -268,9 +268,12 @@
                 openLevel: openLevel,
                 //checkbox: true,
                 showCheck: showCheck,
+                showDesc: true,
                 showSearch: true,
+                showBottom: true,
                 //linkage: false,
                 showIcon: showIcon,
+                callbackLevel: 1,
                 clickExpand: clickExpand,
                 clickChecked: clickChecked,
                 complete: function (tree) {
@@ -282,8 +285,9 @@
                         'nodes:', tree.cache.count, ', level:', tree.cache.level, ', timeout:', tree.cache.timeout, 'ms'
                     ]).join(''));
                 },
-                callback: function () {
-
+                callback: function (node, tree, ev, nodes) {
+                    $.console.log('callback 12345', tree.id, ev, node, nodes);
+                    $.console.log('callback 23456', tree.getChecked());
                 },
                 onclick: function (node, tree, ev) {
                     $.console.log('onclick', tree.id, ev, node);
