@@ -1025,6 +1025,38 @@
         }
         return list;
     },
+    setSelectData = function (elem, val, txt, clear) {
+        if (!$.isElement(elem = $.toElement(elem))) {
+            return this;
+        }
+        if ($.isString(val, true) || $.isNumber(val)) {
+            val = val.toString().trim();
+        } else {
+            return this;
+        }
+        if (!$.isString(txt, true) && !$.isNumber(txt)) {
+            txt = val;
+        }
+        var options = elem.options,
+            c = options.length, i, d, v, t;
+        for (i = 0; i < c; i++) {
+            d = options[i];
+            v = d.value.toString();
+            t = d.text.trim();
+            if (val === v) {
+                elem.selectedIndex = i;
+                return this;
+            }
+        }
+        if (clear) {
+            elem.options.length = 0;
+            c = 0;
+        }
+        elem.options.add(new Option(txt, val));
+        elem.selectedIndex = c;
+
+        return this;
+    },
     getTableData = function (tableElement, options) {
         var list = [], rows = tableElement.rows.length, tHead = tableElement.tHead, rowIndex = tHead ? tHead.rows.length : 0;
         for (var i = rowIndex; i < rows; i++) {
@@ -1105,6 +1137,7 @@
             getFormData: getFormData,
             getFormParam: getFormParam,
             setFormData: setFormData,
+            setSelectData: setSelectData,
             getTableData: getTableData,
             setTableData: setTableData,
             filterData: filterData,

@@ -309,6 +309,7 @@
 	height: 39px;
 	padding:0 4px;
 	margin:0;
+	background: #fff;
 }
 
 .oui-tree-form input,
@@ -521,6 +522,7 @@
 	padding:0 2px;
 	margin:0;
 	text-align: left;
+	background: #fff;
 }
 
 .oui-tree-popup .oui-tree-bottom {

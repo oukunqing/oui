@@ -176,20 +176,19 @@
 				if (css[0] !== 'btn' || !opt.target) {
 					return false;
 				}
-				$.console.log('click:', ev.target, ev.type);
 
 				switch(css[1]) {
 				case 'btn-return':
-					Factory.callback(null, tree, ev);;
+					Factory.callback(null, tree, ev);
 					break;
 				case 'btn-cancel':
-					Factory.setBoxDisplay(tree, false);
+					//Factory.setBoxDisplay(tree, false);
 					break;
 				case 'btn-origin':
 					Factory.setDefaultValue(tree, true);
 					break;
 				}
-				return this;
+				return Factory.setBoxDisplay(tree, false), this;
 			},
 			scroll: function (ev, tree) {
 				var key = 'tree_scroll_' + tree.id,
@@ -800,10 +799,14 @@
 				if (Factory.isTree(id)) {
 					return id;
 				}
-				var empty = $.isEmpty(par), cache, opt;
+
+				var empty = $.isEmpty(par),
+					string = $.isString(id, true) || $.isNumber(id), 
+					cache, opt;
+
 				if ($.isObject(id)) {
 					opt = $.extend(id, par);
-				} else if ($.isString(id, true) || $.isNumber(id)) {
+				} else if (string) {
 					opt = $.extend({}, par, {id: id});
 				} else {
 					opt = $.extend({}, par);
@@ -815,7 +818,7 @@
 				//若都获取不到则创建一个空的树
 				//创建空树的目的是为了容错
 				if (empty && !(cache = Factory.getTreeCache(opt.id, true))) {
-					opt = { id: Config.EmptyTreeId };
+					$.extend(opt, string ? {id: Config.EmptyTreeId} : null);
 				} else {
 					//判断是否指定ID
 					if ($.isUndefinedOrNull(opt.id) || ($.isNumber(opt.id) && !$.isString(opt.id, true))) {
@@ -1305,6 +1308,8 @@
 				}
 				var val = elem.value.trim(),
 					nodes = Factory.findNodes(tree, val);
+				$.console.log('initTargetValue:', elem, val, nodes);
+
 				if (nodes.length > 0) {
 					for (var i = 0; i < nodes.length; i++) {
 						nodes[i].setSelected(true).setChecked(true).position();
@@ -1388,7 +1393,6 @@
 					$.removeClass(elem, 'oui-tree-elem-top,oui-tree-elem-bottom');
 					$.removeClass(elem, 'oui-tree-box-top,oui-tree-box-bottom');
 				}
-
 				return display ? this.setBoxPosition(tree, first) : this;
 			},
 			setBoxPosition: function (tree, first) {
@@ -1794,7 +1798,7 @@
 						tree.panel.style.cssText = ['height:', ph, 'px;'].join('');
 					}
 					if (cache && cache.elem) {
-						cache.elem.style.width = (form.clientWidth - 8) + 'px';
+						cache.elem.style.width = (form.offsetWidth - 8) + 'px';
 					}
 				}
 
@@ -1852,10 +1856,10 @@
 				} else {
 					if (opt.async) {
 						window.setTimeout(function() {
-							Factory.buildNode(tree, opt).initTargetValue(that).completeCallback(that);
+							Factory.buildNode(tree, opt);
 						}, 1);
 					} else {
-						Factory.buildNode(tree, opt).initTargetValue(that).completeCallback(that);
+						Factory.buildNode(tree, opt);
 					}
 				}
 				return this;
@@ -1943,6 +1947,7 @@
 							'nodes:', cache.count, ', level:', cache.level, ', timeout:', cache.timeout, 'ms'
 						].join(''));
 					}
+					Factory.initTargetValue(tree).completeCallback(tree);
 				}
 				
 				return this;
@@ -3625,7 +3630,6 @@
 			if (opt.target) {
 				opt.targetConfig = $.extend({
 					height: 500,
-					defaultValue: undefined,
 					separator: ','
 				}, opt.targetConfig);
 			}
