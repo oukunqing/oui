@@ -68,6 +68,7 @@
 			events: {},
 			clicks: {},
 			timers: {},
+			checks: {},
 			drags: {},
 			search: {}
 		},
@@ -692,7 +693,7 @@
 
 				opt.showTitle = $.isBoolean($.getParam(opt, 'showTitle,showtitle'), false);
 
-				opt.showSearch = $.isBoolean($.getParam(opt, 'showSearch,showForm,showsearch'), false);
+				opt.showSearch = $.isBoolean($.getParam(opt, 'showSearch,showForm,showsearch'), opt.target ? true : false);
 				opt.searchText = $.getParam(opt, 'searchText,searchtext');
 				opt.searchPrompt = $.getParam(opt, 'searchPrompt,searchPlaceholder');
 				opt.searchCallback = $.getParam(opt, 'searchCallback');
@@ -1150,7 +1151,7 @@
 				var nodes = [], values = [],
 					node, type, nid,
 					opt = tree.options,
-					cache = tree.cache.nodes;
+					cache = tree.cache;
 
 				if ($.isArray(value)) {
 					values = value;
@@ -1160,11 +1161,18 @@
 					values = [value];
 				}
 
+				var types = opt.returnTypes;
+				if (types.length <= 0) {
+					for (var k in cache.types) {
+						types.push(k);
+					}
+				}
+
 				for (var i = 0; i < values.length; i++) {
-					for (var j = 0; j < opt.returnTypes.length; j++) {
-						type = opt.returnTypes[j];
-						nid = type + '_' + values[i];
-						if (node = cache[nid]) {
+					for (var j = 0; j < types.length; j++) {
+						type = types[j];
+						nid = (type ? type + '_' : '') + values[i];
+						if (node = cache.nodes[nid]) {
 							nodes.push(node);
 						}
 					}
@@ -1184,16 +1192,49 @@
 			getSearchCache: function (tree) {
 				return Cache.search['oui-search-' + tree.id] || {};
 			},
-			searchNodes: function (tree, txt) {
+			gotoCurent: function (tree) {
+				var cache = tree.cache.current,
+					opt = tree.options,
+					node = cache.selected;
+
+				if (opt.showCheck) {
+					var css = 'span.check-true:not(.check-part-true)',
+						checks = tree.panel.querySelectorAll(css),
+						c = checks.length, i, nid,
+						idx = Cache.checks[tree.id] || 0;
+
+					if (idx >= c) {
+						idx = 0;
+					}
+					for (i = idx; i < c; i++) {
+						nid = $.getAttribute(checks[i], 'nid');
+						if (node = Factory.getNode(tree, nid)) {
+							break;
+						}
+					}
+					Cache.checks[tree.id] = idx + 1;
+				}
+				if (node) {
+					node.position();
+				}
+				return this;
+			},
+			searchNodes: function (tree, txt, elem) {
 				var nodes = [], 
 					opt = tree.options,
 					cfg = Factory.getSearchCache(tree),
-					key = txt.value.trim();
+					key = txt.value.trim(), node;
 
 				if (!$.isString(key, true)) {
-					Factory.setSearchCache(tree, { key: '', search: false });
-					return Factory.showSearchPanel(tree, false);
+					Factory.setSearchCache(tree, { key: '', search: false })
+						.showSearchPanel(tree, false)
+						.gotoCurent(tree);
+
+					return this;
 				}
+
+				Cache.checks[tree.id] = 0;
+
 				if (cfg.key === key) {
 					return Factory.showSearchPanel(tree, true);
 				}
@@ -1308,7 +1349,6 @@
 				}
 				var val = elem.value.trim(),
 					nodes = Factory.findNodes(tree, val);
-				$.console.log('initTargetValue:', elem, val, nodes);
 
 				if (nodes.length > 0) {
 					for (var i = 0; i < nodes.length; i++) {
@@ -1573,7 +1613,7 @@
 					btn = box.querySelector('button.search');
 
 				$.addListener(btn, 'mousedown', function(ev) {
-					Factory.searchNodes(tree, txt);
+					Factory.searchNodes(tree, txt, this);
 				});
 				
 				$.addListener(txt, 'mousedown', function(ev) {
@@ -1582,7 +1622,7 @@
 				$.addListener(txt, 'keyup', function(ev) {
 					var kc = $.getKeyCode(ev);
 					if (kc === KC.Enter) {
-						Factory.searchNodes(tree, txt);
+						Factory.searchNodes(tree, txt, this);
 					}
 				});
 
