@@ -340,7 +340,7 @@
 			isDefaultSkin: function (skin) {
 				return !skin || skin === Config.DefaultSkin;
 			},
-			isDblclick: function (tree, node) {				
+			isDblclick: function (tree, node) {
 				var last = Cache.clicks[tree.id],
 					cur = {id: node.id, ts: new Date().getTime()};
 
@@ -414,9 +414,17 @@
 
 				return Cache.trees[key];
 			},
-			initCache: function (tree, par, force) {
-				var tid = tree.tid || Factory.buildTreeId(tree.id);
-				var opt = tree.options,
+			initCache: function (tree, force) {
+				var tid = tree.tid || Factory.buildTreeId(tree.id),
+					opt = tree.options,
+					par = {
+						dynamic: opt.dynamic,
+						dynamicTypes: opt.dynamicTypes,
+						dynamicDatas: opt.dynamicDatas,
+						leaf: opt.leaf,
+						leafTypes: opt.leafTypes,
+						returnTypes: opt.returnTypes
+					},
 					pa = $.extend({}, par),
 					pc = Cache.caches[tid],
 					store = {
@@ -1953,9 +1961,8 @@
 				if (!opt.data || (!$.isArray(opt.data) && !$.isObject(opt.data))) {
 					if ($.isFunction(opt.data)) {
 						var func = function (data) {
-							opt.data = data;
 							if ($.isArray(data) || $.isObject(data)) {
-								_build(opt);
+								_build(opt, data);
 							}
 						};
 						if (Factory.isPromise()) {
@@ -1966,12 +1973,12 @@
 					}
 					return this;
 				} else {
-					_build(opt);
+					_build(opt, opt.data);
 				}
 
-				function _build (opt) {
-					if ($.isArray(opt.data)) {
-						Factory.buildItem(tree, root, opt.data);
+				function _build (opt, data) {
+					if ($.isArray(data)) {
+						Factory.buildItem(tree, root, data);
 					} else {
 						//数据结构注解，用于多种类型节点
 						var dts = opt.trees, p = {};
@@ -1981,7 +1988,7 @@
 							//遍历数据结构注解，并按顺序指定上下级关系
 							for (k = 0; k < dts.length; k++) {
 								t = dts[k];
-								list = opt.data[t.key];
+								list = data[t.key];
 								p = {type: t.type, ptype: t.ptype, iconType: t.icon || t.type};
 								if ($.isArray(list)) {
 									if (Factory.isDynamicData(tree, p.type)) {
@@ -1993,9 +2000,9 @@
 							}
 						} else {
 							//遍历参数字段，并获取第1个数组字段
-							for (var k in opt.data) {
-								if ($.isArray(opt.data[k])) {
-									Factory.buildItem(tree, root, opt.data[k]);
+							for (var k in data) {
+								if ($.isArray(data[k])) {
+									Factory.buildItem(tree, root, data[k]);
 									break;
 								}
 							}
@@ -2020,6 +2027,13 @@
 					Factory.initTargetValue(tree).completeCallback(tree);
 				}
 				
+				return this;
+			},
+			reloadNode: function (tree) {
+				//仅用于data为function，即动态加载数据
+				if ($.isFunction(tree.options.data)) {
+					Factory.initCache(tree, true).buildPanel(tree, {}, true);
+				}
 				return this;
 			},
 			addNode: function (tree, items, par, dest, insert) {
@@ -3718,14 +3732,7 @@
 				return this;
 			}
 
-			Factory.initCache(this, {
-				dynamic: opt.dynamic,
-				dynamicTypes: opt.dynamicTypes,
-				dynamicDatas: opt.dynamicDatas,
-				leaf: opt.leaf,
-				leafTypes: opt.leafTypes,
-				returnTypes: opt.returnTypes
-			}, true)
+			Factory.initCache(this, true)
 				.setWindowResize()
 				.showSearchPanel(this, false, true)
 				.setDefaultValue(this, {value: opt.defaultValue});
@@ -3751,10 +3758,17 @@
 			return Factory.setBoxDisplay(this, $.isBoolean(show, true)), this;
 		},
 		hide: function () {
-			return Factory.setBoxDisplay(this, false), this;
+			var that = this;
+			return Factory.setBoxDisplay(that, false), that;
 		},
 		resize: function () {
-			return Factory.setPanelSize(this), this;
+			var that = this;
+			return Factory.setPanelSize(that), that;
+		},
+		//仅用于动态加载数据时有效
+		reload: function () {
+			var that = this;			
+			return Factory.reloadNode(that), that;
 		},
 		nid: function (id, type) {
 			return Factory.buildNodeId(id, type);
