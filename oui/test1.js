@@ -2034,7 +2034,8 @@ var names =  [
             '个相关的结果',
             '没有找到相关的结果',
             '搜索',
-            '请输入名称关键字'
+            '请输入名称关键字',
+            '取消'
             ];;
         for(var i =0; i<names.length;i++){
             console.log('//', names[i], names[i].toUnicode());
@@ -2049,3 +2050,12 @@ var names =  [
         }
 
         $.console.log(isempty({}));
+
+
+var str = '宁中波是中国浙江省的一个城市';
+
+
+$.console.log($.replaceKeys(str, ['宁中波', '中'], true));
+$.console.log($.replaceKeys(str, ['宁中波', '中'], '<b>', '</b>', '大'));
+$.console.log(str.replaceKeys(['宁中波', '中'], '<b>', '</b>', '小'));
+$.console.log($.replaceKeys(str, ['宁中波', '中'], true));

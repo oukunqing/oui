@@ -1113,7 +1113,36 @@
                 }
             }
             return ini.join('\r\n');
-        },        
+        },
+        replaceKeys = function (str, keys, prefix, postfix, clear) {
+            if (!$.isArray(keys)) {
+                keys = [keys.toString()];
+            }
+            var dic = {}, c = keys.length, i, pattern = [], fixed = '';
+            if ($.isBoolean(prefix, false)) {
+                clear = prefix;
+            } else if (!$.isBoolean(clear)) {
+                if ($.isString(clear) || $.isNumber(clear)) {
+                    fixed = clear.toString();
+                }
+                if (!$.isString(prefix) && !$.isNumber(prefix)) {
+                    prefix = '';
+                }
+                if (!$.isString(postfix) && !$.isNumber(postfix)) {
+                    postfix = '';
+                }
+                clear = false;
+            }
+            for (i = 0; i < c; i++) {
+                dic[keys[i].toString()] = keys[i];
+                pattern.push(keys[i]);
+            }
+            pattern = new RegExp('(' + pattern.join('|') + ')', 'ig');
+            
+            return str.replace(pattern, function (all, t) { 
+                return clear ? '' : prefix + (fixed || dic[t]) + postfix; 
+            });
+        },
         buildTreeList = function (options) {
             var list = [], node = {}, 
                 items = $.isArray(options) ? options : [options];
@@ -1260,6 +1289,7 @@
         toInteger: toInteger, toInt: toInteger, toNumber: toNumber, 
         toNumberList: toNumberList, toIdList: toIdList, toIntList: toIntList,
         toBoolean: toBoolean, toBool: toBoolean, iniToJson: iniToJson, jsonToIni: jsonToIni, toIniJson: toIniJson,
+        replaceKeys: replaceKeys,
         containsKey: containsKey, containsValue: containsValue, contains: contains, distinctList: distinctList,
         collapseNumberList: collapseNumberList, expandNumberList: expandNumberList,
         collapseNumbers: collapseNumberList, expandNumbers: expandNumberList,
@@ -2355,6 +2385,9 @@
         },
         cleanSlash: function() {
             return $.cleanSlash(this);
+        },
+        replaceKeys: function (keys, prefix, postfix, clear) {
+            return $.replaceKeys(this, keys, prefix, postfix, clear);
         },
         setQueryString: function (data, value, nocache) {
             return $.setQueryString(this, data, value, nocache);

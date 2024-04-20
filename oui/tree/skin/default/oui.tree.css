@@ -197,7 +197,12 @@
 	background-position-y: -100px;
 }
 
-.oui-tree ul.hide,.oui-tree li.hide,.oui-tree span.hide{display:none;}
+.oui-tree-box ul.hide,
+.oui-tree-box li.hide,
+.oui-tree-box span.hide,
+.oui-tree-box button.hide{
+	display:none;
+}
 
 
 /*用于拖动节点*/
@@ -320,31 +325,45 @@
 	outline: none;
 }
 
-.oui-tree-form .search {
+.oui-tree-form .btn {
 	width:25px;height:25px;
 	position: absolute;
 	cursor: pointer;
 	top: 2px;
-	right: 7px;
 	border:solid 1px #f00;
 	border: none;
 	outline: none;
 	margin: 5px 0 0 0;
 	padding: 0;
+	border-radius: 4px;
+}
+
+.oui-tree-form .btn-search {
+	right: 7px;
 	background:transparent url("imgs/tree.png") no-repeat -275px -25px;
 }
-.oui-tree-form .search:hover {
+.oui-tree-form .btn-search:hover {
 	background-position-y: -50px;
+}
+.oui-tree-form .btn-cancel {
+	right: 32px;
+	opacity: 0.9;
+	background:#fff url("imgs/tree.png") no-repeat -50px -75px;
+}
+.oui-tree-form .btn-cancel:hover {
+	background:#fff url("imgs/tree.png") no-repeat -50px -100px;
 }
 
 .oui-tree-form .keywords {
 	height: 30px;
-	line-height: 28px;
+	line-height: 26px;
 	outline: none;
 	padding: 0 30px 0 7px;
 	border: solid 1px #ccc;
 	box-sizing: border-box;
 	border-radius: 4px;
+	font-size: 14px;
+	font-family: Arial,宋体,微软雅黑;
 }
 .oui-tree-form .keywords:hover {
 	border-color: #66afe9;
@@ -434,7 +453,6 @@
 .oui-tree-box .search-result-panel .search-title .ots-title{
 	
 }
-.oui-tree-box .search-result-panel .search-title .ots-clear,
 .oui-tree-box .search-result-panel .search-title .ots-close {
 	font-size: 14px; font-family: 宋体,微软雅黑;
 	color: #000;
@@ -543,11 +561,17 @@
 	font-family: Arial,宋体;
   	border-radius: 5px;
   	cursor: pointer;
+  	outline: none;
 }
 .oui-tree-bottom .btn:hover,
 .oui-tree-bottom .btn-default:hover {
 	background: #e6e6e6;
 	border: solid 1px #adadad;
+  	outline: none;
+}
+
+.oui-tree-bottom .btn:focus{
+  	outline: none;
 }
 
 .oui-tree-bottom .btn-primary {

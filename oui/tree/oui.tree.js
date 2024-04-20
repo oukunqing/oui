@@ -56,6 +56,8 @@
 			SearchResultBoxHeight: 390, 	//12 * 30 + 30
 			SearchResultItemHeight: 30,
 			SearchResultTitleHeight: 30,
+			//搜索框字符长度限制
+			SearchKeywordsLength: 128,
 			//“返回顶部”图标停留时长，单位：毫秒，0表示不限制时间
 			GotoTopButtonKeepTimes: 10 * 1000,
 
@@ -696,6 +698,10 @@
 				opt.showSearch = $.isBoolean($.getParam(opt, 'showSearch,showForm,showsearch'), opt.target ? true : false);
 				opt.searchText = $.getParam(opt, 'searchText,searchtext');
 				opt.searchPrompt = $.getParam(opt, 'searchPrompt,searchPlaceholder');
+				opt.keywordsLength = parseInt($.getParam(opt, 'keywordsLength,searchLength,maxlength'), 10);
+				if (isNaN(opt.keywordsLength) && opt.keywordsLength <= 0) {
+					opt.keywordsLength = Config.SearchKeywordsLength;
+				}
 				opt.searchCallback = $.getParam(opt, 'searchCallback');
 
 				opt.statusField = $.getParam(opt, 'statusField', 'status');
@@ -1230,29 +1236,37 @@
 						.showSearchPanel(tree, false)
 						.gotoCurent(tree);
 
+					$.setElemClass(cfg.no, 'hide', true);
+
 					return this;
 				}
-
 				Cache.checks[tree.id] = 0;
+
+				$.setElemClass(cfg.no, 'hide', false);
 
 				if (cfg.key === key) {
 					return Factory.showSearchPanel(tree, true);
 				}
+
+				var keys = key.split(/[\s,;|]/), c = keys.length, i;
+
 				if ($.isFunction(opt.searchCallback)) {
-					opt.searchCallback(tree, key, function (tree, results) {
+					opt.searchCallback(tree, keys, function (tree, results) {
 						nodes = $.extend([], results);
 					});
 				} else {
 					for (var k in tree.cache.nodes) {
 						var n = tree.cache.nodes[k];
-						if (n.data.name.indexOf(key) > -1) {
-							nodes.push(n);
+						for (i = 0; i < c; i++) {
+							if (n.data.name.indexOf(keys[i]) > -1) {
+								nodes.push(n);
+							}
 						}
 					}
 				}
 				Factory.setSearchCache(tree, { key: key, elem: txt, search: true, nodes: nodes });
 
-				return Factory.showSearchResult(tree, nodes, key);
+				return Factory.showSearchResult(tree, nodes, keys);
 			},
 			buildTargetEvent: function (tree, opt) {
 				if (!tree.target) {
@@ -1596,11 +1610,13 @@
 					'<input type="text" class="keywords oui-tree-keywords" placeholder="', 
 					//opt.searchPrompt || '请输入关键字',
 					opt.searchPrompt || '\u8bf7\u8f93\u5165\u5173\u952e\u5b57',
-					'" />',
+					'" maxlength="', opt.keywordsLength, '" />',
 					//搜索
 					//'<button class="search oui-tree-search" title="', opt.searchText || '\u641c\u7d22', '"></button>',
 					//查找
-					'<button class="search oui-tree-search" title="', opt.searchText || '\u67e5\u627e', '"></button>'
+					'<button class="btn btn-search oui-tree-search" title="', opt.searchText || '\u67e5\u627e', '"></button>',
+					//取消
+					'<button class="btn btn-cancel oui-tree-cancel hide" title="', '\u53d6\u6d88', '"></button>'
 				].join('');
 
 				if (first) {
@@ -1610,10 +1626,16 @@
 				}
 
 				var txt = box.querySelector('input.keywords'),
-					btn = box.querySelector('button.search');
+					btn = box.querySelector('button.btn-search'),
+					no = box.querySelector('button.btn-cancel');
 
 				$.addListener(btn, 'mousedown', function(ev) {
 					Factory.searchNodes(tree, txt, this);
+				});
+				$.addListener(no, 'mousedown', function(ev) {
+					Factory.showSearchPanel(tree, false, true);
+					txt.value = '';
+					$.setElemClass(no, 'hide', true);
 				});
 				
 				$.addListener(txt, 'mousedown', function(ev) {
@@ -1625,8 +1647,15 @@
 						Factory.searchNodes(tree, txt, this);
 					}
 				});
+				$.addListener(txt, 'blur', function(ev) {
+					if (txt.value.trim()) {
+						$.setElemClass(no, 'hide', false);
+					} else {
+						$.setElemClass(no, 'hide', true);
+					}
+				});
 
-				Factory.setSearchCache(tree, { form: div, elem: txt, btn: btn });
+				Factory.setSearchCache(tree, { form: div, elem: txt, btn: btn, no: no });
 
 				return this;
 			},
@@ -1706,6 +1735,7 @@
 				if (!$.isBoolean(show, true) && force) {
 					if (cfg && cfg.elem) {
 						cfg.elem.value = '';
+						$.setElemClass(cfg.no, 'hide', true);
 					}
 					Factory.setSearchCache(tree, { search: false, key: '' });
 				}
@@ -1720,20 +1750,18 @@
 				}
 				return this;
 			},
-			showSearchResult: function (tree, nodes, key) {
+			showSearchResult: function (tree, nodes, keys) {
 				var div = tree.box.querySelector('div.search-result-panel'),
 					show = nodes ? true : undefined, elems,
-					i, c = nodes.length, node, html = [];
+					i, c = nodes.length, node, text, html = [];
 
 				if (!div) {
 					div = document.createElement('div');
 					div.className = 'search-result-panel';
 					div.innerHTML = [
-						'<div class="search-title">', 
+						'<div class="search-title">',
 						'<span class="ots-title"></span>',
 						'<span class="ots-close">\u5173\u95ed</span>',		//关闭
-						'<i>|</i>',
-						'<span class="ots-clear">\u6e05\u9664</span>',		//清除
 						'</div>',
 						'<div class="search-list"></div>'
 					].join('');
@@ -1743,9 +1771,6 @@
 
 					$.addListener(elems[0].childNodes[1], 'click', function(ev) {
 						Factory.showSearchPanel(tree, false);
-					});
-					$.addListener(elems[0].childNodes[3], 'click', function(ev) {
-						Factory.showSearchPanel(tree, false, true);
 					});
 
 					tree.box.appendChild(div);
@@ -1773,15 +1798,16 @@
 				html.push('<ul>');
 				for (var i = 0; i < c; i++) {
 					node = nodes[i], css = ['icon'];
+					text = (node.data.name || node.data.text).toString();
 					if (skin && node.type) {
 						css.push(node.type);
 					} else if (node.isLeaf()) {
 						css.push('icon-page');
 					}
 					html.push([
-						'<li nid="', node.id, '" title="', node.data.name, '">',
+						'<li nid="', node.id, '" title="', text.escapeHtml(), '">',
 						'<span class="', css.join(' '), '"></span>',
-						node.data.name.replace(key, '<b>' + key + '</b>'),
+						text.replaceKeys(keys, '<b>', '</b>'),
 						'</li>'
 					].join(''));
 				}
@@ -1795,11 +1821,15 @@
 						'\u627e\u5230<b>' + c + '</b>\u4e2a\u7ed3\u679c' 
 						: '\u6ca1\u6709\u627e\u5230\u7ed3\u679c',
 					max = Config.SearchResultBoxHeight,
+					panelHeight = tree.panel.offsetHeight,
 					display = $.isBoolean(show, div.style.display === 'none');
 
 				if (height > max) {
 					height = max;
+				} else if (height > panelHeight) {
+					height = panelHeight;
 				}
+
 				div.style.height = height + 'px';
 				elems = div.childNodes;
 				elems[1].style.height = (height - Config.SearchResultTitleHeight) + 'px';
@@ -3618,6 +3648,8 @@
 				searchText: undefined,
 				//搜索输入框文字提示
 				searchPrompt: undefined,
+				//搜索框文字长度限制，默认长度限制128个字符（不区分中英文）
+				keywordsLength: undefined,
 				//搜索回调（用于复杂搜索，内部搜索只搜索名称关键字）
 				searchCallback: undefined,
 				//是否显示底部栏
