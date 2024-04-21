@@ -2035,7 +2035,9 @@ var names =  [
             '没有找到相关的结果',
             '搜索',
             '请输入名称关键字',
-            '取消'
+            '取消',
+            '确定',
+            '还原',
             ];;
         for(var i =0; i<names.length;i++){
             console.log('//', names[i], names[i].toUnicode());

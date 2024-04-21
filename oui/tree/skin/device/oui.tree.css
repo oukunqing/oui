@@ -1,18 +1,20 @@
-.oui-tree-device li .item span.switch{background:transparent url("imgs/tree-device.png?1") no-repeat 0 0;}
-.oui-tree-device li .item span.switch-open {background:url("imgs/tree-device.png?1") no-repeat -25px 0;}
 
-.oui-tree-device li .item span.switch-device,
-.oui-tree-device li .item span.switch-device:hover {background:transparent url("imgs/tree-device.png?1") no-repeat -50px 0;}
-.oui-tree-device li .item span.switch-device-open,
-.oui-tree-device li .item span.switch-device-open:hover {background:url("imgs/tree-device.png?1") no-repeat -75px 0;}
+.oui-tree-device li .item .switch-device,
+.oui-tree-device li .item .switch-device-close,
+.oui-tree-device li .item .switch-device:hover,
+.oui-tree-device li .item .switch-device-close:hover {background:transparent url("imgs/tree-device.png?1") no-repeat -50px 0;}
+.oui-tree-device li .item .switch-device-open,
+.oui-tree-device li .item .switch-device-open:hover {background:url("imgs/tree-device.png?1") no-repeat -75px 0;}
 
-.oui-tree-device li .item span.switch-arrow {background:transparent url("imgs/tree-device.png?1") no-repeat -100px 0;}
-.oui-tree-device li .item span.switch-arrow-open {background:transparent url("imgs/tree-device.png?1") no-repeat -125px 0;}
-.oui-tree-device li .item span.switch-arrow:hover {background:transparent url("imgs/tree-device.png?1") no-repeat -150px 0;}
-.oui-tree-device li .item span.switch-arrow-open:hover {background:transparent url("imgs/tree-device.png?1") no-repeat -175px 0;}
+.oui-tree-device li .item .switch-arrow,
+.oui-tree-device li .item .switch-arrow-close {background:transparent url("imgs/tree-device.png?1") no-repeat -100px 0;}
+.oui-tree-device li .item .switch-arrow-open {background:transparent url("imgs/tree-device.png?1") no-repeat -125px 0;}
+.oui-tree-device li .item .switch-arrow:hover,
+.oui-tree-device li .item .switch-arrow-close:hover {background:transparent url("imgs/tree-device.png?1") no-repeat -150px 0;}
+.oui-tree-device li .item .switch-arrow-open:hover {background:transparent url("imgs/tree-device.png?1") no-repeat -175px 0;}
 
-.oui-tree-device li .item span.switch-none {background:none;}
-.oui-tree-device li .item span.switch-none:hover {background:none;}
+.oui-tree-device li .item .switch-none {background:none;}
+.oui-tree-device li .item .switch-none:hover {background:none;}
 
 .oui-tree li .item span.unit,
 .oui-tree-device li .item span.unit{background:url("imgs/tree-device.png?1") no-repeat 0 -25px;}
@@ -78,3 +80,44 @@
 .oui-tree-box .search-result-panel li span.device{background:url("imgs/tree-device.png?1") no-repeat -50px -25px;}
 .oui-tree-box .search-result-panel li span.camera{background:url("imgs/tree-device.png?1") no-repeat -150px -25px;}
 .oui-tree-box .search-result-panel li span.preset-off{background:url("imgs/tree-device.png?1") no-repeat -225px -25px;}
+
+
+.oui-tree-line ul.line {
+	background: url("imgs/line.png") repeat-y 0;
+}
+
+.oui-tree-line li .item .node-close,
+.oui-tree-line li .item .node-close:hover {
+	background: url("imgs/tree-device.png") no-repeat 0px -125px;
+}
+.oui-tree-line li .item .node-open,
+.oui-tree-line li .item .node-open:hover {
+	background: url("imgs/tree-device.png") no-repeat -25px -125px;
+}
+
+.oui-tree-line li .item .switch-close,
+.oui-tree-line li .item .switch-close:hover {
+	background: url("imgs/tree-device.png") no-repeat -100px -125px;
+}
+.oui-tree-line li .item .switch-open,
+.oui-tree-line li .item .switch-open:hover {
+	background: url("imgs/tree-device.png") no-repeat -125px -125px;
+}
+
+.oui-tree-line li .item .last-close,
+.oui-tree-line li .item .last-close:hover {
+	background: url("imgs/tree-device.png") no-repeat -150px -125px;
+}
+.oui-tree-line li .item .last-open,
+.oui-tree-line li .item .last-open:hover {
+	background: url("imgs/tree-device.png") no-repeat -175px -125px;
+}
+
+.oui-tree-line li .item .switch-none,
+.oui-tree-line li .item .switch-none:hover {
+	background: url("imgs/tree-device.png") no-repeat -225px -125px;
+}
+.oui-tree-line li .item .last-none,
+.oui-tree-line li .item .last-none:hover {
+	background: url("imgs/tree-device.png") no-repeat -250px -125px;
+}

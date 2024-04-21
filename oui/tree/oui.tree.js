@@ -678,6 +678,7 @@
 
 				opt.showType = $.isBoolean($.getParam(opt, 'showType,showtype'), true);
 				opt.showStatus = $.isBoolean($.getParam(opt, 'showStatus,showstatus'), true);
+				opt.showLine = $.isBoolean($.getParam(opt, 'showLine,showline'), false);
 				opt.showIcon = $.isBoolean($.getParam(opt, 'showIcon,showicon'), true);
 
 				var showCheck = $.getParam(opt, 'showCheck,showcheck,checkbox');
@@ -1577,6 +1578,9 @@
 					css += ' oui-tree-';
 					css += opt.skin;
 				}
+				if (opt.showLine) {
+					css += ' oui-tree-line';
+				}
 				return css;
 			},
 			setPanelClass: function (div, opt) {
@@ -1620,11 +1624,11 @@
 					opt.searchPrompt || '\u8bf7\u8f93\u5165\u5173\u952e\u5b57',
 					'" maxlength="', opt.keywordsLength, '" />',
 					//搜索
-					//'<button class="search oui-tree-search" title="', opt.searchText || '\u641c\u7d22', '"></button>',
+					//'<a class="search oui-tree-search" title="', opt.searchText || '\u641c\u7d22', '"></a>',
 					//查找
-					'<button class="btn btn-search oui-tree-search" title="', opt.searchText || '\u67e5\u627e', '"></button>',
+					'<a class="btn btn-search oui-tree-search" title="', opt.searchText || '\u67e5\u627e', '"></a>',
 					//取消
-					'<button class="btn btn-cancel oui-tree-cancel hide" title="', '\u53d6\u6d88', '"></button>'
+					'<a class="btn btn-cancel oui-tree-cancel hide" title="', '\u53d6\u6d88', '"></a>'
 				].join('');
 
 				if (first) {
@@ -1634,8 +1638,8 @@
 				}
 
 				var txt = box.querySelector('input.keywords'),
-					btn = box.querySelector('button.btn-search'),
-					no = box.querySelector('button.btn-cancel');
+					btn = box.querySelector('a.btn-search'),
+					no = box.querySelector('a.btn-cancel');
 
 				$.addListener(btn, 'mousedown', function(ev) {
 					Factory.searchNodes(tree, txt, this);
@@ -1696,9 +1700,9 @@
 				div.style.cssText = ['text-align:', opt.bottomAlign, ';'].join('');
 
 				div.innerHTML = [
-					'<button class="btn btn-return btn-primary">确定</button>',
-					'<button class="btn btn-cancel">取消</button>',
-					'<button class="btn btn-origin">还原</button>',
+					'<a class="btn btn-return btn-primary">\u786e\u5b9a</a>',	//确定
+					'<a class="btn btn-cancel">\u53d6\u6d88</a>',				//取消
+					'<a class="btn btn-origin">\u8fd8\u539f</a>'				//还原
 				].join('');
 
 				box.appendChild(tree.bottom = div);
@@ -1919,9 +1923,6 @@
 					div.innerHTML = '';
 				}
 
-				Factory.showSearchForm(tree).showBottomForm(tree)
-					.setPanelClass(div, opt).setPanelSize(that);
-
 				tag = that.element.tagName.toLowerCase();
 
 				if (opt.trigger || tag.inArray(['input', 'select', 'button', 'a'])) {
@@ -1940,6 +1941,10 @@
 						Factory.buildNode(tree, opt);
 					}
 				}
+
+				Factory.showSearchForm(tree).showBottomForm(tree)
+					.setPanelClass(div, opt).setPanelSize(that);
+
 				return this;
 			},
 			buildRootNode: function (tree, root, elem, fragment) {
@@ -2108,12 +2113,15 @@
 				var src = node.parent;
 				if (Factory.isNode(dest) && node !== dest) {
 					if (src !== dest) {
-						dest.addChild(node, sibling).setExpandClass();
+						dest.addChild(node, sibling).setSwitchClass();
 						node.setParent(dest).updateLevel(dest.getLevel() + 1);
-						src.deleteChildData(node).setBoxDisplay().setExpandClass().updateCount();
+						src.deleteChildData(node).setBoxDisplay().setSwitchClass().updateCount();
+						src.setChildSwitchClass();
+						dest.setChildSwitchClass();
 					} else if (Factory.isNode(sibling) && !sibling.root) {
 						dest.childbox.insertBefore(node.element, sibling.element);
 						dest.setChild(node, sibling, 2);
+						src.setChildSwitchClass();
 					}
 				}
 				return this;
@@ -2148,6 +2156,8 @@
 				}
 				parent.childs.splice(src, 1);
 				parent.childs.splice(dest, 0, node);
+
+				parent.setChildSwitchClass();
 
 				function _callback(node, num, idx) {
 					if ($.isFunction(callback)) {
@@ -2261,8 +2271,8 @@
 					info = Factory.buildInfo(tree, p, opt),
 					html = [
 						'<div class="item" nid="', p.nid, '">',
-						'<span class="', node.getSwitchClass(), '" nid="', p.nid, '"></span>'
-					].concat(check).concat(icon).concat([
+						'<span class="', node.getSwitchClass(true), '" nid="', p.nid, '"></span>'
+					].concat(icon).concat(check).concat([
 						'<a class="name" nid="', p.nid, '"', title, '>',
 						'<span class="text" nid="', p.nid, '">', p.text, '</span>'
 					]).concat(count).concat(desc).concat([
@@ -2400,15 +2410,15 @@
 						//(动态加载 或者 已展开)，需要设置节点展开状态
 						//目的是为了收缩或隐藏节点“展开/收缩”图标
 						if (node.dynamic || node.isExpanded()) {
-							node.setExpandClass(expanded = true);
+							node.setExpandStatus(expanded = true);
 						}
 					}
 					if (!expanded) {
-						node.setExpandClass(true);
+						node.setExpandStatus(true);
 					}
 					if (!initial) {
 						if (node.parent && !dic[node.parent.id]) {
-							node.parent.setExpandClass(false);
+							node.parent.setExpandStatus(false);
 							dic[node.parent.id] = 1;
 						}
 					}
@@ -3019,8 +3029,8 @@
 			if ($.isBoolean(removeElem, true)) {
 				//删除节点DOM元素
 				$.removeElement(that.element);
-
-				parent.checkCollapse();
+				parent.deleteChildData(that);
+				parent.checkCollapse().setChildSwitchClass();
 			}
 			return that;
 		},
@@ -3057,7 +3067,7 @@
 				childs[0].move(destNode, insert);
 				c--;
 			}
-			return that;
+			return that.setChildSwitchClass();
 		},
 		move: function (destNode, insert) {
 			var that = this.self(), dest, sibling;
@@ -3224,7 +3234,7 @@
 				collapsed = that.childs.length <= 0;
 
 			if (collapsed) {
-				that.setParam('expanded', false).setExpandClass();
+				that.setParam('expanded', false).setSwitchClass();
 			}
 			return that;
 		},
@@ -3259,7 +3269,7 @@
 					that.loaded++;
 				}
 			}
-			that.setParam('expanded', expanded).setExpandClass();
+			that.setParam('expanded', expanded).setSwitchClass();
 
 			//鼠标点击的展开/收缩才保存到cookie，如果是模拟的则不保存
 			if (ev && ev.target && ev.target.tagName) {
@@ -3304,19 +3314,6 @@
 		},
 		check: function (checked) {
 			return this.self().setChecked($.isBoolean(checked, true));
-		},
-		getSwitchClass: function () {
-			var that = this.self(),
-				opt = that.tree.options,
-				css = ['switch'];
-
-			if (opt.switch) {
-				css.push('switch' + opt.switch);
-			}
-			if (!that.isLeaf() && that.isExpand()) {
-				css.push('switch' + opt.switch + '-open');
-			}
-			return css.join(' ');
 		},
 		getIconClass: function () {
 			var that = this.self(),
@@ -3462,39 +3459,97 @@
 			//TODO:
 			return that;
 		},
-		setExpandClass: function (initial) {
+		getSwitchClass: function (initial) {
 			var that = this.self(),
-				handle = that.getItem('switch'),
-				nochild = !that.hasChild(),
-				opt = that.tree.options;
+				opt = that.tree.options,
+				css = ['switch'],
+				key = 'switch';
+
+			if (opt.switch) {
+				css.push(key + opt.switch);
+			}
+			if (!that.isLeaf()) {
+				css.push(key + opt.switch + (that.isExpand() ? '-open' : '-close'));
+			}
+
+			return css.join(' ');
+		},
+		setExpandStatus: function (initial) {
+			var that = this.self(),
+				opt = that.tree.options,
+				leaf = that.isLeaf(),
+				nochild = !that.hasChild();
 
 			//虽然被指定为叶子节点类型，但当前已经有子节点加入，那就不能再算是叶子节点了
-			if (that.isLeaf() && nochild) {
+			if (leaf && nochild) {
 				that.setParam('expanded', false);
-				$.setElemClass(handle, 'switch-none', true);
 			} else {
 				if (nochild) {
 					if (!that.isDynamic()) {
 						that.setParam('expanded', false);
-						$.setElemClass(handle, 'switch-none', true);
 					} else if (that.isExpanded() && !that.loaded) {
 						that.setParam('expanded', false);
 					}
-				} else {
-					$.setElemClass(handle, 'switch-none', false);
-					if (opt.switch) {
-						$.setElemClass(handle, 'switch' + opt.switch, true);
-					}
 				}
-				$.setElemClass(handle, 'switch' + opt.switch + '-open', that.isExpanded());
 			}
-			/*
-			if (!that.expanded) {
-				if (that.childbox && that.childbox.className.indexOf('hide') < 0) {
-					$.setElemClass(that.childbox, 'hide', true);
+			return that.setSwitchClass();
+		},
+		setSwitchClass: function () {
+			var that = this.self(),
+				opt = that.tree.options,
+				handle = that.getItem('switch'),
+				css = ['switch'],
+				open = that.expanded,
+				leaf = that.isLeaf(),
+				nochild = !that.hasChild(),
+				none = false,
+				close = '-close';
+
+			if (!handle) {
+				return that.setIconClass();
+			}
+			if (nochild && (leaf || !that.isDynamic())) {
+				close = '-none';
+				none = true;
+			}
+
+			if (that.tree.options.showLine) {
+				var siblings = that.parent.childs,
+					c = siblings.length,
+					last = siblings[c - 1].id === that.id,
+					first = siblings[0].id === that.id;
+
+				if (first && last) {
+					if (that.level === 0) {
+						//only one
+						css.push(open ? 'node-open' : 'node' + close);
+					} else {
+						css.push(open ? 'last-open' : 'last' + close);
+					}
+				} else if (last) {
+					css.push(open ? 'last-open' : 'last' + close);
+				} else {
+					css.push(open ? 'switch-open' : 'switch' + close);
 				}
-			}*/			
+				$.setElemClass(that.childbox, 'line', !last);
+			} else {
+				if (none) {
+					css.push('switch-none');
+				} else {
+					css.push('switch' + (opt.switch) + (open ? '-open' : close));
+				}
+			}
+			handle.className = css.join(' ');
+
 			return that.setIconClass();
+		},
+		setChildSwitchClass: function () {
+			var that = this.self(), node,
+				c = that.childs.length, i;
+			for (i = 0; i < c; i++) {
+				node = that.childs[i].setSwitchClass();				
+			}
+			return that;
 		},
 		setCheckedClass: function () {
 			var that = this.self(),
@@ -3513,7 +3568,7 @@
 			var that = this.self();
 			switch(type) {
 				case 'check': that.setCheckedClass(); break;
-				case 'switch': that.setExpandClass(); break;
+				case 'switch': that.setSwitchClass(); break;
 			}
 			return that;
 		},
@@ -3628,6 +3683,8 @@
 				openTypes: undefined,
 				//指定默认要展开的节点层级
 				openLevel: undefined,
+				//是否显示连线
+				showLine: undefined,
 				//是否显示图标
 				showIcon: undefined,
 				//是否显示复选框

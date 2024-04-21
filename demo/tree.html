@@ -51,8 +51,8 @@
                 </select>
                 <span>Skin</span>
                 <select id="ddlSkin" style="font-size:14px;">
-                    <option value="default">Default</option>
-                    <option value="device" selected="selected">Device</option>
+                    <option value="default" selected="selected">Default</option>
+                    <option value="device">Device</option>
                     <option value="list">List</option>
                 </select>
                 <span>Switch</span>
@@ -62,13 +62,14 @@
                     <option value="arrow">Arrow</option>
                 </select>
                 <label class="chb-label"><input type="checkbox" id="chbCamera" checked="checked" /><span>动态加载通道</span></label>
+                <label class="chb-label"><input type="checkbox" id="chbDynamic" /><span>动态加载节点</span></label>
                 <div></div>
+                <label class="chb-label"><input type="checkbox" id="chbLine" /><span>显示连线</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbCheck" checked="checked" /><span>显示选框</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbIcon" checked="checked" /><span>显示图标</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbType" checked="checked" /><span>显示类型</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbStatus" checked="checked" /><span>显示状态</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbCount" checked="checked" /><span>显示数量</span></label>
-                <label class="chb-label"><input type="checkbox" id="chbDesc" checked="checked" /><span>显示备注</span></label>
                 <div></div>
                 <label class="chb-label"><input type="checkbox" id="chbSearch" checked="checked" /><span>显示搜索</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbTitle" checked="checked" /><span>显示标题</span></label>
@@ -83,6 +84,7 @@
                     <option value="center" selected="selected">居中</option>
                     <option value="right">右对齐</option>
                 </select>
+                <label class="chb-label"><input type="checkbox" id="chbDesc" checked="checked" /><span>显示备注</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbInfo" /><span>显示信息</span></label>
                 <div></div>
                 <label class="chb-label"><input type="checkbox" id="chbKeepStatus" /><span>保持状态</span></label>
@@ -356,6 +358,7 @@
             keepStatus = $('#chbKeepStatus').checked(),
             keepCookie = $('#chbKeepCookie').checked(),
             showCheck = $('#chbCheck').checked(),
+            showLine = $('#chbLine').checked(),
             showIcon = $('#chbIcon').checked(),
             showType = $('#chbType').checked(),
             showStatus = $('#chbStatus').checked(),
@@ -374,13 +377,14 @@
             clickExpand = $('#chbClickExpand').checked(),
             clickChecked = $('#chbClickChecked').checked(),
             dynamicCamera = $('#chbCamera').checked(),
+            dynamic = $('#chbDynamic').checked(),
             showScrollIcon = true;
 
             $.console.log('showStatus:', showStatus);
 
         if ($.isObject(data) && data.units) {
             data.units[0].desc = new Date().getTime();
-            data.units[0].showType = true;
+            //data.units[0].showType = true;
             //data.units[0].icon = {path: 'imgs/tree/area.png'};
         }
         $.tree(TreeId, {
@@ -394,15 +398,15 @@
             switch: switchIcon,
             leaf: true,
             leafType: 'camera',
-            dynamic: 3,
-            //dynamic: true,
+            //dynamic: 3,
+            dynamic: dynamic,
             //指定要动态加载子节点的数据类型
             dynamicTypes: ['device', 'camera'],
             //指定为被动态加载的数据类型
             dynamicDatas: dynamicCamera ? 'camera' : '',
             //指定可选中/返回的数据类型，若未指定，则所有都可返回
-            //returnTypes: ['unit', 'device', 'camera'],
-            returnTypes: ['device', 'camera'],
+            returnTypes: ['unit', 'device', 'camera'],
+            //returnTypes: ['device', 'camera'],
             //返回的数据值字段
             valueFields: ['type', 'id', 'code'],
             //默认值，用于还原
@@ -412,6 +416,7 @@
             openLevel: openLevel,
             //checkbox: true,
             showCheck: showCheck,
+            showLine: showLine,
             showIcon: showIcon,
             showType: showType,
             showStatus: showStatus,
@@ -464,7 +469,7 @@
                 $('#txt').html(html.concat([
                     'nodes:', tree.cache.count, ', level:', tree.cache.level, ', timeout:', tree.cache.timeout, 'ms'
                 ]).join(''));
-                
+                /*
                 window.setTimeout(function() {
                     tree.updateIcon('device_7280,device_7155', {status:'on'}, true);
                     tree.icon('device_7151', {status:'on'}, true);
@@ -488,7 +493,7 @@
                         //.position('unit_567', true)
                         //.collapse(2, 'unit');
                 }, 3000);
-                
+                */
 
                 //window.setTimeout(function() { tree.expandType('unit', true, true); }, 200);
                 //window.setTimeout(function() { tree.collapseType('device', true); }, 20);
@@ -512,6 +517,10 @@
                 } else {
                     cache['node'].self();
                 }
+
+                $.console.log('focus:', document.querySelector('.txt-focus'));
+
+                $('#txtNodeId').prop('value', node.id);
 
                 $.console.log('onclick', tree.id, ev, node, node.childs);
                 

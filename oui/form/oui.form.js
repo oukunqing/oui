@@ -396,13 +396,18 @@
                                 max = parseFloat($.getAttribute(element, customAttrs.MAX_VALUE, ''), 10);
                             }
 
-                            if ($.isNumeric(min) && $.isNumeric(max)) {
-                                msg = (messages.minMax || configs.messages.minMax).format(min, max, numType);
-                            } else if ($.isNumeric(min)) {
-                                msg = (messages.minValue || configs.messages.minValue).format(min, numType);
-                            } else if ($.isNumeric(max)) {
-                                msg = (messages.maxValue || configs.messages.maxValue).format(max, numType);
+                            if (element.tagName.toLowerCase() === 'select') {
+                                msg = (messages.select || messages.required || configs.messages.select).format(title);
+                            } else {
+                                if ($.isNumeric(min) && $.isNumeric(max)) {
+                                    msg = (messages.minMax || configs.messages.minMax).format(min, max, numType);
+                                } else if ($.isNumeric(min)) {
+                                    msg = (messages.minValue || configs.messages.minValue).format(min, numType);
+                                } else if ($.isNumeric(max)) {
+                                    msg = (messages.maxValue || configs.messages.maxValue).format(max, numType);
+                                }
                             }
+
                             //严格模式，需要验证输入的内容格式，比如验证是否是整数
                             if (strict) {
                                 //验证输入的(原始)内容是否是整数
