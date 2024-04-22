@@ -144,6 +144,10 @@
                     <input type="text" id="txtNodeId" class="txt" style="width:180px;" placeholder="是NodeId 不是DataId" />
                 </div>
                 <div style="padding:0 0 5px 0;" class="item">
+                    <button onclick="expand();">展开</button>
+                    <button onclick="collapse();">收缩</button>
+                    <button onclick="expand(true);">展开至</button>
+                    <button onclick="collapse(true);">收缩至</button>
                     <button onclick="position();">定位</button>
                     <button onclick="position(true);">定位并选中</button>
                     <button onclick="checked(true);">勾选</button>
@@ -221,7 +225,7 @@
         ]
     };
 
-    var currentInput;
+    var currentInput = $I('txtNodeId');
 
     window.onload = function () {
         $('#txtNodeId,#txtDestId').click(function (ev, i, obj) {
@@ -284,6 +288,15 @@
     function setWidth(rate) {
         $('#tree').width($('#tree').width() + 50 * rate);
         $.tree().resize();
+    }
+
+    function expand(linkage) {
+        var nid = $('#txtNodeId').val().trim();
+        $.tree(TreeId).expand(nid, linkage);
+    }
+    function collapse(linkage) {
+        var nid = $('#txtNodeId').val().trim();
+        $.tree(TreeId).collapse(nid, linkage);
     }
 
     function position(selected) {

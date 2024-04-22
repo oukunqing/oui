@@ -2077,10 +2077,12 @@
 					fragment = $.createFragment();
 					Factory.buildItem(tree, root, items, p, nodes, fragment).initStatus(tree, false, nodes);
 					if (insert) {
-						var sibling = dest, parent = dest;
+						var sibling = dest, parent = dest.parent;
 						parent.childbox.insertBefore(fragment, sibling);
+						parent.setSwitchClass().setChildSwitchClass();
 					} else {
 						dest.childbox.appendChild(fragment);
+						dest.setSwitchClass().setChildSwitchClass();
 					}
 				} else {
 					var data = _filter(tree, items, p), dr;
@@ -2145,7 +2147,7 @@
 						node.setParent(dest).updateLevel(dest.getLevel() + 1);
 						src.deleteChildData(node).setBoxDisplay().setSwitchClass().updateCount();
 						src.setChildSwitchClass();
-						dest.setChildSwitchClass();
+						dest.setSwitchClass().setChildSwitchClass();
 					} else if (Factory.isNode(sibling) && !sibling.root) {
 						dest.childbox.insertBefore(node.element, sibling.element);
 						dest.setChild(node, sibling, down ? 1 : 2);
@@ -2165,6 +2167,9 @@
 						childs[i].setParent(dest).updateLevel(dest.getLevel() + 1);
 						fragment.appendChild(childs[i].element);
 					}
+					if (!dest.childbox) {
+						dest.setBox(dest.buildBox());
+					}
 					if (sibling) {
 						dest.childs = node.childs.concat(dest.childs);
 						dest.childbox.insertBefore(fragment, sibling.element);
@@ -2173,7 +2178,7 @@
 						dest.childbox.appendChild(fragment);
 					}
 					node.deleteChildData().setBoxDisplay().setSwitchClass().updateCount();
-					dest.setChildSwitchClass().updateCount();
+					dest.setSwitchClass().setChildSwitchClass().updateCount();
 				}
 				return this;
 			},
@@ -2454,6 +2459,7 @@
 					var expanded = false;
 
 					if (!node.hasChild()) {
+						/*
 						//node.setParam('expanded', false);
 
 						//动态加载子节点，先创建子节点容器
@@ -2465,6 +2471,13 @@
 						//目的是为了收缩或隐藏节点“展开/收缩”图标
 						if (node.dynamic || node.isExpanded()) {
 							node.setExpandStatus(expanded = true);
+						}
+						*/
+						node.setParam('expanded', false);
+
+						//动态加载子节点，先创建子节点容器
+						if (node.dynamic) {
+							node.setBox(node.buildBox());
 						}
 					}
 					if (!expanded) {
@@ -3637,6 +3650,9 @@
 		setChildSwitchClass: function () {
 			var that = this.self(), node,
 				c = that.childs.length, i;
+			if (!that.tree.options.showLine) {
+				return that;
+			}
 			for (i = 0; i < c; i++) {
 				node = that.childs[i].setSwitchClass();				
 			}
