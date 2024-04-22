@@ -2126,6 +2126,29 @@
 				}
 				return this;
 			},
+			moveChildNode: function (tree, node, dest, sibling) {
+				if (Factory.isNode(dest) && node !== dest) {
+					var childs = node.childs, c = childs.length, i;
+					if (c <= 0) {
+						return this;
+					}
+					var fragment = $.createFragment();
+					for (i = 0; i < c; i++) {
+						childs[i].setParent(dest).updateLevel(dest.getLevel() + 1);
+						fragment.appendChild(childs[i].element);
+					}
+					if (sibling) {
+						dest.childs = node.childs.concat(dest.childs);
+						dest.childbox.insertBefore(fragment, sibling.element);
+					} else {
+						dest.childs = dest.childs.concat(node.childs);
+						dest.childbox.appendChild(fragment);
+					}
+					node.deleteChildData().setBoxDisplay().setSwitchClass().updateCount();
+					dest.setChildSwitchClass().updateCount();
+				}
+				return this;
+			},
 			changeNodePos: function (tree, node, sibling, drag, callback) {
 				var nodes = [node], num = $.isNumber(sibling), obj = Factory.isNode(sibling);
 				if (!Factory.isNode(node)
@@ -2992,14 +3015,19 @@
 		deleteChildData: function (node) {
 			var that = this.self(),
 				childs = that.childs,
-				i = childs.length - 1;
+				i = childs.length - 1,
+				all = !node;
 
-			while(i >= 0) {
-				if (childs[i].id === node.id) {
-					childs.splice(i, 1);
-					break;
+			if (all) {
+				that.childs = [];
+			} else {
+				while(i >= 0) {
+					if (childs[i].id === node.id) {
+						childs.splice(i, 1);
+						break;
+					}
+					i--;
 				}
-				i--;
 			}
 			if (childs.length <= 0) {
 				that.setParam('expanded', false);
@@ -3008,14 +3036,14 @@
 		},
 		eachDeleteChild: function (removeElem) {
 			var that = this.self(), c = that.childs.length;
-			for (var i = 0; i < c; i++) {
+			for (var i = c - 1; i >= 0; i--) {
 				that.childs[i].delete(removeElem);
 			}
 			return that;
 		},
 		deleteChild: function () {
 			var that = this.self(), c = that.childs.length;
-			for (var i = 0; i < c; i++) {
+			for (var i = c - 1; i >= 0; i--) {
 				that.childs[i].delete();
 			}
 			that.childs = [];
@@ -3055,31 +3083,44 @@
 
 			return that;
 		},
-		moveChild: function (destNode, insert) {
-			var that = this.self(),
-				childs = that.childs,
-				c = childs.length;
+		moveChild: function (destNode, insert, inside, index) {
+			var that = this.self();
+			return that.move(destNode, insert, inside, index, true).setChildSwitchClass();
+		},
+		moveChildTo: function (destNode) {
+			return this.self().moveChild(destNode, false, false);
+		},
+		insertChildTo: function (destNode, inside, index) {
+			return this.self().moveChild(destNode, true, inside, index);
+		},
+		move: function (destNode, insert, inside, index, child) {
+			var that = this.self(), dest, sibling,
+				node = Factory.getNode(that.tree, destNode);
 
-			if (c <= 0) {
+			if (!Factory.isNode(node)) {
 				return that;
 			}
-			while(c > 0) {
-				childs[0].move(destNode, insert);
-				c--;
-			}
-			return that.setChildSwitchClass();
-		},
-		move: function (destNode, insert) {
-			var that = this.self(), dest, sibling;
-			if (insert) {
-				sibling = Factory.getNode(that.tree, destNode);
-				if (Factory.isNode(sibling)) {
+			if ($.isBoolean(insert,false)) {
+				if ($.isBoolean(inside, false)) {
+					if (!$.isNumber(index) || index < 0) {
+						index = 0;
+					}
+					dest = node;
+					sibling = dest.childs[index];
+				} else {
+					sibling = node;
 					dest = sibling.parent;
 				}
 			} else {
 				dest = Factory.getNode(that.tree, destNode);
 			}
-			return Factory.moveNode(tree, that, dest, sibling), that;
+			return Factory[child ? 'moveChildNode' : 'moveNode'](tree, that, dest, sibling), that;
+		},
+		moveTo: function (destNode) {
+			return this.self().move(destNode, false, false);
+		},
+		insertTo: function (destNode, inside, index) {
+			return this.self().move(destNode, true, inside, index);
 		},
 		sortIndex: function (num, callback, defNum) {
 			var that = this.self();
@@ -3933,11 +3974,23 @@
 		deleteChild: function (nodes) {
 			return Factory.eachNodeIds(this.cache.nodes, nodes, 'deleteChild'), this;
 		},
-		move: function (nodes, dest, insert) {
-			return Factory.eachNodeIds(this.cache.nodes, nodes, 'move', dest, insert), this;
+		move: function (nodes, dest, insert, inside, index) {
+			return Factory.eachNodeIds(this.cache.nodes, nodes, 'move', dest, insert, inside, index), this;
 		},
-		moveChild: function (nodes, dest, insert) {
-			return Factory.eachNodeIds(this.cache.nodes, nodes, 'moveChild', dest, insert), this;
+		moveTo: function (nodes, dest) {
+			return Factory.eachNodeIds(this.cache.nodes, nodes, 'moveTo', dest), this;
+		},
+		insertTo: function (nodes, dest, inside, index) {
+			return Factory.eachNodeIds(this.cache.nodes, nodes, 'insertTo', dest, inside, index), this;
+		},
+		moveChild: function (nodes, dest, insert, inside, index) {
+			return Factory.eachNodeIds(this.cache.nodes, nodes, 'moveChild', dest, insert, inside, index), this;
+		},
+		moveChildTo: function (nodes, dest) {
+			return Factory.eachNodeIds(this.cache.nodes, nodes, 'moveChildTo', dest), this;
+		},
+		insertChildTo: function (nodes, dest, inside, index) {
+			return Factory.eachNodeIds(this.cache.nodes, nodes, 'insertChildTo', dest, inside, index), this;
 		},
 		sortIndex: function (nodes, num, callback) {
 			return Factory.eachNodeIds(this.cache.nodes, nodes, 'sortIndex', num, callback), this;

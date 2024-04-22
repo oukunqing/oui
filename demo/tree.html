@@ -61,8 +61,8 @@
                     <option value="device">Device</option>
                     <option value="arrow">Arrow</option>
                 </select>
-                <label class="chb-label"><input type="checkbox" id="chbCamera" checked="checked" /><span>动态加载通道</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbDynamic" /><span>动态加载节点</span></label>
+                <label class="chb-label"><input type="checkbox" id="chbCamera" /><span>动态加载通道</span></label>
                 <div></div>
                 <label class="chb-label"><input type="checkbox" id="chbLine" /><span>显示连线</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbCheck" checked="checked" /><span>显示选框</span></label>
@@ -89,7 +89,7 @@
                 <div></div>
                 <label class="chb-label"><input type="checkbox" id="chbKeepStatus" /><span>保持状态</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbKeepCookie" /><span>保存COOKIE</span></label>
-                <label class="chb-label"><input type="checkbox" id="chbClickExpand" checked="checked" /><span>点击切换</span></label>
+                <label class="chb-label"><input type="checkbox" id="chbClickExpand" /><span>点击切换</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbClickChecked" /><span>点击选中</span></label>
                 <div>
                     <button onclick="test(0);">加载树菜单</button>
@@ -137,35 +137,41 @@
                 <button onclick="expandType();">按类型展开</button>
                 <button onclick="expandType(false);">按类型收缩</button>
             </div>
-            <div>
+            <div style="border-top:solid 1px #ccc;border-bottom:solid 1px #ccc;padding:8px 0 0;margin:2px 0 7px; display: block;overflow: hidden;">
                 <div style="padding:0 0 5px 0;" class="item">
-                    <span>原节点ID:</span>
+                    <span>原节点:</span>
                     <input type="text" id="txtNodeId" class="txt" style="width:180px;" placeholder="是NodeId 不是DataId" />
-                    <span>目标节点ID:</span>
-                    <input type="text" id="txtDestId" class="txt" style="width:180px;" placeholder="目标NodeId" />
                 </div>
                 <div style="padding:0 0 5px 0;" class="item">
                     <button onclick="position();">定位</button>
                     <button onclick="position(true);">定位并选中</button>
                     <button onclick="checked(true);">勾选</button>
                     <button onclick="checked(false);">取消勾选</button>
-                    <button onclick="deleteNode();">删除节点</button>
+                    <button onclick="sortUp();">上移</button>
+                    <button onclick="sortDown();">下移</button>
+                </div>
+                <div style="padding:0 0 5px 0;" class="item">
+                    <button onclick="deleteNode();">删除</button>
                     <select id="ddlChild">
                         <option value="0">节点</option>
                         <option value="1">子节点</option>
                     </select>
-                    <button onclick="moveNode();">移动节点到</button>
-                    <button onclick="moveNode(true);">插入节点到</button>
-                </div>
-                <div style="padding:0 0 5px 0;" class="item">
-                    <button onclick="sortUp();">上移</button>
-                    <button onclick="sortDown();">下移</button>
+                    <button onclick="moveNode();" title="appendChild">移动到</button>
+                    <button onclick="moveNode(true);" title="insertBefore">插入在</button>
+                    <button onclick="moveNode(true, true);" title="insertBefore(inside)">插入到</button>
+                    <input type="text" id="txtInsertIndex" class="txt" style="width:40px;" title="插入到目标节点内部索引位置" maxlength="3" value="0" />
                     <label class="chb-label">
                         <input type="checkbox" value="1" id="chbDrag2" />
                         <span>模拟拖动</span>
                     </label>
-                    <button onclick="sortNode();">移动位置到</button>
+                    <button onclick="sortNode();" title="仅限同级内移位排序">移位到</button>
                 </div>
+                <div style="padding:0 0 5px 0;" class="item">
+                    <span>目标节点:</span>
+                    <input type="text" id="txtDestId" class="txt" style="width:180px;" placeholder="目标NodeId" />
+                </div>
+            </div>
+            <div>                
                 <div style="padding:0 0 5px 0;" class="item">
                     <span>通道ID:</span>
                     <input type="text" id="txtPid" class="txt" style="width:60px;" />
@@ -179,9 +185,10 @@
                     <button onclick="setWidth(1);">增加宽度</button>
                     <button onclick="setWidth(-1);">减少宽度</button>
                 </div>
-                
-                <!--<button onclick="addNode1();">新增子节点</button>-->
             </div>
+        </div>
+        <div id="divGet" class="box" style="display:none;">
+
         </div>
     </div>
 </div>
@@ -213,8 +220,12 @@
         ]
     };
 
-    window.onload = function () {
+    var currentInput;
 
+    window.onload = function () {
+        $('#txtNodeId,#txtDestId').click(function (ev, i, obj) {
+            currentInput = obj;
+        });
     };
 
     var TreeId = 'tree';
@@ -291,12 +302,13 @@
         $.tree(TreeId)[child ? 'deleteChild' : 'delete'](nid);
     }
 
-    function moveNode(insert) {
+    function moveNode(insert, inside) {
         var nid = $('#txtNodeId').val().trim(),
             dest = $('#txtDestId').val().trim(),
-            child = $('#ddlChild').val().toInt();
+            child = $('#ddlChild').val().toInt(),
+            index = $('#txtInsertIndex').val().toInt();
 
-        $.tree(TreeId)[child ? 'moveChild' : 'move'](nid, dest, insert);
+        $.tree(TreeId)[child ? 'moveChild' : 'move'](nid, dest, insert, inside, index);
     }
 
     function sortUp() {
@@ -457,6 +469,7 @@
             clickChecked: clickChecked,
             complete: function (tree) {
                 $('#divOper').show();
+                $('#divGet').show();
 
                 console.log('$.tree(undefined):', $.tree());
                 console.log('$.tree(undefined):', $.tree('1324'));
@@ -520,7 +533,9 @@
 
                 $.console.log('focus:', document.querySelector('.txt-focus'));
 
-                $('#txtNodeId').prop('value', node.id);
+                if (currentInput) {
+                    currentInput.value = node.id;
+                }
 
                 $.console.log('onclick', tree.id, ev, node, node.childs);
                 
