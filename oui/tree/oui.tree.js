@@ -254,7 +254,7 @@
 					node = par.node,
 					dest = ep.node,
 					srcParent = node.parent.id;
-					
+
 				Factory.delDragNode(tree);
 
 				if (!dest || !node) {
@@ -309,6 +309,7 @@
 							dir = obj.pos.top < ev.clientY || obj.node.parent === ep.node ? 'drop-down' : 'drop-up';
 						}
 						obj.dir = dir;
+						$.setElemClass(obj.elem, 'node-move', dir === 'drop-on');
 						$.setClass(ep.element, ['node-drop', dir].join(','), true);
 					}
 				}, 50);
@@ -562,6 +563,7 @@
 				Cache.drags['drag' + tree.id] = {
 					node: node,
 					clone: div,
+					elem: obj,
 					offset: { top: ev.offsetY, left:ev.offsetX - pad.left },
 					pos: { top: ev.clientY, left:ev.clientX }
 				};
@@ -2112,6 +2114,9 @@
 				return this;
 			},
 			getChildIndex: function (parent, nodes) {
+				if (!$.isArray(nodes)) {
+					nodes = [nodes];
+				}
 				var m = parent.childs.length,
 					n = nodes.length,
 					indexs = [], i, j, c;
@@ -2949,6 +2954,10 @@
 				val.type = that.type;
 			}
 			return val;
+		},
+		getIndex: function () {
+			var that = this.self();
+			return Factory.getChildIndex(that.parent, that)[0];	
 		},
 		getSibling: function (dir) {
 			var that = this.self(),

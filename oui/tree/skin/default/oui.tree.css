@@ -332,10 +332,15 @@
 }
 .oui-tree-clone li.node-clone .switch{
 	/*visibility: hidden;*/
-	background:#cce8ff url("imgs/tree.png") no-repeat -175px -100px
+	background:#cce8ff url("imgs/tree.png") no-repeat -175px -100px;
 }
 .oui-tree-clone li.node-clone .button {
 	display: none;
+}
+.oui-tree-clone li.node-move .switch{
+	/*visibility: hidden;*/
+	/*background:#cce8ff url("imgs/tree.png") no-repeat -200px -100px;*/
+	background:#cce8ff url("imgs/tree.png") no-repeat -200px -50px;
 }
 
 .oui-tree li.node-drag {opacity: 0.5;height:24px;}
