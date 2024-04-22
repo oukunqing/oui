@@ -654,6 +654,9 @@
             },
             onbutton: function (node, tree, ev, key) {
 
+            },
+            dragCallback: function (node, tree, key) {
+                $.console.log('dragCallback:', tree.id, node, key);
             }
         });
         $.console.log('test finish:');

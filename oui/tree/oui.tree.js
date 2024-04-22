@@ -252,8 +252,9 @@
 					opt = tree.options,
 					par = Factory.getDragNode(tree),
 					node = par.node,
-					dest = ep.node;
-
+					dest = ep.node,
+					srcParent = node.parent.id;
+					
 				Factory.delDragNode(tree);
 
 				if (!dest || !node) {
@@ -275,6 +276,8 @@
 				}
 				$.setElemClass(node.element, 'node-drag', false);
 				$.setClass(ep.element, 'node-drop,drop-up,drop-down,drop-on', false);
+
+				Factory.dragCallback(node, tree, srcParent !== node.parent.id ? 'move' : 'sort');
 			},
 			dragover: function (ev, tree) {
 				ev.preventDefault();
@@ -822,6 +825,7 @@
 				opt.contextmenuCallback = $.getParam(opt, 'contextmenuCallback,oncontextmenu,contextmenu');
 
 				opt.buttonCallback = $.getParam(opt, 'buttonCallback,onbutton');
+				opt.dragCallback = $.getParam(opt, 'dragCallback,ondrag');
 
 				return opt;
 			},
@@ -2794,6 +2798,12 @@
 					tree.options.buttonCallback(node, tree, ev, btnKey);
 				}
 				return this;
+			},
+			dragCallback: function (node, tree, dragKey) {
+				if ($.isFunction(tree.options.dragCallback)) {
+					tree.options.dragCallback(node, tree, dragKey);
+				}
+				return this;
 			}
 		};
 
@@ -3839,7 +3849,9 @@
 				//contextmenuCallback,oncontextmenu
 				contextmenuCallback: undefined,
 				//buttonCallback,onbutton
-				buttonCallback: undefined
+				buttonCallback: undefined,
+				//dragCallback,ondrag
+				dragCallback: undefined
 			}, options));
 
 			if (opt.target) {

@@ -299,11 +299,11 @@
 	background:url("imgs/tree.png") no-repeat -200px -100px
 }
 .oui-tree li.drop-up > .item {	
-	border-top: dotted 2px #008000;
+	border-top: dotted 1px #008000;
 	border-radius: 0;
 }
 .oui-tree li.drop-down > .item {	
-	border-bottom: dotted 2px #008000;
+	border-bottom: dotted 1px #008000;
 	border-radius: 0;
 }
 .oui-tree li.drop-up > .item .switch {
