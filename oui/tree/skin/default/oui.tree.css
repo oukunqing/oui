@@ -83,6 +83,8 @@
 .oui-tree li.cur > .item a.name{background: #cce8ff;border-color: #cce8ff;}
 .oui-tree li.cur > .item a.name:hover{background: #cce8ff;border-color: #99d1ff;}
 
+.oui-tree-drag li .item a.name span {height:14px;line-height:14px;margin:4px 0;}
+
 .oui-tree li .item span i,
 .oui-tree li .item span b {display:inline-block;white-space:nowrap;}
 
@@ -310,6 +312,13 @@
 .oui-tree li.drop-down > .item .switch {
 	background:url("imgs/tree.png") no-repeat -225px -100px
 }
+.oui-tree li.drop-on > .item {
+	border: dotted 1px #008000;
+}
+.oui-tree li.drop-on > .item .switch {
+	background:url("imgs/tree.png") no-repeat -225px -50px
+}
+
 .oui-tree li.node-drop .button {
 	visibility: hidden;
 }

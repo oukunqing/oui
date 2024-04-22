@@ -249,7 +249,7 @@
 			drop: function (ev, tree) {
 				ev.preventDefault();
 				var ep = Event.target(ev, tree),
-					op = tree.options,
+					opt = tree.options,
 					par = Factory.getDragNode(tree),
 					node = par.node,
 					dest = ep.node;
@@ -259,13 +259,22 @@
 				if (!dest || !node) {
 					return false;
 				}
-				if (node.parent === dest && dest.childs.length > 1) {
-					dest = dest.childs[0];
+				if (opt.dragMove) {
+					//如果拖动到节点文本上，表示移动到节点内
+					if (Factory.isDragText(ep)) {
+						node.moveTo(dest, true);
+					} else {
+						//拖动到节点上，表示插入到节点上方（或下方）
+					    node.insertTo(dest, false, null, par.dir.endWith('down'));
+					}
+				} else {
+					if (node.parent === dest && dest.childs.length > 1) {
+						dest = dest.childs[0];
+					}
+					node.sortNode(dest, null, true);
 				}
-				node.sortNode(dest, null, true);
-
 				$.setElemClass(node.element, 'node-drag', false);
-				$.setClass(ep.element, 'node-drop,drop-up,drop-down', false);
+				$.setClass(ep.element, 'node-drop,drop-up,drop-down,drop-on', false);
 			},
 			dragover: function (ev, tree) {
 				ev.preventDefault();
@@ -287,12 +296,16 @@
 						//判断是否是同组节点（或父节点）
 						//这里只实现同组上下拖动排序，不改变节点父级关系
 						//若拖动改变父级关系，随意拖动之后，极易引起节点混乱
-						|| !Factory.isSameTeam(obj.node, ep.node) 
+						|| (!tree.options.dragMove && !Factory.isSameTeam(obj.node, ep.node))
 						|| ep.element.className.indexOf('node') < 0) {
 						return false;
 					}
 					if (obj.node !== ep.node) {
-						var dir = obj.pos.top < ev.clientY || obj.node.parent === ep.node ? 'drop-down' : 'drop-up';
+						var dir = 'drop-on';
+						if (!tree.options.dragMove || !Factory.isDragText(ep)) {
+							dir = obj.pos.top < ev.clientY || obj.node.parent === ep.node ? 'drop-down' : 'drop-up';
+						}
+						obj.dir = dir;
 						$.setClass(ep.element, ['node-drop', dir].join(','), true);
 					}
 				}, 50);
@@ -300,11 +313,11 @@
 			dragleave: function (ev, tree) {
 				var ep = Event.target(ev, tree), obj = Factory.getDragNode(tree);
 				if (!ep.node 
-					|| !Factory.isSameTeam(obj.node, ep.node)
+					|| (!tree.options.dragMove && !Factory.isSameTeam(obj.node, ep.node))
 					|| ep.element.className.indexOf('node-drop') < 0) {
 					return false;
 				}
-				$.setClass(ep.element, 'node-drop,drop-up,drop-down', false);
+				$.setClass(ep.element, 'node-drop,drop-up,drop-down,drop-on', false);
 			},
 			dragend: function (ev, tree) {
 				var obj = Factory.getDragNode(tree);
@@ -692,6 +705,7 @@
 				opt.showMove = $.isBoolean($.getParam(opt, 'showMove,showmove'), opt.showButton);
 				opt.dragAble = $.isBoolean($.getParam(opt, 'dragAble,draggable,dragable'), false);
 				opt.dragTypes = Factory.parseArrayParam($.getParam(opt, 'dragTypes,dragType'));
+				opt.dragMove = $.isBoolean($.getParam(opt, 'dragMove,dragmove'), false);
 				
 				opt.buttonConfig = $.extend({types:[], buttons:[]}, opt.buttonConfig);
 				var types = opt.buttonConfig.types, buttons = opt.buttonConfig.buttons;
@@ -1573,15 +1587,17 @@
 				return Factory.addNode(tree, data.items, data.par, node), this;
 			},
 			getPanelClass: function (opt) {
-				var css = 'oui-tree';
+				var css = ['oui-tree'];
 				if (!Factory.isDefaultSkin(opt.skin)) {
-					css += ' oui-tree-';
-					css += opt.skin;
+					css.push('oui-tree-' + opt.skin);
 				}
 				if (opt.showLine) {
-					css += ' oui-tree-line';
+					css.push('oui-tree-line');
 				}
-				return css;
+				if (opt.moveAble && opt.dragAble && opt.dragMove) {
+					css.push('oui-tree-drag');
+				}
+				return css.join(' ');
 			},
 			setPanelClass: function (div, opt) {
 				div.className = Factory.getPanelClass(opt);
@@ -2109,9 +2125,12 @@
 				}
 				return indexs;
 			},
-			moveNode: function (tree, node, dest, sibling) {
+			moveNode: function (tree, node, dest, sibling, down) {
 				var src = node.parent;
 				if (Factory.isNode(dest) && node !== dest) {
+					if (down) {
+						sibling = sibling.getSibling(1);
+					}
 					if (src !== dest) {
 						dest.addChild(node, sibling).setSwitchClass();
 						node.setParent(dest).updateLevel(dest.getLevel() + 1);
@@ -2120,13 +2139,13 @@
 						dest.setChildSwitchClass();
 					} else if (Factory.isNode(sibling) && !sibling.root) {
 						dest.childbox.insertBefore(node.element, sibling.element);
-						dest.setChild(node, sibling, 2);
+						dest.setChild(node, sibling, down ? 1 : 2);
 						src.setChildSwitchClass();
 					}
 				}
 				return this;
 			},
-			moveChildNode: function (tree, node, dest, sibling) {
+			moveChildNode: function (tree, node, dest, sibling, down) {
 				if (Factory.isNode(dest) && node !== dest) {
 					var childs = node.childs, c = childs.length, i;
 					if (c <= 0) {
@@ -2313,6 +2332,9 @@
 					return true;
 				}
 				return opt.dragTypes.indexOf(type) > -1;
+			},
+			isDragText: function (par) {
+				return par.tag === 'span' && par.css.inArray(['text', 'count', 'desc']);
 			},
 			isNodeBody: function (par) {
 				return par.tag.inArray(['a', 'span']) && par.css.inArray(['icon', 'name', 'text', 'count', 'desc']);
@@ -2918,6 +2940,14 @@
 			}
 			return val;
 		},
+		getSibling: function (dir) {
+			var that = this.self(),
+				idx = Factory.getChildIndex(that.parent, [that])[0] + dir;
+			if (idx < 0) {
+				idx = 0;
+			}
+			return that.parent.childs[idx];
+		},
 		initParam: function (key, par) {
 			return Factory.initParam.call(this.self(), key, par);
 		},
@@ -3083,44 +3113,41 @@
 
 			return that;
 		},
-		moveChild: function (destNode, insert, inside, index) {
+		moveChild: function (destNode, insert, inside, index, down) {
 			var that = this.self();
-			return that.move(destNode, insert, inside, index, true).setChildSwitchClass();
+			return that.move(destNode, insert, inside, index, down, true).setChildSwitchClass();
 		},
 		moveChildTo: function (destNode) {
 			return this.self().moveChild(destNode, false, false);
 		},
-		insertChildTo: function (destNode, inside, index) {
+		insertChildTo: function (destNode, inside, index, down) {
 			return this.self().moveChild(destNode, true, inside, index);
 		},
-		move: function (destNode, insert, inside, index, child) {
-			var that = this.self(), dest, sibling,
-				node = Factory.getNode(that.tree, destNode);
+		move: function (destNode, insert, inside, index, down, child) {
+			var that = this.self(), sibling,
+				dest = Factory.getNode(that.tree, destNode);
 
-			if (!Factory.isNode(node)) {
+			if (!Factory.isNode(dest)) {
 				return that;
 			}
-			if ($.isBoolean(insert,false)) {
+			if ($.isBoolean(insert, false)) {
 				if ($.isBoolean(inside, false)) {
 					if (!$.isNumber(index) || index < 0) {
 						index = 0;
 					}
-					dest = node;
 					sibling = dest.childs[index];
 				} else {
-					sibling = node;
+					sibling = dest;
 					dest = sibling.parent;
 				}
-			} else {
-				dest = Factory.getNode(that.tree, destNode);
 			}
-			return Factory[child ? 'moveChildNode' : 'moveNode'](tree, that, dest, sibling), that;
+			return Factory[child ? 'moveChildNode' : 'moveNode'](tree, that, dest, sibling, down), that;
 		},
 		moveTo: function (destNode) {
 			return this.self().move(destNode, false, false);
 		},
-		insertTo: function (destNode, inside, index) {
-			return this.self().move(destNode, true, inside, index);
+		insertTo: function (destNode, inside, index, down) {
+			return this.self().move(destNode, true, inside, index, down);
 		},
 		sortIndex: function (num, callback, defNum) {
 			var that = this.self();
@@ -3224,6 +3251,10 @@
 				that.childs.push(node);
 				break;
 			case 1: //insert
+				var idx = Factory.getChildIndex(that, [node])[0];
+				if ($.isNumber(idx)) {
+					that.childs.splice(idx, 1);
+				}
 				indexs = Factory.getChildIndex(that, [sibling]);
 				that.childs.splice(indexs[0], 0, node);
 				break;
@@ -3674,8 +3705,6 @@
 
 	Tree.prototype = {
 		initial: function (options) {
-			$.console.log('initial:', options);
-
 			var opt = Factory.checkOptions($.extend({
 				id: 'otree001',
 				//样式
@@ -3742,6 +3771,8 @@
 				dragAble: undefined,
 				//允许拖动的节点类型，字符串数组或字符串，示例：['unit','device'] 或 'unit'
 				dragTypes: undefined,
+				//是否允许拖动改变节点关系
+				dragMove: undefined,
 				//按钮配置
 				buttonConfig: undefined,
 				//是否显示节点信息

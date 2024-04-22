@@ -86,6 +86,7 @@
                 </select>
                 <label class="chb-label"><input type="checkbox" id="chbDesc" checked="checked" /><span>显示备注</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbInfo" /><span>显示信息</span></label>
+                <label class="chb-label"><input type="checkbox" id="chbDragMove" /><span>拖动迁移</span></label>
                 <div></div>
                 <label class="chb-label"><input type="checkbox" id="chbKeepStatus" /><span>保持状态</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbKeepCookie" /><span>保存COOKIE</span></label>
@@ -385,6 +386,7 @@
             showInfo = $('#chbInfo').checked(),
             moveAble = $('#chbMoveAble').checked(),
             dragAble = $('#chbDragAble').checked(),
+            dragMove = $('#chbDragMove').checked(),
             switchIcon = $('#ddlSwitch').val(),
             clickExpand = $('#chbClickExpand').checked(),
             clickChecked = $('#chbClickChecked').checked(),
@@ -441,6 +443,7 @@
             showMove: showMove,
             moveAble: moveAble,
             dragAble: dragAble,
+            dragMove: dragMove,
             buttonConfig: {
                 types: ['unit','device']
                 //types: ['camera']
