@@ -176,7 +176,7 @@
 					tag = ev.target.tagName.toLowerCase(),
 					css = ev.target.className.split(' ');
 
-				if (css[0] !== 'btn' || !opt.target) {
+				if (css[0] !== 'btn') {
 					return false;
 				}
 
@@ -191,7 +191,10 @@
 					Factory.setDefaultValue(tree, true);
 					break;
 				}
-				return Factory.setBoxDisplay(tree, false), this;
+				if (opt.target) {
+					Factory.setBoxDisplay(tree, false);
+				}
+				return this;
 			},
 			scroll: function (ev, tree) {
 				var key = 'tree_scroll_' + tree.id,
@@ -501,7 +504,9 @@
 						current: {
 							selected: null,
 							position: null,
-							checked: {},
+							checked: {
+								length: 0
+							},
 						},
 						//内部搜索结果
 						searches: [],
@@ -666,7 +671,7 @@
 				if (!$.isString(sw, true) && opt.skin === 'device') {
 					sw = 'device';
 				}
-				opt.switch = $.isString(sw, true) && sw !== 'default' ? '-' + sw : '';
+				opt.switch = $.isString(sw, true) ? '-' + sw : '';
 
 				opt.data = opt.data || opt.items || opt.list;
 				opt.trees = $.getParam(opt, 'trees,tree');
@@ -802,7 +807,7 @@
 				opt.callbackLevel = level;
 
 				opt.showBottom = $.isBoolean($.getParam(opt, 'showBottom,showFoot'), false);
-				if (opt.callbackLevel > 0 && opt.target) {
+				if (opt.callbackLevel > 0) {
 					opt.showBottom = true;
 				}
 				opt.bottomAlign = $.getParam(opt, 'bottomAlign');
@@ -1099,6 +1104,13 @@
 							delete data[key][nid];
 						}
 					}
+					c = 0;
+					for (var k in data[key]) {
+						if (k !== 'length') {
+							c++;
+						}
+					}
+					data[key]['length'] = c;
 				}
 				//选中状态和位置定位，只能是最后一次点击（或设置），存储的是一个节点
 				else if (key.inArray(['selected', 'position'])) {
@@ -1129,7 +1141,7 @@
 							node.setChecked(false);
 						}
 					}
-					dval = {};
+					dval = { length: 0 };
 					break;
 				}
 				if (node) {
@@ -1597,11 +1609,14 @@
 				if (!Factory.isDefaultSkin(opt.skin)) {
 					css.push('oui-tree-' + opt.skin);
 				}
+				if (opt.moveAble && opt.dragAble && opt.dragMove) {
+					css.push('oui-tree-drag');
+				}
 				if (opt.showLine) {
 					css.push('oui-tree-line');
 				}
-				if (opt.moveAble && opt.dragAble && opt.dragMove) {
-					css.push('oui-tree-drag');
+				if (opt.switch) {
+					css.push('oui-tree-' + (opt.showLine ? 'line' : 'switch') + opt.switch);
 				}
 				return css.join(' ');
 			},
@@ -3426,7 +3441,7 @@
 				open = that.expanded && !that.isLeaf() ? '-open' : '';
 
 			if (that.showType && that.icon.type) {
-				if (that.icon.status) {
+				if (opt.showStatus && that.icon.status) {
 					css.push(that.icon.type + '-' + that.icon.status + open);
 				} else if (open) {
 					css.push(that.icon.type + open);
@@ -3637,11 +3652,7 @@
 				}
 				$.setElemClass(that.childbox, 'line', !last);
 			} else {
-				if (none) {
-					css.push('switch-none');
-				} else {
-					css.push('switch' + (opt.switch) + (open ? '-open' : close));
-				}
+				css.push('switch' + (none ? '-none' : open ? '-open' : close));
 			}
 			handle.className = css.join(' ');
 
@@ -3943,6 +3954,14 @@
 			var nid = Factory.isNode(nodeId) ? nodeId.id : Factory.buildNodeId(nodeId);
 			return this.cache.nodes[nid];
 		},
+		getCheckedLength: function () {
+			var cur = this.cache.current,
+				key = 'checked';
+			if (!cur[key]) {
+				return 0;
+			}
+			return cur[key]['length'] || 0;
+		},
 		getChecked: function (dataKey, nodeType) {
 			var cur = this.cache.current,
 				key = 'checked',
@@ -3952,7 +3971,7 @@
 				return [];
 			}
 			for (k in cur[key]) {
-				if (Factory.getNodeValue(cur[key][k], dataKey, nodeType, kv)) {
+				if (k !== 'length' && Factory.getNodeValue(cur[key][k], dataKey, nodeType, kv)) {
 					arr.push(kv.val);
 				}
 			}

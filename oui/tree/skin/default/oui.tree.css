@@ -46,7 +46,7 @@
 }
 
 .oui-tree ul.levelroot {
-	margin:5px 5px 5px 5px;padding:3px 20px 70px 0;overflow:hidden;display:block;
+	margin:0;padding:5px 20px 50px 5px;overflow:hidden;display:block;
 }
 
 .oui-tree ul.levelroot > li {padding:0;}
@@ -57,7 +57,7 @@
 .oui-tree li.cur {}
 .oui-tree li.disabled {}
 
-.oui-tree li {padding:0 0 0 16px;display:block;}
+.oui-tree li {padding:0 0 0 15px;display:block;}
 
 .oui-tree li .item {
 	float:left;display:inline-block;height:24px;overflow:visible;margin-bottom:0px;
@@ -88,60 +88,37 @@
 .oui-tree li .item span i,
 .oui-tree li .item span b {display:inline-block;white-space:nowrap;}
 
-.oui-tree li .item .switch {}
-.oui-tree li:hover .item .switch {}
-
-.oui-tree li .item .switch {width:25px;cursor:pointer;float:left;}
-.oui-tree li .item .switch:hover {background-color:transparent;border-radius:4px;}
-
-.oui-tree li .item .switch,
-.oui-tree li .item .switch-close,
-.oui-tree li .item .switch-default {background:transparent url("imgs/tree.png") no-repeat 0 0;}
-.oui-tree li .item .switch-open,
-.oui-tree li .item .switch-default-open {background:url("imgs/tree.png") no-repeat -25px 0;}
-
-.oui-tree li .item .switch-device,
-.oui-tree li .item .switch-device-close {background:transparent url("imgs/tree.png") no-repeat -50px 0;}
-.oui-tree li .item .switch-device-open {background:url("imgs/tree.png") no-repeat -75px 0;}
-
-.oui-tree li .item .switch-arrow,
-.oui-tree li .item .switch-arrow-close {background:transparent url("imgs/tree.png") no-repeat -100px 0;}
-.oui-tree li .item .switch-arrow-open {background:transparent url("imgs/tree.png") no-repeat -125px 0;}
-.oui-tree li .item .switch-arrow:hover,
-.oui-tree li .item .switch-arrow-close:hover {background:transparent url("imgs/tree.png") no-repeat -150px 0;}
-.oui-tree li .item .switch-arrow-open:hover {background:transparent url("imgs/tree.png") no-repeat -175px 0;}
-
-.oui-tree li .item .switch-none {background:none;cursor:default;}
-.oui-tree li .item .switch-none:hover {background:none;}
+/*关于复选框*/
 /*
 .oui-tree li .item .check{float:left;width:25px;height:24px;border:none;box-sizing:border-box;background-color:transparent;}
-.oui-tree li .item .check{background:url("imgs/tree.png") no-repeat 0 -50px;}
-.oui-tree li .item .check-true{background:url("imgs/tree.png") no-repeat -50px -50px;}
-.oui-tree li .item .check-part-true{background:url("imgs/tree.png") no-repeat -100px -50px;}
-.oui-tree li .item .check-disabled{background:url("imgs/tree.png") no-repeat -150px -50px;cursor:not-allowed;}
-.oui-tree li .item .check-disabled-true{background:url("imgs/tree.png") no-repeat -175px -50px;cursor:not-allowed;}
+.oui-tree li .item .check{background:url("imgs/tree.png") no-repeat 0 -25px;}
+.oui-tree li .item .check-true{background:url("imgs/tree.png") no-repeat -25px -25px;}
+.oui-tree li .item .check-part-true{background:url("imgs/tree.png") no-repeat -53px -25px;}
+.oui-tree li .item .check-disabled{background:url("imgs/tree.png") no-repeat -75px -25px;cursor:not-allowed;}
+.oui-tree li .item .check-disabled-true{background:url("imgs/tree.png") no-repeat -75px -50px;cursor:not-allowed;}
 
-.oui-tree li .item .check:hover {background:url("imgs/tree.png") no-repeat -25px -50px;}
-.oui-tree li .item .check-disabled:hover{background:url("imgs/tree.png") no-repeat 0 -75px;}
-.oui-tree li .item .check-true:hover {background:url("imgs/tree.png") no-repeat -75px -50px;}
-.oui-tree li .item .check-part-true:hover {background:url("imgs/tree.png") no-repeat -125px -50px;}
+.oui-tree li .item .check:hover {background:url("imgs/tree.png") no-repeat 0 -50px;}
+.oui-tree li .item .check-true:hover {background:url("imgs/tree.png") no-repeat -25px -50px;}
+.oui-tree li .item .check-part-true:hover {background:url("imgs/tree.png") no-repeat -50px -50px;}
+.oui-tree li .item .check-disabled:hover{background:url("imgs/tree.png") no-repeat -75px -25px;}
 */
 .oui-tree li .item .check{float:left;width:19px;height:24px;border:none;box-sizing:border-box;background-color:transparent;}
-.oui-tree li .item .check{background:url("imgs/tree.png") no-repeat -3px -50px;}
-.oui-tree li .item .check-true{background:url("imgs/tree.png") no-repeat -53px -50px;}
-.oui-tree li .item .check-part-true{background:url("imgs/tree.png") no-repeat -103px -50px;}
-.oui-tree li .item .check-disabled{background:url("imgs/tree.png") no-repeat -153px -50px;cursor:not-allowed;}
-.oui-tree li .item .check-disabled-true{background:url("imgs/tree.png") no-repeat -178px -50px;cursor:not-allowed;}
+.oui-tree li .item .check{background:url("imgs/tree.png") no-repeat -3px -25px;}
+.oui-tree li .item .check-true{background:url("imgs/tree.png") no-repeat -28px -25px;}
+.oui-tree li .item .check-part-true{background:url("imgs/tree.png") no-repeat -53px -25px;}
+.oui-tree li .item .check-disabled{background:url("imgs/tree.png") no-repeat -78px -25px;cursor:not-allowed;}
+.oui-tree li .item .check-disabled-true{background:url("imgs/tree.png") no-repeat -78px -50px;cursor:not-allowed;}
 
-.oui-tree li .item .check:hover {background:url("imgs/tree.png") no-repeat -28px -50px;}
-.oui-tree li .item .check-disabled:hover{background:url("imgs/tree.png") no-repeat -3px -75px;}
-.oui-tree li .item .check-true:hover {background:url("imgs/tree.png") no-repeat -78px -50px;}
-.oui-tree li .item .check-part-true:hover {background:url("imgs/tree.png") no-repeat -128px -50px;}
+.oui-tree li .item .check:hover {background:url("imgs/tree.png") no-repeat -3px -50px;}
+.oui-tree li .item .check-true:hover {background:url("imgs/tree.png") no-repeat -28px -50px;}
+.oui-tree li .item .check-part-true:hover {background:url("imgs/tree.png") no-repeat -53px -50px;}
+.oui-tree li .item .check-disabled:hover{background:url("imgs/tree.png") no-repeat -78px -25px;}
 
-.oui-tree li .item .icon{width:25px;float:left;cursor:pointer;background:transparent url("imgs/tree.png") no-repeat 0 -25px;}
+/*关于ICON图标*/
+.oui-tree li .item .icon{background:transparent url("imgs/tree.png") no-repeat 0 0;width:24px;float:left;cursor:pointer;}
 .oui-tree li .item .icon:hover{background-color:none;}
-.oui-tree li .item .icon-open{background:url("imgs/tree.png") no-repeat -25px -25px;}
-.oui-tree li .item .icon-page{background:transparent url("imgs/tree.png") no-repeat -50px -25px;}
+.oui-tree li .item .icon-open{background:url("imgs/tree.png") no-repeat -25px 0;}
+.oui-tree li .item .icon-page{background:transparent url("imgs/tree.png") no-repeat -50px 0;}
 .oui-tree li .item .icon-none{background:none;}
 
 .oui-tree li .item span.text{text-align:left;}
@@ -217,59 +194,138 @@
 	background-position-y: -100px;
 }
 
+
+/*关于切换图标*/
+.oui-tree li .item .switch {}
+.oui-tree li:hover .item .switch {}
+
+.oui-tree li .item .switch {width:21px;cursor:pointer;float:left;}
+.oui-tree li .item .switch:hover {background-color:transparent;border-radius:4px;}
+
+.oui-tree li .item .switch-close,
+.oui-tree li .item .switch-close:hover {background:transparent url("imgs/tree.png") no-repeat -127px 0;}
+.oui-tree li .item .switch-open,
+.oui-tree li .item .switch-open:hover {background:url("imgs/tree.png") no-repeat -152px 0;}
+
+.oui-tree-device li .item .switch-close,
+.oui-tree-device li .item .switch-close:hover {background:transparent url("imgs/tree.png") no-repeat -127px -25px;}
+.oui-tree-device li .item .switch-open,
+.oui-tree-device li .item .switch-open:hover {background:url("imgs/tree.png") no-repeat -152px -25px;}
+
+.oui-tree-switch-default li .item .switch-close,
+.oui-tree-switch-default li .item .switch-close:hover {background:transparent url("imgs/tree.png") no-repeat -127px 0;}
+.oui-tree-switch-default li .item .switch-open,
+.oui-tree-switch-default li .item .switch-open:hover {background:url("imgs/tree.png") no-repeat -152px 0;}
+
+.oui-tree-switch-radius li .item .switch-close,
+.oui-tree-switch-radius li .item .switch-close:hover {background:transparent url("imgs/tree.png") no-repeat -177px 0;}
+.oui-tree-switch-radius li .item .switch-open,
+.oui-tree-switch-radius li .item .switch-open:hover {background:url("imgs/tree.png") no-repeat -202px 0;}
+
+.oui-tree-switch-device li .item .switch-close,
+.oui-tree-switch-device li .item .switch-close:hover {background:transparent url("imgs/tree.png") no-repeat -127px -25px;}
+.oui-tree-switch-device li .item .switch-open,
+.oui-tree-switch-device li .item .switch-open:hover {background:url("imgs/tree.png") no-repeat -152px -25px;}
+
+.oui-tree-switch-arrow li .item .switch-close{background:transparent url("imgs/tree.png") no-repeat -177px -25px;}
+.oui-tree-switch-arrow li .item .switch-open{background:url("imgs/tree.png") no-repeat -202px -25px;}
+.oui-tree-switch-arrow li .item .switch-close:hover {background:transparent url("imgs/tree.png") no-repeat -177px -50px;}
+.oui-tree-switch-arrow li .item .switch-open:hover {background:url("imgs/tree.png") no-repeat -202px -50px;}
+
+.oui-tree li .item .switch-none {background:none;cursor:default;}
+.oui-tree li .item .switch-none:hover {background:none;}
+
 /*用于节点连线*/
-
-.oui-tree-line {
-
-}
-.oui-tree-line li.node {padding:0 0 0 24px;}
+.oui-tree-line li.node {padding:0 0 0 22px;}
 
 .oui-tree-line li .item .node-none {
 	background: none;
 }
 
-.oui-tree-line li .item .switch {
-
-}
-
 .oui-tree-line ul.line {
-	background: url("imgs/line.png") repeat-y 0 0;
+	background: url("imgs/line.png") repeat-y -2px 0;
 }
 
-.oui-tree-line li .item .node-close,
-.oui-tree-line li .item .node-close:hover {
-	background: url("imgs/tree.png") no-repeat 0px -125px;
+.oui-tree-line li .item .node-close,.oui-tree-line li .item .node-close:hover {
+	background: url("imgs/tree.png") no-repeat -2px -125px;
 }
-.oui-tree-line li .item .node-open,
-.oui-tree-line li .item .node-open:hover {
-	background: url("imgs/tree.png") no-repeat -25px -125px;
+.oui-tree-line li .item .node-open,.oui-tree-line li .item .node-open:hover {
+	background: url("imgs/tree.png") no-repeat -27px -125px;
+}
+.oui-tree-line li .item .switch-close,.oui-tree-line li .item .switch-close:hover {
+	background: url("imgs/tree.png") no-repeat -102px -125px;
+}
+.oui-tree-line li .item .switch-open,.oui-tree-line li .item .switch-open:hover {
+	background: url("imgs/tree.png") no-repeat -127px -125px;
+}
+.oui-tree-line li .item .last-close,.oui-tree-line li .item .last-close:hover {
+	background: url("imgs/tree.png") no-repeat -152px -125px;
+}
+.oui-tree-line li .item .last-open,.oui-tree-line li .item .last-open:hover {
+	background: url("imgs/tree.png") no-repeat -177px -125px;
 }
 
-.oui-tree-line li .item .switch-close,
-.oui-tree-line li .item .switch-close:hover {
-	background: url("imgs/tree.png") no-repeat -100px -125px;
+.oui-tree-line-radius li .item .node-close,.oui-tree-line-radius li .item .node-close:hover {
+	background: url("imgs/tree.png") no-repeat -2px -150px;
 }
-.oui-tree-line li .item .switch-open,
-.oui-tree-line li .item .switch-open:hover {
-	background: url("imgs/tree.png") no-repeat -125px -125px;
+.oui-tree-line-radius li .item .node-open,.oui-tree-line-radius li .item .node-open:hover {
+	background: url("imgs/tree.png") no-repeat -27px -150px;
+}
+.oui-tree-line-radius li .item .switch-close,.oui-tree-line-radius li .item .switch-close:hover {
+	background: url("imgs/tree.png") no-repeat -102px -150px;
+}
+.oui-tree-line-radius li .item .switch-open,.oui-tree-line-radius li .item .switch-open:hover {
+	background: url("imgs/tree.png") no-repeat -127px -150px;
+}
+.oui-tree-line-radius li .item .last-close,.oui-tree-line-radius li .item .last-close:hover {
+	background: url("imgs/tree.png") no-repeat -152px -150px;
+}
+.oui-tree-line-radius li .item .last-open,.oui-tree-line-radius li .item .last-open:hover {
+	background: url("imgs/tree.png") no-repeat -177px -150px;
 }
 
-.oui-tree-line li .item .last-close,
-.oui-tree-line li .item .last-close:hover {
-	background: url("imgs/tree.png") no-repeat -150px -125px;
+.oui-tree-line-device li .item .node-close,.oui-tree-line-device li .item .node-close:hover {
+	background: url("imgs/tree.png") no-repeat -2px -175px;
 }
-.oui-tree-line li .item .last-open,
-.oui-tree-line li .item .last-open:hover {
-	background: url("imgs/tree.png") no-repeat -175px -125px;
+.oui-tree-line-device li .item .node-open,.oui-tree-line-device li .item .node-open:hover {
+	background: url("imgs/tree.png") no-repeat -27px -175px;
 }
+.oui-tree-line-device li .item .switch-close,.oui-tree-line-device li .item .switch-close:hover {
+	background: url("imgs/tree.png") no-repeat -102px -175px;
+}
+.oui-tree-line-device li .item .switch-open,.oui-tree-line-device li .item .switch-open:hover {
+	background: url("imgs/tree.png") no-repeat -127px -175px;
+}
+.oui-tree-line-device li .item .last-close,.oui-tree-line-device li .item .last-close:hover {
+	background: url("imgs/tree.png") no-repeat -152px -175px;
+}
+.oui-tree-line-device li .item .last-open,.oui-tree-line-device li .item .last-open:hover {
+	background: url("imgs/tree.png") no-repeat -177px -175px;
+}
+
+
+.oui-tree-line-arrow li .item .node-close { background: url("imgs/tree.png") no-repeat -2px -200px; }
+.oui-tree-line-arrow li .item .node-open { background: url("imgs/tree.png") no-repeat -27px -200px; }
+.oui-tree-line-arrow li .item .switch-close { background: url("imgs/tree.png") no-repeat -102px -200px; }
+.oui-tree-line-arrow li .item .switch-open { background: url("imgs/tree.png") no-repeat -127px -200px; }
+.oui-tree-line-arrow li .item .last-close { background: url("imgs/tree.png") no-repeat -152px -200px; }
+.oui-tree-line-arrow li .item .last-open { background: url("imgs/tree.png") no-repeat -177px -200px; }
+
+.oui-tree-line-arrow li .item .node-close:hover { background: url("imgs/tree.png") no-repeat -2px -225px; }
+.oui-tree-line-arrow li .item .node-open:hover { background: url("imgs/tree.png") no-repeat -27px -225px; }
+.oui-tree-line-arrow li .item .switch-close:hover {	background: url("imgs/tree.png") no-repeat -102px -225px; }
+.oui-tree-line-arrow li .item .switch-open:hover { background: url("imgs/tree.png") no-repeat -127px -225px; }
+.oui-tree-line-arrow li .item .last-close:hover { background: url("imgs/tree.png") no-repeat -152px -225px; }
+.oui-tree-line-arrow li .item .last-open:hover { background: url("imgs/tree.png") no-repeat -177px -225px; }
+
 
 .oui-tree-line li .item .switch-none,
 .oui-tree-line li .item .switch-none:hover {
-	background: url("imgs/tree.png") no-repeat -225px -125px;
+	background: url("imgs/tree.png") no-repeat -227px -125px;
 }
 .oui-tree-line li .item .last-none,
 .oui-tree-line li .item .last-none:hover {
-	background: url("imgs/tree.png") no-repeat -250px -125px;
+	background: url("imgs/tree.png") no-repeat -252px -125px;
 }
 
 
@@ -281,6 +337,16 @@
 .oui-tree-box span.hide,
 .oui-tree-box button.hide{
 	display:none;
+}
+
+.oui-tree-box .gray {
+	-webkit-filter: grayscale(100%);
+	-moz-filter: grayscale(100%);
+	-ms-filter: grayscale(100%);
+	-o-filter: grayscale(100%);
+
+	filter: grayscale(100%);
+	filter: gray;
 }
 
 
@@ -338,9 +404,7 @@
 	display: none;
 }
 .oui-tree-clone li.node-move .switch{
-	/*visibility: hidden;*/
-	/*background:#cce8ff url("imgs/tree.png") no-repeat -200px -100px;*/
-	background:#cce8ff url("imgs/tree.png") no-repeat -200px -50px;
+	background:#cce8ff url("imgs/tree.png") no-repeat -225px -25px;
 }
 
 .oui-tree li.node-drag {opacity: 0.5;height:24px;}
@@ -477,44 +541,6 @@
 	box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);
 	-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);
 }
-
-/*
-.oui-tree-form .btn-primary {
-	height: 30px;
-	width: 55px;
-	border: solid 1px #2e6da4;
-	background: #337ab7;
-	box-sizing: border-box;
-	color: #fff;
-	font-family: 宋体;
-	border-radius: 4px;
-	border-top-left-radius: 0;
-	border-bottom-left-radius: 0;
-	border-left: solid 1px transparent;
-	margin-left: -1px;
-}
-
-.oui-tree-form .btn-primary:hover {
-	background: #286090;
-	border: solid 1px #204d74;
-}
-.oui-tree-form .search {
-	border:solid 1px #ccc;
-	box-sizing: border-box;
-	height: 30px;
-	width: 50px;
-	line-height: 20px;
-	padding: 3px;
-	font-size: 14px;
-	font-family: Arial,宋体;
-  	border-radius: 5px;
-  	cursor: pointer;
-}
-.oui-tree-form .search:hover {
-	background: #e6e6e6;
-	border: solid 1px #adadad;
-}
-*/
 
 .oui-tree-box .search-result-panel {
 	box-sizing: border-box;
