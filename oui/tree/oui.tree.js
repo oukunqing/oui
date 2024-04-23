@@ -3603,15 +3603,13 @@
 				handle = that.getItem('switch'),
 				css = ['switch'],
 				open = that.expanded,
-				leaf = that.isLeaf(),
-				nochild = !that.hasChild(),
 				none = false,
 				close = '-close';
 
 			if (!handle) {
 				return that.setIconClass();
 			}
-			if (nochild && (leaf || !that.isDynamic())) {
+			if (!that.hasChild() && (that.isLeaf() || !that.isDynamic())) {
 				close = '-none';
 				none = true;
 			}
@@ -3619,21 +3617,21 @@
 			if (that.tree.options.showLine) {
 				var siblings = that.parent.childs,
 					c = siblings.length,
-					last = siblings[c - 1].id === that.id,
-					first = siblings[0].id === that.id;
+					top = that.level === 0,
+					one = top && c === 1,
+					first = top && siblings[0].id === that.id,
+					last = siblings[c - 1].id === that.id;
 
-				if (first && last) {
-					if (that.level === 0) {
-						//only one
-						css.push(open ? 'node-open' : 'node' + close);
-					} else {
-						css.push(open ? 'last-open' : 'last' + close);
-					}
+				if (one) {
+					css.push(open ? 'one-open' : 'one' + close);
+				} else if (first) {
+					css.push(open ? 'first-open' : 'first' + close);
 				} else if (last) {
 					css.push(open ? 'last-open' : 'last' + close);
 				} else {
 					css.push(open ? 'switch-open' : 'switch' + close);
 				}
+
 				$.setElemClass(that.childbox, 'line', !last);
 			} else {
 				css.push('switch' + (none ? '-none' : open ? '-open' : close));
