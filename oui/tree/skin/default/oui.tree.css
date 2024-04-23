@@ -75,7 +75,7 @@
 .oui-tree li .item a.name span {float:left;display:inline-block;}
 
 .oui-tree li .item a.name{
-	cursor:pointer;margin:0 1px;padding:0 3px 0 2px;
+	cursor:pointer;margin:0 1px;padding:0 3px 0 1px;
 	border:solid 1px transparent;border-radius:4px;
 	width:auto;white-space:nowrap;float:left;
 }
@@ -121,13 +121,13 @@
 .oui-tree li .item .icon-page{background:transparent url("imgs/tree.png") no-repeat -50px 0;}
 .oui-tree li .item .icon-none{background:none;}
 
-.oui-tree li .item span.text{text-align:left;}
+.oui-tree li .item .text{text-align:left;}
 
-.oui-tree li .item span.desc{color:#999;}
-.oui-tree li .item span.desc b{margin:0 0 0 5px;font-weight:normal;}
+.oui-tree li .item .desc{color:#999;}
+.oui-tree li .item .desc b{margin:0 0 0 5px;font-weight:normal;}
 
-.oui-tree li .item span.count{color:#f50;font-family:'Courier New';font-weight:bold;}
-.oui-tree li .item span.count b{margin:0 0 0 5px;font-style:normal;}
+.oui-tree li .item .count{color:#f50;font-family:'Courier New';font-weight:bold;}
+.oui-tree li .item .count b{margin:0 0 0 5px;font-style:normal;}
 
 .oui-tree li .item .button{
 	margin:0 0 0 5px;padding:0;height:24px;
@@ -203,34 +203,34 @@
 .oui-tree li .item .switch:hover {background-color:transparent;border-radius:4px;}
 
 .oui-tree li .item .switch-close,
-.oui-tree li .item .switch-close:hover {background:transparent url("imgs/tree.png") no-repeat -127px 0;}
+.oui-tree li .item .switch-close:hover {background:transparent url("imgs/tree.png") no-repeat -102px -25px;}
 .oui-tree li .item .switch-open,
-.oui-tree li .item .switch-open:hover {background:url("imgs/tree.png") no-repeat -152px 0;}
+.oui-tree li .item .switch-open:hover {background:url("imgs/tree.png") no-repeat -127px -25px;}
 
 .oui-tree-device li .item .switch-close,
-.oui-tree-device li .item .switch-close:hover {background:transparent url("imgs/tree.png") no-repeat -127px -25px;}
+.oui-tree-device li .item .switch-close:hover {background:transparent url("imgs/tree.png") no-repeat -202px -25px;}
 .oui-tree-device li .item .switch-open,
-.oui-tree-device li .item .switch-open:hover {background:url("imgs/tree.png") no-repeat -152px -25px;}
+.oui-tree-device li .item .switch-open:hover {background:url("imgs/tree.png") no-repeat -227px -25px;}
 
 .oui-tree-switch-default li .item .switch-close,
-.oui-tree-switch-default li .item .switch-close:hover {background:transparent url("imgs/tree.png") no-repeat -127px 0;}
+.oui-tree-switch-default li .item .switch-close:hover {background:transparent url("imgs/tree.png") no-repeat -102px -25px;}
 .oui-tree-switch-default li .item .switch-open,
-.oui-tree-switch-default li .item .switch-open:hover {background:url("imgs/tree.png") no-repeat -152px 0;}
+.oui-tree-switch-default li .item .switch-open:hover {background:url("imgs/tree.png") no-repeat -127px -25px;}
 
 .oui-tree-switch-radius li .item .switch-close,
-.oui-tree-switch-radius li .item .switch-close:hover {background:transparent url("imgs/tree.png") no-repeat -177px 0;}
+.oui-tree-switch-radius li .item .switch-close:hover {background:transparent url("imgs/tree.png") no-repeat -152px -25px;}
 .oui-tree-switch-radius li .item .switch-open,
-.oui-tree-switch-radius li .item .switch-open:hover {background:url("imgs/tree.png") no-repeat -202px 0;}
+.oui-tree-switch-radius li .item .switch-open:hover {background:url("imgs/tree.png") no-repeat -177px -25px;}
 
 .oui-tree-switch-device li .item .switch-close,
-.oui-tree-switch-device li .item .switch-close:hover {background:transparent url("imgs/tree.png") no-repeat -127px -25px;}
+.oui-tree-switch-device li .item .switch-close:hover {background:transparent url("imgs/tree.png") no-repeat -202px -25px;}
 .oui-tree-switch-device li .item .switch-open,
-.oui-tree-switch-device li .item .switch-open:hover {background:url("imgs/tree.png") no-repeat -152px -25px;}
+.oui-tree-switch-device li .item .switch-open:hover {background:url("imgs/tree.png") no-repeat -227px -25px;}
 
-.oui-tree-switch-arrow li .item .switch-close{background:transparent url("imgs/tree.png") no-repeat -177px -25px;}
-.oui-tree-switch-arrow li .item .switch-open{background:url("imgs/tree.png") no-repeat -202px -25px;}
-.oui-tree-switch-arrow li .item .switch-close:hover {background:transparent url("imgs/tree.png") no-repeat -177px -50px;}
-.oui-tree-switch-arrow li .item .switch-open:hover {background:url("imgs/tree.png") no-repeat -202px -50px;}
+.oui-tree-switch-arrow li .item .switch-close{background:transparent url("imgs/tree.png") no-repeat -252px -25px;}
+.oui-tree-switch-arrow li .item .switch-open{background:url("imgs/tree.png") no-repeat -277px -25px;}
+.oui-tree-switch-arrow li .item .switch-close:hover {background:transparent url("imgs/tree.png") no-repeat -252px -50px;}
+.oui-tree-switch-arrow li .item .switch-open:hover {background:url("imgs/tree.png") no-repeat -277px -50px;}
 
 .oui-tree li .item .switch-none {background:none;cursor:default;}
 .oui-tree li .item .switch-none:hover {background:none;}
@@ -329,7 +329,6 @@
 }
 
 
-
 .oui-tree-box .hide,
 .oui-tree-box ul.hide,
 .oui-tree-box li.hide,
@@ -339,7 +338,7 @@
 	display:none;
 }
 
-.oui-tree-box .gray {
+.oui-tree .gray {
 	-webkit-filter: grayscale(100%);
 	-moz-filter: grayscale(100%);
 	-ms-filter: grayscale(100%);
@@ -382,7 +381,7 @@
 	border: dotted 1px #008000;
 }
 .oui-tree li.drop-on > .item .switch {
-	background:url("imgs/tree.png") no-repeat -225px -50px
+	background:url("imgs/tree.png") no-repeat -225px -175px
 }
 
 .oui-tree li.node-drop .button {
@@ -404,7 +403,7 @@
 	display: none;
 }
 .oui-tree-clone li.node-move .switch{
-	background:#cce8ff url("imgs/tree.png") no-repeat -225px -25px;
+	background:#cce8ff url("imgs/tree.png") no-repeat -225px -150px;
 }
 
 .oui-tree li.node-drag {opacity: 0.5;height:24px;}
@@ -503,10 +502,10 @@
 
 .oui-tree-form .btn-search {
 	right: 7px;
-	background:transparent url("imgs/tree.png") no-repeat -275px -25px;
+	background:transparent url("imgs/tree.png") no-repeat -275px -150px;
 }
 .oui-tree-form .btn-search:hover {
-	background-position-y: -50px;
+	background-position-y: -175px;
 }
 .oui-tree-form .btn-cancel {
 	right: 32px;
@@ -650,10 +649,10 @@
 	box-sizing: border-box;
 	overflow: hidden;
 	cursor: pointer;
-	background:transparent url("imgs/tree.png") no-repeat -250px -25px;
+	background:transparent url("imgs/tree.png") no-repeat -250px -150px;
 }
 .oui-tree-box .goto-tree-top:hover {
-	background-position-y: -50px;
+	background-position-y: -175px;
 }
 
 .oui-tree-bottom {

@@ -24,9 +24,12 @@
 <body>
 <div class="form">
     <div style="float:left;padding:6px;clear:none;">
-        <div id="tree" style="display:block;border:solid 1px #00f;border-radius:4px;overflow:auto;width:500px;height:600px;margin:0;"></div>
-        <div id="txt" style="margin:0;padding:5px 0;"></div>
+        <div id="tree" style="display:block;border:solid 1px #00f;border-radius:4px;overflow:auto;width:500px;height:600px;margin:0 0 5px 0;"></div>    
+        <select id="unit" style="width:100%;height:34px;" onchange="$.console.log('changed:', this.value);">
+            <option value="7155,8366">205428,866804050921863</option>
+        </select>
         <div id="tree1" style="display:block;border:solid 1px #00f;border-radius:4px;overflow:auto;width:500px;height:200px;margin:0;"></div>
+        <div style="margin-bottom:800px;"></div>
     </div>
     <div style="float:left;padding:0;margin:6px 0 0;clear:none;">
         <div class="box">
@@ -37,6 +40,10 @@
                 <label class="chb-label"><input type="checkbox" value="camera" name="chbData" /><span>通道</span></label>
                 <label class="chb-label"><input type="checkbox" value="department" name="chbData" /><span>部门</span></label>
                 <label class="chb-label"><input type="checkbox" value="person" name="chbData" /><span>人员</span></label>
+                <select id="ddlTreeId">
+                    <option value="tree">目录树</option>
+                    <option value="unit">下拉列表</option>
+                </select>
             </div>
             <div class="item">
                 <select id="ddlLevel">
@@ -194,6 +201,7 @@
                 </div>
             </div>
         </div>
+        <div id="txt" style="margin:0;padding:5px 0;"></div>
         <div id="divGet" class="box" style="display:none;">
 
         </div>
@@ -358,7 +366,9 @@
 
     var cache = {};
 
-    function test(type) {   
+    function test(type) {
+        TreeId = $('#ddlTreeId').val().trim();
+
         var arr = $N('chbData'), keys = {};
         for (var i = 0; i < arr.length; i++) {
             if (arr[i].checked) {
@@ -418,6 +428,7 @@
             //data.units[0].icon = {path: 'imgs/tree/area.png'};
         }
         $.tree(TreeId, {
+            target: TreeId === 'unit' ? 'unit' : null,
             skin: skin, 
             async: true, 
             keepStatus: keepStatus,

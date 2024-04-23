@@ -1486,7 +1486,7 @@
 
 				if (!display) {
 					$.removeClass(elem, 'oui-tree-elem-top,oui-tree-elem-bottom');
-					$.removeClass(elem, 'oui-tree-box-top,oui-tree-box-bottom');
+					$.removeClass(box, 'oui-tree-box-top,oui-tree-box-bottom');
 				}
 				return display ? this.setBoxPosition(tree, first) : this;
 			},
@@ -1500,7 +1500,7 @@
 					pos = 'bottom',
 					p = {
 						left: es.left,
-						top: es.height + es.top,
+						top: es.height + es.top - 1,
 						width: es.width,
 						height: cfg.height || 400
 					};
@@ -1512,7 +1512,7 @@
 				var offset = p.top + p.height - (bs.height + bs.scrollTop);
 				//如果选项框位置高度超过窗口高度，则显示在目标控件的上方
 				if (offset > 0) {
-					p.top = es.top - p.height;
+					p.top = es.top - p.height + 1;
 					pos = 'top';
 
 					//如果选项框位置窗口小于滚动高度，需要设置选项框位置和位置偏移
@@ -1538,7 +1538,7 @@
 				}
 
 				box.style.cssText = [
-					'left:{left}px;top:{top}px;width:{width}px;', 'height:{height}px;'
+					'left:{left}px;top:{top}px;width:{width}px;height:{height}px;'
 				].join('').format(p);
 
 				return this.setBoxSize(tree).setPanelSize(tree);
@@ -2320,37 +2320,21 @@
 				if (opt.dragAble && Factory.isDragType(opt, p.type)) {
 					li.draggable = true;
 				}
-				var hide = ' style="display:none;"',
-					title = opt.showTitle && p.text.length > Config.TitleTextLength ? ' title="' + p.text + '"' : '',
-					check = opt.showCheck ? [
-						'<span class="check" nid="', p.nid, '"></span>',
-					] : [],
-					icon = opt.showIcon ? [
-						'<span class="', node.getIconClass(), '" nid="', p.nid, '"', '></span>'
-					] : [],
-					count = opt.showCount ? [
-						'<span class="count" nid="', p.nid, '"></span>'
-					] : [],
-					desc = opt.showDesc ? [
-						'<span class="desc" nid="', p.nid, '">', 
-						p.desc ? '<b>' + p.desc + '</b>' : '', 
-						'</span>'
-					] : [],
-					button = opt.showButton ? [
-						'<div class="button" nid="', p.nid, '"></div>'
-					] : [],
-					info = Factory.buildInfo(tree, p, opt),
+				var title = opt.showTitle && p.text.length > Config.TitleTextLength ? ' title="' + p.text + '"' : '',
 					html = [
 						'<div class="item" nid="', p.nid, '">',
-						'<span class="', node.getSwitchClass(true), '" nid="', p.nid, '"></span>'
-					].concat(icon).concat(check).concat([
+						'<span class="', node.getSwitchClass(true), '" nid="', p.nid, '"></span>',
+						opt.showIcon ? '<span class="' + node.getIconClass() + '" nid="' + p.nid + '"></span>' : '',
+						opt.showCheck ? '<span class="check" nid="' + p.nid + '"></span>' : '',
 						'<a class="name" nid="', p.nid, '"', title, '>',
-						'<span class="text" nid="', p.nid, '">', p.text, '</span>'
-					]).concat(count).concat(desc).concat([
-						'</a>'
-					]).concat(button).concat(info).concat([
+						'<span class="text" nid="', p.nid, '">', p.text, '</span>',
+						opt.showCount ? '<span class="count" nid="' + p.nid + '"></span>' : '',
+						opt.showDesc ? '<span class="desc" nid="' + p.nid + '">' + (p.desc || '') + '</span>' : '',
+						'</a>',
+						opt.showButton ? '<div class="button" nid="' + p.nid + '"></div>' : '',
+						opt.showInfo ? '<span class="info" nid="' + p.nid + '"></span>' : '',
 						'</div>'
-					]);
+					];
 
 				li.innerHTML = html.join('');
 
