@@ -1,33 +1,83 @@
 <html>
 	<head>
 		<style type="text/css">
-			body{margin:5px;padding:0;font-size: 14px;font-family: Arial,宋体;}
-			.txt {padding: 5px;border:solid 1px #00f;border-radius: 5px;outline: none;width:1010px;height:500px;}
-			.btn {padding:0 15px;height:30px;}
-			.div {padding: 5px;border:solid 1px #f50;width:1000px;border-radius: 5px; line-height:24px;}
+			body{margin:10px;padding:0;font-size: 14px;font-family: Arial,宋体;}
+			.txt {padding: 5px;border:solid 1px #00f;border-radius: 5px;outline: none;width:100%;height:300px;}
+			.btn {padding:0 15px;height:30px;float:left;margin:0 5px 0 0;}
+			.warn {margin:5px 0 0;padding: 5px;border:solid 1px #f50;width:98%;border-radius: 5px; line-height:24px;overflow: auto;}
+			.warn a {border:solid 1px #ccc;display:block; float:left;cursor: pointer;margin:0 4px 4px 0;padding:0 5px;border-radius:3px;}
+			.warn a:hover{color:#f00;font-weight: bold;	}
+			.warn a.cur{border:solid 1px #f00;color:#f00;font-weight:bold;}
+			.codes {float: right;border:solid 1px #00f;max-width:1200px;overflow: auto;border-radius:5px;padding:0 5px;}
+			.codes ul,.codes li{margin:0; padding:0;list-style: none;}
+			.codes li {line-height: 22px;}
+			.codes li:hover {background: #e5f3ff;}
+			.codes li.cur {background: #cce8ff;}
+			.codes .idx {width:50px;display: inline-block;}
+			.select {height:30px;float:left;margin:0 5px 0 0;}
 		</style>
 	</head>
 	<body>
-		<div>
+		<div id="codes" class="codes"></div>
+		<div style="min-width:400px;max-width:600px;float:left;">
 			<textarea id="content" class="txt" placeholder="请复制JS代码，粘贴到这里"></textarea>
-			<div style="margin:5px 0;">
+			<div style="margin:5px 0;clear:both;overflow: hidden;">
 				<button id="btncheck" class="btn" onclick="check();">检测</button>
+				<select id="ddlInterval" class="select">
+					<option value="500">500ms</option>
+					<option value="600">600ms</option>
+					<option value="750">750ms</option>
+					<option value="800">800ms</option>
+					<option value="1000">1000ms</option>
+					<option value="1200">1200ms</option>
+					<option value="1500">1500ms</option>
+					<option value="2000">2000ms</option>
+					<option value="3000">3000ms</option>
+				</select>
+				<button class="btn" onclick="play();">自动轮循</button>
+				<button class="btn" onclick="stop();">停止</button>
+				<button class="btn" onclick="previous();">上一个</button>
+				<button class="btn" onclick="next();">下一个</button>
 			</div>
+			<div id="result" class="warn"></div>
 		</div>
-		<div id="result" class="div"></div>
 	</body>
 </html>
 <script type="text/javascript" src="oui/oui.min.js"></script>
 <script type="text/javascript">
+window.onresize = function () {
+	setSize();
+};
+
+function setSize () {
+	var bs = $.getBodySize();
+	$('#codes').height(bs.height - 20);
+}
+
+window.onload = function () {
+	$('#codes').dblclick(function() {
+		stoped = true;
+	});
+};
+
+var Lines = [], Index = 0, stoped = false, timer, interval;
+
 function check() {
+	Index = 0;
+	Lines = [];
+	stoped = false;
+
 	var con = $I('content').value.split(/\r\n|\n/g),
-		len = con.length, i, c, lines = [], charL, charF,
+		len = con.length, i, c, charL, charF,
 		annotate = 0;
 
+	var html = ['<pre><ul>'];
+ 
 	for (i = 0; i < len - 1; i++) {
+		html.push('<li id="L' + (i + 1) + '"><a class="idx">' + (i + 1) + '</a>' + con[i] + '</li>');
 		var s = con[i].trim(), ns = con[i + 1].trim(), c = s.length,
 			ts = s.replace(/[\s]/g, '');
-		
+
 		if (c > 0) {
 			charL = s[c - 1];
 			charF = ns[0] || '';
@@ -48,14 +98,78 @@ function check() {
 				|| charF.inArray(['}', ']', '.', ','])) {
 				continue;
 			}
-			lines.push(i + 1);
+			Lines.push(i + 1);
 		}
 	}
-	var len = lines.length;
+	html.push('</ul></pre>');
+
+	$('#codes').html(html.join(''));
+
+	var len = Lines.length;
 	if (!len) {
 		$('#result').html('Nothing');
 	} else {
-		$('#result').html('Find ' + len + ' lines:<br />' + lines.join(', '));
+		var rst = ['Find ' + len + ' lines:<br />'];
+		for (var i = 0; i < len; i++) {
+			rst.push('<a id="W' + (Lines[i]) + '" onclick="goto(' + Lines[i] + ',' + i + ');">' + Lines[i] + '</a>');
+		}
+		$('#result').html(rst.join(''));
 	}
+
+	setSize();
+}
+
+function goto(num, idx) {
+	var L = document.getElementById('L' + num),
+		W = document.getElementById('W' + num),
+		div = document.getElementById('codes'),
+		cur = document.querySelectorAll('.cur');
+
+	if (idx < 0) {
+		return false;
+	}
+
+	Index = idx;
+
+	for (var i = 0; i < cur.length; i++) {
+		cur[i].className = '';
+	}
+	L.className = 'cur';
+	W.className = 'cur';
+
+	$.scrollTo(L, div, -300);
+}
+
+function loop (idx) {
+	idx = idx || Index;
+	if (stoped || Lines.length <= 0 || idx >= Lines.length) {
+		return false;
+	}
+	goto(Lines[idx], idx);
+	if (timer) {
+		window.clearTimeout(timer);
+	}
+	timer = window.setTimeout(function () {
+		loop(idx + 1);
+	}, interval);
+}
+
+function play(idx) {
+	stoped = false;
+	interval = $('#ddlInterval').val().toInt();
+	loop(idx);
+}
+
+function stop() {
+	stoped = true;
+}
+
+function previous() {
+	var idx = Index - 1;
+	goto(Lines[idx], idx);
+}
+function next() {
+	var idx = Index + 1;
+	goto(Lines[idx], idx);
 }
 </script>

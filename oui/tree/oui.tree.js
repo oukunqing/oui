@@ -53,6 +53,7 @@
 				Modify: '\u4fee\u6539'		//修改
 			},
 			EmptyTreeId: 'OuiTreeNone',
+			TreeBoxMinHeight: 160,
 			SearchResultBoxHeight: 390, 	//12 * 30 + 30
 			SearchResultItemHeight: 30,
 			SearchResultTitleHeight: 30,
@@ -723,6 +724,8 @@
 					types = $.isString(types, true) ? types.split(/[,;|]/) : [types];
 					opt.buttonConfig.types = types;
 				}
+
+				opt.dragSize = $.isBoolean($.getParam(opt, 'dragResize,dragSize,dragsize'), false);
 
 				opt.showInfo = $.isBoolean($.getParam(opt, 'showInfo,showinfo'), false);
 
@@ -1490,11 +1493,17 @@
 				}
 				return display ? this.setBoxPosition(tree, first) : this;
 			},
-			setBoxPosition: function (tree, first) {
+			setBoxPosition: function (tree, first, topY) {
 				var opt = tree.options,
-					cfg = opt.targetConfig,
+					box = tree.element;
+
+				if ($.isNumber(topY)) {
+					box.style.top = topY + 'px';
+					return this;
+				}
+
+				var cfg = opt.targetConfig,
 					obj = tree.target,
-					box = tree.element,
 					es = $.getOffset(tree.target),
 					bs = $.getBodySize(),
 					pos = 'bottom',
@@ -1502,7 +1511,7 @@
 						left: es.left,
 						top: es.height + es.top - 1,
 						width: es.width,
-						height: cfg.height || 400
+						height: Cache.drags['size' + tree.id] || cfg.height || 400
 					};
 
 				if (p.height > bs.height) {
@@ -1520,7 +1529,7 @@
 						var whiteSpace = 4;
 						//默认显示在目标控件下方，并向上偏移，偏移量即之前超出窗口高度的值
 						p.top = es.top + es.height - offset - whiteSpace;
-						pos = 'middle';
+						pos = 'top-bottom';
 					}
 				}
 
@@ -1538,12 +1547,43 @@
 				}
 
 				box.style.cssText = [
-					'left:{left}px;top:{top}px;width:{width}px;height:{height}px;'
+					'left:{left}px;top:{top}px;width:{width}px;',
+					'height:{height}px;' 
 				].join('').format(p);
 
-				return this.setBoxSize(tree).setPanelSize(tree);
+				return this.setPanelSize(tree).showResizeBar(tree, pos);
 			},
-			setBoxSize: function (tree) {
+			setBoxSize: function (tree, height, append, ev) {
+				var h = parseInt(height, 10),
+					isEvent = ev && ev.target && ev.target.className.indexOf('sizebar');
+
+				if (isEvent) {
+					var key = 'oui-tree-resize';
+					if (Cache.timers[key]) {
+						window.clearTimeout(Cache.timers[key]);
+					}
+					Cache.timers[key] = window.setTimeout(function() {
+						_size();
+					}, 5);
+				} else {
+					_size();
+				}
+
+				function _size() {
+					if (isNaN(h)) {
+						return false;
+					}
+					var bh = (append ? tree.element.offsetHeight : 0) + h;
+					if (bh <= Config.TreeBoxMinHeight || bh > $.getBodySize().height) {
+						return false;
+					}
+					Cache.drags['size' + tree.id] = bh;
+
+					tree.element.style.height = bh + 'px';
+
+					Factory.setPanelSize(tree, null);
+				}
+
 				return this;
 			},
 			setTypeCache: function (tree, type, ptype) {
@@ -1722,10 +1762,7 @@
 					cfg.form.style.display = 'none';
 					Factory.showSearchPanel(tree, false ,true);
 				}
-
-				Factory.setPanelSize(tree, null, true);
-
-				return this;
+				return Factory.setPanelSize(tree, null, true);
 			},
 			buildBottomForm: function (tree, box) {
 				var opt = tree.options;
@@ -1767,6 +1804,103 @@
 					bar.style.display = 'none';
 				}
 
+				return this;
+			},
+			setSizebarEvent: function (tree, elem) {
+				var isWap = false,
+					opt = tree.options,
+					evNameDown = isWap ? 'ontouchstart' : 'onmousedown',
+					evNameUp = isWap ? 'ontouchend' : 'onmouseup',
+                    evNameMove = isWap ? 'ontouchmove' : 'onmousemove',
+                    box = tree.element,
+                    docMouseMove = document[evNameMove],
+                    docMouseUp = document[evNameUp];
+
+                function resizeBox(ev) {
+                	if (!opt.dragSize) {
+                		return false;
+                	}
+                    var evt = ev || $.getEvent(),
+                        //moveX = isWap ? evt.touches[0].clientX : evt.clientX,
+                        moveY = isWap ? evt.touches[0].clientY : evt.clientY,
+                        moveAble = true,
+                        //left = ev.target.className.indexOf('left') > -1,
+                        top = ev.target.className.indexOf('top') > -1,
+                        height = tree.element.offsetHeight,
+                        topY = tree.element.offsetTop,
+                        bottomY = topY + height,
+                        newHeight = height;
+
+                	document[evNameMove] = function (ev) {
+                		if (!moveAble) {
+                			return false;
+                		}
+                        var e = ev || $.getEvent(),
+                            //x = ((isWap ? e.touches[0].clientX : e.clientX) - moveX) * (left ? -1 : 1),
+                            y = ((isWap ? e.touches[0].clientY : e.clientY) - moveY) * (top ? -1 : 1);
+
+                        newHeight = height + y;
+
+                       	if (y < 0 && newHeight < Config.TreeBoxMinHeight) {
+                       		return false;
+                       	}
+                        if (!Factory.setBoxSize(tree, newHeight, false, ev)) {
+                        	return false;
+                        }
+                        if (top) {
+                        	Factory.setBoxPosition(tree, false, topY - y);
+                        }
+                    };
+                    document[evNameUp] = function () {
+                		if (!moveAble) {
+                			return false;
+                		}
+                        document[evNameMove] = docMouseMove;
+                        document[evNameUp] = docMouseUp;
+                        moveAble = false;
+                    };
+                }
+
+				$.addListener(elem, 'mousedown', function(ev) {
+					resizeBox(ev);
+				});
+				return this;
+			},
+			showResizeBar: function (tree, dir) {
+				var opt = tree.options,
+					top = tree.box.querySelector('.topbar'),
+					bottom = tree.box.querySelector('.bottombar');
+
+				if (!opt.dragSize) {
+					return this;
+				}
+				if (!dir) {
+					dir = '';
+				}
+				if (!top) {
+					top = document.createElement('div');
+					top.className = 'sizebar topbar oui-tree-topbar';
+					top.style.display = 'none';
+					Factory.setSizebarEvent(tree, top);
+					tree.box.appendChild(top);
+				}
+				if (!bottom) {
+					bottom = document.createElement('div');
+					bottom.className = 'sizebar bottombar oui-tree-bottombar';
+					if (opt.target) {
+						bottom.style.display = 'none';
+					}
+					Factory.setSizebarEvent(tree, bottom);
+					tree.box.appendChild(bottom);
+				} else if (opt.target) {
+					bottom.style.display = 'none';
+				}
+				if (dir.indexOf('top') > -1) {
+					top.style.display = 'block';
+				}
+				if (dir.indexOf('bottom') > -1) {
+					bottom.style.display = 'block';
+				}
 				return this;
 			},
 			showSearchPanel: function (tree, show, force) {
@@ -1889,7 +2023,11 @@
 				return Factory.showSearchPanel(tree, display);
 			},
 			setPanelSize: function (tree, ev, force) {
-				if (!force && (!tree.panel || !tree.options.showSearch)) {
+				var opt = tree.options,
+					form = tree.box.querySelector('div.form'),
+					bottom = tree.box.querySelector('div.bottom');
+
+				if (!force && (!tree.panel || (!form && !bottom))) {
 					return this;
 				}
 				if (!ev) {
@@ -1905,17 +2043,13 @@
 				}
 				function _resize() {
 					var dh = $.getOffset(tree.box).height,
-						opt = tree.options,
-						form = tree.box.querySelector('div.form'),
-						bottom = tree.box.querySelector('div.bottom'),
-						fh = opt.showSearch && form ? form.offsetHeight : 0,
-						bh = opt.showBottom && bottom ? bottom.offsetHeight : 0,
+						fh = form && form.style.display !== 'none' ? form.offsetHeight : 0,
+						bh = bottom && bottom.style.display !== 'none' ? bottom.offsetHeight : 0,
 						ph = dh - fh - bh,
 						cache = Factory.getSearchCache(tree);
 
-					if (ph !== dh) {
-						tree.panel.style.cssText = ['height:', ph, 'px;'].join('');
-					}
+					tree.panel.style.cssText = ['height:', ph, 'px;'].join('');
+
 					if (cache && cache.elem) {
 						cache.elem.style.width = (form.offsetWidth - 8) + 'px';
 					}
@@ -1936,8 +2070,6 @@
 				if (!box) {
 					that.box = box = document.createElement('div');
 					box.id = that.bid;
-
-					Factory.buildForm(that, box);
 
 					if ($.isElement(opt.target)) {
 						css.push('oui-tree-popup');
@@ -1979,7 +2111,7 @@
 					}
 				}
 
-				Factory.showSearchForm(tree).showBottomForm(tree)
+				Factory.showSearchForm(tree).showBottomForm(tree).showResizeBar(tree)
 					.setPanelClass(div, opt).setPanelSize(that);
 
 				return this;
@@ -3803,6 +3935,8 @@
 				dragMove: undefined,
 				//按钮配置
 				buttonConfig: undefined,
+				//是否允许拖动改变框体大小
+				dragSize: undefined,
 				//是否显示节点信息
 				showInfo: undefined,
 				//是否显示子节点数量
@@ -3920,13 +4054,16 @@
 			var that = this;
 			return Factory.setBoxDisplay(that, false), that;
 		},
-		resize: function () {
+		resize: function (height, append) {
 			var that = this;
+			if ($.isNumber(height)) {
+				return Factory.setBoxSize(that, height, append);
+			}
 			return Factory.setPanelSize(that), that;
 		},
 		//仅用于动态加载数据时有效
 		reload: function () {
-			var that = this;			
+			var that = this;
 			return Factory.reloadNode(that), that;
 		},
 		nid: function (id, type) {
