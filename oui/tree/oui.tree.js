@@ -54,6 +54,7 @@
 			},
 			EmptyTreeId: 'OuiTreeNone',
 			TreeBoxMinHeight: 160,
+			TreeBoxDefaultHeight: 400,
 			SearchResultBoxHeight: 390, 	//12 * 30 + 30
 			SearchResultItemHeight: 30,
 			SearchResultTitleHeight: 30,
@@ -703,6 +704,7 @@
 				opt.showType = $.isBoolean($.getParam(opt, 'showType,showtype'), true);
 				opt.showStatus = $.isBoolean($.getParam(opt, 'showStatus,showstatus'), true);
 				opt.showLine = $.isBoolean($.getParam(opt, 'showLine,showline'), false);
+				opt.hoverLine = $.isBoolean($.getParam(opt, 'hoverLine,hoverline'), false);
 				opt.showIcon = $.isBoolean($.getParam(opt, 'showIcon,showicon'), true);
 
 				var showCheck = $.getParam(opt, 'showCheck,showcheck,checkbox');
@@ -1507,11 +1509,13 @@
 					es = $.getOffset(tree.target),
 					bs = $.getBodySize(),
 					pos = 'bottom',
+					//之前设置过的框体高度
+					boxHeight = Cache.drags['size' + tree.id],
 					p = {
 						left: es.left,
 						top: es.height + es.top - 1,
 						width: es.width,
-						height: Cache.drags['size' + tree.id] || cfg.height || 400
+						height: boxHeight || cfg.height || Config.TreeBoxDefaultHeight
 					};
 
 				if (p.height > bs.height) {
@@ -1654,9 +1658,15 @@
 				}
 				if (opt.showLine) {
 					css.push('oui-tree-line');
+					if (opt.hoverLine) {
+						css.push('oui-tree-line-hover');
+					}
 				}
 				if (opt.switch) {
 					css.push('oui-tree-' + (opt.showLine ? 'line' : 'switch') + opt.switch);
+					if (opt.showLine && opt.hoverLine) {
+						css.push('oui-tree-line' + opt.switch + '-hover');
+					}
 				}
 				return css.join(' ');
 			},
@@ -2024,8 +2034,8 @@
 			},
 			setPanelSize: function (tree, ev, force) {
 				var opt = tree.options,
-					form = tree.box.querySelector('div.form'),
-					bottom = tree.box.querySelector('div.bottom');
+					form = tree.box ? tree.box.querySelector('div.form') : null,
+					bottom = tree.box ? tree.box.querySelector('div.bottom') : null;
 
 				if (!force && (!tree.panel || (!form && !bottom))) {
 					return this;
@@ -3915,6 +3925,8 @@
 				openLevel: undefined,
 				//是否显示连线
 				showLine: undefined,
+				//是否悬停显示连线
+				hoverLine: undefined,
 				//是否显示图标
 				showIcon: undefined,
 				//是否显示复选框
@@ -4008,7 +4020,7 @@
 
 			if (opt.target) {
 				opt.targetConfig = $.extend({
-					height: 500,
+					height: Config.TreeBoxDefaultHeight,
 					separator: ','
 				}, opt.targetConfig);
 			}

@@ -73,6 +73,7 @@
                 <label class="chb-label"><input type="checkbox" id="chbCamera" /><span>动态加载通道</span></label>
                 <div></div>
                 <label class="chb-label"><input type="checkbox" id="chbLine" /><span>显示连线</span></label>
+                <label class="chb-label" title="鼠标悬停显示连线"><input type="checkbox" id="chbHoverLine" /><span>悬停显示</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbIcon" checked="checked" /><span>显示图标</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbCheck" checked="checked" /><span>显示选框</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbType" checked="checked" /><span>显示类型</span></label>
@@ -398,6 +399,7 @@
             keepCookie = $('#chbKeepCookie').checked(),
             showCheck = $('#chbCheck').checked(),
             showLine = $('#chbLine').checked(),
+            hoverLine = $('#chbHoverLine').checked(),
             showIcon = $('#chbIcon').checked(),
             showType = $('#chbType').checked(),
             showStatus = $('#chbStatus').checked(),
@@ -460,6 +462,7 @@
             //checkbox: true,
             showCheck: showCheck,
             showLine: showLine,
+            hoverLine: hoverLine,
             showIcon: showIcon,
             showType: showType,
             showStatus: showStatus,
