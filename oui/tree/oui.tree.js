@@ -53,7 +53,7 @@
 				Modify: '\u4fee\u6539'		//修改
 			},
 			EmptyTreeId: 'OuiTreeNone',
-			TreeBoxMinHeight: 160,
+			TreeBoxMinHeight: 135,
 			TreeBoxDefaultHeight: 400,
 			SearchResultBoxHeight: 390, 	//12 * 30 + 30
 			SearchResultItemHeight: 30,
@@ -727,6 +727,19 @@
 					opt.buttonConfig.types = types;
 				}
 
+				opt.boxHeight = $.getParam(opt, 'boxHeight');
+				if (!$.isNumber(opt.boxHeight) || opt.boxHeight < Config.TreeBoxMinHeight) {
+					opt.boxHeight = undefined;
+				}
+				opt.minHeight = $.getParam(opt, 'minHeight');
+				if (!$.isNumber(opt.minHeight) || opt.minHeight < Config.TreeBoxMinHeight) {
+					opt.minHeight = undefined;
+				}
+				opt.maxHeight = $.getParam(opt, 'maxHeight');
+				if (!$.isNumber(opt.maxHeight) || opt.maxHeight < Config.TreeBoxMinHeight) {
+					opt.maxHeight = undefined;
+				}
+
 				opt.dragSize = $.isBoolean($.getParam(opt, 'dragResize,dragSize,dragsize'), false);
 
 				opt.showInfo = $.isBoolean($.getParam(opt, 'showInfo,showinfo'), false);
@@ -785,6 +798,8 @@
 				}
 				//默认值(原始值)，用于值的还原
 				opt.defaultValue = $.getParam(opt, 'defaultValue,originalValue,originValue');
+				
+				opt.textSeparator = $.getParam(opt, 'textSeparator,separator');
 
 				opt.openTypes = Factory.parseArrayParam($.getParam(opt, 'openTypes,openType'));
 
@@ -1423,7 +1438,6 @@
 					return this;
 				}
 				var opt = tree.options,
-					cfg = opt.targetConfig,
 					tag = tree.target.tagName.toLowerCase(),
 					txt = '', val = '';
 
@@ -1440,7 +1454,7 @@
 						txts.push(nodes[i].getText());
 						vals.push(nodes[i].getValue());
 					}
-					txt = txts.join(cfg.separator || ',');
+					txt = txts.join(opt.textSeparator || ',');
 					val = vals.join(',');
 				} else if (node) {
 					txt = node.getText();
@@ -1504,8 +1518,7 @@
 					return this;
 				}
 
-				var cfg = opt.targetConfig,
-					obj = tree.target,
+				var obj = tree.target,
 					es = $.getOffset(tree.target),
 					bs = $.getBodySize(),
 					pos = 'bottom',
@@ -1515,7 +1528,7 @@
 						left: es.left,
 						top: es.height + es.top - 1,
 						width: es.width,
-						height: boxHeight || cfg.height || Config.TreeBoxDefaultHeight
+						height: boxHeight || opt.boxHeight || Config.TreeBoxDefaultHeight
 					};
 
 				if (p.height > bs.height) {
@@ -1559,6 +1572,7 @@
 			},
 			setBoxSize: function (tree, height, append, ev) {
 				var h = parseInt(height, 10),
+					opt = tree.options,
 					isEvent = ev && ev.target && ev.target.className.indexOf('sizebar');
 
 				if (isEvent) {
@@ -1577,8 +1591,12 @@
 					if (isNaN(h)) {
 						return false;
 					}
-					var bh = (append ? tree.element.offsetHeight : 0) + h;
-					if (bh <= Config.TreeBoxMinHeight || bh > $.getBodySize().height) {
+					var oh = tree.element.offsetHeight,
+						bh = (append ? oh : 0) + h,
+						minH = opt.minHeight || Config.TreeBoxMinHeight,
+						maxH = opt.maxHeight || $.getBodySize().height;
+
+					if ((bh <= minH && bh < oh) || (bh > maxH && bh > oh)) {
 						return false;
 					}
 					Cache.drags['size' + tree.id] = bh;
@@ -1852,7 +1870,7 @@
                         newHeight = height + y;
 
                        	if (y < 0 && newHeight < Config.TreeBoxMinHeight) {
-                       		return false;
+                       		//return false;
                        	}
                         if (!Factory.setBoxSize(tree, newHeight, false, ev)) {
                         	return false;
@@ -3899,6 +3917,8 @@
 				valueFields: [],
 				//默认值，用于值还原
 				defaultValue: undefined,
+				//文本内容分隔符
+				textSeparator: ',',
 				//switch图标类型（默认样式时有效）
 				switch: undefined,
 				//data数据结构注解，示例：[{key:'unit',val:'units'}]
@@ -3989,8 +4009,12 @@
 				clickExpand: undefined,
 				//关联元素
 				target: undefined,
-				//关联弹出层配置
-				targetConfig: undefined,
+				//窗体高度：仅用于下拉弹出窗体
+				boxHeight: undefined,
+				//窗体最小高度
+				minHeight: undefined,
+				//窗体最大高度
+				maxHeight: undefined,
 				//是否触发式显示，例如点击<a>
 				trigger: undefined,
 				//回调等级：0-实时回调，1-点击“确定”按钮后回调
@@ -4017,13 +4041,6 @@
 				//dragCallback,ondrag
 				dragCallback: undefined
 			}, options));
-
-			if (opt.target) {
-				opt.targetConfig = $.extend({
-					height: Config.TreeBoxDefaultHeight,
-					separator: ','
-				}, opt.targetConfig);
-			}
 
 			this.id = opt.id;
 			this.bid = Factory.buildTreeId(opt.id, 'box_');

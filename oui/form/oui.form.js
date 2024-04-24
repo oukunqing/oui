@@ -988,7 +988,8 @@
             if (pass || !obj.isValueSet) {
                 var fc = op.getFieldConfig(obj, op.fields, ignoreCase),
                     keyCase = ignoreCase ? fc.key.substr(0, 1).toLowerCase() + fc.key.substr(1) : fc.key,
-                    value = data[fc.key] || data[keyCase],
+                    //value = data[fc.key] || data[keyCase],
+                    value = $.getParam(data, [fc.key, keyCase].join(',')),
                     isArray = $.isArray(value);
                 if ($.isUndefined(value)) {
                     value = data[fc.nameKey];
