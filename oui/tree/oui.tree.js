@@ -690,7 +690,7 @@
 				opt.async = $.isBoolean(opt.async, true);
 
 				//重新加载时，是否保持节点展开状态
-				opt.keepStatus = $.isBoolean($.getParam(opt, 'keepStatus,keep'), false);
+				opt.keepStatus = $.isBoolean($.getParam(opt, 'keepExpand,keepStatus,keep'), false);
 				//是否保持节点收缩状态
 				opt.keepCollapse = $.isBoolean($.getParam(opt, 'keepCollapse'), false);
 				//是否将状态保存到cookie中
@@ -739,6 +739,11 @@
 				if (!$.isNumber(opt.maxHeight) || opt.maxHeight < Config.TreeBoxMinHeight) {
 					opt.maxHeight = undefined;
 				}
+				opt.position = $.getParam(opt, 'boxPosition,position');
+				if (['top', 'bottom'].indexOf(opt.position) < 0) {
+					opt.position = 'bottom';
+				}
+				opt.positionFixed = $.isBoolean($.getParam(opt, 'positionFixed,fixed'), false);
 
 				opt.dragSize = $.isBoolean($.getParam(opt, 'dragResize,dragSize,dragsize'), false);
 
@@ -1061,6 +1066,13 @@
 				}
 				return this.setCookieCache(tree);
 			},
+			buildCookieName: function (tree) {
+				var url = location.href.split('?')[0],
+					key = $.crc.toCRC16(url),
+					name = 'TREE_STATUS_' + key + '_' + tree.id;
+
+				return name;
+			},
 			setCookieCache: function (tree) {
 				if (!tree.options.keepCookie) {
 					return this;
@@ -1078,9 +1090,9 @@
 						if (Factory.isLocalhost()) {
 							$.console.log('setCookieCache:', tree.id, data);
 						}
-						$.setCookie('TREE_STATUS_' + tree.id, data, tree.options.cookieExpire);
+						$.setCookie(Factory.buildCookieName(tree), data, tree.options.cookieExpire);
 					}
-				}, 2000);
+				}, 1000);
 
 				return this;
 			},
@@ -1090,7 +1102,7 @@
 					//从cookie获取的内容格式可能异常，所以需要捕获异常，防止程序异常中断
 					//从外部客户端获取的内容，严谨原则来看，都需要经过验证
 					try {
-						if (data = $.getCookie('TREE_STATUS_' + tree.id)) {
+						if (data = $.getCookie(Factory.buildCookieName(tree))) {
 							if (Factory.isLocalhost()) {
 								$.console.log('getCookieCache:', tree.id, data);
 							}
@@ -1521,7 +1533,7 @@
 				var obj = tree.target,
 					es = $.getOffset(tree.target),
 					bs = $.getBodySize(),
-					pos = 'bottom',
+					pos = opt.position || 'bottom',
 					//之前设置过的框体高度
 					boxHeight = Cache.drags['size' + tree.id],
 					p = {
@@ -1535,42 +1547,64 @@
 					p.height = bs.height - 6;
 				}
 
-				var offset = p.top + p.height - (bs.height + bs.scrollTop);
-				//如果选项框位置高度超过窗口高度，则显示在目标控件的上方
-				if (offset > 0) {
-					p.top = es.top - p.height + 1;
-					pos = 'top';
-
-					//如果选项框位置窗口小于滚动高度，需要设置选项框位置和位置偏移
-					if (p.top < bs.scrollTop) {
-						var whiteSpace = 4;
-						//默认显示在目标控件下方，并向上偏移，偏移量即之前超出窗口高度的值
-						p.top = es.top + es.height - offset - whiteSpace;
-						pos = 'top-bottom';
-					}
-				}
-
 				switch(pos) {
-				case 'bottom':
-					$.addClass(obj, 'oui-tree-elem-bottom');
-					$.addClass(box, 'oui-tree-box-bottom');
-					break;
 				case 'top':
-					$.addClass(obj, 'oui-tree-elem-top');
-					$.addClass(box, 'oui-tree-box-top');
-					break;
-				default:
+					p.top = es.top - p.height + 1;
 					break;
 				}
 
-				box.style.cssText = [
-					'left:{left}px;top:{top}px;width:{width}px;',
-					'height:{height}px;' 
-				].join('').format(p);
+				if (opt.positionFixed) {
+					_postion(obj, box, pos, p);
+				} else {
+					if (pos === 'bottom') {
+						var offset = p.top + p.height - (bs.height + bs.scrollTop);
+						//如果选项框位置高度超过窗口高度，则显示在目标控件的上方
+						if (offset > 0) {
+							p.top = es.top - p.height + 1;
+							pos = 'top';
 
-				return this.setPanelSize(tree).showResizeBar(tree, pos);
+							//如果选项框位置窗口小于滚动高度，需要设置选项框位置和位置偏移
+							if (p.top < bs.scrollTop) {
+								var whiteSpace = 4;
+								//默认显示在目标控件下方，并向上偏移，偏移量即之前超出窗口高度的值
+								p.top = es.top + es.height - offset - whiteSpace;
+								pos = 'top-bottom';
+							}
+						}
+					} else if (p.top < 0) {
+						p.top = es.height + es.top - 1;
+						if (p.top + p.height > bs.height + bs.scrollTop) {
+							p.top = 4;
+							pos = 'top-bottom';
+						}
+					}
+					_postion(obj, box, pos, p);
+				}
+
+				function _postion (obj, box, pos, p) {
+					switch(pos) {
+					case 'bottom':
+						$.addClass(obj, 'oui-tree-elem-bottom');
+						$.addClass(box, 'oui-tree-box-bottom');
+						break;
+					case 'top':
+						$.addClass(obj, 'oui-tree-elem-top');
+						$.addClass(box, 'oui-tree-box-top');
+						break;
+					default:
+						break;
+					}
+
+					box.style.cssText = [
+						'left:{left}px;top:{top}px;width:{width}px;',
+						'height:{height}px;' 
+					].join('').format(p);
+
+					Factory.setPanelSize(tree).showResizeBar(tree, pos);
+				}
+				return this;
 			},
-			setBoxSize: function (tree, height, append, ev) {
+			setBoxSize: function (tree, height, append, ev, topY) {
 				var h = parseInt(height, 10),
 					opt = tree.options,
 					isEvent = ev && ev.target && ev.target.className.indexOf('sizebar');
@@ -1602,7 +1636,10 @@
 					Cache.drags['size' + tree.id] = bh;
 
 					tree.element.style.height = bh + 'px';
-
+					
+					if (isEvent && topY) {
+						Factory.setBoxPosition(tree, false, topY);
+					}
 					Factory.setPanelSize(tree, null);
 				}
 
@@ -1872,11 +1909,8 @@
                        	if (y < 0 && newHeight < Config.TreeBoxMinHeight) {
                        		//return false;
                        	}
-                        if (!Factory.setBoxSize(tree, newHeight, false, ev)) {
+                        if (!Factory.setBoxSize(tree, newHeight, false, ev, top ? topY - y : 0)) {
                         	return false;
-                        }
-                        if (top) {
-                        	Factory.setBoxPosition(tree, false, topY - y);
                         }
                     };
                     document[evNameUp] = function () {
@@ -4015,6 +4049,10 @@
 				minHeight: undefined,
 				//窗体最大高度
 				maxHeight: undefined,
+				//窗体默认位置: bottom, top
+				position: undefined,
+				//固定窗体位置
+				fixed: undefined,
 				//是否触发式显示，例如点击<a>
 				trigger: undefined,
 				//回调等级：0-实时回调，1-点击“确定”按钮后回调

@@ -2061,3 +2061,4 @@ $.console.log($.replaceKeys(str, ['宁中波', '中'], true));
 $.console.log($.replaceKeys(str, ['宁中波', '中'], '<b>', '</b>', '大'));
 $.console.log(str.replaceKeys(['宁中波', '中'], '<b>', '</b>', '小'));
 $.console.log($.replaceKeys(str, ['宁中波', '中'], true));
+

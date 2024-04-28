@@ -1049,7 +1049,7 @@
             d = options[i];
             v = d.value.toString();
             t = d.text.trim();
-            if (val === v) {
+            if (val === v && txt === t) {
                 elem.selectedIndex = i;
                 return this;
             }
