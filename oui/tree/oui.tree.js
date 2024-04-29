@@ -1069,9 +1069,9 @@
 			buildCookieName: function (tree) {
 				var url = location.href.split('?')[0],
 					key = $.crc.toCRC16(url),
-					name = 'TREE_STATUS_' + key + '_' + tree.id;
+					val = ['TREE_STATUS', key, tree.id];
 
-				return name;
+				return val.join('_');
 			},
 			setCookieCache: function (tree) {
 				if (!tree.options.keepCookie) {
@@ -1302,7 +1302,9 @@
 				var nodes = [], 
 					opt = tree.options,
 					cfg = Factory.getSearchCache(tree),
-					key = txt.value.trim(), node;
+					key = txt.value.trim(), node,
+					keys = key.split(/[\s,;|]/),
+					c = keys.length, i;
 
 				if (!$.isString(key, true)) {
 					Factory.setSearchCache(tree, { key: '', search: false })
@@ -1320,8 +1322,6 @@
 				if (cfg.key === key) {
 					return Factory.showSearchPanel(tree, true);
 				}
-
-				var keys = key.split(/[\s,;|]/), c = keys.length, i;
 
 				if ($.isFunction(opt.searchCallback)) {
 					opt.searchCallback(tree, keys, function (tree, results) {
@@ -1547,10 +1547,8 @@
 					p.height = bs.height - 6;
 				}
 
-				switch(pos) {
-				case 'top':
+				if (pos === 'top') {
 					p.top = es.top - p.height + 1;
-					break;
 				}
 
 				if (opt.positionFixed) {
@@ -1582,18 +1580,8 @@
 				}
 
 				function _postion (obj, box, pos, p) {
-					switch(pos) {
-					case 'bottom':
-						$.addClass(obj, 'oui-tree-elem-bottom');
-						$.addClass(box, 'oui-tree-box-bottom');
-						break;
-					case 'top':
-						$.addClass(obj, 'oui-tree-elem-top');
-						$.addClass(box, 'oui-tree-box-top');
-						break;
-					default:
-						break;
-					}
+					$.addClass(obj, 'oui-tree-elem-' + pos);
+					$.addClass(box, 'oui-tree-box-' + pos);
 
 					box.style.cssText = [
 						'left:{left}px;top:{top}px;width:{width}px;',

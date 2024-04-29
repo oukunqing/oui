@@ -862,6 +862,17 @@
 	position: absolute;
 	cursor: ns-resize;
 }
+.oui-tree-box .sizebar-vertical {
+	width: 5px;height: 100%;
+	background: transparent;
+	border: none;
+	marign: 0;padding: 0;
+	display: block;
+	overflow: hidden;
+	position: absolute;
+	cursor: ew-resize;
+}
+
 .oui-tree-box .topbar {
 	top: 0;
 	left: 0;
@@ -869,4 +880,13 @@
 .oui-tree-box .bottombar {
 	bottom: 0;
 	left: 0;
+}
+
+.oui-tree-box .leftbar {
+	top: 0;
+	left: 0;
+}
+.oui-tree-box .rightbar {
+	top: 0;
+	right: 0;
 }

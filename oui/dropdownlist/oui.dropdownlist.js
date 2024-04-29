@@ -385,37 +385,23 @@
 			buildItems: function (ddl, items, listbox) {
 				var that = ddl,
 					opt = that.options,
-					columns = opt.columns || 0,
-					conWidth = Factory.getItemConWidth(items, opt.itemWidth, columns, opt.choose),
+					columns = opt.columns || 0;
+
+				if (!opt.multi && opt.allowEmpty) {
+					items.unshift({val: '', txt: opt.allowEmpty });
+					//items.splice(0, 0, {val: '', txt: opt.allowEmpty });
+				}
+
+				var	conWidth = Factory.getItemConWidth(items, opt.itemWidth, columns, opt.choose),
 					minWidth = opt.layout === Config.Layout.Grid ? conWidth : 0,
 					key = Config.ItemPrefix + that.id,
 					len = items.length,
 					n = len.toString().length,
 					num = 0,
 					html = [],
-					listbox = $.toElement(listbox);
+					listbox = $.toElement(listbox),
+					align = opt.textAlign ? 'text-align:' + opt.textAlign + ';' : '';
 
-				if (!opt.multi && opt.allowEmpty) {
-					html.push([
-						'<li class="oui-ddl-item" style="',
-						opt.layout !== Config.Layout.List ? 'float:left;' : '',
-						opt.layout === Config.Layout.Grid ? 'min-width:' + Factory.getStyleSize(minWidth || opt.itemWidth) + ';' : '',
-						'">',
-						'<label  class="oui-ddl-label', opt.layout !== Config.Layout.List && opt.border ? ' oui-ddl-label-border' : '', '">',
-						'<input class="oui-ddl-chb"', checked,
-						' type="', opt.multi ? 'checkbox' : 'radio', '"',
-						' id="', '"',
-						' name="', key, '"',
-						' value="', '"',
-						' text="', opt.allowEmpty, '"',
-						' style="display:' + (opt.choose ? '' : 'none') + ';"',
-						' />',
-						'<span>', opt.allowEmpty, '</span>',
-						'</label>',
-						'</li>'
-					].join(''));
-				}
-				var align = opt.textAlign ? 'text-align:' + opt.textAlign + ';' : '';
 				for (var i = 0; i < len; i++) {
 					var dr = items[i], p;
 					if (dr === 'sep' || dr.sep || dr.type === 'sep') {
