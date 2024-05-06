@@ -682,18 +682,22 @@
                     break;
                 case 'up':
                 case 'down':
-                    var num = key === 'up' ? -1 : 1;
+                    /*var num = key === 'up' ? -1 : 1;
                     $.tree(TreeId).sortIndex(node, num, function(node, num, idx) {
                         $.console.log('sortIndex:', node.id, key, num, idx);
                     });
+                    */
                     break;
                 }
             },
             onbutton: function (node, tree, ev, key) {
 
             },
-            dragCallback: function (node, tree, key) {
-                $.console.log('dragCallback:', tree.id, node, key);
+            dragCallback: function (node, tree, dest, key, num, idx) {
+                $.console.log('dragCallback:', tree.id, node, dest, key, num, idx);
+            },
+            sortCallback: function (node, tree, dest, num, idx) {
+                $.console.log('sortCallback:', tree.id, node, dest, num, idx);
             }
         });
         $.console.log('test finish:');

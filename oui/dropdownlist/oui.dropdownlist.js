@@ -1810,18 +1810,14 @@
 			//设置值
 			that.elem.options.length = 0;
 			that.elem.options.add(new Option(txt, val));
-			if (con) {
-				$.setAttribute(that.elem, 'code', con);
-			}
+			$.setAttribute(that.elem, 'code', con);
 
 			if (that.text) {
 				that.text.title = vals.length > 0 ? (opt.name ? opt.name + ': ' : '') + txt : '';
 				//显示文字
 				that.text.value = opt.select ? val : txt;
 				$.setAttribute(that.text, 'value', opt.select ? val : txt);
-				if (con) {
-					$.setAttribute(that.text, 'code', con);
-				}
+				$.setAttribute(that.text, 'code', con);
 			}
 			//return val;
 			return {value: val, text: txt, values: vals, texts: txts, datas: datas};

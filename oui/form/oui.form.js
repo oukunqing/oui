@@ -18,6 +18,7 @@
         DATE_FORMAT: 'data-time,data-timeformat,date-format,dateformat',
         DATA_FORMAT: 'data-format,dataformat,value-format,valueformat',
         OLD_VALUE: 'old-value,oldvalue',
+        DATA_EXCEPT: 'data-except,except',
         DATA_TYPE: 'data-type,datatype,value-type,valuetype',
         ENCODE: 'data-encode,encode,encode-html,encodeHtml,encodeHTML',
         DECODE: 'data-decode,decode,decode-html,decodeHtml,decodeHTML',
@@ -815,11 +816,24 @@
         }
         return list;
     },
+    isDataExcept = function (elem) {
+        var except = $.getAttribute(elem, customAttrs.DATA_EXCEPT);
+        if (typeof except === 'undefined') {
+            return false;
+        }
+        if (except === '1' || except === '' || except === 'true') {
+            return true;
+        }
+        return false;
+    },
     getElementsData = function (warns, arr, op, formElem, camelCase) {
         formElem = $.toElement(formElem);
         var data = {}, configs = op.configs, len = arr.length;
         for (var i = 0; i < len; i++) {
             var obj = arr[i], tag = obj.tagName, type = obj.type, key = '', val = '';
+            if (isDataExcept(obj)) {
+                continue;
+            }
             if (op.tagPattern.test(tag) && op.typePattern.test(type)) {
                 //获取字段参数配置
                 var fc = op.getFieldConfig(obj, op.fields), fcf = fc.field || {}, result = {};
@@ -954,7 +968,7 @@
                 obj = elements[i];
                 tag = obj.tagName.toUpperCase();
                 id = obj.id;
-                if (id) {
+                if (id && !isDataExcept(obj)) {
                     if ((appointTag && tag === opt.tagName) ||
                         (!appointTag && ['INPUT', 'SELECT', 'TEXTAREA'].indexOf(tag) > -1 &&
                             ['button', 'submit', 'hidden', 'password'].indexOf(obj.type) < 0)) {

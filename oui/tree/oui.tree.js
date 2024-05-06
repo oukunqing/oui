@@ -121,7 +121,18 @@
 					if (ep.css.inArray(['check'])) {
 						ep.node.setChecked(null, ev);
 					} else if (ep.css.inArray(['button', 'btn'])) {
-						Factory.buttonCallback(ep.node, tree, ev, $.getAttribute(ep.elem, 'key'));
+						var key = $.getAttribute(ep.elem, 'key');
+						switch(key) {
+						case 'up':
+							ep.node.sortIndex(-1, Factory.sortCallback);
+							break;
+						case 'down':
+							ep.node.sortIndex(1, Factory.sortCallback);
+							break;
+						default:
+							Factory.buttonCallback(ep.node, tree, ev, $.getAttribute(ep.elem, 'key'));
+							break;
+						}
 					} else if (Factory.isNodeBody(ep)) {
 						if (Factory.isDblclick(tree, ep.node)) {
 							return false;
@@ -258,7 +269,9 @@
 					par = Factory.getDragNode(tree),
 					node = par.node,
 					dest = ep.node,
-					srcParent = node.parent.id;
+					srcParent = node.parent.id,
+					num = par.dir.endWith('down') ? 1 : -1,
+					idx = 0;
 
 				Factory.delDragNode(tree);
 
@@ -269,20 +282,25 @@
 					//如果拖动到节点文本上，表示移动到节点内
 					if (Factory.isDragText(ep)) {
 						node.moveTo(dest, true);
+						num = 0;
+						idx = Factory.getChildIndex(dest, node)[0];
 					} else {
 						//拖动到节点上，表示插入到节点上方（或下方）
 					    node.insertTo(dest, false, null, par.dir.endWith('down'));
+						idx = Factory.getChildIndex(node.parent, node)[0];
 					}
 				} else {
 					if (node.parent === dest && dest.childs.length > 1) {
 						dest = dest.childs[0];
+						num = -1;
 					}
 					node.sortNode(dest, null, true);
+					idx = Factory.getChildIndex(node.parent, node)[0];
 				}
 				$.setElemClass(node.element, 'node-drag', false);
 				$.setClass(ep.element, 'node-drop,drop-up,drop-down,drop-on', false);
 
-				Factory.dragCallback(node, tree, srcParent !== node.parent.id ? 'move' : 'sort');
+				Factory.dragCallback(node, tree, dest, srcParent !== node.parent.id ? 'move' : 'sort', num, idx);
 			},
 			dragover: function (ev, tree) {
 				ev.preventDefault();
@@ -701,6 +719,8 @@
 					opt.cookieExpire = Config.CacheCookieExpire;
 				}
 
+				opt.reloadData = $.isBoolean($.getParam(opt, 'reloadData,reload'), false);
+
 				opt.showType = $.isBoolean($.getParam(opt, 'showType,showtype'), true);
 				opt.showStatus = $.isBoolean($.getParam(opt, 'showStatus,showstatus'), true);
 				opt.showLine = $.isBoolean($.getParam(opt, 'showLine,showline'), false);
@@ -715,7 +735,7 @@
 
 				opt.showButton = $.isBoolean($.getParam(opt, 'showButton,showbutton'), false);
 				opt.moveAble = $.isBoolean($.getParam(opt, 'moveAble,moveable'), true);
-				opt.showMove = $.isBoolean($.getParam(opt, 'showMove,showmove'), opt.showButton);
+				opt.showMove = $.isBoolean($.getParam(opt, 'showMove,showmove'), opt.showButton && opt.moveAble);
 				opt.dragAble = $.isBoolean($.getParam(opt, 'dragAble,draggable,dragable'), false);
 				opt.dragTypes = Factory.parseArrayParam($.getParam(opt, 'dragTypes,dragType'));
 				opt.dragMove = $.isBoolean($.getParam(opt, 'dragMove,dragmove'), false);
@@ -744,6 +764,8 @@
 					opt.position = 'bottom';
 				}
 				opt.positionFixed = $.isBoolean($.getParam(opt, 'positionFixed,fixed'), false);
+
+				opt.zindex = $.getParam(opt, 'zIndex,zindex');
 
 				opt.dragSize = $.isBoolean($.getParam(opt, 'dragResize,dragSize,dragsize'), false);
 
@@ -857,6 +879,7 @@
 				opt.contextmenuCallback = $.getParam(opt, 'contextmenuCallback,oncontextmenu,contextmenu');
 
 				opt.buttonCallback = $.getParam(opt, 'buttonCallback,onbutton');
+				opt.sortCallback = $.getParam(opt, 'sortCallback,onsort');
 				opt.dragCallback = $.getParam(opt, 'dragCallback,ondrag');
 
 				return opt;
@@ -1504,6 +1527,10 @@
 					Factory.buildPanel(tree, tree.options, true);
 				} else {
 					display = $.isBoolean(show, box.style.display === 'none');
+					
+					if (display && tree.options.reloadData) {
+						Factory.reloadNode(tree);
+					}
 				}
 
 				tree.element.style.display = display ? 'block' : 'none';
@@ -1552,7 +1579,7 @@
 				}
 
 				if (opt.positionFixed) {
-					_postion(obj, box, pos, p);
+					_postion(obj, box, pos, p, opt);
 				} else {
 					if (pos === 'bottom') {
 						var offset = p.top + p.height - (bs.height + bs.scrollTop);
@@ -1576,16 +1603,16 @@
 							pos = 'top-bottom';
 						}
 					}
-					_postion(obj, box, pos, p);
+					_postion(obj, box, pos, p, opt);
 				}
 
-				function _postion (obj, box, pos, p) {
+				function _postion (obj, box, pos, p, opt) {
 					$.addClass(obj, 'oui-tree-elem-' + pos);
 					$.addClass(box, 'oui-tree-box-' + pos);
 
 					box.style.cssText = [
 						'left:{left}px;top:{top}px;width:{width}px;',
-						'height:{height}px;' 
+						'height:{height}px;'
 					].join('').format(p);
 
 					Factory.setPanelSize(tree).showResizeBar(tree, pos);
@@ -2098,7 +2125,7 @@
 						ph = dh - fh - bh,
 						cache = Factory.getSearchCache(tree);
 
-					tree.panel.style.cssText = ['height:', ph, 'px;'].join('');
+					tree.panel.style.height = ph + 'px';
 
 					if (cache && cache.elem) {
 						cache.elem.style.width = (form.offsetWidth - 8) + 'px';
@@ -2131,6 +2158,9 @@
 						that.element.appendChild(box);
 					}
 					box.className = css.join(' ');
+					if ($.isNumber(opt.zindex) && opt.zindex > 0) {
+						box.style.zIndex = opt.zindex;
+					}
 				}
 
 				if (!div) {
@@ -2394,30 +2424,33 @@
 				}
 				var parent = node.parent, c = parent.childs.length,
 					indexs = Factory.getChildIndex(parent, nodes),
-					src = indexs[0], dest = num ? src + num : indexs[1],
-					down = drag || num ? src < dest : false;
+					srcIdx = indexs[0], destIdx = num ? srcIdx + num : indexs[1],
+					down = drag || num ? srcIdx < destIdx : false,
+					destNode;
 
-				if (src < 0 || dest < 0 || src === dest || dest >= c) {
+				if (srcIdx < 0 || destIdx < 0 || srcIdx === destIdx || destIdx >= c) {
 					return this;
 				}
-				sibling = down ? parent.childs[dest + 1] : sibling || parent.childs[dest];
+				sibling = down ? parent.childs[destIdx + 1] : sibling || parent.childs[destIdx];
 
 				if (sibling) {
 					parent.childbox.insertBefore(node.element, sibling.element);
+					destNode = down ? parent.childs[destIdx] : sibling;
 				} else {
 					parent.childbox.appendChild(node.element);
+					destNode = parent.childs[c - 1];
 				}
-				parent.childs.splice(src, 1);
-				parent.childs.splice(dest, 0, node);
+				parent.childs.splice(srcIdx, 1);
+				parent.childs.splice(destIdx, 0, node);
 
-				parent.setChildSwitchClass();
+				parent.setChildSwitchClass();		
 
-				function _callback(node, num, idx) {
+				function _callback(node, tree, destNode, num, idx) {
 					if ($.isFunction(callback)) {
-						callback(node, num, idx);
+						callback(node, tree, destNode, num, idx);
 					}
 				}
-				return _callback(node, num, dest), this;
+				return _callback(node, tree, destNode, num, destIdx), this;
 			},
 			updateLevelCache: function (tree, node, srcLevel) {
 				var dest = node.getLevel(),
@@ -2761,17 +2794,17 @@
 				}
 				return this;
 			},
-			expandNode: function (tree, node, linkage) {
+			expandNode: function (tree, node, linkage, position) {
 				if (!Factory.isNode(node)) {
 					return this;
 				}
-				return node.expand(linkage), this;
+				return node.expand(linkage, null, position), this;
 			},
-			expandToNode: function (tree, node) {
-				return Factory.expandNode(tree, node, true);
+			expandToNode: function (tree, node, position) {
+				return Factory.expandNode(tree, node, true, position);
 			},
-			expandTo: function (tree, node) {
-				return Factory.expandNode(tree, node, true);
+			expandTo: function (tree, node, position) {
+				return Factory.expandNode(tree, node, true, position);
 			},
 			expandType: function (tree, types, linkage, expand) {
 				var cache = tree.cache, keys = [];
@@ -2998,9 +3031,15 @@
 				}
 				return this;
 			},
-			dragCallback: function (node, tree, dragKey) {
+			dragCallback: function (node, tree, dest, dragKey, num, idx) {
 				if ($.isFunction(tree.options.dragCallback)) {
-					tree.options.dragCallback(node, tree, dragKey);
+					tree.options.dragCallback(node, tree, dest, dragKey, num, idx);
+				}
+				return this;
+			},
+			sortCallback: function (node, tree, dest, num, idx) {
+				if ($.isFunction(tree.options.sortCallback)) {
+					tree.options.sortCallback(node, tree, dest, num, idx);
 				}
 				return this;
 			}
@@ -3569,12 +3608,13 @@
 			}
 			return _callback(that);
 		},
-		expand: function (linkage, callback) {
+		expand: function (linkage, callback, position) {
 			var that = this.self(),
 				expanded = true;
 
-			that.setExpand(expanded, null, false, callback);
-
+			if (!position) {
+				that.setExpand(expanded, null, false, callback);
+			}
 			if (linkage) {
 				var n = that, pn;
 				//找父节点类型
@@ -3590,7 +3630,7 @@
 		},
 		position: function (selected) {
 			var that = this.self(), offsetY = -50;
-			Factory.setCurrentCache(that.tree, 'position', that).expandTo(that.tree, that);
+			Factory.setCurrentCache(that.tree, 'position', that).expandTo(that.tree, that, true);
 			$.scrollTo(that.element, that.tree.panel, offsetY);
 			return selected ? that.setSelected(true) : that;
 		},
@@ -3679,13 +3719,18 @@
 		},
 		updateText: function (str) {
 			var that = this.self(), item;
+			$.extend({}, that.data, {name: str});
 			if ($.isString(str, true) && (item = that.getItem('text'))) {
 				item.innerHTML = str;
 			}
 			return that;
 		},
+		updateName: function (str) {
+			return this.self().updateText(str);
+		},
 		updateDesc: function (str) {
 			var that = this.self(), item;
+			$.extend({}, that.data, {desc: str});
 			if (item = that.getItem('desc')) {
 				item.innerHTML = str || '';
 			}
@@ -3935,6 +3980,8 @@
 				debug: false,
 				//data如果不是数组，是对象结构，则需要指定trees
 				data: [],
+				//是否重新加载数据
+				reloadData: undefined,
 				//值字段，默认为 ['id']
 				valueFields: [],
 				//默认值，用于值还原
@@ -4041,6 +4088,7 @@
 				position: undefined,
 				//固定窗体位置
 				fixed: undefined,
+				zindex: undefined,
 				//是否触发式显示，例如点击<a>
 				trigger: undefined,
 				//回调等级：0-实时回调，1-点击“确定”按钮后回调
@@ -4065,7 +4113,9 @@
 				//buttonCallback,onbutton
 				buttonCallback: undefined,
 				//dragCallback,ondrag
-				dragCallback: undefined
+				dragCallback: undefined,
+				//sortCallback,onsort
+				sortCallback: undefined
 			}, options));
 
 			this.id = opt.id;
@@ -4160,6 +4210,16 @@
 			}
 			return null;
 		},
+		getNode: function () {
+			var cur = this.cache.current,
+				key = 'selected', 
+				kv = Factory.getNodeValue(cur[key], 'node', '', {});
+
+			if (kv) {
+				return kv.val;
+			}
+			return null;
+		},
 		append: function (items, par, pnode) {
 			return Factory.addNode(this, items, par, pnode), this;
 		},
@@ -4217,6 +4277,14 @@
 		},
 		text: function (nodes, texts) {
 			return this.updateText(nodes, texts);
+		},
+		updateName: function (nodes, names) {
+			return Factory.eachNodeIds(this.cache.nodes, nodes, function(node, i, c) {
+				node.updateName(c === 1 ? names : names[i]);
+			}), this;
+		},
+		name: function (nodes, names) {
+			return this.updateName(nodes, names);
 		},
 		updateDesc: function (nodes, texts) {
 			return Factory.eachNodeIds(this.cache.nodes, nodes, function(node, i, c) {
@@ -4423,20 +4491,14 @@
 			}
 			return this;
 		},
-		icon: function (id, nodes, par, linkage) {
-			return Factory.func(id, nodes, 'updateIcon', par, linkage);
-		},
 		updateIcon: function (id, nodes, par, linkage) {
 			return Factory.func(id, nodes, 'updateIcon', par, linkage);
-		},
-		text: function (id, nodes, texts) {
-			return Factory.func(id, nodes, 'updateText', texts);
 		},
 		updateText: function (treeId, nodes, texts) {
 			return Factory.func(id, nodes, 'updateText', texts);
 		},
-		desc: function (id, nodes, texts) {
-			return Factory.func(id, nodes, 'updateDesc', texts);
+		updateName: function (treeId, nodes, names) {
+			return Factory.func(id, nodes, 'updateName', names);
 		},
 		updateDesc: function (id, nodes, texts) {
 			return Factory.func(id, nodes, 'updateDesc', texts);
