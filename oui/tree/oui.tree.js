@@ -872,6 +872,7 @@
 
 				opt.complete = $.getParam(opt, 'completeCallback,oncomplete,complete');
 				opt.callback = $.getParam(opt, 'callback');
+				opt.restore = $.getParam(opt, 'restore');
 				opt.clickCallback = $.getParam(opt, 'clickCallback,onclick');
 				opt.expandCallback = $.getParam(opt, 'expandCallback,onexpand');
 				opt.checkedCallback = $.getParam(opt, 'checkedCallback,onchecked');
@@ -1421,7 +1422,7 @@
 					var par = Factory.getDefaultValue(tree),
 						nodes = $.extend([], par.nodes);
 
-					Factory.showDefaultValue(tree).callback(nodes[0], tree, null, nodes);
+					Factory.showDefaultValue(tree).callback(nodes[0], tree, null, nodes).restore(par, tree);
 				} else {
 					$.extend(tree.cache.defaultValues, par);
 				}
@@ -1454,17 +1455,20 @@
 				if (!$.isElement(elem)) {
 					return this;
 				}
-				if (!elem.tagName.toLowerCase().inArray(['select', 'input'])) {
+				var tag = elem.tagName.toLowerCase();
+				if (!tag.inArray(['select', 'input'])) {
 					return this;
 				}
 				var val = elem.value.trim(),
+					txt = tag === 'select' ? elem.options[elem.selectedIndex].text : val,
+					code = $.getAttribute(elem, 'code'),
 					nodes = Factory.findNodes(tree, val);
 
 				if (nodes.length > 0) {
 					for (var i = 0; i < nodes.length; i++) {
 						nodes[i].setSelected(true).setChecked(true).position();
 					}
-					Factory.setDefaultValue(tree, {value: val, nodes: nodes});
+					Factory.setDefaultValue(tree, {value: val, text: txt, code: code, nodes: nodes});
 				}
 				return this;
 			},
@@ -2957,6 +2961,12 @@
 				}
 				return this;
 			},
+			restore: function (par, tree) {
+				if ($.isFunction(tree.options.restore)) {
+					tree.options.restore(par, tree);
+				}
+				return this;
+			},
 			completeCallback: function (tree) {
 				if ($.isFunction(tree.options.complete)) {
 					tree.options.complete(tree);
@@ -4102,6 +4112,7 @@
 				//以下是回调事件
 				callback: undefined,
 				complete: undefined,
+				restore: undefined,
 				//clickCallback,onclick
 				clickCallback: undefined,
 				//expandCallback,onexpand
