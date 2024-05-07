@@ -689,7 +689,7 @@
 				opt.switch = $.getParam(opt, 'switchType,switchIcon,switch');
 				var sw = (opt.switch || '').toLowerCase();
 				if (!$.isString(sw, true) && opt.skin === 'device') {
-					sw = 'device';
+					sw = 'arrow';
 				}
 				opt.switch = $.isString(sw, true) ? '-' + sw : '';
 
@@ -3998,7 +3998,7 @@
 				defaultValue: undefined,
 				//文本内容分隔符
 				textSeparator: ',',
-				//switch图标类型（默认样式时有效）
+				//switch图标类型
 				switch: undefined,
 				//data数据结构注解，示例：[{key:'unit',val:'units'}]
 				//用于获取data{}数据中的数组字段以及指定节点类型

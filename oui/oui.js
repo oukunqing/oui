@@ -7077,6 +7077,19 @@
         hide: function () {
             return this[0] ? this[0].style.display = 'none' : null, this;
         },
+        display: function (show, recursion) {
+            if ($.isBoolean(show)) {
+                if (show) {
+                    $.fn.show();
+                } else {
+                    $.fn.hide();
+                }
+            } else {
+                //return this[0] ? this[0].style.display !== 'none' : false;
+                return $.isDisplay(this[0], recursion);
+            }
+            return this;
+        },
         attr: function (name, value) {
             var self = this, elem = self[0] || {};
             if ($.isUndefined(value)) {
