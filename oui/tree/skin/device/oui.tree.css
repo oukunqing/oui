@@ -1,3 +1,7 @@
+.oui-tree-device ul.levelroot {
+	margin:0;padding:5px 20px 50px 5px;overflow:hidden;display:block;
+}
+
 .oui-tree li .item span.unit,
 .oui-tree-device li .item span.unit{background:url("imgs/tree-device.png?1") no-repeat 0 0;}
 .oui-tree li .item span.unit-open,

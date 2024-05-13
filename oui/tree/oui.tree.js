@@ -24,6 +24,7 @@
 				return Config.Skin;
 			},
 			Localhost: $.isLocalhost(),
+			IE: $.isIE,
 			MouseWhichLeft: 1,
 			MouseWhichRight: 3,
 			CloseLinkageClassName: 'oui-popup-panel',
@@ -54,6 +55,7 @@
 			},
 			EmptyTreeId: 'OuiTreeNone',
 			TreeBoxMinHeight: 135,
+			TreeItemMinWidth: 100,
 			TreeBoxDefaultHeight: 400,
 			SearchResultBoxHeight: 390, 	//12 * 30 + 30
 			SearchResultItemHeight: 30,
@@ -528,6 +530,10 @@
 								length: 0
 							},
 						},
+						initial: {
+							selects: [],
+							expands: []
+						},
 						//内部搜索结果
 						searches: [],
 						//离线存储
@@ -758,6 +764,10 @@
 				opt.maxHeight = $.getParam(opt, 'maxHeight');
 				if (!$.isNumber(opt.maxHeight) || opt.maxHeight < Config.TreeBoxMinHeight) {
 					opt.maxHeight = undefined;
+				}
+				opt.minWidth = $.getParam(opt, 'minWidth,itemMinWidth');
+				if (!$.isNumber(opt.minWidth) || opt.minWidth < Config.TreeItemMinWidth) {
+					opt.minWidth = 0;
 				}
 				opt.position = $.getParam(opt, 'boxPosition,position');
 				if (['top', 'bottom'].indexOf(opt.position) < 0) {
@@ -1655,7 +1665,7 @@
 					Cache.drags['size' + tree.id] = bh;
 
 					tree.element.style.height = bh + 'px';
-					
+
 					if (isEvent && topY) {
 						Factory.setBoxPosition(tree, false, topY);
 					}
@@ -1679,6 +1689,32 @@
 			},
 			getTypeCache: function (type) {
 				return tree.cache.trees[type] || null;
+			},
+			setInitialCache: function (tree, node, key) {
+				var cfg = key === 'select' ? 'selects' : 'expands',
+					arr = tree.cache.initial[cfg];
+				if (!arr) {
+					arr = [];
+				}
+				arr.push(node);
+				return this;
+			},
+			getInitialCache: function (tree, selected) {
+				var expands = tree.cache.initial.expands;
+				if (expands && $.isArray(expands)) {
+					for (var i = 0; i < expands.length; i++) {
+						expands[i].expand();
+					}
+				}
+				var selects = tree.cache.initial.selects, c;
+				if (selected && $.isArray(selects)) {
+					if ((c = selects.length) > 0) {
+						selects[c - 1].select(true);
+						Factory.callback(selects[0], tree, null, selects);
+					}
+					return this;
+				}
+				return selects;
 			},
 			isReturnType: function (tree, type) {
 				var types = tree.cache.returnTypes || [];
@@ -1926,7 +1962,7 @@
                         newHeight = height + y;
 
                        	if (y < 0 && newHeight < Config.TreeBoxMinHeight) {
-                       		//return false;
+                       		return false;
                        	}
                         if (!Factory.setBoxSize(tree, newHeight, false, ev, top ? topY - y : 0)) {
                         	return false;
@@ -2129,8 +2165,10 @@
 						ph = dh - fh - bh,
 						cache = Factory.getSearchCache(tree);
 
-					tree.panel.style.height = ph + 'px';
-
+					if (ph > 0) {
+						tree.panel.style.height = ph + 'px';
+						$.console.log('setPanelSize:', tree.box, dh, fh, bh, ph);
+					}
 					if (cache && cache.elem) {
 						cache.elem.style.width = (form.offsetWidth - 8) + 'px';
 					}
@@ -2282,6 +2320,7 @@
 							'nodes:', cache.count, ', level:', cache.level, ', timeout:', cache.timeout, 'ms'
 						].join(''));
 					}
+					Factory.getInitialCache(tree, true);
 					Factory.initTargetValue(tree).completeCallback(tree);
 				}
 				
@@ -2533,8 +2572,12 @@
 			},
 			buildLi: function (tree, p, node, opt) {
 				var li = document.createElement('LI');
-				li.className = ('node level' + p.level);
+				li.className = ('node level' + p.level + (Config.IE ? ' ie' : ''));
 				li.setAttribute('nid', p.nid);
+
+				if (Config.IE && opt.minWidth) {
+					li.style.minWidth = opt.minWidth + 'px';
+				}
 
 				if (opt.dragAble && Factory.isDragType(opt, p.type)) {
 					li.draggable = true;
@@ -2589,7 +2632,7 @@
 					showStatus, showType;
 
 				for (i = 0; i < list.length; i++) {
-					if (typeof (d = list[i]).id === 'undefined') {
+					if (typeof (d = list[i]).id === 'undefined' || d.except) {
 						continue;
 					}
 					type = d.type || par.type;
@@ -2649,6 +2692,13 @@
 
 					Factory.setNodeCache(tree, node);
 					Factory.setTypeCache(tree, p.type, p.ptype);
+
+					if (d.select || d.initial || d.show) {
+						Factory.setInitialCache(tree, node, 'select');
+					}
+					if (d.expand) {
+						Factory.setInitialCache(tree, node, 'expand');
+					}
 					
 					if (nodes) {
 						nodes.push(node);
@@ -2677,20 +2727,6 @@
 					var expanded = false;
 
 					if (!node.hasChild()) {
-						/*
-						//node.setParam('expanded', false);
-
-						//动态加载子节点，先创建子节点容器
-						if (node.dynamic) {
-							node.setBox(node.buildBox());
-						}
-
-						//(动态加载 或者 已展开)，需要设置节点展开状态
-						//目的是为了收缩或隐藏节点“展开/收缩”图标
-						if (node.dynamic || node.isExpanded()) {
-							node.setExpandStatus(expanded = true);
-						}
-						*/
 						node.setParam('expanded', false);
 
 						//动态加载子节点，先创建子节点容器
@@ -3491,7 +3527,10 @@
 			if (!childbox) {
 				return that;
 			}
-			that[that.root ? 'fragment' : 'element'].appendChild(childbox);
+			var elem = that[that.root ? 'fragment' : 'element'];
+			if (elem) {
+				elem.appendChild(childbox);
+			}
 			return that.setParam('childbox', childbox);
 		},
 		buildBox: function (displayNone) {
@@ -3536,7 +3575,6 @@
 			if (!node.element) {
 				return that;
 			}
-			//that.childs.push(node);
 
 			if (fragment) {
 				fragment.appendChild(node.element);
@@ -4094,6 +4132,8 @@
 				minHeight: undefined,
 				//窗体最大高度
 				maxHeight: undefined,
+				//节点内容最小宽度(仅用于IE浏览器)
+				minWidth: undefined,
 				//窗体默认位置: bottom, top
 				position: undefined,
 				//固定窗体位置

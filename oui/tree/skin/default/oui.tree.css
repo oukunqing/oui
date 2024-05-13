@@ -45,8 +45,12 @@
 	padding:0;margin:0;border:none;
 }
 
+.oui-tree li.ie {
+	min-width:500px;
+}
+
 .oui-tree ul.levelroot {
-	margin:0;padding:5px 20px 50px 5px;overflow:hidden;display:block;
+	display:block;margin:0;padding:5px 3px 50px 3px;overflow:hidden;overflow:visible !important;
 }
 
 .oui-tree ul.levelroot > li {padding:0;}

@@ -160,7 +160,7 @@
     border: none 0;
     box-sizing: border-box;
     color: #333;
-    font-family: 'Courier New',宋体,微软雅黑;
+    font-family: Arial,'Courier New',宋体,微软雅黑;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -170,7 +170,7 @@
 
 .oui-tabs .cur .tab-txt {
     color: #333;
-    font-family: 'Courier New',宋体,微软雅黑;
+    font-family: Arial,'Courier New',宋体,微软雅黑;
     font-weight: bold;
     font-weight: normal;
 }
