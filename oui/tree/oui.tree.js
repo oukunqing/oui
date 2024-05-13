@@ -3167,7 +3167,8 @@
 				//节点图标样式
 				that.icon = $.extend({
 					type: '',		//类型，示例: unit,device,camera 等
-					status: '',		//状态，示例: on,off,play 等
+					status: '',		//在线状态，示例: on,off 等
+					play: '',		//播放状态, 示例: play,pause,stop|''
 					path: ''		//自定义图标URL
 				}, par.icon);
 
@@ -3692,11 +3693,17 @@
 			var that = this.self(),
 				css = ['icon'],
 				opt = that.tree.options,
-				open = that.expanded && !that.isLeaf() ? '-open' : '';
+				open = that.expanded && !that.isLeaf() ? '-open' : '',
+				play = that.icon.play,
+				status = that.icon.status;
+
+			if (play && play !== 'stop') {
+				status = play;
+			}
 
 			if (that.showType && that.icon.type) {
-				if (opt.showStatus && that.icon.status) {
-					css.push(that.icon.type + '-' + that.icon.status + open);
+				if (opt.showStatus && status) {
+					css.push(that.icon.type + '-' + status + open);
 				} else if (open) {
 					css.push(that.icon.type + open);
 				} else {
@@ -3734,7 +3741,8 @@
 		},
 		setIcon: function (par) {
 			var that = this.self();
-			return $.extend(that.icon, par), that;
+			that.icon = $.extend(that.icon, par);
+			return that;
 		},
 		updateIcon: function (par, linkage) {
 			var that = this.self(),
@@ -3760,6 +3768,13 @@
 
 			return that.updateIcon(par, linkage);
 		},
+		updatePlay: function (play) {
+			var that = this.self(),
+				i, c = that.childs.length,
+				par = {play: $.isString(play, true) ? play : play ? 'play' : 'stop'};
+
+			return that.updateIcon(par, linkage);
+		},
 		updateData: function (data) {
 			var that = this.self();
 			$.extend({}, that.data, data);
@@ -3767,7 +3782,7 @@
 		},
 		updateText: function (str) {
 			var that = this.self(), item;
-			$.extend({}, that.data, {name: str});
+			that.data = $.extend({}, that.data, {name: str});
 			if ($.isString(str, true) && (item = that.getItem('text'))) {
 				item.innerHTML = str;
 			}
@@ -3778,7 +3793,7 @@
 		},
 		updateDesc: function (str) {
 			var that = this.self(), item;
-			$.extend({}, that.data, {desc: str});
+			that.data = $.extend({}, that.data, {desc: str});
 			if (item = that.getItem('desc')) {
 				item.innerHTML = str || '';
 			}
@@ -4321,6 +4336,16 @@
 				node.updateIcon(par, linkage);
 			}), this;
 		},
+		//play: play, stop
+		updatePlay: function (nodes, play, linkage) {
+			if (!$.isString(play, true)) {
+				play = play ? 'play' : 'stop';
+			}
+			var par = {play: play };
+			return Factory.eachNodeIds(this.cache.nodes, nodes, function(node, i, c) {
+				node.updateIcon(par, linkage);
+			}), this;
+		},
 		updateText: function (nodes, texts) {
 			return Factory.eachNodeIds(this.cache.nodes, nodes, function(node, i, c) {
 				node.updateText(c === 1 ? texts : texts[i]);
@@ -4544,6 +4569,12 @@
 		},
 		updateIcon: function (id, nodes, par, linkage) {
 			return Factory.func(id, nodes, 'updateIcon', par, linkage);
+		},
+		updateStatus: function (id, nodes, status, linkage) {
+			return Factory.func(id, nodes, 'updateStatus', status, linkage);
+		},
+		updatePlay: function (id, nodes, play, linkage) {
+			return Factory.func(id, nodes, 'updatePlay', play, linkage);
 		},
 		updateText: function (treeId, nodes, texts) {
 			return Factory.func(id, nodes, 'updateText', texts);
