@@ -835,7 +835,7 @@
 				}
 				//默认值(原始值)，用于值的还原
 				opt.defaultValue = $.getParam(opt, 'defaultValue,originalValue,originValue');
-				
+		
 				opt.textSeparator = $.getParam(opt, 'textSeparator,separator');
 
 				opt.openTypes = Factory.parseArrayParam($.getParam(opt, 'openTypes,openType'));
@@ -2210,9 +2210,10 @@
 					div.id = that.tid;
 					box.appendChild(div);
 					Factory.buildEvent(tree);
-				} else {
+				}/* else {
 					div.innerHTML = '';
-				}
+				}*/
+				//先不清除内容，等节点创建好之后再清除，以减少DOM界面内容切换抖动的幅度
 
 				tag = that.element.tagName.toLowerCase();
 
@@ -2305,6 +2306,9 @@
 						}
 					}
 					Factory.initStatus(tree, true);
+
+					//清除内容
+					tree.panel.innerHTML = '';
 
 					tree.panel.appendChild(root.fragment);
 					delete root.fragment;
@@ -2629,7 +2633,7 @@
 					return this;
 				}
 				var i, d, type, ptype, iconType, nid, pnid, text, desc, p, node, 
-					showStatus, showType;
+					showStatus, showType, status, status2;
 
 				for (i = 0; i < list.length; i++) {
 					if (typeof (d = list[i]).id === 'undefined' || d.except) {
@@ -2654,9 +2658,14 @@
 					};
 					showStatus = $.isBooleans([d.showStatus, opt.showStatus], false);
 					showType = $.isBooleans([d.showType, opt.showType], false);
+					status = d.status;
+					status2 = d[opt.statusField];
 
-					if (showStatus && !$.isUndefined(d.status)) {
-						d.icon = $.extend({}, {status: d[opt.statusField] ? 'on' : 'off'}, d.icon);
+					if (showStatus && (!$.isUndefined(status) || !$.isUndefined(status2))) {
+						if (!$.isUndefinedOrNull(status2)) {
+							status = status2;
+						}
+						d.icon = $.extend({}, {status: status ? 'on' : 'off'}, d.icon);
 					}
 					if (p.pnode) {
 						p.level = p.pnode.level + 1;
@@ -3740,16 +3749,27 @@
 			return that;
 		},
 		setIcon: function (par) {
-			var that = this.self();
+			var that = this.self();			
 			that.icon = $.extend(that.icon, par);
 			return that;
 		},
-		updateIcon: function (par, linkage) {
+		updateIcon: function (par, linkage, field) {
 			var that = this.self(),
+				opt = that.tree.options,
 				i, c = that.childs.length;
 
 			if (Factory.isEmpty(par = $.extend({}, par))) {
 				return that;
+			}
+
+			switch (field) {
+			case 'play':
+				break;
+			default:
+				if (!$.isNullOrUndefined(par[opt.statusField])) {
+					par[field || 'status'] = par[opt.statusField];
+				}
+				break;
 			}
 
 			that.setIcon(par).setIconClass();
@@ -3766,14 +3786,14 @@
 				i, c = that.childs.length,
 				par = {status: $.isString(status, true) ? status : status ? 'on' : 'off'};
 
-			return that.updateIcon(par, linkage);
+			return that.updateIcon(par, linkage, 'status');
 		},
-		updatePlay: function (play) {
+		updatePlay: function (play, linkage) {
 			var that = this.self(),
 				i, c = that.childs.length,
 				par = {play: $.isString(play, true) ? play : play ? 'play' : 'stop'};
 
-			return that.updateIcon(par, linkage);
+			return that.updateIcon(par, linkage, 'play');
 		},
 		updateData: function (data) {
 			var that = this.self();
@@ -3831,25 +3851,24 @@
 			}
 			return that;
 		},
-		update: function (par, linkage) {
+		update: function (arg, linkage) {
 			var that = this.self(),
-				opt = $.extend({}, par),
-				icon = $.extend({}, par.icon);
+				opt = that.tree.options,
+				par = $.extend({}, arg),
+				icon = $.extend({}, arg.icon);
 
-			if (!$.isUndefinedOrNull(opt.status)) {
-				icon.status = opt.status;
+			if (!$.isUndefinedOrNull(par.status)) {
+				icon.status = par.status;
 			}
 
 			if (!Factory.isEmpty(icon)) {
 				that.updateIcon(icon, linkage);
 			}
 
-			var name = $.getParam(opt, 'name,text');
+			var name = $.getParam(par, 'name,text');
 			if ($.isString(name)) {
 				that.updateText(name);
 			}
-
-			//TODO:
 			return that;
 		},
 		getSwitchClass: function (initial) {
@@ -3864,7 +3883,6 @@
 			if (!that.isLeaf()) {
 				css.push(key + opt.switch + (that.isExpand() ? '-open' : '-close'));
 			}
-
 			return css.join(' ');
 		},
 		setExpandStatus: function (initial) {
