@@ -61,7 +61,7 @@
 .oui-tree li.cur {}
 .oui-tree li.disabled {}
 
-.oui-tree li {padding:0 0 0 15px;display:block;}
+.oui-tree li {padding:0 0 0 10px;display:block;}
 
 .oui-tree li .item {
 	float:left;display:inline-block;height:24px;overflow:visible;margin-bottom:0px;
