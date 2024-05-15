@@ -13,6 +13,7 @@
 
     var Config = {
         FilePath: $.getScriptSelfPath(true),
+        FileName: 'oui.leftmenu.',
         DefaultSkin: 'default',
         IsDefaultSkin: function(skin) {
             return (!$.isUndefined(skin) ? skin : Config.GetSkin()) === Config.DefaultSkin;
@@ -130,6 +131,10 @@
         index: 0
     },
     Factory = {
+        loadCss: function (skin, func) {
+            $.loadJsScriptCss(Config.FilePath, skin, func, Config.FileName);
+            return this;
+        },
         initCache: function(objId, options, obj) {
             var key = this.buildKey(objId);
             Cache.menus[key] = {
@@ -185,22 +190,7 @@
                 return new LeftMenu(box, opt);
             }
             return cache.obj;
-        },          
-        loadCss: function (skin, func) {
-            var path = Config.FilePath,
-                name = $.getFileName(path, true),
-                dir = $.getFilePath(path);
-
-            if ($.isString(skin, true)) {
-                dir += 'skin/' + skin + '/';
-            }
-            $.loadLinkStyle(dir + name.replace('.min', '') + '.css', function () {
-                if ($.isFunction(func)) {
-                    func();
-                }
-            });
-            return this;
-        },
+        }
     };
 
     //先加载(默认)样式文件

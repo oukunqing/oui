@@ -11,22 +11,12 @@
 
     var Config = {
         FilePath: $.getScriptSelfPath(true),
+        FileName: 'oui.frozen.',
         Index: 1
     },
     Factory = {
         loadCss: function (skin, func) {
-            var path = Config.FilePath,
-                name = $.getFileName(path, true),
-                dir = $.getFilePath(path);
-
-            if ($.isString(skin, true)) {
-                dir += 'skin/' + skin + '/';
-            }
-            $.loadLinkStyle(dir + name.replace('.min', '') + '.css', function () {
-                if ($.isFunction(func)) {
-                    func();
-                }
-            });
+            $.loadJsScriptCss(Config.FilePath, skin, func, Config.FileName);
             return this;
         },
         timers: {},

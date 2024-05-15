@@ -13,6 +13,7 @@
 
     var Config = {
         FilePath: $.getScriptSelfPath(true),
+        FileName: 'oui.timeplan.',
         DefaultSkin: 'default',
         IsDefaultSkin: function(skin) {
             return (!$.isUndefined(skin) ? skin : Config.GetSkin()) === Config.DefaultSkin;
@@ -284,18 +285,7 @@
             return cache.obj;
         },          
         loadCss: function (skin, func) {
-            var path = Config.FilePath,
-                name = $.getFileName(path, true),
-                dir = $.getFilePath(path);
-
-            if ($.isString(skin, true)) {
-                dir += 'skin/' + skin + '/';
-            }
-            $.loadLinkStyle(dir + name.replace('.min', '') + '.css', function () {
-                if ($.isFunction(func)) {
-                    func();
-                }
-            });
+            $.loadJsScriptCss(Config.FilePath, skin, func, Config.FileName);
             return this;
         },
     };

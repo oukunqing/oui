@@ -14,6 +14,7 @@
 	var SelfPath = $.getScriptSelfPath(true),
 		Config = {
 			FilePath: SelfPath,
+			FileName: 'oui.tree.',
 			FileDir: $.getFilePath(SelfPath),
 			DefaultSkin: 'default',
 			Skin: '',
@@ -358,22 +359,7 @@
 		},
 		Factory = {
 			loadCss: function (skin, func) {
-				var path = Config.FilePath,
-					name = $.getFileName(path, true),
-					arr = skin.split(','),
-					dirRoot = $.getFilePath(path),
-					dir = '';
-
-				for (var i = 0; i < arr.length; i++) {
-					if (arr[i] !== '') {
-						dir = dirRoot + 'skin/' + arr[i] + '/';
-						$.loadLinkStyle(dir + name.replace('.min', '') + '.css', function () {
-							if ($.isFunction(func)) {
-								func();
-							}
-						});
-					}
-				}
+            	$.loadJsScriptCss(Config.FilePath, skin, func, Config.FileName);
 				return this;
 			},
 			isLocalhost: function () {

@@ -10,6 +10,7 @@
 !function ($) {
 
     var Config = {
+        FileName: 'oui.dialog.',
         FilePath: $.getScriptSelfPath(true),
         DefaultSkin: 'default',
         IsDefaultSkin: function (skin) {
@@ -652,6 +653,10 @@
             docOverflow: {}
         },
         Factory = {
+            loadCss: function (skin, func) {
+                $.loadJsScriptCss(Config.FilePath, skin, func, Config.FileName);
+                return this;
+            },
             isRepeat: function (name) {
                 return Cache.events[name] ? true : (Cache.events[name] = true, false);
             },
@@ -1046,20 +1051,6 @@
                 }
 
                 return d;
-            },
-            loadCss: function (skin, func) {
-                var path = Config.FilePath,
-                    name = $.getFileName(path, true),
-                    dir = $.getFilePath(path);
-
-                if ($.isString(skin, true)) {
-                    dir += 'skin/' + skin + '/';
-                }
-                $.loadLinkStyle(dir + name.replace('.min', '') + '.css', function () {
-                    if ($.isFunction(func)) {
-                        func();
-                    }
-                });
             }
         },
         Util = {

@@ -14,6 +14,7 @@
     var SelfPath = $.getScriptSelfPath(true);
     var Config = {
         FilePath: SelfPath,
+        FileName: 'oui.contextmenu.',
         FileDir: $.getFilePath(SelfPath),
         //菜单项边距边框尺寸
         ItemMBPWidth: 22,
@@ -33,18 +34,7 @@
         },
         Factory = {
             loadCss: function (skin, func) {
-                var path = Config.FilePath,
-                    name = $.getFileName(path, true),
-                    dir = $.getFilePath(path);
-
-                if ($.isString(skin, true)) {
-                    dir += 'skin/' + skin + '/';
-                }
-                $.loadLinkStyle(dir + name.replace('.min', '') + '.css', function () {
-                    if ($.isFunction(func)) {
-                        func();
-                    }
-                });
+                $.loadJsScriptCss(Config.FilePath, skin, func, Config.FileName);
                 return this;
             },
             checkItemOptions: function () {

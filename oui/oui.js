@@ -826,7 +826,8 @@
                 value = null;
             }
             url = buildParam(data, value, true, url);
-            if ($.isBoolean(nocache, true)) {
+            var css = url.split('?')[0].endsWith('.css');
+            if ($.isBoolean(nocache, !css)) {
                 var pkey = 'hupts001', time = getTime();
                 url = buildParam(pkey, time, false, url);
             }
@@ -2410,6 +2411,9 @@
         getFileName: function (withoutExtension) {
             return $.getFileName(this, withoutExtension);
         },
+        getFileSalt: function () {
+            return $.getFileSalt(this);
+        },
         getExtension: function () {
             return $.getExtension(this);
         },        
@@ -3982,6 +3986,20 @@
             }
             return name;
         },
+        getFileSalt = function (filePath) {
+            if (!filePath || typeof filePath !== 'string') {
+                return '';
+            }
+            var pos = filePath.indexOf('?'),
+                con = pos >= 0 ? filePath.substr(pos + 1) : '',
+                arr = con.split('&'),
+                len = arr.length;
+            if (len > 0) {
+                var tmp = arr[len - 1].split('=');
+                return tmp[1] || tmp[0] || '';
+            }
+            return '';
+        },
         getFullPath = function(filePath, hideHost) {
         	var path = filePath.split('?')[0];
         	if (hideHost) {
@@ -4908,9 +4926,11 @@
 
             return node;
         },
-        loadLinkStyle = function (path, id, callback) {
+        loadLinkStyle = function (path, id, callback, postfix) {
             if ($.isFunction(id) && !$.isFunction(callback)) {
-                callback = id, id = null;
+                postfix = callback;
+                callback = id,
+                id = null;
             }
             return loadStaticFile(path, id, callback, head, 'link', {
                 type: 'text/css', rel: 'stylesheet', href: $.setQueryString(path)
@@ -4926,6 +4946,29 @@
             return loadStaticFile(path, id, callback, parent, 'script', {
                 type: 'text/javascript', async: true, src: $.setQueryString(path), charset: 'utf-8'
             });
+        },
+        loadJsScriptCss = function (jsPath, skin, func, jsName) {
+            var path = jsPath,
+                name = $.getFileName(path, true),
+                salt = $.getFileSalt(path),
+                arr = $.isString(skin, true) ? skin.split(',') : [''],
+                dirRoot = $.getFilePath(path),
+                dir = '';
+                
+            if (location.href.toLowerCase().startsWith('http')) {
+                if ($.isString(jsName, true) && name.indexOf(jsName) < 0) {
+                    return this;
+                }
+            }
+            for (var i = 0; i < arr.length; i++) {
+                dir = dirRoot + (arr[i] !== '' ? 'skin/' + arr[i] + '/' : '');
+                $.loadLinkStyle(dir + name.replace('.min', '') + (salt ? '.css?' + salt : '.css'), function () {
+                    if ($.isFunction(func)) {
+                        func();
+                    }
+                });
+            }
+            return this;
         },
         removeJsScript = function (id, filePath) {
             if (id) {
@@ -6046,6 +6089,7 @@
         getScriptSelfPath: getScriptSelfPath,
         getFilePath: getFilePath,
         getFileName: getFileName,
+        getFileSalt: getFileSalt,
         getFileSize: getFileSize,
         getExtension: getExtension,
         getFullPath: getFullPath,
@@ -6116,6 +6160,7 @@
         removeElement: removeElement,
         loadLinkStyle: loadLinkStyle,
         loadJsScript: loadJsScript,
+        loadJsScriptCss: loadJsScriptCss,
         removeJsScript: removeJsScript,
         globalEval: globalEval,
         parseJSON: parseJSON, parseJson: parseJSON,

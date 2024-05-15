@@ -9,9 +9,13 @@
 !function ($) {
     'use strict';
 
-    var thisFilePath = $.getScriptSelfPath(true);
+    var Config = {
+        FilePath: $.getScriptSelfPath(true),
+        FileName: 'oui.pagination.'
+    };
+
     //先加载样式文件
-    $.loadLinkStyle($.getFilePath(thisFilePath) + $.getFileName(thisFilePath, true).replace('.min', '') + '.css');
+    $.loadJsScriptCss(Config.FilePath, '', function() {}, Config.FileName);
 
     var defaultClassName = 'oui-pagination',
         defaultPositon = 'left',
@@ -39,7 +43,7 @@
         skin = '',
         getSkin = function() {
             if(!skin) {
-                skin = thisFilePath.getQueryString('skin') || defaultSkin;
+                skin = Config.FilePath.getQueryString('skin') || defaultSkin;
             }
             return skin;
         },
