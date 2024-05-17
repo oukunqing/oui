@@ -2153,7 +2153,7 @@
 
 					if (ph > 0) {
 						tree.panel.style.height = ph + 'px';
-						$.console.log('setPanelSize:', tree.box, dh, fh, bh, ph);
+						//$.console.log('setPanelSize:', tree.box, dh, fh, bh, ph);
 					}
 					if (cache && cache.elem) {
 						cache.elem.style.width = (form.offsetWidth - 8) + 'px';

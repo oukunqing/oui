@@ -4954,7 +4954,7 @@
                 arr = $.isString(skin, true) ? skin.split(',') : [''],
                 dirRoot = $.getFilePath(path),
                 dir = '';
-                
+
             if (location.href.toLowerCase().startsWith('http')) {
                 if ($.isString(jsName, true) && name.indexOf(jsName) < 0) {
                     return this;
@@ -5295,7 +5295,20 @@
                 y: e.clientY + scroll.top - document.body.clientTop
             };
         },
-        scrollTo = function (elem, pnode, offsetY) {
+        isInVisualArea = function (elem, box, strict) {
+            if (!strict) {
+                if (!$.isElement(elem = $.toElement(elem))) {
+                    return null
+                }
+                box = $.isElement(box = $.toElement(box)) ? box : elem.parentNode;
+            }
+            var es = elem.getBoundingClientRect(),
+                bs = box.getBoundingClientRect();
+
+            $.console.log('es:', es, ', bs:', bs);
+            return es.top >= bs.top && es.top + es.height <= bs.top + bs.height;
+        },
+        scrollTo = function (elem, pnode, offsetY, force) {
             if ($.isString(elem, true)) {
                 elem = $.toElement(elem);
             }
@@ -5305,10 +5318,17 @@
                 }
                 return $;
             }
-            pnode = $.toElement(pnode);
+            if ($.isBoolean(offsetY) && !$.isBoolean(force)) {
+                force = offsetY;
+                offsetY = 0;
+            }
+            force = $.isBoolean(force, false);
 
-            var parent = $.isElement(pnode) ? pnode : elem.parentNode,
-                offset = $.getOffset(elem),
+            var parent = $.isElement(pnode = $.toElement(pnode)) ? pnode : elem.parentNode;
+            if (!force && isInVisualArea(elem, parent, true)) {
+                return $;
+            }
+            var offset = $.getOffset(elem),
                 offsetP = $.getOffset(parent),
                 posH = offset.top - offsetP.top;
 
@@ -6184,6 +6204,7 @@
         getEventPos: getEventPosition,
         getScrollPosition: getScrollPosition,
         getScrollPos: getScrollPosition,
+        isInVisualArea: isInVisualArea,
         scrollTo: scrollTo,
         getKeyCode: getKeyCode,
         getKeyChar: getKeyChar,

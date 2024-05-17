@@ -14,23 +14,26 @@
 !function ($) {
     'use strict';
 
-    var customAttrs = {
+    var Config = {
         DATE_FORMAT: 'data-time,data-timeformat,date-format,dateformat',
         DATA_FORMAT: 'data-format,dataformat,value-format,valueformat',
         OLD_VALUE: 'old-value,oldvalue',
         DATA_EXCEPT: 'data-except,except',
+        DATA_REQUIRED: 'required,data-required', 
+        DATA_READONLY: 'readonly,data-readonly',
+        DATA_EDITABLE: 'editable,data-editable',
         DATA_TYPE: 'data-type,datatype,value-type,valuetype',
         ENCODE: 'data-encode,encode,encode-html,encodeHtml,encodeHTML',
         DECODE: 'data-decode,decode,decode-html,decodeHtml,decodeHTML',
         FILTER: 'data-filter,filter,filter-html,filterHtml,filterHTML',
         DATA_SHOW: 'data-show,data-auto',
-        MIN_VALUE: 'min-value,minvalue,minValue,min-val',
-        MAX_VALUE: 'max-value,maxvalue,maxValue,max-val',
-        VAL_LENGTH: 'value-length,val-length,val-len',
+        MIN_VALUE: 'data-min,min-value,minvalue,minValue,min-val',
+        MAX_VALUE: 'data-max,max-value,maxvalue,maxValue,max-val',
+        VAL_LENGTH: 'data-length,data-len,value-length,val-length,val-len',
         MIN_LENGTH: 'min-length,min-len',
         MAX_LENGTH: 'max-length,max-len',
-        DEFAULT_VALUE: 'default-value,defaultvalue,def-val,defval,dval,dv',
-        OPPTION_VALUE: 'option-value,values,options,opt-val'
+        DEFAULT_VALUE: 'data-value,data-val,data-default,data-def,default-value,defaultvalue,dv',
+        OPPTION_VALUE: 'data-options,data-option,option-value,values,options,opt-val'
     };
     var isElement = function (element) {
         return element !== null && typeof element === 'object' && typeof element.nodeType === 'number';
@@ -104,6 +107,8 @@
                     empty: false,
                     //是否严格模式（检测输入内容的类型）
                     strict: false,
+                    //是否显示默认数字,数字型字段，若值为空，则显示默认值或0
+                    dataShow: true,
                     md5: false,
                     readonly: null,
                     editable: null,
@@ -197,7 +202,13 @@
                     value = value || op.getValue(element);
                     field = field || element.field;
                     isSingle = isSingle || element.isSingle;
-                    var configs = element.configs, messages = $.extend({}, op.messages, field.messages);
+                    var configs = element.configs,
+                        messages = $.extend({}, op.messages, field.messages),
+                        required = !$.isUndefined($.getAttribute(element, Config.DATA_REQUIRED));
+
+                    required = $.isBoolean($.getParamCon(field.required, required), false);
+                    $.console.log('get:', element.id, $.getAttribute(element, Config.DATA_REQUIRED), field.required);
+
                     if (value === 'on') {
                         value = element.checked ? 1 : 0;
                     } else {
@@ -210,7 +221,7 @@
                             value = isSingle && $.isNumeric(value) ? 0 : '';
                         }
                     }
-                    if (field.required && isSingle && !element.checked) {
+                    if (required && isSingle && !element.checked) {
                         var msg = (messages.select || configs.messages.select).format(field.title || '');
                         return { pass: false, value: value, message: msg };
                     }
@@ -227,7 +238,7 @@
                     configs = configs || element.configs;
 
                     //获取元素内容时，若元素指定了dataformat，则需要去除自动添加的分隔符
-                    var fmt = $.getAttribute(element, customAttrs.DATA_FORMAT);
+                    var fmt = $.getAttribute(element, Config.DATA_FORMAT);
                     if (value !== '' && fmt) {
                         var p = fmt.indexOf(':');
                         //这里一定要把大写的S转换成小写的s
@@ -250,9 +261,9 @@
                             return { pass: pass, value: value, message: message || '' };
                         },
                         title = getTitle(field, '').replace(/\s/g, ''),
-                        required = field.required || $.getAttribute(element, 'required') === 'required',
-                        readonly = field.readonly || $.getAttribute(element, 'readonly') === 'readonly',
-                        editable = field.editable || ['1','true', 'editable'].indexOf($.getAttribute(element, 'editable')) > -1;
+                        required = field.required || !$.isUndefined($.getAttribute(element, Config.DATA_REQUIRED)),
+                        readonly = field.readonly || !$.isUndefined($.getAttribute(element, Config.DATA_READONLY)), 
+                        editable = field.editable || ['1','true', 'editable'].indexOf($.getAttribute(element, Config.DATA_EDITABLE)) > -1;
 
                     if (required && !field.empty && '' === value) {   // 空值验证
                         if (field.tag === 'SELECT' || op.isLegalName(field.attribute)) {
@@ -270,13 +281,13 @@
                             optionValue = field.optionValue;
 
                         if (!$.isInteger(minLen)) {
-                            minLen = parseInt($.getAttribute(element, customAttrs.MIN_LENGTH, ''), 10);
+                            minLen = parseInt($.getAttribute(element, Config.MIN_LENGTH, ''), 10);
                         }
                         if (!$.isInteger(maxLen)) {
-                            maxLen = parseInt($.getAttribute(element, customAttrs.MAX_LENGTH, ''), 10);
+                            maxLen = parseInt($.getAttribute(element, Config.MAX_LENGTH, ''), 10);
                         }
                         if (!$.isInteger(valLen)) {
-                            valLen = parseInt($.getAttribute(element, customAttrs.VAL_LENGTH, ''), 10);
+                            valLen = parseInt($.getAttribute(element, Config.VAL_LENGTH, ''), 10);
                         }
 
                         /*
@@ -301,7 +312,7 @@
                             }
                             //字符选项模式
                             if ($.isUndefined(optionValue)) {
-                                optionValue = $.getAttribute(element, customAttrs.OPPTION_VALUE, '');
+                                optionValue = $.getAttribute(element, Config.OPPTION_VALUE, '');
                             }
                             optionValue = optionValue.length > 0 ? optionValue.split(/[,;\|]/) : [];
                             //验证输入内容是否在选项中
@@ -336,9 +347,10 @@
                         //不是必填项的数字，如果没有填写，则取默认值或0
                         if (value === '' && !required) {
                             value = field.value || 0;
-                            //var dataShow = $.getAttribute(element, 'data-show,data-auto', '1').toInt();
-                            var dataShow = $.getAttribute(element, customAttrs.DATA_SHOW, '1').toInt();
-                            if (!isEvent && dataShow === 1 && typeof element.value !== 'undefined') {
+                            var attrShow = $.getAttribute(element, Config.DATA_SHOW, '1').toInt() === 1,
+                                dataShow = $.isBoolean($.getParamCon(field.dataShow, attrShow), true);
+                            //若指定了不显示默认值（或0），则不显示
+                            if (!isEvent && dataShow && typeof element.value !== 'undefined') {
                                 element.value = value;
                             }
                         }
@@ -391,10 +403,10 @@
                                 msg = '';
 
                             if ($.isUndefined(min)) {
-                                min = parseFloat($.getAttribute(element, customAttrs.MIN_VALUE, ''), 10);
+                                min = parseFloat($.getAttribute(element, Config.MIN_VALUE, ''), 10);
                             }
                             if ($.isUndefined(max)) {
-                                max = parseFloat($.getAttribute(element, customAttrs.MAX_VALUE, ''), 10);
+                                max = parseFloat($.getAttribute(element, Config.MAX_VALUE, ''), 10);
                             }
 
                             if (element.tagName.toLowerCase() === 'select') {
@@ -422,7 +434,7 @@
 
                             var optionValue = field.optionValue;
                             if ($.isUndefined(optionValue)) {
-                                optionValue = $.getAttribute(element, customAttrs.OPPTION_VALUE, '');
+                                optionValue = $.getAttribute(element, Config.OPPTION_VALUE, '');
                             }
                             optionValue = optionValue.length > 0 ? optionValue.split(/[,;\|]/) : [];
                             if ((!editable || readonly) && optionValue.length > 0) {
@@ -527,17 +539,17 @@
                             var arr = ['string', 'int', 'float', 'decimal'];
                             if (!$.isString(field.dataType) || arr.indexOf(field.dataType) < 0) {
                                 //var elemDataType = $.getAttribute(elem, 'data-type,datatype,value-type,valuetype', '');
-                                var elemDataType = $.getAttribute(elem, customAttrs.DATA_TYPE, '');
+                                var elemDataType = $.getAttribute(elem, Config.DATA_TYPE, '');
                                 field.dataType = elemDataType || arr[0];
                             }
                             if (!$.isTrue(field.encode)) {
-                                field.encode = $.getAttribute(elem, customAttrs.ENCODE, '').isTrue();
+                                field.encode = $.getAttribute(elem, Config.ENCODE, '').isTrue();
                             }
                             if (!$.isTrue(field.decode)) {
-                                field.decode = $.getAttribute(elem, customAttrs.DECODE, '').isTrue();
+                                field.decode = $.getAttribute(elem, Config.DECODE, '').isTrue();
                             }
                             if (!$.isTrue(field.filter)) {
-                                field.filter = $.getAttribute(elem, customAttrs.FILTER, '').isTrue();
+                                field.filter = $.getAttribute(elem, Config.FILTER, '').isTrue();
                             }
 
                             //默认值字段设置
@@ -546,13 +558,13 @@
                             }
                             //如果没有设置默认值，则取用（自定义的）默认值属性的值
                             if (field.value === '') {
-                                var defVal = $.getAttribute(elem, customAttrs.DEFAULT_VALUE, '');
+                                var defVal = $.getAttribute(elem, Config.DEFAULT_VALUE, '');
                                 if (!$.isUndefined(defVal)) {
                                     field.value = defVal;
                                 }
                             }
                             if (!$.isTrue(field.required) && !$.isFalse(field.required)) {
-                                field.required = $.getAttribute(elem, 'required', '').in(['required', 'true']) || false;
+                                field.required = !$.isUndefined($.getAttribute(elem, Config.DATA_REQUIRED)) || false;
                             }
                             return field;
                         },
@@ -583,7 +595,8 @@
                         attribute: '',              //获取指定的属性值作为value
                         minValue: '', maxValue: '', //最小值、最大值（用于验证输入的数字大小）
                         required: null,             //是否必填项
-                        empty: false,               //是否允许空值
+                        empty: false,               //是否允许空值                        
+                        dataShow: null,             //是否显示默认数字,数字型字段，若值为空，则显示默认值或0
                         strict: false,              //是否严格模式（检测输入内容的类型）
                         md5: false,                 //是否MD5加密
                         encode: false,              //是否进行html标记编码
@@ -703,13 +716,13 @@
                         elem = $I(element.id) || element;
 
                     if (!isArray && ('' + val).trim() !== '') {
-                        var dtfmt = $.getAttribute(elem, customAttrs.DATE_FORMAT);
+                        var dtfmt = $.getAttribute(elem, Config.DATE_FORMAT);
                         if (dtfmt && $.isDate(val)) {
                             val = val.format($.isTrue(dtfmt) ? '' : dtfmt || '');
                         } else if (dtfmt && $.isDate(val.toDate(true))) {
                             val = val.toDateString($.isTrue(dtfmt) ? '' : dtfmt || '');
                         } else {
-                            var fmt = $.getAttribute(elem, customAttrs.DATA_FORMAT);
+                            var fmt = $.getAttribute(elem, Config.DATA_FORMAT);
                             if (fmt) {
                                 val = fmt.format(val);
                             }
@@ -817,7 +830,7 @@
         return list;
     },
     isDataExcept = function (elem) {
-        var except = $.getAttribute(elem, customAttrs.DATA_EXCEPT);
+        var except = $.getAttribute(elem, Config.DATA_EXCEPT);
         if (typeof except === 'undefined') {
             return false;
         }
@@ -1020,6 +1033,11 @@
                     op.setSelectOption(obj, value, fc, isArray);
                 } else {
                     if (fc.isSingle || isTable) {
+                        var dataType = $.getAttribute(obj, Config.DATA_TYPE, '').toLowerCase(),
+                            dataShow = $.getAttribute(obj, Config.DATA_SHOW, '1') === 1;
+                        if (['int', 'float', 'double', 'long'].indexOf(dataType) > -1 && !dataShow && ('' + value).toFloat() === 0) {
+                            value = '';
+                        }
                         op.setValue(obj, value, fc, isArray);
                     } else {
                         var tmp = document.getElementsByName(fc.name), vals = isArray ? value : value.toString().split(',');
@@ -1177,7 +1195,7 @@
                 for (var i = 0; i < elems.length; i++) {
                     var elem = $.toElement(elems[i]);
                     if ($.isElement(elem)) {
-                        elem.value = $.isValue($.getAttribute(elem, customAttrs.OLD_VALUE), '');
+                        elem.value = $.isValue($.getAttribute(elem, Config.OLD_VALUE), '');
                     }
                 }
                 return this;
