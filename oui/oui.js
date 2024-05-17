@@ -5295,7 +5295,7 @@
                 y: e.clientY + scroll.top - document.body.clientTop
             };
         },
-        isInVisualArea = function (elem, box, strict) {
+        isInViewport = function (elem, box, strict) {
             if (!strict) {
                 if (!$.isElement(elem = $.toElement(elem))) {
                     return null
@@ -5325,7 +5325,7 @@
             force = $.isBoolean(force, false);
 
             var parent = $.isElement(pnode = $.toElement(pnode)) ? pnode : elem.parentNode;
-            if (!force && isInVisualArea(elem, parent, true)) {
+            if (!force && isInViewport(elem, parent, true)) {
                 return $;
             }
             var offset = $.getOffset(elem),
@@ -6204,7 +6204,7 @@
         getEventPos: getEventPosition,
         getScrollPosition: getScrollPosition,
         getScrollPos: getScrollPosition,
-        isInVisualArea: isInVisualArea,
+        isInViewport: isInViewport,
         scrollTo: scrollTo,
         getKeyCode: getKeyCode,
         getKeyChar: getKeyChar,
