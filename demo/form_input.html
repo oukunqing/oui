@@ -263,16 +263,17 @@ button {width:120px;height:30px;}
         $.setInputFormat('fmt_option', {
             types: ['option'],
             options: ['abc', 'acc', 'asd', '123', '456', '789'],
-            //showOption: false,
+            //showOption: true,
             maxLen: 3,
             //config: { editable: true }
+            config: {show: true}
         }); 
         $.setInputFormat('fmt_option1', {
             types: ['option', 'char'],
             maxLen: 4,
             //是否允许输入中文，默认不允许，需要限制输入格式的一般都是有特定格式规则的输入
             //chinese: true,
-            config: { editable: true }
+            config: { editable: true, show: true }
         });
         $.setInputFormat('fmt_option2', {
             types: ['option', 'word'],

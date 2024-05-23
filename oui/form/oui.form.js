@@ -1748,6 +1748,7 @@
                     if (empty) {
                         $.setAttribute(elem, 'placeholder', $.getAttribute(elem, 'opt-title'));
                     }
+                    $.trigger(elem, 'change');
                 }
                 return elem;
             },
@@ -1815,7 +1816,7 @@
                 var val = $.getAttribute(item, 'data-value'),
                     num = $.getAttribute(item, 'opt-idx').toInt();
 
-                if (num > 0 && num === cur) {
+                if (num > 0 && num === cur && val === elem.value.trim()) {
                     $.input.hideOptionPanel();
                     return that;
                 }
@@ -2015,6 +2016,7 @@
                         $.input.hideOptionPanel();
                     });
                 }
+                
                 var arr = div.querySelectorAll('li');
                 for (var i = 0; i < arr.length; i++) {
                     var li = arr[i];
@@ -2027,11 +2029,17 @@
                         $.input.selectOptionItem(this, null, elem, div);
                     });
                 }
+                /*
                 $.addListener(div, 'mousedown', function(ev) {
                     $.cancelBubble(ev);
+                    var obj = ev.target;
+                    if (obj.tagName !== 'LI') {
+                        return false;
+                    }
+                    $.input.selectOptionItem(obj, null, elem, div);
                     return false;
                 });
-                
+                */
                 $.addListener(document, 'wheel', function (ev) {
                     if (div.style.display !== 'none' && !$.isOnElement(elem.optbox, ev)) {
                         $.input.hidePanel(elem.optbox, elem);
@@ -2090,6 +2098,7 @@
                         excepts: [],
                         options: [],            //内容选项
                         value: null,            //默认值
+                        change: false,         //是否触发change事件
                         config: {}              //配置项，用于options选项框
                     }, par),
                     MAX_HEIGHT = 364,
@@ -2109,6 +2118,7 @@
                         minWidth: 120,          //最小宽度
                         maxWidth: null,         //最大宽度
                         zindex: 0,              //选项框层级
+                        show: false,            //是否显示可选项提示
                         x: null,
                         y: null
                     }, par.config), i, j;
@@ -2120,6 +2130,7 @@
 
                 cfg.number = $.getParam(cfg, 'showNumber,number', null);
                 cfg.display = $.getParam(cfg, 'showValue,display,show', null);
+                cfg.show = $.isBoolean($.getParam(cfg, 'show'), false);
                 cfg.x = $.getParam(cfg, 'left,x', 0);
                 cfg.y = $.getParam(cfg, 'top,y', 0);
 
@@ -2139,6 +2150,7 @@
 
                 opt.config = cfg;
 
+                opt.change = $.isBoolean($.getParam(opt, 'change,trigger'), false);
                 opt.minLen = $.getParam(opt, 'minLength,minLen');
                 opt.maxLen = $.getParam(opt, 'maxLength,maxLen');
                 opt.valLen = $.getParam(opt, 'valueLength,valueLen,valLen');
@@ -2200,7 +2212,7 @@
                         46,     // delete
                     ],
                     // F1-F12功能键
-                    funs = KC.FunList,
+                    funs = KC.FuncList,
                     keys = ctls.concat(opt.codes || []).concat(funs),
                     patterns = $.extend([], opt.patterns),
                     exceptions = $.extend([], opt.exceptions),
@@ -2378,7 +2390,11 @@
                                 } else if (str.length > 0 && elem.placeholder.indexOf(str) < 0) {
                                     //\u9009\u62e9\u6216\u8f93\u5165  选择或输入
                                     //\u53ef\u9009\u9879\uff1a  可选项：
-                                    elem.placeholder += (elem.placeholder ? ' ' : '\u9009\u62e9\u6216\u8f93\u5165 ') + '\u53ef\u9009\u9879\uff1a' + str;
+                                    var prompt = (elem.placeholder ? ' ' : '\u9009\u62e9\u6216\u8f93\u5165 ');
+                                    if (opt.config.show) {
+                                        prompt += '\u53ef\u9009\u9879\uff1a' + str;
+                                    }
+                                    elem.placeholder += prompt;
                                 } else if (!elem.placeholder) {
                                     elem.placeholder = '\u8bf7\u9009\u62e9';    //请选择
                                 }
@@ -2420,6 +2436,9 @@
                                 this.focus();
                                 _showOption(ev, this, opt);
                                 return false;
+                            }
+                            if (opt.change) {
+                                $.trigger(elem, 'change');
                             }
                             if ((kc.inArray(ArrList) || 
                                 ((ddl || opt.config.readonly || !kc.inArray(keys)) && 
@@ -2527,6 +2546,9 @@
                                     return false;
                                 }
                                 $.setAttribute(this, 'opt-typed', $.input.isInputTyped(ps, val) ? 1 : 0);
+                                if (opt.change) {
+                                    $.trigger(elem, 'change');
+                                }
                                 return true;
                             });
                             
@@ -2574,6 +2596,9 @@
                     } else if (!isSelect) {
                         //控制输入，当输入值不匹配时，输入框禁止输入
                         elem.onkeydown = function(ev) {
+                            if (opt.change) {
+                                $.trigger(elem, 'change');
+                            }
                             var kc = $.getKeyCode(ev), selected = $.getSelectedText(this) ? true : false;
                             if ($.input.checkKey(ev, ctls, excepts, opt) || $.input.checkKey(ev, funs, excepts, opt)) {
                                 return true;
@@ -2615,6 +2640,9 @@
                             if ((ctl = $.input.replaceValue(ev, this, val, isCnAble, converts, $.input.getOptionValues(opt.options))).replace) {
                                 return false;
                             }
+                            if (opt.change) {
+                                $.trigger(elem, 'change');
+                            }
                             val = ctl.val;
                             if (isVal) {
                                 if(!$.input.checkFormat(this, patterns, true, opt.config.editable)) {
@@ -2628,6 +2656,9 @@
                             return $.input.setWarnColor(elem, true);
                         });
                         $.addListener(elem, 'blur', function(ev) {
+                            if (opt.change) {
+                                $.trigger(elem, 'change');
+                            }
                             var val = this.value.trim(), len = val.length;
                             $.input.replaceValue(ev, this, val, isCnAble, converts, $.input.getOptionValues(opt.options));
                             if (isNum && (val.endsWith('-') || val.endsWith('.'))) {

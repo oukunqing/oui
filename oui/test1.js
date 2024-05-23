@@ -2051,3 +2051,5 @@ console.log($.setQueryString(s, 123, 1));
 console.log($.setUrlParam(123, false, s));
 
 console.log($.getFileSalt('/libs/oui/tree/oui.tree.js?515'));
+
+console.log(29.0%1 === 0);

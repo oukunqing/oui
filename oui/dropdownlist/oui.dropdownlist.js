@@ -186,7 +186,7 @@
 
 				opt.maxHeight = options.maxHeight || (opt.layout === 'grid' ? Config.BoxGridMaxHeight : Config.BoxMaxHeight);
 
-				opt.dataType = $.getParam(opt, 'dataType,valueType');
+				opt.dataType = $.getParam(opt, 'dataType,datatype,valueType,valuetype');
 				opt.buttonPosition = $.getParam(opt, 'buttonPosition,buttonPos,btnPos', opt.tree ? 'right' : 'center');
 				opt.buttonLimit = $.getParam(opt, 'buttonLimit,buttonLength,buttonLen,btnLimit,btnLength,btnLen');
 				opt.button = $.getParam(opt, 'showButton,button');
@@ -575,50 +575,79 @@
 			setEditEvent: function (ddl) {
 				var that = ddl,
 					opt = that.options,
+					cfg = $.extend({}, opt.config),
 					elem = opt.select ? that.elem : that.text;
 
 				that.texts = document.querySelectorAll('#' + Config.IdPrefix + opt.id + ' .oui-ddl-edit .oui-ddl-new');
 
 				if (opt.editable && that.texts.length > 0) {
+					var text = that.texts[0];
+					if (!$.isElement(text)) {
+						return this;
+					}
+					var type = $.getAttribute(text, 'data-type'),
+						num = false, intVal = false, floatVal = false,
+						min = $.getParam(cfg, 'minValue,minVal,min'), 
+						max = $.getParam(cfg, 'maxValue,maxVal,max');
+
+					switch(type) {
+					case 'int': case 'long': num = intVal = true; break;
+					case 'float': case 'double': num = floatVal = true; break;
+					case 'port': num = true; min = min || 0; max = max || 65535; break;
+					}
+
 					function _inputNewVal() {
-						$.removeClass(that.texts[0], 'oui-ddl-val-err');
+						$.removeClass(text, 'oui-ddl-val-err');
 						
-						var val = that.texts[0].value.trim(),
-							type = $.getAttribute(that.texts[0], 'data-type'),
-							num = false, min, max;
+						var val = text.value.trim();
 						if (val === '') {
 							that.elem.focus();
 							return false;
 						}
-						switch(type) {
-						case 'int': case 'long': num = true; val = parseInt(val, 10); break;
-						case 'float': case 'double': num = true; val = parseFloat(val, 10); break;
-						}
+						val = intVal ? parseInt(val, 10) : floatVal ? parseFloat(val, 10) : val;
+
+						if (num) {
+
+						}  else if (['ip','ipv4'].indexOf(type) > -1) {
+	                        if (/^(local|route|127.|192.|255.|::1)$/i.test(val)) {
+	                            text.value = (val = val.replace(/^(local|127.|::1)$/i, '127.0.0.1')
+	                                .replace(/^(route|192.)$/i, '192.168.1.1')
+	                                .replace(/^255.$/, '255.255.255.0'));
+	                        } else if (!$.PATTERN.Ip.test(val) && $.isString(val, true)) {
+	                        	$.addClass(text, 'oui-ddl-val-err');
+	                            return false
+	                        }
+	                    }
+						/*
+						$.console.log('_inputNewVal:', val);
+
 						if (num) {
 							if (isNaN(val)) {
 								$.console.log('oui-ddl-edit:', that.id, type, ', input value format error');
-								$.addClass(that.texts[0], 'oui-ddl-val-err');
+								$.addClass(text, 'oui-ddl-val-err');
 								return false;
 							} else {
-								if ($.isNumber((min = opt.config.minValue)) && val < min) {
+								if ($.isNumber(min) && val < min) {
 									$.console.log('oui-ddl-edit:', that.id, ', input number entered must be greater than or equal to ' + min);
-									$.addClass(that.texts[0], 'oui-ddl-val-err');
+									$.addClass(text, 'oui-ddl-val-err');
 									return false;
 								}
-								if ($.isNumber((max = opt.config.maxValue)) && val > max) {
+								if ($.isNumber(max) && val > max) {
 									$.console.log('oui-ddl-edit:', that.id, ', input number should be less than or equal to ' + max);
-									$.addClass(that.texts[0], 'oui-ddl-val-err');
+									$.addClass(text, 'oui-ddl-val-err');
 									return false;
 								}
 							}
 						}
+						*/
 						if (!opt.config.keep) {
-							that.texts[0].value = '';
-						}
+							text.value = '';
+						}						
 						that.set(val, {edit: true});
 						that.callback(opt.callbackLevel);
 					}
-					$.addListener(that.texts[0], 'keyup', function(ev) {
+					
+					text.onkeyup = function(ev) {
 						var kc = $.getKeyCode(ev);
 						if (kc.inArray([KC.Enter, KC.Min.Enter])) {	//Enter 回车键确认输入
 							_inputNewVal();
@@ -630,18 +659,54 @@
 							$.cancelBubble(ev);
 						}
 						return false;
-					});
-					$.addListener(that.texts[0], 'keydown', function(ev) {
-						var kc = $.getKeyCode(ev);
-						if (kc.inArray([KC.Tab, KC.Esc])) {
-							$.cancelBubble(ev);
-							//按Tab或Esc键，退出编辑框，焦点返回选项框
-							that.focus(false);
-							//设置esc按键事件，防止document esc冒泡
-							elem.esc = 1;
+					};
+					
+					text.onkeydown = function(ev) {
+						var kc = $.getKeyCode(ev), val, pos = $.getTextCursorPosition(text);
+						if (kc.inArray(KC.CtrlList) || kc.inArray(KC.FuncList)) {
+							if (kc.inArray([KC.Tab, KC.Esc])) {
+								$.cancelBubble(ev);
+								//按Tab或Esc键，退出编辑框，焦点返回选项框
+								that.focus(false);
+								//设置esc按键事件，防止document esc冒泡
+								elem.esc = 1;
+							}
+						} else if (num) {
+							val = text.value.trim();
+							text.tempValue = val;
+
+							var pass = kc.inArray(KC.NumList) || kc.inArray(KC.Min.NumList)
+								|| (cfg.minus && kc.inArray([KC.Symbol.Minus, KC.Min.Symbol.Minus]))
+								|| (floatVal && kc.inArray([KC.Symbol.Dot, KC.Min.Symbol.Dot]));
+
+							if (pass) {
+								if (kc.inArray([KC.Symbol.Minus, KC.Min.Symbol.Minus]) && pos > 0) {
+									return false;
+								}
+								if (kc.inArray([KC.Symbol.Dot, KC.Min.Symbol.Dot]) && val.indexOf('.') > -1) {
+									return false;
+								}
+								var arr = val.split('');
+								arr.splice(pos, 0, $.getKeyChar(ev));
+								val = arr.join('');
+
+								//验证最大值
+								if (max && parseFloat(val, 10) > max) {
+									return false;
+								}
+
+								//验证小数位长度
+								if (floatVal && $.isNumber(cfg.decimalLen)) {
+									var dlen = (val.split('.')[1] || '').trim().length;
+									if (dlen > cfg.decimalLen) {
+										return false;
+									}
+								}
+							}
+							return pass;
 						}
-						return false;
-					});
+						return true;
+					};
 					$.addListener(that.texts[1], 'click', function(ev) {
 						_inputNewVal();
 						return false;
@@ -862,7 +927,7 @@
 						$.console.log('set [property]', elem.id, val, typeof val);
 						if (val !== undefined) {
 							elem.inputValue = val;
-							that.set(val);
+							that.set(val, {edit: that.options.editable});
 							elem.inputValue = null;
 						}
 					}
@@ -1171,7 +1236,7 @@
 		}, options));
 
 		if (opt.editable) {
-			opt.config = $.extend({
+			var cfg = $.extend({
 				maxLength: null,
 				dataType: null,
 				minValue: null,
@@ -1181,14 +1246,23 @@
 				//确定
 				button: '\u786e\u5b9a',
 				//是否保留输入框内容
-				keep: false,
+				keep: true,
+				//是否默认显示编辑框
 				show: true
 			}, options.config);
 
-			opt.config.maxLength = $.getParam(opt.config, 'maxLength,maxlength', 64);
-			opt.config.dataType = $.getParam(opt.config, 'dataType,datatype', opt.dataType);
-			opt.config.minValue = $.getParam(opt.config, 'minValue,minVal,min');
-			opt.config.maxValue = $.getParam(opt.config, 'maxValue,maxVal,max');
+			cfg.maxLength = $.getParam(cfg, 'maxLength,maxlength', 64);
+			cfg.dataType = $.getParam(cfg, 'dataType,datatype,valueType,valuetype', opt.dataType);
+			cfg.minValue = $.getParam(cfg, 'minValue,minVal,min');
+			cfg.maxValue = $.getParam(cfg, 'maxValue,maxVal,max');
+
+			if (['ip', 'ipv4'].indexOf(cfg.dataType) > -1) {
+				if (cfg.maxLength < 15) {
+					cfg.maxLength = 15;
+				}
+			}
+
+			opt.config = cfg;
 		}
 
 		this.id = opt.id;
@@ -1626,15 +1700,13 @@
 				opt = that.options,
 				nodes = that.nodes,
 				elem = that.elem,
-				isZero = nodes[0].value.toString() === '0',
-				cur = Factory.getItemIdx(elem) - (isZero ? 0 : 1),
-				idx = 0,
 				par = $.extend({
 					action: true,
 					checked: false,
 					initial: false,
 					edit: false
-				}, arg);
+				}, arg),
+				idx = 0;
 
 			if ($.isUndefinedOrNull(val)) {
 				val = '';
@@ -1663,8 +1735,10 @@
 				par.checked = $.isBoolean(par.checked, false);
 				
 				if (par.edit && !Factory.isInList(nodes, val)) {
-					if (cur >= 0 && nodes[cur]) {
-						nodes[cur].set(false, false);
+					for (var i = 0; i < nodes.length; i++) {
+						if (nodes[i].checked) {
+							nodes[i].set(false, false);
+						}
 					}
 					idx = par.initial ? 1 : 0;
 					Factory.setItemIdx(that, idx);
@@ -2160,6 +2234,21 @@
 			}
 			return that;
 		},
+		value: function (value, append) {
+			var that = this,
+				opt = that.options,
+				elem = opt.select ? that.elem : that.text;
+
+			that.set(value, {edit: opt.editable});
+
+			if (opt.editable && that.texts.length > 0) {
+				if (!Factory.isInList(that.nodes, value)) {
+					that.texts[0].value = value;
+				}
+			}
+
+			return that;
+		},
 		isClosed: function () {
 			var that = this;
 			return !that.activity;
@@ -2206,6 +2295,20 @@
 				return cache.ddl.update(par);
 			}
 			return Factory.buildList(id, par, single);
+		},
+		value: function(id, value, append) {
+			var cache = Factory.getCache(id);
+			if (cache) {
+				cache.ddl.value(value, append);
+				return this;
+			}
+			elem = $.toElement(elem);
+			if (!$.isElement(elem)) {
+				return this;
+			}
+			elem.value = value;
+			elem.val = value;
+			return this;
 		}
 	});
 
@@ -2218,6 +2321,9 @@
 		},
 		update: function (id, par) {
 			return $.dropdownlist.update(id, par, true);
+		},
+		value: function(elem, value, append) {
+			return $.dropdownlist.value(elem, value, append);
 		}
 	});
 
@@ -2230,6 +2336,9 @@
 		},
 		update: function (id, par) {
 			return $.dropdownlist.update(id, par);
+		},
+		value: function(elem, value, append) {
+			return $.dropdownlist.value(elem, value, append);
 		}
 	});
 }(OUI);

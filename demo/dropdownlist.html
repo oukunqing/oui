@@ -483,11 +483,13 @@ window.onload = function() {
 			},
 			editable: i > 0,
 			config: {
-				maxlength: 3,
-				datatype: 'int',
+				maxlength: 8,
+				datatype: 'ip',
+				minus: true,
+				decimalLen: 2,
 				show: i > 1,
 				min: 5,
-				max: 100,
+				max:1000,
 				keep: i === 3
 			}
 		});

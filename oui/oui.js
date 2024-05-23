@@ -185,6 +185,7 @@
                 Left: 37, Top: 38, Right: 39, Bottom: 40,
                 H: 72, K: 75, J: 74, L: 76
             },
+            CtrlList: [8, 9, 13, 27, 32, 37, 38, 39, 40, 46],
             Char: {
                 A: 65, B: 66, C: 67, D: 68, E: 69, F: 70, G: 71,
                 H: 72, I: 73, J: 74, K: 75, L: 76, M: 77, N: 78,
@@ -196,24 +197,24 @@
             NumList: [48, 49, 50, 51, 52, 53, 54, 55, 56, 57],
             Symbol: { 
                 "*": 56, "+": 187, "-": 189, ".": 190, "/": 191, 
-                ":": 186,  
+                ":": 186, Minus: 189, Dot: 190
             },
             Min: {
                 Enter: 108,
                 0: 96, 1: 97, 2: 98, 3: 99, 4: 100, 
                 5: 101, 6: 102, 7: 103, 8: 104, 9: 105,
                 Symbol: { 
-                    "*": 106, "+": 107, "-": 109, ".": 110, "/": 111 
+                    "*": 106, "+": 107, "-": 109, ".": 110, "/": 111, Minus: 109, Dot: 110
                 },
                 Num: { 0: 96, 1: 97, 2: 98, 3: 99, 4: 100, 5: 101, 6: 102, 7: 103, 8: 104, 9: 105 },
                 NumList: [96, 97, 98, 99, 100, 101, 102, 103, 104, 105],
             },
             //F1 F2 ... F12
-            Fun: {
+            Func: {
                 1: 112, 2: 113, 3: 114, 4: 115, 5: 116, 6: 117, 
                 7: 118, 8: 119, 9: 120, 10: 121, 11: 122, 12: 123
             },
-            FunList: [112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123]
+            FuncList: [112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123]
         },
         POSITION: {
             Cursor: 0, Custom: 0,
@@ -2799,8 +2800,17 @@
         max: function (num) {
             return Math.max(this, num);
         },
-        padLeft: function (totalWidth, paddingChar) { return this.toString().padLeft(totalWidth, paddingChar); },
-        padRight: function (totalWidth, paddingChar) { return this.toString().padRight(totalWidth, paddingChar); },
+        padLeft: function (totalWidth, paddingChar) {
+            var num = this;
+            if (num % 1 !== 0 || num.toString().indexOf('.') > 0) {
+                var arr = num.toString().split('.');
+                return arr[0].padLeft(totalWidth, paddingChar) + '.' + (arr[1] || '');
+            }
+            return this.toString().padLeft(totalWidth, paddingChar); 
+        },
+        padRight: function (totalWidth, paddingChar) { 
+            return this.toString().padRight(totalWidth, paddingChar); 
+        },
         isDecimal: function () { return $.isDecimal(this); },
         isInteger: function () { return $.isInteger(this); },
         isFloat: function () { return $.isDecimal(this); },
