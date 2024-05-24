@@ -2097,8 +2097,11 @@
                         codes: [],
                         excepts: [],
                         options: [],            //内容选项
+                        editable: null,         //选项模式时是否可编辑
                         value: null,            //默认值
-                        change: false,         //是否触发change事件
+                        change: false,          //是否触发change事件
+                        empty: null,            //允许空值
+                        placeholder: null,      //提示信息
                         config: {}              //配置项，用于options选项框
                     }, par),
                     MAX_HEIGHT = 364,
@@ -2156,6 +2159,15 @@
                 opt.valLen = $.getParam(opt, 'valueLength,valueLen,valLen');
                 opt.minVal = $.getParam(opt, 'minValue,minVal');
                 opt.maxVal = $.getParam(opt, 'maxValue,maxVal');
+
+                opt.empty = $.getParam(opt, 'allowEmpty,empty');
+                if (($.isBoolean(opt.empty) && opt.empty) || (!$.isNumber(opt.empty) && opt.empty)) {
+                    opt.empty = {val: '', txt: '&nbsp;'};
+                } else if ($.isString(opt.empty, true)) {
+                    opt.empty = {val: '', txt: opt.empty};
+                } else if (!$.isObject(opt.empty)) {
+                    opt.empty = null;
+                }
 
                 if (!$.isArray(opt.options)) {
                     opt.options = [];
@@ -2368,6 +2380,10 @@
                         opt.options = $.input.setOptionValues(opt.options);
                         elem.className = elem.className.addClass('input-opt-elem');
 
+                        if (opt.empty && opt.empty.txt) {
+                            opt.options.unshift({ val: opt.empty.val || '', txt: opt.empty.txt });
+                        }
+
                         function _showOption(ev, elem, opt, action) {
                             $.input.hideOptionPanel(elem.optbox);
                             //这里不能用options，因为options是select元素的自有属性
@@ -2382,11 +2398,11 @@
                             if (opt.config.readonly) {
                                 $.setAttribute(elem, 'readonly', 'readonly');
                                 elem.style.cursor = 'default';
-                                elem.placeholder = cfg.title || elem.placeholder || '\u8bf7\u9009\u62e9'; //请选择
+                                elem.placeholder = opt.placeholder || cfg.title || elem.placeholder || '\u8bf7\u9009\u62e9'; //请选择
                             } else {
                                 var str = $.input.getOptionValues(opt.options).join(',');
-                                if (cfg.title) {
-                                    elem.placeholder = cfg.title;
+                                if (opt.placeholder || cfg.title) {
+                                    elem.placeholder = opt.placeholder || cfg.title;
                                 } else if (str.length > 0 && elem.placeholder.indexOf(str) < 0) {
                                     //\u9009\u62e9\u6216\u8f93\u5165  选择或输入
                                     //\u53ef\u9009\u9879\uff1a  可选项：
@@ -2477,7 +2493,7 @@
                                     }
                                     _showOption(ev, this, opt, 0);
                                     $.setTextCursorPosition(this);
-                                } else if (!ddl && opt.config.readonly && kc.inArray([KC.Backspace, KC.Delete])) {
+                                } else if (!ddl && cfg.readonly && kc.inArray([KC.Backspace, KC.Delete])) {
                                     //backspace, delete键，表示选项被取消，用-1表示索引
                                     $.input.selectOptionItem(-1, null, this, $.getAttribute(this, 'opt-id'));
                                     this.value = '';
@@ -2563,13 +2579,30 @@
 
                         //选项模式，默认显示选项框，若不想显示选项，需设置 showOption:false
                         if ($.isBoolean(opt.showOption, true)) {
+                            //非只读（即可选可输入），若用mousedown则光标位置没法指定
                             $.addListener(elem, 'mousedown', function(ev) {
-                                $.cancelBubble(ev);
                                 this.focus();
-                                _showOption(ev, this, opt);
+                                if (isSelect || opt.config.readonly) {
+                                    $.cancelBubble(ev);
+                                    _showOption(ev, this, opt);
+                                } else if (elem.optbox) {
+                                    elem.boxshow = elem.optbox.style.display !== 'none';
+                                }
                                 $.hidePopupPanel(elem.optbox);
                                 return false;
                             });
+                            if (!isSelect && !opt.config.readonly) {
+                                $.addListener(elem, 'click', function(ev) {
+                                    $.cancelBubble(ev);
+                                    if (elem.optbox) {
+                                        //mousedown冒泡事件中已切换显示列表框，所以这里需要恢复列表框的显示/隐藏
+                                        elem.optbox.style.display = elem.boxshow ? '' : 'none';
+                                    }
+                                    _showOption(ev, this, opt, null);
+                                    $.hidePopupPanel(elem.optbox);
+                                    return false;
+                                });
+                            }
                         }
 
                         Object.defineProperty(elem, 'val', {
@@ -2594,6 +2627,8 @@
                             }
                         });
                     } else if (!isSelect) {
+                        elem.placeholder = opt.placeholder || cfg.title || elem.placeholder;
+
                         //控制输入，当输入值不匹配时，输入框禁止输入
                         elem.onkeydown = function(ev) {
                             if (opt.change) {
