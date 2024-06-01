@@ -95,8 +95,14 @@
 				$.loadJsScriptCss(Config.FilePath, skin, func, Config.FileName);
 				return this;
 			},
+			buildId: function (id) {
+				if ($.isElement(id)) {
+					return id.id || $.crc.toCRC16(id.toString()).toLowerCase();
+				}
+				return id.toString();
+			},
 			buildKey: function (id) {
-				return 'oui_ddl_' + id;
+				return 'oui_ddl_' + Factory.buildId(id);
 			},
 			getCache: function (id) {
 				var key = this.buildKey(id),
@@ -218,15 +224,19 @@
 				return opt;
 			},
 			buildList: function (id, par, single) {
-				if ($.isObject(id) && $.isUndefined(par)) {
+				var elem;
+				if ($.isElement(id)) {
+					elem = id;
+					id = Factory.buildId(id);
+				} else if ($.isObject(id) && $.isUndefined(par)) {
 					par = id;
 					id = null;
 				} else if ($.isString(id, true)) {
 					par = $.extend({}, par, {id: id});
 				}
 				var opt = $.extend({
-					id: '',
-					element: ''
+					id: id,
+					element: elem
 				}, par), cache, ddl;
 
 				if (single) {
@@ -234,6 +244,8 @@
 				}
 
 				opt.id = opt.id || opt.element.id;
+
+				$.console.log('buildList:', opt);
 
 				var arr = $.isArray(opt.id) ? opt.id : $.isString(opt.id) ? opt.id.split(/[,;\|，]/) : opt.id.toString().split(/[,;\|，]/);
 				if (arr.length > 1) {

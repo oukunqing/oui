@@ -4727,6 +4727,17 @@
             }
             return this;
         },
+        getCssText = function (elem) {
+            var arr = (elem.style.cssText || '').split(';'),
+                obj = {};
+            for (var i = 0; i < arr.length; i++) {
+                var tmp = arr[i].split(':'), k = tmp[0].trim();
+                if (k) {
+                    obj[k] = (tmp[1] || '').trim();
+                }
+            }
+            return obj;
+        },
         toCssText = function (obj) {
             if ($.isString(obj)) {
                 return obj;
@@ -4738,10 +4749,10 @@
             for (var i in obj) {
                 var val = obj[i];
                 if ($.isString(val) || $.isNumber(val)) {
-                    cssText.push(i + ':' + ('' + val).trim() + ';');
+                    cssText.push(i + ':' + ('' + val).trim());
                 }
             }
-            return cssText.join(' ');
+            return cssText.join(';');
         },
         setStyle = function (elem, styles, value, exempt) {
             if ($.isNullOrUndefined(elem)) {
@@ -5836,9 +5847,10 @@
         buildOption = function (value, text) {
             return '<option value="' + value + '">' + text + '</option>';
         },
-        buildOptions = function (list, minVal, maxVal, stepVal, curVal, valUnit) {
+        buildOptions = function (list, minVal, maxVal, stepVal, curVal, valUnit, valText) {
             var html = [];
             if ($.isNumber(list)) {
+                valText = valUnit;
                 valUnit = curVal;
                 curVal = stepVal;
                 stepVal = maxVal;
@@ -5850,7 +5862,9 @@
                 stepVal = stepVal || 1;
                 for (var i = minVal; i <= maxVal; i += stepVal) {
                     var selected = curVal === i ? ' selected="selected"' : '';
-                    html.push('<option value="' + i + '"' + selected + '>' + i + (valUnit || '') + '</option>');
+                    html.push([
+                        '<option value="', i, '"', selected, '>', valText || '', i, valUnit || '', '</option>'
+                    ].join(''));
                 }
                 return html.join('');
             }
@@ -5872,7 +5886,9 @@
                     txt = dr;
                 }
                 var selected = curVal === val ? ' selected="selected"' : '';
-                html.push('<option value="' + val + '"' + selected + '>' + txt + (valUnit || '') + '</option>');
+                html.push([
+                    '<option value="', val, '"', selected, '>', valText || '', txt, valUnit || '', '</option>'
+                ].join(''));
             }
             return html.join('');
         },
@@ -6176,6 +6192,7 @@
         setAttribute: setAttribute,
         removeAttribute: removeAttribute,
         delAttribute: removeAttribute,
+        getCssText: getCssText,
         toCssText: toCssText,
         setStyle: setStyle,
         setElemClass: setElemClass,
@@ -6215,6 +6232,7 @@
         getScrollPosition: getScrollPosition,
         getScrollPos: getScrollPosition,
         isInViewport: isInViewport,
+        isInViewPort: isInViewport,
         scrollTo: scrollTo,
         getKeyCode: getKeyCode,
         getKeyChar: getKeyChar,
@@ -6744,21 +6762,24 @@
         },
         setElementAttribute: function (elem, value, attributeName) {
             elem = $.toElement(elem);
-            if (attributeName === 'value') {
-                elem.value = value;
-            } else {
-                elem.setAttribute(attributeName, value);
+            var s = attributeName.split(/[,|;]/), n = s.length;
+            for (var i = 0; i < n; i++) {
+                if (s[i] === 'value') {
+                    elem.value = value;
+                } if (s[i] === 'val') {
+                    elem.val = value;
+                } else if (s[i]) {
+                    elem.setAttribute(s[i], value);
+                }
             }
             return this;
         },
         setElementValue: function (elements, values, attributeName, sameValue) {
             var isAttribute = $.isString(attributeName);
             if (!$.isString(attributeName)) {
-                attributeName = 'value';
+                attributeName = 'value,val';
             }
-
             var elems = ($.isArray(elements) || $.isArrayLike(elements)) ? elements : [elements],
-                isAttr = $.isString(attributeName),
                 len = elems.length,
                 vals = !$.isArray(values) ? [values] : values,
                 elem;

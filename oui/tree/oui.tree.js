@@ -671,6 +671,11 @@
 					opt.target = undefined;
 				}
 
+				opt.trigger = $.getParam(opt, 'trigger');
+				if (opt.trigger === 'mousedown' && opt.target && !Factory.isTargetText(opt.target)) {
+					opt.trigger = undefined;
+				}
+
 				if ($.isString(opt.skin, true)) {
 					opt.skin = opt.skin.toLowerCase();
 				} else {
@@ -716,6 +721,7 @@
 				opt.showType = $.isBoolean($.getParam(opt, 'showType,showtype'), true);
 				opt.showStatus = $.isBoolean($.getParam(opt, 'showStatus,showstatus'), true);
 				opt.showLine = $.isBoolean($.getParam(opt, 'showLine,showline'), false);
+				opt.showSwitch = $.isBoolean($.getParam(opt, 'showSwitch'), true);
 				opt.hoverLine = $.isBoolean($.getParam(opt, 'hoverLine,hoverline'), false);
 				opt.showIcon = $.isBoolean($.getParam(opt, 'showIcon,showicon'), true);
 
@@ -739,6 +745,11 @@
 					opt.buttonConfig.types = types;
 				}
 
+				opt.boxWidth = $.getParam(opt, 'boxWidth');
+				if (opt.target && (!$.isNumber(opt.boxWidth) || opt.boxWidth < 100)) {
+					opt.boxWidth = 200;
+				}
+
 				opt.boxHeight = $.getParam(opt, 'boxHeight');
 				if (!$.isNumber(opt.boxHeight) || opt.boxHeight < Config.TreeBoxMinHeight) {
 					opt.boxHeight = undefined;
@@ -758,6 +769,10 @@
 				opt.position = $.getParam(opt, 'boxPosition,position');
 				if (['top', 'bottom'].indexOf(opt.position) < 0) {
 					opt.position = 'bottom';
+				}
+				opt.align = $.getParam(opt, 'align');
+				if (['left', 'right'].indexOf(opt.align) < 0) {
+					opt.align = 'left';
 				}
 				opt.positionFixed = $.isBoolean($.getParam(opt, 'positionFixed,fixed'), false);
 
@@ -1375,10 +1390,11 @@
 					tag = elem.tagName.toLowerCase(),
 					type = elem.type.toLowerCase(),
 					evName = 'mousedown';
-
+				/*
 				if (tag !== 'select' && (tag !== 'input' || !type.inArray(['text']))) {
 					return this;
 				}
+				*/
 				$.addClass(elem, 'oui-tree-elem');
 
 				$.addListener(document, 'mousedown', function (ev) {
@@ -1402,12 +1418,17 @@
 							Factory.setBoxDisplay(tree, false, ev, this);
 						}
 					});
-				} else {
+				} else if (Factory.isTargetText(elem)) {
 					evName = 'focus';
+				} else {
+					evName = opt.trigger || 'click';
+				}
+				if (evName.inArray(['mouseout', 'mousemove'])) {
+					return this;
 				}
 				$.addListener(elem, evName, function (ev) {
 					$.cancelBubble(ev);
-					Factory.setBoxDisplay(tree, null, ev, this);
+					Factory.setBoxDisplay(tree, evName.inArray(['mouseover']) ? true : null, ev, this);
 					$.hidePopupPanel(tree.element);
 				});
 
@@ -1564,7 +1585,7 @@
 					//之前设置过的框体高度
 					boxHeight = Cache.drags['size' + tree.id],
 					p = {
-						left: es.left,
+						left: opt.align === 'right' ? es.left + es.width - box.offsetWidth : es.left,
 						top: es.height + es.top - 1,
 						width: es.width,
 						height: boxHeight || opt.boxHeight || Config.TreeBoxDefaultHeight
@@ -1642,7 +1663,7 @@
 					}
 					var oh = tree.element.offsetHeight,
 						bh = (append ? oh : 0) + h,
-						minH = opt.minHeight || Config.TreeBoxMinHeight,
+						minH = opt.minHeight || (Config.TreeBoxMinHeight),
 						maxH = opt.maxHeight || $.getBodySize().height;
 
 					if ((bh <= minH && bh < oh) || (bh > maxH && bh > oh)) {
@@ -2128,7 +2149,32 @@
 			setPanelSize: function (tree, ev, force) {
 				var opt = tree.options,
 					form = tree.box ? tree.box.querySelector('div.form') : null,
-					bottom = tree.box ? tree.box.querySelector('div.bottom') : null;
+					bottom = tree.box ? tree.box.querySelector('div.bottom') : null,
+					btn = opt.target;
+
+				if (btn && !Factory.isTargetText(btn)) {
+					var css = $.getCssText(tree.box),
+						tmp = {
+							width: 'auto', height: 'auto'
+						};
+
+					if (opt.boxWidth) {
+						tmp['min-width'] = opt.boxWidth + 'px';
+					}
+					if (opt.align === 'right') {
+						tmp['border-top-left-radius'] = '4px';
+					} else {
+						tmp['border-top-right-radius'] = '4px';
+					}
+					tree.box.style.cssText = $.toCssText($.extend({}, css, tmp));
+
+					if (opt.align === 'right') {
+						var es = $.getOffset(btn);
+						tree.box.style.left = es.left + es.width - tree.box.offsetWidth + 'px';
+					}
+
+					return this;
+				}
 
 				if (!force && (!tree.panel || (!form && !bottom))) {
 					return this;
@@ -2159,8 +2205,16 @@
 						cache.elem.style.width = (form.offsetWidth - 8) + 'px';
 					}
 				}
-
 				return this;
+			},
+			isTargetText: function (target) {
+				if (!$.isElement(target = $.toElement(target))) {
+					return false;
+				}
+				var tag = target.tagName.toLowerCase(),
+					type = target.type.toLowerCase();
+
+				return tag === 'select' || tag === 'input' && type.inArray(['text']);
 			},
 			buildPanel: function (tree, par, initial) {
 				var that = tree,
@@ -2178,6 +2232,9 @@
 
 					if ($.isElement(opt.target)) {
 						css.push('oui-tree-popup');
+						if (!Factory.isTargetText(opt.target)) {
+							css.push('oui-tree-btn');
+						}
 						css.push(Config.CloseLinkageClassName);
 
 						that.element = box;
@@ -2206,10 +2263,13 @@
 				if (opt.trigger || tag.inArray(['input', 'select', 'button', 'a'])) {
 					var events = $.isBoolean(opt.trigger) ? ['mousedown'] : opt.trigger.split(/[,;|]/);
 					for (var i = 0; i < events.length; i++) {
-						$.addListener(that.element, events[i], function(ev) {
-							tree.display();
-						});
+						if (!events[i].inArray(['mouseover', 'mousemove', 'mousemove'])) {
+							$.addListener(that.element, events[i], function(ev) {
+								tree.display();
+							});
+						}
 					}
+					Factory.buildNode(tree, opt);
 				} else {
 					if (opt.async) {
 						window.setTimeout(function() {
@@ -2575,7 +2635,7 @@
 				var title = opt.showTitle && p.text.length > Config.TitleTextLength ? ' title="' + p.text + '"' : '',
 					html = [
 						'<div class="item" nid="', p.nid, '">',
-						'<span class="', node.getSwitchClass(true), '" nid="', p.nid, '"></span>',
+						opt.showSwitch ? '<span class="' + node.getSwitchClass(true) + '" nid="' + p.nid + '"></span>' : '',
 						opt.showIcon ? '<span class="' + node.getIconClass() + '" nid="' + p.nid + '"></span>' : '',
 						opt.showCheck ? '<span class="check" nid="' + p.nid + '"></span>' : '',
 						'<a class="name" nid="', p.nid, '"', title, '>',
@@ -4083,6 +4143,8 @@
 				showLine: undefined,
 				//是否悬停显示连线
 				hoverLine: undefined,
+				//是否显示切换图标
+				showSwitch: undefined,
 				//是否显示图标
 				showIcon: undefined,
 				//是否显示复选框
@@ -4145,6 +4207,8 @@
 				clickExpand: undefined,
 				//关联元素
 				target: undefined,
+				//窗体宽度：仅用于点击弹出窗体
+				boxWidth: undefined,
 				//窗体高度：仅用于下拉弹出窗体
 				boxHeight: undefined,
 				//窗体最小高度
@@ -4155,6 +4219,8 @@
 				minWidth: undefined,
 				//窗体默认位置: bottom, top
 				position: undefined,
+				//窗体水平位置，left, right，默认:left
+				align: undefined,
 				//固定窗体位置
 				fixed: undefined,
 				zindex: undefined,

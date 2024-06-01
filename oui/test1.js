@@ -2052,4 +2052,40 @@ console.log($.setUrlParam(123, false, s));
 
 console.log($.getFileSalt('/libs/oui/tree/oui.tree.js?515'));
 
-console.log(29.0%1 === 0);
+console.log(Date.timeTick(new Date().getTime()));
+
+
+var arr = '4b73e938815907bff9e6428cba3ebffe'.hexToAscii();
+console.log(arr);
+
+console.log($.toAsciiHex(arr, true));
+
+console.log('abcABC'.toAscii());
+console.log($.asciiToStr('abcABC'.toAscii()));
+
+var ts = parseInt(new Date().getTime()/1000, 10);
+console.log('ts:', ts);
+console.log('date:', ts - ts % 86400);
+
+
+function calcDiskSize(gbSize) {
+    var size;
+    if (gbSize >= 1024) {
+        size = gbSize * 1000 * 1000 * 1000 * 1000;
+        return size / 1024 / 1024 / 1024 / 1024;
+    } else {
+        size = gbSize * 1000 * 1000 * 1000;
+        return size / 1024 / 1024 / 1024;
+    }
+}
+
+console.log(calcDiskSize(16));
+console.log(calcDiskSize(32));
+console.log(calcDiskSize(64));
+console.log(calcDiskSize(128));
+console.log(calcDiskSize(256));
+console.log(calcDiskSize(500));
+console.log(calcDiskSize(512));
+console.log(calcDiskSize(1024));
+console.log(calcDiskSize(2048));
+console.log(calcDiskSize(4096));
