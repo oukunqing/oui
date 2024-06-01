@@ -1337,6 +1337,8 @@
 				&& (isEditPage && elem.className.indexOf('form-control') > -1)) {
 				opt.textWidth = 'auto';
 			}
+			var txtWidth = Factory.getStyleSize(opt.textWidth, offset.width),
+				realWidth = parseInt(txtWidth, 10);
 
 			if (tag === 'select') {
 				that.elem = elem;
@@ -1355,7 +1357,7 @@
 					}
 					txt.style.cssText = [
 						'background-color:#fff;padding: 0 20px 0 9px;',
-						opt.textWidth === 'auto' ? '' : 'width:' + Factory.getStyleSize(opt.textWidth, offset.width) + ';',
+						opt.textWidth === 'auto' || !realWidth ? '' : 'width:' + txtWidth + ';',
 						opt.style ? opt.style + ';' : ''
 					].join('');
 					opt.element.parentNode.insertBefore(txt, elem);
@@ -1364,8 +1366,8 @@
 				} else {
 					that.text = null;
 					elem = that.elem;
-					if (opt.textWidth !== 'auto') {
-						elem.style.width =  Factory.getStyleSize(opt.textWidth, offset.width);
+					if (opt.textWidth !== 'auto' && realWidth) {
+						elem.style.width =  txtWidth;
 					}
 					//设置select默认显示的行数为1，即显示1行
 					elem.size = 1;
