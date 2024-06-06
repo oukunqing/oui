@@ -671,6 +671,9 @@
 					opt.target = undefined;
 				}
 
+				opt.name = $.getParam(opt, 'name');
+				opt.title = $.getParam(opt, 'title', opt.name);
+
 				opt.trigger = $.getParam(opt, 'trigger');
 				if (opt.trigger === 'mousedown' && opt.target && !Factory.isTargetText(opt.target)) {
 					opt.trigger = undefined;
@@ -1477,7 +1480,7 @@
 					return this;
 				}
 				var val = elem.value.trim(),
-					txt = tag === 'select' ? elem.options[elem.selectedIndex].text : val,
+					txt = tag === 'select' && elem.options.length > 0 ? elem.options[elem.selectedIndex].text : val,
 					code = $.getAttribute(elem, 'code'),
 					nodes = Factory.findNodes(tree, val);
 
@@ -1486,6 +1489,9 @@
 						nodes[i].setSelected(true).setChecked(true).position();
 					}
 					Factory.setDefaultValue(tree, {value: val, text: txt, code: code, nodes: nodes});
+				}
+				if (!txt) {
+					Factory.setTargetValue(nodes[0], tree, tree.options.showCheck, true, nodes);
 				}
 				return this;
 			},
@@ -1516,6 +1522,9 @@
 					txt = node.getText();
 					val = node.getValue();
 				}
+				if (!val && !txt) {
+					txt = opt.title;
+				}
 
 				switch(tag) {
 				case 'select':
@@ -1524,6 +1533,9 @@
 					break;
 				case 'input':
 					tree.target.value = val;
+					break;
+				default:
+					return this;
 					break;
 				}
 
@@ -2150,13 +2162,12 @@
 				var opt = tree.options,
 					form = tree.box ? tree.box.querySelector('div.form') : null,
 					bottom = tree.box ? tree.box.querySelector('div.bottom') : null,
-					btn = opt.target;
+					btn = opt.target && !Factory.isTargetText(opt.target),
+					boxWidth = $.isNumber(opt.boxWidth) && opt.boxWidth > 100;
 
-				if (btn && !Factory.isTargetText(btn)) {
-					var css = $.getCssText(tree.box),
-						tmp = {
-							width: 'auto', height: 'auto'
-						};
+				if (tree.box && (btn || boxWidth)) {
+					var css = $.getCssText(tree.box), 
+						tmp = btn ? { width: 'auto', height: 'auto' } : {};
 
 					if (opt.boxWidth) {
 						tmp['min-width'] = opt.boxWidth + 'px';
@@ -2169,11 +2180,16 @@
 					tree.box.style.cssText = $.toCssText($.extend({}, css, tmp));
 
 					if (opt.align === 'right') {
-						var es = $.getOffset(btn);
+						var es = $.getOffset(opt.target);
 						tree.box.style.left = es.left + es.width - tree.box.offsetWidth + 'px';
 					}
 
-					return this;
+					var boxH = tree.box.offsetHeight;
+					if (opt.maxHeight && boxH > opt.maxHeight) {
+						tree.box.style.maxHeight = opt.maxHeight + 'px';
+						tree.panel.style.maxHeight = opt.maxHeight + 'px';
+					}
+
 				}
 
 				if (!force && (!tree.panel || (!form && !bottom))) {
@@ -3044,7 +3060,7 @@
 					node = tree.cache.current.selected;
 				}
 
-				if (node && tree.target) {
+				if (tree.target) {
 					Factory.setTargetValue(node, tree, checked, force, nodes);
 				}
 				if ($.isFunction(tree.options.callback)) {
@@ -4089,6 +4105,8 @@
 		initial: function (options) {
 			var opt = Factory.checkOptions($.extend({
 				id: 'otree001',
+				name: '',
+				title: '',
 				//样式
 				skin: '',
 				//树菜单容器

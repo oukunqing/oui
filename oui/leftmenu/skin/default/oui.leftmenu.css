@@ -24,7 +24,8 @@
     overflow: hidden;
     right: -1px;
     z-index: 1001;
-    margin: 5px 0;
+    margin: 2px 0 0;
+    padding: 0;
     top: 0;
 }
 

@@ -279,7 +279,7 @@
                     isIframe = true;
                     iframeId = Util.buildIframeId(objId, itemId);
                     loadingId = Util.buildLoadingId(objId, itemId);
-                    html += '<div id="' + loadingId + '" class="tab-loading" style="display:none;">' 
+                    html += '<div id="' + loadingId + '" class="tab-loading">' 
                         + Util.getLangText('loading', opt.lang) + '</div>'
                         + '<iframe id="' + iframeId + '" class="tab-iframe"'
                         + ' style="width:100%;height:' + cfg.conHeight + 'px;"'
@@ -323,15 +323,15 @@
                     return this;
                 }
                 var loading = $I(Util.buildLoadingId(t.id, iframe.itemId));
-                loading.style.display = '';
-                iframe.src = $.setQueryString(url);
+                //loading.style.display = '';
                 iframe.onload = iframe.onreadystatechange = function () {
                     if (!this.readyState || this.readyState === 'complete') {
-                        loading.style.display = 'none';
+                        loading.style.visibility = 'hidden';
                     }
                 };
                 //设置加载标记，表示iframe已经加载过
                 iframe.loaded = true;
+                iframe.src = $.setQueryString(url);
             } catch(e) {
 
             }

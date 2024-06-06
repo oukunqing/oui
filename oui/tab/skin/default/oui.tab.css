@@ -215,7 +215,7 @@
 
 .oui-tabs-contents .tab-panel {
     position: relative;
-    min-height: 100px;
+    /*min-height: 100px;*/
     display: block;
     margin: 0;
     padding: 0;
@@ -235,7 +235,7 @@
     padding: 5px 10px;
     margin: 5px;
     border: solid 1px #ddd;
-    background: #fff;
+    background: transparent;
     z-index: 1001;
     position: absolute;
     opacity: 0.9;
