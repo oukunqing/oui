@@ -185,6 +185,8 @@
                     menu = new ContextMenu(opt);
                 } else {
                     menu = cache.menu;
+                    $.console.log('opt:', opt, menu.opt);
+                    
                     if (isUpdate) {
                         menu.update(options);
                     }

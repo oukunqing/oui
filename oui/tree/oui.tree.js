@@ -1685,6 +1685,8 @@
 
 					tree.element.style.height = bh + 'px';
 
+					$.console.log('bh:', bh);
+
 					if (isEvent && topY) {
 						Factory.setBoxPosition(tree, false, topY);
 					}
@@ -2189,7 +2191,6 @@
 						tree.box.style.maxHeight = opt.maxHeight + 'px';
 						tree.panel.style.maxHeight = opt.maxHeight + 'px';
 					}
-
 				}
 
 				if (!force && (!tree.panel || (!form && !bottom))) {
@@ -2213,7 +2214,7 @@
 						ph = dh - fh - bh,
 						cache = Factory.getSearchCache(tree);
 
-					if (ph > 0) {
+					if (ph > 0 && (fh > 0 || bh > 0)) {
 						tree.panel.style.height = ph + 'px';
 						//$.console.log('setPanelSize:', tree.box, dh, fh, bh, ph);
 					}
@@ -2860,13 +2861,17 @@
 				}
 				return this;
 			},
-			callNodeFunc: function (nodes, nodeId, funcName, arg0, arg1, arg2, arg3) {
-				if ($.isArray(nodeId)) {
-					nodeId = nodeId[0];
+			callNodeFunc: function (nodes, nodeIds, funcName, arg0, arg1, arg2, arg3) {
+				if (!$.isArray(nodeIds)) {
+					nodeIds = $.isString(nodeIds) ? nodeIds.split(/[,;|]/) : [nodeIds];
 				}
-				var node, nid = Factory.isNode(nodeId) ? nodeId.id : Factory.buildNodeId(nodeId);
-				if ((node = nodes[nid]) && $.isFunction(node[funcName])) {
-					node[funcName](arg0, arg1, arg2, arg3);
+				var c = nodeIds.length, nid, node;
+				for (var i = 0; i < c; i++) {
+					nid = Factory.isNode(nodeIds[i]) ? nodeIds.id : Factory.buildNodeId(nodeIds[i]);
+					if ((node = nodes[nid]) && $.isFunction(node[funcName])) {
+						node[funcName](arg0, arg1, arg2, arg3);
+						break;
+					}
 				}
 				return this;
 			},
@@ -2905,17 +2910,11 @@
 				}
 				return this;
 			},
-			expandNode: function (tree, node, linkage, position) {
+			expandTo: function (tree, node, position) {
 				if (!Factory.isNode(node)) {
 					return this;
 				}
-				return node.expand(linkage, null, position), this;
-			},
-			expandToNode: function (tree, node, position) {
-				return Factory.expandNode(tree, node, true, position);
-			},
-			expandTo: function (tree, node, position) {
-				return Factory.expandNode(tree, node, true, position);
+				return node.expand(true, null, position), this;
 			},
 			expandType: function (tree, types, linkage, expand) {
 				var cache = tree.cache, keys = [];
@@ -2949,10 +2948,10 @@
 				return Factory.expandType(tree, types, true, false);
 			},
 			expandEach: function (nodes, expand, sameLevel) {
-				var j, c = nodes.length, node, k;
+				var j, c = nodes.length, o, k;
 				for (k in nodes) {
-					if ((node = nodes[k]) && !node.isLeaf()) {
-						node.setExpand(expand);
+					if ((o = nodes[k]) && !o.isLeaf()) {
+						o.setExpand(expand);
 					}
 				}
 				return this;
@@ -3748,6 +3747,43 @@
 		collapse: function () {
 			return this.self().setExpand(false);
 		},
+		expandChild: function (linkage, self, types, expanded) {
+			var that = this.self();
+			if ($.isBoolean(types)) {
+				expanded = types;
+				types = null;
+			}
+			expanded = $.isBoolean(expanded, true);
+			types = $.isArray(types) ? types : $.isString(types, true) ? types.split(/[,;|]/) : [];
+			var isType = types.length > 0;
+
+			function _expand(childs, linkage, expanded) {
+				var c = childs.length, node;
+				for (var i = 0; i < c; i++) {
+					node = childs[i];
+					//展开，指定全部或指定类型的子节点
+					if (!isType || types.indexOf(node.type) > -1) {
+						node.setExpand(expanded);
+					}
+					if (linkage) {
+						var cs = node.childs;
+						if (cs && cs.length > 0) {
+							_expand(cs, linkage, expanded);
+						}
+					}
+				}
+			}
+			_expand(that.childs, linkage, expanded);
+
+			if (self && (!isType || types.indexOf(that.type) > -1)) {
+				that.setExpand(expanded);
+			}
+
+			return that;
+		},
+		collapseChild: function (linkage, self, types) {
+			return this.self().expandChild(linkage, self, types, false);
+		},
 		position: function (selected) {
 			var that = this.self(), offsetY = -50;
 			Factory.setCurrentCache(that.tree, 'position', that).expandTo(that.tree, that, true);
@@ -4512,6 +4548,18 @@
 		collapse: function (nodes) {
 			return Factory.eachNodeIds(this.cache.nodes, nodes, 'collapse'), this;
 		},
+		expandNode: function (nodes, linkage) {
+			return this.expand(nodes, linkage);
+		},
+		expandToNode: function (nodes) {
+			return this.expand(nodes, $.isBoolean(linkage, true));
+		},
+		expandChild: function (nodes, linkage, self, types, expand) {
+			return Factory.eachNodeIds(this.cache.nodes, nodes, 'expandChild', linkage, self, types, expand), this;
+		},
+		collapseChild: function (nodes, linkage, self, types) {
+			return Factory.eachNodeIds(this.cache.nodes, nodes, 'expandChild', linkage, self, types, false), this;
+		},
 		selected: function (nodes, selected, position) {
 			return Factory.callNodeFunc(this.cache.nodes, nodes, 'setSelected', $.isBoolean(selected, true), position), this;
 		},
@@ -4538,12 +4586,6 @@
 		},
 		collapseToLevel: function (levels, reverse) {
 			return Factory.collapseLevel(this, levels, true, $.isBoolean(reverse, true)), this;
-		},
-		expandNode: function (nodes, linkage) {
-			return Factory.expandNode(this, nodes, linkage);
-		},
-		expandToNode: function (nodes) {
-			return Factory.expandToNode(this, nodes);
 		},
 		expandType: function (types, linkage, expand) {
 			return Factory.expandType(this, types, linkage, expand), this;
@@ -4696,6 +4738,12 @@
 		},
 		collapse: function (id, nodes) {
 			return Factory.func(id, nodes, 'collapse');
+		},
+		expandChild: function (id, nodes, linkage, self, types, expand) {
+			return Factory.func(id, nodes, 'expandChild', linkage, self, types, expand);
+		},
+		collapseChild: function (id, nodes, linkage, self, types) {
+			return Factory.func(id, nodes, 'expandChild', linkage, self, types, false);
 		},
 		expandAll: function (id, collapse) {
 			return Factory.action(id, 'expandAll', collapse);
