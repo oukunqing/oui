@@ -1,23 +1,23 @@
 .oui-tabs-bluegray {
-    border-bottom: solid 1px #99bbe8;
+    border-bottom: solid 1px #96c2f1;
 }
 
 .oui-tabs-bluegray .tab-box {}
 
 .oui-tabs-bluegray .tab-switch {
-    background: #d6e3f3;
+    background: #eff7ff;
 }
 
 .oui-tabs-bluegray .tab-switch-left {
-    border-top: solid 1px #99bbe8;
-    border-bottom: solid 1px #99bbe8;
-    border-right: solid 1px #99bbe8;
+    border-top: solid 1px #96c2f1;
+    border-bottom: solid 1px #96c2f1;
+    border-right: solid 1px #96c2f1;
 }
 
 .oui-tabs-bluegray .tab-switch-right {
-    border-top: solid 1px #99bbe8;
-    border-bottom: solid 1px #99bbe8;
-    border-left: solid 1px #99bbe8;
+    border-top: solid 1px #96c2f1;
+    border-bottom: solid 1px #96c2f1;
+    border-left: solid 1px #96c2f1;
 }
 
 .oui-tabs-bluegray .tab-switch .arrow {}
@@ -43,14 +43,15 @@
 .oui-tabs-bluegray ul, .oui-tabs-bluegray li {}
 
 .oui-tabs-bluegray .tab-item {
-    background: #d6e3f3;
-    border: solid 1px #99bbe8;
-    border-bottom: solid 1px #99bbe8;
+    /*background: #e8f5fe;*/
+    background: #eff7ff;
+    border: solid 1px #96c2f1;
+    border-bottom: solid 1px #96c2f1;
 }
 
 .oui-tabs-bluegray .cur,.oui-tabs-bluegray .tab-item:hover {
     background: #fff;
-    border: solid 1px #99bbe8;
+    border: solid 1px #96c2f1;
     border-bottom: solid 1px #fff;
 }
 
@@ -77,6 +78,6 @@
 }
 
 .oui-tabs-bluegray .tab-item .tab-close:hover{
-    background: #d6e3f3;
+    background: #eff7ff;
 	color: #333;
 }

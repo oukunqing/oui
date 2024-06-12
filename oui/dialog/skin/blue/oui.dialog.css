@@ -3,8 +3,11 @@
     margin: 0px;
     /*width: auto; */
     position: absolute;
-    border: solid 1px #99bbe8;
-    background: #99bbe8;
+    /*border: solid 1px #99bbe8;*/
+    /*border: solid 1px #96c2f1;*/
+    /*border: solid 1px #c9d9ee;*/
+    border: solid 1px #96c2f1;
+    background: #eff7ff;
     border-radius: 5px;
     box-sizing: border-box;
     box-shadow: 0 2px 3px 0 rgba(0,0,0,.32);
@@ -22,7 +25,7 @@
 }
 
 .oui-dialog-blue .dialog-main {
-    /*background: #99bbe8;*/
+    /*background: #c9d9ee;*/
 }
 
 .oui-dialog-max {
@@ -36,7 +39,13 @@
 .oui-dialog-blue .dialog-head{
     padding:2px 2px 1px; margin:0;
     border: none 0;
+    background: #eff7ff;
+    /*
     background: #99bbe8;
+    background: #e8f5fe;
+    background: #cae3ff;
+    background: #d3e3fd;
+    */
     /*左右圆角与总的背景互斥*/
     /*
     border-top-left-radius: 4px;
@@ -46,7 +55,8 @@
     width: 100%;
     height: 30px;
     max-height: 50px;
-    /*border-bottom: solid 1px #ddd;*/
+    border-bottom: solid 1px #d3e3fd;
+    border-bottom: solid 1px #cceff5;
     box-sizing: border-box;
     clear: both; 
     overflow: hidden;
