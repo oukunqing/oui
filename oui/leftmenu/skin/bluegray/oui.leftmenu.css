@@ -11,8 +11,8 @@
 .oui-leftmenu-bluegray .cur, .oui-leftmenu-bluegray .item:hover {
     background: #fff;
     border: solid 1px #96c2f1;
-    border-right: solid 1px #f5f5f5;
-    border-right: solid 1px #fff;
+    /*border-right: solid 1px #f5f5f5;*/
+    border-right: solid 1px #eff7ff;
 }
 .oui-leftmenu-bluegray .item a {
     color: #000;
@@ -31,6 +31,6 @@
 .oui-rightmenu-bluegray .cur, .oui-rightmenu-bluegray .item:hover {
     background: #fff;
     border: solid 1px #96c2f1;
-    border-left: solid 1px #f5f5f5;
-    border-left: solid 1px #fff;
+    /*border-left: solid 1px #f5f5f5;*/
+    border-left: solid 1px #eff7ff;
 }

@@ -1685,8 +1685,6 @@
 
 					tree.element.style.height = bh + 'px';
 
-					$.console.log('bh:', bh);
-
 					if (isEvent && topY) {
 						Factory.setBoxPosition(tree, false, topY);
 					}
