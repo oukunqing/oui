@@ -2073,6 +2073,7 @@ console.log('date:', ts - ts % 86400);
 
 
 function calcDiskSize(gbSize) {
+    console.log(gbSize);
     var size;
     if (gbSize >= 1024) {
         size = gbSize * 1000 * 1000 * 1000 * 1000;

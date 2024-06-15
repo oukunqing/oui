@@ -1510,7 +1510,8 @@
                     return util;
                 }
                 if (opt.reloadAble) {
-                    if (util.isIframe(opt) || (opt.showReload && $.isFunction(opt.reloadCallback))) {
+                    //iframe窗体，显示标题栏时才显示重载按钮
+                    if ((util.isIframe(opt) && opt.showHead) || (opt.showReload && $.isFunction(opt.reloadCallback))) {
                         var reload = Common.getStatusText('reload', opt.lang);
                         if (opt.reloadPosition === 'right') {
                             html.push('<a class="dialog-btn btn-reload" code="reload" key="reload" title="' + reload + '"></a>');

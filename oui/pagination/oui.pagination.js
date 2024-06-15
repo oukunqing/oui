@@ -67,6 +67,8 @@
             opt.showPageGoto = $.getParam(opt, 'showPageGoto|showPageJump');
             opt.showStatText = $.getParam(opt, 'showStatText|showTextEnable');
 
+            opt.pageSizeOptions = $.extend([], opt.pageSizeOptions, opt.sizeOptions);
+
             return opt;
         },
         setOptions = function (op, options, dataCount) {
@@ -527,9 +529,9 @@
                 op.pageSizeItems = defaultPageSizeItems;
             }
 
-            if ($.isArray(op.sizeOptions)) {
-                for (var i = 0; i < op.sizeOptions.length; i++) {
-                    var n = op.sizeOptions[i];
+            if ($.isArray(op.pageSizeOptions)) {
+                for (var i = 0; i < op.pageSizeOptions.length; i++) {
+                    var n = op.pageSizeOptions[i];
                     if (op.pageSizeItems.indexOf(n) < 0) {
                         op.pageSizeItems.push(n);
                     }
@@ -650,9 +652,9 @@
             showPageStatLeft: false,    //是否显示页面统计（位于左边）
             showDataStatLeft: false,    //是否显示数据统计（位于左边）
 
-            showPageSize: true,       //是否显示PageSize下拉框
+            showPageSize: true,         //是否显示PageSize下拉框
             pageSizeItems: [],          //PageSize下拉框默认选项
-            sizeOptions: [],            //要追加的PageSize下拉框选项
+            pageSizeOptions: [],        //要追加的PageSize下拉框选项
             callback: function (pageIndex, pageSize, that, param) {      //回调函数模式
                 console.log('pagination callback: ', 'pageIndex: ', pageIndex, 'pageSize: ', pageSize, ', param: ', param);
             },
