@@ -12,6 +12,7 @@
     'use strict';
 
     var Config = {
+        IE: $.browser.isIE(),
         FilePath: $.getScriptSelfPath(true),
         FileName: 'oui.tab.',
         DefaultSkin: 'default',
@@ -162,6 +163,12 @@
                 t.right = elem;
                 Util.scrollAction(t, t.right, 'right');
             });
+
+            if (opt.tabsep) {
+                $.createElement('DIV', '', function(elem) {
+                    elem.className = 'tab-sep';
+                }, t.tabContainer);
+            }
 
             return this;
         },
@@ -345,16 +352,11 @@
             t.sizeTimer = window.setTimeout(function() {
                 var ts = $.getInnerSize(t.tabContainer),
                     s = $.elemSize(t.box), 
-                    tw = Util.getItemSize(t),
+                    tw = Config.IE ? Util.getItemSize(t) : t.container.offsetWidth,
                     als = $.getOuterSize(t.left).width,
                     ars = $.getOuterSize(t.right).width,
                     w = ts.width- s.margin.width - s.padding.width - s.border.width,
-                    bw = Util.checkSize(w - als - ars),
-                    debug = $.isDebug();
-
-                if (debug) {
-                    console.log('setSize:', t.id, ', tw: ', tw, ', als: ', als, ', ars: ', ars, ', w: ', w, ', bw: ', bw);
-                }
+                    bw = Util.checkSize(w - als - ars);
 
                 if(tw <= bw) {
                     t.left.style.display = 'none';
@@ -370,15 +372,15 @@
                     ars2 = $.getOuterSize(t.right).width,
                     bw2 = Util.checkSize(w - als2 - ars2);
 
-                if (debug) {
-                    console.log('setSize:', t.id, ', tw: ', tw, ', als2: ', als2, ', ars2: ', ars2, ', bw: ', bw2);
-                }
 
                 //设置 tab box 宽度
                 t.box.style.width = bw2 + 'px';
                 t.box.style.left = als2 + 'px';
-                //设置 tab 项实际总宽度
-                t.container.style.width = (tw < bw2 ? bw2 : tw) + 'px';
+
+                if (Config.IE) {
+                    //设置 tab 项实际总宽度
+                    t.container.style.width = (tw < bw2 ? bw2 : tw) + 'px';
+                }
 
                 if($.isFunction(func)) {
                     func(par);
@@ -955,6 +957,7 @@
             showContextMenu: true,
             //切换按钮宽度
             tabSwitchWidth: Config.CMenuSwitchWidth,
+            tabsep: false,
             // Tab最大数量
             maxCount: 30,
             // Tab标签最大宽度
@@ -985,6 +988,9 @@
             cssTab = ' oui-tabs-' + opt.skin;
             cssCon = ' oui-tabs-' + opt.skin + '-contents';
             Factory.loadCss(opt.skin);
+        }
+        if (opt.tabsep) {
+            cssTab += ' oui-tabs-sep';
         }
         $.addClass(that.tabContainer, 'oui-tabs' + cssTab);
         $.addClass(that.conContainer, 'oui-tabs-contents' + cssCon);
@@ -1320,6 +1326,7 @@
             type: 'switch',     //switch, scroll
             event: 'click',     //click, mouseover
             skin: 'default',
+            tabsep: false,
             style: {
                 //box: 'margin: 0 5px;',
                 //tab: 'margin: 0 1px;',
@@ -1347,6 +1354,9 @@
                 cssTab = ' oui-tabs-' + opt.skin;
                 cssCon = ' oui-tabs-' + opt.skin + '-contents';
                 Factory.loadCss(opt.skin);
+            }
+            if (opt.tabsep) {
+                cssTab += ' oui-tabs-sep';
             }
             $.addClass(that.tabContainer, 'oui-tabs' + cssTab);
             $.addClass(that.conContainer, 'oui-tabs-contents' + cssCon);
@@ -1380,6 +1390,12 @@
                         };                
                         that.tabContainer.appendChild(elem);
                     });
+                    if (opt.tabsep) {
+                        $.createElement('DIV', '', function(elem) {
+                            elem.className = 'tab-sep';
+                            that.tabContainer.appendChild(elem);
+                        });
+                    }
                 } else {
                     $.addClass(parent, 'tab-box');
                     if (opt.style.box) {
@@ -1387,7 +1403,13 @@
                     }
                     parent.oncontextmenu = function(ev) {
                         return false;
-                    }; 
+                    };
+                    if (opt.tabsep) {
+                        $.createElement('DIV', '', function(elem) {
+                            elem.className = 'tab-sep';
+                            parent.parentNode.appendChild(elem);
+                        });
+                    }
                 }
             }
             for(var i = 0; i < that.tabs.length; i++) {

@@ -4,20 +4,26 @@
 
 .oui-tabs-bluegray .tab-box {}
 
+.oui-tabs-sep {
+    border-bottom: none;
+}
+
+.oui-tabs-bluegray .tab-sep {
+    border-color: #96c2f1;
+}
+
 .oui-tabs-bluegray .tab-switch {
     background: #eff7ff;
 }
 
 .oui-tabs-bluegray .tab-switch-left {
-    border-top: solid 1px #96c2f1;
-    border-bottom: solid 1px #96c2f1;
-    border-right: solid 1px #96c2f1;
+    border: solid 1px #96c2f1;
+    border-left: none;
 }
 
 .oui-tabs-bluegray .tab-switch-right {
-    border-top: solid 1px #96c2f1;
-    border-bottom: solid 1px #96c2f1;
-    border-left: solid 1px #96c2f1;
+    border: solid 1px #96c2f1;
+    border-right: none;
 }
 
 .oui-tabs-bluegray .tab-switch .arrow {}

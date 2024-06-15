@@ -90,6 +90,35 @@
     border-left-color: #333;
 }
 
+.oui-tabs-sep {
+    height: 34px;
+    border-bottom: none;
+}
+
+.oui-tabs-sep .tab-box {  
+    bottom: 3px;
+    z-index: 10001;
+}
+
+.oui-tabs-sep .tab-sep {
+    z-index: 10000;
+    height: 4px;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background: #fff;
+    box-sizing: border-box;
+    border-top:solid 1px #dee1e6;
+    border-bottom: none;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+}
+
+.oui-tabs-sep .tab-switch {
+    bottom: 3px;
+}
+
 .oui-tabs .tab-container {
     border: none 0;
     display: block;
@@ -101,6 +130,10 @@
     bottom: 0;
     white-space: nowrap;
     overflow: hidden;
+    width:auto;
+    white-space:nowrap;
+    width:-moz-max-content;
+    width:-webkit-max-content;
 }
 
 .oui-tabs ul, .oui-tabs li {

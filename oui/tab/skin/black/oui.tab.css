@@ -4,6 +4,13 @@
 
 .oui-tabs-black .tab-box {}
 
+.oui-tabs-sep {
+    border-bottom: none;
+}
+.oui-tabs-black .tab-sep {
+    border-color: #292929;
+}
+
 .oui-tabs-black .tab-switch {
     background: #292929;
 }
