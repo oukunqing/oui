@@ -145,7 +145,7 @@
             if (null === shade) {
                 $.createElement('div', id, function (elem) {
                     elem.style.cssText = 'background:#000;width:' + bs.width + 'px;height:' + bs.height + 'px;'
-                        + 'display:block;position:absolute;'
+                        + 'display:block;position:absolute;top:0;left:0;border:none;margin:0;padding:0;'
                         + 'overflow:hidden;opacity:0;z-index:' + (cache.zindex - 1) + ';'
                         + '-moz-user-select:none;-khtml-user-select:none;user-select:none;-ms-user-select:none;';
                 }, $I(cache.options.parent) || document.body);
