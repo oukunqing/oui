@@ -889,6 +889,7 @@
 				opt.restore = $.getParam(opt, 'restore');
 				opt.clickCallback = $.getParam(opt, 'clickCallback,onclick');
 				opt.expandCallback = $.getParam(opt, 'expandCallback,onexpand');
+				opt.expandForceCallback = $.getParam(opt, 'expandForceCallback,onexpandForce');
 				opt.checkedCallback = $.getParam(opt, 'checkedCallback,onchecked');
 				opt.dblclickCallback = $.getParam(opt, 'dblclickCallback,ondblclick,dblclick');
 				opt.contextmenuCallback = $.getParam(opt, 'contextmenuCallback,oncontextmenu,contextmenu');
@@ -3684,10 +3685,10 @@
 				node = that,
 				tree = that.tree;
 
-			if (!that.isDynamic() && !that.hasChild()) {
+			if ($.isBoolean(expanded) && expanded === that.expanded) {
 				return _callback(that);
 			}
-			if ($.isBoolean(expanded) && expanded === that.expanded) {
+			if (!that.isDynamic() && !that.hasChild()) {
 				return _callback(that);
 			}
 			if (that.childbox) {
@@ -3708,6 +3709,9 @@
 						});
 					}
 					that.loaded++;
+				}
+				if ($.isFunction(tree.options.expandForceCallback)) {
+					tree.options.expandForceCallback(that, tree, expanded);
 				}
 			}
 			that.setParam('expanded', expanded).setSwitchClass();
@@ -4294,6 +4298,8 @@
 				clickCallback: undefined,
 				//expandCallback,onexpand
 				expandCallback: undefined,
+				//非动态加载时，返回展开事件
+				expandForceCallback: undefined,
 				//dblclickCallback,ondblclick
 				dblclickCallback: undefined,
 				//contextmenuCallback,oncontextmenu

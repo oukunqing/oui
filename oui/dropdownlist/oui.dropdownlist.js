@@ -792,7 +792,7 @@
 							that.hide();
 						}
 					} else if (ev.shiftKey && kc === KCC.F) {
-						$cancelBubble(ev);
+						$.cancelBubble(ev);
 						return false;
 					}
 					return false;
