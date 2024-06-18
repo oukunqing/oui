@@ -4347,6 +4347,13 @@
 			var that = this;
 			return Factory.setBoxDisplay(that, false), that;
 		},
+		isHide: function () {
+			var that = this;
+			if (that.box) {
+				return that.box.style.display === 'none';
+			}
+			return true;
+		},
 		resize: function (height, append) {
 			var that = this;
 			if ($.isNumber(height)) {
@@ -4680,6 +4687,10 @@
 		hide: function (id) {
 			var cache = Factory.getTreeCache(id);
 			return cache ? cache.tree.hide() : null;
+		},
+		isHide: function (id) {
+			var cache = Factory.getTreeCache(id);
+			return cache ? cache.tree.isHide() : false;
 		},
 		add: function (id, items, par) {
 			var tree = $.tree.get(id);

@@ -793,6 +793,13 @@
                 }
                 Factory.setMenuIconWidth(menu);
 
+                var first = !menu.box;
+                menu.box = box;
+
+                if (first && $.isFunction(op.complete)) {
+                    op.complete(menu);
+                }
+
                 return box;
             },
             hideContextMenu: function (ev, id, hide) {
@@ -847,7 +854,8 @@
             x: 0,
             y: -1,
             //是否显示图标
-            showIcon: false
+            showIcon: false,
+            complete: null
         }, options);
 
         this.id = opt.menuId || opt.id;
@@ -902,6 +910,9 @@
         },
         hide: function () {
             return Factory.hideContextMenu(null, this.id, true), this;
+        },
+        isHide: function() {
+            return this.box && this.box.style.display === 'none';
         },
         insert: function (items, insertIndex, show, isAdd) {
             var cache = Factory.getCache(this.id),

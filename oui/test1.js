@@ -2094,3 +2094,9 @@ console.log(calcDiskSize(512));
 console.log(calcDiskSize(1024));
 console.log(calcDiskSize(2048));
 console.log(calcDiskSize(4096));
+
+var aa = null;
+
+console.log(aa);
+
+console.log(aa? 'aa':'bb');

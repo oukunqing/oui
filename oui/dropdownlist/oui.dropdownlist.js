@@ -245,8 +245,6 @@
 
 				opt.id = opt.id || opt.element.id;
 
-				$.console.log('buildList:', opt);
-
 				var arr = $.isArray(opt.id) ? opt.id : $.isString(opt.id) ? opt.id.split(/[,;\|，]/) : opt.id.toString().split(/[,;\|，]/);
 				if (arr.length > 1) {
 					var list = [];

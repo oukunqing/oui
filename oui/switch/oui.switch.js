@@ -129,7 +129,7 @@
                 });
 
                 $('#' + cache.options.switchbar).click(function () {
-                    if ($.isFunction(cache.options.click)) {                        
+                    if ($.isFunction(cache.options.click)) {
                         cache.options.click(that.elem);
                     }
                 });

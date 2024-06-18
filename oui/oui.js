@@ -5423,92 +5423,111 @@
             return false;
         },
         isOnElement = function (elem, ev) {
-            if (!isElement(elem = toElement(elem)) || !ev) {
-                return false;
-            }
-            var pos, scroll;
-            if (ev.fromElement || typeof ev.x === 'undefined') {
-                pos = getEventPosition(ev);
-            } else {
-                scroll = getScrollPosition();
-                pos = { x: ev.x + scroll.left, y: ev.y + scroll.top };
-            }
-            if (isOnElem(elem, pos)) {
-                return true;
-            }
-            /*
-            var childs = elem.childNodes;
-            for (var i = 0; i < childs.length; i++) {
-                var sub = childs[i];
-                if (sub.childNodes.length > 0) {
-                    return isOnElement(sub, pos);
-                } else if (isOnElem(sub, pos)) {
+            function _onElement(elem, ev) {
+                if (!isElement(elem = toElement(elem)) || !ev) {
+                    return false;
+                }
+                var pos, scroll;
+                if (ev.fromElement || typeof ev.x === 'undefined') {
+                    pos = getEventPosition(ev);
+                } else {
+                    scroll = getScrollPosition();
+                    pos = { x: ev.x + scroll.left, y: ev.y + scroll.top };
+                }
+                if (isOnElem(elem, pos)) {
                     return true;
                 }
-            }
-            */
-            //不再采用递归
-            var childs = elem.querySelectorAll('*'),
-                c = childs.length, k, i, j, m, n;
-
-            //若子元素数量超过8个，则每次同时比较4个元素
-            //比较方向：开始向右，结束向左，中间向左，中间向右
-            if (c >= 8) {
-                k = Math.ceil(c / 4);
-                for (i = 0; i < k; i++) {
-                    j = k * 4 - 1 - i;
-                    j = j >= c ? c - 1 : j;
-                    m = k * 2 + i,
-                    n = k * 2 - 1 - i;
-                    if (isOnElem(childs[i], pos) || isOnElem(childs[j], pos) || isOnElem(childs[m], pos) || isOnElem(childs[n], pos)) {
+                /*
+                var childs = elem.childNodes;
+                for (var i = 0; i < childs.length; i++) {
+                    var sub = childs[i];
+                    if (sub.childNodes.length > 0) {
+                        return isOnElement(sub, pos);
+                    } else if (isOnElem(sub, pos)) {
                         return true;
                     }
                 }
-            } else {
-                //每次同时比较2个元素
-                k = Math.ceil(c / 2);
-                for (i = 0; i < k; i++) {
-                    j = k * 2 - 1 - i;
-                    j = j >= c ? c - 1 : j;
-                    if (isOnElem(childs[i], pos) || isOnElem(childs[j], pos)) {
-                        return true;
+                */
+                //不再采用递归
+                var childs = elem.querySelectorAll('*'),
+                    c = childs.length, k, i, j, m, n;
+
+                //若子元素数量超过8个，则每次同时比较4个元素
+                //比较方向：开始向右，结束向左，中间向左，中间向右
+                if (c >= 8) {
+                    k = Math.ceil(c / 4);
+                    for (i = 0; i < k; i++) {
+                        j = k * 4 - 1 - i;
+                        j = j >= c ? c - 1 : j;
+                        m = k * 2 + i,
+                        n = k * 2 - 1 - i;
+                        if (isOnElem(childs[i], pos) || isOnElem(childs[j], pos) || isOnElem(childs[m], pos) || isOnElem(childs[n], pos)) {
+                            return true;
+                        }
                     }
+                } else {
+                    //每次同时比较2个元素
+                    k = Math.ceil(c / 2);
+                    for (i = 0; i < k; i++) {
+                        j = k * 2 - 1 - i;
+                        j = j >= c ? c - 1 : j;
+                        if (isOnElem(childs[i], pos) || isOnElem(childs[j], pos)) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+
+            var elems = $.isArray(elem) ? elem : [elem];
+            for(var i = 0; i < elems.length; i++) {
+                if (_onElement(elems[i], ev)) {
+                    return true;
                 }
             }
             return false;
         },
         isInElement = function (elem, ev) {
-            if (!isElement(elem = toElement(elem)) || !ev) {
-                return false;
-            }
-            var t = ev.target;
-            if (!$.isElement(t)) {
-                return false;
-            } else if (elem === t) {
-                return true;
-            }
-            var childs = elem.querySelectorAll('*'),
-                c = childs.length, k, i, j, m, n;
+            function _inElement(elem, ev) {
+                if (!isElement(elem = toElement(elem)) || !ev) {
+                    return false;
+                }
+                var t = ev.target;
+                if (!$.isElement(t)) {
+                    return false;
+                } else if (elem === t) {
+                    return true;
+                }
+                var childs = elem.querySelectorAll('*'),
+                    c = childs.length, k, i, j, m, n;
 
-            if (c >= 8) {
-                k = Math.ceil(c / 4);
-                for (i = 0; i < k; i++) {
-                    j = k * 4 - 1 - i;
-                    j = j >= c ? c - 1 : j;
-                    m = k * 2 + i,
-                    n = k * 2 - 1 - i;
-                    if (childs[i] === t || childs[j] === t || childs[m] === t || childs[n] === t) {
-                        return true;
+                if (c >= 8) {
+                    k = Math.ceil(c / 4);
+                    for (i = 0; i < k; i++) {
+                        j = k * 4 - 1 - i;
+                        j = j >= c ? c - 1 : j;
+                        m = k * 2 + i,
+                        n = k * 2 - 1 - i;
+                        if (childs[i] === t || childs[j] === t || childs[m] === t || childs[n] === t) {
+                            return true;
+                        }
+                    }
+                } else {
+                    k = Math.ceil(c / 2);
+                    for (i = 0; i < k; i++) {
+                        j = k * 2 - 1 - i;
+                        j = j >= c ? c - 1 : j;
+                        if (childs[i] === t || childs[j] === t) {
+                            return true;
+                        }
                     }
                 }
-            } else {
-                k = Math.ceil(c / 2);
-                for (i = 0; i < k; i++) {
-                    j = k * 2 - 1 - i;
-                    j = j >= c ? c - 1 : j;
-                    if (childs[i] === t || childs[j] === t) {
-                        return true;
-                    }
+                return false;
+            }
+            var elems = $.isArray(elem) ? elem : [elem];
+            for(var i = 0; i < elems.length; i++) {
+                if (_inElement(elems[i], ev)) {
+                    return true;
                 }
             }
             return false;
@@ -6544,9 +6563,31 @@
                 }
                 return checked;
             }
-        };
+        },
+        timers = {};
 
     $.extendNative($, {
+        setTimeout: function (func, delay, key) {
+            if ($.isString(key, true)) {
+                if (timers[key]) {
+                    window.clearTimeout(timers[key]);
+                    timers[key] = null;
+                }
+                timers[key] = window.setTimeout(func, delay);
+            } else {
+                window.setTimeout(func, delay);
+            }
+            return this;
+        },
+        delTimeout: function (key) {
+            if ($.isString(key, true)) {
+                if (timers[key]) {
+                    window.clearTimeout(timers[key]);
+                    timers[key] = null;
+                }
+            }
+            return this;
+        },
         setChecked: function (selector, action, values, initial) {
             if ($.isArrayLike(selector)) {
                 selector = $.makeArray(selector);
