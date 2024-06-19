@@ -2023,7 +2023,9 @@ var names =  [
             '不启用验证码','一直启用验证码','登录失败累计','次后启用',
             '日志保存天数','错误日志保存天数',
             '退出登录',
-            '配置端','控制端', '导航菜单'
+            '配置端','控制端', '导航菜单',
+            '我的设备分组',
+            '禁用','启用','设备分组位置','顶部', '底部'
             ];
         for(var i =0; i<names.length;i++){
             console.log('//', names[i], names[i].toUnicode());
@@ -2094,9 +2096,3 @@ console.log(calcDiskSize(512));
 console.log(calcDiskSize(1024));
 console.log(calcDiskSize(2048));
 console.log(calcDiskSize(4096));
-
-var aa = null;
-
-console.log(aa);
-
-console.log(aa? 'aa':'bb');

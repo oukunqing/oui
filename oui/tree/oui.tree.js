@@ -1426,6 +1426,9 @@
 					evName = 'focus';
 				} else {
 					evName = opt.trigger || 'click';
+					if ($.isArray(evName)) {
+						evName = evName[0].toString();
+					}
 				}
 				if (evName.inArray(['mouseout', 'mousemove'])) {
 					return this;
@@ -2279,7 +2282,7 @@
 				if (opt.trigger || tag.inArray(['input', 'select', 'button', 'a'])) {
 					var events = $.isBoolean(opt.trigger) ? ['mousedown'] : opt.trigger.split(/[,;|]/);
 					for (var i = 0; i < events.length; i++) {
-						if (!events[i].inArray(['mouseover', 'mousemove', 'mousemove'])) {
+						if (!events[i].inArray(['mouseover', 'mousemove', 'mouseout'])) {
 							$.addListener(that.element, events[i], function(ev) {
 								tree.display();
 							});
@@ -2709,7 +2712,7 @@
 					text = d.name || '',
 					desc = d.desc || '',
 					p = {
-						data: d, text: text.toString().escapeHtml(),
+						data: d.data || d, text: text.toString().escapeHtml(),
 						nid: nid, pnid: pnid, type: type, ptype: ptype,
 						id: Factory.buildElemId(tid, nid),
 						pid: Factory.buildElemId(tid, pnid),

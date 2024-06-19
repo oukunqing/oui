@@ -2817,6 +2817,7 @@
         isInt: function () { return $.isInteger(this); },
         isHexNumber: function () { return $.isHexNumeric(this); },
         isNaN: function () { return isNaN(parseFloat(this, 10)); },
+        toInt: function (defaultValue) { return $.toInteger(this.toString(), defaultValue); },
         toAscii: function () { return this.toString().charCodeAt(); },
         //cutoff: 是否截断长度（截断长度会带来一些问题，应在特定情况下谨慎使用）
         toHex: function (len, lower, cutoff) {
