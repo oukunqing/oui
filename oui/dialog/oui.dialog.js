@@ -30,7 +30,7 @@
         },
         //重载图标的位置 left 或 right
         ReloadPosition: function () {
-            return $.getQueryString(Config.FilePath, ['reloadPosition', 'reloadPos']) || 'right';
+            return $.getQueryString(Config.FilePath, ['reloadPosition', 'reloadPos']) || 'left';
         },
         GetLang: function () {
             return $.getQueryString(Config.FilePath, ['lang']) || 'chinese';
@@ -4059,7 +4059,7 @@
                 form: false,            //是否为Form表单，Form表单则默认允许复制和选择内容
                 reloadAble: true,       //是否可以重新加载
                 reloadInterval: 3500,   //重新加载的时间间隔，单位：毫秒
-                reloadPosition: Config.ReloadPosition(),//重新按钮位置 left,right, 默认：right
+                reloadPosition: Config.ReloadPosition(),//重新按钮位置 left,right, 默认：left
                 element: null,          //Element 要加载内容的html控件
                 icon: '',               //Icon图标  info, warning, question, error, success, loading
                 loading: '',            //loading提示文字
