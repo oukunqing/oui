@@ -628,10 +628,10 @@
                         ptype = p[2] || p[0];
                         icon = p[3] || p[0];
                     } else if ($.isObject(p)) {
-                        type = $.getParam(p, 'type');
-                        key = $.getParam(p, 'key,data,type');
-                        ptype = $.getParam(p, 'parent,ptype,type');
-                        icon = $.getParam(p, 'iconType,icon,type');
+                        type = $.getParam(p, 'node,type');
+                        key = $.getParam(p, 'key,data') || type;
+                        ptype = $.getParam(p, 'parent,pnode,ptype,type') || type;
+                        icon = $.getParam(p, 'iconType,icon') || type;
                     } else if ($.isString(p, true)) {
                         var ps = p.split(/[:\|]/);
                     	type = p[0];
@@ -2704,8 +2704,8 @@
 					if (typeof (d = list[i]).id === 'undefined' || d.except) {
 						continue;
 					}
-					type = d.type || par.type;
-					ptype = d.ptype || par.ptype || type;
+					type = d.nodeType || d.node || par.type;
+					ptype = d.pnodeType || d.pnode || par.ptype || type;
 					iconType = d.iconType || par.iconType || type;
 					nid = Factory.buildNodeId(d.id, type);
 					pnid = Factory.buildNodeId(d.pid, ptype);
