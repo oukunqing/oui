@@ -1120,6 +1120,9 @@
             if (!$.isArray(keys)) {
                 keys = [keys.toString()];
             }
+            if (keys.length <= 0 || /[*?]/.test(keys[0]) || (keys[0].startsWith('/') && keys[0].endsWith('/'))) {
+                return str;
+            }
             var dic = {}, c = keys.length, i, pattern = [], fixed = '';
             if ($.isBoolean(prefix, false)) {
                 clear = prefix;
@@ -1136,8 +1139,9 @@
                 clear = false;
             }
             for (i = 0; i < c; i++) {
-                dic[keys[i].toString()] = keys[i];
-                pattern.push(keys[i]);
+                var k = keys[i] || '';
+                dic[k.toString()] = k;
+                pattern.push(k);
             }
             pattern = new RegExp('(' + pattern.join('|') + ')', 'ig');
             

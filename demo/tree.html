@@ -616,11 +616,15 @@
                     $.cmenu({
                         id: 'treemenu',
                         obj: 'tree',
-                        width: 150,
+                        width: 'auto',
                         items: [
                             { name: '展开至一级', func: function () { tree.expandToLevel(0); } },
                             { name: '展开至二级', func: function () { tree.expandToLevel(1); } },
                             { name: '展开所有目录', func: function () { tree.expandToType('unit'); } },
+                            { name: '收缩所有目录(包含子节点)', func: function () { tree.collapseToType('unit'); } },
+                            //collapseToType：表示收缩指定类型的所有节点（包含不同类型的下级的子节点）
+                            //collapseType: 表示收缩指定类型的节点（不收缩不同类型的子节点）
+                            { name: '收缩所有目录', func: function () { tree.collapseType('unit'); } },
                             { name: '收缩至一级', func: function () { tree.collapseToLevel(1); } },
                             { name: '收缩至二级', func: function () { tree.collapseToLevel(2); } },
                             { sep: 1 },

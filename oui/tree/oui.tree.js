@@ -1341,8 +1341,13 @@
 				var nodes = [], 
 					opt = tree.options,
 					cfg = Factory.getSearchCache(tree),
-					key = txt.value.trim(), node,
-					keys = key.split(/[\s,;|]/),
+					val = txt.value.trim(),
+					key = val,
+					//匹配模式：0-字符匹配，1-通配符匹配，2-正则匹配
+					type = (val.length > 2 && val.startsWith('/') && val.endsWith('/')) ? 2 : 
+						(val.indexOf('*') > -1 || val.indexOf('?') > -1) ? 1 : 0,
+					node, pattern,
+					keys = val.split(/[\s,;|]/),
 					c = keys.length, i;
 
 				if (!$.isString(key, true)) {
@@ -1362,6 +1367,24 @@
 					return Factory.showSearchPanel(tree, true);
 				}
 
+				function _match(pattern, content) {
+				    var pn = pattern.length, cn = content.length;
+				    if (!pn && !cn) {
+				        return true;
+				    } else if (pn > 1 && pattern[0] === '*' && !cn) {
+				        return false;
+				    } else if ((pn > 1 && pattern[0] === '?') || (pn && cn && pattern[0] === content[0])) {
+				        return _match(pattern.substring(1), content.substring(1));
+				    } else if (pn && pattern[0] === '*') {
+				        return _match(pattern.substring(1), content) || _match(pattern, content.substring(1));
+				    }
+				    return false;
+				}
+
+				if (type === 2) {
+					pattern = new RegExp(key.substring(1, key.length - 1));
+				}
+
 				if ($.isFunction(opt.searchCallback)) {
 					opt.searchCallback(tree, keys, function (tree, results) {
 						nodes = $.extend([], results);
@@ -1369,10 +1392,24 @@
 				} else {
 					for (var k in tree.cache.nodes) {
 						var n = tree.cache.nodes[k];
-						for (i = 0; i < c; i++) {
-							if (n.data.name.indexOf(keys[i]) > -1) {
+						switch (type) {
+						case 0:
+							for (i = 0; i < c; i++) {
+								if (n.data.name.indexOf(keys[i]) > -1) {
+									nodes.push(n);
+								}
+							}
+							break;
+						case 1:
+							if (_match(key, n.data.name)) {
 								nodes.push(n);
 							}
+							break;
+						case 2:
+							if (pattern.test(n.data.name)) {
+								nodes.push(n);
+							}
+							break;
 						}
 					}
 				}
@@ -4378,8 +4415,8 @@
 		nid: function (id, type) {
 			return Factory.buildNodeId(id, type);
 		},
-		node: function (nodeId) {
-			var nid = Factory.isNode(nodeId) ? nodeId.id : Factory.buildNodeId(nodeId);
+		node: function (nodeId, type) {
+			var nid = Factory.isNode(nodeId) ? nodeId.id : Factory.buildNodeId(nodeId, type);
 			return this.cache.nodes[nid];
 		},
 		getCheckedLength: function () {
@@ -4414,8 +4451,12 @@
 			}
 			return null;
 		},
-		getNode: function () {
-			var cur = this.cache.current,
+		getNode: function (nodeId, type) {
+			var that = this;
+			if (Factory.isNode(nodeId) || $.isString(nodeId, true)) {
+				return that.node(nodeId, type);
+			}
+			var cur = that.cache.current,
 				key = 'selected', 
 				kv = Factory.getNodeValue(cur[key], 'node', '', {});
 

@@ -2097,3 +2097,26 @@ console.log(calcDiskSize(512));
 console.log(calcDiskSize(1024));
 console.log(calcDiskSize(2048));
 console.log(calcDiskSize(4096));
+
+function match(pattern, content) {
+    var pn = pattern.length, cn = content.length;
+    if (!pn && !cn) {
+        return true;
+    } else if (pn > 1 && pattern[0] === '*' && !cn) {
+        return false;
+    } else if ((pn > 1 && pattern[0] === '?') || (pn && cn && pattern[0] === content[0])) {
+        return match(pattern.substring(1), content.substring(1));
+    } else if (pn && pattern[0] === '*') {
+        return match(pattern.substring(1), content) || match(pattern, content.substring(1));
+    }
+    return false;
+}
+console.log(match('*b*f*', 'abcdefg'));
+
+
+var ppp = '/[\\dab]/';
+var p2 = eval('(' + ppp + ')');
+console.log(p2);
+console.log(ppp.substring(1, ppp.length - 1));
+var p3 = new RegExp(ppp.substring(1, ppp.length - 1));
+console.log(p3);

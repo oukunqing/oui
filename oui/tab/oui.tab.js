@@ -983,6 +983,7 @@
         var opt = $.extend(cfg, options);
 
         that.id = opt.id || '';
+        that.cur = '';
 
         if (opt.skin !== Config.DefaultSkin) {
             cssTab = ' oui-tabs-' + opt.skin;
@@ -1148,6 +1149,7 @@
 
             if(cur) {
                 $.addClass(cur.tab, 'cur');
+
                 if (cfg.type !== 'scroll') {
                     $(cur.con).show();
                 } else {
@@ -1174,6 +1176,7 @@
             }
 
             if(itemId) {
+                that.cur = itemId;
                 window.setTimeout(function() { that.show(); }, 20);
             }
 
@@ -1227,7 +1230,9 @@
         reload: function(itemId) {
             var that = this,
                 cache = Factory.getCache(that.id),
-                item = Factory.getItem(cache, itemId);
+                item = Factory.getItem(cache, itemId || that.cur);
+
+            //$.console.log('reload:', itemId || that.cur);
 
             if(item && item.iframe) {
                 Util.loadPage(that, item.iframe, item.opt.url, true);
@@ -1244,6 +1249,21 @@
                     this.loadPage(that, dr.iframe, dr.opt.url, true);
                 }
             }
+            return that;
+        },
+        update: function (id, content, append) {
+            var that = this,
+                panel = $I(Util.buildPanelId(that.id, id));
+
+            if (!panel) {
+                return that;
+            }
+            if (append) {
+                panel.innerHTML += content;
+            } else {
+                panel.innerHTML = content;
+            }
+
             return that;
         },
         setContentSize: function(size, isContent, opt) {
