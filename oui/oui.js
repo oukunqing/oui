@@ -5934,6 +5934,21 @@
             }
             return arr;
         },
+        clearEmptyItem = function (list) {
+            var arr = $.isArray(list) ? list : [list],
+                len = arr.length;
+            if (len <= 1) {
+                return arr;
+            }
+            var rst = [];
+
+            for (var i = 0; i < len; i++) {
+                if (arr[i] !== '') {
+                    rst.push(arr[i]);
+                }
+            }
+            return rst;
+        },
         fullScreen = function (elem) {
             if (!$.isDocument(elem) && !$.isElement(elem = $.toElement(elem))) {
                 return this;
@@ -6296,6 +6311,7 @@
         buildOption: buildOption,
         buildOptions: buildOptions,
         buildNumbers: buildNumbers,
+        clearEmptyItem: clearEmptyItem,
         fullScreen: fullScreen,
         exitFullScreen: exitFullScreen,
         isFullScreen: isFullScreen,

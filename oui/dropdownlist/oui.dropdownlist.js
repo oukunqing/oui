@@ -1870,7 +1870,7 @@
 				vals.push(Factory.toValue(that.elem.inputValue, opt.dataType));
 				txts.push(that.elem.inputValue);
 			}
-			txt = txts.join(opt.symbol || ',') || opt.title || '';
+			txt = $.clearEmptyItem(txts).join(opt.symbol || ',') || opt.title || '';
 			val = vals.join(',');
 			con = cons.join(',');
 
@@ -1919,7 +1919,7 @@
 				if ($.isFunction(opt.callback)) {
 					opt.callback(data.value, level === Config.CallbackLevel.Initial, data, that);
 				} else if ($.isDebug()) {
-					$.console.log(that.id, '[callback]', ', value:', data.value, ', initial:', initial, ', data:', data, that);
+					$.console.log(that.id, '[callback]', ', value:', data.value, ', initial:', opt.initial, ', data:', data, that);
 				}
 				if (opt.change) {
 					$.trigger(elem, 'change');
