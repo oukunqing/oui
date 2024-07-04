@@ -134,7 +134,7 @@
                 debounce: true,
                 colStartRowIndex: 0,
                 background: '#f8f8f8',
-                zindex: 99999,
+                zindex: 100,
                 showSplitLine: false,
                 setBackground: false,
                 border: '',

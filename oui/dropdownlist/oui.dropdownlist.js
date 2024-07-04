@@ -1919,7 +1919,7 @@
 				if ($.isFunction(opt.callback)) {
 					opt.callback(data.value, level === Config.CallbackLevel.Initial, data, that);
 				} else if ($.isDebug()) {
-					$.console.log(that.id, '[callback]', ', value:', data.value, ', initial:', opt.initial, ', data:', data, that);
+					$.console.log(that.id, '[callback]', ', value:', data.value, ', data:', data, that);
 				}
 				if (opt.change) {
 					$.trigger(elem, 'change');

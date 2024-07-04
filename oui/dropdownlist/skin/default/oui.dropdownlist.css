@@ -205,6 +205,9 @@ label.oui-ddl-label-border {
 label.oui-ddl-label-border:hover {
     border: solid 1px #f1f1f1;
 }
+label.oui-ddl-label-border span {
+	line-height: 28px;
+}
 
 input.oui-ddl-chb {
 	float: left;
@@ -213,7 +216,7 @@ input.oui-ddl-chb {
     min-width: 14px;
     width: 14px;
     height: 14px;
-    margin: 7px 5px 0 0;
+    margin: 8px 5px 0 0;
 }
 label.oui-ddl-label-border input.oui-ddl-chb {
     margin: 7px 5px 0 2px;

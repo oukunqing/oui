@@ -3041,6 +3041,8 @@
                 formatString = 'yyyy-MM-dd';
             } else if (['dt'].indexOf(formatString) >= 0) {
                 formatString = 'yyyyMMdd';
+            } else if (['ds'].indexOf(formatString) >= 0) {
+                formatString = 'yyyyMMddHHmmss';
             }
             var p = /([y]+|[M]+|[d]+|[H]+|[s]+|[f]+)/gi,
                 y = year + (year < 1900 ? 1900 : 0), M = t.getMonth() + 1, d = t.getDate(),
