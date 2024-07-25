@@ -1078,7 +1078,13 @@
             }
             return json;
         },
-        toIniJson = function (json, separator) {
+        toIniJson = function (json, separator, hideSection) {
+            if ($.isBoolean(separator)) {
+                hideSection = separator;
+                separator = null;
+            }
+            hideSection = $.isBoolean(hideSection, false);
+
             var obj = {}, c = 0;
             for (var k in json) {
                 var item = json[k],
@@ -1087,10 +1093,14 @@
                     id = tmp[1];
 
                 if(pid && id) {
-                    if (typeof obj[pid] === 'undefined') {
-                        obj[pid] = {};
+                    if (hideSection) {
+                        obj[id] = item;
+                    } else {
+                        if (typeof obj[pid] === 'undefined') {
+                            obj[pid] = {};
+                        }
+                        obj[pid][id] = item;
                     }
-                    obj[pid][id] = item;
                     c++;
                 }
             }
