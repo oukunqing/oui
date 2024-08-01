@@ -4546,11 +4546,21 @@
             var scrollLeft = window.scrollX || window.pageXOffset || doc.scrollLeft,
                 scrollTop = window.scrollY || window.pageYOffset || doc.scrollTop;
 
-            return { 
+            var size = { 
                 width: doc.clientWidth, height: doc.clientHeight, 
                 scrollTop: scrollTop, scrollLeft: scrollLeft, 
                 scrollWidth: doc.scrollWidth, scrollHeight: doc.scrollHeight 
-            };
+            }, zoom = getZoomRatio();
+
+            if (zoom < 50) {
+                size.width -= 3;
+            } else if (zoom < 75) {
+                size.width -= 2;
+            } else if (zoom > 100) {
+                size.width -= 1;
+            }
+
+            return size;
         },
         getDocumentSize = function (isOffset) {
             return getBodySize(isOffset);
@@ -5961,13 +5971,13 @@
             }
             return rst;
         },
-        fullScreen = function (elem) {
-            if (!$.isDocument(elem) && !$.isElement(elem = $.toElement(elem))) {
+        execFullScreen = function(evt, elem, full) {
+            if (typeof evt !== 'undefined' && evt) {
+                evt.call(elem);
+                if ($.isFunction(window.fullScreenCallback)) {
+                    window.fullScreenCallback(full);
+                }
                 return this;
-            }
-            var rfs = elem.requestFullScreen || elem.webkitRequestFullScreen || elem.mozRequestFullScreen || elem.msRequestFullScreen;
-            if (typeof rfs !== 'undefined' && rfs) {
-                return rfs.call(elem), this;
             }
             if (typeof window.ActiveXObject !== 'undefined') {
                 var wscript = new ActiveXObject("WScript.Shell");
@@ -5975,31 +5985,50 @@
                     wscript.SendKeys("{F11}");
                 }
             }
+            if ($.isFunction(window.fullScreenCallback)) {
+                window.fullScreenCallback(full);
+            }
             return this;
+        },
+        fullScreen = function (elem) {
+            if (!$.isDocument(elem) && !$.isElement(elem = $.toElement(elem))) {
+                return this;
+            }
+            var rfs = elem.requestFullScreen || 
+                elem.webkitRequestFullScreen || 
+                elem.mozRequestFullScreen || 
+                elem.msRequestFullScreen;
+            
+            return execFullScreen(rfs, elem, true), this;
         },
         exitFullScreen = function () {
             var elem = document,
-                cfs = elem.cancelFullScreen || elem.webkitCancelFullScreen || elem.mozCancelFullScreen || elem.exitFullScreen;
-
-            if (typeof cfs !== 'undefined' && cfs) {
-                return cfs.call(elem), this;
-            }
-            if (typeof window.ActiveXObject !== 'undefined') {
-                var wscript = new ActiveXObject("WScript.Shell");
-                if (wscript != null) {
-                    wscript.SendKeys("{F11}");
-                }
-            }
-            return this;
+                cfs = elem.cancelFullScreen || 
+                elem.webkitCancelFullScreen || 
+                elem.mozCancelFullScreen || 
+                elem.exitFullScreen;
+            
+            return execFullScreen(cfs, elem, false), this;
+        },
+        getFullScreenElement = function () {
+            return document.fullscreenElement ||
+                document.mozFullScreenElement ||
+                document.webkitFullScreenElement ||
+                document.msFullScreenElement;
         },
         isFullScreen = function () {
-            return (
-                document.fullscreen ||
-                document.mozFullScreen ||
-                document.webkitIsFullScreen ||
-                document.webkitFullScreen ||
-                document.msFullScreen
-            );
+            return getFullScreenElement() !== undefined;
+        },
+        addFullScreenListener = function (callback) {
+            if (!$.isFunction(callback)) {
+                return this;
+            }
+            document.addEventListener('fullscreenchange', callback);
+            document.addEventListener('mozfullscreenchange', callback); 
+            document.addEventListener('webkitfullscreenchange', callback);
+            document.addEventListener('MSFullscreenChange', callback);
+
+            return this;
         },
         isSubWindow = function() {
             return window.location !== top.window.location;
@@ -6327,6 +6356,9 @@
         fullScreen: fullScreen,
         exitFullScreen: exitFullScreen,
         isFullScreen: isFullScreen,
+        getFullScreenElement: getFullScreenElement,
+        getFullScreenElem: getFullScreenElement,
+        addFullScreenListener: addFullScreenListener,
         isSubWindow: isSubWindow,
         isTopWindow: isTopWindow,
         setSelectValue: setSelectValue,
