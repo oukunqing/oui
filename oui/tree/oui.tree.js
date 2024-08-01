@@ -1451,12 +1451,12 @@
 						if (kc.inArray([KC.Enter, KC.Space, KC.Min.Enter])) {
 							this.focus();
 							$.cancelBubble(ev);
-							Factory.setBoxDisplay(tree, null, ev, this);
+							Factory.setBoxDisplay(tree, null, null, ev, this);
 						} else if (kc.inArray([KC.Tab, KC.Esc])) {
 							if(tree.element !== null && tree.element.style.display !== 'none') {
 								$.cancelBubble(ev);
 							}
-							Factory.setBoxDisplay(tree, false, ev, this);
+							Factory.setBoxDisplay(tree, false, null, ev, this);
 						}
 					});
 				} else if (Factory.isTargetText(elem)) {
@@ -1472,7 +1472,7 @@
 				}
 				$.addListener(elem, evName, function (ev) {
 					$.cancelBubble(ev);
-					Factory.setBoxDisplay(tree, evName.inArray(['mouseover']) ? true : null, ev, this);
+					Factory.setBoxDisplay(tree, evName.inArray(['mouseover']) ? true : null, null, ev, this);
 					$.hidePopupPanel(tree.element);
 				});
 
@@ -1586,10 +1586,12 @@
 
 				return this;
 			},
-			setBoxDisplay: function (tree, show, ev, elem) {
+			setBoxDisplay: function (tree, show, target, ev, elem) {
 				if (!tree.target) {
 					return this;
 				}
+				tree.target2 = target;
+
 				var box = document.querySelector('#' + tree.bid),
 					first = !box,
 					display = first;
@@ -1609,20 +1611,22 @@
 
 				tree.element.style.display = display ? 'block' : 'none';
 
-				if ($.isElement(elem)) {
-					elem.focus();
-				} else {
-					elem = tree.target;
+				if (!target) {					
+					if ($.isElement(elem)) {
+						elem.focus();
+					} else {
+						elem = tree.target;
+					}
+					$.setClass(elem, 'oui-tree-elem-cur', display);
 				}
-				$.setClass(elem, 'oui-tree-elem-cur', display);
 
 				if (!display) {
 					$.removeClass(elem, 'oui-tree-elem-top,oui-tree-elem-bottom');
 					$.removeClass(box, 'oui-tree-box-top,oui-tree-box-bottom');
 				}
-				return display ? this.setBoxPosition(tree, first) : this;
+				return display ? this.setBoxPosition(tree, first, target) : this;
 			},
-			setBoxPosition: function (tree, first, topY) {
+			setBoxPosition: function (tree, first, target, topY) {
 				var opt = tree.options,
 					box = tree.element;
 
@@ -1631,8 +1635,8 @@
 					return this;
 				}
 
-				var obj = tree.target,
-					es = $.getOffset(tree.target),
+				var obj = target || tree.target,
+					es = $.getOffset(obj),
 					bs = $.getBodySize(),
 					pos = opt.position || 'bottom',
 					//之前设置过的框体高度
@@ -1727,7 +1731,7 @@
 					tree.element.style.height = bh + 'px';
 
 					if (isEvent && topY) {
-						Factory.setBoxPosition(tree, false, topY);
+						Factory.setBoxPosition(tree, false, null, topY);
 					}
 					Factory.setPanelSize(tree, null);
 				}
@@ -2221,7 +2225,7 @@
 					tree.box.style.cssText = $.toCssText($.extend({}, css, tmp));
 
 					if (opt.align === 'right') {
-						var es = $.getOffset(opt.target);
+						var es = $.getOffset(tree.target2 || opt.target);
 						tree.box.style.left = es.left + es.width - tree.box.offsetWidth + 'px';
 					}
 
@@ -2255,7 +2259,6 @@
 
 					if (ph > 0 && (fh > 0 || bh > 0)) {
 						tree.panel.style.height = ph + 'px';
-						//$.console.log('setPanelSize:', tree.box, dh, fh, bh, ph);
 					}
 					if (cache && cache.elem) {
 						cache.elem.style.width = (form.offsetWidth - 8) + 'px';
@@ -4371,6 +4374,8 @@
 
 			if (opt.target) {
 				this.target = opt.target;
+				//临时停靠目标
+				this.target2 = null;
 				Factory.buildTargetEvent(this, opt);
 				if (this.panel) {
 					Factory.buildPanel(this, this.options, true);
@@ -4383,11 +4388,11 @@
 
 			return this;
 		},
-		display: function (show) {
-			return Factory.setBoxDisplay(this, show), this;
+		display: function (show, target) {
+			return Factory.setBoxDisplay(this, show, target), this;
 		},
-		show: function (show) {
-			return Factory.setBoxDisplay(this, $.isBoolean(show, true)), this;
+		show: function (show, target) {
+			return Factory.setBoxDisplay(this, $.isBoolean(show, true), target), this;
 		},
 		hide: function () {
 			var that = this;
@@ -4730,9 +4735,9 @@
 			var cache = Factory.getTreeCache(id);
 			return cache ? cache.tree : null;
 		},
-		show: function (id, show) {
+		show: function (id, show, target) {
 			var cache = Factory.getTreeCache(id);
-			return cache ? cache.tree.show(show) : null;
+			return cache ? cache.tree.show(show, target) : null;
 		},
 		hide: function (id) {
 			var cache = Factory.getTreeCache(id);

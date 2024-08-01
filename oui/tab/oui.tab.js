@@ -1317,7 +1317,9 @@
             return that;
         },
         size: function(size, isContent, opt) {
-            return this.setContentSize(size, isContent, opt);
+            this.setContentSize(size, isContent, opt);
+            Util.setSize(this);
+            return this;
         },
         scrollSwitch: function (tab) {
             var that = this,

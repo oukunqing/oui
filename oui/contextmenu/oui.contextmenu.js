@@ -796,8 +796,8 @@
                 var first = !menu.box;
                 menu.box = box;
 
-                if (first && $.isFunction(op.complete)) {
-                    op.complete(menu);
+                if ((first || op.always) && $.isFunction(op.complete)) {
+                    op.complete(menu, first);
                 }
 
                 return box;
@@ -855,6 +855,8 @@
             y: -1,
             //是否显示图标
             showIcon: false,
+            //是否每次显示菜单都回调complete
+            always: false,
             complete: null
         }, options);
 
