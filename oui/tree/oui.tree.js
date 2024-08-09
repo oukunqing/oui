@@ -788,6 +788,7 @@
 				opt.showTitle = $.isBoolean($.getParam(opt, 'showTitle,showtitle'), false);
 
 				opt.showSearch = $.isBoolean($.getParam(opt, 'showSearch,showForm,showsearch'), opt.target ? true : false);
+				opt.searchFields = Factory.parseArrayParam($.getParam(opt, 'searchFields,searchField'));
 				opt.searchText = $.getParam(opt, 'searchText,searchtext');
 				opt.searchPrompt = $.getParam(opt, 'searchPrompt,searchPlaceholder');
 				opt.keywordsLength = parseInt($.getParam(opt, 'keywordsLength,searchLength,maxlength'), 10);
@@ -1337,6 +1338,22 @@
 				}
 				return this;
 			},
+			distinct: function (arr) {
+				var newArr = [], tmp = {}, v = '';
+				for (var i = 0; i < arr.length; i++) {
+					v = arr[i];
+					if (v && !tmp['' + v]) {
+						tmp['' + v] = v;
+					}
+				}
+
+				for (var k in tmp) {
+					//newArr.push(k);
+					newArr.push(tmp[k]);
+				}
+
+				return newArr;
+			},
 			searchNodes: function (tree, txt, elem) {
 				var nodes = [], 
 					opt = tree.options,
@@ -1347,7 +1364,7 @@
 					type = (val.length > 2 && val.startsWith('/') && val.endsWith('/')) ? 2 : 
 						(val.indexOf('*') > -1 || val.indexOf('?') > -1) ? 1 : 0,
 					node, pattern,
-					keys = val.split(/[\s,;|]/),
+					keys = Factory.distinct(val.split(/[\s,;|]/)),
 					c = keys.length, i;
 
 				if (!$.isString(key, true)) {
@@ -1390,24 +1407,28 @@
 						nodes = $.extend([], results);
 					});
 				} else {
+					var isSearchCode = opt.searchFields.indexOf('code') > -1, dic = {};
 					for (var k in tree.cache.nodes) {
-						var n = tree.cache.nodes[k];
-						switch (type) {
+						var n = tree.cache.nodes[k], k = n.id;
+						switch (type){ 
 						case 0:
 							for (i = 0; i < c; i++) {
-								if (n.data.name.indexOf(keys[i]) > -1) {
+								if (!dic[k] && (n.data.name.indexOf(keys[i]) > -1 || (isSearchCode && n.data.code.indexOf(keys[i]) > -1))) {
 									nodes.push(n);
+									dic[k] = 1;
 								}
 							}
 							break;
 						case 1:
-							if (_match(key, n.data.name)) {
+							if (!dic[k] && (_match(key, n.data.name) || (isSearchCode && _match(key, n.data.code)))) {
 								nodes.push(n);
+								dic[k] = 1;
 							}
 							break;
 						case 2:
-							if (pattern.test(n.data.name)) {
+							if (!dic[k] && (pattern.test(n.data.name) || (isSearchCode && pattern.test(n.data.code)))) {
 								nodes.push(n);
+								dic[k] = 1;
 							}
 							break;
 						}
@@ -1715,7 +1736,7 @@
 				}
 
 				function _size() {
-					if (isNaN(h)) {
+					if (isNaN(h) || !tree.element) {
 						return false;
 					}
 					var oh = tree.element.offsetHeight,
@@ -2691,7 +2712,7 @@
 				if (opt.dragAble && Factory.isDragType(opt, p.type)) {
 					li.draggable = true;
 				}
-				var title = opt.showTitle && p.text.length > Config.TitleTextLength ? ' title="' + p.text + '"' : '',
+				var title = opt.showTitle && p.title.length > Config.TitleTextLength ? ' title="' + p.title + '"' : '',
 					html = [
 						'<div class="item" nid="', p.nid, '">',
 						opt.showSwitch ? '<span class="' + node.getSwitchClass(true) + '" nid="' + p.nid + '"></span>' : '',
@@ -2738,7 +2759,8 @@
 					return this;
 				}
 				var i, d, type, ptype, iconType, nid, pnid, text, desc, p, node, 
-					showStatus, showType, status, status2;
+					showStatus, showType, status, status2,
+					isSearchCode = opt.searchFields.indexOf('code') > -1;
 
 				for (i = 0; i < list.length; i++) {
 					if (typeof (d = list[i]).id === 'undefined' || d.except) {
@@ -2749,10 +2771,11 @@
 					iconType = d.iconType || par.iconType || type;
 					nid = Factory.buildNodeId(d.id, type);
 					pnid = Factory.buildNodeId(d.pid, ptype);
-					text = d.name || '',
+					text = (d.name || '').toString().escapeHtml(),
 					desc = d.desc || '',
 					p = {
-						data: d.data || d, text: text.toString().escapeHtml(),
+						data: d.data || d, text: text,
+						title: text + (isSearchCode && d.code !== d.name ? ' [' + d.code + ']' : ''),
 						nid: nid, pnid: pnid, type: type, ptype: ptype,
 						id: Factory.buildElemId(tid, nid),
 						pid: Factory.buildElemId(tid, pnid),
@@ -4278,6 +4301,8 @@
 				showTitle: undefined,
 				//是否显示搜索
 				showSearch: undefined,
+				//搜索的数据字段
+				searchFields: ['code'],
 				//搜索按钮文字显示，默认显示“查找”
 				searchText: undefined,
 				//搜索输入框文字提示
