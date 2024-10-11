@@ -2878,7 +2878,7 @@
         toDate: function (format) { return this.toString().toDate(format); },
         toDateString: function (format) { return this.toString().toDateString(format); },
         toDateFormat: function (format) { return this.toString().toDateFormat(format); },
-        toNumberUnit: function (num, kn, unit, decimalLen, force, space) {
+        /*toNumberUnit: function (num, kn, unit, decimalLen, force, space) {
             if (typeof decimalLen === 'boolean') {
                 space = force;
                 force = decimalLen;
@@ -2893,25 +2893,24 @@
             unit = (space ? ' ' : '') + ('' + (unit || '')).trim();
             var m = parseInt(num / kn, 10);
             var n = (num % kn / kn).round(decimalLen);
-            return (force ? (m + n) : m) > 0 ? (m + n).round(decimalLen) + unit : num + (unit === 'KB' ? 'bytes' : '');
-        },
+            return (force ? (m + n) : m) > 0 ? (m + n).round(decimalLen) + unit : num + (unit === 'KB' ? '字节' : '');
+        },*/
         toFileSize: function (decimalLen, space, force) {
             if (typeof decimalLen === 'boolean') {
                 force = space;
                 space = decimalLen;
                 decimalLen = 2;
             }
-            var kb = 1024, mb = 1024 * 1024, gb = 1024 * 1024 * 1024, num = this;
-            if (num >= gb) {
-                return num.toNumberUnit(num, gb, 'GB', decimalLen, false, space);
-            } else if (num >= mb) {
-                return num.toNumberUnit(num, mb, 'MB', decimalLen, false, space);
-            } else if (num >= kb) {
-                return num.toNumberUnit(num, kb, 'KB', decimalLen, false, space);
-            } else if (num < kb) {
-                return num.toNumberUnit(num, kb, 'KB', decimalLen, $.isBoolean(force, true), space);
+
+            var kb = 1024, num = this,            
+                units = ['字节', 'KB', 'MB', 'GB'],
+                c = units.length, i = 0;
+
+            while (num > kb && i < c) {
+                num /= kb;
+                i++;
             }
-            return '';
+            return num.round(decimalLen) + (space ? ' ' : '') + units[i];
         },
         join: function () {
             return this.toString();
@@ -4420,11 +4419,20 @@
             if (!isElement(elem = $.toElement(elem))) {
                 return { width: 0, height: 0, top: 0, left: 0 };
             }
+            var w = parseFloat('0' + getElementStyle(elem, 'width'), 10).round(3),
+                h = parseFloat('0' + getElementStyle(elem, 'height'), 10).round(3),
+                w2 = parseInt(w),
+                left = 0,
+                top = 0;
+
+            // 处理CSS元素宽度小数的问题
+            w = w2 + (w !== w2 && w - w2 < 0.5 ? 1 : 0);
+
             var par = {
-                width: elem.offsetWidth,
-                height: elem.offsetHeight,
-                left: elem.offsetLeft,
-                top: elem.offsetTop
+                width: w || elem.offsetWidth,
+                height: h || elem.offsetHeight,
+                left: left || elem.offsetLeft,
+                top: top || elem.offsetTop
             };
 
             if ($.isBoolean(basic, false)) {
@@ -4439,8 +4447,8 @@
                 body = doc.body,
                 defaultView = doc.defaultView,
                 prevComputedStyle = getElementStyle(elem),
-                left = elem.offsetLeft,
-                top = elem.offsetTop;
+                left = par.left,
+                top = par.top;
 
             while ((elem = elem.parentNode) && elem !== body && elem !== docElem) {
                 if (prevComputedStyle.position === 'fixed') {
@@ -4481,7 +4489,9 @@
             return $.extend(par, { left: left, top: top });
         },
         getClientSize = function (elem) {
-            return isElement(elem = $.toElement(elem)) ? { width: elem.clientWidth, height: elem.clientHeight } : { width: 0, height: 0 };
+            return isElement(elem = $.toElement(elem)) ? { 
+                width: elem.clientWidth, height: elem.clientHeight 
+            } : { width: 0, height: 0 };
         },
         getOuterSize = function (elem) {
             var os = getOffsetSize(elem, true),
@@ -4496,7 +4506,10 @@
         getScrollSize = function (elem) {
             if (isElement(elem = $.toElement(elem))) {
                 return {
-                    left: elem.scrollLeft, width: elem.scrollWidth, top: elem.scrollTop, height: elem.scrollHeight,
+                    top: elem.scrollTop, 
+                    left: elem.scrollLeft, 
+                    width: elem.scrollWidth, 
+                    height: elem.scrollHeight,
                 };
             }
             return { left: 0, top: 0, width: 0, height: 0 };

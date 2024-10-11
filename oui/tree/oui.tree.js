@@ -1409,24 +1409,24 @@
 				} else {
 					var isSearchCode = opt.searchFields.indexOf('code') > -1, dic = {};
 					for (var k in tree.cache.nodes) {
-						var n = tree.cache.nodes[k], k = n.id;
+						var n = tree.cache.nodes[k], k = n.id, code = n.data.code || '';
 						switch (type){ 
 						case 0:
 							for (i = 0; i < c; i++) {
-								if (!dic[k] && (n.data.name.indexOf(keys[i]) > -1 || (isSearchCode && n.data.code.indexOf(keys[i]) > -1))) {
+								if (!dic[k] && (n.data.name.indexOf(keys[i]) > -1 || (isSearchCode && code && code.indexOf(keys[i]) > -1))) {
 									nodes.push(n);
 									dic[k] = 1;
 								}
 							}
 							break;
 						case 1:
-							if (!dic[k] && (_match(key, n.data.name) || (isSearchCode && _match(key, n.data.code)))) {
+							if (!dic[k] && (_match(key, n.data.name) || (isSearchCode && code && _match(key, code)))) {
 								nodes.push(n);
 								dic[k] = 1;
 							}
 							break;
 						case 2:
-							if (!dic[k] && (pattern.test(n.data.name) || (isSearchCode && pattern.test(n.data.code)))) {
+							if (!dic[k] && (pattern.test(n.data.name) || (isSearchCode && code && pattern.test(code)))) {
 								nodes.push(n);
 								dic[k] = 1;
 							}
@@ -1668,6 +1668,8 @@
 						width: es.width,
 						height: boxHeight || opt.boxHeight || Config.TreeBoxDefaultHeight
 					};
+
+					console.log('es:', es);
 
 				if (p.height > bs.height) {
 					p.height = bs.height - 6;
@@ -2138,7 +2140,7 @@
 			showSearchResult: function (tree, nodes, keys) {
 				var div = tree.box.querySelector('div.search-result-panel'),
 					show = nodes ? true : undefined, elems,
-					i, c = nodes.length, node, text, html = [];
+					i, c = nodes.length, node, dr, name, text, title, html = [];
 
 				if (!div) {
 					div = document.createElement('div');
@@ -2176,21 +2178,27 @@
 					});
 				}
 				var cache = Factory.getSearchCache(tree), css = [],
-					skin = !Factory.isDefaultSkin(tree.options.skin);
+					skin = !Factory.isDefaultSkin(tree.options.skin),
+					isSearchCode = tree.options.searchFields.indexOf('code') > -1;
+
 				if (cache.elem) {
 					div.style.width = cache.elem.offsetWidth + 'px';
 				}
 				html.push('<ul>');
+
 				for (var i = 0; i < c; i++) {
 					node = nodes[i], css = ['icon'];
-					text = (node.data.name || node.data.text).toString();
+					dr = node.data || {};
+					name = dr.name || dr.text;
+					text = name.toString().escapeHtml();
+					title = text + (isSearchCode && dr.code && name !== dr.code ? ' [' + dr.code + ']' : '');
 					if (skin && node.type) {
 						css.push(node.type);
 					} else if (node.isLeaf()) {
 						css.push('icon-page');
 					}
 					html.push([
-						'<li nid="', node.id, '" title="', text.escapeHtml(), '">',
+						'<li nid="', node.id, '" title="', title, '">',
 						'<span class="', css.join(' '), '"></span>',
 						text.replaceKeys(keys, '<b>', '</b>'),
 						'</li>'
@@ -2238,11 +2246,15 @@
 					if (opt.boxWidth) {
 						tmp['min-width'] = opt.boxWidth + 'px';
 					}
-					if (opt.align === 'right') {
-						tmp['border-top-left-radius'] = '4px';
-					} else {
-						tmp['border-top-right-radius'] = '4px';
+
+					if (btn || (Math.abs(tree.box.offsetWidth - opt.target.offsetWidth) > 1)) {
+						if (opt.align === 'right') {
+							tmp['aorder-top-left-radius'] = '4px';
+						} else {
+							tmp['border-top-right-radius'] = '4px';
+						}
 					}
+
 					tree.box.style.cssText = $.toCssText($.extend({}, css, tmp));
 
 					if (opt.align === 'right') {
