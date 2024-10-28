@@ -42,7 +42,9 @@
         if ($.isString(formElement)) { formElement = document.getElementById(formElement.replace(/^[#]+/, '')); }
         if (!$.isElement(formElement) || !formElement.getElementsByTagName) {
             //throw new Error('element 参数错误');
-            throw new Error('element \u53c2\u6570\u9519\u8bef');
+            //throw new Error('element \u53c2\u6570\u9519\u8bef');
+            console.error('element \u53c2\u6570\u9519\u8bef');
+            return false;
         }
         var id = formElement.id || '',
             opt = $.extend({}, options);
@@ -595,7 +597,7 @@
                         attribute: '',              //获取指定的属性值作为value
                         minValue: '', maxValue: '', //最小值、最大值（用于验证输入的数字大小）
                         required: null,             //是否必填项
-                        empty: false,               //是否允许空值                        
+                        empty: false,               //是否允许空值
                         dataShow: null,             //是否显示默认数字,数字型字段，若值为空，则显示默认值或0
                         strict: false,              //是否严格模式（检测输入内容的类型）
                         md5: false,                 //是否MD5加密
@@ -1055,10 +1057,12 @@
         return list;
     },
     setFormData = function (formElement, options, formData, ignoreCase) {
-        var data = filterData(options, formData), list = [];
+        var data = filterData(options, formData), arr = [], list = [];
         if (!$.isEmpty(data)) {
-            var op = initFormConfig(formElement, options), configs = op.configs,
+            var op = initFormConfig(formElement, options), configs = op.configs;
+            if (op) {
                 arr = op.formElement.getElementsByTagName(configs.tagName || "*");
+            }
             list = setElementsData(data, arr, op, false, $.isBoolean(ignoreCase, true));
         }
         return list;
@@ -1662,7 +1666,7 @@
                         if (opt.minVal && parseFloat('0' + val, 10) < opt.minVal) {
                             return false;
                         }
-                    } else {                        
+                    } else {
                         if ((opt.maxLen && opt.maxLen > 0 && val.length > opt.maxLen) || (opt.valLen && opt.valLen > 0 && val.length > opt.valLen)) {
                             return false;
                         }
@@ -1908,7 +1912,7 @@
                     }
                     var pos = $.setPanelPosition(elem, elem.optbox, cfg);
                     $.addClass(elem.optbox, 'input-opt-panel-box-' + pos.position);
-                    $.addClass(elem, 'input-opt-elem-' + pos.position);                    
+                    $.addClass(elem, 'input-opt-elem-' + pos.position);
                     if (cfg.x) {
                         elem.optbox.style.left = parseFloat(elem.optbox.style.left, 10) + cfg.x + 'px';
                     }
@@ -2604,28 +2608,29 @@
                                 });
                             }
                         }
-
-                        Object.defineProperty(elem, 'val', {
-                            /*value: 'hello',
-                            writable: true,
-                            configurable: true,
-                            */
-                            get: function () {
-                                return elem.value;
-                            },
-                            set: function (val) {
-                                if (!elem.values) {
-                                    _showOption(null, elem, opt, 0);
-                                }
-                                for (var i = 0; i < elem.values.length; i++) {
-                                    var v = elem.values[i].val;
-                                    if (v === val || v.toString() === val.toString()) {
-                                        $.input.selectOptionItem(i + 1, null, elem, elem.div);
-                                        break;
+                        if (typeof elem.val === 'undefined') {
+                            Object.defineProperty(elem, 'val', {
+                                /*value: 'hello',
+                                writable: true,
+                                configurable: true,
+                                */
+                                get: function () {
+                                    return elem.value;
+                                },
+                                set: function (val) {
+                                    if (!elem.values) {
+                                        _showOption(null, elem, opt, 0);
+                                    }
+                                    for (var i = 0; i < elem.values.length; i++) {
+                                        var v = elem.values[i].val;
+                                        if (v === val || v.toString() === val.toString()) {
+                                            $.input.selectOptionItem(i + 1, null, elem, elem.div);
+                                            break;
+                                        }
                                     }
                                 }
-                            }
-                        });
+                            });
+                        }
                     } else if (!isSelect) {
                         elem.placeholder = opt.placeholder || cfg.title || elem.placeholder;
 

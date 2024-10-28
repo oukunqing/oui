@@ -163,6 +163,8 @@
                     <button onclick="position(true);">定位并选中</button>
                     <button onclick="checked(true);">勾选</button>
                     <button onclick="checked(false);">取消勾选</button>
+                    <button onclick="checked(true, true);">全部勾选</button>
+                    <button onclick="checked(false, true);">全部取消勾选</button>
                     <button onclick="sortUp();">上移</button>
                     <button onclick="sortDown();">下移</button>
                 </div>
@@ -314,9 +316,13 @@
         $.tree(TreeId).position(nid, selected);
     }
 
-    function checked(checked) {
-        var nid = $('#txtNodeId').val().trim();
-        $.tree(TreeId).checked(nid, checked);
+    function checked(checked, isAll) {
+        if (isAll) {
+            $.tree(TreeId).checked(true, checked, 'unit');
+        } else {            
+            var nid = $('#txtNodeId').val().trim();
+            $.tree(TreeId).checked(nid, checked);
+        }
     }
 
     function deleteNode() {

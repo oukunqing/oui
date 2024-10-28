@@ -2787,7 +2787,7 @@
 					desc = d.desc || '',
 					p = {
 						data: d.data || d, text: text,
-						title: text + (isSearchCode && d.code !== d.name ? ' [' + d.code + ']' : ''),
+						title: text + (isSearchCode && d.code && d.code !== d.name ? ' [' + d.code + ']' : ''),
 						nid: nid, pnid: pnid, type: type, ptype: ptype,
 						id: Factory.buildElemId(tid, nid),
 						pid: Factory.buildElemId(tid, pnid),
@@ -4630,7 +4630,23 @@
 		sortDown: function (nodes, num, callback) {
 			return Factory.eachNodeIds(this.cache.nodes, nodes, 'sortDown', num, callback), this;
 		},
-		checked: function (nodes, checked) {
+		getNodeIds: function(types) {
+			var nodes = [], node, 
+				arrType = $.isArray(types) ? types : $.isString(types, true) ? types.split(/[,|;]/g) : [],
+				hasType = arrType.length > 0;
+
+			for (var k in this.cache.nodes) {
+				node = this.cache.nodes[k];
+				if (!hasType || arrType.indexOf(node.type) > -1) {
+					nodes.push(k);
+				}
+			}
+			return nodes;
+		},
+		checked: function (nodes, checked, types) {
+			if ($.isBoolean(nodes, false)) {
+				nodes = this.getNodeIds(types);
+			}
 			return Factory.eachNodeIds(this.cache.nodes, nodes, 'setChecked', $.isBoolean(checked, true)), this;
 		},
 		check: function (nodes, selected, position) {
@@ -4825,8 +4841,8 @@
 		selected: function (id, nodes, selected) {
 			return Factory.func(id, nodes, 'select', selected);
 		},
-		checked: function (id, nodes, checked) {
-			return Factory.func(id, nodes, 'checked', checked);
+		checked: function (id, nodes, checked, types) {
+			return Factory.func(id, nodes, 'checked', checked, types);
 		},
 		disabled: function (id, nodes, disabled) {
 			return Factory.func(id, nodes, 'disabled', disabled);

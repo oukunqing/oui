@@ -1362,6 +1362,18 @@
                 }
             }
             return undefined;
+        },
+        setPrefix: function(data, prefix) {
+            if ($.isArray(data)) {
+                var arr = [];
+                for (var i = 0, c = data.length; i < c; i++) {
+                    arr.push((prefix || '') + data[i]);
+                }
+                return arr;
+            } else if ($.isString(data) || $.isNumber(data)) {
+                return (prefix || '') + data;
+            }
+            return data;
         }/*,
         toJsonFormat: function (json) {
 
@@ -4419,20 +4431,11 @@
             if (!isElement(elem = $.toElement(elem))) {
                 return { width: 0, height: 0, top: 0, left: 0 };
             }
-            var w = parseFloat('0' + getElementStyle(elem, 'width'), 10).round(3),
-                h = parseFloat('0' + getElementStyle(elem, 'height'), 10).round(3),
-                w2 = parseInt(w),
-                left = 0,
-                top = 0;
-
-            // 处理CSS元素宽度小数的问题
-            w = w2 + (w !== w2 && w - w2 < 0.5 ? 1 : 0);
-
             var par = {
-                width: w || elem.offsetWidth,
-                height: h || elem.offsetHeight,
-                left: left || elem.offsetLeft,
-                top: top || elem.offsetTop
+                width: elem.offsetWidth,
+                height: elem.offsetHeight,
+                left: elem.offsetLeft,
+                top: elem.offsetTop
             };
 
             if ($.isBoolean(basic, false)) {
