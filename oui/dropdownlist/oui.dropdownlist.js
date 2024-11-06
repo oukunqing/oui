@@ -1800,7 +1800,7 @@
 			}
 			if (!opt.multi) {
 				//单选模式，如果没有指定选中项，则设置选中第1项
-				if (idx >= 0 && idx <= nodes.length) {
+				if (nodes.length > 0 && idx >= 0 && idx <= nodes.length) {
 					nodes[idx - (idx > 0 ? 1 : 0)].set(true, false);
 					Factory.setItemIdx(that, idx);
 					that.get();
