@@ -80,6 +80,11 @@
 			// 选项框最小宽度设置
 			BoxMinWidths: [40, 245, 345],
 			BoxMinHeights: [64, 90, 140],
+			SearchResultBoxHeight: 390, 	//12 * 30 + 30
+			SearchResultItemHeight: 30,
+			SearchResultTitleHeight: 30,
+			//搜索框字符长度限制
+			SearchKeywordsLength: 128,
 			// 隐藏但是需要占位
 			CssHidden: ';visibility:hidden;width:0px;height:0px;border:none;margin:0;padding:0;font-size:1px;line-height:0px;float:left;'
 		},
@@ -88,7 +93,8 @@
 			ids: [],
 			lists: {},
 			events: {},
-			caches: {}
+			caches: {},
+			search: {}
 		},
 		Factory = {
 			loadCss: function (skin, func) {
@@ -209,6 +215,8 @@
 				opt.y = ('' + $.getParam(opt, 'margin,top,y')).toInt();
 				opt.w = ('' + $.getParam(opt, 'w')).toInt();
 				opt.change = $.isBoolean($.getParam(opt, 'onchange,change'), true);
+
+				opt.showSearch = $.isBoolean($.getParam(opt, 'showSearch,showForm,showsearch,search'), false);
 
 				if (opt.index < 0) {
 					opt.index = 0;
@@ -1053,6 +1061,359 @@
 					return '';
 				}
 				return prefix + '-' + skin;
+			},
+			setSearchCache: function (ddl, par) {
+				var key = 'oui-search-' + ddl.id,
+					cache = Cache.search[key];
+
+				if (!$.isBoolean(par.search, true)) {
+					par.nodes = [];
+				}
+				Cache.search[key] = $.extend({}, cache, par);
+				return this;
+			},
+			getSearchCache: function (ddl) {
+				return Cache.search['oui-search-' + ddl.id] || {};
+			},
+			getNodeCache: function (ddl, nodeId) {
+				var idx = parseInt(nodeId, 10);
+				var c = ddl.nodes.length;
+				for (var i = 0; i < c; i++) {
+					if (ddl.nodes[i].id === nodeId) {
+						return ddl.nodes[i];
+					}
+				}
+				return null;
+			},
+			buildSearch: function (ddl, box) {
+				var opt = ddl.options;
+
+				if (!opt.showSearch) {
+					return this;
+				}
+				var div = document.createElement('div'), first = box.childNodes[0];
+				div.className = 'search oui-ddl-search';
+				div.innerHTML = [
+					'<input type="text" class="keywords oui-ddl-keywords" placeholder="', 
+					//opt.searchPrompt || '请输入关键字',
+					opt.searchPrompt || '\u8bf7\u8f93\u5165\u5173\u952e\u5b57',
+					'" maxlength="', opt.keywordsLength, '" />',
+					//搜索
+					//'<a class="search oui-ddl-search" title="', opt.searchText || '\u641c\u7d22', '"></a>',
+					//查找
+					'<a class="btn btn-search oui-ddl-search" title="', opt.searchText || '\u67e5\u627e', '"></a>',
+					//取消
+					'<a class="btn btn-cancel oui-ddl-cancel hide" title="', '\u53d6\u6d88', '"></a>'
+				].join('');
+
+				if (first) {
+					box.insertBefore(div, first);
+				} else {
+					box.appendChild(div);
+				}
+
+				var txt = box.querySelector('input.keywords'),
+					btn = box.querySelector('a.btn-search'),
+					no = box.querySelector('a.btn-cancel');
+
+				$.addListener(btn, 'mousedown', function(ev) {
+					Factory.searchNodes(ddl, txt, this);
+				});
+				$.addListener(no, 'mousedown', function(ev) {
+					Factory.showSearchPanel(ddl, false, true);
+					txt.value = '';
+					$.setElemClass(no, 'hide', true);
+				});
+				
+				$.addListener(txt, 'mousedown', function(ev) {
+					Factory.showSearchPanel(ddl, true);
+				});
+				$.addListener(txt, 'keyup', function(ev) {
+					var kc = $.getKeyCode(ev);
+					if (kc === KC.Enter) {
+						Factory.searchNodes(ddl, txt, this);
+					}
+				});
+				$.addListener(txt, 'blur', function(ev) {
+					if (txt.value.trim()) {
+						$.setElemClass(no, 'hide', false);
+					} else {
+						$.setElemClass(no, 'hide', true);
+					}
+				});
+
+				ddl.frm = div;
+
+				Factory.setSearchCache(ddl, { form: div, elem: txt, btn: btn, no: no });
+
+				return this;
+			},
+			showSearchForm: function (ddl) {
+				var opt = ddl.options,
+					cfg = Factory.getSearchCache(ddl);
+
+				if (opt.showSearch) {
+					if (!cfg.form) {
+						Factory.buildSearch(ddl, ddl.box);
+					} else if (cfg.form.style.display === 'none') {
+						cfg.form.style.display = 'block';
+					}
+				} else if (cfg.form) {
+					cfg.form.style.display = 'none';
+					Factory.showSearchPanel(ddl, false ,true);
+				}
+				return Factory.setPanelSize(ddl, null, true);
+			},
+			setPanelSize: function (ddl) {
+				if (!ddl.options.showSearch) {
+					return this;
+				}
+				var txt = ddl.frm.querySelector('.keywords');
+				txt.style.width = $.getOffset(ddl.frm).width - 10 + 'px';
+				txt.style.maxWidth = $.getOffset(ddl.frm).width - 10 + 'px';
+
+				return this;
+			},
+			showSearchPanel: function(ddl, show, force) {
+				if (!ddl.box || (!force && !ddl.options.showSearch)) {
+					return this;
+				}
+				var cfg = Factory.getSearchCache(ddl),
+					div = ddl.box.querySelector('div.search-result-panel');
+
+				if (!div) {
+					return this;
+				} else if (!cfg.search) {
+					show = false;
+				}
+				if (!$.isBoolean(show, true) && force) {
+					if (cfg && cfg.elem) {
+						cfg.elem.value = '';
+						$.setElemClass(cfg.no, 'hide', true);
+					}
+					Factory.setSearchCache(ddl, { search: false, key: '' });
+				}
+				var display = $.isBoolean(show, div.style.display === 'none');
+				div.style.display = display ? 'block' : 'none';
+
+				if (display && cfg.elem) {
+					div.style.width = cfg.elem.offsetWidth + 'px';
+					$.setElemClass(cfg.elem, 'keywords-popup', true);
+				} else {
+					$.setElemClass(cfg.elem, 'keywords-popup', false);
+				}
+				return this;
+			},
+			showSearchResult: function (ddl, nodes, keys) {
+				//console.log('showSearchResult:', nodes, keys);
+
+				var div = ddl.box.querySelector('div.search-result-panel'),
+					show = nodes ? true : undefined, elems,
+					i, c = nodes.length, node, dr, name, text, title, html = [];
+
+				if (!div) {
+					div = document.createElement('div');
+					div.className = 'search-result-panel';
+					div.innerHTML = [
+						'<div class="search-title">',
+						'<span class="ots-title"></span>',
+						'<span class="ots-close">\u5173\u95ed</span>',		//关闭
+						'</div>',
+						'<div class="search-list"></div>'
+					].join('');
+
+					elems = div.childNodes;
+					Factory.setSearchCache(ddl, { title: elems[0], panel: elems[1] });
+
+					$.addListener(elems[0].childNodes[1], 'click', function(ev) {
+						Factory.showSearchPanel(ddl, false);
+					});
+
+					ddl.box.appendChild(div);
+
+					$.addListener(div, 'mouseup,dblclick', function (ev) {
+						var elem = ev.target, tag = elem.tagName.toLowerCase(), nid, node;
+						if (tag != 'li' && elem.parentNode) {
+							elem = elem.parentNode;
+						}
+						if (nid = $.getAttribute(elem, 'nid')) {
+							if (node = Factory.getNodeCache(ddl, nid)) {
+								Factory.setItemIdx(ddl, node.idx);
+								ddl.action(node, {click: true}).callback(ddl.options.callbackLevel);
+
+								//Factory.setSearchCache(ddl, { key: key, elem: txt, search: true, nodes: nodes });
+
+								if (ev.type === 'dblclick') {
+									Factory.showSearchPanel(ddl, false);
+								}
+							}
+						}
+					});
+				}
+				var cache = Factory.getSearchCache(ddl),
+					isSearchCode = false;
+
+				if (cache.elem) {
+					div.style.width = cache.elem.offsetWidth + 'px';
+				}
+				html.push('<ul>');
+
+				for (var i = 0; i < c; i++) {
+					node = nodes[i];
+					dr = node.data || {};
+					name = dr.name || dr.text || node.text;
+					text = name.toString().escapeHtml();
+					title = text + (isSearchCode && dr.code && name !== dr.code ? ' [' + dr.code + ']' : '');
+		
+					html.push([
+						'<li nid="', node.id, '" title="', title, '">',
+						text.replaceKeys(keys, '<b>', '</b>'),
+						'</li>'
+					].join(''));
+				}
+				html.push('</ul>');
+
+				Factory.setSearchCache(ddl, { search: true });
+
+				var height = c * Config.SearchResultItemHeight + Config.SearchResultTitleHeight + 2,
+					//title = c > 0 ? '找到<b>' + c + '</b>个结果' : '没有找到结果',
+					title = c > 0 ? 
+						'\u627e\u5230<b>' + c + '</b>\u4e2a\u7ed3\u679c' 
+						: '\u6ca1\u6709\u627e\u5230\u7ed3\u679c',
+					max = Config.SearchResultBoxHeight,
+					boxHeight = ddl.box.offsetHeight,
+					display = $.isBoolean(show, div.style.display === 'none');
+
+				if (height > max) {
+					height = max;
+				}
+				if (height > boxHeight) {
+					height = boxHeight - 60;
+				}
+
+				div.style.height = height + 'px';
+				elems = div.childNodes;
+				elems[1].style.height = (height - Config.SearchResultTitleHeight) + 'px';
+
+				cache.title.childNodes[0].innerHTML = title;
+				cache.panel.innerHTML = c > 0 ? html.join('') : '';
+
+				return Factory.showSearchPanel(ddl, display);
+			},
+			gotoCurrent: function (ddl) {
+				var opt = ddl.options,
+				con = ddl.con,
+				elem = opt.select ? ddl.elem : ddl.text,
+				idx = Factory.getItemIdx(elem),
+				node = ddl.nodes[idx - 1];
+
+				if (node) {
+					$.scrollTo(node.label, con);
+				}
+				
+				return this;
+			},
+			distinct: function (arr) {
+				var newArr = [], tmp = {}, v = '';
+				for (var i = 0; i < arr.length; i++) {
+					v = arr[i];
+					if (v && !tmp['' + v]) {
+						tmp['' + v] = v;
+					}
+				}
+
+				for (var k in tmp) {
+					//newArr.push(k);
+					newArr.push(tmp[k]);
+				}
+
+				return newArr;
+			},
+			searchNodes: function (ddl, txt, btn) {
+				//console.log('ddl:', txt, txt.value, ddl.nodes);
+				var nodes = [],
+					opt = ddl.options,
+					cfg = Factory.getSearchCache(ddl),
+					val = txt.value.trim(),
+					key = val,
+					//匹配模式：0-字符匹配，1-通配符匹配，2-正则匹配
+					type = (val.length > 2 && val.startsWith('/') && val.endsWith('/')) ? 2 : 
+						(val.indexOf('*') > -1 || val.indexOf('?') > -1) ? 1 : 0,
+					node, pattern,
+					keys = Factory.distinct(val.split(/[\s,;|]/)),
+					c = keys.length, i;
+
+				if (!$.isString(key, true)) {
+					Factory.setSearchCache(ddl, { key: '', search: false })
+						.showSearchPanel(ddl, false)
+						.gotoCurrent(ddl);
+
+					$.setElemClass(cfg.no, 'hide', true);
+
+					return this;
+				}
+				
+				$.setElemClass(cfg.no, 'hide', false);
+
+				if (cfg.key === key) {
+					return Factory.showSearchPanel(ddl, true);
+				}
+
+				function _match(pattern, content) {
+				    var pn = pattern.length, cn = content.length;
+				    if (!pn && !cn) {
+				        return true;
+				    } else if (pn > 1 && pattern[0] === '*' && !cn) {
+				        return false;
+				    } else if ((pn > 1 && pattern[0] === '?') || (pn && cn && pattern[0] === content[0])) {
+				        return _match(pattern.substring(1), content.substring(1));
+				    } else if (pn && pattern[0] === '*') {
+				        return _match(pattern.substring(1), content) || _match(pattern, content.substring(1));
+				    }
+				    return false;
+				}
+
+				if (type === 2) {
+					pattern = new RegExp(key.substring(1, key.length - 1));
+				}
+
+				if ($.isFunction(opt.searchCallback)) {
+					opt.searchCallback(ddl, keys, function (tree, results) {
+						nodes = $.extend([], results);
+					});
+				} else {
+					//var isSearchCode = opt.searchFields.indexOf('code') > -1, dic = {};
+					var isSearchCode = false, dic = {};
+					for (var k in ddl.nodes) {
+						var n = ddl.nodes[k], k = n.id, code = n.data.code || '',
+							text = n.text || '';
+						switch (type){ 
+						case 0:
+							for (i = 0; i < c; i++) {
+								if (!dic[k] && (text.indexOf(keys[i]) > -1 || (isSearchCode && code && code.indexOf(keys[i]) > -1))) {
+									nodes.push(n);
+									dic[k] = 1;
+								}
+							}
+							break;
+						case 1:
+							if (!dic[k] && (_match(key, text) || (isSearchCode && code && _match(key, code)))) {
+								nodes.push(n);
+								dic[k] = 1;
+							}
+							break;
+						case 2:
+							if (!dic[k] && (pattern.test(text) || (isSearchCode && code && pattern.test(code)))) {
+								nodes.push(n);
+								dic[k] = 1;
+							}
+							break;
+						}
+					}
+				}
+				Factory.setSearchCache(ddl, { key: key, elem: txt, search: true, nodes: nodes });
+
+				return Factory.showSearchResult(ddl, nodes, keys);
 			}
 		};
 
@@ -1201,6 +1562,8 @@
 			number: false,
 			//是否显示值内容
 			display: false,
+			//是否显示搜索
+			showSearch: undefined,
 			//是否支持按钮快捷键功能
 			shortcutKey: true,
 			//是否显示按钮快捷键数字
@@ -1538,7 +1901,8 @@
 					.setElemEvent(that)
 					.setItemEvent(that)
 					.setElemProperty(that)
-					.setEditEvent(that);
+					.setEditEvent(that)
+					.showSearchForm(that);
 
 				if (!$.isUndefinedOrNull(opt.value) && (opt.value !== '' || !opt.multi)) {
 					that.set(opt.value, {initial: true});
@@ -1903,7 +2267,7 @@
 				opt = that.options,
 				data = that.get(),
 				elem = opt.select ? that.elem : that.text,
-				level = !$.isNumber(callbackLevel) ? 0 :(callbackLevel || 0);
+				level = !$.isNumber(callbackLevel) ? 0 : (callbackLevel || 0);
 
 			if (level === Config.CallbackLevel.Initial) {
 				if (data.value === '') {
@@ -1984,6 +2348,7 @@
 					for (i = 0; i < spans.length; i++) {
 						spans[i].title = $.getOffset(spans[i]).height > Config.BoxItemHeight ? spans[i].innerHTML.filterHtml() : '';
 					}
+					Factory.setPanelSize(that);
 				}
 			}
 			return that.activity = true, that;
@@ -2050,7 +2415,8 @@
 
 			that.formSize(bs.width || bs.max);
 
-			var barH = $.getOffset(that.bar).height;
+			var barH = $.getOffset(that.bar).height,
+				frmH = $.getOffset(that.frm).height;
 
 			//行列布局时，当选项内容宽度超过预设的宽度时，动态调用列数，以使行列对齐
 			if (opt.layout !== 'list' && $.isNumber(opt.columns) && opt.columns > 0) {
@@ -2085,7 +2451,7 @@
 			//先清除选项内容框高度
 			that.con.style.height = 'auto';
 			//再设置选项内容框高度
-			that.con.style.height = ($.getOffset(box).height - barH - 2) + 'px';
+			that.con.style.height = ($.getOffset(box).height - barH - frmH - 2) + 'px';
 			
 			return that;
 		},

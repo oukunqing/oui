@@ -732,6 +732,7 @@
 				opt.showCheck = $.isBoolean(showCheck, false) || showCheck === 'checkbox';
 
 				opt.showCount = $.isBoolean($.getParam(opt, 'showCount,showcount'), false);
+				opt.hideCountZero = $.isBoolean($.getParam(opt, 'hideCountZero,hideZero,hidecountZero,hidezero'), false);
 				opt.showDesc = $.isBoolean($.getParam(opt, 'showDesc,showdesc'), false);
 
 				opt.showButton = $.isBoolean($.getParam(opt, 'showButton,showbutton'), false);
@@ -786,6 +787,7 @@
 				opt.showInfo = $.isBoolean($.getParam(opt, 'showInfo,showinfo'), false);
 
 				opt.showTitle = $.isBoolean($.getParam(opt, 'showTitle,showtitle'), false);
+				opt.forceTitle = $.isBoolean($.getParam(opt, 'forceTitle,forcetitle'), false);
 
 				opt.showSearch = $.isBoolean($.getParam(opt, 'showSearch,showForm,showsearch'), opt.target ? true : false);
 				opt.searchFields = Factory.parseArrayParam($.getParam(opt, 'searchFields,searchField'));
@@ -1311,7 +1313,7 @@
 			getSearchCache: function (tree) {
 				return Cache.search['oui-search-' + tree.id] || {};
 			},
-			gotoCurent: function (tree) {
+			gotoCurrent: function (tree) {
 				var cache = tree.cache.current,
 					opt = tree.options,
 					node = cache.selected;
@@ -1370,7 +1372,7 @@
 				if (!$.isString(key, true)) {
 					Factory.setSearchCache(tree, { key: '', search: false })
 						.showSearchPanel(tree, false)
-						.gotoCurent(tree);
+						.gotoCurrent(tree);
 
 					$.setElemClass(cfg.no, 'hide', true);
 
@@ -2219,8 +2221,9 @@
 
 				if (height > max) {
 					height = max;
-				} else if (height > panelHeight) {
-					height = panelHeight;
+				}
+				if (height > panelHeight) {
+					height = panelHeight - 30;
 				}
 
 				div.style.height = height + 'px';
@@ -2249,7 +2252,7 @@
 
 					if (btn || (Math.abs(tree.box.offsetWidth - opt.target.offsetWidth) > 1)) {
 						if (opt.align === 'right') {
-							tmp['aorder-top-left-radius'] = '4px';
+							tmp['border-top-left-radius'] = '4px';
 						} else {
 							tmp['border-top-right-radius'] = '4px';
 						}
@@ -2724,7 +2727,7 @@
 				if (opt.dragAble && Factory.isDragType(opt, p.type)) {
 					li.draggable = true;
 				}
-				var title = opt.showTitle && p.title.length > Config.TitleTextLength ? ' title="' + p.title + '"' : '',
+				var title = opt.showTitle && (opt.forceTitle || p.title.length > Config.TitleTextLength) ? ' title="' + p.title + '"' : '',
 					html = [
 						'<div class="item" nid="', p.nid, '">',
 						opt.showSwitch ? '<span class="' + node.getSwitchClass(true) + '" nid="' + p.nid + '"></span>' : '',
@@ -3523,7 +3526,7 @@
 				that.childs[i].delete();
 			}
 			that.childs = [];
-			return that.checkCollapse();
+			return that.checkCollapse().updateCount();
 		},
 		delete: function (removeElem) {
 			var that = this.self(), parent = that.parent;
@@ -4021,7 +4024,7 @@
 					window.clearTimeout(Cache.timers[key]);
 				}
 				Cache.timers[key] = window.setTimeout(function() {
-					str = '<b>(' + c + ')</b>';
+					str = c > 0 || !that.tree.options.hideCountZero ? '<b>(' + c + ')</b>' : '';
 					if (item = that.getItem('count')) {
 						item.innerHTML = str;
 					}
@@ -4305,12 +4308,16 @@
 				showInfo: undefined,
 				//是否显示子节点数量
 				showCount: undefined,
+				//是否隐藏子节点零数量
+				hideCountZero: undefined,
 				//是否显示节点类型图标
 				showType: undefined,
 				//是否显示节点状态
 				showStatus: undefined,
 				//是否显示title
 				showTitle: undefined,
+				//是否强制显示title
+				forceTitle: undefined,
 				//是否显示搜索
 				showSearch: undefined,
 				//搜索的数据字段

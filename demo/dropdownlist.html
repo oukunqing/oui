@@ -186,6 +186,7 @@ window.onload = function() {
 		number: true,
 		change: true,
 		origin: true,
+		search: true,
 		//value: '5',
 		//index: 2,
 		boxWidth: 400,
@@ -539,6 +540,7 @@ $.dropdownlist('tree2', {
 	dataType: 'int',
 	number: true,
 	desc: true,	
+	search: true,
 	callback: function (value, initial, data, ddl) {
 		$.console.log(ddl.id, '[callback]', ', value:', value, ', initial:', initial, ', data:', data);
 	},
@@ -587,6 +589,7 @@ $.dropdownlist('tree1', {
 	dataType: 'int',
 	//将Id/Value值作为desc显示
 	desc: true,
+	search: true,
 	//是否防抖回调，默认是防抖的，所以默认不用设置此参数，若不需要防抖，则需要设置为 false
 	//debounce: true,
 	//callbackDebounce: false,

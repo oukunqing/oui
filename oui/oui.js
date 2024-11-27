@@ -249,11 +249,20 @@
         },
         isObject = function (o) { return o !== null && typeof o === 'object'; },
         isArray = Array.isArray || function (a) { return Object.prototype.toString.call(a) === '[object Array]'; },
+        value = function (values) {
+            var arr = isArray(values) ? values : arguments, i = 0, c = arr.length;
+            for (i = 0; i < c; i++) {
+                if (arr[i] !== undefined && arr[i] !== null) {
+                    return arr[i];
+                }
+            }
+            return;
+        },
         /*
             判断变量是否为boolean
             b: 变量
             dv: 默认值，若dv为boolean，且b不为boolean，则返回dv；若dv不为boolean,则返回b === boolean
-        */
+        */        
         isBoolean = function (b, dv) {
             var bool = typeof b === 'boolean';
             return typeof dv === 'boolean' ? (bool ? b : dv) : bool;
@@ -721,7 +730,8 @@
             var s = [];
             if (isArray(a)) {
                 for (var i = 0, c = a.length; i < c; i++) {
-                    var key = a[i].key || a[i].name, val = a[i].value || a[i].data || a[i].val;
+                    //var key = a[i].key || a[i].name, val = a[i].value || a[i].data || a[i].val;
+                    var key = a[i].key || a[i].name, val = $.value(a[i].value, a[i].data, a[i].val);
                     url = _buildParam(url, s, key, val, getUrlVal(url, key));
                 }
             } else if (isObj) {
@@ -1283,7 +1293,8 @@
     };
 
     $.extendNative($, {
-        trim: trim, isUndefined: isUndefined, isUndef: isUndefined, isString: isString, isNumber: isNumber,
+        trim: trim, value: value,
+        isUndefined: isUndefined, isUndef: isUndefined, isString: isString, isNumber: isNumber,
         isFunction: isFunction, isFunc: isFunction, isObject: isObject, isArray: isArray, isDate: isDate, 
         isDateString: isDateString, isDateStr: isDateString,
         isBoolean: isBoolean, isBool: isBoolean, isBooleans: isBooleans, isBools: isBooleans,
@@ -5369,7 +5380,7 @@
             var es = elem.getBoundingClientRect(),
                 bs = box.getBoundingClientRect();
 
-            $.console.log('es:', es, ', bs:', bs);
+            //$.console.log('es:', es, ', bs:', bs);
             return es.top >= bs.top && es.top + es.height <= bs.top + bs.height;
         },
         scrollTo = function (elem, pnode, offsetY, force) {
