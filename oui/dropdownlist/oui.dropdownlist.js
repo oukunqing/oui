@@ -217,6 +217,7 @@
 				opt.change = $.isBoolean($.getParam(opt, 'onchange,change'), true);
 
 				opt.showSearch = $.isBoolean($.getParam(opt, 'showSearch,showForm,showsearch,search'), false);
+				opt.clearSearch = $.isBoolean($.getParam(opt, 'clearSearch'), true);
 
 				if (opt.index < 0) {
 					opt.index = 0;
@@ -1148,6 +1149,18 @@
 
 				return this;
 			},
+			cancelSearch: function(ddl) {
+				var txt = ddl.box.querySelector('input.keywords'),
+					no = ddl.box.querySelector('a.btn-cancel');
+
+				txt.value = '';
+
+				$.setElemClass(no, 'hide', true);
+
+				Factory.setSearchCache(ddl, { search: false, key: '' }).showSearchPanel(ddl, false);
+
+				return this;
+			},
 			showSearchForm: function (ddl) {
 				var opt = ddl.options,
 					cfg = Factory.getSearchCache(ddl);
@@ -1238,13 +1251,15 @@
 						}
 						if (nid = $.getAttribute(elem, 'nid')) {
 							if (node = Factory.getNodeCache(ddl, nid)) {
-								Factory.setItemIdx(ddl, node.idx);
-								ddl.action(node, {click: true}).callback(ddl.options.callbackLevel);
-
-								//Factory.setSearchCache(ddl, { key: key, elem: txt, search: true, nodes: nodes });
-
-								if (ev.type === 'dblclick') {
-									Factory.showSearchPanel(ddl, false);
+								if (ddl.options.multi) {
+									node.set(true);
+									ddl.callback(ddl.options.callbackLevel);
+								} else {
+									Factory.setItemIdx(ddl, node.idx);
+									ddl.action(node, {click: true});
+								}
+								if (ddl.options.clearSearch) {
+									Factory.cancelSearch(ddl);
 								}
 							}
 						}
@@ -1302,13 +1317,31 @@
 			},
 			gotoCurrent: function (ddl) {
 				var opt = ddl.options,
-				con = ddl.con,
-				elem = opt.select ? ddl.elem : ddl.text,
-				idx = Factory.getItemIdx(elem),
-				node = ddl.nodes[idx - 1];
+					con = ddl.con,
+					elem = opt.select ? ddl.elem : ddl.text;
 
-				if (node) {
-					$.scrollTo(node.label, con);
+				if (opt.multi) {
+					var nodes = [], c = ddl.nodes.length, idx = ddl.gotoIdx || 0;
+					for (var i = 0; i < c; i++) {
+						if (ddl.nodes[i].checked) {
+							nodes.push(ddl.nodes[i]);
+						}
+					}
+					if (idx >= nodes.length) {
+						idx = 0;
+					}
+
+					if (nodes[idx]) {
+						$.scrollTo(nodes[idx].label, con);
+					}
+					ddl.gotoIdx = idx + 1;
+				} else {
+					var idx = Factory.getItemIdx(elem),
+						node = ddl.nodes[idx - 1];
+
+					if (node) {
+						$.scrollTo(node.label, con);
+					}
 				}
 				
 				return this;
@@ -1564,6 +1597,8 @@
 			display: false,
 			//是否显示搜索
 			showSearch: undefined,
+			//双击搜索项清除搜索
+			clearSearch: undefined,
 			//是否支持按钮快捷键功能
 			shortcutKey: true,
 			//是否显示按钮快捷键数字
