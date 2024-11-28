@@ -83,6 +83,8 @@
 			SearchResultBoxHeight: 390, 	//12 * 30 + 30
 			SearchResultItemHeight: 30,
 			SearchResultTitleHeight: 30,
+			//搜索触发条件，超过10个选项才搜索
+			SearchConditionCount: 10,
 			//搜索框字符长度限制
 			SearchKeywordsLength: 128,
 			// 隐藏但是需要占位
@@ -217,6 +219,7 @@
 				opt.change = $.isBoolean($.getParam(opt, 'onchange,change'), true);
 
 				opt.showSearch = $.isBoolean($.getParam(opt, 'showSearch,showForm,showsearch,search'), false);
+				opt.realSearch = $.isBoolean($.getParam(opt, 'realSearch'), false);
 				opt.clearSearch = $.isBoolean($.getParam(opt, 'clearSearch'), true);
 
 				if (opt.index < 0) {
@@ -1089,7 +1092,7 @@
 			buildSearch: function (ddl, box) {
 				var opt = ddl.options;
 
-				if (!opt.showSearch) {
+				if (!opt.showSearch || ddl.nodes.length <= Config.SearchConditionCount) {
 					return this;
 				}
 				var div = document.createElement('div'), first = box.childNodes[0];
@@ -1131,7 +1134,7 @@
 				});
 				$.addListener(txt, 'keyup', function(ev) {
 					var kc = $.getKeyCode(ev);
-					if (kc === KC.Enter) {
+					if (kc === KC.Enter || opt.realSearch) {
 						Factory.searchNodes(ddl, txt, this);
 					}
 				});
@@ -1149,7 +1152,7 @@
 
 				return this;
 			},
-			cancelSearch: function(ddl) {
+			clearSearch: function(ddl) {
 				var txt = ddl.box.querySelector('input.keywords'),
 					no = ddl.box.querySelector('a.btn-cancel');
 
@@ -1178,12 +1181,16 @@
 				return Factory.setPanelSize(ddl, null, true);
 			},
 			setPanelSize: function (ddl) {
-				if (!ddl.options.showSearch) {
+				if (!ddl.options.showSearch || !ddl.frm) {
 					return this;
 				}
-				var txt = ddl.frm.querySelector('.keywords');
-				txt.style.width = $.getOffset(ddl.frm).width - 10 + 'px';
-				txt.style.maxWidth = $.getOffset(ddl.frm).width - 10 + 'px';
+				var txt = ddl.frm.querySelector('.keywords'), w = 0;
+				if (txt) {
+					w = $.getOffset(ddl.frm).width - 10;
+					txt.style.width = w + 'px';
+					txt.style.minWidth = w + 'px';
+					txt.style.maxWidth = w + 'px';
+				}
 
 				return this;
 			},
@@ -1259,7 +1266,7 @@
 									ddl.action(node, {click: true});
 								}
 								if (ddl.options.clearSearch) {
-									Factory.cancelSearch(ddl);
+									Factory.clearSearch(ddl);
 								}
 							}
 						}
@@ -1302,8 +1309,9 @@
 				if (height > max) {
 					height = max;
 				}
-				if (height > boxHeight) {
-					height = boxHeight - 60;
+				//搜索框输入框高度30px，上边距5px
+				if (height >= boxHeight - 30 - 5) {
+					height = boxHeight - 30 - 5 - 30;
 				}
 
 				div.style.height = height + 'px';
@@ -1597,7 +1605,9 @@
 			display: false,
 			//是否显示搜索
 			showSearch: undefined,
-			//双击搜索项清除搜索
+			//实时搜索
+			realSearch: undefined,
+			//选中搜索项后清除搜索
 			clearSearch: undefined,
 			//是否支持按钮快捷键功能
 			shortcutKey: true,

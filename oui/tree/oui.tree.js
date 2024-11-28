@@ -790,6 +790,9 @@
 				opt.forceTitle = $.isBoolean($.getParam(opt, 'forceTitle,forcetitle'), false);
 
 				opt.showSearch = $.isBoolean($.getParam(opt, 'showSearch,showForm,showsearch'), opt.target ? true : false);
+				opt.realSearch = $.isBoolean($.getParam(opt, 'realSearch'), false);
+				opt.clearSearch = $.isBoolean($.getParam(opt, 'clearSearch'), false);
+
 				opt.searchFields = Factory.parseArrayParam($.getParam(opt, 'searchFields,searchField'));
 				opt.searchText = $.getParam(opt, 'searchText,searchtext');
 				opt.searchPrompt = $.getParam(opt, 'searchPrompt,searchPlaceholder');
@@ -1941,7 +1944,7 @@
 				});
 				$.addListener(txt, 'keyup', function(ev) {
 					var kc = $.getKeyCode(ev);
-					if (kc === KC.Enter) {
+					if (kc === KC.Enter || opt.realSearch) {
 						Factory.searchNodes(tree, txt, this);
 					}
 				});
@@ -1954,6 +1957,19 @@
 				});
 
 				Factory.setSearchCache(tree, { form: div, elem: txt, btn: btn, no: no });
+
+				return this;
+			},
+			clearSearch: function(tree) {
+				var txt = tree.box.querySelector('input.keywords'),
+					no = tree.box.querySelector('a.btn-cancel');
+
+				if (txt) {
+					txt.value = '';
+				}
+				$.setElemClass(no, 'hide', true);
+
+				Factory.setSearchCache(tree, { search: false, key: '' }).showSearchPanel(tree, false);
 
 				return this;
 			},
@@ -2175,6 +2191,9 @@
 								if (ev.type === 'dblclick') {
 									Factory.showSearchPanel(tree, false);
 								}
+								if (tree.options.clearSearch) {
+									Factory.clearSearch(tree);
+								}
 							}
 						}
 					});
@@ -2219,10 +2238,10 @@
 					panelHeight = tree.panel.offsetHeight,
 					display = $.isBoolean(show, div.style.display === 'none');
 
-				if (height > max) {
+				if (height >= max) {
 					height = max;
 				}
-				if (height > panelHeight) {
+				if (height >= panelHeight) {
 					height = panelHeight - 30;
 				}
 
@@ -4320,6 +4339,10 @@
 				forceTitle: undefined,
 				//是否显示搜索
 				showSearch: undefined,
+				//实时搜索
+				realSearch: undefined,
+				//选中搜索项后清除搜索
+				clearSearch: undefined,
 				//搜索的数据字段
 				searchFields: ['code'],
 				//搜索按钮文字显示，默认显示“查找”
