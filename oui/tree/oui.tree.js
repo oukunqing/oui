@@ -1944,7 +1944,7 @@
 				});
 				$.addListener(txt, 'keyup', function(ev) {
 					var kc = $.getKeyCode(ev);
-					if (kc === KC.Enter || opt.realSearch) {
+					if (kc === KC.Enter || opt.realSearch || txt.value.trim() === '') {
 						Factory.searchNodes(tree, txt, this);
 					}
 				});

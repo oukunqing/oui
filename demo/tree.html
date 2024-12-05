@@ -86,8 +86,11 @@
                 <label class="chb-label"><input type="checkbox" id="chbMove" /><span>显示移动</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbDragAble" /><span>允许拖动</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbDragMove" /><span>拖动迁移</span></label>
+                <label class="chb-label"><input type="checkbox" id="chbDragSize" /><span>拖动改变高度</span></label>
                 <div></div>
                 <label class="chb-label"><input type="checkbox" id="chbSearch" checked="checked" /><span>显示搜索</span></label>
+                <label class="chb-label"><input type="checkbox" id="chbRealSearch" /><span>实时搜索</span></label>
+                <label class="chb-label"><input type="checkbox" id="chbClearSearch" /><span>清除搜索</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbBottom" /><span>显示底部</span></label>
                 <select id="ddlBottomAlign" style="font-size:14px;">
                     <option value="left">左对齐</option>
@@ -96,7 +99,6 @@
                 </select>
                 <label class="chb-label"><input type="checkbox" id="chbDesc" checked="checked" /><span>显示备注</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbInfo" /><span>显示信息</span></label>
-                <label class="chb-label"><input type="checkbox" id="chbDragSize" /><span>拖动改变高度</span></label>
                 <div></div>
                 <label class="chb-label"><input type="checkbox" id="chbKeepStatus" /><span>保持状态</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbKeepCookie" /><span>保存COOKIE</span></label>
@@ -414,6 +416,8 @@
             bottomAlign = $('#ddlBottomAlign').val(),
             showMove = $('#chbMove').checked(),
             showSearch = $('#chbSearch').checked(),
+            realSearch = $('#chbRealSearch').checked(),
+            clearSearch = $('#chbClearSearch').checked(),
             showTitle = $('#chbTitle').checked(),
             showInfo = $('#chbInfo').checked(),
             moveAble = $('#chbMoveAble').checked(),
@@ -492,8 +496,8 @@
             showTitle: showTitle,
             showInfo: showInfo,
             showSearch: showSearch,
-            clearSearch: true,
-            realSearch: true,
+            clearSearch: clearSearch,
+            realSearch: realSearch,
             /*searchCallback: function (tree, keywords, resolve) {
                 var nodes = [], j = 0;
                 for (var k in tree.cache.nodes) {
