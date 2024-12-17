@@ -184,14 +184,14 @@
 }
 
 .oui-tabs .tab-item .tab-icon {
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
     float: left;
     display: inline-block;
     border: none;
     overflow: hidden;
     box-sizing: border-box;
-    margin:4px 8px 0 0;
+    margin: 3px 7px 0 0;
     padding: 0;
     background-size:cover;
 }
