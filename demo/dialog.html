@@ -808,7 +808,7 @@ function tips(){
             'tooltip': {
                 'background': '#f00',
                 //'border': 'solid 1px #00f',
-                'color': '#ff0000',
+                'color': '#f1f1f1',
                 'border-color': '#f00'
             }
         },
@@ -823,16 +823,15 @@ function tips(){
 
     window.setTimeout(function() {
         var html = 'tips: 请注意：提示信息已经更新。<br />大家好啊'
-        + '<img style="width:240px;" src="http://122.227.179.90:81/skin/default/images/home/welcome.jpg" />'
-        + '<img style="width:100px;" src="http://122.227.179.90:81/skin/default/images/home/welcome.jpg" />';
+        + '<img style="width:240px;" src="http://112.54.97.178:81/skin/imgs/com/welcome.jpg" />'
+        + '<img style="width:100px;" src="http://112.54.97.178:81/skin/imgs/com/welcome.jpg" />';
         win//.options('styles', null)
             .update(html, {
                 //position: 'rightTop',
 				position: 'leftbottom',
                 styles: null
             })
-    },3000);
-    
+    }, 3000);    
     
     window.setTimeout(function() {
         win.update('tips: 请注意：提示信息已经再次更新。', {
@@ -840,11 +839,12 @@ function tips(){
             styles: {
                 'tooltip': {
                     'background': '#00f',
-                    'border-color': '#00f'
+                    'border-color': '#00f',
+                    'color': '#f1f1f1'
                 }
             }
         })
-    },5000);
+    }, 5000);
 
     window.setTimeout(function() {
         win.update('tips: 请注意：提示信息更新。', { 

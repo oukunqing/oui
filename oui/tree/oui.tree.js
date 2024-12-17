@@ -3933,7 +3933,7 @@
 				style = [];
 
 			if (that.icon.path) {
-				style = ['background:url(\'', that.icon.path, '\') no-repeat center;'];
+				style = ['background:url(\'', that.icon.path, '\') no-repeat center;background-size:cover;'];
 			}
 
 			return style.join('');
