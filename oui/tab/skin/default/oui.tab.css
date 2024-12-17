@@ -183,10 +183,23 @@
     margin: 0;
 }
 
+.oui-tabs .tab-item .tab-icon {
+    width: 18px;
+    height: 18px;
+    float: left;
+    display: inline-block;
+    border: none;
+    overflow: hidden;
+    box-sizing: border-box;
+    margin:4px 8px 0 0;
+    padding: 0;
+    background-size:cover;
+}
+
 .oui-tabs .tab-item .tab-txt {
     cursor: pointer;
     text-decoration: none;
-    display: block;
+    display: inline-block;
     float: left;
     padding: 0 10px;
     margin: 0;
@@ -199,6 +212,10 @@
     white-space: nowrap;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
+}
+
+.oui-tabs .tab-item .tab-txt-icon {
+    padding:0 10px 0 5px;
 }
 
 .oui-tabs .cur .tab-txt {

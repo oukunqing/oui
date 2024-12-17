@@ -209,10 +209,17 @@
                     closeStyle = 'margin-top:' + parseInt((lineHeight - Config.ItemCloseHeight) / 2, 10) + 'px;';
                     txtStyle += ';line-height:' + lineHeight + 'px;';
                 }
-                var con = '<a class="tab-txt" href="javascript:void(0);" style="{1}">{name}</a>';
-                if(opt.closeAble && !isElem) {
-                    con += '<i class="tab-close" title="{2}" style="{3}">×</i>';
-                }
+                var has_icon = opt.icon && opt.icon.path ? true : false;
+                var con = [
+                    '<a class="tab-txt', has_icon ? ' tab-txt-icon' : '', '" href="javascript:void(0);" style="{1}">', 
+                    has_icon ? [
+                        '<span class="tab-icon" style="background:url(\'', opt.icon.path, '\') no-repeat center;',
+                        'background-size:cover;"></span>'
+                    ].join('') : '',
+                    '{name}</a>',
+                    opt.closeAble && !isElem ? '<i class="tab-close" title="{2}" style="{3}">×</i>' : ''
+                ].join('');
+
                 closeTitle = Util.getLangText('closetab', opt.lang);
                 elem.innerHTML = con.format(opt, txtStyle, closeTitle, closeStyle);
                 
