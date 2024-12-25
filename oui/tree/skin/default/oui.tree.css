@@ -125,6 +125,9 @@
 .oui-tree li .item .icon-page{background:transparent url("imgs/tree.png?1") no-repeat -50px 0;}
 .oui-tree li .item .icon-none{background:none;}
 
+.oui-tree li .item .icon-gray{filter: gray;filter: grayscale(100%);}
+.oui-tree li .item:hover .icon-gray{filter:unset;}
+
 .oui-tree li .item .text{text-align:left;}
 
 .oui-tree li .item .desc{color:#999;}

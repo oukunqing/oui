@@ -3164,6 +3164,12 @@
 				if ($.isFunction(tree.options.callback)) {
 					Factory.debounceCallback(tree.options.callback, node, tree, ev, nodes);
 				}
+
+				var icon = node.items['icon'];
+				if (icon && icon.className.indexOf('icon-gray') > -1) {
+					$.removeClass(icon, 'icon-gray');
+				}
+
 				return this;
 			},
 			restore: function (par, tree) {
@@ -3944,12 +3950,15 @@
 				icon.className = that.getIconClass();
 				if (style = that.getIconStyle()) {
 					icon.style.cssText = style;
+					if (that.icon.gray) {
+						$.addClass(icon, 'icon-gray');
+					}
 				}
 			}
 			return that;
 		},
 		setIcon: function (par) {
-			var that = this.self();			
+			var that = this.self();
 			that.icon = $.extend(that.icon, par);
 			return that;
 		},

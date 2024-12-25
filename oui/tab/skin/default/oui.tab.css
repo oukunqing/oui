@@ -234,6 +234,10 @@
     filter: grayscale(100%);
 }
 
+.oui-tabs li.pre:hover .tab-txt-icon {
+    filter: unset;
+}
+
 .oui-tabs li.cur .tab-txt {
     /*color: #333;*/
     color: #000;
