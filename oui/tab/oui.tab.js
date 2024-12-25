@@ -312,6 +312,8 @@
                     iframe.itemId = itemId;
                     if(opt.load) {
                         Util.loadPage(t, iframe, Util.buildPageUrl(opt.url, itemId));
+                    } else {
+                        $.addClass(tab, 'pre');
                     }
                 }
 
@@ -1169,6 +1171,7 @@
                 */
                 if(cur.iframe) {
                     Util.loadPage(that, cur.iframe, cur.opt.url, reload);
+                    $.removeClass(cur.tab, 'pre');
                 }
                 Factory.setCur(that, cur, true);
                 Util.setTabPosition(that, cur.tab);

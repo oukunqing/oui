@@ -196,7 +196,13 @@
     background-size:cover;
 }
 
-.oui-tabs .tab-item .tab-txt {
+
+.oui-tabs .tab-item:hover .tab-txt,.oui-tabs .cur .tab-txt,
+.oui-tabs .cur .tab-close,.oui-tabs .tab-item:hover .tab-close {
+    color: #333;
+}
+
+.oui-tabs li.tab-item .tab-txt {
     cursor: pointer;
     text-decoration: none;
     display: inline-block;
@@ -207,6 +213,7 @@
     box-sizing: border-box;
     color: #333;
     font-family: Arial,'Courier New',宋体,微软雅黑;
+    font-weight: normal;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -218,11 +225,18 @@
     padding:0 10px 0 5px;
 }
 
-.oui-tabs .cur .tab-txt {
-    color: #333;
-    font-family: Arial,'Courier New',宋体,微软雅黑;
-    font-weight: bold;
-    font-weight: normal;
+.oui-tabs li.pre .tab-txt {
+    color: #555;
+}
+
+.oui-tabs li.pre .tab-txt-icon {
+    filter: gray;
+    filter: grayscale(100%);
+}
+
+.oui-tabs li.cur .tab-txt {
+    /*color: #333;*/
+    color: #000;
 }
 
 .oui-tabs .tab-item .tab-close {
@@ -241,11 +255,6 @@
     box-sizing: border-box;
     overflow: hidden;
     cursor: default;
-}
-
-.oui-tabs .tab-item:hover .tab-txt,.oui-tabs .cur .tab-txt,
-.oui-tabs .cur .tab-close,.oui-tabs .tab-item:hover .tab-close {
-    color: #333;
 }
 
 .oui-tabs .tab-item .tab-close:hover {
