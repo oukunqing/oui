@@ -187,30 +187,48 @@
 				}, 30);
 				return this;
 			},
-			buttonClick: function (ev, tree) {
-				var opt = tree.options,
+			buttonClick: function (ev, tree, buttons) {
+				var that = this, custom = false,
+					opt = tree.options,
 					tag = ev.target.tagName.toLowerCase(),
-					css = ev.target.className.split(' ');
+					css = ev.target.className.split(' '),
+					key = css[1] ? css[1].split('-')[1] : '';
 
 				if (css[0] !== 'btn') {
 					return false;
 				}
-
-				switch(css[1]) {
-				case 'btn-return':
-					Factory.callback(null, tree, ev);
-					break;
-				case 'btn-cancel':
-					//Factory.setBoxDisplay(tree, false);
-					break;
-				case 'btn-origin':
-					Factory.setDefaultValue(tree, true);
-					break;
+				if ($.isArray(buttons) && buttons.length > 0) {
+					for (var i = 0; i < buttons.length; i++) {
+						if (buttons[i].key === key && $.isFunction(buttons[i].func)) {
+							buttons[i].func(tree);
+							custom = true;
+							break;
+						}
+					}
+				}
+				if (!custom) {
+					switch(key.toLowerCase()) {
+					case 'ok':
+					case 'yes':
+						Factory.callback(null, tree, ev);
+						break;
+					case 'cancel':
+					case 'close':
+					case 'no':
+						//Factory.setBoxDisplay(tree, false);
+						Factory.closeCallback(tree);
+						break;
+					case 'origin':
+					case 'default':
+					case 'restore':
+						Factory.setDefaultValue(tree, true);
+						break;
+					}
 				}
 				if (opt.target) {
 					Factory.setBoxDisplay(tree, false);
 				}
-				return this;
+				return that;
 			},
 			scroll: function (ev, tree) {
 				var key = 'tree_scroll_' + tree.id,
@@ -748,6 +766,7 @@
 					types = $.isString(types, true) ? types.split(/[,;|]/) : [types];
 					opt.buttonConfig.types = types;
 				}
+				opt.bottomConfig = $.extend({names:[], count: 3, buttons:[]}, opt.bottomConfig);
 
 				opt.boxWidth = $.getParam(opt, 'boxWidth');
 				if (opt.target && (!$.isNumber(opt.boxWidth) || opt.boxWidth < 100)) {
@@ -893,6 +912,7 @@
 				opt.complete = $.getParam(opt, 'completeCallback,oncomplete,complete');
 				opt.callback = $.getParam(opt, 'callback');
 				opt.restore = $.getParam(opt, 'restore');
+				opt.closeCallback = $.getParam(opt, 'closeCallback,oncancel,onclose');
 				opt.clickCallback = $.getParam(opt, 'clickCallback,onclick');
 				opt.expandCallback = $.getParam(opt, 'expandCallback,onexpand');
 				opt.expandForceCallback = $.getParam(opt, 'expandForceCallback,onexpandForce');
@@ -1674,7 +1694,7 @@
 						height: boxHeight || opt.boxHeight || Config.TreeBoxDefaultHeight
 					};
 
-					console.log('es:', es);
+				//console.log('es:', es);
 
 				if (p.height > bs.height) {
 					p.height = bs.height - 6;
@@ -1994,20 +2014,40 @@
 				if (!opt.showBottom) {
 					return this;
 				}
-				var div = document.createElement('div');
+				var cfg = opt.bottomConfig,
+					buttons = cfg.buttons,
+					count = cfg.count,
+					i = 0;
+
+				var div = document.createElement('div'), html = [];
 				div.className = 'bottom oui-tree-bottom';
 				div.style.cssText = ['text-align:', opt.bottomAlign, ';'].join('');
 
-				div.innerHTML = [
-					'<a class="btn btn-return btn-primary">\u786e\u5b9a</a>',	//确定
-					'<a class="btn btn-cancel">\u53d6\u6d88</a>',				//取消
-					'<a class="btn btn-origin">\u8fd8\u539f</a>'				//还原
-				].join('');
+				if ($.isArray(buttons) && buttons.length > 0) {
+					for (i = 0; i < buttons.length; i++) {
+						var dr = buttons[i];
+						html.push('<a class="btn btn-{key|}{1}">{name|}</a>'.format(dr, dr.primary ? ' btn-primary' : ''));
+					}
+				} else {
+					//确定，取消，还原
+					var names = ['\u786e\u5b9a', '\u53d6\u6d88', '\u8fd8\u539f'];
+					if ($.isArray(cfg.names) && cfg.names.length > 0) {
+						for (i = 0; i < cfg.names.length; i++) {
+							names[i] = cfg.names[i];
+						}
+					}
+					html = [
+						count > 0 ? '<a class="btn btn-ok btn-primary">' + names[0] + '</a>' : '',	//确定
+						count > 1 ? '<a class="btn btn-cancel">' + names[1] + '</a>' : '',			//取消
+						count > 2 ? '<a class="btn btn-origin">' + names[2] + '</a>' : ''			//还原
+					].join('');
+				}
 
+				div.innerHTML = html.join('');
 				box.appendChild(tree.bottom = div);
 
 				$.addListener(div, 'click', function (ev) {
-					Event.buttonClick(ev, tree);
+					Event.buttonClick(ev, tree, buttons);
 				});
 
 				return this;
@@ -3165,11 +3205,20 @@
 					Factory.debounceCallback(tree.options.callback, node, tree, ev, nodes);
 				}
 
-				var icon = node.items['icon'];
-				if (icon && icon.className.indexOf('icon-gray') > -1) {
-					$.removeClass(icon, 'icon-gray');
+				if (node) {
+					//这里的node.items['icon'] 是树节点的icon DOM元素
+					//这里的node.icon 是树节点的icon参数配置
+					var icon = node.items['icon'];
+					if (icon && node.icon.gray && icon.className.indexOf('icon-gray') > -1) {
+						$.removeClass(icon, 'icon-gray');
+					}
 				}
-
+				return this;
+			},
+			closeCallback: function (tree) {
+				if ($.isFunction(tree.options.closeCallback)) {
+					tree.options.closeCallback(tree);
+				}
 				return this;
 			},
 			restore: function (par, tree) {
