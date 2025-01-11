@@ -16,7 +16,15 @@ button {width:120px;height:30px;}
         <table cellpadding="5">
             <tr>
                 <td></td>
-                <td><input type="text" id="fmt_test" placeholder="不限制" /></td>
+                <td><input type="password" data="passwordtype" id="fmt_test" placeholder="不限制" /></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><input type="text" id="fmt_del" placeholder="请输入关键字" /></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><input type="password" id="fmt_pwd" data="passwordtype" placeholder="请输入密码" autocomplete="off" /></td>
             </tr>
             <tr>
                 <td></td>
@@ -165,10 +173,29 @@ button {width:120px;height:30px;}
             maxVal: 65535
         });
 
+        $.setInputFormat('fmt_del', {
+            //types: 'none',
+            types: false,
+            icon: { del: function(elem) {
+                $.console.log('icon-del:', elem)
+            }}
+        });
+
+        $.setInputFormat('fmt_pwd', {
+            //types: 'none',
+            types: false,
+            icon: { pwd: function(elem) {
+                $.console.log('icon-pwd:', elem)
+            }}
+        });
+
         $.setInputFormat('fmt_num_15', {
             types: ['number'],
             //内容长度固定为15个字节
-            valLen: 15
+            valLen: 15,
+            icon: { del: function(elem) {
+                $.console.log('icon-del:', elem)
+            }}
         });
 
         $.setInputFormat('fmt_num_max', {

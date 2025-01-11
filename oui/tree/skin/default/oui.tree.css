@@ -647,7 +647,8 @@
 .oui-tree-form .btn:hover {
 	text-decoration: none;
 }
-.oui-tree-form .btn:focus {
+.oui-tree-form .btn:focus,
+.oui-tree-form .btn:active {
 	outline: none;
 	background-color:transparent;
 	border: none;
@@ -656,10 +657,13 @@
 .oui-tree-form .btn-search {
 	right: 7px;
 	background:transparent url("imgs/tree.png?1") no-repeat -275px -150px;
+	outline: none;
 }
 .oui-tree-form .btn-search:hover {
 	background-position-y: -175px;
+	background-color: transparent;
 }
+
 .oui-tree-form .btn-cancel {
 	right: 32px;
 	opacity: 0.9;

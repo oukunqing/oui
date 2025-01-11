@@ -1228,7 +1228,7 @@
                 }, idx = list.length, i;
 
                 o.p.index = o.p.index || 0;
-                
+
                 if (o.d.ptype) {
                     _find(o, true, false, false) || _find(o, true, true, false) || _each(list, o, true);
                 } else {
@@ -1264,7 +1264,7 @@
             }
             return data;
         };
-        
+
     var counter = 1, debug = isBoolean(isDebug(), true);
     $.extendNative = $.fn.extendNative = function (destination, source, constructor) {
         if (arguments.length < 2) {
@@ -2454,7 +2454,7 @@
         },
         getExtension: function () {
             return $.getExtension(this);
-        },        
+        },
         isImageFile: function () {
             var s = this,
                 regExt = /^[.](jpg|jpeg|png|gif|bmp)$/i,
@@ -2925,7 +2925,7 @@
                 decimalLen = 2;
             }
 
-            var kb = 1024, num = this,            
+            var kb = 1024, num = this,
                 units = ['字节', 'KB', 'MB', 'GB'],
                 c = units.length, i = 0;
 
@@ -3316,7 +3316,7 @@
                 k += pos0;
                 pushSeparateItem(arr, pr);
 
-                pos1 = ns.indexOf(']');                
+                pos1 = ns.indexOf(']');
                 if (pos1 < 0) {
                     pushSeparateItem(arr, {type: 0, list: ns.split(''), loop: 0 });
                     break;
@@ -4870,7 +4870,7 @@
             return false;
         },
         setClassValue = function (cur, css, action) {
-            var arr = cur.trim().split(' '), p;            
+            var arr = cur.trim().split(' '), p;
             if (action === true || action === 1 || 'add' === action) {
                 if (arr.indexOf(css) < 0) {
                     arr.push(css);
@@ -4938,6 +4938,13 @@
         },
         toggleClass = function (elem, value) {
             return setClass(elem, value, 'toggle'), this;
+        },
+        replaceClass = function (elem, oldCss, newCss) {
+            var arr = elem.className.split(' '), len = arr.length, list = [];
+            for (var i = 0; i < len; i++) {
+                list.push(arr[i] === oldCss ? newCss : arr[i]);
+            }
+            return elem.className = list.join(' '), this;
         },
         appendChild = function (parent, elem, isRemove) {
             if ($.isElement(parent) || $.isDocument(parent)) {
@@ -5233,7 +5240,7 @@
                         if (!$.isBody(e.target)) {
                             return false;
                         }
-                    }                
+                    }
                     if (typeof keyCode === 'number' && e.keyCode === keyCode) {
                         pass = true;
                     } else if (typeof keyCode === 'string' && keyCode.toUpperCase().indexOf(e.key.toUpperCase()) > -1) {
@@ -6307,6 +6314,7 @@
         addClass: addClass,
         removeClass: removeClass,
         toggleClass: toggleClass,
+        replaceClass: replaceClass,
         getClass: getClass,
         hasClass: hasClass,
         appendChild: appendChild,

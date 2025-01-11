@@ -35,6 +35,7 @@
         DEFAULT_VALUE: 'data-value,data-val,data-default,data-def,default-value,defaultvalue,dv',
         OPPTION_VALUE: 'data-options,data-option,option-value,values,options,opt-val'
     };
+
     var isElement = function (element) {
         return element !== null && typeof element === 'object' && typeof element.nodeType === 'number';
     },
@@ -1170,6 +1171,20 @@
             }
         }
         return null;
+    },
+    formEnter = function (elements, func) {
+        var elems = $.isArray(elements) ? elements : $.isString(elements) ? elements.split(/[,\|;]/) : [elements],
+            len = elems.length;
+        for (var i = 0; i < len; i++) {
+            var elem = $.toElement(elems[i]);
+            $.addListener(elem, 'keyup', function(ev) {
+                var keyCode = $.getKeyCode(ev);
+                if (keyCode === $.KEY_CODE.Enter && $.isFunction(func)) {
+                    func();
+                }
+            });
+        }
+        return this;
     };
 
     $.extend({
@@ -1184,6 +1199,7 @@
             setTableData: setTableData,
             filterData: filterData,
             findElement: findElement,
+            formEnter: formEnter,
             validate: function (element) {
                 var elems = $.isArray(element) ? element : [element];
                 for (var i = 0; i < elems.length; i++) {
@@ -1433,6 +1449,34 @@
         KCA = KC.Arrow,
         KCC = KC.Char,
         CloseLinkageClassName = 'oui-popup-panel';
+
+    var FilePath = $.getScriptSelfPath(true),
+        FileDir = FilePath.substr(0, FilePath.lastIndexOf('/') + 1);
+
+    var IconCss = [
+        '<style style="text/css">',
+        '.oui-form-txt-icon{cursor:pointer;position:absolute;border:none;overflow:hidden;',
+        'box-sizing:border-box;text-align:center;font-size:28px;font-family:Arial;font-weight:normal;',
+        'width:30px;height:30px;color:#999;margin:0;padding:0;',
+        'background:url("',FileDir,'form-icon.png") no-repeat 0 0;}',
+        '.oui-form-txt-icon:hover{color:#000;background-position-y:-30px;}',
+
+        '.oui-form-icon-del{background-position:0 0;}',
+        '.oui-form-icon-del:hover{background-position:0 -30px;}',
+
+        '.oui-form-icon-pwd{background-position:-30px 0;}',
+        '.oui-form-icon-pwd:hover{background-position:-30px -30px;}',
+        '.oui-form-icon-txt{background-position:-60px 0;}',
+        '.oui-form-icon-txt:hover{background-position:-60px -30px;}',
+
+        '.oui-form-icon-query{background-position:-90px 0;}',
+        '.oui-form-icon-query:hover{background-position:-90px -30px;}',
+
+        'input[type="password"]::-webkit-credentials-cramble-button{appearance: none;}',
+        'input[type="password"]::-ms-reveal{display: none;}',
+        'input[type="password"]::-ms-clear{display: none;}',
+        '</style>'
+    ].join('');
 
     // $.input
     $.extend($, {
@@ -2060,11 +2104,124 @@
 
                 return opt;
             },
+            buildIcon: function (elem, opt) {
+                var icons = $.extend({}, opt.icon), idx = 0;
+
+                if (!elem.icons) {
+                    elem.icons = {};
+                }
+
+                if (document.getElementById('oui_form_icon_style_001') === null) {
+                    var css = document.createElement('div');
+                    css.id = 'oui_form_icon_style_001';
+                    css.style.cssText = 'position:absolute;left:-3000px;top:-3000px;display:none;';
+                    css.innerHTML = IconCss;
+                    document.body.appendChild(css);
+                }
+
+                function _build(key, icon) {
+                    elem.icons[key] = {
+                        icon: icon,
+                        show: true
+                    };
+                }
+
+                function _listen(elem) {
+                    $.addListener(window, 'resize', function(ev) {
+                        $.input.setIcon(ev, elem);
+                    });
+                    $.addListener(elem, 'mouseover', function(ev) {
+                        $.input.setIcon(ev, elem);
+                    });
+                }
+
+                function _create(elem, key, func, idx) {
+                    $.createElement('A', '', function(el) {
+                        var ps = $.getOffset(elem), h = (ps.height > 30 ? 30 : ps.height) - 1,
+                            zIndex = parseInt('0' + $.getElementStyle(elem, 'z-index'), 10) + 1;
+
+                        el.key = key;
+                        el.className = 'oui-form-txt-icon oui-form-icon-' + key;
+                        el.style.cssText = [
+                            'position:absolute;background-color:transparent;height:',h, 'px;line-height:', h, 'px;',
+                            'z-index:', zIndex, ';'
+                        ].join('');
+
+                        _build(key, el);
+                        _listen(elem);
+
+                        $.input.showIcon(elem, key, idx);
+
+                        $.addListener(el, 'click', function(ev) {
+                            if (['del', 'query'].indexOf(key) > -1) {
+                                if (el.key === 'del') {
+                                    el.style.display = 'none';
+                                    elem.value = '';
+                                }
+                                if ($.isFunction(func)) {
+                                    func(elem);
+                                }
+                            } else if ('pwd' === key) {
+                                if (el.className.indexOf('oui-form-icon-pwd') > -1) {
+                                    $.replaceClass(el, 'oui-form-icon-pwd', 'oui-form-icon-txt');
+                                    elem.type = 'text';
+                                } else {
+                                    $.replaceClass(el, 'oui-form-icon-txt', 'oui-form-icon-pwd');
+                                    elem.type = 'password';
+                                }
+                            }
+                            elem.focus();
+                        });
+                    }, document.body);
+                }
+
+                for (var k in icons) {
+                    if (k === 'del') {
+                        _create(elem, k, icons[k], idx++);
+                    } else if (k === 'pwd') {
+                        _create(elem, k, icons[k], idx++);
+                    } else if (k === 'query') {
+                        _create(elem, k, icons[k], idx++);
+                    }
+                }
+                return this;
+            },
+            showIcon: function (elem, key, idx) {
+                var d = elem.icons[key];
+                if (!d) {
+                    return this;
+                }
+                var show = true;
+                if (key === 'del' ) {
+                    var val = elem.value.trim();
+                    show = val.length > 0;
+                    d.icon.style.display = show ? '' : 'none';
+                    d.show = show;
+                }
+                if (!show) {
+                    return this;
+                }
+                var ps = $.getOffset(elem),
+                    top = ps.top - (30 - ps.height) + 1, 
+                    left = ps.left + ps.width - 30 - 1;
+                    
+                d.icon.style.top = top + 'px';
+                d.icon.style.left = left + 'px';
+
+                return this;
+            },
+            setIcon: function (ev, elem) {
+                var val = elem.value.trim(), len = val.length, idx = 0;
+                for (var k in elem.icons) {
+                    $.input.showIcon(elem, k, idx++);
+                }
+                return this;
+            },
             // 设置输入框内容格式
             // 需要设置输入格式的文本框，默认情况下是不允许空格和特殊字符的
             setFormat: function (elements, options) {
                 var elems = [], element, keyTypes = [
-                    'open', //open 表示不限制输入，但需要验证选项等特殊格式
+                    'open', 'none', //open | none 表示不限制输入，但需要验证选项等特殊格式
                     'char', 'number', 'char_number', 'word', 'int', 'long', 'float', 'double', 'bool', 'control', 'symbol', 
                     'option', 'ipv4', 'ipv6', 'port', 'hex', 'md5', 'angle', 'at'
                 ];
@@ -2106,7 +2263,8 @@
                         change: false,          //是否触发change事件
                         empty: null,            //允许空值
                         placeholder: null,      //提示信息
-                        config: {}              //配置项，用于options选项框
+                        config: {},             //配置项，用于options选项框
+                        icon: {}                //图标项，用于功能联动，如：删除、显示/隐藏、查询等
                     }, par),
                     MAX_HEIGHT = 364,
                     ZINDEX = 999999999,
@@ -2205,8 +2363,9 @@
                 if ($.isNumber(opt.config.width) && opt.config.width && opt.config.width < 50) {
                     opt.config.width = 50;
                 }
-
-                if ($.isString(opt.types, true)) {
+                if ($.isBoolean(opt.types) && !opt.types) {
+                    opt.types = ['none'];
+                } else if ($.isString(opt.types, true)) {
                     opt.types = opt.types.split(/[,\|]/);
                 }
                 if ((!$.isArray(opt.types) || opt.types.length <= 0) && $.isString(opt.type, true)) {
@@ -2268,28 +2427,28 @@
                         isOpt = true;
                         continue;
                     }
-                    if (type.inArray(['open', 'number', 'char_number', 'int', 'float', 'word', 'ipv4', 'ipv6', 'port', 'hex', 'md5', 'angle', 'at'])) {
+                    if (type.inArray(['open', 'none', 'number', 'char_number', 'int', 'float', 'word', 'ipv4', 'ipv6', 'port', 'hex', 'md5', 'angle', 'at'])) {
                         keys = keys.concat(KC.NumList);       // 0-9键
                         keys = keys.concat(KC.Min.NumList); // 0-9键（小键盘）
                         if (type.inArray(['number', 'int', 'float', 'angle'])) {
                             isNum = true;
                         }
-                        if (!type.inArray(['open', 'ipv6', 'word', 'at'])) {
+                        if (!type.inArray(['open', 'none', 'ipv6', 'word', 'at'])) {
                             opt.shift = false;
                         }
                     }
-                    if (type.inArray(['open', 'control', 'at'])) {
+                    if (type.inArray(['open', 'none', 'control', 'at'])) {
                         // ;: =+ ,< -_ .> /? `~
                         keys = keys.concat([opt.space ? KC.Space : 0, 186, 187, 188, 189, 190, 191, 192]);
                         // [{ \| ]} '"
                         keys = keys.concat([219, 220, 221, 222]);
                     }
-                    if (type.inArray(['open', 'symbol'])) {
+                    if (type.inArray(['open', 'none', 'symbol'])) {
                         // * + - . / (小键盘)  * + - . / (主键盘)
                         keys = keys.concat([106, 107, 109, 110, 111, 56, 187, 189, 190, 191]);
                     }
 
-                    if (type.inArray(['open', 'char', 'char_number', 'word', 'at'])) {
+                    if (type.inArray(['open', 'none', 'char', 'char_number', 'word', 'at'])) {
                         for (j = KCC.A; j <= KCC.Z; j++) { keys.push(j); } // A-Z 键
                     } else if (type.inArray(['hex', 'ipv6', 'md5'])) {
                         for (j = KCC.A; j <= KCC.F; j++) { keys.push(j); } // A-F 键
@@ -2378,6 +2537,8 @@
                         if ($.isNumber(opt.config.width) && opt.config.width) {
                             elem.style.width = opt.config.width + 'px';
                         }
+                    } else {
+                        $.input.buildIcon(elem, opt);
                     }
 
                     if (isOpt || isBool) {
@@ -2442,6 +2603,11 @@
                         //这里为什么不用$.addListener？
                         //因为这里需要阻止非法输入，而$.addListener不是独占式的
                         elem.onkeydown = function(ev) {
+                            if (opt.types[0] === 'none') {
+                                //设置功能图标
+                                $.input.setIcon(ev, elem, opt);
+                                return true;
+                            }
                             var kc = $.getKeyCode(ev), 
                                 ddl = this.tagName === 'SELECT', 
                                 typed = $.getAttribute(this, 'opt-typed', '0').toInt(),
@@ -2514,6 +2680,9 @@
                                 if ($.getSelectedText(this)) {
                                     return true;
                                 }
+                                //设置功能图标
+                                $.input.setIcon(ev, elem, opt);
+
                                 var pos = $.getTextCursorPosition(this),
                                     key = ev.key,
                                     txt = this.value.trim(),
@@ -2546,6 +2715,11 @@
 
                         if (!isSelect) {
                             $.addListener(elem, 'keyup', function(ev) {
+                                if (opt.types[0] === 'none') {
+                                    //设置功能图标
+                                    $.input.setIcon(ev, elem, opt);
+                                    return true;
+                                }
                                 var kc = $.getKeyCode(ev),
                                     val = this.value.trim(),
                                     ps = $.input.getOptionValues(opt.options),
@@ -2559,6 +2733,9 @@
                                     $.setAttribute(this, 'opt-typed', $.input.isInputTyped(ps, ctl.val) ? 1 : 0);
                                     return false;
                                 }
+                                //设置功能图标
+                                $.input.setIcon(ev, elem, opt);
+
                                 val = ctl.val;
 
                                 if(!$.input.checkFormat(this, $.extend([], opt.options), false, opt.config.editable)) {
@@ -2636,9 +2813,17 @@
 
                         //控制输入，当输入值不匹配时，输入框禁止输入
                         elem.onkeydown = function(ev) {
+                            if (opt.types[0] === 'none') {
+                                //设置功能图标
+                                $.input.setIcon(ev, elem, opt);
+                                return true;
+                            }
                             if (opt.change) {
                                 $.trigger(elem, 'change');
                             }
+                            //设置功能图标
+                            $.input.setIcon(ev, elem, opt);
+
                             var kc = $.getKeyCode(ev), selected = $.getSelectedText(this) ? true : false;
                             if ($.input.checkKey(ev, ctls, excepts, opt) || $.input.checkKey(ev, funs, excepts, opt)) {
                                 return true;
@@ -2676,6 +2861,11 @@
                             return false;
                         };
                         $.addListener(elem, 'keyup', function(ev) {
+                            if (opt.types[0] === 'none') {
+                                //设置功能图标
+                                $.input.setIcon(ev, elem, opt);
+                                return true;
+                            }
                             var kc = $.getKeyCode(ev), val = this.value.trim(), ctl;
                             if ((ctl = $.input.replaceValue(ev, this, val, isCnAble, converts, $.input.getOptionValues(opt.options))).replace) {
                                 return false;
@@ -2683,6 +2873,9 @@
                             if (opt.change) {
                                 $.trigger(elem, 'change');
                             }
+                            //设置功能图标
+                            $.input.setIcon(ev, elem, opt);
+
                             val = ctl.val;
                             if (isVal) {
                                 if(!$.input.checkFormat(this, patterns, true, opt.config.editable)) {
@@ -2696,6 +2889,9 @@
                             return $.input.setWarnColor(elem, true);
                         });
                         $.addListener(elem, 'blur', function(ev) {
+                            if (opt.types[0] === 'none') {
+                                return true;
+                            }
                             if (opt.change) {
                                 $.trigger(elem, 'change');
                             }
@@ -2719,11 +2915,18 @@
                                 return false;
                             };
                         } else {
-                            elem.onpaste = function() {
+                            elem.onpaste = function(ev) {
+                                if (opt.types[0] === 'none') {
+                                    //设置功能图标
+                                    $.input.setIcon(ev, elem, opt);
+                                    return true;
+                                }
                                 //如果输入框的内容已经超出长度限制，则不能再粘贴内容
                                 if (!$.input.checkValLen(this.value.trim(), opt, true, false, this)) {
                                     return $.input.setWarnColor(this, false);
                                 }
+                                //设置功能图标
+                                $.input.setIcon(ev, elem, opt);
                             };
                         }
 
