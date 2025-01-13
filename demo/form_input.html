@@ -36,7 +36,11 @@ button {width:120px;height:30px;}
             </tr>
             <tr>
                 <td></td>
-                <td><input type="password" id="fmt_pwd" data="passwordtype" placeholder="请输入密码" autocomplete="off" /></td>
+                <td><input type="password" id="fmt_pwd" placeholder="请输入密码" autocomplete="off" /></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><input type="text" id="fmt_txt" placeholder="请输入密码" autocomplete="off" /></td>
             </tr>
             <tr>
                 <td></td>
@@ -205,12 +209,10 @@ button {width:120px;height:30px;}
             },*/ del: true
         });
 
-        $.setInputFormat('fmt_pwd', {
-            //types: 'none',
-            types: false,
-            icon: { pwd: function(elem) {
-                $.console.log('icon-pwd:', elem)
-            }}
+        $.setInputIcon('fmt_pwd', 'pwd');
+
+        $.setInputIcon('fmt_txt', {
+            txt: true
         });
 
         $.setInputFormat('fmt_num_15', {

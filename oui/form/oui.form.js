@@ -2145,7 +2145,7 @@
 
                 return opt;
             },
-            buildIcon: function (elem, opt) {
+            buildIcon: function (elem, opt, parent) {
                 var icons = $.extend({}, opt.icon), idx = 0;
 
                 if (!elem.icons) {
@@ -2185,6 +2185,10 @@
                             zIndex = parseInt('0' + $.getElementStyle(elem, 'z-index'), 10) + 1;
 
                         el.key = key;
+                        if (parent) {
+                            el.parent = elem.parentNode;
+                            elem.parentNode.style.position = 'relative';
+                        }
                         el.className = 'oui-form-txt-icon oui-form-icon-' + key;
                         el.style.cssText = [
                             'position:absolute;background-color:transparent;height:',h, 'px;line-height:', h, 'px;',
@@ -2205,7 +2209,7 @@
                                 if ($.isFunction(func)) {
                                     func(elem);
                                 }
-                            } else if ('pwd' === key) {
+                            } else if ('pwd' === key || 'txt' === key) {
                                 if (el.className.indexOf('oui-form-icon-pwd') > -1) {
                                     $.replaceClass(el, 'oui-form-icon-pwd', 'oui-form-icon-txt');
                                     elem.type = 'text';
@@ -2216,13 +2220,13 @@
                             }
                             elem.focus();
                         });
-                    }, document.body);
+                    }, parent ? elem.parentNode : document.body);
                 }
 
                 for (var k in icons) {
                     if (k === 'del') {
                         _create(elem, k, icons[k], idx++);
-                    } else if (k === 'pwd') {
+                    } else if (k === 'pwd' || k === 'txt') {
                         _create(elem, k, icons[k], idx++);
                     } else if (k === 'query') {
                         _create(elem, k, icons[k], idx++);
@@ -2250,9 +2254,14 @@
                 var ps = $.getOffset(elem),
                     top = ps.top - (30 - ps.height) / 2, 
                     left = ps.left + ps.width - 30 * (idx + 1) - 1;
-                    
-                d.icon.style.top = top + 'px';
-                d.icon.style.left = left + 'px';
+
+                if (d.icon.parent) {
+                    d.icon.style.top = (30 - ps.height) / 2 + 'px';
+                    d.icon.style.right = 30 * idx + 'px';
+                } else {
+                    d.icon.style.top = top + 'px';
+                    d.icon.style.left = left + 'px';
+                }
 
                 return this;
             },
@@ -3002,13 +3011,18 @@
             }
             return this;
         },
-        setInputIcon: function (elements, options) {
-            var elems = Util.checkElemArray(elements),
+        setInputIcon: function (elements, options, parent) {
+            var elems = Util.checkElemArray(elements), opt = {};
+            if ($.isString(options, true)) {
+                opt = { icon: {} };
+                opt.icon[options] = true;
+            } else {
                 opt = { icon: $.extend({}, options) };
+            }
 
             for (var i = 0; i < elems.length; i++) {
                 if ($.isElement(elem = $.toElement(elems[i]))) {
-                    $.input.buildIcon(elem, opt);
+                    $.input.buildIcon(elem, opt, parent);
                     _setEvent(elem);
                 }
             }
