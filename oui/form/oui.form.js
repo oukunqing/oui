@@ -743,6 +743,10 @@
                         elem.setAttribute(attr, (con = op.encodeHtml(val, fc.decode)));
                         elem.setAttribute('val', con);
                     }
+                    //elem绑定了统计字数的功能，触发change事件
+                    if (elem.getAttribute('stat-len')) {
+                        $.trigger(elem, 'change');
+                    }
                     return true;
                 },
                 setSelectOption: function (element, value, fieldConfig, isArray) {
@@ -1453,29 +1457,6 @@
     var FilePath = $.getScriptSelfPath(true),
         FileDir = FilePath.substr(0, FilePath.lastIndexOf('/') + 1);
 
-    var IconCss = [
-        '.oui-form-txt-icon{cursor:pointer;position:absolute;border:none;overflow:hidden;',
-        'box-sizing:border-box;text-align:center;font-size:28px;font-family:Arial;font-weight:normal;',
-        'width:30px;height:30px;color:#999;margin:0;padding:0;',
-        'background:url("',FileDir,'form-icon.png") no-repeat 0 0;}',
-        '.oui-form-txt-icon:hover{color:#000;background-position-y:-30px;}',
-
-        '.oui-form-icon-del{background-position:0 0;}',
-        '.oui-form-icon-del:hover{background-position:0 -30px;}',
-
-        '.oui-form-icon-pwd{background-position:-30px 0;}',
-        '.oui-form-icon-pwd:hover{background-position:-30px -30px;}',
-        '.oui-form-icon-txt{background-position:-60px 0;}',
-        '.oui-form-icon-txt:hover{background-position:-60px -30px;}',
-
-        '.oui-form-icon-query{background-position:-90px 0;}',
-        '.oui-form-icon-query:hover{background-position:-90px -30px;}',
-
-        'input[type="password"]::-webkit-credentials-cramble-button{appearance: none;}',
-        'input[type="password"]::-ms-reveal{display: none;}',
-        'input[type="password"]::-ms-clear{display: none;}'
-    ].join('');
-
     var Util = {
         timer: {},
         checkElemArray: function (elements) {
@@ -1496,6 +1477,14 @@
                 css.innerHTML = content;
                 document.head.appendChild(css);
             }
+            return this;
+        },
+        buildInputStyle: function (id) {
+            Util.buildStyle('oui_form_input_style_001', [
+                '.oui-form-elem:focus{outline:none;border-color:#66afe9;box-shadow:inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);',
+                ' -webkit-box-shadow:inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);}'
+            ].join(''));
+
             return this;
         },
         buildOptionStyle: function (id) {
@@ -1533,10 +1522,11 @@
         buildIconStyle: function (id) {
             Util.buildStyle('oui_form_icon_style_001', [
                 '.oui-form-txt-icon{cursor:pointer;position:absolute;border:none;overflow:hidden;',
-                'box-sizing:border-box;text-align:center;font-size:28px;font-family:Arial;font-weight:normal;',
-                'width:30px;height:30px;color:#999;margin:0;padding:0;',
+                'box-sizing:border-box;text-align:center;font-size:14px;font-family:Arial;font-weight:normal;',
+                'width:30px;height:30px;color:#999;margin:0;padding:0;text-decoration:none;',
                 'background:url("',FileDir,'form-icon.png") no-repeat 0 0;}',
-                '.oui-form-txt-icon:hover{color:#000;background-position-y:-30px;}',
+
+                '.oui-form-txt-icon:hover{background-position-y:-30px;text-decoration:none;}',
 
                 '.oui-form-icon-del{background-position:0 0;}',
                 '.oui-form-icon-del:hover{background-position:0 -30px;}',
@@ -1548,6 +1538,12 @@
 
                 '.oui-form-icon-query{background-position:-90px 0;}',
                 '.oui-form-icon-query:hover{background-position:-90px -30px;}',
+
+                '.oui-form-icon-len,.oui-form-icon-lbl{',
+                'width:32px;cursor:default;',
+                'border-left:solid 1px #ddd;background:#fff;opacity:0.9;',
+                //'border-top-right-radius:4px;border-bottom-right-radius:4px;',
+                '}',
 
                 'input[type="password"]::-webkit-credentials-cramble-button{appearance: none;}',
                 'input[type="password"]::-ms-reveal{display: none;}',
@@ -2160,13 +2156,18 @@
                     };
                 }
 
-                function _listen(elem) {
+                function _listen(elem, key) {
                     $.addListener(window, 'resize', function(ev) {
                         $.input.setIcon(ev, elem);
                     });
                     $.addListener(elem, 'mouseover', function(ev) {
                         $.input.setIcon(ev, elem);
                     });
+                    if (key === 'len') {
+                        $.addListener(elem, 'change', function(ev) {
+                            $.input.setIcon(ev, elem);
+                        });
+                    }
                 }
 
                 function _enter(elem, func) {
@@ -2179,10 +2180,19 @@
                     });
                 }
 
-                function _create(elem, key, func, idx) {
+                function _getElementStyle(elem, styleName) {
+                    var style = elem.currentStyle || document.defaultView.getComputedStyle(elem, null);
+                    return $.checkValue(style[styleName], '');
+                }
+
+                function _create(elem, key, arg, idx) {
                     $.createElement('A', '', function(el) {
-                        var ps = $.getOffset(elem), h = (ps.height > 30 ? 30 : ps.height),
-                            zIndex = parseInt('0' + $.getElementStyle(elem, 'z-index'), 10) + 1;
+                        var zIndex = parseInt('0' + _getElementStyle(elem, 'z-index'), 10) + 1,
+                            ps = $.getOffset(elem), iconSize = 30, h = ps.height - 2, css = [];
+
+                        if (['len', 'lbl'].indexOf(key) < 0 && h > iconSize) {
+                            h = iconSize;
+                        }
 
                         el.key = key;
                         if (parent) {
@@ -2190,15 +2200,33 @@
                             elem.parentNode.style.position = 'relative';
                         }
                         el.className = 'oui-form-txt-icon oui-form-icon-' + key;
-                        el.style.cssText = [
-                            'position:absolute;background-color:transparent;height:',h, 'px;line-height:', h, 'px;',
-                            'z-index:', zIndex, ';'
-                        ].join('');
+                        css = ['height:',h, 'px;line-height:', h, 'px;z-index:', zIndex, ';'];
+                        if (['lbl', 'len'].indexOf(key) > -1) {
+                            css.push([
+                                'border-left:', _getElementStyle(elem, 'borderLeft'), ';',
+                                'background-color:', _getElementStyle(elem, 'backgroundColor'), ';',
+                                'color:', _getElementStyle(elem, 'color'), ';'
+                            ].join(''));
+                        }
+                        css.push([
+                            'border-top-right-radius:', _getElementStyle(elem, 'borderTopRightRadius'), ';',
+                            'border-bottom-right-radius:', _getElementStyle(elem, 'borderBottomRightRadius'), ';'
+                        ].join(''));
+
+                        el.style.cssText = css.join('');
+
+                        if (key === 'lbl') {
+                            el.innerHTML = arg;
+                        } else if (key === 'len') {
+                            //设置stat-len属性，用于内容更改时触发onchange事件： trigger(elem, 'change')
+                            elem.setAttribute('stat-len', 1);
+                        }
+                        $.addClass(elem, 'oui-form-elem');
 
                         _build(key, el);
-                        _listen(elem);
+                        _listen(elem, key);
 
-                        $.input.showIcon(elem, key, idx);
+                        $.input.showIcon(elem, key, idx, true);
 
                         $.addListener(el, 'click', function(ev) {
                             if (['del', 'query'].indexOf(key) > -1) {
@@ -2206,8 +2234,8 @@
                                     el.style.display = 'none';
                                     elem.value = '';
                                 }
-                                if ($.isFunction(func)) {
-                                    func(elem);
+                                if ($.isFunction(arg)) {
+                                    arg(elem);
                                 }
                             } else if ('pwd' === key || 'txt' === key) {
                                 if (el.className.indexOf('oui-form-icon-pwd') > -1) {
@@ -2224,11 +2252,7 @@
                 }
 
                 for (var k in icons) {
-                    if (k === 'del') {
-                        _create(elem, k, icons[k], idx++);
-                    } else if (k === 'pwd' || k === 'txt') {
-                        _create(elem, k, icons[k], idx++);
-                    } else if (k === 'query') {
+                    if (['del', 'pwd', 'txt', 'query', 'len', 'lbl'].indexOf(k) > -1) {
                         _create(elem, k, icons[k], idx++);
                     } else if (k === 'enter' && $.isFunction(icons[k])) {
                         _enter(elem, icons[k]);
@@ -2236,51 +2260,58 @@
                 }
                 return this;
             },
-            showIcon: function (elem, key, idx) {
+            showIcon: function (elem, key, idx, first) {
                 var d = elem.icons[key];
                 if (!d) {
                     return this;
                 }
-                var show = true;
-                if (key === 'del' ) {
-                    var val = elem.value.trim();
-                    show = val.length > 0;
-                    d.icon.style.display = show ? '' : 'none';
-                    d.show = show;
-                }
-                if (!show) {
-                    return this;
-                }
-                var ps = $.getOffset(elem),
-                    top = ps.top - (30 - ps.height) / 2, 
-                    left = ps.left + ps.width - 30 * (idx + 1) - 1;
+                function _show() {
+                    var show = true, val = elem.value.trim();
+                    if (key === 'del' ) {
+                        show = val.length > 0;
+                        d.icon.style.display = show ? '' : 'none';
+                        d.show = show;
+                    } else if (key === 'len') {
+                        d.icon.innerHTML = val.length;
+                    }
+                    if (!show) {
+                        return this;
+                    }
+                    var ps = $.getOffset(elem), iconSize = 30, h = ps.height - 2, offset = 0;
+                    if (['len', 'lbl'].indexOf(key) < 0) {
+                        if (h > iconSize) {
+                            h = iconSize;
+                        }
+                    }
+                    var bh = $.getBorderSize(elem);
+                    offset = (ps.height - bh.height - h) / 2;
 
-                if (d.icon.parent) {
-                    d.icon.style.top = (30 - ps.height) / 2 + 'px';
-                    d.icon.style.right = 30 * idx + 'px';
-                } else {
-                    d.icon.style.top = top + 'px';
-                    d.icon.style.left = left + 'px';
-                }
-
-                return this;
-            },
-            setIcon: function (ev, elem) {
-                function _set(elem) {
-                    for (var k in elem.icons) {
-                        $.input.showIcon(elem, k, idx++);
+                    if (d.icon.parent) {
+                        d.icon.style.top = 1 + offset + 'px';
+                        d.icon.style.right = iconSize * idx + 1 + 'px';
+                    } else {
+                        d.icon.style.top = ps.top + 1 + offset + 'px';
+                        d.icon.style.left = ps.left + ps.width - d.icon.offsetWidth * (idx + 1) - 1 + 'px';
                     }
                 }
-                var val = elem.value.trim(), len = val.length, idx = 0;
-                if (len === 1) {
-                    _set(elem);
+
+                var val = elem.value.trim(), len = val.length;
+                if (first || key === 'len' || len === 1) {
+                    _show(elem);
                 } else {
                     if (Util.timer['icon']) {
                         window.clearTimeout(Util.timer['icon']);
                     }
                     Util.timer['icon'] = window.setTimeout(function() {
-                        _set(elem);
+                        _show(elem);
                     }, 256);
+                }
+                return this;
+            },
+            setIcon: function (ev, elem) {
+                var idx = 0;
+                for (var k in elem.icons) {
+                    $.input.showIcon(elem, k, idx++);
                 }
                 return this;
             },
@@ -2297,7 +2328,7 @@
                     return this;
                 }
                 
-                Util.buildOptionStyle();
+                Util.buildInputStyle().buildOptionStyle();
 
                 var par = $.extend({}, options),
                     opt = $.extend({
@@ -2585,7 +2616,8 @@
                         continue;
                     }
                     isSelect = elem.tagName === 'SELECT';
-                    elem.className = elem.className.addClass('oui-input-fmt');
+                    $.addClass(elem, 'oui-form-elem');
+                    $.addClass(elem, 'oui-input-fmt');
 
                     if (isSelect) {
                         if (opt.config.minWidth) {
@@ -2847,7 +2879,8 @@
                         }
                         if (typeof elem.val === 'undefined') {
                             Object.defineProperty(elem, 'val', {
-                                /*value: 'hello',
+                                /*
+                                value: 'hello',
                                 writable: true,
                                 configurable: true,
                                 */

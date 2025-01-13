@@ -36,6 +36,10 @@ button {width:120px;height:30px;}
             </tr>
             <tr>
                 <td></td>
+                <td><input type="text" id="fmt_del5" placeholder="请输入时长频率" /></td>
+            </tr>
+            <tr>
+                <td></td>
                 <td><input type="password" id="fmt_pwd" placeholder="请输入密码" autocomplete="off" /></td>
             </tr>
             <tr>
@@ -128,7 +132,7 @@ button {width:120px;height:30px;}
             </tr>
             <tr>
                 <td></td>
-                <td><input type="text" id="fmt_channel" placeholder="" /></td>
+                <td><input type="text" id="fmt_channel" placeholder="" style="" /></td>
             </tr>
             <tr>
                 <td></td>
@@ -206,8 +210,12 @@ button {width:120px;height:30px;}
         $.setInputIcon('fmt_del3,fmt_del4', {
             /*query: function(elem) {
                 $.console.log('icon-query:', elem)
-            },*/ del: true
+            },*/ len: true, del: true
         });
+        $.setInputIcon('fmt_del5', {
+            lbl: '分钟'
+        });
+
 
         $.setInputIcon('fmt_pwd', 'pwd');
 
