@@ -24,6 +24,18 @@ button {width:120px;height:30px;}
             </tr>
             <tr>
                 <td></td>
+                <td><input type="text" id="fmt_del2" placeholder="请输入关键字2" /></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><input type="text" id="fmt_del3" placeholder="请输入设备编号" /></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td><input type="text" id="fmt_del4" placeholder="请输入通道编号" /></td>
+            </tr>
+            <tr>
+                <td></td>
                 <td><input type="password" id="fmt_pwd" data="passwordtype" placeholder="请输入密码" autocomplete="off" /></td>
             </tr>
             <tr>
@@ -172,13 +184,25 @@ button {width:120px;height:30px;}
             minVal: 80,
             maxVal: 65535
         });
-
-        $.setInputFormat('fmt_del', {
+        $.setInputFormat('fmt_del2,fmt_del', {
             //types: 'none',
             types: false,
-            icon: { del: function(elem) {
-                $.console.log('icon-del:', elem)
-            }}
+            icon: { 
+                query: function(elem) {
+                    $.console.log('icon-query:', elem);
+                },
+                del: function(elem) {
+                    $.console.log('icon-del:', elem);
+                },
+                enter: function (elem) {
+                    $.console.log('elem-enter:', elem.value, elem);
+                }
+            }
+        });
+        $.setInputIcon('fmt_del3,fmt_del4', {
+            /*query: function(elem) {
+                $.console.log('icon-query:', elem)
+            },*/ del: true
         });
 
         $.setInputFormat('fmt_pwd', {

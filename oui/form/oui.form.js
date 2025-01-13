@@ -7,7 +7,7 @@
 
     $.form plugin
 
-    $.input 输入框控制: $.input.setFormat, $.setInputFormat
+    $.input 输入框控制: $.input.setFormat, $.setInputFormat, $.setInputIcon
 */
 
 // $.form
@@ -1454,7 +1454,6 @@
         FileDir = FilePath.substr(0, FilePath.lastIndexOf('/') + 1);
 
     var IconCss = [
-        '<style style="text/css">',
         '.oui-form-txt-icon{cursor:pointer;position:absolute;border:none;overflow:hidden;',
         'box-sizing:border-box;text-align:center;font-size:28px;font-family:Arial;font-weight:normal;',
         'width:30px;height:30px;color:#999;margin:0;padding:0;',
@@ -1474,9 +1473,90 @@
 
         'input[type="password"]::-webkit-credentials-cramble-button{appearance: none;}',
         'input[type="password"]::-ms-reveal{display: none;}',
-        'input[type="password"]::-ms-clear{display: none;}',
-        '</style>'
+        'input[type="password"]::-ms-clear{display: none;}'
     ].join('');
+
+    var Util = {
+        timer: {},
+        checkElemArray: function (elements) {
+            var elems = [];
+            if ($.isArrayLike(elements) || $.isArray(elements)) {
+                elems = elements;
+            } else if ($.isElement(elements)) {
+                elems = [elements];
+            } else if ($.isString(elements, true)) {
+                elems = elements.split(/[,;\|]/).length > 1 ? elements.split(/[,;\|]/) : [elements];
+            }
+            return elems;
+        },
+        buildStyle: function (id, content) {
+            if (document.getElementById(id) === null) {
+                var css = document.createElement('style');
+                css.id = id;
+                css.innerHTML = content;
+                document.head.appendChild(css);
+            }
+            return this;
+        },
+        buildOptionStyle: function (id) {
+            Util.buildStyle('oui_form_option_style_001', [
+                '.oui-input-fmt{ime-mode:disabled;}',
+                '.input-opt-elem{outline:none;}',
+                '.input-opt-elem:focus {outline:none;border-color:#66afe9;box-shadow:inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);',
+                ' -webkit-box-shadow:inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);}',
+                '.input-opt-elem-top{border-top-left-radius:0;border-top-right-radius:0;}',
+                '.input-opt-elem-bottom{border-bottom-left-radius:0;border-bottom-right-radius:0;}',
+                '.input-opt-elem-bottom:focus{border-bottom-color:#eee;}',
+                '.input-opt-panel-box{position:absolute;border:solid 1px #66afe9;background:#fff;border-radius:5px;overflow:auto;opacity:1;',
+                ' box-shadow:inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);margin:0;padding:0;box-sizing:border-box;',
+                ' -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);}',
+                '.input-opt-panel-box-top{border-bottom-left-radius:0;border-bottom-right-radius:0;margin-top:1px;}',
+                '.input-opt-panel-box-bottom{border-top-left-radius:0;border-top-right-radius:0;margin-top:-1px;}',
+                '.input-opt-ul{margin:0;padding:1px 0;border:none;background:transparent;}',
+                '.input-opt-ul i{font-style:normal;color:#ccc;display:inline-block;text-align:right;',
+                ' border:none;margin:0 7px 0 0;padding:0;font-size:14px;}',
+                '.input-opt-ul li{margin:0 1px;list-style:none;line-height:30px;height:30px;overflow:hidden;font-size:14px;',
+                '   border:none;cursor:default;}',
+                '.input-opt-ul li:last-child{border-bottom:none;}',
+                '.input-opt-ul li:hover,.input-opt-ul li.cur:hover{background:#f5f5f5;color:#000;}',
+                '.input-opt-ul li.cur{background:#dfe8f6;color:#000;}',
+                '.input-opt-ul li:hover i,.input-opt-ul li.cur:hover i{color:#f50;}',
+                '.input-opt-ul li.cur i{color:#f00;}',
+                '.input-opt-ul li a{margin:0;padding:0;font-size:14px;display:block;border:none;background:none;text-decoration:none;color:#000;cursor:default;}',
+                '.input-opt-ul li span{margin:0;padding:0;font-size:14px;border:none;margin:0;padding:0;}',
+                '.input-opt-ul li u{text-decoration:none;color:#999;font-size:14px;margin:03px;padding:0;border:0;background:none;}',
+                '.input-opt-ul li span.i-t{color:#999;margin:0 0 0 8px;padding:0;font-size:14px;border:none;background:none;}'
+            ].join(''));
+
+            return this;
+        },
+        buildIconStyle: function (id) {
+            Util.buildStyle('oui_form_icon_style_001', [
+                '.oui-form-txt-icon{cursor:pointer;position:absolute;border:none;overflow:hidden;',
+                'box-sizing:border-box;text-align:center;font-size:28px;font-family:Arial;font-weight:normal;',
+                'width:30px;height:30px;color:#999;margin:0;padding:0;',
+                'background:url("',FileDir,'form-icon.png") no-repeat 0 0;}',
+                '.oui-form-txt-icon:hover{color:#000;background-position-y:-30px;}',
+
+                '.oui-form-icon-del{background-position:0 0;}',
+                '.oui-form-icon-del:hover{background-position:0 -30px;}',
+
+                '.oui-form-icon-pwd{background-position:-30px 0;}',
+                '.oui-form-icon-pwd:hover{background-position:-30px -30px;}',
+                '.oui-form-icon-txt{background-position:-60px 0;}',
+                '.oui-form-icon-txt:hover{background-position:-60px -30px;}',
+
+                '.oui-form-icon-query{background-position:-90px 0;}',
+                '.oui-form-icon-query:hover{background-position:-90px -30px;}',
+
+                'input[type="password"]::-webkit-credentials-cramble-button{appearance: none;}',
+                'input[type="password"]::-ms-reveal{display: none;}',
+                'input[type="password"]::-ms-clear{display: none;}'
+            ].join(''));
+
+            return this;
+        }
+    };
 
     // $.input
     $.extend($, {
@@ -1877,45 +1957,6 @@
 
                 return that;
             },
-            buildStyle: function () {
-                if (document.getElementById('input_option_panel_style_001') === null) {
-                    var css = document.createElement('div');
-                    css.id = 'input_option_panel_style_001';
-                    css.style.cssText = 'position:absolute;left:-3000px;top:-3000px;display:none;';
-                    css.innerHTML = [
-                        '<style style="text/css">',
-                        '.oui-input-fmt{ime-mode:disabled;}',
-                        '.input-opt-elem{outline:none;}',
-                        '.input-opt-elem:focus {outline:none;border-color:#66afe9;box-shadow:inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);',
-                        ' -webkit-box-shadow:inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);}',
-                        '.input-opt-elem-top{border-top-left-radius:0;border-top-right-radius:0;}',
-                        '.input-opt-elem-bottom{border-bottom-left-radius:0;border-bottom-right-radius:0;}',
-                        '.input-opt-elem-bottom:focus{border-bottom-color:#eee;}',
-                        '.input-opt-panel-box{position:absolute;border:solid 1px #66afe9;background:#fff;border-radius:5px;overflow:auto;opacity:1;',
-                        ' box-shadow:inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);margin:0;padding:0;box-sizing:border-box;',
-                        ' -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);}',
-                        '.input-opt-panel-box-top{border-bottom-left-radius:0;border-bottom-right-radius:0;margin-top:1px;}',
-                        '.input-opt-panel-box-bottom{border-top-left-radius:0;border-top-right-radius:0;margin-top:-1px;}',
-                        '.input-opt-ul{margin:0;padding:1px 0;border:none;background:transparent;}',
-                        '.input-opt-ul i{font-style:normal;color:#ccc;display:inline-block;text-align:right;',
-                        ' border:none;margin:0 7px 0 0;padding:0;font-size:14px;}',
-                        '.input-opt-ul li{margin:0 1px;list-style:none;line-height:30px;height:30px;overflow:hidden;font-size:14px;',
-                        '   border:none;cursor:default;}',
-                        '.input-opt-ul li:last-child{border-bottom:none;}',
-                        '.input-opt-ul li:hover,.input-opt-ul li.cur:hover{background:#f5f5f5;color:#000;}',
-                        '.input-opt-ul li.cur{background:#dfe8f6;color:#000;}',
-                        '.input-opt-ul li:hover i,.input-opt-ul li.cur:hover i{color:#f50;}',
-                        '.input-opt-ul li.cur i{color:#f00;}',
-                        '.input-opt-ul li a{margin:0;padding:0;font-size:14px;display:block;border:none;background:none;text-decoration:none;color:#000;cursor:default;}',
-                        '.input-opt-ul li span{margin:0;padding:0;font-size:14px;border:none;margin:0;padding:0;}',
-                        '.input-opt-ul li u{text-decoration:none;color:#999;font-size:14px;margin:03px;padding:0;border:0;background:none;}',
-                        '.input-opt-ul li span.i-t{color:#999;margin:0 0 0 8px;padding:0;font-size:14px;border:none;background:none;}',
-                        '</style>'
-                    ].join('');
-                    document.body.appendChild(css);
-                }
-                return this;
-            },
             setTitle: function (box) {
                 var spans = document.querySelectorAll('#' + box.id + ' span'),
                     itemHeight = 30;
@@ -2110,14 +2151,7 @@
                 if (!elem.icons) {
                     elem.icons = {};
                 }
-
-                if (document.getElementById('oui_form_icon_style_001') === null) {
-                    var css = document.createElement('div');
-                    css.id = 'oui_form_icon_style_001';
-                    css.style.cssText = 'position:absolute;left:-3000px;top:-3000px;display:none;';
-                    css.innerHTML = IconCss;
-                    document.body.appendChild(css);
-                }
+                Util.buildIconStyle();
 
                 function _build(key, icon) {
                     elem.icons[key] = {
@@ -2135,9 +2169,19 @@
                     });
                 }
 
+                function _enter(elem, func) {
+                    $.addListener(elem, 'keyup', function(ev) {
+                        var val = elem.value.trim(),
+                            kc = $.getKeyCode(ev);
+                        if (val.length > 0 && kc === $.KEY_CODE.Enter) {
+                            func(elem);
+                        }
+                    });
+                }
+
                 function _create(elem, key, func, idx) {
                     $.createElement('A', '', function(el) {
-                        var ps = $.getOffset(elem), h = (ps.height > 30 ? 30 : ps.height) - 1,
+                        var ps = $.getOffset(elem), h = (ps.height > 30 ? 30 : ps.height),
                             zIndex = parseInt('0' + $.getElementStyle(elem, 'z-index'), 10) + 1;
 
                         el.key = key;
@@ -2182,6 +2226,8 @@
                         _create(elem, k, icons[k], idx++);
                     } else if (k === 'query') {
                         _create(elem, k, icons[k], idx++);
+                    } else if (k === 'enter' && $.isFunction(icons[k])) {
+                        _enter(elem, icons[k]);
                     }
                 }
                 return this;
@@ -2202,8 +2248,8 @@
                     return this;
                 }
                 var ps = $.getOffset(elem),
-                    top = ps.top - (30 - ps.height) + 1, 
-                    left = ps.left + ps.width - 30 - 1;
+                    top = ps.top - (30 - ps.height) / 2, 
+                    left = ps.left + ps.width - 30 * (idx + 1) - 1;
                     
                 d.icon.style.top = top + 'px';
                 d.icon.style.left = left + 'px';
@@ -2211,33 +2257,38 @@
                 return this;
             },
             setIcon: function (ev, elem) {
+                function _set(elem) {
+                    for (var k in elem.icons) {
+                        $.input.showIcon(elem, k, idx++);
+                    }
+                }
                 var val = elem.value.trim(), len = val.length, idx = 0;
-                for (var k in elem.icons) {
-                    $.input.showIcon(elem, k, idx++);
+                if (len === 1) {
+                    _set(elem);
+                } else {
+                    if (Util.timer['icon']) {
+                        window.clearTimeout(Util.timer['icon']);
+                    }
+                    Util.timer['icon'] = window.setTimeout(function() {
+                        _set(elem);
+                    }, 256);
                 }
                 return this;
             },
             // 设置输入框内容格式
             // 需要设置输入格式的文本框，默认情况下是不允许空格和特殊字符的
             setFormat: function (elements, options) {
-                var elems = [], element, keyTypes = [
+                var elems = Util.checkElemArray(elements), element, keyTypes = [
                     'open', 'none', //open | none 表示不限制输入，但需要验证选项等特殊格式
                     'char', 'number', 'char_number', 'word', 'int', 'long', 'float', 'double', 'bool', 'control', 'symbol', 
                     'option', 'ipv4', 'ipv6', 'port', 'hex', 'md5', 'angle', 'at'
                 ];
-                if ($.isArrayLike(elements) || $.isArray(elements)) {
-                    elems = elements;
-                } else if ($.isElement(elements)) {
-                    elems = [elements];
-                } else if ($.isString(elements, true)) {
-                    elems = elements.split(/[,;\|]/).length > 1 ? elements.split(/[,;\|]/) : [elements];
-                }
 
                 if ((!$.isArrayLike(elems) && !$.isArray(elems)) || !(element = $.toElement(elems[0]))) {
                     return this;
                 }
                 
-                $.input.buildStyle();
+                Util.buildOptionStyle();
 
                 var par = $.extend({}, options),
                     opt = $.extend({
@@ -2945,7 +2996,31 @@
             }
         },
         setInputFormat: function (elements, options) {
-            return $.input.setFormat(elements, options);
+            var elems = Util.checkElemArray(elements);
+            for (var i = 0; i < elems.length; i++) {
+                $.input.setFormat(elems[i], options);
+            }
+            return this;
+        },
+        setInputIcon: function (elements, options) {
+            var elems = Util.checkElemArray(elements),
+                opt = { icon: $.extend({}, options) };
+
+            for (var i = 0; i < elems.length; i++) {
+                if ($.isElement(elem = $.toElement(elems[i]))) {
+                    $.input.buildIcon(elem, opt);
+                    _setEvent(elem);
+                }
+            }
+            function _setEvent(elem) {
+                $.addListener(elem, 'keydown', function(ev) {
+                    $.input.setIcon(ev, elem);
+                });
+                $.addListener(elem, 'keyup', function(ev) {
+                    $.input.setIcon(ev, elem);
+                });
+            }
+            return $;
         }
     });
 }(OUI);
