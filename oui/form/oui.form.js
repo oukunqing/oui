@@ -1540,7 +1540,7 @@
                 '.oui-form-icon-query:hover{background-position:-90px -30px;}',
 
                 '.oui-form-icon-len,.oui-form-icon-lbl{',
-                'width:32px;cursor:default;',
+                'width:30px;cursor:default;',
                 'border-left:solid 1px #ddd;background:#fff;opacity:0.9;',
                 //'border-top-right-radius:4px;border-bottom-right-radius:4px;',
                 '}',
@@ -2180,6 +2180,24 @@
                     });
                 }
 
+                function _background(elem, arg) {
+                    var opt = {left: 0, right: 0, width: 20, path: ''};
+                    if ($.isObject(arg)) {
+                        opt = $.extend(opt, arg);
+                    } else if ($.isString(arg)) {
+                        opt.path = arg;
+                    }
+                    if (!$.isString(opt.path, true)) {
+                        return false;
+                    }
+                    var css = [
+                        'background-image:url("', opt.path, '");',
+                        'background-repeat:no-repeat;background-position:', opt.left, 'px center;',
+                        'padding-left:', (opt.width || 20) + opt.left + (opt.right || opt.left), 'px;'
+                    ];
+                    elem.style.cssText = css.join('');
+                }
+
                 function _getElementStyle(elem, styleName) {
                     var style = elem.currentStyle || document.defaultView.getComputedStyle(elem, null);
                     return $.checkValue(style[styleName], '');
@@ -2188,7 +2206,20 @@
                 function _create(elem, key, arg, idx) {
                     $.createElement('A', '', function(el) {
                         var zIndex = parseInt('0' + _getElementStyle(elem, 'z-index'), 10) + 1,
-                            ps = $.getOffset(elem), iconSize = 30, h = ps.height - 2, css = [];
+                            ps = $.getOffset(elem), iconSize = 30, h = ps.height - 2, css = [],
+                            func = null, w = 30, txt = '';
+
+                        if ($.isFunction(arg)) {
+                            func = arg;
+                        } else if ($.isObject(arg)) {
+                            func = arg.func;
+                            if ($.isNumber(arg.width)) {
+                                w = arg.width;
+                            }
+                            txt = arg.text || arg.txt;
+                        } else if ($.isString(arg)) {
+                            txt = arg;
+                        }
 
                         if (['len', 'lbl'].indexOf(key) < 0 && h > iconSize) {
                             h = iconSize;
@@ -2200,7 +2231,7 @@
                             elem.parentNode.style.position = 'relative';
                         }
                         el.className = 'oui-form-txt-icon oui-form-icon-' + key;
-                        css = ['height:',h, 'px;line-height:', h, 'px;z-index:', zIndex, ';'];
+                        css = ['width:', w, 'px;', 'height:',h, 'px;line-height:', h, 'px;z-index:', zIndex, ';'];
                         if (['lbl', 'len'].indexOf(key) > -1) {
                             css.push([
                                 'border-left:', _getElementStyle(elem, 'borderLeft'), ';',
@@ -2216,7 +2247,7 @@
                         el.style.cssText = css.join('');
 
                         if (key === 'lbl') {
-                            el.innerHTML = arg;
+                            el.innerHTML = txt;
                         } else if (key === 'len') {
                             //设置stat-len属性，用于内容更改时触发onchange事件： trigger(elem, 'change')
                             elem.setAttribute('stat-len', 1);
@@ -2256,14 +2287,24 @@
                         _create(elem, k, icons[k], idx++);
                     } else if (k === 'enter' && $.isFunction(icons[k])) {
                         _enter(elem, icons[k]);
+                    } else if (['ico', 'pic'].indexOf(k) > -1) {
+                        _background(elem, icons[k]);
                     }
                 }
                 return this;
             },
             showIcon: function (elem, key, idx, first) {
-                var d = elem.icons[key];
+                var d = elem.icons[key], offsetWidth = 0, i = 0;
                 if (!d) {
                     return this;
+                }
+                for (var k in elem.icons) {
+                    var obj = elem.icons[k].icon, w = obj.offsetWidth || parseInt('0' + obj.style.width, 10);
+                    offsetWidth += w;
+                    i++;
+                    if (i > idx) {
+                        break;
+                    }
                 }
                 function _show() {
                     var show = true, val = elem.value.trim();
@@ -2277,21 +2318,25 @@
                     if (!show) {
                         return this;
                     }
-                    var ps = $.getOffset(elem), iconSize = 30, h = ps.height - 2, offset = 0;
-                    if (['len', 'lbl'].indexOf(key) < 0) {
-                        if (h > iconSize) {
-                            h = iconSize;
-                        }
-                    }
+                    var ps = $.getOffset(elem), iconSize = 30, h = ps.height - 2, offset = 0, selfW = 0;
                     var bh = $.getBorderSize(elem);
                     offset = (ps.height - bh.height - h) / 2;
 
+                    if (['len', 'lbl'].indexOf(key) < 0) {
+                        if (h > iconSize) {
+                            h = iconSize;
+                        } else if (h < iconSize) {
+                            offset = -(iconSize - h) / 2;
+                        }
+                    }
+
                     if (d.icon.parent) {
+                        selfW = d.icon.offsetWidth || parseInt('0' + d.icon.style.width, 10);
                         d.icon.style.top = 1 + offset + 'px';
-                        d.icon.style.right = iconSize * idx + 1 + 'px';
+                        d.icon.style.right = (offsetWidth - selfW) + 1 + 'px';
                     } else {
                         d.icon.style.top = ps.top + 1 + offset + 'px';
-                        d.icon.style.left = ps.left + ps.width - d.icon.offsetWidth * (idx + 1) - 1 + 'px';
+                        d.icon.style.left = ps.left + ps.width - offsetWidth - 1 + 'px';
                     }
                 }
 

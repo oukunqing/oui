@@ -4,7 +4,7 @@
     <title>表单输入内容限制示例</title>
 <style type="text/css">
 body {font-size:14px;}
-input {width:400px; height: 34px; font-size:14px; border:solid 1px #ccc; box-sizing: border-box; margin:0; padding: 0 8px; border-radius:4px;}
+input {width:400px; height: 28px; font-size:14px; border:solid 1px #ccc; box-sizing: border-box; margin:0; padding: 0 8px; border-radius:4px;}
 /*input:focus{border:solid 1px #00f;}*/
 select{width:412px; height:34px;border:solid 1px #ccc;margin:0; padding: 0 8px;border-radius:4px; box-sizing: border-box;}
 /*select:focus{border:solid 1px #00f;}*/
@@ -16,7 +16,7 @@ button {width:120px;height:30px;}
         <table cellpadding="5">
             <tr>
                 <td></td>
-                <td><input type="password" data="passwordtype" id="fmt_test" placeholder="不限制" /></td>
+                <td><input type="text" id="fmt_test" placeholder="不限制" /></td>
             </tr>
             <tr>
                 <td></td>
@@ -28,15 +28,15 @@ button {width:120px;height:30px;}
             </tr>
             <tr>
                 <td></td>
-                <td><input type="text" id="fmt_del3" placeholder="请输入设备编号" /></td>
+                <td><input type="text" id="fmt_del3" placeholder="请输入设备编码" /></td>
             </tr>
             <tr>
                 <td></td>
-                <td><input type="text" id="fmt_del4" placeholder="请输入通道编号" /></td>
+                <td><input type="text" id="fmt_del4" placeholder="请输入通道编码" /></td>
             </tr>
             <tr>
                 <td></td>
-                <td><input type="text" id="fmt_del5" placeholder="请输入时长频率" /></td>
+                <td><input type="text" id="fmt_del5" placeholder="请输入时长频率,只能输入数字" /></td>
             </tr>
             <tr>
                 <td></td>
@@ -192,6 +192,20 @@ button {width:120px;height:30px;}
             minVal: 80,
             maxVal: 65535
         });
+        /*
+        $('#fmt_test').change(function(ev, idx, obj) {
+            console.log('change:', obj.value);
+        });
+        $I('fmt_test').addEventListener('abcc', function(ev) {
+            console.log('change:', this.value);
+        });
+        */
+        $.addListener('fmt_test', 'abc', function(ev) {
+            console.log('changed:', this.value);
+        });
+        $I('fmt_test').value = '12345';
+        $.trigger('fmt_test', 'abc');
+
         $.setInputFormat('fmt_del2,fmt_del', {
             //types: 'none',
             types: false,
@@ -210,18 +224,44 @@ button {width:120px;height:30px;}
         $.setInputIcon('fmt_del3,fmt_del4', {
             /*query: function(elem) {
                 $.console.log('icon-query:', elem)
-            },*/ len: true, del: true
+            },*/ len: {width:40}, del: true
         });
+        /*
         $.setInputIcon('fmt_del5', {
             lbl: '分钟'
         });
+        */
 
-
-        $.setInputIcon('fmt_pwd', 'pwd');
-
-        $.setInputIcon('fmt_txt', {
-            txt: true
+        $.setInputFormat('fmt_del5', {
+            types: ['number'],
+            //内容长度固定为15个字节
+            valLen: 10,
+            icon: { lbl: '秒', del: function(elem) {
+                $.console.log('icon-del:', elem)
+            }}
         });
+
+
+        //$.setInputIcon('fmt_pwd', 'pwd');
+        $.setInputIcon('fmt_pwd', {
+            len:true,pwd:true,del:true,
+            ico: {path: 'imgs/warning.png', width:14, left: 5, right: 5}
+        });
+
+        /*
+        $I('fmt_pwd').style.cssText = [
+        'background-image:url("imgs/warning.png");background-repeat:no-repeat; background-position: 10px center;padding-left:30px;'
+        ].join('');
+        */
+        $.setInputIcon('fmt_txt', {
+            txt: true,
+            ico: {path: 'imgs/disabled.png', width:14, left: 5, right: 5}
+        });
+        window.setTimeout(function() {
+            $.setInputIcon('fmt_txt', {
+                ico: {path: 'imgs/success.png', width:14, left: 5, right: 5}
+            });
+        }, 1000);
 
         $.setInputFormat('fmt_num_15', {
             types: ['number'],
@@ -362,7 +402,8 @@ button {width:120px;height:30px;}
         $.setInputFormat('fmt_channel', {
             types: ['int', 'option'],
             options: buildOptions(channels, '通道'),
-            config: { readonly: false, title: '请选择通道'  }
+            config: { readonly: false, title: '请选择通道'  },
+            icon: {lbl: {text:'通道',width:40} }
         });
 
         $.setInputFormat('fmt_channel2', {
