@@ -973,7 +973,7 @@
             }
             return val;
         }
-        if ($.isArray(elements)) {
+        if ($.isArrayLike(elements)) {
             for (i = 0; i < elements.length; i++) {
                 obj = $.toElement(elements[i]);
                 id = obj.id;
@@ -1177,7 +1177,7 @@
         return null;
     },
     formEnter = function (elements, func) {
-        var elems = $.isArray(elements) ? elements : $.isString(elements) ? elements.split(/[,\|;]/) : [elements],
+        var elems = $.isArrayLike(elements) ? elements : $.isString(elements) ? elements.split(/[,\|;]/) : [elements],
             len = elems.length;
         for (var i = 0; i < len; i++) {
             var elem = $.toElement(elems[i]);
@@ -1205,7 +1205,7 @@
             findElement: findElement,
             formEnter: formEnter,
             validate: function (element) {
-                var elems = $.isArray(element) ? element : [element];
+                var elems = $.isArrayLike(element) ? element : [element];
                 for (var i = 0; i < elems.length; i++) {
                     var elem = $.toElement(element);
                     if ($.isElement(elem) && $.isFunction(elem.validate)) {
@@ -1215,7 +1215,7 @@
             },
             //还原输入框原始值，原始值保存在输入框 自定义属性 old-value 中
             restoreValue: function (elements) {
-                var elems = $.isArray(elements) ? elements : [elements];
+                var elems = $.isArrayLike(elements) ? elements : [elements];
                 for (var i = 0; i < elems.length; i++) {
                     var elem = $.toElement(elems[i]);
                     if ($.isElement(elem)) {

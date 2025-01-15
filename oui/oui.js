@@ -4229,6 +4229,9 @@
             return this;
         },
         getScriptSelfPath = function (relativePath) {
+            if (!doc) {
+                return '';
+            }
             var elements = doc.getElementsByTagName('script'), len = elements.length, elem = elements[len - 1];
             return (relativePath ? elem.getAttribute('src') : elem.src) || '';
         },
@@ -4668,8 +4671,14 @@
             } else if ($.isFunction(obj) || isWindow(obj)) {
                 return false;
             }
+            if ($.isArray(obj)) {
+                return true;
+            }
             var length = !!obj && 'length' in obj && obj.length;
-            return $.isArray(obj) || length === 0 || $.isNumber(length) && length > 0 && (length - 1) in obj;
+            if (length > 0 && !$.isElement(obj[0])) {
+                return false;
+            }
+            return length === 0 || $.isNumber(length) && length > 0 && (length - 1) in obj;
         },
         merge = function (first, second) {
             var len = second.length,
@@ -5728,7 +5737,7 @@
                 } else {
                     isEvent ? elem['dispatchEvent'](ev) : elem['fireEvent'](evName);
                 }
-            } else if ($.isArray(elem)) {
+            } else if ($.isArrayLike(elem)) {
                 for (var i = 0; i < elem.length; i++) {
                     var e = $.toElement(elem[i]);
                     if ($.isElement(e)) {
