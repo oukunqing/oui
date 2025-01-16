@@ -240,6 +240,8 @@
 				if ($.isElement(id)) {
 					elem = id;
 					id = Factory.buildId(id);
+				} else if ($.isArrayLike(id)) {
+
 				} else if ($.isObject(id) && $.isUndefined(par)) {
 					par = id;
 					id = null;
@@ -255,9 +257,9 @@
 					opt.single = true;
 				}
 
-				opt.id = opt.id || opt.element.id;
+				opt.id = opt.id || (opt.element ? opt.element.id : '');
 
-				var arr = $.isArray(opt.id) ? opt.id : $.isString(opt.id) ? opt.id.split(/[,;\|，]/) : opt.id.toString().split(/[,;\|，]/);
+				var arr = $.isArrayLike(opt.id) ? opt.id : $.isString(opt.id) ? opt.id.split(/[,;\|，]/) : opt.id.toString().split(/[,;\|，]/);
 				if (arr.length > 1) {
 					var list = [];
 					for (var i = 0; i < arr.length; i++) {
@@ -393,6 +395,17 @@
 					}
 				}
 				return false;
+			},
+			clearItems: function (ddl, panel) {
+				var that = ddl;
+				that.nodes = [];
+				that.items = [];
+				panel = $.toElement(panel);
+				if ($.isElement(panel)) {
+					panel.innerHTML = '';
+					panel.style.height = 0 + 'px';
+				}
+				return this;
 			},
 			buildItems: function (ddl, items, listbox) {
 				var that = ddl,
@@ -1985,7 +1998,10 @@
 				opt.items = $.toTreeList(opt.items);
 			}
 
-			Factory.buildItems(that, opt.items, key + '_list').setNodes(that).initValue(that);
+			Factory.clearItems(that, key + '_list')
+				.buildItems(that, opt.items, key + '_list')
+				.setNodes(that)
+				.initValue(that);
 
 			return that.size().position().set(par.value).complete();
 		},
