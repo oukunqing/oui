@@ -228,24 +228,29 @@ button {width:120px;height:30px;}
         });
         /*
         $.setInputIcon('fmt_del5', {
-            lbl: '分钟'
+            unit: '分钟'
         });
         */
 
-        $.setInputFormat('fmt_del5', {
-            types: ['number'],
+        $.setInputIcon('fmt_del5', {
+            //types: ['number'],
             //内容长度固定为15个字节
-            valLen: 10,
-            icon: { lbl: '秒', del: function(elem) {
-                $.console.log('icon-del:', elem)
-            }}
+            //valLen: 10,
+            //icon: { 
+                btn: {text:'设置',width:40, bg: '#ddd', func:function() { alert('设置'); } },
+                unit: '秒', 
+                lbl: {text:'时长', width:40, color: '#f00' }, 
+                del: function(elem) {
+                    $.console.log('icon-del:', elem)
+                }
+            //}
         });
 
 
         //$.setInputIcon('fmt_pwd', 'pwd');
         $.setInputIcon('fmt_pwd', {
             len:true,pwd:true,del:true,
-            ico: {path: 'imgs/warning.png', width:14, left: 5, right: 5}
+            icon: {path: 'imgs/warning.png', width:14, left: 5, right: 5}
         });
 
         /*
@@ -261,7 +266,7 @@ button {width:120px;height:30px;}
             $.setInputIcon('fmt_txt', {
                 ico: {path: 'imgs/success.png', width:14, left: 5, right: 5}
             });
-        }, 1000);
+        }, 3000);
 
         $.setInputFormat('fmt_num_15', {
             types: ['number'],
@@ -403,7 +408,7 @@ button {width:120px;height:30px;}
             types: ['int', 'option'],
             options: buildOptions(channels, '通道'),
             config: { readonly: false, title: '请选择通道'  },
-            icon: {lbl: {text:'通道',width:40} }
+            icon: {unit: {text:'通道',width:40} }
         });
 
         $.setInputFormat('fmt_channel2', {

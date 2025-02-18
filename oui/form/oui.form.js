@@ -19,7 +19,7 @@
         DATA_FORMAT: 'data-format,dataformat,value-format,valueformat',
         OLD_VALUE: 'old-value,oldvalue',
         DATA_EXCEPT: 'data-except,except',
-        DATA_REQUIRED: 'required,data-required', 
+        DATA_REQUIRED: 'required,data-required',
         DATA_READONLY: 'readonly,data-readonly',
         DATA_EDITABLE: 'editable,data-editable',
         DATA_TYPE: 'data-type,datatype,value-type,valuetype',
@@ -39,1157 +39,1157 @@
     var isElement = function (element) {
         return element !== null && typeof element === 'object' && typeof element.nodeType === 'number';
     },
-    initFormConfig = function (formElement, options, elements) {
-        if ($.isString(formElement)) { formElement = document.getElementById(formElement.replace(/^[#]+/, '')); }
-        if (!$.isElement(formElement) || !formElement.getElementsByTagName) {
-            //throw new Error('element 参数错误');
-            //throw new Error('element \u53c2\u6570\u9519\u8bef');
-            console.error('element \u53c2\u6570\u9519\u8bef');
-            return false;
-        }
-        var id = formElement.id || '',
-            opt = $.extend({}, options);
+        initFormConfig = function (formElement, options, elements) {
+            if ($.isString(formElement)) { formElement = document.getElementById(formElement.replace(/^[#]+/, '')); }
+            if (!$.isElement(formElement) || !formElement.getElementsByTagName) {
+                //throw new Error('element 参数错误');
+                //throw new Error('element \u53c2\u6570\u9519\u8bef');
+                console.error('element \u53c2\u6570\u9519\u8bef');
+                return false;
+            }
+            var id = formElement.id || '',
+                opt = $.extend({}, options);
 
-        opt.tagPattern = opt.tagPattern || opt.tagAppend || opt.tagNames || opt.tagName;
+            opt.tagPattern = opt.tagPattern || opt.tagAppend || opt.tagNames || opt.tagName;
 
-        var messages = {
-            required: '\u8bf7\u8f93\u5165{0}',//请输入
-            select: '\u8bf7\u9009\u62e9{0}',//请选择
-            minLength: '{0}\u8bf7\u52ff\u5c0f\u4e8e{1}\u4e2a\u5b57\u7b26',
-            maxLength: '{0}\u8bf7\u52ff\u8d85\u8fc7{1}\u4e2a\u5b57\u7b26',
-            //{0}长度为{1}个字符
-            valLength: '{0}\u957f\u5ea6\u4e3a{1}\u4e2a\u5b57\u7b26',
-            //请输入 u5165大于或等于 的
-            minValue: '\u8bf7\u8f93\u5165\u5927\u4e8e\u6216\u7b49\u4e8e{0}\u7684{1}',
-            //请输入 小于或等于 的
-            maxValue: '\u8bf7\u8f93\u5165\u5c0f\u4e8e\u6216\u7b49\u4e8e{0}\u7684{1}',
-            //请输入  之间的
-            minMax: '\u8bf7\u8f93\u5165{0} - {1}\u4e4b\u95f4\u7684{2}',
-            //请输入
-            number: '\u8bf7\u8f93\u5165{0}',
-            //请输入正确的
-            pattern: '\u8bf7\u8f93\u5165\u6b63\u786e\u7684{0}',
-            //输入有误
-            optionValue: '{0}\u8f93\u5165\u6709\u8bef'
-        },
-            highLight = {
-                styleId: 'form-validate-css-' + id,
-                className: 'form-validate-css-' + id,
-                cssText: 'border:solid 1px #f00;'
+            var messages = {
+                required: '\u8bf7\u8f93\u5165{0}',//请输入
+                select: '\u8bf7\u9009\u62e9{0}',//请选择
+                minLength: '{0}\u8bf7\u52ff\u5c0f\u4e8e{1}\u4e2a\u5b57\u7b26',
+                maxLength: '{0}\u8bf7\u52ff\u8d85\u8fc7{1}\u4e2a\u5b57\u7b26',
+                //{0}长度为{1}个字符
+                valLength: '{0}\u957f\u5ea6\u4e3a{1}\u4e2a\u5b57\u7b26',
+                //请输入 u5165大于或等于 的
+                minValue: '\u8bf7\u8f93\u5165\u5927\u4e8e\u6216\u7b49\u4e8e{0}\u7684{1}',
+                //请输入 小于或等于 的
+                maxValue: '\u8bf7\u8f93\u5165\u5c0f\u4e8e\u6216\u7b49\u4e8e{0}\u7684{1}',
+                //请输入  之间的
+                minMax: '\u8bf7\u8f93\u5165{0} - {1}\u4e4b\u95f4\u7684{2}',
+                //请输入
+                number: '\u8bf7\u8f93\u5165{0}',
+                //请输入正确的
+                pattern: '\u8bf7\u8f93\u5165\u6b63\u786e\u7684{0}',
+                //输入有误
+                optionValue: '{0}\u8f93\u5165\u6709\u8bef'
             },
-            op = {
-                tagPattern: new RegExp('INPUT|SELECT|TEXTAREA' + (opt.tagPattern ? '|' + opt.tagPattern : ''), 'i'),
-                typePattern: /text|hidden|password|select-one|checkbox|radio|email|url|number|range|date|search/,
-                valuePattern: {
-                    email: /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/,
-                    url: /(^#)|(^http(s*):\/\/[^\s]+\.[^\s]+)/,
-                    date: /^(\d{4})[-\/](\d{1}|0\d{1}|1[0-2])([-\/](\d{1}|0\d{1}|[1-2][0-9]|3[0-1]))*$/,
-                    identity: /(^\d{15}$)|(^\d{17}(x|X|\d)$)/
+                highLight = {
+                    styleId: 'form-validate-css-' + id,
+                    className: 'form-validate-css-' + id,
+                    cssText: 'border:solid 1px #f00;'
                 },
-                formElement: formElement,
-                submitHandler: opt.submitHandler || opt.submit,
-                // 如果 opt参数中没有包含 fields 或者 rules 字段，则取整个opt参数作为字段规则
-                // 这个情况会出现在直接调用 getFormData 的时候
-                fields: opt.fields || opt.rules ? $.extend({}, opt.fields, opt.rules) : $.extend({}, opt),
-                configs: $.extend({
-                    defaultValue: '',
-                    minValue: '',
-                    maxValue: '',
-                    minLength: '',
-                    maxLength: '',
-                    valLength: '',
-                    optionValue: '',    //选项值
-                    tagName: '*',       //指定要获取的HTML标签类型
-                    prefix: '',
-                    removePrefix: true,
-                    checkNumber: true,
-                    isJoin: true,
-                    joinSeparate: ',',
-                    focusInvalid: false,
-                    //是否允许空值
-                    empty: false,
-                    //是否严格模式（检测输入内容的类型）
-                    strict: false,
-                    //是否显示默认数字,数字型字段，若值为空，则显示默认值或0
-                    dataShow: true,
-                    md5: false,
-                    readonly: null,
-                    editable: null,
-                    same: { id: '', msg: '' },
-                    distinct: { id: '', msg: '' },
-                    //检测字段内容是否已存在
-                    exists: null,
-                    //提示信息回调 function(status, message, element){}
-                    //status 验证状态：true-表示通过，false-表示失败
-                    tooltip: null,
-                    //提示信息显示时长（毫秒），0-表示一直显示，若大于0表示会定时关闭
-                    tooltipTime: null,
-                    tooltipStyle: null,
-                    //外部验证回调函数 function(value, element){} 返回值为 boolean （true|false）
-                    //返回 true - 表示验证通过，false-表示验证失败
-                    validate: null,
-                    singleStep: false,  //单步执行验证
-                    highLight: false,   //是否高亮显示
-                    highLightStyle: 'border:solid 1px #f00;',   //高亮显示的样式，默认为红色边框
-                    ignore: false,
-                    dynamic: false,     //表单内容是否动态改变
-                    messages: {}
-                }, opt.configs),
-                messages: $.extend({}, messages, opt.messages),
-                trim: function (s) { return ('' + s).replace(/(^[\s]*)|([\s]*$)/g, ''); },
-                isMatch: function (key, pattern) {
-                    return (pattern || /^[a-z0-9_]+[A-Z]/).test(key) || (pattern || /(^[a-z0-9]+_)[A-Za-z\d]/).test(key);
-                },
-                checkElement: function (element) {
-                    if ($.isString(element)) { element = document.getElementById(element); }
-                    if (!$.isObject(element) || !element.getElementsByTagName) { throw new Error('element \u53c2\u6570\u8f93\u5165\u9519\u8bef'); } //参数输入错误
-                    return element;
-                },
-                isCheckBox: function (element, type) { return /^checkbox|radio$/.test(type); },
-                isChecked: function (element, type) { return /^checkbox|radio$/.test(type) ? element.checked : true; },
-                isSelect: function (element, tag) { return /^SELECT$/.test(tag); },
-                isLegalName: function (name) { return name && /^[_A-Za-z]/.test(name); },
-                swap: function (o) {
-                    var tmp;
-                    if (o.minValue && o.maxValue && o.minValue > o.maxValue) {
-                        tmp = o.minValue; o.minValue = o.maxValue, o.maxValue = tmp;
-                    }
-                    if (o.minLength && o.maxLength && o.minLength > o.maxLength) {
-                        tmp = o.minLength; o.minLength = o.maxLength, o.maxLength = tmp;
-                    }
-                    return o;
-                },
-                getLabels: function () {
-                    var arr = formElement.getElementsByTagName('label'),
-                        labels = {};
-
-                    for (var i = 0; i < arr.length; i++) {
-                        var o = arr[i],
-                            f = o.getAttribute('for'),
-                            k = op.getKey(f),
-                            t = $.getInnerText(o);
-                        labels[k] = { title: t, obj: o };
-                    }
-                    return labels;
-                },
-                getKey: function (key, configs) {
-                    if (!$.isString(key)) {
-                        key = '';
-                    }
-                    if (!$.isObject(configs)) {
-                        configs = op.configs;
-                    }
-                    if (configs.removePrefix && ($.isString(configs.prefix) || $.isBoolean(configs.prefix, false))) {
-                        if (op.isMatch(key)) {
-                            key = key.replace(/(^[a-z\d]+_)|(^txt|ddl|lbl|chb)[_]?/g, '');
-                        } else if ($.isString(configs.prefix) && configs.prefix !== '') {
-                            var pos = key.indexOf(configs.prefix);
-                            if (pos >= 0) {
-                                key = key.substr(pos + configs.prefix.length);
-                            }
-                        }
-                    }
-                    return key;
-                },
-                getValue: function (element, noDefault) {
-                    //console.log('getValue: ', element.id, ', field: ', element.field, ', value: ', element.value);
-                    var val = element.value;
-                    if (element.field) {
-                        var attr = element.field.attribute || element.field.attr;
-                        // 获取 value 或 指定的属性值 或 默认值
-                        return op.trim((!op.isLegalName(attr) ? val : element.getAttribute(attr)) || (!noDefault ? element.field.defaultValue : ''));
-                    }
-                    return op.trim(val);
-                },
-                getCheckValue: function (element, value, field, isSingle) {
-                    value = value || op.getValue(element);
-                    field = field || element.field;
-                    isSingle = isSingle || element.isSingle;
-                    var configs = element.configs,
-                        messages = $.extend({}, op.messages, field.messages),
-                        required = !$.isUndefined($.getAttribute(element, Config.DATA_REQUIRED));
-
-                    required = $.isBoolean($.getParamCon(field.required, required), false);
-                    $.console.log('get:', element.id, $.getAttribute(element, Config.DATA_REQUIRED), field.required);
-
-                    if (value === 'on') {
-                        value = element.checked ? 1 : 0;
-                    } else {
-                        if (element.checked && field.dataType !== 'string' && $.isNumeric(value)) {
-                            switch (field.dataType) {
-                                case 'int': case 'long': value = parseInt(value, 10); break;
-                                case 'float': case 'double': case 'decimal': value = parseFloat(value, 10); break;
-                            }
-                        } else if (!element.checked) {
-                            value = isSingle && $.isNumeric(value) ? 0 : '';
-                        }
-                    }
-                    if (required && isSingle && !element.checked) {
-                        var msg = (messages.select || configs.messages.select).format(field.title || '');
-                        return { pass: false, value: value, message: msg };
-                    }
-                    return { pass: true, value: value, message: '' };
-                },
-                checkValue: function (element, value, field, configs) {
-                    var isEvent = typeof configs === 'undefined', keyCode = 0;
-                    if (isEvent && value) {
-                        keyCode = $.getKeyCode(value);
-                        value = null;
-                    }
-                    value = value || op.getValue(element);
-                    field = field || element.field;
-                    configs = configs || element.configs;
-
-                    //获取元素内容时，若元素指定了dataformat，则需要去除自动添加的分隔符
-                    var fmt = $.getAttribute(element, Config.DATA_FORMAT);
-                    if (value !== '' && fmt) {
-                        var p = fmt.indexOf(':');
-                        //这里一定要把大写的S转换成小写的s
-                        //因为在正则表达式中\s表示空白字符，\S表示非空白字符，意思完全相反
-                        var k = (p > 0 ? fmt.substr(p + 1, 1) : '').replace('S', 's');
-                        if (k) {
-                            value = value.replace(new RegExp('\\' + k, 'gi'), '');
-                        }
-                    }
-
-                    var len = value.length,
-                        messages = $.extend({}, op.messages, field.messages),
-                        getTitle = function (field, title) {
-                            var str = field.title || title,
-                                lbl = op.labels[field.key] || {};
-                            return str || lbl.title || '';
-                        },
-                        result = function (pass, value, message) {
-                            if (!pass && arguments.length <= 2) { message = value; value = ''; }
-                            return { pass: pass, value: value, message: message || '' };
-                        },
-                        title = getTitle(field, '').replace(/\s/g, ''),
-                        required = field.required || !$.isUndefined($.getAttribute(element, Config.DATA_REQUIRED)),
-                        readonly = field.readonly || !$.isUndefined($.getAttribute(element, Config.DATA_READONLY)), 
-                        editable = field.editable || ['1','true', 'editable'].indexOf($.getAttribute(element, Config.DATA_EDITABLE)) > -1;
-
-                    if (required && !field.empty && '' === value) {   // 空值验证
-                        if (field.tag === 'SELECT' || op.isLegalName(field.attribute)) {
-                            return result(false, (messages.select || messages.required || configs.messages.select).format(title));
-                        } else {
-                            return result(false, (messages.required || configs.messages.required).format(title));
-                        }
-                    }
-
-                    if (field.dataType === 'string') {
-                        var pattern = field.pattern || op.valuePattern[field.type], validate = field.validate || configs.validate,
-                            minLen = field.minLength || field.minLen,
-                            maxLen = field.maxLength || field.maxLen,
-                            valLen = field.valLength || field.valLen,
-                            optionValue = field.optionValue;
-
-                        if (!$.isInteger(minLen)) {
-                            minLen = parseInt($.getAttribute(element, Config.MIN_LENGTH, ''), 10);
-                        }
-                        if (!$.isInteger(maxLen)) {
-                            maxLen = parseInt($.getAttribute(element, Config.MAX_LENGTH, ''), 10);
-                        }
-                        if (!$.isInteger(valLen)) {
-                            valLen = parseInt($.getAttribute(element, Config.VAL_LENGTH, ''), 10);
-                        }
-
-                        /*
-                            字符串输入验证规则
-                            1.外部验证
-                            2.若为必填项，无输入，则验证不通过
-                            3.若为有输入，不管是否必填，都需要验证字符长度和输入格式
-                        */
-                        if ($.isFunction(validate)) {    // 外部验证函数（优先）
-                            if (!validate(value, element)) { return result(false); }
-                        } else if (required && ('' === value || len <= 0)) {
-                            return result(false, (messages.required || configs.messages.required).format(title));
-                        } else if (len > 0) {
-                            if ($.isInteger(valLen) && valLen > 0 && len !== valLen) {
-                                return result(false, (messages.valLength || configs.messages.valLength).format(title, valLen));
-                            } else if ($.isInteger(minLen) && len < minLen) {      //验证内容长度
-                                return result(false, (messages.minLength || configs.messages.minLength).format(title, minLen));
-                            } else if ($.isInteger(maxLen) && len > maxLen) {
-                                return result(false, (messages.maxLength || configs.messages.maxLength).format(title, maxLen));
-                            } else if (pattern && !pattern.test(value)) {   // 正则表达式验证
-                                return result(false, (messages.pattern || configs.messages.pattern).format(title));
-                            }
-                            //字符选项模式
-                            if ($.isUndefined(optionValue)) {
-                                optionValue = $.getAttribute(element, Config.OPPTION_VALUE, '');
-                            }
-                            optionValue = optionValue.length > 0 ? optionValue.split(/[,;\|]/) : [];
-                            //验证输入内容是否在选项中
-                            if ((!editable || readonly) && optionValue.length > 0) {
-                                for (var i = 0; i < optionValue.length; i++) {
-                                    var ps = optionValue[i].split(/[:\|]/);
-                                    if (ps[0] === value) {
-                                        return result(true, value);
-                                    }
-                                }
-                                return result(false, (messages.optionValue || configs.messages.optionValue).format(title) + '<br />可选项：' + optionValue);
-                            }
-                        }
-                    } else if (['ip','ipv4'].indexOf(field.dataType) > -1) {
-                        //限制内容长度为15个字节
-                        element.maxLength = 15;
-
-                        var KEY_CODE_BACKSPACE = 8, KEY_CODE_DELETE = 46;
-                        if ([KEY_CODE_BACKSPACE, KEY_CODE_DELETE].indexOf(keyCode) < 0 && /^(local|route|127.|192.|255.|::1)$/i.test(value)) {
-                            element.value = (value = value.replace(/^(local|127.|::1)$/i, '127.0.0.1')
-                                .replace(/^(route|192.)$/i, '192.168.1.1')
-                                .replace(/^255.$/, '255.255.255.0'));
-                        } else if (!$.PATTERN.Ip.test(value) && $.isString(value, true)) {
-                            return result(false, ('{0}\u683c\u5f0f\u8f93\u5165\u9519\u8bef').format(title));    //格式输入错误
-                        }
-                    } else {
-                        // 验证数字输入，大小值范围限定，其中 type="hidden" 默认值至少为0
-                        //数字
-                        var val = value.trim(), numType = '\u6570\u5b57', 
-                            strict = field.strict || configs.strict;
-
-                        //不是必填项的数字，如果没有填写，则取默认值或0
-                        if (value === '' && !required) {
-                            value = field.value || 0;
-                            var attrShow = $.getAttribute(element, Config.DATA_SHOW, '1').toInt() === 1,
-                                dataShow = $.isBoolean($.getParamCon(field.dataShow, attrShow), true);
-                            //若指定了不显示默认值（或0），则不显示
-                            if (!isEvent && dataShow && typeof element.value !== 'undefined') {
-                                element.value = value;
-                            }
-                        }
-                        switch (field.dataType) {
-                            case 'int':
-                            case 'long':
-                                value = parseInt(value, 10);
-                                numType = '\u6574\u6570';//整数
-                                break;
-                            case 'float':
-                            case 'double':
-                            case 'decimal':
-                                value = parseFloat(value, 10);
-                                numType = '\u5c0f\u6570';//小数
-                                break;
-                            case 'port':
-                                value = parseInt(value, 10);
-                                if (!isNaN(value) && (value < 0 || value > 65535)) {
-                                    return result(false, '\u7aef\u53e3\u6570\u503c\u5e94\u4ecb\u4e8e0 - 65535\u4e4b\u95f4'); //端口数值应介于 之间
-                                }
-                                numType = '\u7aef\u53e3';//端口
-                                break;
-                            case 'bool':    //布尔值只有2种状态 0 或 1
-                                if (!/^([01\s]+|true|false|yes|no)$/i.test(value)) {
-                                    return result(false, '\u8bf7\u8f93\u5165\u5e03\u5c14\u503c0\u62161');  //请输入布尔值0或1
-                                }
-                                if (/^([01][01\s]+|true|false|yes|no)$/i.test(value)) {
-                                    value = ('' + value).replace(/^(true|[1][01\s]+|yes)$/i, 1).replace(/^(false|[0][01\s]+|no)$/i, 0);
-                                    //value = /^true$/i.test(value) ? 1 : 0;
-                                    element.value = value;
-                                }
-                                value = parseInt(value, 10);
-                                //重新赋值
-                                val = value.toString();
-                                break;
-                        } 
-                        if (isNaN(value)) {
-                            var dv = $.isNumeric(field.value) ? field.value :
-                                ($.isNumeric(configs.defaultValue) ? configs.defaultValuel : (element.type === 'hidden' ? 0 : ''));
-
-                            if ($.isNumeric(dv)) {
-                                value = dv;
-                            } else if (configs.checkNumber) {
-                                return result(false, (messages.number || configs.messages.number).format(numType));
-                            }
-                        }
-                        if (configs.checkNumber) {
-                            var min = field.minValue || configs.minValue || field.minVal || configs.minVal || field.min || configs.min,
-                                max = field.maxValue || configs.maxValue || field.maxVal || configs.maxVal || field.max || configs.max,
-                                msg = '';
-
-                            if ($.isUndefined(min)) {
-                                min = parseFloat($.getAttribute(element, Config.MIN_VALUE, ''), 10);
-                            }
-                            if ($.isUndefined(max)) {
-                                max = parseFloat($.getAttribute(element, Config.MAX_VALUE, ''), 10);
-                            }
-
-                            if (element.tagName.toLowerCase() === 'select') {
-                                msg = (messages.select || messages.required || configs.messages.select).format(title);
-                            } else {
-                                if ($.isNumeric(min) && $.isNumeric(max)) {
-                                    msg = (messages.minMax || configs.messages.minMax).format(min, max, numType);
-                                } else if ($.isNumeric(min)) {
-                                    msg = (messages.minValue || configs.messages.minValue).format(min, numType);
-                                } else if ($.isNumeric(max)) {
-                                    msg = (messages.maxValue || configs.messages.maxValue).format(max, numType);
-                                }
-                            }
-
-                            //严格模式，需要验证输入的内容格式，比如验证是否是整数
-                            if (strict) {
-                                //验证输入的(原始)内容是否是整数
-                                if (field.dataType === 'int' && !$.isInteger(val)) {
-                                    return result(false, msg);
-                                }
-                            }
-                            if (($.isNumeric(min) && value < min) || ($.isNumeric(max) && value > max)) {
-                                return result(false, msg);
-                            }
-
-                            var optionValue = field.optionValue;
-                            if ($.isUndefined(optionValue)) {
-                                optionValue = $.getAttribute(element, Config.OPPTION_VALUE, '');
-                            }
-                            optionValue = optionValue.length > 0 ? optionValue.split(/[,;\|]/) : [];
-                            if ((!editable || readonly) && optionValue.length > 0) {
-                                if (val.length <= 0) {
-                                    return !required ? result(true, value) : result(false, (messages.required || configs.messages.required).format(title));
-                                }
-                                for (var i = 0; i < optionValue.length; i++) {
-                                    var pv = field.dataType === 'float' ? parseFloat(optionValue[i], 10) : parseInt(optionValue[i], 10);
-                                    //parseInt parseFloat 自带容错，比如 0123abc parseInt()之后的结果是数字 123
-                                    //虽然结果是数字，但是严格来说，输入是错误的，真正的输入内容应该是 只有123才对
-                                    //所以为了严谨起见，不但要比较数值还要比较输入内容
-                                    if (pv === value && optionValue[i] === val) {
-                                        return result(true, value);
-                                    }
-                                }
-                                return result(false, (messages.optionValue || configs.messages.optionValue).format(title) + 
-                                    '<br />\u53ef\u9009\u9879\uff1a' + optionValue.join(', '));     //可选项
-                            }
-                        }
-                    }
-                    //相同内容检测
-                    if ($.isObject(field.same) && field.same.id) {
-                        var target = document.getElementById(field.same.id);
-                        if (target && target.value !== value) {
-                            //两次输入的内容不一样
-                            return result(false, field.same.message || field.same.msg || '\u4e24\u6b21\u8f93\u5165\u7684\u5185\u5bb9\u4e0d\u4e00\u6837');
-                        }
-                    }
-                    //内容去重检测
-                    if ($.isObject(field.distinct) && field.distinct.id) {
-                        var target = document.getElementById(field.distinct.id);
-                        if (target && target.value === value) {
-                            return result(false, field.distinct.message || field.distinct.msg || '\u5185\u5bb9\u4e0d\u80fd\u91cd\u590d');//内容不能重复
-                        }
-                    }
-                    //检测内容是否存在
-                    if ($.isFunction(field.exists)) {
-                        field.exists(element);
-                    }
-                    return result(true, value);
-                },
-                showTooltip: function (result, element, isSubmit, forname) {
-                    //记录提示信息隐藏次数，防止重复隐藏
-                    if ($.isUndefined(element.hideTooltip)) {
-                        element.hideTooltip = 0;
-                    }
-                    var configs = element.configs;
-                    var tooltip = element.field.tooltip || configs.tooltip || function (status, message, element) {
-                        if (status) {
-                            $.tooltip.close(element);
-                            $(element).removeClass(highLight.className);
-                        } else {
-                            var time = element.field.tooltipTime;
-                            if (!$.isNumber(time) || time < -1) {
-                                time = configs.tooltipTime;
-                            }
-                            var options = { time: $.isNumber(time) ? time : 0, tipsMore: true, for: forname },
-                                position = (element.field || {}).position || configs.position,
-                                tooltipStyle = configs.tooltipStyle ||
-                                    (configs.styles || configs.style || {}).tooltip ||
-                                    op.configs.tooltipStyle ||
-                                    (op.configs.styles || op.configs.style || {}).tooltip;
-
-                            if ($.isString(position, true) || $.isNumber(position)) {
-                                options.position = position;
-                            }
-                            if (tooltipStyle) {
-                                options.tooltipStyle = tooltipStyle;
-                            }
-                            $.tooltip(message, element, options);
-                            if (configs.highLight) {
-                                $(element).removeClass(highLight.className);
-                                $(element).addClass(highLight.className);
-                            }
-                            //单步模式，若输入不为空时，焦点锁定
-                            if (configs.singleStep && configs.focusInvalid && (op.getValue(element, true) !== '' || isSubmit)) {
-                                op.setFocus(element);
-                            }
-                        }
-                    };
-                    if ($.isFunction(tooltip)) { tooltip(result.pass, result.message, element); }
-                },
-                loadCssCode: function (code) {
-                    var head = document.getElementsByTagName('head')[0];
-                    if (document.getElementById(highLight.styleId) != null || !head) { return false; }
-
-                    var css = '.' + highLight.className + '{' + (code || highLight.cssText || '') + '}',
-                        style = document.createElement('style');
-
-                    style.id = highLight.styleId; style.type = 'text/css'; style.rel = 'stylesheet';
-
-                    if (style.appendChild) {
-                        style.appendChild(document.createTextNode(css));    //for Chrome Firefox Opera Safari
-                    } else {
-                        style.styleSheet.cssText = css; //for IE
-                    }
-                    head.appendChild(style);
-                },
-                getFieldConfig: function (element, fields, ignoreCase) {
-                    var isValue = function (s) { return !$.isUndefined(s) && !$.isObject(s); },
-                        checkField = function (field, elem) {
-                            var arr = ['string', 'int', 'float', 'decimal'];
-                            if (!$.isString(field.dataType) || arr.indexOf(field.dataType) < 0) {
-                                //var elemDataType = $.getAttribute(elem, 'data-type,datatype,value-type,valuetype', '');
-                                var elemDataType = $.getAttribute(elem, Config.DATA_TYPE, '');
-                                field.dataType = elemDataType || arr[0];
-                            }
-                            if (!$.isTrue(field.encode)) {
-                                field.encode = $.getAttribute(elem, Config.ENCODE, '').isTrue();
-                            }
-                            if (!$.isTrue(field.decode)) {
-                                field.decode = $.getAttribute(elem, Config.DECODE, '').isTrue();
-                            }
-                            if (!$.isTrue(field.filter)) {
-                                field.filter = $.getAttribute(elem, Config.FILTER, '').isTrue();
-                            }
-
-                            //默认值字段设置
-                            if (field.value === '') {
-                                field.value = isValue(field.val) ? field.val : isValue(field.defaultValue) ? field.defaultValue : field.value;
-                            }
-                            //如果没有设置默认值，则取用（自定义的）默认值属性的值
-                            if (field.value === '') {
-                                var defVal = $.getAttribute(elem, Config.DEFAULT_VALUE, '');
-                                if (!$.isUndefined(defVal)) {
-                                    field.value = defVal;
-                                }
-                            }
-                            if (!$.isTrue(field.required) && !$.isFalse(field.required)) {
-                                field.required = !$.isUndefined($.getAttribute(elem, Config.DATA_REQUIRED)) || false;
-                            }
-                            return field;
-                        },
-                        id = element.id, name = element.name, nodeType = element.nodeType,
-                        key = op.getKey(id || name), nameKey = op.getKey(name),
-                        keyField = fields[key],
-                        isAppointId = fields[op.getKey(id)] || false,
-                        isSingle = isAppointId || document.getElementsByName(name || '').length <= 1,
-                        dataType = '';
-
-                    if ($.isString(keyField, true)) {
-                        dataType = keyField;
-                        keyField = {};
-                    } else if ($.isObject(keyField)) {
-                        if (!$.isBoolean(keyField.required)) {
-                            keyField.required = keyField.require || null;
-                        }
-                        keyField.pattern = keyField.regex || keyField.pattern || '';
-                    }
-
-                    var field = checkField(op.swap($.extend({
-                        title: '',                  //字段名称（用于提示信息）
-                        type: '',                   //字段类型（email,url等），用于格式验证
-                        dataKey: '',                //指定值关键字（默认不用指定）
-                        dataType: dataType,         //值类型（string,int,float)
-                        defaultValue: '',           //默认值 (val, value, defaultValue)
-                        value: '',                  //获取到的字段内容
-                        attribute: '',              //获取指定的属性值作为value
-                        minValue: '', maxValue: '', //最小值、最大值（用于验证输入的数字大小）
-                        required: null,             //是否必填项
-                        empty: false,               //是否允许空值
-                        dataShow: null,             //是否显示默认数字,数字型字段，若值为空，则显示默认值或0
-                        strict: false,              //是否严格模式（检测输入内容的类型）
-                        md5: false,                 //是否MD5加密
-                        encode: false,              //是否进行html标记编码
-                        decode: false,              //是否进行html标记解码
-                        readonly: null,             //控件是否只读
-                        editable: null,             //控件是否可编辑（用于选项输入框）
-                        //为加强数据安全，默认过滤HTML标记
-                        filter: true,              //是否过滤html标记
-                        minLength: '',              //字节最小长度
-                        maxLength: '',              //字符最大长度
-                        pattern: '',                //正则表达式（内部验证）
+                op = {
+                    tagPattern: new RegExp('INPUT|SELECT|TEXTAREA' + (opt.tagPattern ? '|' + opt.tagPattern : ''), 'i'),
+                    typePattern: /text|hidden|password|select-one|checkbox|radio|email|url|number|range|date|search/,
+                    valuePattern: {
+                        email: /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/,
+                        url: /(^#)|(^http(s*):\/\/[^\s]+\.[^\s]+)/,
+                        date: /^(\d{4})[-\/](\d{1}|0\d{1}|1[0-2])([-\/](\d{1}|0\d{1}|[1-2][0-9]|3[0-1]))*$/,
+                        identity: /(^\d{15}$)|(^\d{17}(x|X|\d)$)/
+                    },
+                    formElement: formElement,
+                    submitHandler: opt.submitHandler || opt.submit,
+                    // 如果 opt参数中没有包含 fields 或者 rules 字段，则取整个opt参数作为字段规则
+                    // 这个情况会出现在直接调用 getFormData 的时候
+                    fields: opt.fields || opt.rules ? $.extend({}, opt.fields, opt.rules) : $.extend({}, opt),
+                    configs: $.extend({
+                        defaultValue: '',
+                        minValue: '',
+                        maxValue: '',
+                        minLength: '',
+                        maxLength: '',
+                        valLength: '',
+                        optionValue: '',    //选项值
+                        tagName: '*',       //指定要获取的HTML标签类型
+                        prefix: '',
+                        removePrefix: true,
+                        checkNumber: true,
+                        isJoin: true,
+                        joinSeparate: ',',
+                        focusInvalid: false,
+                        //是否允许空值
+                        empty: false,
+                        //是否严格模式（检测输入内容的类型）
+                        strict: false,
+                        //是否显示默认数字,数字型字段，若值为空，则显示默认值或0
+                        dataShow: true,
+                        md5: false,
+                        readonly: null,
+                        editable: null,
+                        same: { id: '', msg: '' },
+                        distinct: { id: '', msg: '' },
+                        //检测字段内容是否已存在
+                        exists: null,
                         //提示信息回调 function(status, message, element){}
                         //status 验证状态：true-表示通过，false-表示失败
                         tooltip: null,
                         //提示信息显示时长（毫秒），0-表示一直显示，若大于0表示会定时关闭
                         tooltipTime: null,
-                        //给SELECT赋值时，当下拉选项值不存在时，是否追加（特殊情况使用）
-                        appendOption: false,
+                        tooltipStyle: null,
                         //外部验证回调函数 function(value, element){} 返回值为 boolean （true|false）
                         //返回 true - 表示验证通过，false-表示验证失败
                         validate: null,
-                        messages: {},               //验证失败时显示的提示信息（为空则显示默认的信息）
-                        //tooltip position
-                        position: '',
-                        tooltipStyle: null,
-                        same: { id: '', msg: '' },
-                        distinct: { id: '', msg: '' },
-                        //检测字段内容是否已存在
-                        exists: null
-                    }, keyField)), element);
+                        singleStep: false,  //单步执行验证
+                        highLight: false,   //是否高亮显示
+                        highLightStyle: 'border:solid 1px #f00;',   //高亮显示的样式，默认为红色边框
+                        ignore: false,
+                        dynamic: false,     //表单内容是否动态改变
+                        messages: {}
+                    }, opt.configs),
+                    messages: $.extend({}, messages, opt.messages),
+                    trim: function (s) { return ('' + s).replace(/(^[\s]*)|([\s]*$)/g, ''); },
+                    isMatch: function (key, pattern) {
+                        return (pattern || /^[a-z0-9_]+[A-Z]/).test(key) || (pattern || /(^[a-z0-9]+_)[A-Za-z\d]/).test(key);
+                    },
+                    checkElement: function (element) {
+                        if ($.isString(element)) { element = document.getElementById(element); }
+                        if (!$.isObject(element) || !element.getElementsByTagName) { throw new Error('element \u53c2\u6570\u8f93\u5165\u9519\u8bef'); } //参数输入错误
+                        return element;
+                    },
+                    isCheckBox: function (element, type) { return /^checkbox|radio$/.test(type); },
+                    isChecked: function (element, type) { return /^checkbox|radio$/.test(type) ? element.checked : true; },
+                    isSelect: function (element, tag) { return /^SELECT$/.test(tag); },
+                    isLegalName: function (name) { return name && /^[_A-Za-z]/.test(name); },
+                    swap: function (o) {
+                        var tmp;
+                        if (o.minValue && o.maxValue && o.minValue > o.maxValue) {
+                            tmp = o.minValue; o.minValue = o.maxValue, o.maxValue = tmp;
+                        }
+                        if (o.minLength && o.maxLength && o.minLength > o.maxLength) {
+                            tmp = o.minLength; o.minLength = o.maxLength, o.maxLength = tmp;
+                        }
+                        return o;
+                    },
+                    getLabels: function () {
+                        var arr = formElement.getElementsByTagName('label'),
+                            labels = {};
 
-                    if (!$.isObject(field.messages)) {
-                        field.messages = { required: field.messages };
-                    }
-                    field.key = key;
-                    //缓存控件Tag类型
-                    field.tag = element.tagName;
-                    //缓存字段配置
-                    element.field = field, element.key = key;
-                    //标记元素是Id模式，还是Name数组模式
-                    element.isSingle = isSingle;
-
-                    return {
-                        id: id, name: name, key: key, nameKey: nameKey, value: op.getValue(element),
-                        dataKey: field.dataKey, isSingle: isSingle, field: field
-                    };
-                },
-                setControlEvent: function (element, configs, fieldConfig, formElement) {
-                    if (!element.isSetEvent) {
-                        var fid = formElement.id;
-                        var events = {
-                            focus: function () { op.showTooltip(op.checkValue(this), this, false, fid); },
-                            blur: function () { op.showTooltip(op.checkValue(this), this, false, fid); },
-                            change: function () { op.showTooltip(op.checkValue(this), this, false, fid); },
-                            click: function () { op.showTooltip(op.getCheckValue(this), this, false, fid); },
-                            keyup: function (ev) { op.showTooltip(op.checkValue(this, ev), this, false, fid); }
-                        };
-
-                        if (typeof $.OUI === 'boolean') {
-                            if (!configs.focusInvalid) {
-                                $.addListener(element, 'focus', events['focus']);
+                        for (var i = 0; i < arr.length; i++) {
+                            var o = arr[i],
+                                f = o.getAttribute('for'),
+                                k = op.getKey(f),
+                                t = $.getInnerText(o);
+                            labels[k] = { title: t, obj: o };
+                        }
+                        return labels;
+                    },
+                    getKey: function (key, configs) {
+                        if (!$.isString(key)) {
+                            key = '';
+                        }
+                        if (!$.isObject(configs)) {
+                            configs = op.configs;
+                        }
+                        if (configs.removePrefix && ($.isString(configs.prefix) || $.isBoolean(configs.prefix, false))) {
+                            if (op.isMatch(key)) {
+                                key = key.replace(/(^[a-z\d]+_)|(^txt|ddl|lbl|chb)[_]?/g, '');
+                            } else if ($.isString(configs.prefix) && configs.prefix !== '') {
+                                var pos = key.indexOf(configs.prefix);
+                                if (pos >= 0) {
+                                    key = key.substr(pos + configs.prefix.length);
+                                }
                             }
-                            $.addListener(element, 'blur', events['blur']);
+                        }
+                        return key;
+                    },
+                    getValue: function (element, noDefault) {
+                        //console.log('getValue: ', element.id, ', field: ', element.field, ', value: ', element.value);
+                        var val = element.value;
+                        if (element.field) {
+                            var attr = element.field.attribute || element.field.attr;
+                            // 获取 value 或 指定的属性值 或 默认值
+                            return op.trim((!op.isLegalName(attr) ? val : element.getAttribute(attr)) || (!noDefault ? element.field.defaultValue : ''));
+                        }
+                        return op.trim(val);
+                    },
+                    getCheckValue: function (element, value, field, isSingle) {
+                        value = value || op.getValue(element);
+                        field = field || element.field;
+                        isSingle = isSingle || element.isSingle;
+                        var configs = element.configs,
+                            messages = $.extend({}, op.messages, field.messages),
+                            required = !$.isUndefined($.getAttribute(element, Config.DATA_REQUIRED));
 
-                            if (fieldConfig.field.tag === 'SELECT') {
-                                $.addListener(element, 'change', events['change']);
-                            } else if (op.isCheckBox(element, element.type)) {
-                                $.addListener(element, 'click', events['click']);
+                        required = $.isBoolean($.getParamCon(field.required, required), false);
+                        $.console.log('get:', element.id, $.getAttribute(element, Config.DATA_REQUIRED), field.required);
+
+                        if (value === 'on') {
+                            value = element.checked ? 1 : 0;
+                        } else {
+                            if (element.checked && field.dataType !== 'string' && $.isNumeric(value)) {
+                                switch (field.dataType) {
+                                    case 'int': case 'long': value = parseInt(value, 10); break;
+                                    case 'float': case 'double': case 'decimal': value = parseFloat(value, 10); break;
+                                }
+                            } else if (!element.checked) {
+                                value = isSingle && $.isNumeric(value) ? 0 : '';
+                            }
+                        }
+                        if (required && isSingle && !element.checked) {
+                            var msg = (messages.select || configs.messages.select).format(field.title || '');
+                            return { pass: false, value: value, message: msg };
+                        }
+                        return { pass: true, value: value, message: '' };
+                    },
+                    checkValue: function (element, value, field, configs) {
+                        var isEvent = typeof configs === 'undefined', keyCode = 0;
+                        if (isEvent && value) {
+                            keyCode = $.getKeyCode(value);
+                            value = null;
+                        }
+                        value = value || op.getValue(element);
+                        field = field || element.field;
+                        configs = configs || element.configs;
+
+                        //获取元素内容时，若元素指定了dataformat，则需要去除自动添加的分隔符
+                        var fmt = $.getAttribute(element, Config.DATA_FORMAT);
+                        if (value !== '' && fmt) {
+                            var p = fmt.indexOf(':');
+                            //这里一定要把大写的S转换成小写的s
+                            //因为在正则表达式中\s表示空白字符，\S表示非空白字符，意思完全相反
+                            var k = (p > 0 ? fmt.substr(p + 1, 1) : '').replace('S', 's');
+                            if (k) {
+                                value = value.replace(new RegExp('\\' + k, 'gi'), '');
+                            }
+                        }
+
+                        var len = value.length,
+                            messages = $.extend({}, op.messages, field.messages),
+                            getTitle = function (field, title) {
+                                var str = field.title || title,
+                                    lbl = op.labels[field.key] || {};
+                                return str || lbl.title || '';
+                            },
+                            result = function (pass, value, message) {
+                                if (!pass && arguments.length <= 2) { message = value; value = ''; }
+                                return { pass: pass, value: value, message: message || '' };
+                            },
+                            title = getTitle(field, '').replace(/\s/g, ''),
+                            required = field.required || !$.isUndefined($.getAttribute(element, Config.DATA_REQUIRED)),
+                            readonly = field.readonly || !$.isUndefined($.getAttribute(element, Config.DATA_READONLY)),
+                            editable = field.editable || ['1', 'true', 'editable'].indexOf($.getAttribute(element, Config.DATA_EDITABLE)) > -1;
+
+                        if (required && !field.empty && '' === value) {   // 空值验证
+                            if (field.tag === 'SELECT' || op.isLegalName(field.attribute)) {
+                                return result(false, (messages.select || messages.required || configs.messages.select).format(title));
                             } else {
-                                $.addListener(element, 'keyup', events['keyup']);
+                                return result(false, (messages.required || configs.messages.required).format(title));
+                            }
+                        }
+
+                        if (field.dataType === 'string') {
+                            var pattern = field.pattern || op.valuePattern[field.type], validate = field.validate || configs.validate,
+                                minLen = field.minLength || field.minLen,
+                                maxLen = field.maxLength || field.maxLen,
+                                valLen = field.valLength || field.valLen,
+                                optionValue = field.optionValue;
+
+                            if (!$.isInteger(minLen)) {
+                                minLen = parseInt($.getAttribute(element, Config.MIN_LENGTH, ''), 10);
+                            }
+                            if (!$.isInteger(maxLen)) {
+                                maxLen = parseInt($.getAttribute(element, Config.MAX_LENGTH, ''), 10);
+                            }
+                            if (!$.isInteger(valLen)) {
+                                valLen = parseInt($.getAttribute(element, Config.VAL_LENGTH, ''), 10);
+                            }
+
+                            /*
+                                字符串输入验证规则
+                                1.外部验证
+                                2.若为必填项，无输入，则验证不通过
+                                3.若为有输入，不管是否必填，都需要验证字符长度和输入格式
+                            */
+                            if ($.isFunction(validate)) {    // 外部验证函数（优先）
+                                if (!validate(value, element)) { return result(false); }
+                            } else if (required && ('' === value || len <= 0)) {
+                                return result(false, (messages.required || configs.messages.required).format(title));
+                            } else if (len > 0) {
+                                if ($.isInteger(valLen) && valLen > 0 && len !== valLen) {
+                                    return result(false, (messages.valLength || configs.messages.valLength).format(title, valLen));
+                                } else if ($.isInteger(minLen) && len < minLen) {      //验证内容长度
+                                    return result(false, (messages.minLength || configs.messages.minLength).format(title, minLen));
+                                } else if ($.isInteger(maxLen) && len > maxLen) {
+                                    return result(false, (messages.maxLength || configs.messages.maxLength).format(title, maxLen));
+                                } else if (pattern && !pattern.test(value)) {   // 正则表达式验证
+                                    return result(false, (messages.pattern || configs.messages.pattern).format(title));
+                                }
+                                //字符选项模式
+                                if ($.isUndefined(optionValue)) {
+                                    optionValue = $.getAttribute(element, Config.OPPTION_VALUE, '');
+                                }
+                                optionValue = optionValue.length > 0 ? optionValue.split(/[,;\|]/) : [];
+                                //验证输入内容是否在选项中
+                                if ((!editable || readonly) && optionValue.length > 0) {
+                                    for (var i = 0; i < optionValue.length; i++) {
+                                        var ps = optionValue[i].split(/[:\|]/);
+                                        if (ps[0] === value) {
+                                            return result(true, value);
+                                        }
+                                    }
+                                    return result(false, (messages.optionValue || configs.messages.optionValue).format(title) + '<br />可选项：' + optionValue);
+                                }
+                            }
+                        } else if (['ip', 'ipv4'].indexOf(field.dataType) > -1) {
+                            //限制内容长度为15个字节
+                            element.maxLength = 15;
+
+                            var KEY_CODE_BACKSPACE = 8, KEY_CODE_DELETE = 46;
+                            if ([KEY_CODE_BACKSPACE, KEY_CODE_DELETE].indexOf(keyCode) < 0 && /^(local|route|127.|192.|255.|::1)$/i.test(value)) {
+                                element.value = (value = value.replace(/^(local|127.|::1)$/i, '127.0.0.1')
+                                    .replace(/^(route|192.)$/i, '192.168.1.1')
+                                    .replace(/^255.$/, '255.255.255.0'));
+                            } else if (!$.PATTERN.Ip.test(value) && $.isString(value, true)) {
+                                return result(false, ('{0}\u683c\u5f0f\u8f93\u5165\u9519\u8bef').format(title));    //格式输入错误
                             }
                         } else {
-                            if (!configs.focusInvalid) {
-                                $(element).focus(events['focus']);
+                            // 验证数字输入，大小值范围限定，其中 type="hidden" 默认值至少为0
+                            //数字
+                            var val = value.trim(), numType = '\u6570\u5b57',
+                                strict = field.strict || configs.strict;
+
+                            //不是必填项的数字，如果没有填写，则取默认值或0
+                            if (value === '' && !required) {
+                                value = field.value || 0;
+                                var attrShow = $.getAttribute(element, Config.DATA_SHOW, '1').toInt() === 1,
+                                    dataShow = $.isBoolean($.getParamCon(field.dataShow, attrShow), true);
+                                //若指定了不显示默认值（或0），则不显示
+                                if (!isEvent && dataShow && typeof element.value !== 'undefined') {
+                                    element.value = value;
+                                }
                             }
-                            $(element).blur(events['blur']);
-
-                            if (fieldConfig.field.tag === 'SELECT') {
-                                $(element).change(events['change']);
-                            } else if (op.isCheckBox(element, element.type)) {
-                                $(element).click(events['click']);
-                            } else {
-                                $(element).keyup(events['keyup']);
+                            switch (field.dataType) {
+                                case 'int':
+                                case 'long':
+                                    value = parseInt(value, 10);
+                                    numType = '\u6574\u6570';//整数
+                                    break;
+                                case 'float':
+                                case 'double':
+                                case 'decimal':
+                                    value = parseFloat(value, 10);
+                                    numType = '\u5c0f\u6570';//小数
+                                    break;
+                                case 'port':
+                                    value = parseInt(value, 10);
+                                    if (!isNaN(value) && (value < 0 || value > 65535)) {
+                                        return result(false, '\u7aef\u53e3\u6570\u503c\u5e94\u4ecb\u4e8e0 - 65535\u4e4b\u95f4'); //端口数值应介于 之间
+                                    }
+                                    numType = '\u7aef\u53e3';//端口
+                                    break;
+                                case 'bool':    //布尔值只有2种状态 0 或 1
+                                    if (!/^([01\s]+|true|false|yes|no)$/i.test(value)) {
+                                        return result(false, '\u8bf7\u8f93\u5165\u5e03\u5c14\u503c0\u62161');  //请输入布尔值0或1
+                                    }
+                                    if (/^([01][01\s]+|true|false|yes|no)$/i.test(value)) {
+                                        value = ('' + value).replace(/^(true|[1][01\s]+|yes)$/i, 1).replace(/^(false|[0][01\s]+|no)$/i, 0);
+                                        //value = /^true$/i.test(value) ? 1 : 0;
+                                        element.value = value;
+                                    }
+                                    value = parseInt(value, 10);
+                                    //重新赋值
+                                    val = value.toString();
+                                    break;
                             }
-                        }
+                            if (isNaN(value)) {
+                                var dv = $.isNumeric(field.value) ? field.value :
+                                    ($.isNumeric(configs.defaultValue) ? configs.defaultValuel : (element.type === 'hidden' ? 0 : ''));
 
-                        element.validate = function () {
-                            op.showTooltip(op.checkValue(element), element, false, fid);
-                        };
-                    }
-                    //记录是否被创建事件，防止重复创建
-                    element.isSetEvent = 1;
-                },
-                encodeHtml: function (val, encode) {
-                    if ($.isString(val, true) && encode) {
-                        return val.encodeHtml();
-                    }
-                    return val;
-                },
-                decodeHtml: function (val, decode) {
-                    if ($.isString(val, true) && decode) {
-                        return val.decodeHtml();
-                    }
-                    return val;
-                },
-                filterHtml: function (val, filter) {
-                    if ($.isString(val, true) && filter) {
-                        return val.filterHtml();
-                    }
-                    return val;
-                },
-                setValue: function (element, value, fieldConfig, isArray) {
-                    var fc = fieldConfig.field || {},
-                        attr = fc.attribute || fc.attr,
-                        val = isArray ? value.join(',') : value,
-                        con = '',
-                        elem = $I(element.id) || element;
-
-                    if (!isArray && ('' + val).trim() !== '') {
-                        var dtfmt = $.getAttribute(elem, Config.DATE_FORMAT);
-                        if (dtfmt && $.isDate(val)) {
-                            val = val.format($.isTrue(dtfmt) ? '' : dtfmt || '');
-                        } else if (dtfmt && $.isDate(val.toDate(true))) {
-                            val = val.toDateString($.isTrue(dtfmt) ? '' : dtfmt || '');
-                        } else {
-                            var fmt = $.getAttribute(elem, Config.DATA_FORMAT);
-                            if (fmt) {
-                                val = fmt.format(val);
+                                if ($.isNumeric(dv)) {
+                                    value = dv;
+                                } else if (configs.checkNumber) {
+                                    return result(false, (messages.number || configs.messages.number).format(numType));
+                                }
                             }
-                        }
-                    }
-                    if (!op.isLegalName(attr)) {
-                        if (typeof elem.value === 'undefined') {
-                            elem.innerHTML = op.encodeHtml(val, fc.decode);
-                        } else {
-                            elem.value = (con = op.decodeHtml(val, fc.decode));
-                            //设置elem.val是为了与$.dropdownlist数据绑定联动
-                            elem.val = con;
-                        }
-                    } else {
-                        elem.setAttribute(attr, (con = op.encodeHtml(val, fc.decode)));
-                        elem.setAttribute('val', con);
-                    }
-                    //elem绑定了统计字数的功能，触发change事件
-                    if (elem.getAttribute('stat-len')) {
-                        $.trigger(elem, 'change');
-                    }
-                    return true;
-                },
-                setSelectOption: function (element, value, fieldConfig, isArray) {
-                    var text = value, val = value, isEmptyArray = false,
-                        elem = $I(element.id) || element;
+                            if (configs.checkNumber) {
+                                var min = field.minValue || configs.minValue || field.minVal || configs.minVal || field.min || configs.min,
+                                    max = field.maxValue || configs.maxValue || field.maxVal || configs.maxVal || field.max || configs.max,
+                                    msg = '';
 
-                    if (isArray) {
-                        isEmptyArray = 0 === value.length, val = value[0] || '', text = value[1] || val;
-                    }
-                    elem.value = value;
-                    //设置elem.val是为了与$.dropdownlist数据绑定联动
-                    elem.val = value;
-                    //当下拉选项不存在时，是否追加选项
-                    if (fieldConfig.field.appendOption && element.selectedIndex < 0) {
-                        if (isEmptyArray) {
-                            return false;
-                        }
-                        elem.options.add(new Option(text, val));
-                        //elem.value = value;
-                        elem.selectedIndex = element.options.length - 1;
-                    }
-                },
-                setCheckBoxChecked: function (element, value, fieldConfig, isArray) {
-                    if (isArray) {
-                        if (value.length > 0) {
-                            //检测首尾是否是数字，如果是数字，则转换成字符，便于Array.indexOf比较
-                            value = $.isNumber(value[0]) || $.isNumber(value[value.length - 1]) ? value.join(',').split(',') : value;
-                            var arr = document.getElementsByName(fieldConfig.name), len = arr.length;
-                            //检测是否是选框组
-                            if (fieldConfig.name && len > 1) {
-                                for (var i = 0; i < len; i++) {
-                                    if (value.indexOf(arr[i].value) >= 0) {
-                                        arr[i].checked = true;
+                                if ($.isUndefined(min)) {
+                                    min = parseFloat($.getAttribute(element, Config.MIN_VALUE, ''), 10);
+                                }
+                                if ($.isUndefined(max)) {
+                                    max = parseFloat($.getAttribute(element, Config.MAX_VALUE, ''), 10);
+                                }
+
+                                if (element.tagName.toLowerCase() === 'select') {
+                                    msg = (messages.select || messages.required || configs.messages.select).format(title);
+                                } else {
+                                    if ($.isNumeric(min) && $.isNumeric(max)) {
+                                        msg = (messages.minMax || configs.messages.minMax).format(min, max, numType);
+                                    } else if ($.isNumeric(min)) {
+                                        msg = (messages.minValue || configs.messages.minValue).format(min, numType);
+                                    } else if ($.isNumeric(max)) {
+                                        msg = (messages.maxValue || configs.messages.maxValue).format(max, numType);
                                     }
                                 }
-                            } else {
-                                if (value.indexOf(element.value) >= 0) {
-                                    element.checked = true;
+
+                                //严格模式，需要验证输入的内容格式，比如验证是否是整数
+                                if (strict) {
+                                    //验证输入的(原始)内容是否是整数
+                                    if (field.dataType === 'int' && !$.isInteger(val)) {
+                                        return result(false, msg);
+                                    }
+                                }
+                                if (($.isNumeric(min) && value < min) || ($.isNumeric(max) && value > max)) {
+                                    return result(false, msg);
+                                }
+
+                                var optionValue = field.optionValue;
+                                if ($.isUndefined(optionValue)) {
+                                    optionValue = $.getAttribute(element, Config.OPPTION_VALUE, '');
+                                }
+                                optionValue = optionValue.length > 0 ? optionValue.split(/[,;\|]/) : [];
+                                if ((!editable || readonly) && optionValue.length > 0) {
+                                    if (val.length <= 0) {
+                                        return !required ? result(true, value) : result(false, (messages.required || configs.messages.required).format(title));
+                                    }
+                                    for (var i = 0; i < optionValue.length; i++) {
+                                        var pv = field.dataType === 'float' ? parseFloat(optionValue[i], 10) : parseInt(optionValue[i], 10);
+                                        //parseInt parseFloat 自带容错，比如 0123abc parseInt()之后的结果是数字 123
+                                        //虽然结果是数字，但是严格来说，输入是错误的，真正的输入内容应该是 只有123才对
+                                        //所以为了严谨起见，不但要比较数值还要比较输入内容
+                                        if (pv === value && optionValue[i] === val) {
+                                            return result(true, value);
+                                        }
+                                    }
+                                    return result(false, (messages.optionValue || configs.messages.optionValue).format(title) +
+                                        '<br />\u53ef\u9009\u9879\uff1a' + optionValue.join(', '));     //可选项
                                 }
                             }
                         }
-                    } else {
-                        value = '' + value;
-                        element.checked = element.value === value || (element.value === 'on' && value === '1');
-                    }
-                },
-                setFocus: function (element) {
-                    //$(element).focus();
-                    element.focus();
-                }
-            };
-
-        //将默认提示信息附加到configs.messages参数中
-        $.extend(op.configs.messages, messages);
-
-        if (op.configs.highLight) {
-            op.loadCssCode(op.configs.highLightStyle);
-        }
-        //单独设置表单内容或简化参数设置时，把prefix参数字段加到options中
-        //比如整个options只有一个参数prefix
-        //这样就不用嵌套把prefix写成{configs:{prefix:false}},只需要写成{prefix:false}即可
-        if (!$.isUndefined(opt.prefix) && !op.configs.prefix) {
-            op.configs.prefix = opt.prefix;
-        }
-
-        op.labels = op.getLabels();
-
-        return op;
-    },
-    setFormVerify = function (formElement, options, elements) {
-        var op = initFormConfig(formElement, options),
-            configs = op.configs,
-            list = [],
-            arr = ($.isObject(elements) && elements.length > 0 && !configs.dynamic) ? elements :
-                op.formElement.getElementsByTagName(configs.tagName || "*"),
-            len = arr.length;
-
-        for (var i = 0; i < len; i++) {
-            var obj = arr[i], tag = obj.tagName, type = obj.type;
-            //if (tagPattern.test(tag) && (tag != 'input' || typePattern.test(type))) {
-            if (op.tagPattern.test(tag) && op.typePattern.test(type)) {
-                var fc = op.getFieldConfig(obj, op.fields);
-                obj.configs = op.configs;
-                op.setControlEvent(obj, op.configs, fc, formElement);
-                list.push(obj);
-            }
-        }
-        return list;
-    },
-    isDataExcept = function (elem) {
-        var except = $.getAttribute(elem, Config.DATA_EXCEPT);
-        if (typeof except === 'undefined') {
-            return false;
-        }
-        if (except === '1' || except === '' || except === 'true') {
-            return true;
-        }
-        return false;
-    },
-    getElementsData = function (warns, arr, op, formElem, camelCase) {
-        formElem = $.toElement(formElem);
-        var data = {}, configs = op.configs, len = arr.length;
-        for (var i = 0; i < len; i++) {
-            var obj = arr[i], tag = obj.tagName, type = obj.type, key = '', val = '';
-            if (isDataExcept(obj)) {
-                continue;
-            }
-            if (op.tagPattern.test(tag) && op.typePattern.test(type)) {
-                //获取字段参数配置
-                var fc = op.getFieldConfig(obj, op.fields), fcf = fc.field || {}, result = {};
-                obj.configs = configs;
-
-                // 判断是否为复选框
-                if (op.isCheckBox(obj, type)) {
-                    if (!fc.key) {
-                        fc.key = 'CheckBox';
-                    }
-                    result = op.getCheckValue(obj, fc.value, fc.field, obj.isSingle);
-                } else {
-                    result = op.checkValue(obj, fc.value, fc.field, configs);
-                }
-                op.showTooltip(result, obj, true, formElem.id);
-
-                val = result.value;
-
-                if (!result.pass) {
-                    warns.push({ element: obj, message: result.message });
-                    op.setControlEvent(obj, configs, fc, formElem);
-                    if (configs.singleStep) {
-                        if (!configs.focusInvalid) {
-                            op.setFocus(obj);
+                        //相同内容检测
+                        if ($.isObject(field.same) && field.same.id) {
+                            var target = document.getElementById(field.same.id);
+                            if (target && target.value !== value) {
+                                //两次输入的内容不一样
+                                return result(false, field.same.message || field.same.msg || '\u4e24\u6b21\u8f93\u5165\u7684\u5185\u5bb9\u4e0d\u4e00\u6837');
+                            }
                         }
-                        return false;
-                    }
-                } else if (obj.isSingle) {
-                    if (fc.key) {
-                        key = fc.dataKey || fc.key;
-                        if (camelCase) {
-                            key = key.substr(0, 1).toLowerCase() + key.substr(1);
+                        //内容去重检测
+                        if ($.isObject(field.distinct) && field.distinct.id) {
+                            var target = document.getElementById(field.distinct.id);
+                            if (target && target.value === value) {
+                                return result(false, field.distinct.message || field.distinct.msg || '\u5185\u5bb9\u4e0d\u80fd\u91cd\u590d');//内容不能重复
+                            }
                         }
-                        if (fcf.md5 && $.isString(val, true)) {
-                            data[key] = $.md5(val);
+                        //检测内容是否存在
+                        if ($.isFunction(field.exists)) {
+                            field.exists(element);
+                        }
+                        return result(true, value);
+                    },
+                    showTooltip: function (result, element, isSubmit, forname) {
+                        //记录提示信息隐藏次数，防止重复隐藏
+                        if ($.isUndefined(element.hideTooltip)) {
+                            element.hideTooltip = 0;
+                        }
+                        var configs = element.configs;
+                        var tooltip = element.field.tooltip || configs.tooltip || function (status, message, element) {
+                            if (status) {
+                                $.tooltip.close(element);
+                                $(element).removeClass(highLight.className);
+                            } else {
+                                var time = element.field.tooltipTime;
+                                if (!$.isNumber(time) || time < -1) {
+                                    time = configs.tooltipTime;
+                                }
+                                var options = { time: $.isNumber(time) ? time : 0, tipsMore: true, for: forname },
+                                    position = (element.field || {}).position || configs.position,
+                                    tooltipStyle = configs.tooltipStyle ||
+                                        (configs.styles || configs.style || {}).tooltip ||
+                                        op.configs.tooltipStyle ||
+                                        (op.configs.styles || op.configs.style || {}).tooltip;
+
+                                if ($.isString(position, true) || $.isNumber(position)) {
+                                    options.position = position;
+                                }
+                                if (tooltipStyle) {
+                                    options.tooltipStyle = tooltipStyle;
+                                }
+                                $.tooltip(message, element, options);
+                                if (configs.highLight) {
+                                    $(element).removeClass(highLight.className);
+                                    $(element).addClass(highLight.className);
+                                }
+                                //单步模式，若输入不为空时，焦点锁定
+                                if (configs.singleStep && configs.focusInvalid && (op.getValue(element, true) !== '' || isSubmit)) {
+                                    op.setFocus(element);
+                                }
+                            }
+                        };
+                        if ($.isFunction(tooltip)) { tooltip(result.pass, result.message, element); }
+                    },
+                    loadCssCode: function (code) {
+                        var head = document.getElementsByTagName('head')[0];
+                        if (document.getElementById(highLight.styleId) != null || !head) { return false; }
+
+                        var css = '.' + highLight.className + '{' + (code || highLight.cssText || '') + '}',
+                            style = document.createElement('style');
+
+                        style.id = highLight.styleId; style.type = 'text/css'; style.rel = 'stylesheet';
+
+                        if (style.appendChild) {
+                            style.appendChild(document.createTextNode(css));    //for Chrome Firefox Opera Safari
                         } else {
-                            val = op.filterHtml(val, fcf.filter);
-                            data[key] = op.encodeHtml(val, fcf.encode);
+                            style.styleSheet.cssText = css; //for IE
                         }
+                        head.appendChild(style);
+                    },
+                    getFieldConfig: function (element, fields, ignoreCase) {
+                        var isValue = function (s) { return !$.isUndefined(s) && !$.isObject(s); },
+                            checkField = function (field, elem) {
+                                var arr = ['string', 'int', 'float', 'decimal'];
+                                if (!$.isString(field.dataType) || arr.indexOf(field.dataType) < 0) {
+                                    //var elemDataType = $.getAttribute(elem, 'data-type,datatype,value-type,valuetype', '');
+                                    var elemDataType = $.getAttribute(elem, Config.DATA_TYPE, '');
+                                    field.dataType = elemDataType || arr[0];
+                                }
+                                if (!$.isTrue(field.encode)) {
+                                    field.encode = $.getAttribute(elem, Config.ENCODE, '').isTrue();
+                                }
+                                if (!$.isTrue(field.decode)) {
+                                    field.decode = $.getAttribute(elem, Config.DECODE, '').isTrue();
+                                }
+                                if (!$.isTrue(field.filter)) {
+                                    field.filter = $.getAttribute(elem, Config.FILTER, '').isTrue();
+                                }
+
+                                //默认值字段设置
+                                if (field.value === '') {
+                                    field.value = isValue(field.val) ? field.val : isValue(field.defaultValue) ? field.defaultValue : field.value;
+                                }
+                                //如果没有设置默认值，则取用（自定义的）默认值属性的值
+                                if (field.value === '') {
+                                    var defVal = $.getAttribute(elem, Config.DEFAULT_VALUE, '');
+                                    if (!$.isUndefined(defVal)) {
+                                        field.value = defVal;
+                                    }
+                                }
+                                if (!$.isTrue(field.required) && !$.isFalse(field.required)) {
+                                    field.required = !$.isUndefined($.getAttribute(elem, Config.DATA_REQUIRED)) || false;
+                                }
+                                return field;
+                            },
+                            id = element.id, name = element.name, nodeType = element.nodeType,
+                            key = op.getKey(id || name), nameKey = op.getKey(name),
+                            keyField = fields[key],
+                            isAppointId = fields[op.getKey(id)] || false,
+                            isSingle = isAppointId || document.getElementsByName(name || '').length <= 1,
+                            dataType = '';
+
+                        if ($.isString(keyField, true)) {
+                            dataType = keyField;
+                            keyField = {};
+                        } else if ($.isObject(keyField)) {
+                            if (!$.isBoolean(keyField.required)) {
+                                keyField.required = keyField.require || null;
+                            }
+                            keyField.pattern = keyField.regex || keyField.pattern || '';
+                        }
+
+                        var field = checkField(op.swap($.extend({
+                            title: '',                  //字段名称（用于提示信息）
+                            type: '',                   //字段类型（email,url等），用于格式验证
+                            dataKey: '',                //指定值关键字（默认不用指定）
+                            dataType: dataType,         //值类型（string,int,float)
+                            defaultValue: '',           //默认值 (val, value, defaultValue)
+                            value: '',                  //获取到的字段内容
+                            attribute: '',              //获取指定的属性值作为value
+                            minValue: '', maxValue: '', //最小值、最大值（用于验证输入的数字大小）
+                            required: null,             //是否必填项
+                            empty: false,               //是否允许空值
+                            dataShow: null,             //是否显示默认数字,数字型字段，若值为空，则显示默认值或0
+                            strict: false,              //是否严格模式（检测输入内容的类型）
+                            md5: false,                 //是否MD5加密
+                            encode: false,              //是否进行html标记编码
+                            decode: false,              //是否进行html标记解码
+                            readonly: null,             //控件是否只读
+                            editable: null,             //控件是否可编辑（用于选项输入框）
+                            //为加强数据安全，默认过滤HTML标记
+                            filter: true,              //是否过滤html标记
+                            minLength: '',              //字节最小长度
+                            maxLength: '',              //字符最大长度
+                            pattern: '',                //正则表达式（内部验证）
+                            //提示信息回调 function(status, message, element){}
+                            //status 验证状态：true-表示通过，false-表示失败
+                            tooltip: null,
+                            //提示信息显示时长（毫秒），0-表示一直显示，若大于0表示会定时关闭
+                            tooltipTime: null,
+                            //给SELECT赋值时，当下拉选项值不存在时，是否追加（特殊情况使用）
+                            appendOption: false,
+                            //外部验证回调函数 function(value, element){} 返回值为 boolean （true|false）
+                            //返回 true - 表示验证通过，false-表示验证失败
+                            validate: null,
+                            messages: {},               //验证失败时显示的提示信息（为空则显示默认的信息）
+                            //tooltip position
+                            position: '',
+                            tooltipStyle: null,
+                            same: { id: '', msg: '' },
+                            distinct: { id: '', msg: '' },
+                            //检测字段内容是否已存在
+                            exists: null
+                        }, keyField)), element);
+
+                        if (!$.isObject(field.messages)) {
+                            field.messages = { required: field.messages };
+                        }
+                        field.key = key;
+                        //缓存控件Tag类型
+                        field.tag = element.tagName;
+                        //缓存字段配置
+                        element.field = field, element.key = key;
+                        //标记元素是Id模式，还是Name数组模式
+                        element.isSingle = isSingle;
+
+                        return {
+                            id: id, name: name, key: key, nameKey: nameKey, value: op.getValue(element),
+                            dataKey: field.dataKey, isSingle: isSingle, field: field
+                        };
+                    },
+                    setControlEvent: function (element, configs, fieldConfig, formElement) {
+                        if (!element.isSetEvent) {
+                            var fid = formElement.id;
+                            var events = {
+                                focus: function () { op.showTooltip(op.checkValue(this), this, false, fid); },
+                                blur: function () { op.showTooltip(op.checkValue(this), this, false, fid); },
+                                change: function () { op.showTooltip(op.checkValue(this), this, false, fid); },
+                                click: function () { op.showTooltip(op.getCheckValue(this), this, false, fid); },
+                                keyup: function (ev) { op.showTooltip(op.checkValue(this, ev), this, false, fid); }
+                            };
+
+                            if (typeof $.OUI === 'boolean') {
+                                if (!configs.focusInvalid) {
+                                    $.addListener(element, 'focus', events['focus']);
+                                }
+                                $.addListener(element, 'blur', events['blur']);
+
+                                if (fieldConfig.field.tag === 'SELECT') {
+                                    $.addListener(element, 'change', events['change']);
+                                } else if (op.isCheckBox(element, element.type)) {
+                                    $.addListener(element, 'click', events['click']);
+                                } else {
+                                    $.addListener(element, 'keyup', events['keyup']);
+                                }
+                            } else {
+                                if (!configs.focusInvalid) {
+                                    $(element).focus(events['focus']);
+                                }
+                                $(element).blur(events['blur']);
+
+                                if (fieldConfig.field.tag === 'SELECT') {
+                                    $(element).change(events['change']);
+                                } else if (op.isCheckBox(element, element.type)) {
+                                    $(element).click(events['click']);
+                                } else {
+                                    $(element).keyup(events['keyup']);
+                                }
+                            }
+
+                            element.validate = function () {
+                                op.showTooltip(op.checkValue(element), element, false, fid);
+                            };
+                        }
+                        //记录是否被创建事件，防止重复创建
+                        element.isSetEvent = 1;
+                    },
+                    encodeHtml: function (val, encode) {
+                        if ($.isString(val, true) && encode) {
+                            return val.encodeHtml();
+                        }
+                        return val;
+                    },
+                    decodeHtml: function (val, decode) {
+                        if ($.isString(val, true) && decode) {
+                            return val.decodeHtml();
+                        }
+                        return val;
+                    },
+                    filterHtml: function (val, filter) {
+                        if ($.isString(val, true) && filter) {
+                            return val.filterHtml();
+                        }
+                        return val;
+                    },
+                    setValue: function (element, value, fieldConfig, isArray) {
+                        var fc = fieldConfig.field || {},
+                            attr = fc.attribute || fc.attr,
+                            val = isArray ? value.join(',') : value,
+                            con = '',
+                            elem = $I(element.id) || element;
+
+                        if (!isArray && ('' + val).trim() !== '') {
+                            var dtfmt = $.getAttribute(elem, Config.DATE_FORMAT);
+                            if (dtfmt && $.isDate(val)) {
+                                val = val.format($.isTrue(dtfmt) ? '' : dtfmt || '');
+                            } else if (dtfmt && $.isDate(val.toDate(true))) {
+                                val = val.toDateString($.isTrue(dtfmt) ? '' : dtfmt || '');
+                            } else {
+                                var fmt = $.getAttribute(elem, Config.DATA_FORMAT);
+                                if (fmt) {
+                                    val = fmt.format(val);
+                                }
+                            }
+                        }
+                        if (!op.isLegalName(attr)) {
+                            if (typeof elem.value === 'undefined') {
+                                elem.innerHTML = op.encodeHtml(val, fc.decode);
+                            } else {
+                                elem.value = (con = op.decodeHtml(val, fc.decode));
+                                //设置elem.val是为了与$.dropdownlist数据绑定联动
+                                elem.val = con;
+                            }
+                        } else {
+                            elem.setAttribute(attr, (con = op.encodeHtml(val, fc.decode)));
+                            elem.setAttribute('val', con);
+                        }
+                        //elem绑定了统计字数的功能，触发change事件
+                        if (elem.getAttribute('stat-len')) {
+                            $.trigger(elem, 'change');
+                        }
+                        return true;
+                    },
+                    setSelectOption: function (element, value, fieldConfig, isArray) {
+                        var text = value, val = value, isEmptyArray = false,
+                            elem = $I(element.id) || element;
+
+                        if (isArray) {
+                            isEmptyArray = 0 === value.length, val = value[0] || '', text = value[1] || val;
+                        }
+                        elem.value = value;
+                        //设置elem.val是为了与$.dropdownlist数据绑定联动
+                        elem.val = value;
+                        //当下拉选项不存在时，是否追加选项
+                        if (fieldConfig.field.appendOption && element.selectedIndex < 0) {
+                            if (isEmptyArray) {
+                                return false;
+                            }
+                            elem.options.add(new Option(text, val));
+                            //elem.value = value;
+                            elem.selectedIndex = element.options.length - 1;
+                        }
+                    },
+                    setCheckBoxChecked: function (element, value, fieldConfig, isArray) {
+                        if (isArray) {
+                            if (value.length > 0) {
+                                //检测首尾是否是数字，如果是数字，则转换成字符，便于Array.indexOf比较
+                                value = $.isNumber(value[0]) || $.isNumber(value[value.length - 1]) ? value.join(',').split(',') : value;
+                                var arr = document.getElementsByName(fieldConfig.name), len = arr.length;
+                                //检测是否是选框组
+                                if (fieldConfig.name && len > 1) {
+                                    for (var i = 0; i < len; i++) {
+                                        if (value.indexOf(arr[i].value) >= 0) {
+                                            arr[i].checked = true;
+                                        }
+                                    }
+                                } else {
+                                    if (value.indexOf(element.value) >= 0) {
+                                        element.checked = true;
+                                    }
+                                }
+                            }
+                        } else {
+                            value = '' + value;
+                            element.checked = element.value === value || (element.value === 'on' && value === '1');
+                        }
+                    },
+                    setFocus: function (element) {
+                        //$(element).focus();
+                        element.focus();
                     }
-                } else {
-                    if ((key = fc.dataKey || fc.nameKey || fc.key) !== '') {
-                        if (camelCase) {
-                            key = key.substr(0, 1).toLowerCase() + key.substr(1);
-                        }
-                        if ($.isUndefined(data[key])) {
-                            data[key] = [];
-                        }
-                        if (!$.isArray(data[key])) {
-                            $.console.warn('The name is repeated with the id.', obj);
-                        } else if ('' !== $.trim(val)) {
-                            val = op.filterHtml(val, fcf.filter);
-                            data[key].push(op.encodeHtml(val, fcf.encode));
-                        }
-                    }
+                };
+
+            //将默认提示信息附加到configs.messages参数中
+            $.extend(op.configs.messages, messages);
+
+            if (op.configs.highLight) {
+                op.loadCssCode(op.configs.highLightStyle);
+            }
+            //单独设置表单内容或简化参数设置时，把prefix参数字段加到options中
+            //比如整个options只有一个参数prefix
+            //这样就不用嵌套把prefix写成{configs:{prefix:false}},只需要写成{prefix:false}即可
+            if (!$.isUndefined(opt.prefix) && !op.configs.prefix) {
+                op.configs.prefix = opt.prefix;
+            }
+
+            op.labels = op.getLabels();
+
+            return op;
+        },
+        setFormVerify = function (formElement, options, elements) {
+            var op = initFormConfig(formElement, options),
+                configs = op.configs,
+                list = [],
+                arr = ($.isObject(elements) && elements.length > 0 && !configs.dynamic) ? elements :
+                    op.formElement.getElementsByTagName(configs.tagName || "*"),
+                len = arr.length;
+
+            for (var i = 0; i < len; i++) {
+                var obj = arr[i], tag = obj.tagName, type = obj.type;
+                //if (tagPattern.test(tag) && (tag != 'input' || typePattern.test(type))) {
+                if (op.tagPattern.test(tag) && op.typePattern.test(type)) {
+                    var fc = op.getFieldConfig(obj, op.fields);
+                    obj.configs = op.configs;
+                    op.setControlEvent(obj, op.configs, fc, formElement);
+                    list.push(obj);
                 }
             }
-        }
-        if (warns.length > 0) {
-            if (!configs.focusInvalid) {
-                op.setFocus(warns[0].element);
+            return list;
+        },
+        isDataExcept = function (elem) {
+            var except = $.getAttribute(elem, Config.DATA_EXCEPT);
+            if (typeof except === 'undefined') {
+                return false;
+            }
+            if (except === '1' || except === '' || except === 'true') {
+                return true;
             }
             return false;
-        } else {
-            for (var k in data) {
-                var v = data[k];
-                if ($.isArray(v)) {
-                    if (v.length <= 1) {
-                        data[k] = ($.isUndefined(v[0]) || v[0] === '') ? '' : v[0];
-                    } else if (configs.isJoin) {
-                        data[k] = v.join(configs.joinSeparate);
-                    }
-                }
-            }
-            return data;
-        }
-    },
-    getFormData = function (formElement, options, elements, camelCase) {
-        //获取表单参数配置
-        var warns = [], arr = [], op = initFormConfig(formElement, options), configs = op.configs;
-        if ($.isObject(elements) && elements.length > 0 && !configs.dynamic) {
-            arr = elements;
-        } else {
-            arr = op.formElement.getElementsByTagName(configs.tagName || "*");
-        }
-        var data = getElementsData(warns, arr, op, formElement, camelCase);
-        if ($.isDebug()) {
-            console.log('data: ', data, ', warns: ', warns);
-        }
-        return data;
-    },
-    getFormParam = function (formElement, options, elements) {
-        var opt = $.extend({ tagName: '' }, options);
-        var param = {}, appointTag = opt.tagName.trim() !== '', 
-            i, obj, id, tag, dataType;
-
-        function _getParVal (obj) {
-            var dataType = $.getAttribute(obj, 'data-type|dataType|datatype'),
-                tag = obj.tagName.toUpperCase(),
-                type = obj.type.toLowerCase(),
-                val = obj.value.trim();
-            if (tag === 'INPUT' && ['checkbox', 'radio'].indexOf(type) > -1) {
-                val = obj.checked ? obj.value || '1' : '0';
-            }
-            switch (dataType) {
-            case 'int': case 'long': case 'port':
-                val = parseInt(val, 10);
-                val = isNaN(val) ? 0 : val;
-                break;
-            case 'float': case 'double': case 'decimal': 
-                val = parseFloat(val, 10);
-                val = isNaN(val) ? 0 : val;
-                break;
-            case 'bool':
-                val = val.startWith('1') || val.toLowerCase().startWith('true') ? 1 : 0;
-                break;
-            }
-            return val;
-        }
-        if ($.isArrayLike(elements)) {
-            for (i = 0; i < elements.length; i++) {
-                obj = $.toElement(elements[i]);
-                id = obj.id;
-                if ($.isElement(obj) && id) {
-                    param[id] = _getParVal(obj);
-                }
-            }
-        } else {
-            var form = $.toElement(formElement);
-            elements = form.getElementsByTagName(opt.tagName || "*");
-            for (i = 0; i < elements.length; i++) {
-                obj = elements[i];
-                tag = obj.tagName.toUpperCase();
-                id = obj.id;
-                if (id && !isDataExcept(obj)) {
-                    if ((appointTag && tag === opt.tagName) ||
-                        (!appointTag && ['INPUT', 'SELECT', 'TEXTAREA'].indexOf(tag) > -1 &&
-                            ['button', 'submit', 'hidden', 'password'].indexOf(obj.type) < 0)) {
-                        param[id] = _getParVal(obj);;
-                    }
-                }
-            }
-        }
-        return param;
-    },
-    filterData = function (options, formData) {
-        if ($.isObject(options) && !$.isObject(formData)) {
-            formData = options.formData || options.datas || options.data || options;
-        }
-        return formData;
-    },
-    setElementsData = function (data, arr, op, isTable, ignoreCase) {
-        if (!$.isObject(data)) {
-            data = {};
-        }
-        var len = arr.length, list = [];
-        for (var i = 0; i < len; i++) {
-            if (!arr[i]) {
-                continue;
-            }
-            var obj = arr[i], tag = obj.tagName, type = obj.type;
-            if (!op.tagPattern.test(tag) || (typeof type !== 'undefined' && !op.typePattern.test(type))) {
-                continue;
-            }
-            var pass = true;
-            if (pass || !obj.isValueSet) {
-                var fc = op.getFieldConfig(obj, op.fields, ignoreCase),
-                    keyCase = ignoreCase ? fc.key.substr(0, 1).toLowerCase() + fc.key.substr(1) : fc.key,
-                    //value = data[fc.key] || data[keyCase],
-                    value = $.getParam(data, [fc.key, keyCase].join(',')),
-                    isArray = $.isArray(value);
-                if ($.isUndefined(value)) {
-                    value = data[fc.nameKey];
-                }
-                if ($.isUndefined(value)) {
-                    value = data[obj.id];
-                }
-                if ($.isUndefined(value)) {
+        },
+        getElementsData = function (warns, arr, op, formElem, camelCase) {
+            formElem = $.toElement(formElem);
+            var data = {}, configs = op.configs, len = arr.length;
+            for (var i = 0; i < len; i++) {
+                var obj = arr[i], tag = obj.tagName, type = obj.type, key = '', val = '';
+                if (isDataExcept(obj)) {
                     continue;
                 }
-                if (op.isCheckBox(obj, type)) {
-                    op.setCheckBoxChecked(obj, value, fc, isArray);
-                } else if (tag === 'SELECT') {
-                    op.setSelectOption(obj, value, fc, isArray);
-                } else {
-                    if (fc.isSingle || isTable) {
-                        var dataType = $.getAttribute(obj, Config.DATA_TYPE, '').toLowerCase(),
-                            dataShow = $.getAttribute(obj, Config.DATA_SHOW, '1') === 1;
-                        if (['int', 'float', 'double', 'long'].indexOf(dataType) > -1 && !dataShow && ('' + value).toFloat() === 0) {
-                            value = '';
-                        }
-                        op.setValue(obj, value, fc, isArray);
-                    } else {
-                        var tmp = document.getElementsByName(fc.name), vals = isArray ? value : value.toString().split(',');
-                        for (var j = 0, c = arr.length; j < c; j++) {
-                            if (!$.isUndefined(vals[j])) {
-                                op.setValue(arr[j], vals[j], fc, false);
-                            }
-                            tmp[j].isValueSet = true;
-                        }
-                    }
-                }
-            }
-            list.push(obj);
-        }
-        return list;
-    },
-    setFormData = function (formElement, options, formData, ignoreCase) {
-        var data = filterData(options, formData), arr = [], list = [];
-        if (!$.isEmpty(data)) {
-            var op = initFormConfig(formElement, options), configs = op.configs;
-            if (op) {
-                arr = op.formElement.getElementsByTagName(configs.tagName || "*");
-            }
-            list = setElementsData(data, arr, op, false, $.isBoolean(ignoreCase, true));
-        }
-        return list;
-    },
-    setSelectData = function (elem, val, txt, clear) {
-        if (!$.isElement(elem = $.toElement(elem))) {
-            return this;
-        }
-        if ($.isString(val, true) || $.isNumber(val)) {
-            val = val.toString().trim();
-        } else {
-            return this;
-        }
-        if (!$.isString(txt, true) && !$.isNumber(txt)) {
-            txt = val;
-        }
-        var options = elem.options,
-            c = options.length, i, d, v, t;
-        for (i = 0; i < c; i++) {
-            d = options[i];
-            v = d.value.toString();
-            t = d.text.trim();
-            if (val === v && txt === t) {
-                elem.selectedIndex = i;
-                return this;
-            }
-        }
-        if (clear) {
-            elem.options.length = 0;
-            c = 0;
-        }
-        elem.options.add(new Option(txt, val));
-        elem.selectedIndex = c;
+                if (op.tagPattern.test(tag) && op.typePattern.test(type)) {
+                    //获取字段参数配置
+                    var fc = op.getFieldConfig(obj, op.fields), fcf = fc.field || {}, result = {};
+                    obj.configs = configs;
 
-        return this;
-    },
-    getTableData = function (tableElement, options) {
-        var list = [], rows = tableElement.rows.length, tHead = tableElement.tHead, rowIndex = tHead ? tHead.rows.length : 0;
-        for (var i = rowIndex; i < rows; i++) {
-            var warns = [], op = initFormConfig(tableElement, options), configs = op.configs;
-            var tr = tableElement.rows[i], arr = tr.getElementsByTagName(configs.tagName || "*");
-            var data = getElementsData(warns, arr, op, tableElement);
-            if (data) {
-                list.push(data);
-            }
-        }
-        return list;
-    },
-    setTableData = function (tableElement, options, tableDatas) {
-        var findId = function (tr) {
-            var cells = tr.cells;
-            if (cells) {
-                var arr = cells[0].getElementsByTagName(configs.tagName || "*");
-                for (var i = 0; i < arr.length; i++) {
-                    var key = op.getKey(arr[i].id || arr[i].name);
-                    if (key.toUpperCase() === 'ID') {
-                        return arr[i].value;
+                    // 判断是否为复选框
+                    if (op.isCheckBox(obj, type)) {
+                        if (!fc.key) {
+                            fc.key = 'CheckBox';
+                        }
+                        result = op.getCheckValue(obj, fc.value, fc.field, obj.isSingle);
+                    } else {
+                        result = op.checkValue(obj, fc.value, fc.field, configs);
+                    }
+                    op.showTooltip(result, obj, true, formElem.id);
+
+                    val = result.value;
+
+                    if (!result.pass) {
+                        warns.push({ element: obj, message: result.message });
+                        op.setControlEvent(obj, configs, fc, formElem);
+                        if (configs.singleStep) {
+                            if (!configs.focusInvalid) {
+                                op.setFocus(obj);
+                            }
+                            return false;
+                        }
+                    } else if (obj.isSingle) {
+                        if (fc.key) {
+                            key = fc.dataKey || fc.key;
+                            if (camelCase) {
+                                key = key.substr(0, 1).toLowerCase() + key.substr(1);
+                            }
+                            if (fcf.md5 && $.isString(val, true)) {
+                                data[key] = $.md5(val);
+                            } else {
+                                val = op.filterHtml(val, fcf.filter);
+                                data[key] = op.encodeHtml(val, fcf.encode);
+                            }
+                        }
+                    } else {
+                        if ((key = fc.dataKey || fc.nameKey || fc.key) !== '') {
+                            if (camelCase) {
+                                key = key.substr(0, 1).toLowerCase() + key.substr(1);
+                            }
+                            if ($.isUndefined(data[key])) {
+                                data[key] = [];
+                            }
+                            if (!$.isArray(data[key])) {
+                                $.console.warn('The name is repeated with the id.', obj);
+                            } else if ('' !== $.trim(val)) {
+                                val = op.filterHtml(val, fcf.filter);
+                                data[key].push(op.encodeHtml(val, fcf.encode));
+                            }
+                        }
                     }
                 }
+            }
+            if (warns.length > 0) {
+                if (!configs.focusInvalid) {
+                    op.setFocus(warns[0].element);
+                }
+                return false;
+            } else {
+                for (var k in data) {
+                    var v = data[k];
+                    if ($.isArray(v)) {
+                        if (v.length <= 1) {
+                            data[k] = ($.isUndefined(v[0]) || v[0] === '') ? '' : v[0];
+                        } else if (configs.isJoin) {
+                            data[k] = v.join(configs.joinSeparate);
+                        }
+                    }
+                }
+                return data;
             }
         },
-            findData = function (datas, len, id) {
-                for (var i = 0; i < len; i++) {
-                    var data = datas[i], _id = data.ID || data.Id || data.id;
-                    if (_id) {
-                        if (_id === id) {
+        getFormData = function (formElement, options, elements, camelCase) {
+            //获取表单参数配置
+            var warns = [], arr = [], op = initFormConfig(formElement, options), configs = op.configs;
+            if ($.isObject(elements) && elements.length > 0 && !configs.dynamic) {
+                arr = elements;
+            } else {
+                arr = op.formElement.getElementsByTagName(configs.tagName || "*");
+            }
+            var data = getElementsData(warns, arr, op, formElement, camelCase);
+            if ($.isDebug()) {
+                console.log('data: ', data, ', warns: ', warns);
+            }
+            return data;
+        },
+        getFormParam = function (formElement, options, elements) {
+            var opt = $.extend({ tagName: '' }, options);
+            var param = {}, appointTag = opt.tagName.trim() !== '',
+                i, obj, id, tag, dataType;
+
+            function _getParVal(obj) {
+                var dataType = $.getAttribute(obj, 'data-type|dataType|datatype'),
+                    tag = obj.tagName.toUpperCase(),
+                    type = obj.type.toLowerCase(),
+                    val = obj.value.trim();
+                if (tag === 'INPUT' && ['checkbox', 'radio'].indexOf(type) > -1) {
+                    val = obj.checked ? obj.value || '1' : '0';
+                }
+                switch (dataType) {
+                    case 'int': case 'long': case 'port':
+                        val = parseInt(val, 10);
+                        val = isNaN(val) ? 0 : val;
+                        break;
+                    case 'float': case 'double': case 'decimal':
+                        val = parseFloat(val, 10);
+                        val = isNaN(val) ? 0 : val;
+                        break;
+                    case 'bool':
+                        val = val.startWith('1') || val.toLowerCase().startWith('true') ? 1 : 0;
+                        break;
+                }
+                return val;
+            }
+            if ($.isArrayLike(elements)) {
+                for (i = 0; i < elements.length; i++) {
+                    obj = $.toElement(elements[i]);
+                    id = obj.id;
+                    if ($.isElement(obj) && id) {
+                        param[id] = _getParVal(obj);
+                    }
+                }
+            } else {
+                var form = $.toElement(formElement);
+                elements = form.getElementsByTagName(opt.tagName || "*");
+                for (i = 0; i < elements.length; i++) {
+                    obj = elements[i];
+                    tag = obj.tagName.toUpperCase();
+                    id = obj.id;
+                    if (id && !isDataExcept(obj)) {
+                        if ((appointTag && tag === opt.tagName) ||
+                            (!appointTag && ['INPUT', 'SELECT', 'TEXTAREA'].indexOf(tag) > -1 &&
+                                ['button', 'submit', 'hidden', 'password'].indexOf(obj.type) < 0)) {
+                            param[id] = _getParVal(obj);;
+                        }
+                    }
+                }
+            }
+            return param;
+        },
+        filterData = function (options, formData) {
+            if ($.isObject(options) && !$.isObject(formData)) {
+                formData = options.formData || options.datas || options.data || options;
+            }
+            return formData;
+        },
+        setElementsData = function (data, arr, op, isTable, ignoreCase) {
+            if (!$.isObject(data)) {
+                data = {};
+            }
+            var len = arr.length, list = [];
+            for (var i = 0; i < len; i++) {
+                if (!arr[i]) {
+                    continue;
+                }
+                var obj = arr[i], tag = obj.tagName, type = obj.type;
+                if (!op.tagPattern.test(tag) || (typeof type !== 'undefined' && !op.typePattern.test(type))) {
+                    continue;
+                }
+                var pass = true;
+                if (pass || !obj.isValueSet) {
+                    var fc = op.getFieldConfig(obj, op.fields, ignoreCase),
+                        keyCase = ignoreCase ? fc.key.substr(0, 1).toLowerCase() + fc.key.substr(1) : fc.key,
+                        //value = data[fc.key] || data[keyCase],
+                        value = $.getParam(data, [fc.key, keyCase].join(',')),
+                        isArray = $.isArray(value);
+                    if ($.isUndefined(value)) {
+                        value = data[fc.nameKey];
+                    }
+                    if ($.isUndefined(value)) {
+                        value = data[obj.id];
+                    }
+                    if ($.isUndefined(value)) {
+                        continue;
+                    }
+                    if (op.isCheckBox(obj, type)) {
+                        op.setCheckBoxChecked(obj, value, fc, isArray);
+                    } else if (tag === 'SELECT') {
+                        op.setSelectOption(obj, value, fc, isArray);
+                    } else {
+                        if (fc.isSingle || isTable) {
+                            var dataType = $.getAttribute(obj, Config.DATA_TYPE, '').toLowerCase(),
+                                dataShow = $.getAttribute(obj, Config.DATA_SHOW, '1') === 1;
+                            if (['int', 'float', 'double', 'long'].indexOf(dataType) > -1 && !dataShow && ('' + value).toFloat() === 0) {
+                                value = '';
+                            }
+                            op.setValue(obj, value, fc, isArray);
+                        } else {
+                            var tmp = document.getElementsByName(fc.name), vals = isArray ? value : value.toString().split(',');
+                            for (var j = 0, c = arr.length; j < c; j++) {
+                                if (!$.isUndefined(vals[j])) {
+                                    op.setValue(arr[j], vals[j], fc, false);
+                                }
+                                tmp[j].isValueSet = true;
+                            }
+                        }
+                    }
+                }
+                list.push(obj);
+            }
+            return list;
+        },
+        setFormData = function (formElement, options, formData, ignoreCase) {
+            var data = filterData(options, formData), arr = [], list = [];
+            if (!$.isEmpty(data)) {
+                var op = initFormConfig(formElement, options), configs = op.configs;
+                if (op) {
+                    arr = op.formElement.getElementsByTagName(configs.tagName || "*");
+                }
+                list = setElementsData(data, arr, op, false, $.isBoolean(ignoreCase, true));
+            }
+            return list;
+        },
+        setSelectData = function (elem, val, txt, clear) {
+            if (!$.isElement(elem = $.toElement(elem))) {
+                return this;
+            }
+            if ($.isString(val, true) || $.isNumber(val)) {
+                val = val.toString().trim();
+            } else {
+                return this;
+            }
+            if (!$.isString(txt, true) && !$.isNumber(txt)) {
+                txt = val;
+            }
+            var options = elem.options,
+                c = options.length, i, d, v, t;
+            for (i = 0; i < c; i++) {
+                d = options[i];
+                v = d.value.toString();
+                t = d.text.trim();
+                if (val === v && txt === t) {
+                    elem.selectedIndex = i;
+                    return this;
+                }
+            }
+            if (clear) {
+                elem.options.length = 0;
+                c = 0;
+            }
+            elem.options.add(new Option(txt, val));
+            elem.selectedIndex = c;
+
+            return this;
+        },
+        getTableData = function (tableElement, options) {
+            var list = [], rows = tableElement.rows.length, tHead = tableElement.tHead, rowIndex = tHead ? tHead.rows.length : 0;
+            for (var i = rowIndex; i < rows; i++) {
+                var warns = [], op = initFormConfig(tableElement, options), configs = op.configs;
+                var tr = tableElement.rows[i], arr = tr.getElementsByTagName(configs.tagName || "*");
+                var data = getElementsData(warns, arr, op, tableElement);
+                if (data) {
+                    list.push(data);
+                }
+            }
+            return list;
+        },
+        setTableData = function (tableElement, options, tableDatas) {
+            var findId = function (tr) {
+                var cells = tr.cells;
+                if (cells) {
+                    var arr = cells[0].getElementsByTagName(configs.tagName || "*");
+                    for (var i = 0; i < arr.length; i++) {
+                        var key = op.getKey(arr[i].id || arr[i].name);
+                        if (key.toUpperCase() === 'ID') {
+                            return arr[i].value;
+                        }
+                    }
+                }
+            },
+                findData = function (datas, len, id) {
+                    for (var i = 0; i < len; i++) {
+                        var data = datas[i], _id = data.ID || data.Id || data.id;
+                        if (_id) {
+                            if (_id === id) {
+                                return data;
+                            }
+                        } else {
                             return data;
                         }
-                    } else {
-                        return data;
                     }
-                }
-                return null;
-            };
-        var op = initFormConfig(tableElement, options), configs = op.configs;
-        var list = [], len = tableDatas.length, rows = tableElement.rows.length, tHead = tableElement.tHead, rowIndex = tHead ? tHead.rows.length : 0;
-        for (var i = rowIndex; i < rows; i++) {
-            var tr = tableElement.rows[i], arr = tr.getElementsByTagName(configs.tagName || "*");
-            var id = findId(tr), data = id ? findData(tableDatas, len, id) : tableDatas[i] || {}, isTable = true;
-            list.push(setElementsData(data, arr, op, isTable));
-        }
-        return list;
-    },
-    findElement = function (elements, tagName) {
-        var tags = [];
-        if ($.isUndefined(tagName)) {
-            return $.toElement(elements[0]);
-        }
-        if (tagName.indexOf('|') > -1) {
-            tags = tagName.split('|');
-        }
+                    return null;
+                };
+            var op = initFormConfig(tableElement, options), configs = op.configs;
+            var list = [], len = tableDatas.length, rows = tableElement.rows.length, tHead = tableElement.tHead, rowIndex = tHead ? tHead.rows.length : 0;
+            for (var i = rowIndex; i < rows; i++) {
+                var tr = tableElement.rows[i], arr = tr.getElementsByTagName(configs.tagName || "*");
+                var id = findId(tr), data = id ? findData(tableDatas, len, id) : tableDatas[i] || {}, isTable = true;
+                list.push(setElementsData(data, arr, op, isTable));
+            }
+            return list;
+        },
+        findElement = function (elements, tagName) {
+            var tags = [];
+            if ($.isUndefined(tagName)) {
+                return $.toElement(elements[0]);
+            }
+            if (tagName.indexOf('|') > -1) {
+                tags = tagName.split('|');
+            }
 
-        for (var i = 0; i < elements.length; i++) {
-            var elem = $.toElement(elements[i]);
-            for (var j = 0; j < tags.length; j++) {
-                var ts = tags[j].split(':');
-                if (elem.tagName === ts[0]) {
-                    if (!ts[1] || (ts[1] && elem.type === ts[1])) {
-                        return elem;
+            for (var i = 0; i < elements.length; i++) {
+                var elem = $.toElement(elements[i]);
+                for (var j = 0; j < tags.length; j++) {
+                    var ts = tags[j].split(':');
+                    if (elem.tagName === ts[0]) {
+                        if (!ts[1] || (ts[1] && elem.type === ts[1])) {
+                            return elem;
+                        }
                     }
                 }
-            }
-            if (elem.tagName === tagName) {
-                return elem;
-            }
-        }
-        return null;
-    },
-    formEnter = function (elements, func) {
-        var elems = $.isArrayLike(elements) ? elements : $.isString(elements) ? elements.split(/[,\|;]/) : [elements],
-            len = elems.length;
-        for (var i = 0; i < len; i++) {
-            var elem = $.toElement(elems[i]);
-            $.addListener(elem, 'keyup', function(ev) {
-                var keyCode = $.getKeyCode(ev);
-                if (keyCode === $.KEY_CODE.Enter && $.isFunction(func)) {
-                    func();
+                if (elem.tagName === tagName) {
+                    return elem;
                 }
-            });
-        }
-        return this;
-    };
+            }
+            return null;
+        },
+        formEnter = function (elements, func) {
+            var elems = $.isArrayLike(elements) ? elements : $.isString(elements) ? elements.split(/[,\|;]/) : [elements],
+                len = elems.length;
+            for (var i = 0; i < len; i++) {
+                var elem = $.toElement(elems[i]);
+                $.addListener(elem, 'keyup', function (ev) {
+                    var keyCode = $.getKeyCode(ev);
+                    if (keyCode === $.KEY_CODE.Enter && $.isFunction(func)) {
+                        func();
+                    }
+                });
+            }
+            return this;
+        };
 
     $.extend({
         form: {
@@ -1263,33 +1263,33 @@
         //服务异常
         $.alert(html.join('<br />'), '\u670d\u52a1\u5f02\u5e38', { id: 'appServerError', icon: 'error', copyAble: true });
     },
-    showAjaxFail = function (data, textStatus, jqXHR) {
-        var msg = data.msg || data.Msg || data.message || data.Message || '',
-            error = data.error || data.Error || '';
+        showAjaxFail = function (data, textStatus, jqXHR) {
+            var msg = data.msg || data.Msg || data.message || data.Message || '',
+                error = data.error || data.Error || '';
 
-        //定制功能，如果页面上有定制了window.showAjaxFailAlert函数，并且错误信息是noauth（未登录）
-        //则不直接弹出提示信息，而且跳转到定制函数中处理
-        if (error.toLowerCase() === 'noauth' && $.isFunction(window.showAjaxFailAlert)) {
-            window.showAjaxFailAlert(data, msg, error);
-            return false;
-        }
+            //定制功能，如果页面上有定制了window.showAjaxFailAlert函数，并且错误信息是noauth（未登录）
+            //则不直接弹出提示信息，而且跳转到定制函数中处理
+            if (error.toLowerCase() === 'noauth' && $.isFunction(window.showAjaxFailAlert)) {
+                window.showAjaxFailAlert(data, msg, error);
+                return false;
+            }
 
-        var html = [msg];
-        if (error) {
-            //可能的原因：
-            html.push('\u53ef\u80fd\u7684\u539f\u56e0\uff1a');
-            html.push(error);
-        }
-        var dialogId = data.dialogId || data.dialog || '';
-        var callback = null;
-        if ($.isFunction(window.showAjaxFail)) {
-            callback = function () {
-                window.showAjaxFail(data);
-            };
-        }
-        //提示信息
-        $.alert(html.join('<br />'), '\u63d0\u793a\u4fe1\u606f', { icon: 'warning', copyAble: true, id: dialogId, callback: callback });
-    };
+            var html = [msg];
+            if (error) {
+                //可能的原因：
+                html.push('\u53ef\u80fd\u7684\u539f\u56e0\uff1a');
+                html.push(error);
+            }
+            var dialogId = data.dialogId || data.dialog || '';
+            var callback = null;
+            if ($.isFunction(window.showAjaxFail)) {
+                callback = function () {
+                    window.showAjaxFail(data);
+                };
+            }
+            //提示信息
+            $.alert(html.join('<br />'), '\u63d0\u793a\u4fe1\u606f', { icon: 'warning', copyAble: true, id: dialogId, callback: callback });
+        };
 
     $.extend($, {
         ajaxRequest: function (options) {
@@ -1522,9 +1522,10 @@
         buildIconStyle: function (id) {
             Util.buildStyle('oui_form_icon_style_001', [
                 '.oui-form-txt-icon{cursor:pointer;position:absolute;border:none;overflow:hidden;',
-                'box-sizing:border-box;text-align:center;font-size:14px;font-family:Arial;font-weight:normal;',
+                'box-sizing:border-box;text-align:center;font-size:14px;font-family:Arial,宋体;font-weight:normal;',
                 'width:30px;height:30px;color:#999;margin:0;padding:0;text-decoration:none;',
-                'background:url("',FileDir,'form-icon.png") no-repeat 0 0;}',
+                '-moz-user-select: none;-khtml-user-select: none;user-select: none;-ms-user-select: none;',
+                'background:url("', FileDir, 'form-icon.png") no-repeat 0 0;}',
 
                 '.oui-form-txt-icon:hover{background-position-y:-30px;text-decoration:none;}',
 
@@ -1539,11 +1540,14 @@
                 '.oui-form-icon-query{background-position:-90px 0;}',
                 '.oui-form-icon-query:hover{background-position:-90px -30px;}',
 
-                '.oui-form-icon-len,.oui-form-icon-lbl{',
+                '.oui-form-icon-len,.oui-form-icon-unit,.oui-form-icon-post,.oui-form-icon-btn{',
                 'width:30px;cursor:default;',
                 'border-left:solid 1px #ddd;background:#fff;opacity:0.9;',
                 //'border-top-right-radius:4px;border-bottom-right-radius:4px;',
                 '}',
+                '.oui-form-icon-btn{cursor:pointer;}',
+                '.oui-form-icon-pre,.oui-form-icon-lbl{width:30px;cursor:default;',
+                'border-right:solid 1px #ddd;background:#fff;opacity:0.9;}',
 
                 'input[type="password"]::-webkit-credentials-cramble-button{appearance: none;}',
                 'input[type="password"]::-ms-reveal{display: none;}',
@@ -1568,7 +1572,7 @@
                     return (codes || []).indexOf(keyCode) >= 0 && (excepts || []).indexOf(keyCode) < 0;
                 }
             },
-            checkVal: function(val, types, opt, keydown, elem) {
+            checkVal: function (val, types, opt, keydown, elem) {
                 opt = $.extend({}, opt);
                 types = $.extend([], types);
                 var patterns = $.extend([], opt.patterns), pass = false;
@@ -1596,7 +1600,7 @@
                     float: [$.PATTERN.Float, /^([0]?|[-]|[.])$/],
                     double: [$.PATTERN.Double, /^([0]?|[-]|[.])$/],
                     port: [$.PATTERN.Port, /^[0]?$/],
-                    angle: [opt.minus ? /^[\-]?360(\.[0]{0,8})?$|^([1-3][0-5][0-9]|[1-2][0-9]+|[0-9]{1,2})([.][\d]{0,8})?$/ : 
+                    angle: [opt.minus ? /^[\-]?360(\.[0]{0,8})?$|^([1-3][0-5][0-9]|[1-2][0-9]+|[0-9]{1,2})([.][\d]{0,8})?$/ :
                         /^360(\.[0]{0,8})?$|^([1-3][0-5][0-9]|[1-2][0-9]+|[0-9]{1,2})([.][\d]{0,8})?$/, opt.minus ? /^[\-]?[0]?$/ : /^[0]?$/],
                     hex: [opt.space ? /^[A-F0-9\s]{1,}$/i : /^[A-F0-9]{1,}$/i, /^[0]{0}$/],
                     md5: [/^[A-F0-9]{32}$/i, /^[0]{0}$/]
@@ -1641,7 +1645,7 @@
                 if (elem.tagName === 'SELECT') {
                     arr = elem.options;
                     for (i = 0; i < arr.length; i++) {
-                        options.push({val: arr[i].value, txt: arr[i].text});
+                        options.push({ val: arr[i].value, txt: arr[i].text });
                     }
                 } else {
                     arr = ($.getAttribute(elem, 'options') || '').split(/[,;\|]/);
@@ -1649,9 +1653,9 @@
                         if (arr[i] !== '') {
                             if (arr[i].indexOf(':') > 0) {
                                 var tmp = arr[i].split(':');
-                                options.push({val: tmp[0], txt: tmp[1] || tmp[0]});
+                                options.push({ val: tmp[0], txt: tmp[1] || tmp[0] });
                             } else {
-                                options.push({val: arr[i], txt: arr[i]});
+                                options.push({ val: arr[i], txt: arr[i] });
                             }
                         }
                     }
@@ -1731,7 +1735,7 @@
             replaceValue: function (ev, elem, val, isCnAble, converts, optionValues) {
                 var replace = false;
                 //当没有选项并且也不允许中文输入的情况，清除中文（包括标点符号）
-                if (!$.input.isInOption(optionValues, val) && !isCnAble && 
+                if (!$.input.isInOption(optionValues, val) && !isCnAble &&
                     /([。，、：；‘’“”！……~｛【《》】｝]|[\u3220-\uFA29]|[`·])+/ig.test(val)) {
                     val = val.replace(/([。，、：；‘’“”！……~｛【《》】｝]|[\u3220-\uFA29]|[`·])+/ig, '');
                     elem.value = val;
@@ -1762,7 +1766,7 @@
             setWarnColor: function (elem, pass, focus) {
                 if (!pass) {
                     if (!elem.oldColor) {
-                        elem.oldColor  = $.getElementStyle(elem, 'color');
+                        elem.oldColor = $.getElementStyle(elem, 'color');
                     }
                     if (focus) {
                         elem.focus();
@@ -1800,7 +1804,7 @@
 
                     if (opt.valLen && opt.valLen > 0 && val.length !== opt.valLen) {
                         $.input.setWarnColor(elem, false, true);
-                    } else if(opt.minLen && opt.minLen > 0 && val.length < opt.minLen) {
+                    } else if (opt.minLen && opt.minLen > 0 && val.length < opt.minLen) {
                         $.input.setWarnColor(elem, false, true);
                     }
                 }
@@ -1890,7 +1894,7 @@
                 if (isArrowKey) {
                     var arr = div.querySelectorAll('li'),
                         len = arr.length,
-                        idx = item < 0 ? 0 : item > len ? len : item, 
+                        idx = item < 0 ? 0 : item > len ? len : item,
                         //n = item,
                         n = idx;
 
@@ -1904,7 +1908,7 @@
                         }
                     } else {
                         if ($.isNumber(keyCode)) {
-                            switch(keyCode) {
+                            switch (keyCode) {
                                 case 37: idx = 1; break;
                                 case 39: idx = len; break;
                                 case 77: idx = Math.ceil(len / 2); break;
@@ -1963,10 +1967,10 @@
                 return this;
             },
             buildOption: function (options) {
-                return $.isArray(options) ? 
-                    options : $.isUndefinedOrNull(options) ? 
-                    [] : $.isString(options, true) ? 
-                    options.split(/[,;\|]/) : [options];
+                return $.isArray(options) ?
+                    options : $.isUndefinedOrNull(options) ?
+                        [] : $.isString(options, true) ?
+                            options.split(/[,;\|]/) : [options];
             },
             //action: 0 - hide, 1 - toggle, 2 - show
             setOption: function (elem, options, config, action) {
@@ -2008,7 +2012,7 @@
                     curIdx = 0,
                     n = len.toString().length,
                     elemVal = elem.value.trim(),
-                    html = [ '<ul class="input-opt-ul">' ],
+                    html = ['<ul class="input-opt-ul">'],
                     isSelect = elem.tagName === 'SELECT';
 
                 div.target = elem.tagName;
@@ -2033,7 +2037,7 @@
                 ].join(';');
 
                 for (var i = 0; i < len; i++) {
-                    var val = opt[i].val, 
+                    var val = opt[i].val,
                         txt = opt[i].txt,
                         con = txt,
                         cur = elemVal === val.toString();
@@ -2090,26 +2094,26 @@
                 window.inputFormatTimers = {};
                 if (!window.inputOptionDocEventListener) {
                     window.inputOptionDocEventListener = 1;
-                    $.addListener(document, 'mousedown', function(ev) {
-                        if ((ev.target.tagName === 'LI' && ev.target.className.indexOf('input-opt-panel-item') > -1) || 
+                    $.addListener(document, 'mousedown', function (ev) {
+                        if ((ev.target.tagName === 'LI' && ev.target.className.indexOf('input-opt-panel-item') > -1) ||
                             (ev.target.tagName === 'SELECT' && ev.target.className.indexOf('input-opt-panel-select') > -1)) {
                             return false;
                         }
                         $.input.hideOptionPanel();
                     });
-                    $.addListener(window, 'resize', function(ev) {
+                    $.addListener(window, 'resize', function (ev) {
                         $.input.hideOptionPanel();
                     });
                 }
-                
+
                 var arr = div.querySelectorAll('li');
                 for (var i = 0; i < arr.length; i++) {
                     var li = arr[i];
-                    $.addListener(li, 'mousedown', function(ev) {
+                    $.addListener(li, 'mousedown', function (ev) {
                         $.cancelBubble(ev);
                         return false;
                     });
-                    $.addListener(li, 'click', function(ev) {
+                    $.addListener(li, 'click', function (ev) {
                         $.cancelBubble(ev);
                         $.input.selectOptionItem(this, null, elem, div);
                     });
@@ -2157,21 +2161,21 @@
                 }
 
                 function _listen(elem, key) {
-                    $.addListener(window, 'resize', function(ev) {
+                    $.addListener(window, 'resize', function (ev) {
                         $.input.setIcon(ev, elem);
                     });
-                    $.addListener(elem, 'mouseover', function(ev) {
+                    $.addListener(elem, 'mouseover', function (ev) {
                         $.input.setIcon(ev, elem);
                     });
                     if (key === 'len') {
-                        $.addListener(elem, 'change', function(ev) {
+                        $.addListener(elem, 'change', function (ev) {
                             $.input.setIcon(ev, elem);
                         });
                     }
                 }
 
                 function _enter(elem, func) {
-                    $.addListener(elem, 'keyup', function(ev) {
+                    $.addListener(elem, 'keyup', function (ev) {
                         var val = elem.value.trim(),
                             kc = $.getKeyCode(ev);
                         if (val.length > 0 && kc === $.KEY_CODE.Enter) {
@@ -2181,7 +2185,7 @@
                 }
 
                 function _background(elem, arg) {
-                    var opt = {left: 0, right: 0, width: 20, path: ''};
+                    var opt = { left: 0, right: 0, width: 20, path: '' };
                     if ($.isObject(arg)) {
                         opt = $.extend(opt, arg);
                     } else if ($.isString(arg)) {
@@ -2195,7 +2199,7 @@
                         'background-repeat:no-repeat;background-position:', opt.left, 'px center;',
                         'padding-left:', (opt.width || 20) + opt.left + (opt.right || opt.left), 'px;'
                     ];
-                    elem.style.cssText = css.join('');
+                    elem.style.cssText = (elem.style.cssText || '') + css.join('');
                 }
 
                 function _getElementStyle(elem, styleName) {
@@ -2204,10 +2208,10 @@
                 }
 
                 function _create(elem, key, arg, idx) {
-                    $.createElement('A', '', function(el) {
+                    $.createElement('A', '', function (el) {
                         var zIndex = parseInt('0' + _getElementStyle(elem, 'z-index'), 10) + 1,
                             ps = $.getOffset(elem), iconSize = 30, h = ps.height - 2, css = [],
-                            func = null, w = 30, txt = '';
+                            func = null, w = 30, txt = '', color = '', bg = '';
 
                         if ($.isFunction(arg)) {
                             func = arg;
@@ -2217,11 +2221,13 @@
                                 w = arg.width;
                             }
                             txt = arg.text || arg.txt;
+                            color = arg.color || '';
+                            bg = arg.background || arg.bg || '';
                         } else if ($.isString(arg)) {
                             txt = arg;
                         }
 
-                        if (['len', 'lbl'].indexOf(key) < 0 && h > iconSize) {
+                        if (['len', 'lbl', 'pre', 'post', 'unit', 'btn'].indexOf(key) < 0 && h > iconSize) {
                             h = iconSize;
                         }
 
@@ -2231,22 +2237,34 @@
                             elem.parentNode.style.position = 'relative';
                         }
                         el.className = 'oui-form-txt-icon oui-form-icon-' + key;
-                        css = ['width:', w, 'px;', 'height:',h, 'px;line-height:', h, 'px;z-index:', zIndex, ';'];
-                        if (['lbl', 'len'].indexOf(key) > -1) {
+                        css = ['width:', w, 'px;', 'height:', h, 'px;line-height:', h, 'px;z-index:', zIndex, ';'];
+                        if (['lbl', 'len', 'btn', 'pre', 'post', 'unit'].indexOf(key) > -1) {
+                            if (['pre', 'lbl'].indexOf(key) > -1) {
+                                css.push(['border-right:', _getElementStyle(elem, 'borderRight'), ';border-left:none;'].join(''));
+                            } else {
+                                css.push(['border-left:', _getElementStyle(elem, 'borderLeft'), ';border-right:none;'].join(''));
+                            }
                             css.push([
-                                'border-left:', _getElementStyle(elem, 'borderLeft'), ';',
-                                'background-color:', _getElementStyle(elem, 'backgroundColor'), ';',
-                                'color:', _getElementStyle(elem, 'color'), ';'
+                                'background-color:', bg || _getElementStyle(elem, 'backgroundColor'), ';',
+                                'color:', color || _getElementStyle(elem, 'color'), ';'
                             ].join(''));
                         }
-                        css.push([
-                            'border-top-right-radius:', _getElementStyle(elem, 'borderTopRightRadius'), ';',
-                            'border-bottom-right-radius:', _getElementStyle(elem, 'borderBottomRightRadius'), ';'
-                        ].join(''));
+                        if (['pre', 'lbl'].indexOf(key) > -1) {
+                            css.push([
+                                'border-top-left-radius:', _getElementStyle(elem, 'borderTopLeftRadius'), ';',
+                                'border-bottom-left-radius:', _getElementStyle(elem, 'borderBottomLeftRadius'), ';'
+                            ].join(''));
+                            elem.style.cssText = (elem.style.cssText || '') + 'padding-left:' + (w + 5) + 'px;';
+                        } else {
+                            css.push([
+                                'border-top-right-radius:', _getElementStyle(elem, 'borderTopRightRadius'), ';',
+                                'border-bottom-right-radius:', _getElementStyle(elem, 'borderBottomRightRadius'), ';'
+                            ].join(''));
+                        }
 
                         el.style.cssText = css.join('');
 
-                        if (key === 'lbl') {
+                        if (['lbl', 'pre', 'post', 'unit', 'btn'].indexOf(key) > -1) {
                             el.innerHTML = txt;
                         } else if (key === 'len') {
                             //设置stat-len属性，用于内容更改时触发onchange事件： trigger(elem, 'change')
@@ -2259,14 +2277,14 @@
 
                         $.input.showIcon(elem, key, idx, true);
 
-                        $.addListener(el, 'click', function(ev) {
-                            if (['del', 'query'].indexOf(key) > -1) {
+                        $.addListener(el, 'click', function (ev) {
+                            if (['del', 'query', 'btn'].indexOf(key) > -1) {
                                 if (el.key === 'del') {
                                     el.style.display = 'none';
                                     elem.value = '';
                                 }
-                                if ($.isFunction(arg)) {
-                                    arg(elem);
+                                if ($.isFunction(func)) {
+                                    func(elem);
                                 }
                             } else if ('pwd' === key || 'txt' === key) {
                                 if (el.className.indexOf('oui-form-icon-pwd') > -1) {
@@ -2283,11 +2301,11 @@
                 }
 
                 for (var k in icons) {
-                    if (['del', 'pwd', 'txt', 'query', 'len', 'lbl'].indexOf(k) > -1) {
+                    if (['del', 'pwd', 'txt', 'query', 'len', 'btn', 'lbl', 'pre', 'post', 'unit'].indexOf(k) > -1) {
                         _create(elem, k, icons[k], idx++);
                     } else if (k === 'enter' && $.isFunction(icons[k])) {
                         _enter(elem, icons[k]);
-                    } else if (['ico', 'pic'].indexOf(k) > -1) {
+                    } else if (['ico', 'pic', 'icon'].indexOf(k) > -1) {
                         _background(elem, icons[k]);
                     }
                 }
@@ -2300,15 +2318,17 @@
                 }
                 for (var k in elem.icons) {
                     var obj = elem.icons[k].icon, w = obj.offsetWidth || parseInt('0' + obj.style.width, 10);
-                    offsetWidth += w;
+                    if (['pre', 'lbl'].indexOf(k) < 0) {
+                        offsetWidth += w;
+                    }
                     i++;
                     if (i > idx) {
                         break;
                     }
                 }
-                function _show() {
+                function _show(elem, key) {
                     var show = true, val = elem.value.trim();
-                    if (key === 'del' ) {
+                    if (key === 'del') {
                         show = val.length > 0;
                         d.icon.style.display = show ? '' : 'none';
                         d.show = show;
@@ -2322,12 +2342,16 @@
                     var bh = $.getBorderSize(elem);
                     offset = (ps.height - bh.height - h) / 2;
 
-                    if (['len', 'lbl'].indexOf(key) < 0) {
+
+                    if (['len', 'unit', 'btn', 'lbl', 'pre', 'post'].indexOf(key) < 0) {
                         if (h > iconSize) {
                             h = iconSize;
                         } else if (h < iconSize) {
                             offset = -(iconSize - h) / 2;
                         }
+                    }
+                    if (['btn'].indexOf(key) > -1) {
+                        h = ps.height;
                     }
 
                     if (d.icon.parent) {
@@ -2335,21 +2359,29 @@
                         d.icon.style.top = 1 + offset + 'px';
                         d.icon.style.right = (offsetWidth - selfW) + 1 + 'px';
                     } else {
-                        d.icon.style.top = ps.top + 1 + offset + 'px';
-                        d.icon.style.left = ps.left + ps.width - offsetWidth - 1 + 'px';
+                        d.icon.style.top = (ps.top + 1 + offset) + 'px';
+                        if (['pre', 'lbl'].indexOf(key) > -1) {
+                            d.icon.style.left = ps.left + 1 + 'px';
+                        } else {
+                            d.icon.style.left = ps.left + ps.width - offsetWidth - 1 + 'px';
+                        }
                     }
                 }
 
                 var val = elem.value.trim(), len = val.length;
                 if (first || key === 'len' || len === 1) {
-                    _show(elem);
+                    _show(elem, key);
                 } else {
-                    if (Util.timer['icon']) {
-                        window.clearTimeout(Util.timer['icon']);
+                    _show(elem, key);
+                    /*
+                    var tid = ['icon', key, elem.id].join('-');
+                    if (Util.timer[tid]) {
+                        window.clearTimeout(Util.timer[tid]);
                     }
-                    Util.timer['icon'] = window.setTimeout(function() {
-                        _show(elem);
-                    }, 256);
+                    Util.timer[tid] = window.setTimeout(function () {
+                        _show(elem, key);
+                    }, 50);
+                    */
                 }
                 return this;
             },
@@ -2365,14 +2397,14 @@
             setFormat: function (elements, options) {
                 var elems = Util.checkElemArray(elements), element, keyTypes = [
                     'open', 'none', //open | none 表示不限制输入，但需要验证选项等特殊格式
-                    'char', 'number', 'char_number', 'word', 'int', 'long', 'float', 'double', 'bool', 'control', 'symbol', 
+                    'char', 'number', 'char_number', 'word', 'int', 'long', 'float', 'double', 'bool', 'control', 'symbol',
                     'option', 'ipv4', 'ipv6', 'port', 'hex', 'md5', 'angle', 'at'
                 ];
 
                 if ((!$.isArrayLike(elems) && !$.isArray(elems)) || !(element = $.toElement(elems[0]))) {
                     return this;
                 }
-                
+
                 Util.buildInputStyle().buildOptionStyle();
 
                 var par = $.extend({}, options),
@@ -2436,13 +2468,13 @@
                 cfg.y = $.getParam(cfg, 'top,y', 0);
 
                 //获取默认参数值，如果没有明确配置参数值，则从element属性中获取
-                var ks = [['append'], ['editable'],['relative'],['number']];
-                for (var k = 0 ; k < ks.length; k++) {
+                var ks = [['append'], ['editable'], ['relative'], ['number']];
+                for (var k = 0; k < ks.length; k++) {
                     if (!$.isBoolean(cfg[ks[k][0]])) {
                         cfg[ks[k][0]] = $.getAttribute(element, 'opt-' + (ks[k][1] || ks[k][0]), 'false').inArray(['true', '1']);
                     }
                 }
-                var ns = [['width'],['height', 'maxHeight,height'],['zindex', 'zindex,zIndex']];
+                var ns = [['width'], ['height', 'maxHeight,height'], ['zindex', 'zindex,zIndex']];
                 for (var n = 0; n < ns.length; n++) {
                     if (!(cfg[ns[n][0]] = $.getParam(cfg, ns[n][1] || ns[n][0], 0))) {
                         cfg[ns[n][0]] = $.getAttribute(element, 'opt-' + ns[n][0], 0);
@@ -2460,9 +2492,9 @@
 
                 opt.empty = $.getParam(opt, 'allowEmpty,empty');
                 if (($.isBoolean(opt.empty) && opt.empty) || (!$.isNumber(opt.empty) && opt.empty)) {
-                    opt.empty = {val: '', txt: '&nbsp;'};
+                    opt.empty = { val: '', txt: '&nbsp;' };
                 } else if ($.isString(opt.empty, true)) {
-                    opt.empty = {val: '', txt: opt.empty};
+                    opt.empty = { val: '', txt: opt.empty };
                 } else if (!$.isObject(opt.empty)) {
                     opt.empty = null;
                 }
@@ -2493,7 +2525,7 @@
                     opt.exceptions = [opt.exceptions];
                 }
 
-                if ($.isNumber(opt.config.minWidth) && opt.config.minWidth &&  opt.config.minWidth < 50) {
+                if ($.isNumber(opt.config.minWidth) && opt.config.minWidth && opt.config.minWidth < 50) {
                     opt.config.minWidth = 50;
                 }
                 if ($.isNumber(opt.config.width) && opt.config.width && opt.config.width < 50) {
@@ -2610,7 +2642,7 @@
                         // . (小键盘) . (主键盘)
                         keys = keys.concat([KC.Symbol['.'], KC.Min.Symbol['.']]);
                         patterns = patterns.concat([
-                            new RegExp('^(' + _minus + '[1-9][0-9]{0,23}[.]?[0-9]{0,' + decimalLen + '}|' + _minus + '[0]([.][0-9]{0,' + decimalLen + '})?)$'), 
+                            new RegExp('^(' + _minus + '[1-9][0-9]{0,23}[.]?[0-9]{0,' + decimalLen + '}|' + _minus + '[0]([.][0-9]{0,' + decimalLen + '})?)$'),
                             opt.minus ? /^([0]?|[-])$/ : /^[0]?$/
                         ]);
                     } else if (type === 'angle') {
@@ -2619,7 +2651,7 @@
                         }
                         opt.maxVal = opt.maxVal || 360;
                         patterns = patterns.concat([
-                            new RegExp('^360(\.[0]{0,' + decimalLen + '})?$|^([1-3][0-5][0-9]|[1-2][0-9]+|[0-9]{1,2})([.][0-9]{0,' + decimalLen + '})?$'), 
+                            new RegExp('^360(\.[0]{0,' + decimalLen + '})?$|^([1-3][0-5][0-9]|[1-2][0-9]+|[0-9]{1,2})([.][0-9]{0,' + decimalLen + '})?$'),
                             /^[0]?$/
                         ]);
                     } else if (type === 'port') {
@@ -2634,7 +2666,7 @@
                         //错误的IPv4输入格式
                         exceptions = exceptions.concat([/(\.\.)+|^([\d]{1,3}\.){4,}$|([\d]{4,})|(25[6-9]|(0|[3-9])[\d]{2})/]);
                         opt.maxLen = 15;
-                        converts = converts.concat([{src: '127.', dest: '127.0.0.1'}, ['192.', '192.168.'], ['255.', '255.255.255.0']]);
+                        converts = converts.concat([{ src: '127.', dest: '127.0.0.1' }, ['192.', '192.168.'], ['255.', '255.255.255.0']]);
                     } else if (type === 'ipv6') {
                         keys = keys.concat([KC.Symbol[':']]);
                         isVal = true;
@@ -2646,7 +2678,7 @@
                     if (type === 'word') {
                         keys = keys.concat([KC.Symbol['-']]);
                     }
-                    if (type==='md5' && !opt.valLen) {
+                    if (type === 'md5' && !opt.valLen) {
                         opt.valLen = 32;
                     }
                 }
@@ -2739,14 +2771,14 @@
                         }
                         //这里为什么不用$.addListener？
                         //因为这里需要阻止非法输入，而$.addListener不是独占式的
-                        elem.onkeydown = function(ev) {
+                        elem.onkeydown = function (ev) {
                             if (opt.types[0] === 'none') {
                                 //设置功能图标
                                 $.input.setIcon(ev, elem, opt);
                                 return true;
                             }
-                            var kc = $.getKeyCode(ev), 
-                                ddl = this.tagName === 'SELECT', 
+                            var kc = $.getKeyCode(ev),
+                                ddl = this.tagName === 'SELECT',
                                 typed = $.getAttribute(this, 'opt-typed', '0').toInt(),
                                 div = $I($.getAttribute(this, 'opt-id')),
                                 ArrList = [KCA.Left, KCA.Top, KCA.Bottom, KCA.Right], //左 上 下 右
@@ -2763,9 +2795,9 @@
                             if (opt.change) {
                                 $.trigger(elem, 'change');
                             }
-                            if ((kc.inArray(ArrList) || 
-                                ((ddl || opt.config.readonly || !kc.inArray(keys)) && 
-                                    (kc.inArray(VimList) || kc.inArray(VimKey) || shortcut))) && 
+                            if ((kc.inArray(ArrList) ||
+                                ((ddl || opt.config.readonly || !kc.inArray(keys)) &&
+                                    (kc.inArray(VimList) || kc.inArray(VimKey) || shortcut))) &&
                                 (ddl || opt.config.readonly || !typed)) {
                                 $.cancelBubble(ev);
                                 var idx = ($.getAttribute(this, 'opt-idx') || '').toInt(),
@@ -2851,7 +2883,7 @@
                         };
 
                         if (!isSelect) {
-                            $.addListener(elem, 'keyup', function(ev) {
+                            $.addListener(elem, 'keyup', function (ev) {
                                 if (opt.types[0] === 'none') {
                                     //设置功能图标
                                     $.input.setIcon(ev, elem, opt);
@@ -2875,7 +2907,7 @@
 
                                 val = ctl.val;
 
-                                if(!$.input.checkFormat(this, $.extend([], opt.options), false, opt.config.editable)) {
+                                if (!$.input.checkFormat(this, $.extend([], opt.options), false, opt.config.editable)) {
                                     this.focus();
                                     return false;
                                 }
@@ -2885,11 +2917,11 @@
                                 }
                                 return true;
                             });
-                            
+
                             //内容指定，当输入的内容与选项不匹配时，输入框锁定焦点
-                            $.addListener(elem, 'blur', function(ev) {
+                            $.addListener(elem, 'blur', function (ev) {
                                 $.input.replaceValue(ev, this, this.value.trim(), isCnAble, converts, $.input.getOptionValues(opt.options));
-                                if(!$.input.checkFormat(this, $.extend([], opt.options), false, opt.config.editable)) {
+                                if (!$.input.checkFormat(this, $.extend([], opt.options), false, opt.config.editable)) {
                                     this.focus();
                                 }
                             });
@@ -2898,7 +2930,7 @@
                         //选项模式，默认显示选项框，若不想显示选项，需设置 showOption:false
                         if ($.isBoolean(opt.showOption, true)) {
                             //非只读（即可选可输入），若用mousedown则光标位置没法指定
-                            $.addListener(elem, 'mousedown', function(ev) {
+                            $.addListener(elem, 'mousedown', function (ev) {
                                 this.focus();
                                 if (isSelect || opt.config.readonly) {
                                     $.cancelBubble(ev);
@@ -2910,7 +2942,7 @@
                                 return false;
                             });
                             if (!isSelect && !opt.config.readonly) {
-                                $.addListener(elem, 'click', function(ev) {
+                                $.addListener(elem, 'click', function (ev) {
                                     $.cancelBubble(ev);
                                     if (elem.optbox) {
                                         //mousedown冒泡事件中已切换显示列表框，所以这里需要恢复列表框的显示/隐藏
@@ -2950,7 +2982,7 @@
                         elem.placeholder = opt.placeholder || cfg.title || elem.placeholder;
 
                         //控制输入，当输入值不匹配时，输入框禁止输入
-                        elem.onkeydown = function(ev) {
+                        elem.onkeydown = function (ev) {
                             if (opt.types[0] === 'none') {
                                 //设置功能图标
                                 $.input.setIcon(ev, elem, opt);
@@ -2998,7 +3030,7 @@
                             }
                             return false;
                         };
-                        $.addListener(elem, 'keyup', function(ev) {
+                        $.addListener(elem, 'keyup', function (ev) {
                             if (opt.types[0] === 'none') {
                                 //设置功能图标
                                 $.input.setIcon(ev, elem, opt);
@@ -3016,7 +3048,7 @@
 
                             val = ctl.val;
                             if (isVal) {
-                                if(!$.input.checkFormat(this, patterns, true, opt.config.editable)) {
+                                if (!$.input.checkFormat(this, patterns, true, opt.config.editable)) {
                                     return $.input.setWarnColor(this, false, true);
                                 }
                             } else {
@@ -3026,7 +3058,7 @@
                             }
                             return $.input.setWarnColor(elem, true);
                         });
-                        $.addListener(elem, 'blur', function(ev) {
+                        $.addListener(elem, 'blur', function (ev) {
                             if (opt.types[0] === 'none') {
                                 return true;
                             }
@@ -3049,11 +3081,11 @@
                             return $.input.setWarnColor(this, true);
                         });
                         if (!opt.paste) {
-                            elem.onpaste = function() {
+                            elem.onpaste = function () {
                                 return false;
                             };
                         } else {
-                            elem.onpaste = function(ev) {
+                            elem.onpaste = function (ev) {
                                 if (opt.types[0] === 'none') {
                                     //设置功能图标
                                     $.input.setIcon(ev, elem, opt);
@@ -3105,10 +3137,10 @@
                 }
             }
             function _setEvent(elem) {
-                $.addListener(elem, 'keydown', function(ev) {
+                $.addListener(elem, 'keydown', function (ev) {
                     $.input.setIcon(ev, elem);
                 });
-                $.addListener(elem, 'keyup', function(ev) {
+                $.addListener(elem, 'keyup', function (ev) {
                     $.input.setIcon(ev, elem);
                 });
             }

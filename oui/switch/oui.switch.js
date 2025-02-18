@@ -50,7 +50,7 @@
             };
             return this;
         },
-        setCache: function (opt, oar) {
+        setCache: function (opt, par) {
             var key = Config.buildKey(opt),
                 cache = Config.caches[key];
             if (cache) {

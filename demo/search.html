@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>搜索提示</title>
+</head>
+<body>
+	<div>
+		<input type="text" id="keywords" />
+		<input type="text" id="keywords1" />
+		<input type="text" id="keywords2" />
+		<input type="text" id="keywords3" />
+	</div>
+</body>
+</html>
+<script type="text/javascript" src="../oui/oui.js"></script>
+<script type="text/javascript" src="../oui/search/oui.search.js"></script>
+<script type="text/javascript">
+window.onload = function() {
+	$.search('keywords', {});
+	$.search($I('keywords1'), {});
+	$.search({
+		id: 'keywords2'
+	});
+	$.search({
+		element: $I('keywords3')
+	});
+};
+</script>

@@ -789,6 +789,9 @@
                 b = buildParam($.extend({}, param), null, false);
             return ($.isString(a, true) ? a + '&' : '') + b;
         },
+        buildApiData = function(formData, param, caseType) {
+            return buildAjaxData('', formData, param, caseType);
+        },
         buildUrlParam = function (param, strict, url) {
             return buildParam($.extend({}, param), null, strict, url);
         },
@@ -1326,6 +1329,7 @@
         toFunction: toFunction, toFunc: toFunction, callFunction: callFunction, callFunc: callFunction,
         param: buildParam, buildParam: buildParam, setUrlParam: setUrlParam, 
         buildAjaxData: buildAjaxData, buildUrlData: buildAjaxData, buildUrlParam: buildUrlParam,
+        buildApiData: buildApiData,
         setQueryString: setQueryString, getQueryString: getQueryString, getUrlHost: getUrlHost, getUrlPage: getUrlPage,
         setDebug: setDebug, isDebugAction: isDebugAction, isDebug: isDebug, isLocalhost: isLocalhost,
         filterValue: filterValue, keywordOverload: keywordOverload, keyOverload: keywordOverload,
