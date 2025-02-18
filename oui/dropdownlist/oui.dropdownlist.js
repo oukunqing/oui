@@ -910,6 +910,10 @@
 
 				if (!this.isRepeat(that.id + '-mousedown')) {
 					$.addListener(that.box, 'mousedown', function(ev) {
+						if (opt.focusable) {
+							//防止mousedown事件冒泡，保持控件不失去焦点
+							$.cancelBubble(ev);
+						}
 						var elem = ev.target,
 							tag = elem.tagName.toLowerCase(),
 							css = elem.className,
@@ -940,7 +944,6 @@
 							}
 						}
 
-						that.elem.focus();
 					});
 				}
 				return this;
@@ -1663,6 +1666,8 @@
 			beforeChange: undefined,
 			//是否允许扩展选项（可以自行输入不存在的选项值）
 			editable: false,
+			//选中选项后选框是否获取焦点
+			focusable: true,
 			config: {}
 		}, options));
 
