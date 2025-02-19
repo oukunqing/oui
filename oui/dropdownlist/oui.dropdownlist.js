@@ -467,6 +467,7 @@
 							desc = dr.desc || (opt.desc ? val.toString() : ''),
 							title = '<span class="oui-ddl-li-txt">' + 
 								(opt.display && val !== '' && val !== txt ? val + '<u>-</u>' + txt : txt === '' ? val : txt) + 
+								//(opt.display && val !== '' && val !== txt ? val + ' - ' + txt : txt === '' ? val : txt) + 
 								'</span>' +
 								(desc && txt !== desc ? '<span class="oui-ddl-li-txt i-t">' + desc + '</span>' : '');
 
@@ -910,16 +911,18 @@
 
 				if (!this.isRepeat(that.id + '-mousedown')) {
 					$.addListener(that.box, 'mousedown', function(ev) {
-						if (opt.focusable) {
-							//防止mousedown事件冒泡，保持控件不失去焦点
-							$.cancelBubble(ev);
-						}
 						var elem = ev.target,
 							tag = elem.tagName.toLowerCase(),
 							css = elem.className,
 							lbl = elem;
 
-						if (tag !== 'label' || css.indexOf('oui-ddl-label') < 0) {
+						if (opt.focusable) {
+							//防止mousedown事件冒泡，保持控件不失去焦点
+							$.cancelBubble(ev);
+						}
+						if (tag === 'u') {
+							lbl = elem.parentNode.parentNode;
+						} else if (tag !== 'label' || css.indexOf('oui-ddl-label') < 0) {
 							lbl = elem.parentNode;
 						}
 						if (lbl.className.indexOf('oui-ddl-label') < 0) {

@@ -237,14 +237,14 @@ button {width:120px;height:30px;}
             //内容长度固定为15个字节
             //valLen: 10,
             //icon: { 
-                btn: {text:'设置',width:40, bg: '#ddd', func:function() { alert('设置'); } },
+                btn: {text:'设置',width:40, primary: false, func:function() { alert('设置'); } },
                 unit: '秒', 
                 lbl: {text:'时长', width:40, color: '#f00' }, 
                 del: function(elem) {
                     $.console.log('icon-del:', elem)
                 }
             //}
-        });
+        }, true);
 
 
         //$.setInputIcon('fmt_pwd', 'pwd');

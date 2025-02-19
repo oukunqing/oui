@@ -1521,6 +1521,7 @@
         },
         buildIconStyle: function (id) {
             Util.buildStyle('oui_form_icon_style_001', [
+                '.oui-input-parent-div{margin:0;padding:0;border:none;overflow:hidden;border-radius:0;border-box:box-sizing;position:relative;}',
                 '.oui-form-txt-icon{cursor:pointer;position:absolute;border:none;overflow:hidden;',
                 'box-sizing:border-box;text-align:center;font-size:14px;font-family:Arial,宋体;font-weight:normal;',
                 'width:30px;height:30px;color:#999;margin:0;padding:0;text-decoration:none;',
@@ -1545,7 +1546,11 @@
                 'border-left:solid 1px #ddd;background:#fff;opacity:0.9;',
                 //'border-top-right-radius:4px;border-bottom-right-radius:4px;',
                 '}',
-                '.oui-form-icon-btn{cursor:pointer;}',
+                '.oui-form-icon-btn{cursor:pointer;background:#eee;color:#000;border:solid 1px #ccc;border-box:box-sizing;text-decoration:none;}',
+                '.oui-form-icon-btn:hover{background:#e6e6e6;color:#000;}',
+                '.oui-form-icon-btn-primary{cursor:pointer;background:#337ab7;color:#fff;border:solid 1px #2e6da4;border-box:box-sizing;text-decoration:none;}',
+                '.oui-form-icon-btn-primary:hover{background:#286090;border:solid 1px #204d74;color:#fff;}',
+
                 '.oui-form-icon-pre,.oui-form-icon-lbl{width:30px;cursor:default;',
                 'border-right:solid 1px #ddd;background:#fff;opacity:0.9;}',
 
@@ -2211,7 +2216,12 @@
                     $.createElement('A', '', function (el) {
                         var zIndex = parseInt('0' + _getElementStyle(elem, 'z-index'), 10) + 1,
                             ps = $.getOffset(elem), iconSize = 30, h = ps.height - 2, css = [],
-                            func = null, w = 30, txt = '', color = '', bg = '';
+                            func = null, w = 30, txt = '', color = '', bg = '',
+                            primary = false, follow = false;
+
+                        if (key.indexOf('btn') > -1) {
+                            h = ps.height;
+                        }
 
                         if ($.isFunction(arg)) {
                             func = arg;
@@ -2223,6 +2233,8 @@
                             txt = arg.text || arg.txt;
                             color = arg.color || '';
                             bg = arg.background || arg.bg || '';
+                            primary = $.isBoolean(arg.primary, false);
+                            follow = $.isBoolean(arg.follow, false);
                         } else if ($.isString(arg)) {
                             txt = arg;
                         }
@@ -2236,25 +2248,47 @@
                             el.parent = elem.parentNode;
                             elem.parentNode.style.position = 'relative';
                         }
-                        el.className = 'oui-form-txt-icon oui-form-icon-' + key;
+                        el.className = 'oui-form-txt-icon oui-form-icon-' + key + (primary ? '-primary': '');
                         css = ['width:', w, 'px;', 'height:', h, 'px;line-height:', h, 'px;z-index:', zIndex, ';'];
                         if (['lbl', 'len', 'btn', 'pre', 'post', 'unit'].indexOf(key) > -1) {
-                            if (['pre', 'lbl'].indexOf(key) > -1) {
-                                css.push(['border-right:', _getElementStyle(elem, 'borderRight'), ';border-left:none;'].join(''));
+                            //按钮，需要边框，边框颜色可以指定或者取文本框的边框颜色
+                            if (key.indexOf('btn') > -1) {
+                                if (follow) {
+                                    css.push([
+                                        'background-color:', bg || _getElementStyle(elem, 'backgroundColor'), ';',
+                                        'color:', color || _getElementStyle(elem, 'color'), ';'
+                                    ].join(''));
+                                } else {
+                                    if (bg) {
+                                        css.push('background-color:' + bg + ';');
+                                    }
+                                    if (color) {
+                                        css.push('color:' + color + ';');
+                                    }
+                                }
+                                css.push('line-height:' + (h - 2) + 'px;');
+                                if (!primary) {
+                                    css.push(['border:', _getElementStyle(elem, 'border'), ';'].join(''));
+                                }
                             } else {
-                                css.push(['border-left:', _getElementStyle(elem, 'borderLeft'), ';border-right:none;'].join(''));
+                                //前缀标签，位置在输入框的左边
+                                if (['pre', 'lbl'].indexOf(key) > -1) {
+                                    css.push(['border-right:', _getElementStyle(elem, 'borderRight'), ';border-left:none;'].join(''));
+                                } else {
+                                    css.push(['border-left:', _getElementStyle(elem, 'borderLeft'), ';border-right:none;'].join(''));
+                                }
+                                css.push([
+                                    'background-color:', bg || _getElementStyle(elem, 'backgroundColor'), ';',
+                                    'color:', color || _getElementStyle(elem, 'color'), ';'
+                                ].join(''));
                             }
-                            css.push([
-                                'background-color:', bg || _getElementStyle(elem, 'backgroundColor'), ';',
-                                'color:', color || _getElementStyle(elem, 'color'), ';'
-                            ].join(''));
                         }
                         if (['pre', 'lbl'].indexOf(key) > -1) {
                             css.push([
                                 'border-top-left-radius:', _getElementStyle(elem, 'borderTopLeftRadius'), ';',
                                 'border-bottom-left-radius:', _getElementStyle(elem, 'borderBottomLeftRadius'), ';'
                             ].join(''));
-                            elem.style.cssText = (elem.style.cssText || '') + 'padding-left:' + (w + 5) + 'px;';
+                            elem.style.cssText = (elem.style.cssText || '') + 'padding-left:' + (w + $.getPaddingSize(elem).left) + 'px;';
                         } else {
                             css.push([
                                 'border-top-right-radius:', _getElementStyle(elem, 'borderTopRightRadius'), ';',
@@ -2300,6 +2334,18 @@
                     }, parent ? elem.parentNode : document.body);
                 }
 
+                if (parent) {
+                    var pd = elem.parentNode;
+                    if (pd.className.indexOf('oui-input-parent-div') < 0) {
+                        pd = document.createElement('div');
+                        pd.className = 'oui-input-parent-div';
+                        elem.parentNode.insertBefore(pd, elem);
+                        elem.parentNode.removeChild(elem);
+                        pd.appendChild(elem);
+                    }
+                    elem.parentNode.style.position = 'relative';
+                }
+
                 for (var k in icons) {
                     if (['del', 'pwd', 'txt', 'query', 'len', 'btn', 'lbl', 'pre', 'post', 'unit'].indexOf(k) > -1) {
                         _create(elem, k, icons[k], idx++);
@@ -2342,6 +2388,9 @@
                     var bh = $.getBorderSize(elem);
                     offset = (ps.height - bh.height - h) / 2;
 
+                    if (key.indexOf('btn') > -1) {
+                        h = ps.height;
+                    }
 
                     if (['len', 'unit', 'btn', 'lbl', 'pre', 'post'].indexOf(key) < 0) {
                         if (h > iconSize) {
@@ -2350,20 +2399,24 @@
                             offset = -(iconSize - h) / 2;
                         }
                     }
-                    if (['btn'].indexOf(key) > -1) {
+                    if (key.indexOf('btn') > -1) {
                         h = ps.height;
                     }
 
                     if (d.icon.parent) {
                         selfW = d.icon.offsetWidth || parseInt('0' + d.icon.style.width, 10);
-                        d.icon.style.top = 1 + offset + 'px';
-                        d.icon.style.right = (offsetWidth - selfW) + 1 + 'px';
+                        d.icon.style.top = (key.indexOf('btn') < 0 ? 1 : 0) + offset + 'px';
+                        if (['pre', 'lbl'].indexOf(key) > -1) {
+                            d.icon.style.left = 1 + 'px';
+                        } else {
+                            d.icon.style.right = (offsetWidth - selfW) + 'px';
+                        }
                     } else {
-                        d.icon.style.top = (ps.top + 1 + offset) + 'px';
+                        d.icon.style.top = (ps.top + (key.indexOf('btn') < 0 ? 1 : 0) + offset) + 'px';
                         if (['pre', 'lbl'].indexOf(key) > -1) {
                             d.icon.style.left = ps.left + 1 + 'px';
                         } else {
-                            d.icon.style.left = ps.left + ps.width - offsetWidth - 1 + 'px';
+                            d.icon.style.left = ps.left + ps.width - offsetWidth - (key.indexOf('btn') < 0 ? 1 : 0) + 'px';
                         }
                     }
                 }
@@ -2372,16 +2425,13 @@
                 if (first || key === 'len' || len === 1) {
                     _show(elem, key);
                 } else {
-                    _show(elem, key);
-                    /*
                     var tid = ['icon', key, elem.id].join('-');
                     if (Util.timer[tid]) {
                         window.clearTimeout(Util.timer[tid]);
                     }
                     Util.timer[tid] = window.setTimeout(function () {
                         _show(elem, key);
-                    }, 50);
-                    */
+                    }, 256);
                 }
                 return this;
             },
