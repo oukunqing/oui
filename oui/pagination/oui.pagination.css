@@ -1,7 +1,7 @@
 .oui-pagination {
     display: block;
     font-size: 14px;
-    font-family: Arial;
+    font-family: Arial,宋体;
     color: #000;
     overflow: hidden;
     border: none 0 #ccc;
@@ -20,7 +20,7 @@
 
 .oui-pagination .label,.oui-pagination span {	
     font-size:14px;
-    font-family: Arial;
+    font-family: Arial,宋体;
 	font-weight: normal;
     color: #000;
     background-color: transparent;
@@ -50,7 +50,7 @@
 }
 
 .oui-pagination a,.oui-pagination input,.oui-pagination button,.oui-pagination select {
-    font-family: Arial; outline: none;
+    font-family: Arial,宋体; outline: none;
     margin: 0; padding: 0; float: left; height: 28px; font-size: 14px; font-weight: normal; text-align: center; 
     border-radius: 5px; box-sizing: border-box; background-image: none; background-color: transparent;    
     border: 1px solid #ccc; color: #000; background: #fff; white-space: nowrap; vertical-align: middle; display: inline-block;
@@ -120,7 +120,7 @@
 }
 
 .oui-pagination a.symbol { font-size: 14px;
-    font-family: Arial; color: #000; padding: 0 10px;
+    font-family: Arial,宋体; color: #000; padding: 0 10px;
 }
 
 /*非链接文字默认颜色为灰色*/
@@ -134,14 +134,14 @@
     display: inline-block;
     outline: none;
     width: 35px;
-    padding: 0 3px;
-    margin: 0;
+    padding: 0 5px;
+    margin: 0 2px;
     text-align: center;
     /*background: #fff;*/
     background-color: transparent;
     border: solid 1px #005eac;
     font-size: 14px;
-    font-family: Arial;
+    font-family: Arial,宋体;
     -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
     box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
     -webkit-transition: border-color ease-in-out .15s, -webkit-box-shadow ease-in-out .15s;
@@ -155,6 +155,7 @@
 
 .oui-pagination input.group {
     border-top-right-radius: 0; border-bottom-right-radius: 0; border-right: none 0 ;
+    margin: 0;
 }
 
 .oui-pagination button.btn {
@@ -166,7 +167,7 @@
     border-color: #2e6da4;
     border-left: none;
     background: transparent;
-    font-family: Arial;
+    font-family: Arial,宋体;
 
     -ms-touch-action: manipulation;
     touch-action: manipulation;
@@ -189,6 +190,7 @@
 
 .oui-pagination .select {
     padding: 1px 3px;
+    margin: 0 2px 0 0;
     border: solid 1px #005eac;
     -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
     box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
