@@ -28,7 +28,7 @@
         //默认的每页显示条数选项
         defaultPageSizeItems = [1, 2, 5, 10, 15, 20, 25, 30, 40, 50, 60, 100, 150, 200],
         defaultInputWidth = 35,         //输入框默认宽度，单位：px
-        defaultInputHeight = 22,        //按钮、输入框默认高度，单位：px
+        defaultInputHeight = 28,        //按钮、输入框默认高度，单位：px
         defaultDebounceTime = 50,       //防抖最小时长，单位：毫秒
         defaultLongPressTime = 1024,    //长按最小时长，单位：毫秒
         defaultLongPressInterval = 50,          //长按分页间隔，单位：毫秒
