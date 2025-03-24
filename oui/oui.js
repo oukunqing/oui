@@ -7502,6 +7502,9 @@
             error: function () {
                 return !isie ? console.error.apply(this, getArguments(arguments, log('e'))) : console.error(log('e'), arguments), this;
             },
+            err: function () {
+                return !isie ? console.error.apply(this, getArguments(arguments, log('e'))) : console.error(log('e'), arguments), this;
+            },
             trace: function () {
                 return !isie ? console.trace.apply(this, getArguments(arguments, log('t'))) : console.trace(log('t'), arguments), this;
             }

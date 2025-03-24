@@ -1225,7 +1225,9 @@
 
                 if (!opt.form && (!opt.showHead || ctls.iframe || Common.isPlainText(ctls.content))) {
                     $.addListener([ctls.body, ctls.dialog], isWap ? 'touchstart' : 'mousedown', function (ev) {
-                        $.cancelBubble();
+                        if (!opt.copyAble) {
+                            $.cancelBubble();
+                        }
                         that.topMost();
                         if (isWap) {
                             ev.preventDefault();
@@ -1239,14 +1241,14 @@
                         }
                     });
 
-                    if (!opt.copyAble) {
-                        $.addListener(ctls.dialog, [isWap ? 'touchstart' : 'mousedown'], function (ev) {
+                    $.addListener(ctls.dialog, [isWap ? 'touchstart' : 'mousedown'], function (ev) {
+                        if (!opt.copyAble) {
                             $.cancelBubble();
-                            if (isWap) {
-                                ev.preventDefault();
-                            }
-                        });
-                    }
+                        }
+                        if (isWap) {
+                            ev.preventDefault();
+                        }
+                    });
                 }
 
                 if (ctls.container && opt.cancelBubble) {
