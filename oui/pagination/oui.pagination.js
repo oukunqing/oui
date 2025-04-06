@@ -77,19 +77,19 @@
                     first: '&laquo;', previous: '&lsaquo;', next: '&rsaquo;', last: '&raquo;',
                     ellipsis: '&middot;&middot;&middot;', goto: 'Goto', reload: 'Reload',
                     pageCount: '共{0}页', dataCount: '共{0}条',
-                    pageStat: '{0}/{1}页', dataStat: '{0}-{1}条 / 共{2}条'
+                    pageStat: '{0}/{1}页', dataStat: '{1}-{2}条 / 共{0}条', dataStatOne: '共{0}条'
                 },
                 chinese: {
                     first: '首页', previous: '上一页', next: '下一页', last: '末页',
                     ellipsis: '&middot;&middot;&middot;', goto: '跳转', reload: '重载',
                     pageCount: '共{0}页', dataCount: '共{0}条',
-                    pageStat: '{0}/{1}页', dataStat: '{0}-{1}条 / 共{2}条'
+                    pageStat: '{0}/{1}页', dataStat: '{1}-{2}条 / 共{0}条', dataStatOne: '共{0}条'
                 },
                 english: {
                     first: 'First', previous: 'Prev', next: 'Next', last: 'Last',
                     ellipsis: '&middot;&middot;&middot;', goto: 'Goto', reload: 'Reload',
                     pageCount: 'Page:{0}', dataCount: 'Total: {0}',
-                    pageStat: 'Page:{0}/{1}', dataStat: 'Show:{0} - {1} / Total: {2}'
+                    pageStat: 'Page:{0}/{1}', dataStat: 'Show:{1} - {2} / Total: {0}', dataStatOne: 'Total: {0}'
                 }
             };
             texts['cn'] = texts.chinese;
@@ -281,7 +281,7 @@
                 var str = text || '{0}', datas = [0, 0, 0], stat = getDataStat(that),
                     op = that.options;
                 if (stat.count > 0) {
-                    datas = [stat.min, stat.max, stat.count];
+                    datas = [stat.count, stat.min, stat.max];
                 }
 
                 arr.push([
@@ -308,7 +308,7 @@
                 pageIndex = op.pageIndex - 1 + op.minuend;
             } else if ((kc === 39 || kc === 74) && (op.pageIndex + op.minuend) < op.pageCount) {
                 pageIndex = op.pageIndex + 1 + op.minuend;
-            } else if (kc === 77) {
+            } else if (kc === 77) {     //M-77
                 //pageIndex = Math.ceil(op.pageCount / 2);
                 pageIndex = parseInt(op.pageCount / 2, 10);
             } else if (kc === 68 || kc === 70) {    //D-68 F-70
@@ -634,6 +634,8 @@
             markCount: 10,              //分页数字按钮显示个数，默认为10个
             markType: defaultType,      //标记类型：图标|中文|英文（symbol|chinese|english）
             markText: null,             //标记文字（上一页 下一页）
+            hideOne: true,              //是否隐藏只有一页时的页码等
+            alwaysShow: false,          //是否始终显示页码
             showList: false,            //是否显示数字列表，若不显示数字列表，则默认显示输入框
             showInvalid: true,          //是否显示无效的按钮
             showEllipsis: true,         //是否显示省略号(快进)按钮
@@ -729,82 +731,89 @@
             //创建CssStyle，防止闪烁
             $.createCssStyle(cssData, cssId);
 
+            var dataStatKey = 'dataStat';
+            if (op.pageCount < 2 && !op.alwaysShow && op.hideOne) {
+                dataStatKey = 'dataStatOne';
+            }
+
             buildDataCount(op.showStatText && op.showDataCount, that, html, op.markText['dataCount'], op.dataCount);
-            buildDataStat(op.showStatText && op.showDataStatLeft, that, html, op.markText['dataStat']);
+            buildDataStat(op.showStatText && op.showDataStatLeft, that, html, op.markText[dataStatKey]);
             buildPageStat(op.showStatText && op.showPageStatLeft, that, html, op.markText['pageStat']);
 
             buildPageSize(op.showPageSize, that, html, op.minuend);
 
-            if (op.pageIndex != min && op.pageCount > 0) {
-                buildLinkText(op.showFirstLast, that, html, op.pageStart, 'first', false, className);
-                //显示省略号快退按钮
-                if (op.showEllipsis && pmSub >= op.pageStart) {
-                    quickNum = pmSub > op.pageStart ? pmSub : op.pageStart;
-                    buildLinkText(true, that, html, quickNum, 'ellipsis', false, 'ellipsis');
-                } else if (op.alwaysEllipsis) {
-                    buildLinkText(true, that, html, 'PQ', 'ellipsis', true, 'ellipsis');
-                }
-                buildLinkText(true, that, html, op.pageIndex - 1, 'previous', false, className);
-            } else if (op.showInvalid) {
-                buildLinkText(op.showFirstLast, that, html, 0, 'first', true, className);
-                if (op.alwaysEllipsis) {
-                    buildLinkText(true, that, html, 'PQ', 'ellipsis', true, 'ellipsis');
-                }
-                buildLinkText(true, that, html, 0, 'previous', true, className);
-            }
-
-            if (op.showList) {
-                var c = 0,
-                    h = ' style="height:' + op.height + 'px;line-height:' + (op.height - 2) + 'px;"';
-                for (var i = min; i < max; i++) {
-                    var num = i + op.minuend;
-                    if (i > op.pageCount || c > op.markCount) {
-                        break;
+            if (op.pageCount > 1 || op.alwaysShow || !op.hideOne) {
+                if (op.pageIndex != min && op.pageCount > 0) {
+                    buildLinkText(op.showFirstLast, that, html, op.pageStart, 'first', false, className);
+                    //显示省略号快退按钮
+                    if (op.showEllipsis && pmSub >= op.pageStart) {
+                        quickNum = pmSub > op.pageStart ? pmSub : op.pageStart;
+                        buildLinkText(true, that, html, quickNum, 'ellipsis', false, 'ellipsis');
+                    } else if (op.alwaysEllipsis) {
+                        buildLinkText(true, that, html, 'PQ', 'ellipsis', true, 'ellipsis');
                     }
-                    if (c === mi) {
-                        buildPageInput(op.showPageInput, that, html, false, 'i');
+                    buildLinkText(true, that, html, op.pageIndex - 1, 'previous', false, className);
+                } else if (op.showInvalid) {
+                    buildLinkText(op.showFirstLast, that, html, 0, 'first', true, className);
+                    if (op.alwaysEllipsis) {
+                        buildLinkText(true, that, html, 'PQ', 'ellipsis', true, 'ellipsis');
                     }
-                    if (i === op.pageIndex) {
-                        html.push('<li><a class="link cur"' + h + '>' + num + '</a></li>');
-                    } else {
-                        html.push('<li><a class="link num" value="' + i + '"' + h + '>' + num + '</a></li>');
+                    buildLinkText(true, that, html, 0, 'previous', true, className);
+                }
+
+                if (op.showList) {
+                    var c = 0,
+                        h = ' style="height:' + op.height + 'px;line-height:' + (op.height - 2) + 'px;"';
+                    for (var i = min; i < max; i++) {
+                        var num = i + op.minuend;
+                        if (i > op.pageCount || c > op.markCount) {
+                            break;
+                        }
+                        if (c === mi) {
+                            buildPageInput(op.showPageInput, that, html, false, 'i');
+                        }
+                        if (i === op.pageIndex) {
+                            html.push('<li><a class="link cur"' + h + '>' + num + '</a></li>');
+                        } else {
+                            html.push('<li><a class="link num" value="' + i + '"' + h + '>' + num + '</a></li>');
+                        }
+                        c++;
                     }
-                    c++;
+                } else {
+                    buildPageInput(op.showPageInput, that, html, false, 'i');
                 }
-            } else {
-                buildPageInput(op.showPageInput, that, html, false, 'i');
+                
+                //上一页<、下一页>、第一页<<、最后一页标记>>
+                if (op.pageIndex != op.pageCount - op.minuend && op.pageCount > 0) {
+                    buildLinkText(true, that, html, op.pageIndex + 1, 'next', false, className);
+
+                    //显示省略号快进按钮
+                    if (op.showEllipsis && pmSum < op.pageCount) {
+                        quickNum = pmSum < pcSub ? pmSum : pcSub;
+                        buildLinkText(true, that, html, quickNum, 'ellipsis', false, 'ellipsis');
+                    } else if (op.alwaysEllipsis) {
+                        buildLinkText(true, that, html, 'NQ', 'ellipsis', true, 'ellipsis');
+                    }
+                    buildLinkText(op.showFirstLast, that, html, pcSub, 'last', false, className);
+                } else if (op.showInvalid) {
+                    buildLinkText(true, that, html, 0, 'next', true, className);
+                    if (op.alwaysEllipsis) {
+                        buildLinkText(true, that, html, 'NQ', 'ellipsis', true, 'ellipsis');
+                    }
+                    buildLinkText(op.showFirstLast, that, html, 0, 'last', true, className);
+                }
+
+                buildPageInput(op.showPageGoto, that, html, true, 'j');
+
+                buildLinkText(op.showReload, that, html, op.pageIndex, 'reload', false, 'text');
+
+                buildDataCount(op.showStatText && op.showPageCount, that, html, op.markText['pageCount'], op.pageCount);
+                buildPageStat(op.showStatText && op.showPageStat, that, html, op.markText['pageStat'], op.pageCount);
             }
-
-            //上一页<、下一页>、第一页<<、最后一页标记>>
-            if (op.pageIndex != op.pageCount - op.minuend && op.pageCount > 0) {
-                buildLinkText(true, that, html, op.pageIndex + 1, 'next', false, className);
-
-                //显示省略号快进按钮
-                if (op.showEllipsis && pmSum < op.pageCount) {
-                    quickNum = pmSum < pcSub ? pmSum : pcSub;
-                    buildLinkText(true, that, html, quickNum, 'ellipsis', false, 'ellipsis');
-                } else if (op.alwaysEllipsis) {
-                    buildLinkText(true, that, html, 'NQ', 'ellipsis', true, 'ellipsis');
-                }
-                buildLinkText(op.showFirstLast, that, html, pcSub, 'last', false, className);
-            } else if (op.showInvalid) {
-                buildLinkText(true, that, html, 0, 'next', true, className);
-                if (op.alwaysEllipsis) {
-                    buildLinkText(true, that, html, 'NQ', 'ellipsis', true, 'ellipsis');
-                }
-                buildLinkText(op.showFirstLast, that, html, 0, 'last', true, className);
-            }
-
-            buildPageInput(op.showPageGoto, that, html, true, 'j');
-
-            buildLinkText(op.showReload, that, html, op.pageIndex, 'reload', false, 'text');
-
-            buildDataCount(op.showStatText && op.showPageCount, that, html, op.markText['pageCount'], op.pageCount);
-            buildPageStat(op.showStatText && op.showPageStat, that, html, op.markText['pageStat'], op.pageCount);
 
             html.push('</ul></div>');
 
-            buildDataStat(op.showStatText && op.showDataStat, that, html, op.markText['dataStat']);
+            buildDataStat(op.showStatText && op.showDataStat, that, html, op.markText[dataStatKey]);
 
             html.push('</div>');
 

@@ -135,7 +135,11 @@
 
    var p4 = $.pagination({
         element: document.getElementById('p4'),
-        dataCount: 812,
+        dataCount: 12,
+        //不管多少页都显示页码
+        //alwaysShow: true,
+        //当只有一页时隐藏页码（默认是隐藏的）
+        //hideOne: false,
         pageIndex: 0,
         pageStart: 0,
         pageSize: 15,

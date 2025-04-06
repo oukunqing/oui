@@ -192,7 +192,7 @@
             $.addListener(that.img, 'load', function(ev) {
                 var bs = Factory.getOffsetSize(that.box),
                     size = Factory.getSize(bs.width, bs.height, img.naturalWidth, img.naturalHeight, defZoom, minZoom);
-                console.log('size:', size);
+     
                 that.cfg = {
                     filePath: that.img.src,
                     width: img.naturalWidth,
@@ -226,7 +226,7 @@
                 if(!update) {
                     that.select().control();
                 }                    
-                that.drag().wheelZoom().status().title();
+                that.drag().wheelZoom().touchZoom().status().title();
                 
                 $.getFileSize(that.cfg.filePath, function(size) {
                     var fileSize = size >= 0 ? size : (opt.fileSize || 0);
@@ -336,13 +336,11 @@
             var that = this;
             $.addListener(that.img, 'pointerdown', function (ev) {
                 if (0 == ev.button) {
-                    console.log('map pointerdown', ev);
                     $.cancelBubble(ev);
                     that.cfg.pointerdown = true;
                     that.img.setPointerCapture(ev.pointerId);
                     that.cfg.lastpointer = $.getEventPos(ev);
                     that.cfg.diffpointer = { x: 0, y: 0 };
-                    console.log('down:', that.cfg.x, that.cfg.y);
                 }
             });
             $.addListener(that.img, 'pointermove', function (ev) {
@@ -508,7 +506,7 @@
 
             Factory.setImgSize(that);
 
-            return this.status().move();
+            return that.status().move();
         },
         zoom: function (action, ev, zoomratio) {
             var that = this,
@@ -518,7 +516,7 @@
                 scale = that.cfg.curScale;
 
             if((!action && scale <= that.cfg.minScale) || (action && scale >= that.cfg.maxScale)) {
-                return this;
+                return that;
             }
 
             if(!action) {
@@ -554,7 +552,7 @@
             
             Factory.setImgSize(that);
 
-            return this.status().move();
+            return that.status().move();
         },
         center: function (opt) {
             var that = this;
@@ -563,7 +561,6 @@
                     x: parseInt(that.cfg.w / 2, 10) / that.cfg.curScale,
                     y: parseInt(that.cfg.h / 2, 10) / that.cfg.curScale
                 };
-                console.log('opt:', opt);
             }
             var x = that.cfg.curScale * opt.x,
                 y = that.cfg.curScale * opt.y,
@@ -583,7 +580,7 @@
             that.img.style.left = targetLeft + 'px';
             that.img.style.top = targetTop + 'px';
 
-            return this.move();
+            return that.move();
         },
         move: function () {
             return this;
@@ -617,7 +614,53 @@
                 that.zoom(true, ev, 1.25);
                 ev.preventDefault();
             });
-            return this;
+            return that;
+        },
+        touchZoom: function() {
+            var that = this;
+            /*
+            $.addListener(that.img, 'touchstart', function(ev) {
+                if (e.touches.length === 2) {
+                    var x = Math.abs(e.touches[0].clientX - e.touches[1].clientX);
+                    var y = Math.abs(e.touches[0].clientY - e.touches[1].clientY);
+                    var startDistance = Math.sqrt(x * x + y * y);
+                    that.cfg.startDistance = startDistance
+                }
+            });
+
+            $.addListener(that.img, 'touchmove', function(ev) {
+                if (e.touches.length === 2) {
+                    e.preventDefault();
+                    var x = Math.abs(e.touches[0].clientX - e.touches[1].clientX);
+                    var y = Math.abs(e.touches[0].clientY - e.touches[1].clientY);
+                    var currentDistance = Math.sqrt(x * x + y * y),
+                        startDistance = that.cfg.startDistance,
+                        curScale = that.cfg.curScale,
+                        newScale = curScale * (currentDistance / startDistance);
+
+                    //that.img.style.transform = `scale(${newScale})`;
+
+                    that.cfg.curScale = newScale;
+
+                    that.scale(newScale);
+                }
+            });
+
+            $.addListener(that.img, 'touchend', function(ev) {
+                if (e.touches.length === 0) {
+                    var x = Math.abs(e.changedTouches[0].clientX - e.changedTouches[1].clientX);
+                    var y = Math.abs(e.changedTouches[0].clientY - e.changedTouches[1].clientY);
+                    var endDistance = Math.sqrt(x * x + y * y),
+                        startDistance = that.cfg.startDistance,
+                        curScale = that.cfg.curScale;
+
+                    curScale = curScale * (endDistance / startDistance);
+
+                    that.cfg.curScale = curScale;
+                }
+            });
+            */
+            return that;
         },
         resize: function(size, fill, margin) {
             var that = this, bs, ms;
@@ -646,7 +689,7 @@
                 that.cfg.curScale = size.curScale;
                 that.cfg.minScale = size.minScale;
             }            
-            return this;
+            return that;
         },
         //判断鼠标位置是否在图片范围内（图片位置不是固定的）
         onpicture: function(p, cfg) {
