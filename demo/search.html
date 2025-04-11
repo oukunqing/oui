@@ -4,12 +4,15 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>搜索提示</title>
+	<style type="text/css">
+		input {width:180px;height:28px;}
+	</style>
 </head>
 <body>
 	<div>
 		<input type="text" id="keywords" />
 		<input type="text" id="keywords1" />
-		<input type="text" id="keywords2" />
+		<input type="text" id="keywords2" style="margin-right:100px;" />
 		<input type="text" id="keywords3" />
 	</div>
 </body>
@@ -18,10 +21,58 @@
 <script type="text/javascript" src="../oui/search/oui.search.js"></script>
 <script type="text/javascript">
 window.onload = function() {
-	$.search('keywords', {});
+	$.search('keywords', {
+		strict: 1,
+		get: function(elem, resolve) {
+			//$.console.log('get:', elem, resolve);
+
+			var list = [{id:1, name:'搜索列表1'},{id:2, name:'搜索列表2'},{id:3, name:'搜索列表3'}];
+
+			if ($.isFunction(resolve)) {
+				resolve(list);
+			}
+		},
+		callback: function(elem, data, search) {
+			$.console.log('search:', search, 'data:', data);
+		}
+	});
+	$.search('keywords', {
+		strict: true,
+		get: function(elem, resolve) {
+			//$.console.log('get:', elem, resolve);
+
+			var list = [{id:1, name:'搜索列表1'},{id:2, name:'搜索列表2'},{id:3, name:'搜索列表3'}];
+
+			if ($.isFunction(resolve)) {
+				resolve(list);
+			}
+		},
+		callback: function(elem, data, search) {
+			$.console.log('search:', search, 'data:', data);
+		}
+	});
 	$.search($I('keywords1'), {});
 	$.search({
-		id: 'keywords2'
+		id: 'keywords2', width:200,height:100,
+		strict: 2,
+		get: function(elem, resolve) {
+			//$.console.log('get:', elem, resolve);
+
+			var list = [{id:11, name:'搜索列表11'},{id:22, name:'搜索列表22'},{id:33, name:'搜索列表33'},{id:44, name:'搜索列表44'},{id:55, name:'搜索列表55'},{id:66, name:'搜索列表66'}];
+
+			if ($.isFunction(resolve)) {
+				resolve(list);
+			}
+		},
+		show: function (dr) {
+			return dr.name + ' - ' + dr.id;
+		},
+		callback: function(elem, data, search) {
+			$.console.log('search:', search, 'data:', data);
+			if (data) {
+				elem.value = data.id + ' - ' + data.name;
+			}
+		}
 	});
 	$.search({
 		element: $I('keywords3')

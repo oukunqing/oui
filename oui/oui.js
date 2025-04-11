@@ -847,6 +847,19 @@
             }
             return url;
         },
+        addQueryString = function(url, key, val) {
+            return setQueryString(url, key, val, false);
+        },
+        removeQueryString = function(url, key) {
+            var datas = getQueryString(url);
+            for (var k in datas) {
+                if (k === key) {
+                    delete datas[k];
+                    break;
+                }
+            }
+            return buildParam(datas, undefined, url.split('?')[0]);
+        },
         getUrlHost = function (url, prefix) {
             var pos = url.indexOf('//'),
                 http = pos > 0 ? url.substr(0, pos + 2) : '',
@@ -1331,6 +1344,7 @@
         buildAjaxData: buildAjaxData, buildUrlData: buildAjaxData, buildUrlParam: buildUrlParam,
         buildApiData: buildApiData,
         setQueryString: setQueryString, getQueryString: getQueryString, getUrlHost: getUrlHost, getUrlPage: getUrlPage,
+        addQueryString: addQueryString, removeQueryString: removeQueryString, delQueryString: removeQueryString,
         setDebug: setDebug, isDebugAction: isDebugAction, isDebug: isDebug, isLocalhost: isLocalhost,
         filterValue: filterValue, keywordOverload: keywordOverload, keyOverload: keywordOverload,
         setValue: setValue, getValue: getValue, isValue: isValue, getParam: getParam,
@@ -2437,6 +2451,15 @@
         },
         getQueryString: function (name) {
             return $.getQueryString(this, name);
+        },
+        addQueryString: function(key, value) {
+            return $.addQueryString(this, key, value);
+        },
+        delQueryString: function(key) {
+            return $.delQueryString(this, key);
+        },
+        removeQueryString: function(key) {
+            return $.removeQueryString(this, key);
         },
         setUrlParam: function (data, value, nocache) {
             return $.setQueryString(this, data, value, nocache);
