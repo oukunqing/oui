@@ -53,12 +53,16 @@ window.onload = function() {
 	});
 	$.search($I('keywords1'), {});
 	$.search({
-		id: 'keywords2', width:200,height:100,
+		id: 'keywords2', width:200,height:100,lineHeight:35,
 		strict: 2,
 		get: function(elem, resolve) {
 			//$.console.log('get:', elem, resolve);
 
-			var list = [{id:11, name:'搜索列表11'},{id:22, name:'搜索列表22'},{id:33, name:'搜索列表33'},{id:44, name:'搜索列表44'},{id:55, name:'搜索列表55'},{id:66, name:'搜索列表66'}];
+			var list = [
+				{id:11, name:'搜索列表11'},{id:22, name:'搜索列表22'},
+				{id:33, name:'搜索列表33'},{id:44, name:'搜索列表44'},
+				{id:55, name:'搜索列表55'},{id:66, name:'搜索列表66'}
+			];
 
 			if ($.isFunction(resolve)) {
 				resolve(list);

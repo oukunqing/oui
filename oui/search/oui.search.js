@@ -84,6 +84,7 @@
             if (div) {
                 return div;
             }
+            var lineHeight = opt.lineHeight || 30;
             div = document.createElement('div');
             div.className = 'oui-search-list-panel oui-search-list-panel-' + id;
             div.style.display = 'none';
@@ -96,9 +97,10 @@
                 'margin:0;padding:0;list-style:none;',
                 '}',
                 '.oui-search-list-panel-', id, ' .item {', 
-                'height:30px;line-height:28px;border:none;box-sizing:border-box;margin:0 1px; padding:0 10px;cursor:pointer;',
+                'height:', lineHeight, 'px;line-height:', lineHeight, 'px;border:none;box-sizing:border-box;',
+                'margin:0 1px; padding:0 10px;cursor:default;',
                 '}',
-                '.oui-search-list-panel-', id, ' .item:hover {background:#f1f1f1;}',
+                '.oui-search-list-panel-', id, ' .item:hover {background: #e5f3ff;}',
                 '</style>',
                 '<div class="oui-search-panel-body"></div>'
             ].join('');
@@ -127,12 +129,15 @@
                     width = opt.width || size.width,
                     maxHeight = opt.height || 500,
                     cssText = [
-                        'margin:0;padding:0',
-                        'border:solid 1px #ccc',
+                        'margin:0;padding:0;',
+                        'border:solid 1px #66afe9',
+                        'background: #fff;opacity:0.95;',
                         'box-sizing:border-box',
                         'border-bottom-left-radius:5px',
                         'border-bottom-right-radius:5px',
                         'overflow:auto;position:absolute',
+                        'box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);',
+                        '-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);',
                         'width:' + width + 'px',
                         'max-height:' + (maxHeight) + 'px',
                         'left:' + size.left + 'px',
@@ -151,7 +156,6 @@
             return this;
         },
         showList: function(search, data) {
-            console.log('showList:', data);
             var opt = search.options,
                 elem = opt.element,
                 id = opt.id,
@@ -169,11 +173,11 @@
                 return this;
             }
 
-            var list = $.isArray(data) ? data : data.list,                
+            var list = $.isArray(data) ? data : data.list,
                 html = ['<ul>'];
 
-            if (!$.isArray(list)) {                
-                return this;
+            if (!$.isArray(list) || list.length <= 0) {
+                return this.showPanel(search, false);
             }
 
             Config.setCache(search, list);
@@ -257,12 +261,15 @@
             return this;
         },
         hideOther: function(search) {
+            var opt = search.options;
             var panels = document.querySelectorAll('div.oui-search-list-panel');
             if (!panels || !panels.length) {
                 return this;
             }
             for (var i = 0; i < panels.length; i++) {
-                panels[i].style.display = 'none';
+                if (panels[i].className.indexOf('oui-search-list-panel-' + opt.id) < 0) {
+                    panels[i].style.display = 'none';
+                }
             }
             return this;
         }
@@ -312,21 +319,24 @@
             $.addListener(elem, 'keyup', function(ev) {
                 var val = elem.value.trim();
                 if (!val) {
-                    Factory.showList(that, null).showPanel(that, false);
+                    Factory.showList(that, null).showPanel(that, false).callback(that, null, null);
                     return false;
                 }
-                /*$.debounce({
-                    id: 'oui-search-' + .id,
-                    delay: 100,
-                    timeout: 5000
-                }, function() {
+                if (opt.debounce) {
+                    $.debounce({
+                        id: 'oui-search-' + opt.id,
+                        delay: 100,
+                        timeout: 5000
+                    }, function() {
+                        new Promise(function (resolve, reject) {
+                            get(elem, func);
+                        });
+                    });
+                } else {
                     new Promise(function (resolve, reject) {
                         get(elem, func);
                     });
-                });*/
-                new Promise(function (resolve, reject) {
-                    get(elem, func);
-                });
+                }
             });
 
             return this;

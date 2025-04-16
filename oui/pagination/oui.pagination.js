@@ -77,19 +77,22 @@
                     first: '&laquo;', previous: '&lsaquo;', next: '&rsaquo;', last: '&raquo;',
                     ellipsis: '&middot;&middot;&middot;', goto: 'Goto', reload: 'Reload',
                     pageCount: '共{0}页', dataCount: '共{0}条',
-                    pageStat: '{0}/{1}页', dataStat: '{1}-{2}条 / 共{0}条', dataStatOne: '共{0}条'
+                    pageStat: '{0}/{1}页', dataStat: '{1}-{2}条 / 共{0}条', dataStatOne: '共{0}条',
+                    input: '页码:'
                 },
                 chinese: {
                     first: '首页', previous: '上一页', next: '下一页', last: '末页',
                     ellipsis: '&middot;&middot;&middot;', goto: '跳转', reload: '重载',
                     pageCount: '共{0}页', dataCount: '共{0}条',
-                    pageStat: '{0}/{1}页', dataStat: '{1}-{2}条 / 共{0}条', dataStatOne: '共{0}条'
+                    pageStat: '{0}/{1}页', dataStat: '{1}-{2}条 / 共{0}条', dataStatOne: '共{0}条',
+                    input: '页码:'
                 },
                 english: {
                     first: 'First', previous: 'Prev', next: 'Next', last: 'Last',
                     ellipsis: '&middot;&middot;&middot;', goto: 'Goto', reload: 'Reload',
                     pageCount: 'Page:{0}', dataCount: 'Total: {0}',
-                    pageStat: 'Page:{0}/{1}', dataStat: 'Show:{1} - {2} / Total: {0}', dataStatOne: 'Total: {0}'
+                    pageStat: 'Page:{0}/{1}', dataStat: 'Show:{1} - {2} / Total: {0}', dataStatOne: 'Total: {0}',
+                    input: 'PageIndex:'
                 }
             };
             texts['cn'] = texts.chinese;
@@ -220,10 +223,14 @@
                     width = w > defaultInputWidth ? w : (w + (c > 0 ? c : 0) * 11),
                     height = 'height:' + op.height + 'px;line-height:' + (op.height - 2) + 'px;',
                     margin = t === 'j' ? 'margin-left:2px;padding-right:5px;' : '',
-                    input = '<input type="text" class="text ' + className + '" value="' + (op.pageIndex + op.minuend)
-                        + '" maxlength="' + maxlength + '" t="' + t + '"' + ' style="width:' + width + 'px;' + height + margin + '"'
-                        + 'autocomplete="off" />';
+                    input = [
+                        '<input type="text" class="text ', className, '" value="', (op.pageIndex + op.minuend), '"',
+                        ' maxlength="', maxlength, '" t="', t, '"', ' style="width:', width, 'px;', height, margin, '"',
+                        ' autocomplete="off" title="', op.markText['input'], ('1 - ' + op.pageCount), '" />'
+                    ].join('');
+
                 arr.push(input);
+
                 if (showButton) {
                     arr.push('<button class="btn group" style="' + height + '">' + (op.markText['jump'] || op.markText['goto']) + '</button>');
                 }
@@ -335,7 +342,7 @@
             return false;
         },
         checkInputValue = function (op, val) {
-            if (val > op.pageCount) {
+            if (val >= op.pageCount) {
                 val = op.pageCount - op.minuend;
             } else if (val < op.pageStart) {
                 val = op.pageStart;
