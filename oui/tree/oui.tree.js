@@ -736,6 +736,8 @@
 				if (!$.isNumber(opt.cookieExpire) || opt.cookieExpire < 0) {
 					opt.cookieExpire = Config.CacheCookieExpire;
 				}
+				//同一层级下是否只能展开一个节点
+				opt.onlyOpenOne = $.isBoolean($.getParam(opt, 'onlyOpenOne,openOne,onlyOne,ooo'), false);
 
 				opt.reloadData = $.isBoolean($.getParam(opt, 'reloadData,reload'), false);
 
@@ -3838,7 +3840,8 @@
 		setExpand: function (expanded, ev, linkage, callback) {
 			var that = this.self(),
 				node = that,
-				tree = that.tree;
+				tree = that.tree,
+				onlyOpenOne = tree.options.onlyOpenOne;
 
 			if ($.isBoolean(expanded) && expanded === that.expanded) {
 				return _callback(that);
@@ -3848,8 +3851,14 @@
 			}
 			if (that.childbox) {
 				expanded = $.isBoolean(expanded, !that.expanded);
-				//$.setElemClass(that.childbox, 'hide', !expanded);
+
+				// 仅展开一个节点，先关闭同级的其他节点
+				if (expanded && onlyOpenOne) {
+					Factory.collapseLevel(tree, that.level);
+				}
 				that.setBoxDisplay(expanded);
+
+				//$.setElemClass(that.childbox, 'hide', !expanded);
 
 				//动态加载，默认可加载多次，若已加载子节点，则不再动态加载
 				if (!linkage && expanded && !that.hasChild() && ev && ev.target) {
@@ -4317,6 +4326,8 @@
 				keepCookie: undefined,
 				//cookie过期时间，单位：分钟
 				cookieExpire: undefined,
+				//是否只展开一项（同一层级）
+				onlyOpenOne: undefined,
 				//是否调试模式
 				debug: false,
 				//data如果不是数组，是对象结构，则需要指定trees

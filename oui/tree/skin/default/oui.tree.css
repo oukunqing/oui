@@ -622,6 +622,7 @@
 	padding:0 4px;
 	margin:0;
 	background: #fff;
+	overflow: hidden;
 }
 
 .oui-tree-form input,
