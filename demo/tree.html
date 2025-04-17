@@ -105,7 +105,11 @@
                 <label class="chb-label"><input type="checkbox" id="chbClickExpand" /><span>点击切换</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbClickChecked" /><span>点击选中</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbCallbackLevel" /><span>确认再返回</span></label>
-                <label class="chb-label"><input type="checkbox" id="chbOnlyOpenOne" title="同一层级下仅展开一个节点" /><span>仅展开一个节点</span></label>
+                <div></div>
+                <label class="chb-label" title="显示连线时不可用"><input type="checkbox" id="chbFullWidth" /><span>整行全宽</span></label>
+                <label class="chb-label" title="同一层级下仅展开一个节点"><input type="checkbox" id="chbOnlyOpenOne" /><span>仅展开一个节点</span></label>
+                <label class="chb-label"><input type="checkbox" id="chbTreeMenu" /><span>树形导航菜单</span></label>
+
                 <div>
                     <button onclick="test(0);">加载树菜单</button>
                     <button onclick="test(1);">加载树菜单1</button>
@@ -432,6 +436,8 @@
             dynamic = $('#chbDynamic').checked(),
             callbackLevel = $('#chbCallbackLevel').checked(),
             onlyOpenOne = $('#chbOnlyOpenOne').checked(),
+            fullWidth = $('#chbFullWidth').checked(),
+            treeMenu = $('#chbTreeMenu').checked(),
             showScrollIcon = true;
 
             $.console.log('showStatus:', showStatus);
@@ -477,6 +483,8 @@
             showCheck: showCheck,
             showLine: showLine,
             hoverLine: hoverLine,
+            fullWidth: fullWidth,
+            treeMenu: treeMenu,
             showIcon: showIcon,
             showType: showType,
             showStatus: showStatus,

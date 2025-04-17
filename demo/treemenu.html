@@ -3,37 +3,49 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>搜索提示</title>
+	<title>树形导航菜单</title>
 	<style type="text/css">
 		input {width:180px;height:28px;}
 	</style>
 </head>
 <body>
 	<div>
-		<div id="menu1"></div>
+		<div id="menu1" style="border:solid 1px #ccc; width:200px;height:800px;float:left;"></div>
+		<div id="main1" style="border:solid 1px #ccc; width:800px;height:800px;float:left;margin-left:10px;"></div>
 	</div>
 </body>
 </html>
 <script type="text/javascript" src="../oui/oui.js"></script>
-<script type="text/javascript" src="../oui/treemenu/oui.treemenu.js"></script>
+<script type="text/javascript" src="../oui/tree/oui.tree.js"></script>
 <script type="text/javascript">
 
 function buildList() {
 	var list = [], id = 0;
 	for (var i = 0; i < 3; i++) {
 		id++;
-		list.push({id: id, name: '菜单' + id});
+		list.push({id: id, name: '菜单' + id, disabled: id === 3, url: '/api/' + id});
 	}
 	for (var i = 0; i < 3; i++) {
 		id++;
-		list.push({id: id, name: '菜单' + id, pid: 2});
+		list.push({id: id, name: '菜单' + id, pid: 2, url: '/api/' + id });
+	}
+	for (var i = 0; i < 3; i++) {
+		id++;
+		list.push({id: id, name: '菜单' + id, pid: 3, url: '/api/' + id, disabled: id === 8 });
 	}
 	return list;
 }
 
 window.onload = function() {
-	$.treemenu('menu1', {
-		list: buildList()
+	$.tree('menu1', {
+		data: buildList(),
+		callback: function (node, tree, ev) {
+			$.console.log('callback:', node);
+			var dr = node.data;
+			if (dr.url) {
+				$('#main1').html(dr.name + ':' + dr.url);
+			}
+		}
 	});
 };
 </script>

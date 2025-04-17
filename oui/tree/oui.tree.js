@@ -114,7 +114,7 @@
 
 				if (!ep.node) {
 					return false;
-				}				
+				}
 				if (ep.tag.inArray(['a', 'span'])) {
 					if (ep.css.inArray(['switch'])) {
 						//ep.node.setExpand();
@@ -140,19 +140,26 @@
 						if (Factory.isDblclick(tree, ep.node)) {
 							return false;
 						}
-						if (Factory.isReturnType(tree, ep.node.type)) {
-							Factory.setTargetValue(ep.node, tree).clickCallback(ep.node, tree, ev);
-							ep.node.setSelected(true, ev);
-							if (op.clickChecked) {
-								ep.node.setChecked(null, ev);
-							}
-						}
-						if (op.clickExpand) {
-							//clickExpanded 与 clickExpand 是两个不同的参数
-							ep.node.setExpand(op.clickExpanded, ev);
+						_event();
+					}
+				} else if ((op.treeMenu || op.fullWidth) && Factory.isNodeItem(ep)) {
+					_event();
+				}
+
+				function _event() {
+					if (Factory.isReturnType(tree, ep.node.type)) {
+						Factory.setTargetValue(ep.node, tree).clickCallback(ep.node, tree, ev);
+						ep.node.setSelected(true, ev);
+						if (op.clickChecked) {
+							ep.node.setChecked(null, ev);
 						}
 					}
+					if (op.clickExpand) {
+						//clickExpanded 与 clickExpand 是两个不同的参数
+						ep.node.setExpand(op.clickExpanded, ev);
+					}
 				}
+
 				return this;
 			},
 			mouseup: function (ev, tree) {
@@ -904,7 +911,7 @@
 				}
 
 				//是否显示滚动时的小火箭图标（用于返回顶部）
-				opt.showScrollIcon = $.isBoolean($.getParam(opt, 'showScrollIcon,showFireArrow,showReturnTop,fireArrow'), true);
+				opt.showScrollIcon = $.isBoolean($.getParam(opt, 'showScrollIcon,showFireArrow,showReturnTop,fireArrow'), false);
 
 				//默认需要防抖回调
 				opt.callbackDebounce = $.isBoolean($.getParam(opt, 'callbackDebounce,debounce'), false);
@@ -925,6 +932,28 @@
 				opt.buttonCallback = $.getParam(opt, 'buttonCallback,onbutton');
 				opt.sortCallback = $.getParam(opt, 'sortCallback,onsort');
 				opt.dragCallback = $.getParam(opt, 'dragCallback,ondrag');
+
+				// 是否允许全部回调（包括被禁用的节点）
+				opt.fullCallback = $.isBoolean($.getParam(opt, 'fullCallback,allCallback'), false);
+
+				// 树形导航菜单
+				opt.treeMenu = $.isBoolean($.getParam(opt, 'treeMenu'), false);
+				// 整行全宽
+				opt.fullWidth = $.isBoolean($.getParam(opt, 'fullWidth,lineWidth'), false);
+
+				// 启用整行全宽，不显示连线
+				// 树形导航菜单，不显示连线
+				if (opt.fullWidth || opt.treeMenu) {
+					opt.showLine = false;
+
+					// 树形导航菜单，不用整行全宽，不启用复选框
+					if (opt.treeMenu) {
+						opt.fullWidth = false;
+						opt.showCheck = false;
+						opt.showScrollIcon = false;
+						opt.clickExpand = true;
+					}
+				}
 
 				return opt;
 			},
@@ -1023,6 +1052,8 @@
 				return this;
 			},
 			dealEvent: function (ev, tree, evType, opt) {
+				$.cancelBubble(ev);
+
 				if (!evType && (ev && ev.type)) {
 					evType = ev.type;
 				}
@@ -1696,8 +1727,6 @@
 						height: boxHeight || opt.boxHeight || Config.TreeBoxDefaultHeight
 					};
 
-				//console.log('es:', es);
-
 				if (p.height > bs.height) {
 					p.height = bs.height - 6;
 				}
@@ -1885,6 +1914,12 @@
 					if (opt.hoverLine) {
 						css.push('oui-tree-line-hover');
 					}
+				}
+				if (opt.fullWidth) {
+					css.push('oui-tree-full');
+				}
+				if (opt.treeMenu) {
+					css.push('oui-tree-menu');
 				}
 				if (opt.switch) {
 					css.push('oui-tree-' + (opt.showLine ? 'line' : 'switch') + opt.switch);
@@ -2777,8 +2812,10 @@
 				return ul;
 			},
 			buildLi: function (tree, p, node, opt) {
-				var li = document.createElement('LI');
-				li.className = ('node level' + p.level + (Config.IE ? ' ie' : ''));
+				var li = document.createElement('LI'),
+					pw = opt.treeMenu ? 15 : opt.fullWidth ? (opt.showLine ? 22 : 10) : 0;
+
+				li.className = ('node level' + p.level + (Config.IE ? ' ie' : '') + (p.disabled ? ' disabled' : ''));
 				li.setAttribute('nid', p.nid);
 
 				if (Config.IE && opt.minWidth) {
@@ -2789,8 +2826,9 @@
 					li.draggable = true;
 				}
 				var title = opt.showTitle && (opt.forceTitle || p.title.length > Config.TitleTextLength) ? ' title="' + p.title + '"' : '',
+					pad = pw > 0 ? ' style="padding-left:' + (p.level * pw) + 'px;"' : '',
 					html = [
-						'<div class="item" nid="', p.nid, '">',
+						'<div class="item" nid="', p.nid, '"', pad, '>',
 						opt.showSwitch ? '<span class="' + node.getSwitchClass(true) + '" nid="' + p.nid + '"></span>' : '',
 						opt.showIcon ? '<span class="' + node.getIconClass() + '" nid="' + p.nid + '"></span>' : '',
 						opt.showCheck ? '<span class="check" nid="' + p.nid + '"></span>' : '',
@@ -2816,6 +2854,9 @@
 			},
 			isDragText: function (par) {
 				return par.tag === 'span' && par.css.inArray(['text', 'count', 'desc']);
+			},
+			isNodeItem: function (par) {
+				return par.tag.inArray(['div']) && par.css.inArray(['item']);
 			},
 			isNodeBody: function (par) {
 				return par.tag.inArray(['a', 'span']) && par.css.inArray(['icon', 'name', 'text', 'count', 'desc']);
@@ -2858,6 +2899,7 @@
 						//desc: desc.toString().escapeHtml(),
 						desc: [desc.toString().escapeHtml(), opt.debug ? nid : ''].join(' '),
 						pnode: tree.cache.nodes[pnid],
+						disabled: d.disabled || false,
 						expanded: false
 					};
 					showStatus = $.isBooleans([d.showStatus, opt.showStatus], false);
@@ -2887,8 +2929,8 @@
 						type: p.type,
 						level: p.level,
 						expanded: p.expanded,
+						disabled: p.disabled,
 						checked: d.checked || false,
-						disabled: d.disabled || false,
 						dynamic: tree.isDynamicType(p.type),
 						icon: $.extend({ type: iconType }, d.icon),
 						showStatus: showStatus,
@@ -3189,7 +3231,8 @@
 				return this;
 			},
 			callback: function (node, tree, ev, nodes) {
-				var checked = tree.options.showCheck,
+				var opt = tree.options,
+					checked = opt.showCheck,
 					force = true;
 
 				if (!$.isArray(nodes) && checked) {
@@ -3198,6 +3241,11 @@
 
 				if (node === null) {
 					node = tree.cache.current.selected;
+				}
+
+				// 被禁用的节点，不允许回调返回结果
+				if (node.disabled && !opt.fullCallback) {
+					return this;
 				}
 
 				if (tree.target) {
@@ -4368,6 +4416,10 @@
 				showLine: undefined,
 				//是否悬停显示连线
 				hoverLine: undefined,
+				//是否整行全宽
+				fullWidth: undefined,
+				//树形导航菜单
+				treeMenu: undefined,
 				//是否显示切换图标
 				showSwitch: undefined,
 				//是否显示图标
@@ -4469,6 +4521,8 @@
 				debounceDelay: Config.DebounceDelay,
 				//防抖间隔，单位：毫秒
 				debounceTimeout: Config.DebounceTimeout,
+				//是否全部回调（被禁用的节点也可以回调）
+				fullCallback: undefined,
 				//以下是回调事件
 				callback: undefined,
 				complete: undefined,

@@ -63,15 +63,6 @@
 
 .oui-tree li {padding:0 0 0 10px;display:block;}
 
-/*用于节点连线*/
-.oui-tree-line li.node {padding:0 0 0 22px;}
-
-.oui-tree-line li .item .node-none {
-	background: none;
-}
-
-.oui-tree-menu li, .oui-tree-menu li.node {padding: 0;}
-
 .oui-tree li .item {
 	float:left;display:inline-block;height:24px;overflow:visible;margin-bottom:0px;
 	border-radius:4px;width:auto;clear:both;
@@ -251,7 +242,14 @@
 .oui-tree li .item .switch-none {background:none;cursor:default;}
 .oui-tree li .item .switch-none:hover {background:none;}
 
+
 /*用于节点连线*/
+.oui-tree-line li.node {padding:0 0 0 22px;}
+
+.oui-tree-line li .item .node-none {
+	background: none;
+}
+
 .oui-tree-line ul.line,
 .oui-tree-box:hover .oui-tree-line-hover ul.line {
 	background: url("imgs/line.png") repeat-y -2px 0;
@@ -918,4 +916,56 @@
 }
 .oui-tree-btn ul.levelroot {
 	padding:5px 20px 20px 3px;
+}
+
+/*关于整行全宽*/
+.oui-tree-full {}
+.oui-tree-full ul.box {width:100%;}
+.oui-tree-full li, .oui-tree-full li.node {padding: 0;width:100%;}
+.oui-tree-full li .item {
+	width:100%;
+}
+.oui-tree-full li > .item:hover {background:#e5f3ff;cursor:pointer;}
+
+.oui-tree-full li.cur > .item {background: #cce8ff;border-color: #cce8ff;}
+.oui-tree-full li.cur > .item:hover{background: #cce8ff;border-color: #99d1ff;}
+
+.oui-tree-full li.cur > .item a.name{background:none;border-color:#cce8ff;}
+.oui-tree-full li.cur > .item a.name:hover{background:none;border-color:#cce8ff;}
+
+
+/*关于树形导航菜单*/
+.oui-tree-menu {}
+.oui-tree-menu ul.box {width:100%;}
+.oui-tree-menu li, .oui-tree-menu li.node {padding: 0;width:100%;}
+.oui-tree-menu li .item {
+	height:34px; line-height: 34px;width:100%;
+}
+.oui-tree-menu li > .item:hover {background:#e5f3ff;cursor:pointer;}
+
+.oui-tree-menu li .item a.name,.oui-tree-menu li .item a.name span,.oui-tree-menu li .item span {
+	display:inline-block;height:34px;line-height:32px;
+	outline:none;overflow:visible;white-space:nowrap;
+	text-align:center; font-size:14px;
+}
+.oui-tree-menu li .item span.switch {height: 24px;margin-top:5px;}
+.oui-tree-menu li .item span.switch-none {background: none;}
+.oui-tree-menu li .item span.switch-open {}
+.oui-tree-menu li .item span.switch-close {}
+.oui-tree-menu li .item span.check {margin-top:5px;}
+.oui-tree-menu li .item .icon,.oui-tree-menu li .item .icon-open {
+	width:24px;height:24px;box-sizing: border-box;margin-top:5px;
+}
+
+.oui-tree-menu li.cur > .item {background: #cce8ff;border-color: #cce8ff;}
+.oui-tree-menu li.cur > .item:hover{background: #cce8ff;border-color: #99d1ff;}
+
+.oui-tree-menu li.cur > .item a.name{background:none;border-color:#cce8ff;}
+.oui-tree-menu li.cur > .item a.name:hover{background:none;border-color:#cce8ff;}
+
+
+.oui-tree li.disabled > .item,.oui-tree li.disabled > .item span,
+.oui-tree-menu li.disabled > .item,.oui-tree-menu li.disabled > .item span {
+	color: #999;
+	cursor: not-allowed;
 }
