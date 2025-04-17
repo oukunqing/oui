@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>搜索提示</title>
+	<style type="text/css">
+		input {width:180px;height:28px;}
+	</style>
+</head>
+<body>
+	<div>
+		<div id="menu1"></div>
+	</div>
+</body>
+</html>
+<script type="text/javascript" src="../oui/oui.js"></script>
+<script type="text/javascript" src="../oui/treemenu/oui.treemenu.js"></script>
+<script type="text/javascript">
+
+function buildList() {
+	var list = [], id = 0;
+	for (var i = 0; i < 3; i++) {
+		id++;
+		list.push({id: id, name: '菜单' + id});
+	}
+	for (var i = 0; i < 3; i++) {
+		id++;
+		list.push({id: id, name: '菜单' + id, pid: 2});
+	}
+	return list;
+}
+
+window.onload = function() {
+	$.treemenu('menu1', {
+		list: buildList()
+	});
+};
+</script>

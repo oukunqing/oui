@@ -5,7 +5,7 @@
     @Author: oukunqing
     @License：MIT
 
-    $.leftmenu 左栏菜单插件
+    $.sidemenu 侧边栏菜单插件
 */
 
 !function($) {
@@ -13,7 +13,7 @@
 
     var Config = {
         FilePath: $.getScriptSelfPath(true),
-        FileName: 'oui.leftmenu.',
+        FileName: 'oui.sidemenu.',
         DefaultSkin: 'default',
         IsDefaultSkin: function(skin) {
             return (!$.isUndefined(skin) ? skin : Config.GetSkin()) === Config.DefaultSkin;
@@ -178,16 +178,16 @@
         buildMenu: function(container, options) {
             var box = $.toElement(container);
             if(!$.isElement(box)) {
-                console.log('oui.leftmenu: ', '参数输入错误');
+                console.log('oui.sidemenu: ', '参数输入错误');
                 return null;
             }
             var par = $.extend({}, options),
-                id = 'oui-leftmenu-' + (par.id || box.id || Cache.index++),
+                id = 'oui-sidemenu-' + (par.id || box.id || Cache.index++),
                 opt = $.extend({}, options, {id: id}),
                 cache = Factory.getCache(opt.id);
 
             if(!cache) {
-                return new LeftMenu(box, opt);
+                return new SideMenu(box, opt);
             }
             return cache.obj;
         }
@@ -200,7 +200,7 @@
         Factory.loadCss(Config.GetSkin());
     }
 
-    function LeftMenu (container, options) {
+    function SideMenu (container, options) {
         var that = this;
         that.container = $.toElement(container);
         if(!$.isElement(that.container)) {
@@ -208,7 +208,7 @@
         }
 
         var cfg = {
-            id: 'oui-leftmenu',
+            id: 'oui-sidemenu',
             skin: Config.DefaultSkin,       //样式: default, blue
             //lang: 'chinese',              //chinese, english
             //lang: Config.GetLang(),         //语言 Chinese,English
@@ -244,7 +244,7 @@
         that.initial(that.options);
     }
 
-    LeftMenu.prototype = {
+    SideMenu.prototype = {
         initial: function(opt) {
             var that = this, cssTab = '';
 
@@ -261,7 +261,7 @@
                 }
                 Factory.loadCss(opt.skin);
             }
-            $.addClass(that.container, 'oui-leftmenu' + (opt.position  === 'right' ? ' oui-rightmenu' : '') + cssTab);
+            $.addClass(that.container, 'oui-sidemenu oui-leftmenu' + (opt.position  === 'right' ? ' oui-rightmenu' : '') + cssTab);
 
             that.size({width: opt.width, height: opt.height});
 
@@ -339,8 +339,15 @@
     };
 
     $.extend({
+        sidemenu: function(container, options) {
+            return Factory.buildMenu(container, options);
+        },
         leftmenu: function(container, options) {
             return Factory.buildMenu(container, options);
+        },
+        rightmenu: function(container, options) {
+            var opt = $.extend(options, { position: 'right' });
+            return Factory.buildMenu(container, opt);
         }
     });
 }(OUI);

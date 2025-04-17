@@ -12,15 +12,15 @@
      .con {border:solid 1px #99bbe8;box-sizing: border-box;min-width:100px;float:left; }   
     </style>
     <!--<script type="text/javascript" src="../oui/tab/oui.tab.js?12&skin=orange&lang=english"></script>-->
-    <script type="text/javascript" src="../oui/leftmenu/oui.leftmenu.js?12&skin="></script>
+    <script type="text/javascript" src="../oui/sidemenu/oui.sidemenu.js?12&skin="></script>
 </head>
 <body>
-    <div style="float:left;margin:10px 10px 10px 0;">
+    <div id="left" style="float:left;margin:10px 10px 10px 0;">
         <div id="nav"></div>
         <div id="content" class="box" style="height:500px;border-left:none;"></div>
     </div>
 
-    <div style="float:right;margin:10px 10px 10px 0;">
+    <div id="right" style="float:right;margin:10px 10px 10px 0;">
         <div id="nav2" style="width:400px;"></div>
         <div id="content2" class="con" style="height:450px;border-right:none;"></div>
     </div>
@@ -28,8 +28,8 @@
 </body>
 </html>
 <script type="text/javascript">
-    var menu1 = $.leftmenu($I('nav'), {
-        id: 'leftmenu1',
+    var menu1 = $.sidemenu($I('nav'), {
+        id: 'sidemenu1',
         //skin: 'bluegray',
         event: 'click',		//click, mouseover
         //position: 'right',
@@ -62,8 +62,8 @@
     }, 6*1000);
 
 
-    $.leftmenu($I('nav2'), {
-        id: 'leftmenu2',
+    $.sidemenu($I('nav2'), {
+        id: 'sidemenu2',
         skin: 'bluegray',
         position: 'right',
         width: 33,

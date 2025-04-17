@@ -63,6 +63,15 @@
 
 .oui-tree li {padding:0 0 0 10px;display:block;}
 
+/*用于节点连线*/
+.oui-tree-line li.node {padding:0 0 0 22px;}
+
+.oui-tree-line li .item .node-none {
+	background: none;
+}
+
+.oui-tree-menu li, .oui-tree-menu li.node {padding: 0;}
+
 .oui-tree li .item {
 	float:left;display:inline-block;height:24px;overflow:visible;margin-bottom:0px;
 	border-radius:4px;width:auto;clear:both;
@@ -243,12 +252,6 @@
 .oui-tree li .item .switch-none:hover {background:none;}
 
 /*用于节点连线*/
-.oui-tree-line li.node {padding:0 0 0 22px;}
-
-.oui-tree-line li .item .node-none {
-	background: none;
-}
-
 .oui-tree-line ul.line,
 .oui-tree-box:hover .oui-tree-line-hover ul.line {
 	background: url("imgs/line.png") repeat-y -2px 0;

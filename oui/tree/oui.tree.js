@@ -3326,7 +3326,7 @@
 		Factory.loadCss(appointSkin);
 	}
 
-	function Type(par) {
+	function Type (par) {
 		this.initial(par);
 	}
 
@@ -3348,7 +3348,7 @@
 		}
 	};
 
-	function Node(par) {
+	function Node (par) {
 		this.initial(par);
 	}
 
@@ -3364,7 +3364,7 @@
 			}
 			return that;
 		},
-		initial: function(par) {
+		initial: function (par) {
 			par = $.extend({}, par);
 			var that = this.self();
 
@@ -4296,7 +4296,7 @@
 		}
 	};
 
-	function Tree(id, options) {
+	function Tree (id, options) {
 		if ($.isObject(id) && $.isUndefined(options)) {
 			options = id;
 			id = null;
