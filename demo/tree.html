@@ -24,7 +24,7 @@
 <body>
 <div class="form">
     <div style="float:left;padding:6px;clear:none;">
-        <div id="tree" style="display:block;border:solid 1px #ccc;border-radius:4px;overflow:auto;width:500px;height:600px;margin:0 0 5px 0;"></div>    
+        <div id="tree" style="display:block;border:solid 1px #ccc;border-radius:4px;overflow:hidden;width:500px;height:600px;margin:0 0 5px 0;"></div>    
         <select id="unit" style="width:100%;max-width:500px;height:34px;" onchange="$.console.log('changed:', this.value);">
             <option value="7155,8366">205428,866804050921863</option>
         </select>
@@ -68,6 +68,7 @@
                     <option value="radius">Radius</option>
                     <option value="device">Device</option>
                     <option value="arrow">Arrow</option>
+                    <option value="updown">UpDown</option>
                 </select>
                 <label class="chb-label"><input type="checkbox" id="chbDynamic" /><span>动态加载节点</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbCamera" /><span>动态加载通道</span></label>
@@ -105,10 +106,16 @@
                 <label class="chb-label"><input type="checkbox" id="chbClickExpand" /><span>点击切换</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbClickChecked" /><span>点击选中</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbCallbackLevel" /><span>确认再返回</span></label>
+                <label class="chb-label" title="启用自定义样式可以实现节点样式自由，可增加行高或全宽，或改变背景及字体颜色等等&#10;需要注意的是：自定义的样式符合节点结构设计，否则可能会引起节点布局混乱">
+                    <input type="checkbox" id="chbCustomCss" />
+                    <span style="color:#f00;">自定义样式</span>
+                </label>
                 <div></div>
                 <label class="chb-label" title="显示连线时不可用"><input type="checkbox" id="chbFullWidth" /><span>整行全宽</span></label>
+                <label class="chb-label" title="显示连线时不可用"><input type="checkbox" id="chbHighHeight" /><span>增加行高</span></label>
                 <label class="chb-label" title="同一层级下仅展开一个节点"><input type="checkbox" id="chbOnlyOpenOne" /><span>仅展开一个节点</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbTreeMenu" /><span>树形导航菜单</span></label>
+                <label class="chb-label"><input type="checkbox" id="chbRightSwitch" /><span>右侧切换图标</span></label>
 
                 <div>
                     <button onclick="test(0);">加载树菜单</button>
@@ -226,6 +233,48 @@
 </div>
 </body>
 </html>
+<style type="text/css">
+    /*自定义样式 示例*/
+    .my-tree {}
+    .my-tree li .item {
+        height:40px; line-height: 38px;
+    }
+    .my-tree li .item span.switch {height: 24px;margin-top:8px;}
+    .my-tree li .item span.check {margin-top:8px;}
+    .my-tree li .item .icon,.my-tree li .item .icon-open {
+        width:24px;height:24px;margin-top:8px;
+    }
+    .my-tree li .item a.name,.my-tree li .item a.name span,.my-tree li .item span {
+        height:40px;line-height:38px;
+    }
+
+    /*通栏自定义样式示例*/
+    /*
+    .my-tree {}
+    .my-tree ul.box {width:100%;}
+    .my-tree li, .my-tree li.node {padding: 0;width:100%;}
+    .my-tree li .item {
+        height:30px; line-height: 28px;width:100%;
+    }
+    .my-tree li .item span.switch {height:24px;margin-top:3px;}
+    .my-tree li .item span.switch-none {background: none;}
+    .my-tree li .item span.check {margin-top:3px;}
+    .my-tree li .item .icon,.my-tree li .item .icon-open {
+        width:24px;height:24px;margin-top:3px;
+    }
+    .my-tree li .item a.name,.my-tree li .item a.name span,.my-tree li .item span {
+        height:30px;line-height:28px;
+    }
+
+    .my-tree li > .item:hover {background:#e5f3ff;cursor:pointer;}
+
+    .my-tree li.cur > .item {background: #cce8ff;border-color: #cce8ff;}
+    .my-tree li.cur > .item:hover{background: #cce8ff;border-color: #99d1ff;}
+
+    .my-tree li.cur > .item a.name{background:none;border-color:#cce8ff;}
+    .my-tree li.cur > .item a.name:hover{background:none;border-color:#cce8ff;}
+*/
+</style>
 <script type="text/javascript" src="../oui/oui.js?1"></script>
 <script type="text/javascript" src="../oui/contextmenu/oui.contextmenu.js"></script>
 <script type="text/javascript" src="../oui/tree/oui.tree.js?123"></script>
@@ -437,7 +486,10 @@
             callbackLevel = $('#chbCallbackLevel').checked(),
             onlyOpenOne = $('#chbOnlyOpenOne').checked(),
             fullWidth = $('#chbFullWidth').checked(),
+            highHeight = $('#chbHighHeight').checked(),
             treeMenu = $('#chbTreeMenu').checked(),
+            rightSwitch = $('#chbRightSwitch').checked(),
+            customCss = $('#chbCustomCss').checked(),
             showScrollIcon = true;
 
             $.console.log('showStatus:', showStatus);
@@ -484,7 +536,10 @@
             showLine: showLine,
             hoverLine: hoverLine,
             fullWidth: fullWidth,
+            highHeight: highHeight,
+            customCss: customCss ? 'my-tree' : '',
             treeMenu: treeMenu,
+            rightSwitch: rightSwitch,
             showIcon: showIcon,
             showType: showType,
             showStatus: showStatus,

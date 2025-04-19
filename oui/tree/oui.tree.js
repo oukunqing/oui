@@ -81,7 +81,8 @@
 		},
 		Event = {
 			target: function (ev, tree) {
-				var elem = ev.target,
+				var opt = tree.options,
+					elem = ev.target,
 					parent = elem.parentNode,
 					tag = elem.tagName.toLowerCase();
 
@@ -104,6 +105,12 @@
 
 				var p = Event.target(ev, tree);
 				if (p.node && Factory.isNodeSwitch(p)) {
+
+					/*右侧切换图标，由于滚动条的原因会导致图标位置变动，会引起mousedown冒泡，所以禁止switch的mousedown事件*/
+					if (tree.options.rightSwitch && p.css.inArray(['switch'])) {
+						return this;
+					}
+				
 					p.node.setExpand(null, ev);	
 				}
 				return this;
@@ -117,8 +124,11 @@
 				}
 				if (ep.tag.inArray(['a', 'span'])) {
 					if (ep.css.inArray(['switch'])) {
-						//ep.node.setExpand();
-						//switch事件迁移到mousedown
+						//只有在右侧切换图标时，才启用switch的click事件						
+						//其他情况下，switch事件迁移到mousedown
+						if (op.rightSwitch) {
+							ep.node.setExpand();
+						}
 						return false;
 					}
 					if (ep.css.inArray(['check'])) {
@@ -936,23 +946,47 @@
 				// 是否允许全部回调（包括被禁用的节点）
 				opt.fullCallback = $.isBoolean($.getParam(opt, 'fullCallback,allCallback'), false);
 
+				// 节点能不能被选中的条件
+				// 字符串：用于匹配参数中的某个字段是否有内容，比如 {url:''} 中的url是否有内容
+				// 外部函数：将参数中的数据传给外部函数，由外部函数决定是否可以选中
+				opt.selectedCondition = $.getParam(opt, 'selectedCondition');
+
 				// 树形导航菜单
 				opt.treeMenu = $.isBoolean($.getParam(opt, 'treeMenu'), false);
 				// 整行全宽
 				opt.fullWidth = $.isBoolean($.getParam(opt, 'fullWidth,lineWidth'), false);
+				// 增加行高
+				opt.highHeight = $.isBoolean($.getParam(opt, 'highHeight,lineHeight'), false);
+				// 切换图标是否显示在右边，仅树形导航菜单时启用
+				opt.rightSwitch = $.isBoolean($.getParam(opt, 'rightSwitch'), false);
+
+				// 自定义样式（谨慎使用，需要对html/css比较熟悉）
+				opt.customCss = $.getParam(opt, 'customCss');
+				if (!$.isString(opt.customCss, true)) {
+					opt.customCss = '';
+				}
+
+				/* 以下参数有互斥关系 */
 
 				// 启用整行全宽，不显示连线
 				// 树形导航菜单，不显示连线
-				if (opt.fullWidth || opt.treeMenu) {
+				if (opt.fullWidth || opt.highHeight || opt.treeMenu) {
 					opt.showLine = false;
 
 					// 树形导航菜单，不用整行全宽，不启用复选框
 					if (opt.treeMenu) {
 						opt.fullWidth = false;
+						opt.highHeight = false;
 						opt.showCheck = false;
 						opt.showScrollIcon = false;
 						opt.clickExpand = true;
+					} else if (opt.fullWidth) {
+						opt.highHeight = false;
 					}
+				}
+				// 非树形导航菜单时，不启用右侧切换图标
+				if (!opt.treeMenu) {
+					opt.rightSwitch = false;
 				}
 
 				return opt;
@@ -1918,8 +1952,14 @@
 				if (opt.fullWidth) {
 					css.push('oui-tree-full');
 				}
+				if (opt.highHeight) {
+					css.push('oui-tree-high');
+				}
 				if (opt.treeMenu) {
 					css.push('oui-tree-menu');
+				}
+				if (opt.customCss) {
+					css.push(opt.customCss);
 				}
 				if (opt.switch) {
 					css.push('oui-tree-' + (opt.showLine ? 'line' : 'switch') + opt.switch);
@@ -2235,7 +2275,7 @@
 			showSearchResult: function (tree, nodes, keys) {
 				var div = tree.box.querySelector('div.search-result-panel'),
 					show = nodes ? true : undefined, elems,
-					i, c = nodes.length, node, dr, name, text, title, html = [];
+					i, c = nodes.length, node, dr, name, text, code, title, html = [];
 
 				if (!div) {
 					div = document.createElement('div');
@@ -2287,9 +2327,10 @@
 				for (var i = 0; i < c; i++) {
 					node = nodes[i], css = ['icon'];
 					dr = node.data || {};
-					name = dr.name || dr.text;
+					name = dr.name || dr.text || '';
 					text = name.toString().escapeHtml();
-					title = text + (isSearchCode && dr.code && name !== dr.code ? ' [' + dr.code + ']' : '');
+					code = (dr.code || '').toString().trim();
+					title = text + (isSearchCode && code && name !== code ? ' [' + code + ']' : '');
 					if (skin && node.type) {
 						css.push(node.type);
 					} else if (node.isLeaf()) {
@@ -2813,7 +2854,8 @@
 			},
 			buildLi: function (tree, p, node, opt) {
 				var li = document.createElement('LI'),
-					pw = opt.treeMenu ? 15 : opt.fullWidth ? (opt.showLine ? 22 : 10) : 0;
+					pw = opt.treeMenu ? 15 : opt.fullWidth ? (opt.showLine ? 22 : 10) : 0,
+					float = '';
 
 				li.className = ('node level' + p.level + (Config.IE ? ' ie' : '') + (p.disabled ? ' disabled' : ''));
 				li.setAttribute('nid', p.nid);
@@ -2825,11 +2867,14 @@
 				if (opt.dragAble && Factory.isDragType(opt, p.type)) {
 					li.draggable = true;
 				}
+				if (opt.treeMenu && opt.rightSwitch) {
+					float = ' style="float:right;margin-right:5px;"';
+				}
 				var title = opt.showTitle && (opt.forceTitle || p.title.length > Config.TitleTextLength) ? ' title="' + p.title + '"' : '',
-					pad = pw > 0 ? ' style="padding-left:' + (p.level * pw) + 'px;"' : '',
+					pad = pw > 0 ? ' style="padding-left:' + (p.level * pw + (opt.rightSwitch ? 5 : 0)) + 'px;"' : '',
 					html = [
 						'<div class="item" nid="', p.nid, '"', pad, '>',
-						opt.showSwitch ? '<span class="' + node.getSwitchClass(true) + '" nid="' + p.nid + '"></span>' : '',
+						opt.showSwitch ? '<span class="' + node.getSwitchClass(true) + '" nid="' + p.nid + '"' + float + '></span>' : '',
 						opt.showIcon ? '<span class="' + node.getIconClass() + '" nid="' + p.nid + '"></span>' : '',
 						opt.showCheck ? '<span class="check" nid="' + p.nid + '"></span>' : '',
 						'<a class="name" nid="', p.nid, '"', title, '>',
@@ -2875,7 +2920,7 @@
 				if (!$.isArray(list) || list.length <= 0) {
 					return this;
 				}
-				var i, d, type, ptype, iconType, nid, pnid, text, desc, p, node, 
+				var i, d, type, ptype, iconType, nid, pnid, text, desc, code, p, node, 
 					showStatus, showType, status, status2,
 					isSearchCode = opt.searchFields.indexOf('code') > -1;
 
@@ -2888,16 +2933,20 @@
 					iconType = d.iconType || par.iconType || type;
 					nid = Factory.buildNodeId(d.id, type);
 					pnid = Factory.buildNodeId(d.pid, ptype);
-					text = (d.name || '').toString().escapeHtml(),
-					desc = d.desc || '',
+					text = (d.name || '').toString().trim().escapeHtml();
+					desc = (d.desc || '').toString().trim();
+					code = (code || '').toString().trim();
+					if (desc) {
+						desc = desc.escapeHtml();
+					}
 					p = {
 						data: d.data || d, text: text,
-						title: text + (isSearchCode && d.code && d.code !== d.name ? ' [' + d.code + ']' : ''),
+						title: text + (isSearchCode && code && code !== d.name ? ' [' + code + ']' : ''),
 						nid: nid, pnid: pnid, type: type, ptype: ptype,
 						id: Factory.buildElemId(tid, nid),
 						pid: Factory.buildElemId(tid, pnid),
 						//desc: desc.toString().escapeHtml(),
-						desc: [desc.toString().escapeHtml(), opt.debug ? nid : ''].join(' '),
+						desc: [desc, opt.debug ? nid : ''].join(' '),
 						pnode: tree.cache.nodes[pnid],
 						disabled: d.disabled || false,
 						expanded: false
@@ -3770,22 +3819,44 @@
 			return Factory.setStoreCache(this.tree, key, node, action), this;
 		},
 		setSelected: function (selected, ev) {
-			var that = this.self();
-			selected = $.isBoolean(selected, !that.selected);
-			if (selected && (that.disabled || !Factory.isReturnType(that.tree, that.type))) {
-				return that;
-			}
-			if (selected) {
+			var that = this.self(), opt = that.tree.options, 
+				set = $.isBoolean(selected, !that.selected);
+
+			if (set) {
+				if (that.disabled || !Factory.isReturnType(that.tree, that.type)) {
+					return that;
+				}
+
+				// 根据“选中条件”来决定是否可以选择当前节点为“选中状态”
+				if ($.isFunction(opt.selectedCondition)) {
+					if (!opt.selectedCondition(that.data)) {
+						return that;
+					}
+				} else if ($.isString(opt.selectedCondition)) {
+					var keys = opt.selectedCondition.split(/[,;|]/g), len = keys.length;
+					var pass = false;
+					for (var i = 0; i < len; i++) {
+						if (!$.isUndefinedOrNull(that.data[keys[i]])) {
+							pass = true;
+							break;
+						}
+					}
+					if (!pass) {
+						return that;
+					}
+				}
+
 				//设置当前选中的节点状态
-				Factory.setCurrentCache(that.tree, 'selected', that, selected);
+				Factory.setCurrentCache(that.tree, 'selected', that, set);
 
 				if (ev && ev.target) {
 					Factory.setCurrentCache(that.tree, 'position', that)
-						.setStoreCache(that.tree, 'position', that, selected);
+						.setStoreCache(that.tree, 'position', that, set);
 				}
 			}
-			return that.setParam('selected', selected).setSelectedClass()
-				.setStoreCache('selected', that, selected);
+
+			return that.setParam('selected', set).setSelectedClass()
+				.setStoreCache('selected', that, set);
 		},
 		setDisabled: function (disabled) {
 			var that = this.self();
@@ -4418,10 +4489,17 @@
 				hoverLine: undefined,
 				//是否整行全宽
 				fullWidth: undefined,
+				//是否增加行高，默认行高是24px，增高后为30px
+				highHeight: undefined,
+				//自定义样式className
+				customCss: undefined,
 				//树形导航菜单
 				treeMenu: undefined,
 				//是否显示切换图标
 				showSwitch: undefined,
+				//是否右边切换图标（切换图标在右边，默认是在左边）
+				//treeMenu为true时有效
+				rightSwitch: undefined,
 				//是否显示图标
 				showIcon: undefined,
 				//是否显示复选框
@@ -4523,6 +4601,8 @@
 				debounceTimeout: Config.DebounceTimeout,
 				//是否全部回调（被禁用的节点也可以回调）
 				fullCallback: undefined,
+				//节点能不能被选中的条件
+				selectedCondition: undefined,
 				//以下是回调事件
 				callback: undefined,
 				complete: undefined,
@@ -4933,6 +5013,14 @@
 	$.extend({
 		tree: function (id, par) {
 			return Factory.buildTree(id, par);
+		},
+		treemenu: function (id, par) {
+			var opt = $.extend({}, par, { treeMenu: true });
+			return Factory.buildTree(id, opt);
+		},
+		treefull: function (id, par) {
+			var opt = $.extend({}, par, { fullWidth: true });
+			return Factory.buildTree(id, opt);
 		}
 	});
 

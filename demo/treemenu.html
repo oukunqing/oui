@@ -10,8 +10,10 @@
 </head>
 <body>
 	<div>
-		<div id="menu1" style="border:solid 1px #ccc; width:200px;height:800px;float:left;"></div>
-		<div id="main1" style="border:solid 1px #ccc; width:800px;height:800px;float:left;margin-left:10px;"></div>
+		<div id="menu1" style="border:solid 1px #ccc; width:200px;float:left;overflow: auto;">
+			<div id="tree1"></div>
+		</div>
+		<div id="main1" style="border:solid 1px #ccc; width:800px;float:left;margin-left:10px;"></div>
 	</div>
 </body>
 </html>
@@ -21,31 +23,71 @@
 
 function buildList() {
 	var list = [], id = 0;
-	for (var i = 0; i < 3; i++) {
+	for (var i = 0; i < 5; i++) {
 		id++;
-		list.push({id: id, name: '菜单' + id, disabled: id === 3, url: '/api/' + id});
+		list.push({id: id, name: '菜单' + id, disabled: id === 3, url2: '/api/' + id, icon: 'unit'});
 	}
 	for (var i = 0; i < 3; i++) {
 		id++;
 		list.push({id: id, name: '菜单' + id, pid: 2, url: '/api/' + id });
 	}
-	for (var i = 0; i < 3; i++) {
+	for (var i = 0; i < 2; i++) {
 		id++;
-		list.push({id: id, name: '菜单' + id, pid: 3, url: '/api/' + id, disabled: id === 8 });
+		list.push({id: id, name: '菜单' + id, pid: 3, url: '/api/' + id, disabled: i == 1 });
+	}
+	for (var i = 0; i < 5; i++) {
+		id++;
+		list.push({id: id, name: '菜单' + id, pid: 4, url: '/api/' + id});
+	}
+	for (var i = 0; i < 6; i++) {
+		id++;
+		list.push({id: id, name: '菜单' + id, pid: 5, url: '/api/' + id});
 	}
 	return list;
 }
 
+function isAllowSelected (par) {
+	$.console.log('isAllowSelected:', par);
+	if ($.isString(par.url, true)) {
+		return true;
+	}
+	return false;
+}
+
 window.onload = function() {
-	$.tree('menu1', {
+	setSize();
+	$.treemenu('tree1', {
 		data: buildList(),
+		//skin: 'device',
+		switch: 'updown',
+		openLevel: 0,
+		rightSwitch: true,
+		onlyOpenOne: false,
+		keepStatus: true,
+		keepCookie: true,
+		selectedCondition: 'url',
+		//selectedCondition: isAllowSelected,
 		callback: function (node, tree, ev) {
 			$.console.log('callback:', node);
 			var dr = node.data;
 			if (dr.url) {
 				$('#main1').html(dr.name + ':' + dr.url);
 			}
+		},
+		complete: function(tree) {
+			var node = tree.getNode();
+			$.console.log('complete:', node);
 		}
 	});
+};
+
+function setSize() {	
+	var bs = $.getBodySize();
+	$('#menu1').height(bs.height - 50);
+	$('#main1').height(bs.height - 50);
+}
+
+window.onresize = function() {
+	setSize();
 };
 </script>
