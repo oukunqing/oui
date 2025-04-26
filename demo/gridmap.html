@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>网格地图</title>
+</head>
+<body>
+    <div id="canvas-container" style="width:600px;height:800px;border:solid 1px #f00;">
+        <canvas id="gridCanvas"></canvas>
+    </div>
+</body>
+</html>
+<script type="text/javascript" src="../oui/oui.js?1"></script>
+<script type="text/javascript" src="../oui/gridmap/oui.gridmap.js"></script>
+<script type="text/javascript">
+window.onload = function() {
+	$.gridmap('gridCanvas', {});
+};
+
+window.onresize = function() {
+
+};
+</script>

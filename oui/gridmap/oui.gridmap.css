@@ -1,0 +1,112 @@
+.oui-gridmap-box {
+
+}
+.oui-gridmap {
+
+}
+
+.oui-gridmap-scale {
+	position: absolute;
+	left: 10px;
+	top: 10px;
+
+	-moz-user-select: none;
+	-khtml-user-select: none;
+	user-select: none;
+	-ms-user-select: none;
+}
+
+.oui-gridmap-scale a {
+	width: 25px;
+	height: 25px;
+	display: block;
+	border: solid 1px #ccc;
+	box-sizing: border-box;
+	line-height: 23px;
+	text-align: center;
+	font-size: 14px;
+	font-family: 宋体;
+	cursor: pointer;
+	clear: both;
+	text-decoration: none;
+	color: #000;
+}
+
+.oui-gridmap-scale a:hover {
+	color:#000;
+}
+
+.oui-gridmap-scale .add {
+
+}
+.oui-gridmap-scale .sub {
+	
+}
+
+.oui-gridmap-rule {
+	position:absolute;
+	right:10px;
+	bottom:10px;
+
+	-moz-user-select: none;
+	-khtml-user-select: none;
+	user-select: none;
+	-ms-user-select: none;
+}
+
+.oui-gridmap-rule div {
+	border: none;
+	margin: 0;
+	padding: 0;
+	background: transparent;
+}
+
+.oui-gridmap-rule .text {
+	margin-bottom:-1px;
+	font-size:12px;
+	font-family:Arial,宋体;
+	text-align:center;
+}
+
+.oui-gridmap-rule .line2 {
+	height:4px;border:solid 1px #000;border-top:none;box-sizing:border-box;
+}
+.oui-gridmap-rule .line {
+	height:2px;background:#000;
+}
+
+.oui-gridmap-rule-v {
+	position:absolute;
+	right:10px;
+	top:10px;
+
+	-moz-user-select: none;
+	-khtml-user-select: none;
+	user-select: none;
+	-ms-user-select: none;	
+}
+
+.oui-gridmap-rule-v div {
+	border: none;
+	margin: 0;
+	padding: 0;
+	background: transparent;
+	position: absolute;
+}
+
+.oui-gridmap-rule-v .text {
+	margin-bottom:-1px;
+	font-size:12px;
+	line-height:13px;
+	font-family:Arial,宋体;
+	text-align:center;
+	right: 5px;
+}
+
+.oui-gridmap-rule-v .line2 {
+	width:4px;border:solid 1px #000;border-left:none;box-sizing:border-box;
+	right: 0px;
+}
+.oui-gridmap-rule-v .line {
+	width:2px;background:#000;
+}

@@ -245,8 +245,17 @@
         width:24px;height:24px;margin-top:8px;
     }
     .my-tree li .item a.name,.my-tree li .item a.name span,.my-tree li .item span {
-        height:40px;line-height:38px;
+        height:40px;line-height:38px; color:#00f;
     }
+    .my-tree li.cur > .item {}
+    .my-tree li.cur > .item:hover{}
+
+
+    .my-tree li > .item a.name{background:none;}
+    .my-tree li > .item a.name:hover{background:#f8f8f8;border-color:#cce8ff;}
+
+    .my-tree li.cur > .item a.name{background:none;border-color:#cce8ff;}
+    .my-tree li.cur > .item a.name:hover{background:#f1f1f1;border-color:#cce8ff;}
 
     /*通栏自定义样式示例*/
     /*

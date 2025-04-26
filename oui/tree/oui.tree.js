@@ -183,13 +183,14 @@
 						Factory.dblclickCallback(p.node, tree, ev);
 					}
 				}
+				return this;
 			},
 			contextmenu: function (ev, tree) {
 				var p = Event.target(ev, tree), node;
 				if (p.node && Factory.isNodeBody(p)) {
 					node = p.node;
 				}
-				Factory.contextmenuCallback(node, tree, ev);
+				return Factory.contextmenuCallback(node, tree, ev), this;
 			},
 			mouseover: function (ev, tree) {
 				var key = 'tree_node_over_' + tree.id;
@@ -299,6 +300,8 @@
 
 				//清除默认的预览图
 				ev.dataTransfer.setDragImage(new Image(), 0, 0);
+
+				return this;
 			},
 			drop: function (ev, tree) {
 				ev.preventDefault();
@@ -339,6 +342,8 @@
 				$.setClass(ep.element, 'node-drop,drop-up,drop-down,drop-on', false);
 
 				Factory.dragCallback(node, tree, dest, srcParent !== node.parent.id ? 'move' : 'sort', num, idx);
+
+				return this;
 			},
 			dragover: function (ev, tree) {
 				ev.preventDefault();
@@ -348,6 +353,7 @@
 					y = ev.clientY - par.offset.top;
 					par.clone.style.transform = 'translate3d( ' + x + 'px ,' + y + 'px,0)'; 
 				}
+				return this;
 			},
 			dragenter: function (ev, tree) {
 				var key = 'tree_drag_enter_' + tree.id, data;
@@ -374,6 +380,7 @@
 						$.setClass(ep.element, ['node-drop', dir].join(','), true);
 					}
 				}, 50);
+				return this;
 			},
 			dragleave: function (ev, tree) {
 				var ep = Event.target(ev, tree), obj = Factory.getDragNode(tree);
@@ -383,6 +390,7 @@
 					return false;
 				}
 				$.setClass(ep.element, 'node-drop,drop-up,drop-down,drop-on', false);
+				return this;
 			},
 			dragend: function (ev, tree) {
 				var obj = Factory.getDragNode(tree);
@@ -390,6 +398,7 @@
 					$.setElemClass(obj.node.element, 'node-drag', false);
 				}
 				Factory.delDragNode(tree);
+				return this;
 			}
 		},
 		Factory = {
@@ -1086,8 +1095,6 @@
 				return this;
 			},
 			dealEvent: function (ev, tree, evType, opt) {
-				$.cancelBubble(ev);
-
 				if (!evType && (ev && ev.type)) {
 					evType = ev.type;
 				}
@@ -4919,6 +4926,12 @@
 			return Factory.expandAll(this, expand), this;
 		},
 		collapseAll: function () {
+			return Factory.expandAll(this, false), this;
+		},
+		openAll: function (expand) {
+			return Factory.expandAll(this, expand), this;
+		},
+		closeAll: function () {
 			return Factory.expandAll(this, false), this;
 		},
 		expandLevel: function (levels, linkage, reverse, expand) {
