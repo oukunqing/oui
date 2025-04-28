@@ -3187,6 +3187,9 @@
 				return Factory.expandType(tree, types, true, false);
 			},
 			expandEach: function (nodes, expand, sameLevel) {
+				if (!nodes) {
+					return this;
+				}
 				var j, c = nodes.length, o, k;
 				for (k in nodes) {
 					if ((o = nodes[k]) && !o.isLeaf()) {

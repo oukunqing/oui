@@ -79,6 +79,7 @@
     		var div = document.createElement('div');
     		div.className = 'oui-gridmap-scale';
     		div.innerHTML = [
+    			'<a class="reset" title="重置">R</a>',
     			'<a class="center" title="回到中心点">C</a>',
     			'<a class="add" title="放大一级">+</a>',
     			'<a class="sub" title="缩小一级">-</a>'
@@ -95,22 +96,30 @@
     			case 'center':
     				map.center();
     				break;
+    			case 'reset':
+    				Factory.resetView(map);
+    				break;
     			case 'add':
-    				map.scale(1, 1);
+    				//map.scale(1, 1);
+    				Factory.zoomAtCenter(map, 1.1);
     				break;
     			case 'sub':
-    				map.scale(1, -1);
+    				//map.scale(1, -1);
+    				Factory.zoomAtCenter(map, 1 / 1.1);
     				break;
     			}
     		});
 
     		return this;
     	},
-    	setScaleLevel: function (map, level, action) {    		
+    	setScaleLevel: function (map, level, action, offset, point) {    		
     		var that = map,
+    			canvas = that.canvas,
+    			state = that.state,
     			maxScale = that.options.scaleRules.length,
     			maxHeightScale = that.options.heightRules.length,
-    			curLevel = that.state.scaleLevel,
+    			oldLevel = state.scaleLevel,
+    			curLevel = oldLevel,
     			max = maxScale >= maxHeightScale ? maxScale : maxHeightScale;
 
     		if (!$.isNumber(level) || level <= 0) {
@@ -123,18 +132,45 @@
     			} else if (curLevel > max) {
     				curLevel = max;
     			}
-    			that.state.scaleLevel = curLevel;
+    			state.scaleLevel = curLevel;
     		} else {
-    			that.state.scaleLevel = level > max ? max : level;
+    			curLevel = level > max ? max : level;
+    			state.scaleLevel = curLevel;
+    		}
+    		if (offset) {
+    			//2.根据比例尺换算距离
+	    		var ruleHorizontal = this.getRatioRule(map, false),
+	    			ruleVertical = this.getRatioRule(map, false),
+	    			ruleHorizontalOld = this.getRatioRule(map, false, oldLevel),
+	    			ruleVerticalOld = this.getRatioRule(map, false, oldLevel);
+
+	    		var offsetX = state.offsetX,
+	    			offsetY = state.offsetY;
+
+	    		if (point) {
+	    			console.log('(point.x - canvas.width / 2):', (point.x - state.centerX));
+	    			//offsetX += (point.x - state.centerX);
+	    			//offsetY += (point.y - state.centerY);
+
+	    			console.log('setScaleLevel:', point, state);
+	    		}
+
+	    		offsetX -= (curLevel - oldLevel) * 50 * 1000 / Math.abs(ruleHorizontal.ratio - ruleHorizontalOld.ratio);
+	    		offsetY -= (curLevel - oldLevel) * 50 * 1000 / Math.abs(ruleVertical.ratio - ruleVerticalOld.ratio);
+
+    			state.offsetX = offsetX;
+    			state.offsetY = offsetY;
+
+    			console.log('setScaleLevel:', state.scaleLevel, state.offsetX, state.offsetY, state.centerX);
     		}
 
-    		return this;
+    		return this.setCenterPoint(map);
     	},
-    	getRatioRule: function (map, vertical) {
+    	getRatioRule: function (map, vertical, appointLevel) {
     		var opt = map.options,
     			rules = vertical ? opt.heightRules : opt.scaleRules,
     			max = rules.length,
-    			level = map.state.scaleLevel - 1;
+    			level = (appointLevel || map.state.scaleLevel) - 1;
 
     		if (level >= max) {
     			level = max - 1;
@@ -164,8 +200,6 @@
     		var nodes = elem.childNodes,
     			attr = vertical ? 'height' : 'width',
     			ratio = this.getRatioRule(map, vertical);
-
-    		$.console.log('nodes:', nodes, ratio);
 
     		nodes[0].style[attr] = ratio.grid + 'px';
     		nodes[0].innerHTML = ratio.text;
@@ -257,6 +291,9 @@
 		    return parseFloat(distance.toFixed(3));
 		},
     	getPointPosition: function (map, pointFirst, point, vertical) {
+    		if (!point.latitude || !point.longitude) {
+    			return point;
+    		}
     		var that = this,
     			distanceHorizontal = that.calculateDistance(0, pointFirst.longitude, 0, point.longitude),
     			distanceVertical,
@@ -280,7 +317,7 @@
 
     		distanceHorizontal *= 1000 / ruleHorizontal.ratio * ruleSize;
     		distanceVertical *= 1000 / ruleVertical.ratio * ruleSize;
-    		console.log('getPointPosition:', ruleHorizontal, ruleVertical);
+    		//console.log('getPointPosition:', ruleHorizontal, ruleVertical);
 
     		//3.根据中心点计算相对位置
     		x = pointFirst.x + (symbolX * distanceHorizontal);
@@ -310,7 +347,7 @@
     			len = points.length,
     			pc = that.getCanvasCenter(map);
 
-    		console.log('drawPoints:', points, pc);
+    		//console.log('drawPoints:', points, pc);
 
     		if (len <= 0) {
     			return this;
@@ -321,13 +358,13 @@
             var pointSize = 6; // 点直径固定为3px
 
     		//绘制第1个点
-    		var p0 = $.extend(points[0], pc);
-    		console.log('p0:', p0);
+    		var p0 = points[0].latitude ? $.extend(points[0], pc) : points[0];
+    		console.log('i:', 0, ',p:', p0);
     		that.drawPoint(canvas, ctx, p0, pointSize, map.state);
 
     		for (var i = 1; i < len; i++) {
     			var p = that.getPointPosition(map, p0, points[i], opt.vertical);
-    			console.log('i:', i, ',p:', p, p0, points[i]);
+    			console.log('i:', i, ',p:', p);
     			that.drawPoint(canvas, ctx, p, pointSize, map.state);
     		}
     		return this;
@@ -341,6 +378,57 @@
     			Factory.setCanvasSize(map);
     			Factory.setRatioRule(map).drawGrid(map).drawPoints(map);
     		}
+    		return this;
+    	},
+    	setCenterPoint: function (map) {
+    		var state = map.state;
+    		state.centerX += state.offsetX;
+    		state.centerY += state.offsetY;
+    		return this;
+    	},
+    	zoomAtCenter: function (map, delta) {
+    		var state = map.state,
+    			canvas = map.canvas;
+
+    		const oldScale = state.scale;
+            state.scale *= delta;
+            state.scale = Math.max(0.1, Math.min(state.scale, 20)); // 限制缩放范围
+            
+            // 调整偏移量以保持中心点不变
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            state.offsetX = centerX - (centerX - state.offsetX) * (state.scale / oldScale);
+            state.offsetY = centerY - (centerY - state.offsetY) * (state.scale / oldScale);
+            
+            Factory.drawGridMap(map);
+
+            return this;
+    	},
+    	zoomAtPoint: function (map, delta, x, y) {
+    		var state = map.state,
+    			canvas = map.canvas;
+
+    		const oldScale = state.scale;
+            state.scale *= delta;
+            state.scale = Math.max(0.1, Math.min(state.scale, 20)); // 限制缩放范围
+            
+            // 调整偏移量以保持指定点不变
+            state.offsetX = x - (x - state.offsetX) * (state.scale / oldScale);
+            state.offsetY = y - (y - state.offsetY) * (state.scale / oldScale);
+            
+            Factory.drawGridMap(map);
+
+            return this;
+    	},
+    	resetView: function (map) {
+    		var state = map.state;
+
+            state.scale = 1;
+            state.offsetX = 0;
+            state.offsetY = 0;
+
+            Factory.drawGridMap(map);
+
     		return this;
     	}
     };
@@ -376,6 +464,15 @@
     		points: []
     	}, options);
 
+    	this.options = opt;
+    	this.canvas = $.toElement(opt.canvas);
+    	this.id = this.canvas.id;
+    	if (this.canvas) {
+	    	this.ctx = this.canvas.getContext('2d');
+	    	this.canvas.parentNode.style.position = 'relative';
+	    	//$.addClass(this.canvas.parentNode, '');
+	    }
+
     	this.state = {
     		canvasWidth: 0,
     		canvasHeight: 0,
@@ -386,20 +483,14 @@
             isDragging: false,
             lastX: 0,
             lastY: 0,
+            centerX: this.canvas.width / 2,
+            centerY: this.canvas.height / 2,
             points: [] // 存储所有点的位置
     	};
 
     	if ($.isArray(opt.points)) {
     		this.state.points.concat(opt.points);
     	}
-    	this.options = opt;
-    	this.canvas = $.toElement(opt.canvas);
-    	this.id = this.canvas.id;
-    	if (this.canvas) {
-	    	this.ctx = this.canvas.getContext('2d');
-	    	this.canvas.parentNode.style.position = 'relative';
-	    	//$.addClass(this.canvas.parentNode, '');
-	    }
 	    this.initial();
 	}
 
@@ -446,7 +537,7 @@
 	                state.lastX = e.clientX;
 	                state.lastY = e.clientY;
 
-	                Factory.drawGridMap(that);
+	                Factory.setCenterPoint(that).drawGridMap(that);
 	            }
 	        });
 	        
@@ -459,11 +550,28 @@
 
 			$.addListener([canvas], 'wheel', function(e) {
 	            e.preventDefault();
-	            /*
-	            
+
+	            var left = canvas.parentNode.offsetLeft,
+	                top = canvas.parentNode.offsetTop;
+
 	            // 获取鼠标位置相对于画布的坐标
-	            const mouseX = e.clientX;
-	            const mouseY = e.clientY;
+	            const mouseX = e.clientX - left;
+	            const mouseY = e.clientY - top;
+
+	            const delta = e.deltaY > 0 ? 1 / 1.1 : 1.1;
+	            Factory.zoomAtPoint(that, delta, mouseX, mouseY);
+	            /*
+
+	            var offset = {
+	            	left: canvas.parentNode.offsetLeft,
+	            	top: canvas.parentNode.offsetTop,
+	            	width: canvas.width,
+	            	height: canvas.height
+	            };
+     
+	            // 获取鼠标位置相对于画布的坐标
+	            const mouseX = e.clientX - offset.left;
+	            const mouseY = e.clientY - offset.top;
 	            
 	            // 计算鼠标位置在世界坐标中的位置
 	            const worldX = (mouseX - state.offsetX) / state.scale;
@@ -488,9 +596,12 @@
 	            
 	            Factory.drawGridMap(that);
 
+	            //var delta = -e.deltaY;
+
+	            //Factory.setScaleLevel(that, 1, delta < 0 ? -1 : 1, true, {x: worldX, y: worldY});
+
+	            //Factory.drawGridMap(that);
 	            */
-	            var delta = -e.deltaY;
-	            Factory.setScaleLevel(that, 1, delta < 0 ? -1 : 1).drawGridMap(that);
 	        });        
 
     		return this;
@@ -513,7 +624,7 @@
     		return Factory.drawGridMap(that), that;
     	},
     	scale: function (level, action) {
-    		return Factory.setScaleLevel(this, level, action).drawGridMap(this), this;
+    		return Factory.setScaleLevel(this, level, action, true).drawGridMap(this), this;
     	},
     	center: function () {
     		return Factory.gotoCenter(this);

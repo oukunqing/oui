@@ -15,7 +15,30 @@
 <script type="text/javascript" src="../oui/gridmap/oui.gridmap.js"></script>
 <script type="text/javascript">
 window.onload = function() {
-	$.gridmap('gridCanvas', {});
+    var points = [{
+        "latitude": 29.87335208,
+        "longitude": 121.60112843,
+        "height": 102.057
+    },
+    {
+        "latitude": 29.87332337,
+        "longitude": 121.6011218,
+        "height": 106.915
+    },
+    {
+        "latitude": 29.87334803,
+        "longitude": 121.60117848,
+        "height": 103.722,
+    }];
+
+    points = [
+        { x: 10, y: 10 },
+        { x: 20, y: 15 },
+        { x: 30, y: 20 },
+        { x: 15, y: 30 },
+        { x: 25, y: 25 }
+    ];
+	$.gridmap('gridCanvas', {}).update(points);
 };
 
 window.onresize = function() {
