@@ -763,7 +763,7 @@
 					opt.cookieExpire = Config.CacheCookieExpire;
 				}
 				//同一层级下是否只能展开一个节点
-				opt.onlyOpenOne = $.isBoolean($.getParam(opt, 'onlyOpenOne,openOne,onlyOne,ooo'), false);
+				opt.onlyOpenOne = $.isBoolean($.getParam(opt, 'onlyOpenOne,openOne,onlyOne,ooo,onlyExpandOne,expandOne,oeo'), false);
 
 				opt.reloadData = $.isBoolean($.getParam(opt, 'reloadData,reload'), false);
 
@@ -2590,15 +2590,16 @@
 							}
 						}
 					}
-					Factory.initStatus(tree, true);
+					Factory.initStatus(tree, true).checkOnlyOpenOne(tree);
 
-					//清除内容
+					// 清除内容
 					tree.panel.innerHTML = '';
 
 					tree.panel.appendChild(root.fragment);
 					delete root.fragment;
 
-					//DOM定位需要DOM渲染之后
+					// 节点(定位、展开、选中)状态保持
+					// DOM节点渲染之后再恢复节点状态
 					Factory.keepStatus(tree, true);
 
 					cache.finish = new Date().getTime();
@@ -3064,6 +3065,7 @@
 				}
 				var nodes = tree.cache.nodes,
 					store = tree.cache.store,
+					// 3种状态保持：定位状态、展开状态、选中状态
 					keys = isPosition ? ['position'] : ['expanded', 'selected'],
 					func = isPosition ? ['position'] : ['setExpand', 'setSelected'],
 					dic, action, node;
@@ -3081,6 +3083,36 @@
 					}
 				}
 				return this;
+			},
+			checkOnlyOpenOne: function (tree) {
+				var that = this;
+				if (!tree.options.onlyOpenOne) {
+					return that;
+				}
+				var levels = tree.cache.levels,
+					len = levels.length, 
+					node, rootNode;
+
+				for (var i = 0; i < len; i++) {
+					var nodes = levels[i];
+					for (var k in nodes) {
+						var node = nodes[k];
+						if (node.expanded) {
+							if (!rootNode) {
+								that.collapseLevel(tree, node.level);
+								node.expand();
+								rootNode = node;
+								break;
+							} else if (node.parent === rootNode) {
+								rootNode = node;
+							} else {
+								node.collapse();								
+							}
+						}
+					}
+				}
+
+				return that;
 			},
 			eachNodeIds: function (nodes, nodeIds, funcName, arg0, arg1, arg2, arg3) {
 				if (!$.isArray(nodeIds)) {
@@ -3985,6 +4017,7 @@
 				if (expanded && onlyOpenOne) {
 					Factory.collapseLevel(tree, that.level);
 				}
+
 				that.setBoxDisplay(expanded);
 
 				//$.setElemClass(that.childbox, 'hide', !expanded);
@@ -4008,6 +4041,11 @@
 				}
 			}
 			that.setParam('expanded', expanded).setSwitchClass();
+
+			if (expanded && onlyOpenOne) {
+				//定位到当前节点（但不选中）
+				that.position(false);
+			}
 
 			//鼠标点击的展开/收缩才保存到cookie，如果是模拟的则不保存
 			if (ev && ev.target && ev.target.tagName) {
@@ -4039,8 +4077,13 @@
 			}
 			return that;
 		},
-		collapse: function () {
-			return this.self().setExpand(false);
+		collapse: function (linkage) {
+			if (linkage) {
+				this.self().expandChild(linkage, true, null, false);
+			} else {
+				this.self().setExpand(false);
+			}
+			return this;
 		},
 		expandChild: function (linkage, self, types, expanded) {
 			var that = this.self();
@@ -4083,6 +4126,7 @@
 			var that = this.self(), offsetY = -50;
 			Factory.setCurrentCache(that.tree, 'position', that).expandTo(that.tree, that, true);
 			$.scrollTo(that.element, that.tree.panel, offsetY);
+			$.console.log('that.element:', that.element, offsetY);
 			return selected ? that.setSelected(true) : that;
 		},
 		select: function (selected) {
@@ -4351,7 +4395,7 @@
 				return that;
 			}
 			for (i = 0; i < c; i++) {
-				node = that.childs[i].setSwitchClass();				
+				node = that.childs[i].setSwitchClass();
 			}
 			return that;
 		},
@@ -4901,8 +4945,8 @@
 		expand: function (nodes, linkage) {
 			return Factory.eachNodeIds(this.cache.nodes, nodes, 'expand', linkage), this;
 		},
-		collapse: function (nodes) {
-			return Factory.eachNodeIds(this.cache.nodes, nodes, 'collapse'), this;
+		collapse: function (nodes, linkage) {
+			return Factory.eachNodeIds(this.cache.nodes, nodes, 'collapse', linkage), this;
 		},
 		expandNode: function (nodes, linkage) {
 			return this.expand(nodes, linkage);
@@ -5107,11 +5151,11 @@
 		position: function (id, node) {
 			return Factory.func(id, node, 'position');
 		},
-		expand: function (id, nodes) {
-			return Factory.func(id, nodes, 'expand');
+		expand: function (id, nodes, linkage) {
+			return Factory.func(id, nodes, 'expand', linkage);
 		},
-		collapse: function (id, nodes) {
-			return Factory.func(id, nodes, 'collapse');
+		collapse: function (id, nodes, linkage) {
+			return Factory.func(id, nodes, 'collapse', linkage);
 		},
 		expandChild: function (id, nodes, linkage, self, types, expand) {
 			return Factory.func(id, nodes, 'expandChild', linkage, self, types, expand);

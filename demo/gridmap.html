@@ -6,7 +6,7 @@
 	<title>网格地图</title>
 </head>
 <body>
-    <div id="canvas-container" style="width:600px;height:800px;border:solid 1px #f00;">
+    <div id="canvas-container" style="width:800px;height:800px;border:solid 1px #f00;">
         <canvas id="gridCanvas"></canvas>
     </div>
 </body>
@@ -16,21 +16,19 @@
 <script type="text/javascript">
 window.onload = function() {
     var points = [{
-        "latitude": 29.87335208,
-        "longitude": 121.60112843,
-        "height": 102.057
-    },
-    {
+        "latitude": 29.87338225,
+        "longitude": 121.60113585,
+        "height": 103.406,
+    },{
         "latitude": 29.87332337,
         "longitude": 121.6011218,
-        "height": 106.915
-    },
-    {
+        "height": 106.915,
+    },{
         "latitude": 29.87334803,
         "longitude": 121.60117848,
         "height": 103.722,
     }];
-
+    /*
     points = [
         { x: 10, y: 10 },
         { x: 20, y: 15 },
@@ -38,6 +36,7 @@ window.onload = function() {
         { x: 15, y: 30 },
         { x: 25, y: 25 }
     ];
+    */
 	$.gridmap('gridCanvas', {}).update(points);
 };
 

@@ -77,10 +77,9 @@
     	},
     	buildScaleBar: function (map) {
     		var div = document.createElement('div');
-    		div.id = 'oui-gridmap-tools-' + map.id;
     		div.className = 'oui-gridmap-scale';
     		div.innerHTML = [
-    			'<span class="ratio">1.12</span>',
+    			'<span id="map_ratio">1.12</span>',
     			'<a class="reset" title="重置">R</a>',
     			'<a class="center" title="回到中心点">C</a>',
     			'<a class="add" title="放大一级">+</a>',
@@ -290,7 +289,7 @@
     		x = pointFirst.x + (symbolX * distanceHorizontal);
     		y = pointFirst.y + (symbolY * distanceVertical);
 
-			$.console.log('distanceHorizontal:', distanceHorizontal, distanceVertical);
+			$.console.log('distanceHorizontal:', distanceHorizontal, distanceVertical, x, y);
 
     		return $.extend(point, { x: x, y: y });
     	},
@@ -355,7 +354,16 @@
     			ratioHeight = canvasHeight / heightRange;
 
     		var x = point.longitude * ratioWidth,
-    			y = canvasHeight - (point.latitude * ratioHeight);
+    			y = canvasHeight - (point.latitude * ratioHeight),
+    			offsetXD = canvas.width / 2 * (state.scale - 1),
+    			offsetYD = canvas.height / 2 * (state.scale - 1),
+    			xo = (Math.abs(state.offsetX) - offsetXD) / (state.scale - 1),
+    			yo = -(Math.abs(state.offsetY) - offsetYD) / (state.scale - 1);
+
+
+    		$.console.log('offset:', state.scale, xo, yo);
+
+    		$.console.log('state.offsetX:', state.offsetX, state.offsetY, offsetXD, offsetYD, x, y);
 
     		return $.extend({}, point, { x: x, y: y });
     	},
@@ -422,10 +430,6 @@
     		}
     		return this;
     	},
-    	showScaleRatio: function (map) {
-    		document.querySelector('#oui-gridmap-tools-' + map.id + ' .ratio').innerHTML = map.state.scale;
-    		return this;
-    	},
     	zoomAtCenter: function (map, delta, level) {
     		var state = map.state,
     			canvas = map.canvas;
@@ -438,14 +442,13 @@
     		}
             state.scale = Math.max(1, Math.min(state.scale, 32)); // 限制缩放范围
             
-            Factory.showScaleRatio(map);
+            $I('map_ratio').innerHTML = state.scale;
 
             state.scaleLevel = state.scale;
 
             // 调整偏移量以保持中心点不变
             const centerX = canvas.width / 2;
             const centerY = canvas.height / 2;
-
             state.offsetX = centerX - (centerX - state.offsetX) * (state.scale / oldScale);
             state.offsetY = centerY - (centerY - state.offsetY) * (state.scale / oldScale);
             
@@ -463,7 +466,7 @@
 
             state.scale = Math.max(1, Math.min(state.scale, 32)); // 限制缩放范围
 
-            Factory.showScaleRatio(map);
+            $I('map_ratio').innerHTML = state.scale;
 
             state.scaleLevel = state.scale;
             
@@ -561,23 +564,30 @@
     		});
 
     		$.addListener(canvas, 'mousedown', function(e) {
+	            var left = canvas.parentNode.offsetLeft,
+	                top = canvas.parentNode.offsetTop,
+	                x = e.clientX - state.offsetX - left,
+	                y = e.clientY - state.offsetY - top;
+
 				// 检查是否按下了Ctrl键或Meta键(用于添加点)
 	            if (e.ctrlKey || e.metaKey) {
 	                // 添加点
-	                const worldX = (e.clientX - state.offsetX) / state.scale;
-	                const worldY = (e.clientY - state.offsetY) / state.scale;
+	                const worldX = x / state.scale;
+	                const worldY = y / state.scale;
+
 	                state.points.push({ x: worldX, y: worldY });
 
 	                Factory.drawGridMap(that);
 	            } else {
 	                // 开始拖动
 	                state.isDragging = true;
-	                state.lastX = e.clientX;
-	                state.lastY = e.clientY;
+	                state.lastX = x;
+	                state.lastY = y;
 	                canvas.style.cursor = 'grabbing';
 	            }
+	            $.console.log('[position] x: ', x, ',y:', y, state.offsetX, state.offsetY);
     		});
-
+    		
 			$.addListener([canvas, document], 'mousemove', function(e) {
 				$.cancelBubble(e);
 	            if (state.isDragging) {
@@ -591,7 +601,7 @@
 	                Factory.setCenterPoint(that).drawGridMap(that);
 	            }
 	        });
-	        
+	        	        
 			$.addListener([canvas, document], 'mouseup', function(e) {
 	            if (state.isDragging) {
 	                state.isDragging = false;

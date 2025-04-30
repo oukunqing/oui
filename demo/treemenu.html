@@ -60,9 +60,12 @@ window.onload = function() {
 		data: buildList(),
 		//skin: 'device',
 		switch: 'updown',
-		openLevel: 0,
+		// 默认展开层级，0-全部收缩，1-表示展开1级，
+		// -1 - 表示全部展开（不作处理：如果节点指定展开或收缩，以单个节点的状态）
+		//openLevel: 0,
 		rightSwitch: true,
-		onlyOpenOne: false,
+		// 同一级节点是否只能展开一个
+		onlyOpenOne: true,
 		keepStatus: true,
 		keepCookie: true,
 		selectedCondition: 'url',
