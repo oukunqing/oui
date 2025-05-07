@@ -124,7 +124,7 @@
 				}
 				if (ep.tag.inArray(['a', 'span'])) {
 					if (ep.css.inArray(['switch'])) {
-						//只有在右侧切换图标时，才启用switch的click事件						
+						//只有在右侧切换图标时，才启用switch的click事件
 						//其他情况下，switch事件迁移到mousedown
 						if (op.rightSwitch) {
 							ep.node.setExpand();
@@ -1142,7 +1142,7 @@
 				tree.cache.level = Math.max(tree.cache.level, node.level);
 				tree.cache.count += 1;
 				tree.cache.total += 1;
-					
+
 				return this;
 			},
 			deleteNodeCache: function (tree, node) {
@@ -1731,7 +1731,7 @@
 
 				tree.element.style.display = display ? 'block' : 'none';
 
-				if (!target) {					
+				if (!target) {
 					if ($.isElement(elem)) {
 						elem.focus();
 					} else {
@@ -2776,7 +2776,7 @@
 				parent.childs.splice(srcIdx, 1);
 				parent.childs.splice(destIdx, 0, node);
 
-				parent.setChildSwitchClass();		
+				parent.setChildSwitchClass();
 
 				function _callback(node, tree, destNode, num, idx) {
 					if ($.isFunction(callback)) {
@@ -3011,7 +3011,7 @@
 					if (d.expand) {
 						Factory.setInitialCache(tree, node, 'expand');
 					}
-					
+
 					if (nodes) {
 						nodes.push(node);
 					}
@@ -3106,7 +3106,7 @@
 							} else if (node.parent === rootNode) {
 								rootNode = node;
 							} else {
-								node.collapse();								
+								node.collapse();
 							}
 						}
 					}

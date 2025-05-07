@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>时间刻度</title>
+	<style type="text/css">
+	</style>
+</head>
+<body>
+	<div id="timebar"></div>
+</body>
+</html>
+<script type="text/javascript" src="../oui/oui.js"></script>
+<script type="text/javascript" src="../oui/timebar/oui.timebar.js"></script>
+<script type="text/javascript">
+
+window.onload = function() {
+	setSize();
+
+	$.timebar('timebar', {
+		//time: new Date().dayStart('')
+		//time: new Date().dayStart(),
+		time: new Date(),
+		//比例尺：两种写法
+        /*rules: [
+            {width:120,minutes:120},{width:120,minutes:60},{width:120,minutes:30},{width:240,minutes:30},
+            {width:120,minutes:10},{width:120,minutes:5},{width:240,minutes:5}
+        ],
+        rules: [
+            [120,120],[120,60],[120,30],[240,30],[120,10],[120,5],[240,5]
+        ],        
+		//默认比例索引
+		level: 0,
+		*/
+		//height: 65,
+		//tickHeight: 20,
+		callback: function (data, t) {
+			console.log('data:', data, t);
+		},
+		//showPanel: false,
+		showOrigin: true,
+		showReload: true,
+		minTime: '2025-05-06 00:00:00',
+		maxTime: '2025-05-09 00:00:00',
+		showLeft: false,
+		showRight: true
+	});
+	
+};
+
+function setSize() {	
+	var bs = $.getBodySize();
+}
+
+window.onresize = function() {
+	setSize();
+};
+</script>

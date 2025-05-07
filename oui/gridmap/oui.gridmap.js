@@ -579,7 +579,6 @@
     		});
 
 			$.addListener([canvas, document], 'mousemove', function(e) {
-				$.cancelBubble(e);
 	            if (state.isDragging) {
 	                const dx = e.clientX - state.lastX;
 	                const dy = e.clientY - state.lastY;
@@ -642,8 +641,8 @@
     };
 
     $.extend({
-    	gridmap: function(id, opt) {
-    		return Factory.buildGridMap(id, opt);
+    	gridmap: function(id, options) {
+    		return Factory.buildGridMap(id, options);
     	}
     });
 

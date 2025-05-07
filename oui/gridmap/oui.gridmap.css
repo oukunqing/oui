@@ -1,8 +1,11 @@
 .oui-gridmap-box {
+	position: relative;
 
 }
 .oui-gridmap {
-
+	position: absolute;
+	left: 0;
+	top: 0;
 }
 
 .oui-gridmap-scale {

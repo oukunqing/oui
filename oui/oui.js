@@ -279,7 +279,7 @@
             return dvb ? (bool ? b : dv) : bool;
         },
         isDate = function (obj) {
-            return obj instanceof Date && !isNaN(obj.getFullYear());
+            return (obj instanceof Date || Object.prototype.toString.call(obj) === '[object Date]') && !isNaN(obj.getFullYear());
         },
         isDateString = function (str) {
             var pattern = /[\d]/;
@@ -3167,6 +3167,31 @@
         getMonthEnd: function () { return $.getMonthEnd(this); },
         getDayStart: function () { return $.getDayStart(this); },
         getDayEnd: function () { return $.getDayEnd(this); },
+        totalSeconds: function (milliseconds) {
+            milliseconds = $.isBoolean(milliseconds, true);
+            var dt = this,
+                ts = dt.getHours() * 3600 + dt.getMinutes() * 60 + dt.getSeconds() + 
+                    (milliseconds ? dt.getMilliseconds() / 1000 : 0);
+
+            return ts;
+        },
+        dayStart: function(fmt) {
+            var dt = this,
+                ts = dt.getTime() / 1000 - dt.totalSeconds();
+
+            if ($.isString(fmt)) {
+                return ts.toDate().format(fmt);
+            }
+            return ts;
+        },
+        dayEnd: function(fmt) {
+            var ts = this.todayStart() + 86400 - 1;
+
+            if ($.isString(fmt)) {
+
+            }
+            return ts;
+        }
     }, 'Date.prototype');
 
     $.extendNative(Date, {
