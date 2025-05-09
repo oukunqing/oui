@@ -84,6 +84,61 @@ window.onload = function() {
 			$.console.log('complete:', node);
 		}
 	});
+	$.treemenu('tree1', {
+		data: buildList(),
+		//skin: 'device',
+		switch: 'updown',
+		// 默认展开层级，0-全部收缩，1-表示展开1级，
+		// -1 - 表示全部展开（不作处理：如果节点指定展开或收缩，以单个节点的状态）
+		//openLevel: 0,
+		rightSwitch: true,
+		// 同一级节点是否只能展开一个
+		onlyOpenOne: true,
+		// 保持状态（浏览器或页面关闭后失效）
+		keepStatus: true,
+		// 保持节点收缩/展开的状态到cookie中
+		keepCookie: true,
+		selectedCondition: 'url',
+		//selectedCondition: isAllowSelected,
+		callback: function (node, tree, ev) {
+			$.console.log('callback:', node);
+			var dr = node.data;
+			if (dr.url) {
+				$('#main1').html(dr.name + ':' + dr.url);
+			}
+		},
+		complete: function(tree) {
+			var node = tree.getNode();
+			$.console.log('complete:', node);
+		}
+	});$.treemenu('tree1', {
+		data: buildList(),
+		//skin: 'device',
+		switch: 'updown',
+		// 默认展开层级，0-全部收缩，1-表示展开1级，
+		// -1 - 表示全部展开（不作处理：如果节点指定展开或收缩，以单个节点的状态）
+		//openLevel: 0,
+		rightSwitch: true,
+		// 同一级节点是否只能展开一个
+		onlyOpenOne: true,
+		// 保持状态（浏览器或页面关闭后失效）
+		keepStatus: true,
+		// 保持节点收缩/展开的状态到cookie中
+		keepCookie: true,
+		selectedCondition: 'url',
+		//selectedCondition: isAllowSelected,
+		callback: function (node, tree, ev) {
+			$.console.log('callback:', node);
+			var dr = node.data;
+			if (dr.url) {
+				$('#main1').html(dr.name + ':' + dr.url);
+			}
+		},
+		complete: function(tree) {
+			var node = tree.getNode();
+			$.console.log('complete:', node);
+		}
+	});
 };
 
 function setSize() {	

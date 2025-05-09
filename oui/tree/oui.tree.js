@@ -1007,7 +1007,7 @@
 
 				var empty = $.isEmpty(par),
 					string = $.isString(id, true) || $.isNumber(id), 
-					cache, opt;
+					cache, opt, tree;
 
 				if ($.isObject(id)) {
 					opt = $.extend(id, par);
@@ -1038,12 +1038,25 @@
 				}
 				if (cache) {
 					//这里获取的树，可能是目标树，也可能是空树
-					return cache.tree;
+					tree = cache.tree;
 				} else if ((cache = Factory.getTreeCache(opt.id))) {
-					return cache.tree.initial(opt);
+					tree = cache.tree;
+					if (tree.finished()) {
+						tree.initial(opt);
+					} else {
+						var tid = 'initial_' + tree.id;
+						window.clearInterval(Cache.timers[tid]);
+						Cache.timers[tid] = window.setInterval(function() {
+							if (tree.finished()) {
+								window.clearInterval(Cache.timers[tid]);
+								tree.initial(opt);
+							}
+						}, 1);
+					}
 				} else {
-					return Factory.setTreeCache(new Tree(opt), empty).tree;
+					tree = Factory.setTreeCache(new Tree(opt), empty).tree;
 				}
+				return tree;
 			},
 			buildEvent: function (tree) {
 				//var div = tree.target ? tree.element : tree.panel;
@@ -2464,8 +2477,7 @@
 					div = document.querySelector('#' + that.tid);
 
 				cache.start = new Date().getTime();
-
-				console.log('buildPanel:', box);
+				cache.finish = 0;
 
 				if (!box) {
 					that.box = box = document.createElement('div');
@@ -2540,6 +2552,7 @@
 					root = Factory.buildRootNode(tree, true);
 
 				cache.begin = new Date().getTime();
+				cache.finish = 0;
 				cache.count = 0;
 
 				if (!opt.data || (!$.isArray(opt.data) && !$.isObject(opt.data))) {
@@ -4713,6 +4726,10 @@
 			//$.console.log('initial:', this.id, this);
 
 			return this;
+		},
+		finished: function () {
+			var that = this, cache = that.cache;
+			return cache && cache.finish;
 		},
 		display: function (show, target) {
 			return Factory.setBoxDisplay(this, show, target), this;

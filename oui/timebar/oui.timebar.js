@@ -215,7 +215,7 @@
             }
 
             for (i = 0; i < data.length; i++) {
-                var s = data[i] + 86400 - defaultTs,
+                var s = data[i] - defaultTs,
                     p = parseInt(s / rule.seconds, 10) + (s % rule.seconds ? 1 : 0);
                 points[p] = 1;
             }
@@ -376,7 +376,7 @@
                     timeout: 5000
                 }, function() {
                     opt.callback(range, ts);
-                });                
+                });
             }
             return that;
         },
@@ -587,7 +587,7 @@
                 document.addEventListener('mouseup', () => {
                     cache.dragging = false;
                 });
-            }            
+            }
         
             Factory.setSize(that).setOffset(that).drawScale(that);
 
