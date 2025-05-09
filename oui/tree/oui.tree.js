@@ -2465,6 +2465,8 @@
 
 				cache.start = new Date().getTime();
 
+				console.log('buildPanel:', box);
+
 				if (!box) {
 					that.box = box = document.createElement('div');
 					box.id = that.bid;

@@ -36,7 +36,7 @@
     };
 
     var Factory = {
-        buildtimebar: function(id, options) {
+        buildTimeBar: function(id, options) {
             var opt = {};
             if ($.isElement(id)) {
                 $.extend(opt, options, { box: id, id: id.id });
@@ -51,11 +51,11 @@
             }
             var cache = Cache.getCache(opt.id), ts;
             if (cache) {
-                ts = cache.ts;
+                ts = cache.ts.update(opt);
             } else {
-                ts = new timebar(opt);
-                Cache.setCache(opt.id, ts);
+                ts = new TimeBar(opt);
             }
+            Cache.setCache(opt.id, ts);
             return ts;
         },
         buildElement: function (ts) {
@@ -171,6 +171,79 @@
             }
             return this;
         },
+        buildStrokeStyle: function(color, opacity) {
+            if (opacity === 1) {
+                return color;
+            }
+            var str = color.substr(1), len = str.length, numbers = [];
+
+            if (len === 6) {
+                numbers.push(parseInt('0x' + str[0] + str[1]));
+                numbers.push(parseInt('0x' + str[2] + str[3]));
+                numbers.push(parseInt('0x' + str[4] + str[5]));
+            } else if (len === 3) {
+                numbers.push(parseInt('0x' + str[0] + str[0]));
+                numbers.push(parseInt('0x' + str[1] + str[1]));
+                numbers.push(parseInt('0x' + str[2] + str[2]));
+            }
+            numbers.push(opacity);
+
+            return 'rgba(' + numbers.join(',') + ')';
+        },
+        getDataLines: function (ts) {
+            var opt = ts.options;
+            if (!$.isDate(opt.minTime) || !$.isDate(opt.maxTime)) {
+                return [];
+            }
+            var center = ts.elements.canvas.width / 2,
+                cache = ts.cache,
+                offset = ts.cache.offset,
+                defaultTs = cache.defaultTime.getTime() / 1000,
+                seconds = opt.maxTime.timeSpan(opt.minTime).totalSeconds,
+                rule = Factory.getRule(ts),
+                width = parseInt(seconds / rule.seconds, 10),
+                data = cache.data,/* [
+                    1746691176,1746691206,1746691236,1746691266,1746691296,1746691326,1746691356,1746691386,
+                    1746691416,1746691446,1746691476,1746691506,1746691536,1746691566,1746691596,1746691626,
+                    1746691656,1746691686,1746691716,1746691746
+                ],*/
+                points = [], lines = [],
+                i = 0, j = 0, c = width;
+
+            for(i = 0; i < c; i++) {
+                points[i] = 0;
+            }
+
+            for (i = 0; i < data.length; i++) {
+                var s = data[i] + 86400 - defaultTs,
+                    p = parseInt(s / rule.seconds, 10) + (s % rule.seconds ? 1 : 0);
+                points[p] = 1;
+            }
+
+            for (i = 0; i < c; i++) {
+                if (points[i]) {
+                    if (j > 0) {
+                        var p = lines[j - 1], n1 = i - p.x, n2 = i - (p.x + p.w);
+                        if (n2 <= 1) {
+                            p.w += 1;
+                        } else if (n1 <= 1) {
+                            ;
+                        } else {
+                            lines.push({ x: i, w: 1 });
+                            j++;
+                        }
+                    } else {
+                        lines.push({ x: i, w: 1 });
+                        j++;
+                    }
+                }
+            }
+
+            if (lines.length > 0) {
+                $.console.log('getDataLines:', seconds, rule, width, points, lines);
+            }
+            return lines;
+        },
         drawScale: function (ts, clientX) {
             var obj = ts.elements,
                 opt = ts.options,
@@ -200,20 +273,21 @@
             //清除所有
             ctx.clearRect(0, 0, width, height);
 
-            //画水平线
-            _drawline(ctx, '#555', 2, 0, width, height - tickHeight, height - tickHeight);
-
-            //画中心线
-            _drawline(ctx, '#fc0', 2, center, center, 0, height);
-            
             // cache.defaultTime 是 Date 对象
             // 这里为什么不直接用 dt = cache.defaultTime，而要复制一个Date
             // 是因为下面用了 dt.addMinutes() 方法
             var dt = _dt();
 
+            // 数据线
+            var dataLines = Factory.getDataLines(ts);
+            for (var i = 0; i < dataLines.length; i++) {
+                var dr = dataLines[i], x = dr.x + center + offset;
+                _drawline(ctx, '#00ff00', 0.9, dr.w, x + dr.w / 2, x + dr.w / 2, height - tickHeight + 1, height);
+            }
+
             // 画右边刻度
             if (mode % 2 > 0) {
-                var w = cache.leftMaxOffset && !opt.showRight ? cache.leftMaxOffset + cache.offset + 1 : center;
+                var w = $.isNumber(cache.leftMaxOffset) && !opt.showRight ? (cache.leftMaxOffset + cache.offset + 1) : center;
                 if (w > center) {
                     w = center;
                 }
@@ -225,7 +299,7 @@
             dt = _dt();
             // 画左边刻度
             if (mode > 1) {
-                var w = cache.rightMaxOffset && !opt.showLeft ? cache.rightMaxOffset - cache.offset + 1 : center;
+                var w = $.isNumber(cache.rightMaxOffset) && !opt.showLeft ? (cache.rightMaxOffset - cache.offset + 1) : center;
                 if (w > center) {
                     w = center;
                 }
@@ -234,6 +308,12 @@
                 _drawscale(tickCount, 1);
             }
 
+            //画水平线
+            _drawline(ctx, '#555', 1, 2, 0, width, height - tickHeight, height - tickHeight);
+
+            //画中心线
+            _drawline(ctx, '#fc0', 0.9, 2, center, center, 0, height);
+            
             var seconds = Factory.getTimeOffset(ts, offset);
             cache.currentTime = _dt().addSeconds(seconds);
             //画当前时间
@@ -250,11 +330,12 @@
                 return cache.defaultTime.format().toDate();
             }
 
-            function _drawline (ctx, color, lineWidth, x0, x1, y0, y1) {
+            function _drawline (ctx, color, opacity, lineWidth, x0, x1, y0, y1) {
                 ctx.beginPath();
                 ctx.moveTo(x0, y0);
                 ctx.lineTo(x1, y1);
-                ctx.strokeStyle = color;
+                //ctx.strokeStyle = color;
+                ctx.strokeStyle = Factory.buildStrokeStyle(color, opacity);
                 ctx.lineWidth = lineWidth;
                 ctx.stroke();
             }
@@ -269,8 +350,7 @@
             function _drawscale (count, left) {
                 for (var i = 0; i < count; i++) {
                     var x = (left ? -1 : 1) * (i * tickWidth) + (center + offset);
-                    _drawline(ctx, '#999', 1, x, x, height - tickHeight + 1, height);
-                    
+                    _drawline(ctx, '#999', 1, 1, x, x, height - tickHeight + 1, height);
                     dt.addMinutes((left ? -1 : 1) * (i ? 1 : 0) * tickMinutes);
                     _drawtext(ctx, dt.format('HH:mm'), '12px Arial', '#aaa', x, height - tickHeight - 4);
                 }
@@ -345,6 +425,7 @@
                 ],
                 // 默认比例索引
                 level: 1,
+                data: [],
                 callback: function (data, t) {
                     console.log('timebar-callback:', data, t);
                 },
@@ -367,10 +448,10 @@
             if (!$.isDate(opt.time)) {
                 opt.time = opt.time.toString().toDate();
             }
-            if (!$.isDate(opt.minTime) && $.isString(opt.minTime, true)) {
+            if (!$.isDate(opt.minTime) && ($.isString(opt.minTime, true) || $.isNumber(opt.minTime))) {
                 opt.minTime = opt.minTime.toDate();
             }
-            if (!$.isDate(opt.maxTime) && $.isString(opt.maxTime, true)) {
+            if (!$.isDate(opt.maxTime) && ($.isString(opt.maxTime, true) || $.isNumber(opt.maxTime))) {
                 opt.maxTime = opt.maxTime.toDate();
             }
 
@@ -401,105 +482,128 @@
             }
             opt.rules = rules;
 
+            if (!$.isArray(opt.data)) {
+                opt.data = [];
+            }
+
             return opt;
         }
     };
 
-    function timebar(options) {
-        var opt = Factory.checkOptions(options);
-
-        this.options = opt;
-        this.id = this.options.id;
-        this.elements = { box: opt.box };
+    function TimeBar(options) {
         this.cache = {
-            defaultTime: opt.time.dayStart().toDate(),
-            originTime: opt.time,
-            currentTime: opt.time,
             offset: 0,
             dragging: false,
             lastX: 0,
             startTime: '',
             endTime: '',
-            tickHeight: opt.tickHeight,
-            ruleLevel: opt.level,
             range: ''
         };
-
-        this.initial();
+        this.initial(options).build();
     }
 
-    timebar.prototype = {
-        initial: function() {
+    TimeBar.prototype = {
+        initial: function(options) {
+            var that = this,
+                opt = Factory.checkOptions(options);
+
+            that.options = opt;
+            that.id = that.options.id;
+            if (!that.elements) {
+                that.elements = { box: opt.box };
+            }
+            $.extend(that.cache, {
+                defaultTime: opt.time.dayStart().toDate(),
+                originTime: opt.time,
+                currentTime: opt.time,
+                data: opt.data || [],
+                tickHeight: opt.tickHeight,
+                ruleLevel: opt.level
+            });
+
+            return that;
+        },
+        build: function(options) {
             var that = this,
                 cache = that.cache,
                 obj = that.elements;
 
-            Factory.buildElement(that).setSize(that).setOffset(that).drawScale(that);
+            if (!obj.canvas) {
+                Factory.buildElement(that);
 
-            $.addListener(window, 'resize', function() {
-                Factory.setSize(that).drawScale(that);
-            });
+                $.addListener(window, 'resize', function() {
+                    Factory.setSize(that).drawScale(that);
+                });
 
-            $.addListener(obj.box, 'click', function(e) {
-                $.cancelBubble(e);
+                $.addListener(obj.box, 'click', function(e) {
+                    $.cancelBubble(e);
 
-                var elem = e.target,
-                    css = elem.className;
+                    var elem = e.target,
+                        css = elem.className;
 
-                switch(css) {
-                case 'add':
-                    Factory.setRuleLevel(that, 1);
-                    break;
-                case 'sub':
-                    Factory.setRuleLevel(that, -1);
-                    break;
-                case 'ori':
-                    Factory.resetOffset(that);
-                    break;
-                case 'rel':
-                    Factory.resetOffset(that, 1);
-                    break;
-                }
-            });
+                    switch(css) {
+                    case 'add':
+                        Factory.setRuleLevel(that, 1);
+                        break;
+                    case 'sub':
+                        Factory.setRuleLevel(that, -1);
+                        break;
+                    case 'ori':
+                        Factory.resetOffset(that);
+                        break;
+                    case 'rel':
+                        Factory.resetOffset(that, 1);
+                        break;
+                    }
+                });
 
-            $.addListener(obj.box, 'mousedown', function(e) {
-                var elem = e.target,
-                    css = elem.className;
+                $.addListener(obj.box, 'mousedown', function(e) {
+                    var elem = e.target,
+                        css = elem.className;
 
-                if (e.target.className.indexOf('oui-timebar') < 0) {
-                    return true;
-                }
-                cache.dragging = true;
-                cache.lastX = e.offsetX;
-                Factory.drawScale(that);
-            });
-
-            document.addEventListener('mousemove', (e) => {
-                if (cache.dragging) {
-                    var dx = e.offsetX - cache.lastX;
-                    cache.offset += dx;
+                    if (e.target.className.indexOf('oui-timebar') < 0) {
+                        return true;
+                    }
+                    cache.dragging = true;
                     cache.lastX = e.offsetX;
-                    Factory.checkOffsetLimit(that).drawScale(that);
-                } else if (e.target.className.indexOf('oui-timebar') > -1) {
-                    Factory.drawScale(that, e.clientX - obj.box.offsetLeft);
-                }
-            });
+                    Factory.drawScale(that);
+                });
 
-            obj.canvas.addEventListener('mouseout', () => {
-                Factory.drawScale(that);
-            });
+                document.addEventListener('mousemove', (e) => {
+                    if (cache.dragging) {
+                        var dx = e.offsetX - cache.lastX;
+                        cache.offset += dx;
+                        cache.lastX = e.offsetX;
+                        Factory.checkOffsetLimit(that).drawScale(that);
+                    } else if (e.target.className.indexOf('oui-timebar') > -1) {
+                        Factory.drawScale(that, e.clientX - obj.box.offsetLeft);
+                    }
+                });
 
-            document.addEventListener('mouseup', () => {
-                cache.dragging = false;
-            });
+                obj.box.addEventListener('mouseout', () => {
+                    Factory.drawScale(that);
+                });
+
+                document.addEventListener('mouseup', () => {
+                    cache.dragging = false;
+                });
+            }            
+        
+            Factory.setSize(that).setOffset(that).drawScale(that);
 
             return that;
+        },
+        update: function (options) {
+            var that = this,
+                opt = $.extend(that.options, options);
+
+            return that.initial(opt).build();
         }
     };
 
     $.extend({
         timebar: function (id, options) {
-            return Factory.buildtimebar(id, options);
+            return Factory.buildTimeBar(id, options);
         }
     });
 

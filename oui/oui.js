@@ -3185,7 +3185,7 @@
             return ts;
         },
         dayEnd: function(fmt) {
-            var ts = this.todayStart() + 86400 - 1;
+            var ts = this.dayStart() + 86400 - 1;
 
             if ($.isString(fmt)) {
 

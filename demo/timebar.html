@@ -21,7 +21,7 @@ window.onload = function() {
 	$.timebar('timebar', {
 		//time: new Date().dayStart('')
 		//time: new Date().dayStart(),
-		time: new Date(),
+		time: new Date().dayStart(),
 		//比例尺：两种写法
         /*rules: [
             {width:120,minutes:120},{width:120,minutes:60},{width:120,minutes:30},{width:240,minutes:30},
@@ -41,11 +41,55 @@ window.onload = function() {
 		//showPanel: false,
 		showOrigin: true,
 		showReload: true,
-		minTime: '2025-05-06 00:00:00',
-		maxTime: '2025-05-09 00:00:00',
-		showLeft: false,
-		showRight: true
+		minTime: new Date().dayStart(),
+		maxTime: new Date().dayEnd(),
+		showLeft: true,
+		showRight: false
 	});
+
+	/*
+	$.timebar('timebar', {
+		//time: new Date().dayStart('')
+		//time: new Date().dayStart(),
+		time: new Date().dayStart(),
+		//比例尺：两种写法
+        rules: [
+            {width:120,minutes:120},{width:120,minutes:60},{width:120,minutes:30},{width:240,minutes:30},
+            {width:120,minutes:10},{width:120,minutes:5},{width:240,minutes:5}
+        ],
+        rules: [
+            [120,120],[120,60],[120,30],[240,30],[120,10],[120,5],[240,5]
+        ],        
+		//默认比例索引
+		level: 0,
+		
+		data: [
+            1746691176,1746691206,1746691236,1746691266,1746691296,1746691326,1746691356,1746691386,
+            1746691416,1746691446,1746691476,1746691506,1746691536,1746691566,1746691596,1746691626,
+            1746691656,1746691686,1746691716,1746691746
+        ],
+		//height: 65,
+		//tickHeight: 20,
+		callback: function (data, t) {
+			console.log('data:', data, t);
+		},
+		//showPanel: false,
+		showOrigin: true,
+		showReload: true,
+		minTime: new Date().dayStart(),
+		maxTime: new Date().dayEnd(),
+		showLeft: false,
+		showRight: false
+	});
+	*/
+	$.timebar('timebar').update({
+		showLeft: false,
+		data: [
+            1746691176,1746691206,1746691236,1746691266,1746691296,1746691326,1746691356,1746691386,
+            1746691416,1746691446,1746691476,1746691506,1746691536,1746691566,1746691596,1746691626,
+            1746691656,1746691686,1746691716,1746691746
+        ]
+    });
 	
 };
 
