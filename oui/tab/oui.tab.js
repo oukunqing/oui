@@ -244,8 +244,8 @@
                         es = $.getElementSize(elem);
                     elem.style.width = cfg.maxWidth + 'px';
                     //txt.style.width = (cfg.maxWidth - ps.width - ms.width - btnW - es.border.width - 2) + 'px';
-                    //减去12是因为文字缩略显示之后多出省略号
-                    txt.style.width = (cfg.maxWidth - ms.width - btnW - es.border.width - 12) + 'px';
+                    //减去14是因为文字缩略显示之后多出省略号
+                    txt.style.width = (cfg.maxWidth - ms.width - btnW - es.border.width - 14) + 'px';
                     txt.title = $.getInnerText(txt);
                 }
             });
@@ -889,29 +889,39 @@
             return null;
         },
         getNext: function(objId, itemId, curPos) {
-            var cache = this.getCache(objId);
+            var cache = this.getCache(objId), items = [];
             if (!cache || !cache.ids.length) {
                 return null;
             }
-            var items = [];
             for (var k in cache.items) {
                 items.push(cache.items[k]);
             }
             items.sort(function(a, b) {
                 return a.pos < b.pos;
             });
-            var i = 0, len = items.length;
-            for (i = 0; i < len; i++) {
-                if (items[i].pos > curPos) {
-                    return items[i];
+
+            // 关闭标签后，查找下一个或上一个相邻的标签
+            // 优先查找已经打开（或加载）的标签
+            function _find(items, len, curPos, reverse, loaded) {
+                var i, t;
+                for (i = 0; i < len; i++) {
+                    t = items[reverse ? len - 1 - i : i];
+                    if ((reverse ? t.pos < curPos : t.pos > curPos) && (!loaded || (!t.iframe || t.iframe.loaded))) {
+                        return t;
+                    }
                 }
             }
-            for (i = len - 1; i >= 0; i--) {
-                if (items[i].pos < curPos) {
-                    return items[i];
-                }
-            }
-            return null;
+            var len = items.length;
+
+            //1.找下一个已经打开的页面
+            //2.找上一个已经打开的页面
+            //3.找下一个页面
+            //4.找上一个页面
+            return _find(items, len, curPos, false, true) ||
+                _find(items, len, curPos, true, true) ||
+                _find(items, len, curPos, false, false) ||
+                _find(items, len, curPos, true, false) ||
+                null;
         },
         getCur: function(t, cache) {
             cache = cache || this.getCache(t.id);
