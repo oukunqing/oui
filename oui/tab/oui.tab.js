@@ -861,6 +861,7 @@
                 }
                 item.iframe.src = '';
                 item.iframe.loaded = false;
+                item.iframe.closed = true;
                 console.log('item:', item);
             }
             return this;
@@ -896,17 +897,20 @@
             for (var k in cache.items) {
                 items.push(cache.items[k]);
             }
-            items.sort(function(a, b) {
-                return a.pos < b.pos;
+            items = items.sort(function(a, b) {
+                return a.pos - b.pos;
             });
 
             // 关闭标签后，查找下一个或上一个相邻的标签
             // 优先查找已经打开（或加载）的标签
-            function _find(items, len, curPos, reverse, loaded) {
-                var i, t;
+            function _find(items, len, curPos, reverse, loaded, closed) {
+                var i, j, t;
                 for (i = 0; i < len; i++) {
-                    t = items[reverse ? len - 1 - i : i];
-                    if ((reverse ? t.pos < curPos : t.pos > curPos) && (!loaded || (!t.iframe || t.iframe.loaded))) {
+                    j = reverse ? len - 1 - i : i;
+                    t = items[j];
+                    if ((reverse ? t.pos < curPos : t.pos > curPos) && 
+                        (!loaded || (!t.iframe || t.iframe.loaded)) &&
+                        (!closed || (!t.iframe || t.iframe.closed))) {
                         return t;
                     }
                 }
@@ -917,10 +921,12 @@
             //2.找上一个已经打开的页面
             //3.找下一个页面
             //4.找上一个页面
-            return _find(items, len, curPos, false, true) ||
-                _find(items, len, curPos, true, true) ||
-                _find(items, len, curPos, false, false) ||
-                _find(items, len, curPos, true, false) ||
+            return _find(items, len, curPos, false, true, false) ||
+                _find(items, len, curPos, true, true, false) ||
+                _find(items, len, curPos, false, false, true) ||
+                _find(items, len, curPos, true, false, true) ||
+                _find(items, len, curPos, false, false, false) ||
+                _find(items, len, curPos, true, false, false) ||
                 null;
         },
         getCur: function(t, cache) {
