@@ -451,10 +451,11 @@
 
             var w = Math.abs(p1.x - p2.x),
                 h = Math.abs(p1.y - p2.y),
-                small = p1.x > p2.x && p1.y > p2.y,
+                //small = p1.x > p2.x && p1.y > p2.y,
+                small = p1.y > p2.y,
                 scale = that.cfg.curScale,
                 left, top, ratio,
-                p0 = { 
+                p0 = {
                     x: p1.x < p2.x ? p1.x : p2.x, 
                     y: p1.y < p2.y ? p1.y : p2.y
                 };

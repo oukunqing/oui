@@ -43,7 +43,8 @@
             loading: { chinese: '正在努力加载，请稍候...', english: 'Loading, please wait a moment!' },
             overrun: { chinese: '标签页数量已超出限制', english: 'Tab page count exceeded limit.' },
             closetab: { chinese: '关闭', english: 'Close tab' },
-            close: { chinese: '关闭当前标签页', english: 'Close tab' },
+            close: { chinese: '关闭标签页', english: 'Close tab' },
+            closeCon: { chinese: '关闭标签内容', english: 'Only close the content' },
             closeall: { chinese: '关闭全部标签页', english: 'Close all tabs' },
             closeother: { chinese: '关闭其他标签页', english: 'Close other tabs' },
             closeleft: { chinese: '关闭左侧标签页', english: 'Close tab to the left' },
@@ -512,7 +513,8 @@
                 right: this.getSiblingCount(curItem.tab, 'nextSibling'),
                 iframe: curItem.iframe,
                 iframeCount: iframeCount,
-                closedCount: closedCount
+                closedCount: closedCount,
+                item: curItem
             };
 
             return data;
@@ -525,6 +527,7 @@
             var cache = Factory.getCache(t.id), opt = cache.options, dis = ' disabled';
             var html = [
                 '<a class="cmenu-item{0}" code="cur">{1}</a>'.format(s.close ? '' : dis, Util.getLangText('close', opt.lang)),
+                s.iframe && s.iframe.loaded ? '<a class="cmenu-item{0}" code="con">{1}</a>'.format(s.close ? '' : dis, Util.getLangText('closeCon', opt.lang)) : '',
                 '<div class="cmenu-sep"></div>',
                 '<a class="cmenu-item{0}" code="all">{1}</a>'.format(s.count > 0 ? '' : dis, Util.getLangText('closeall', opt.lang)),
                 '<a class="cmenu-item{0}" code="other">{1}</a>'.format(s.other > 0 ? '' : dis, Util.getLangText('closeother', opt.lang)),
@@ -641,6 +644,9 @@
                 case 'cur':
                     t.close(itemId);
                     break;
+                case 'con':
+                    t.close(itemId, true);
+                    break;
                 case 'all':
                     t.closeAll();
                     break;
@@ -743,7 +749,7 @@
         setCache: function(objId, opt, tab, con, iframe) {
             var cache = this.getCache(objId);
             if(cache) {
-                var itemId = opt.id;
+                var itemId = opt.id, idx = cache.ids.length;
                 cache.items[itemId] = {
                     objId: objId,
                     itemId: itemId,
@@ -751,9 +757,14 @@
                     iframe: iframe,
                     opt: opt,
                     tab: tab,
-                    con: con
+                    con: con,
+                    //标签页添加的顺序(不会改变)
+                    idx: idx,
+                    //标签页显示的位置(会改变)
+                    pos: idx
                 };
                 cache.ids.push(itemId);
+
                 this.setClosedItem(cache, itemId, opt, true);
             }
             return this;
@@ -828,6 +839,32 @@
             }
             return this;
         },
+        delItemUrl: function(t, itemId, exceptItemId) {
+            var cache = Factory.getCache(t.id);
+            if(!cache) {
+                return this;
+            }
+            if($.isBoolean(itemId, false)) {
+                for(var k in cache.items) {
+                    if($.isUndefined(exceptItemId) || exceptItemId.toString() !== k.toString()) {
+                        _clear(itemId, cache);
+                    }
+                }
+            } else {
+                _clear(itemId, cache);
+            }
+
+            function _clear(itemId, cache) {
+                var item = cache.items[itemId];
+                if (!item || !item.iframe) {
+                    return false;
+                }
+                item.iframe.src = '';
+                item.iframe.loaded = false;
+                console.log('item:', item);
+            }
+            return this;
+        },
         delCache: function(cache, itemId) {
             var item = cache.items[itemId];
             if(item && item.closeAble) {
@@ -848,6 +885,31 @@
             if(cache && cache.ids.length > 0) {
                 var itemId = cache.ids[cache.ids.length - 1];
                 return cache.items[itemId];
+            }
+            return null;
+        },
+        getNext: function(objId, itemId, curPos) {
+            var cache = this.getCache(objId);
+            if (!cache || !cache.ids.length) {
+                return null;
+            }
+            var items = [];
+            for (var k in cache.items) {
+                items.push(cache.items[k]);
+            }
+            items.sort(function(a, b) {
+                return a.pos < b.pos;
+            });
+            var i = 0, len = items.length;
+            for (i = 0; i < len; i++) {
+                if (items[i].pos > curPos) {
+                    return items[i];
+                }
+            }
+            for (i = len - 1; i >= 0; i--) {
+                if (items[i].pos < curPos) {
+                    return items[i];
+                }
             }
             return null;
         },
@@ -1197,7 +1259,7 @@
             that.tabContainer.style.display = show ? 'block' : 'none';
             return that;
         },
-        close: function(itemId) {
+        close: function(itemId, onlyCloseContent) {
             var that = this,
                 cache = Factory.getCache(that.id),
                 item = Factory.getItem(cache, itemId),
@@ -1209,13 +1271,20 @@
                 return that;
             }
 
-            Factory.delItem(that, itemId);
+            if (onlyCloseContent) {
+                Factory.delItemUrl(that, itemId);
+                $.addClass(item.tab, 'pre');
+            } else {
+                Factory.delItem(that, itemId);
+            }
 
             if(cur) {
                 //关闭当前页，需要重新设置一个新的当前页
                 if(itemId === cur.itemId) {
                     change = true;
-                    var item = Factory.setCur(that, null, true).getLast(that.id);
+                    //var item = Factory.setCur(that, null, true).getLast(that.id);
+                    var curIdx = cur.idx;
+                    var item = Factory.setCur(that, null, true).getNext(that.id, itemId, curIdx);
                     if(item) {
                         newId = item.itemId;
                     }

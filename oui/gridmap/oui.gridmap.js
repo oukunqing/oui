@@ -240,15 +240,15 @@
 		    const R = 6378137;
 		    
 		    // 将经纬度从度转换为弧度
-		    const φ1 = lat1 * Math.PI / 180;
-		    const φ2 = lat2 * Math.PI / 180;
-		    const Δφ = (lat2 - lat1) * Math.PI / 180;
-		    const Δλ = (lon2 - lon1) * Math.PI / 180;
+		    const d1 = lat1 * Math.PI / 180;
+		    const d2 = lat2 * Math.PI / 180;
+		    const a1 = (lat2 - lat1) * Math.PI / 180;
+		    const a2 = (lon2 - lon1) * Math.PI / 180;
 		    
 		    // Haversine公式
-		    const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-		              Math.cos(φ1) * Math.cos(φ2) *
-		              Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+		    const a = Math.sin(a1 / 2) * Math.sin(a1 / 2) +
+		              Math.cos(d1) * Math.cos(d2) *
+		              Math.sin(a2 / 2) * Math.sin(a2 / 2);
 		    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 		    
 		    // 计算距离并四舍五入到毫秒（小数点后三位）
@@ -357,7 +357,7 @@
     		var x = point.longitude * ratioWidth,
     			y = canvasHeight - (point.latitude * ratioHeight);
 
-    		return $.extend({}, point, { x: x, y: y });
+    		return $.extend(point, { x: x, y: y });
     	},
     	drawPoint: function (canvas, ctx, point, pointSize, state, origin) {
     		// 将世界坐标转换为屏幕坐标
@@ -398,6 +398,8 @@
     		for (var i = 0; i < len; i++) {
     			ctx.fillStyle = colors[i % colorCount];
     			p = points[i];
+    			p.radius = pointSize / 2;
+
     			if (0 === i) {
     				p0 = p = p.latitude ? Factory.calcPointPosition(map, p) : p;
     			console.log('i:', i, ',p:', p);
@@ -408,6 +410,8 @@
     				that.drawPoint(canvas, ctx, p, pointSize, map.state, true);
 	    		}
     		}
+
+    		$.console.log('points:', points);
 
     		return this;
     	},
@@ -512,7 +516,8 @@
     		gridFixed: true,
     		showLine: true,
     		dashLine: true,
-    		points: []
+    		points: [],
+    		clickCallback: null
     	}, options);
 
     	this.options = opt;
@@ -611,7 +616,29 @@
 	            //const delta = e.deltaY > 0 ? 1 / 1.1 : 1.1;
 	            const delta = e.deltaY > 0 ? -1 : 1;
 	            Factory.zoomAtPoint(that, delta, mouseX, mouseY, true);
-	        });        
+	        });
+
+	        $.addListener([canvas], 'click', function(e) {
+	        	var rect = canvas.getBoundingClientRect(),
+	        		clickX = e.clientX - rect.left,
+	        		clickY = e.clientY - rect.top,
+	        		points = that.state.points;
+
+	        	for (var i = 0; i < points.length; i++) {
+					var p = points[i],
+						px = p.x * state.scale + state.offsetX,
+						py = p.y * state.scale + state.offsetY,
+						distance = Math.sqrt((clickX - px) ** 2 + (clickY - py) ** 2);
+
+	        		if (distance <= p.radius) {
+	        			$.console.log('ppp:', i, p);
+	        			if ($.isFunction(opt.clickCallback)) {
+	        				opt.clickCallback(e, p, that);
+	        			}
+	        			break;
+	        		}
+	        	}
+	        });
 
     		return this;
     	},

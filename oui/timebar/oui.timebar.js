@@ -105,7 +105,7 @@
 
             return this;
         },
-        getTimeRange: function (ts) {
+        getTimeRange: function (ts, clientX) {
             var cache = ts.cache,
                 rule = Factory.getRule(ts),
                 tickMinutes = rule.minutes,
@@ -119,11 +119,17 @@
                 return cache.defaultTime.toString().toDate();
             }
 
-            return {
+            var data = {
                 startTime: _dt().addSeconds(start).format(),
                 endTime: _dt().addSeconds(end).format(),
-                currentTime: _dt().addSeconds(seconds).format() 
+                currentTime: _dt().addSeconds(seconds).format(),
             };
+            if ($.isNumber(clientX)) {
+                var clickOffset = Factory.checkOffsetLimit(ts, offset - clientX),
+                    clickSeconds = Factory.getTimeOffset(ts, clickOffset);
+                data['clickTime'] = _dt().addSeconds(clickSeconds).format();
+            }
+            return data;
         },
         getTimeOffset: function (ts, offset) {
             var cache = ts.cache,
@@ -147,29 +153,41 @@
 
             return this;
         },
-        checkOffsetLimit: function (ts) {
+        checkOffsetLimit: function (ts, clickOffset) {
             var cache = ts.cache,
                 opt = ts.options,
                 rule = Factory.getRule(ts);
 
             if ($.isDate(opt.maxTime)) {
                 // 左边最大偏移像素
-                var leftMaxOffset = Math.abs(opt.maxTime.timeSpan(cache.defaultTime).totalSeconds) / rule.seconds;                
-                if (cache.offset < 0 && cache.offset < -leftMaxOffset) {
-                    cache.offset = -leftMaxOffset;
+                var leftMaxOffset = Math.abs(opt.maxTime.timeSpan(cache.defaultTime).totalSeconds) / rule.seconds;
+                if ($.isNumber(clickOffset)) {
+                    if (clickOffset < 0 && clickOffset < -leftMaxOffset) {
+                        clickOffset = -leftMaxOffset;
+                    }
+                } else {
+                    if (cache.offset < 0 && cache.offset < -leftMaxOffset) {
+                        cache.offset = -leftMaxOffset;
+                    }
+                    cache.leftMaxOffset = leftMaxOffset;
                 }
-                cache.leftMaxOffset = leftMaxOffset;
             }
 
             if ($.isDate(opt.minTime)) {
                 // 右边最大偏移像素
-                var rightMaxOffset = Math.abs(opt.minTime.timeSpan(cache.defaultTime).totalSeconds) / rule.seconds;      
-                if (cache.offset > 0 && cache.offset > rightMaxOffset) {
-                    cache.offset = rightMaxOffset;
+                var rightMaxOffset = Math.abs(opt.minTime.timeSpan(cache.defaultTime).totalSeconds) / rule.seconds;
+                if ($.isNumber(clickOffset)) {
+                    if (clickOffset > 0 && clickOffset > rightMaxOffset) {
+                        clickOffset = rightMaxOffset;
+                    }
+                } else {
+                    if (cache.offset > 0 && cache.offset > rightMaxOffset) {
+                        cache.offset = rightMaxOffset;
+                    }
+                    cache.rightMaxOffset = rightMaxOffset;
                 }
-                cache.rightMaxOffset = rightMaxOffset;
             }
-            return this;
+            return $.isNumber(clickOffset) ? clickOffset : this;
         },
         buildStrokeStyle: function(color, opacity) {
             if (opacity === 1) {
@@ -239,7 +257,7 @@
                 }
             }
 
-            if (lines.length > 0) {
+            if (lines.length > 0 && opt.debug) {
                 $.console.log('getDataLines:', seconds, rule, width, points, lines);
             }
             return lines;
@@ -358,13 +376,13 @@
 
             return this.callback(ts);
         },
-        callback: function (ts) {
+        callback: function (ts, clientX) {
             var that = this,
                 opt = ts.options,
                 cache = ts.cache;
 
             if ($.isFunction(opt.callback)) {
-                var range = $.toJsonString(Factory.getTimeRange(ts));
+                var range = $.toJsonString(Factory.getTimeRange(ts, clientX));
                 if (range === cache.range) {
                     return that;
                 }
@@ -442,7 +460,9 @@
                 // 是否显示“回到原点”按钮
                 showOrigin: false,
                 // 是否显示“重新加载”按钮
-                showReload: false
+                showReload: false,
+                // 点击事件 mouseup, click, dblclick
+                clickEvent: 'click'
             }, options);
 
             if (!$.isDate(opt.time)) {
@@ -494,6 +514,7 @@
         this.cache = {
             offset: 0,
             dragging: false,
+            moving: false,
             lastX: 0,
             startTime: '',
             endTime: '',
@@ -525,6 +546,7 @@
         },
         build: function(options) {
             var that = this,
+                opt = that.options,
                 cache = that.cache,
                 obj = that.elements;
 
@@ -561,19 +583,24 @@
                     var elem = e.target,
                         css = elem.className;
 
-                    if (e.target.className.indexOf('oui-timebar') < 0) {
+                    if (e.target.tagName.toLowerCase() !== 'canvas') {
                         return true;
                     }
                     cache.dragging = true;
+                    cache.moving = false;
                     cache.lastX = e.offsetX;
-                    Factory.drawScale(that);
+                    //Factory.drawScale(that);
                 });
 
                 document.addEventListener('mousemove', (e) => {
+                    if (e.target.tagName.toLowerCase() !== 'canvas') {
+                        return true;
+                    }
                     if (cache.dragging) {
                         var dx = e.offsetX - cache.lastX;
                         cache.offset += dx;
                         cache.lastX = e.offsetX;
+                        cache.moving = true;
                         Factory.checkOffsetLimit(that).drawScale(that);
                     } else if (e.target.className.indexOf('oui-timebar') > -1) {
                         Factory.drawScale(that, e.clientX - obj.box.offsetLeft);
@@ -586,7 +613,17 @@
 
                 document.addEventListener('mouseup', () => {
                     cache.dragging = false;
+                    cache.moving = false;
                 });
+
+                if (['mouseup', 'click', 'dblclick'].indexOf(opt.clickEvent) > -1) {
+                    obj.box.addEventListener(opt.clickEvent, (e) => {
+                        if (!cache.moving && e.target.className.indexOf('canvas') > -1) {
+                            Factory.callback(that, e.offsetX - obj.canvas.width / 2);
+                        }
+                        cache.moving = false;
+                    });
+                }
             }
         
             Factory.setSize(that).setOffset(that).drawScale(that);
