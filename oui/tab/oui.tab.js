@@ -41,18 +41,18 @@
         LongPressScrollMaxDistance: 50,     //长按时一次滚动的距离，单位：px
         LangText: {
             loading: { chinese: '正在努力加载，请稍候...', english: 'Loading, please wait a moment!' },
-            overrun: { chinese: '标签页数量已超出限制', english: 'Tab page count exceeded limit.' },
+            overrun: { chinese: '标签页数量已超出限制', english: 'Tabs count exceeded limit.' },
             closetab: { chinese: '关闭', english: 'Close tab' },
             close: { chinese: '关闭标签页', english: 'Close tab' },
-            closeCon: { chinese: '关闭标签内容', english: 'Only close the content' },
+            closeCon: { chinese: '关闭标签内容', english: 'Close tab\'s content' },
             closeall: { chinese: '关闭全部标签页', english: 'Close all tabs' },
             closeother: { chinese: '关闭其他标签页', english: 'Close other tabs' },
-            closeleft: { chinese: '关闭左侧标签页', english: 'Close tab to the left' },
-            closeright: { chinese: '关闭右侧标签页', english: 'Close tab to the right' },
+            closeleft: { chinese: '关闭左侧标签页', english: 'Close tabs to the left' },
+            closeright: { chinese: '关闭右侧标签页', english: 'Close tabs to the right' },
             reload: { chinese: '重新加载', english: 'Reload' },
             reloadall: { chinese: '全部重新加载', english: 'Reload all' },
-            reopen: { chinese: '重新打开关闭的标签页', english: 'Reopen closed tab' },
-            reopenall: { chinese: '重新打开关闭的全部标签页', english: 'Reopen all closed tab' }
+            reopen: { chinese: '重新打开关闭的标签页', english: 'Reopen closed tabs' },
+            reopenall: { chinese: '重新打开关闭的全部标签页', english: 'Reopen all closed tabs' }
         },
         IdPrefix: 'oui-tabs-'
     },
@@ -897,12 +897,13 @@
             for (var k in cache.items) {
                 items.push(cache.items[k]);
             }
-            items = items.sort(function(a, b) {
+            items.sort(function(a, b) {
                 return a.pos - b.pos;
             });
 
             // 关闭标签后，查找下一个或上一个相邻的标签
             // 优先查找已经打开（或加载）的标签
+            // 其次查找曾经打开（或加载）过的标签
             function _find(items, len, curPos, reverse, loaded, closed) {
                 var i, j, t;
                 for (i = 0; i < len; i++) {
@@ -917,10 +918,12 @@
             }
             var len = items.length;
 
-            //1.找下一个已经打开的页面
-            //2.找上一个已经打开的页面
-            //3.找下一个页面
-            //4.找上一个页面
+            //1.找下一个已经打开的标签
+            //2.找上一个已经打开的标签
+            //3.找下一个曾经打开的标签
+            //4.找上一个曾经打开的标签
+            //5.找下一个标签
+            //6.找上一个标签
             return _find(items, len, curPos, false, true, false) ||
                 _find(items, len, curPos, true, true, false) ||
                 _find(items, len, curPos, false, false, true) ||
