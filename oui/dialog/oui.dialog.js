@@ -418,6 +418,10 @@
                 opt.coverOCX = opt.coverOCX || opt.coverOcx || opt.cover;
                 */
 
+                if (!$.isString(opt.code)) {
+                    opt.code = '';
+                }
+
                 opt.element = $.getParamCon(elem, opt.element);
                 opt.content = $.getParamCon(content, opt.content);
                 opt.title = $.getParamCon(title, opt.title);
@@ -4036,6 +4040,7 @@
             par = Common.checkOptions(content, title, options),
             cfg = {
                 id: null,                       //id
+                code: '',                       //编码
                 skin: Config.DefaultSkin,       //样式: default, blue
                 //lang: Config.Lang.Chinese,      //语言 Chinese,English
                 lang: Config.GetLang(),         //语言 Chinese,English
@@ -4383,7 +4388,7 @@
             //但有时候被隐藏之后就再也不会去重新打开，这样会造成打开太多的窗口
             //所以设置一个定时关闭的时限自动去关闭被隐藏的对话框
             if (opt.closeTimeout > 0) {
-                $.console.log('[hide-close]', 'id:', opt.id, 'timeout:', opt.closeTimeout);
+                $.console.log('[hide-close]', 'id:', opt.code || opt.id, 'timeout:', opt.closeTimeout);
 
                 that.hideTime = parseInt(new Date().getTime() / 1000, 10);
                 _clearTimer(that);
