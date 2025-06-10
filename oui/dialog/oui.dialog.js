@@ -4086,7 +4086,7 @@
                 closeIcon: '',          //Close关闭按钮图标，close0, close1, close2, close3, 默认为空
                 closeType: 'close',     //关闭方式， close | hide
                 closeHide: false,       //关闭方式，true - 相当于closeType:'hide',若closeHide为数字且大于0，则同时表示closeHide为true和closeTimeout
-                closeTimeout: 20 * 60,  //关闭时限，当closeType==='hide'有效，这个参数是为了防止对话框被隐藏后不再启动用，可以定时关闭
+                closeTimeout: 0,        //关闭时限，当closeType==='hide'有效，这个参数是为了防止对话框被隐藏后不再启动用，可以定时关闭
                 showOnly: null,         //重新显示时，是否仅显示(而不更新内容)，主要用于 iframe(url)对话框, 当closeType==='hide'有效
                 clickClose: false,      //鼠标点击(dblclick | click)document(非对话框范围)关闭对话框
                 escClose: false,        //是否允许按Esc关闭
