@@ -426,6 +426,20 @@
                 opt.complete = $.getParam(opt, 'complete,onload,ready', null, true);
                 opt.coverOCX = $.getParam(opt, 'coverOCX,coverOcx,cover', null, true);
 
+                opt.closeType = $.getParam(opt, 'closeType');
+                if (['close', 'hide'].indexOf(opt.closeType) < 0) {
+                    opt.closeType = 'close';
+                }
+
+                opt.closeHide = $.getParam(opt, 'closeHide,onlyHide,hide');
+                if ($.isBoolean(opt.closeHide)) {                    
+                    if (opt.closeHide) {
+                        opt.closeType = 'hide';
+                    }
+                } else if ($.isNumber(opt.closeHide)) {
+                    opt.closeType = 'hide';
+                    opt.closeTimeout = opt.closeHide > 0 ? opt.closeHide : 0;
+                }
                 //当closeType为hide，关闭（隐藏）对话框后重新显示对话框时，是否只显示（而不更新对话框内容）
                 //主要用于对iframe对话框的重新显示，如果更新内容，iframe页面会重新加载
                 //而有时并不想要重新加载iframe页面，只是重新显示，因为要保留对话框状态
@@ -4071,6 +4085,8 @@
                 closeAble: true,        //是否允许关闭
                 closeIcon: '',          //Close关闭按钮图标，close0, close1, close2, close3, 默认为空
                 closeType: 'close',     //关闭方式， close | hide
+                closeHide: false,       //关闭方式，true - 相当于closeType:'hide',若closeHide为数字且大于0，则同时表示closeHide为true和closeTimeout
+                closeTimeout: 20 * 60,  //关闭时限，当closeType==='hide'有效，这个参数是为了防止对话框被隐藏后不再启动用，可以定时关闭
                 showOnly: null,         //重新显示时，是否仅显示(而不更新内容)，主要用于 iframe(url)对话框, 当closeType==='hide'有效
                 clickClose: false,      //鼠标点击(dblclick | click)document(非对话框范围)关闭对话框
                 escClose: false,        //是否允许按Esc关闭
@@ -4298,7 +4314,8 @@
             return $.isInElement(ctls.dialog, ev);
         },
         show: function (content, title) {
-            var that = this, p = Util.getParam(that);
+            var that = this, p = Util.getParam(that), opt = p.options;
+
             if (that.isClosed() || !p || !that.isHide()) {
                 return that;
             }
@@ -4353,6 +4370,37 @@
 
             if (p.options.lock) {
                 Util.hideDocOverflow(that, true);
+            }
+
+            function _clearTimer(d) {
+                if (d.hideTimer) {
+                    window.clearInterval(d.hideTimer);
+                    delete d.hideTimer;
+                }
+            }
+
+            //当前closeType为hide时，对话框不会真正关闭，只是隐藏，
+            //但有时候被隐藏之后就再也不会去重新打开，这样会造成打开太多的窗口
+            //所以设置一个定时关闭的时限自动去关闭被隐藏的对话框
+            if (opt.closeTimeout > 0) {
+                $.console.log('[hide-close]', 'id:', opt.id, 'timeout:', opt.closeTimeout);
+
+                that.hideTime = parseInt(new Date().getTime() / 1000, 10);
+                _clearTimer(that);
+                that.hideTimer = window.setInterval(function() {
+                    if (!that.isHide() && that.hideTimer) {
+                        _clearTimer(that);
+                    }
+                    var ts = parseInt(new Date().getTime() / 1000, 10),
+                        ms = ts - that.hideTime;
+
+                    if (ms >= opt.closeTimeout) {
+                        _clearTimer(that);
+                        if (that.isHide()) {
+                            that.close(true);
+                        }
+                    }
+                }, 1000);
             }
 
             return that;

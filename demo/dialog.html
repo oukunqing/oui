@@ -350,6 +350,7 @@ function confirm2(){
         + '<a href="http://www.baidu.com" target="_blank">baidu</a>'
         + '<div><a href="http://www.163.com">163</a><span onclick="alert(126);">126</span></div>';*/
     var win = $.confirm(html,  {
+        id: 'confirm2',
         buttons: $.DialogButtons.OKCancel,
         //clickBgClose: 'dblclick',
         icon: 'question',
@@ -382,7 +383,10 @@ function confirm2(){
         showTimer: true,
 		*/
         //clickBgClose: true,
-        closeType: 'hide',
+        //closeType: 'hide',
+        //closeHide: true,
+        //closeTimeout: 30,
+        closeHide: true,
         //parent: 'p2',
         //redirect: 'http://www.baidu.com',
         //target: 'http://www.baidu.com',

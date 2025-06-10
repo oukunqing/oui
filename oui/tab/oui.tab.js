@@ -1302,8 +1302,9 @@
                 if(itemId === cur.itemId) {
                     change = true;
                     //var item = Factory.setCur(that, null, true).getLast(that.id);
-                    var curIdx = cur.idx;
-                    var item = Factory.setCur(that, null, true).getNext(that.id, itemId, curIdx);
+                    var curIdx = cur.idx,
+                        item = Factory.setCur(that, null, true).getNext(that.id, itemId, curIdx);
+
                     if(item) {
                         newId = item.itemId;
                     }
