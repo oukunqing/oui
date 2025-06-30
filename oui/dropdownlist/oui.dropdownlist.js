@@ -219,6 +219,16 @@
 				opt.change = $.isBoolean($.getParam(opt, 'onchange,change'), true);
 
 				opt.showSearch = $.isBoolean($.getParam(opt, 'showSearch,showForm,showsearch,search'), false);
+
+				opt.searchFields = $.getParam(opt, 'searchFields');
+				if (!$.isArray(opt.searchFields)) {
+					opt.searchFields = $.isString(opt.searchFields, true) ? opt.searchFields.split(/[,;|]/g) : [];
+				}
+				var searchCode = $.isBoolean($.getParam(opt, 'searchCodeField,searchCode'), false);
+				if (searchCode) {
+					opt.searchFields.push('code');
+				}
+
 				opt.realSearch = $.isBoolean($.getParam(opt, 'realSearch'), false);
 				opt.clearSearch = $.isBoolean($.getParam(opt, 'clearSearch'), true);
 
@@ -916,7 +926,7 @@
 							css = elem.className,
 							lbl = elem;
 
-						if (opt.focusable) {
+						if (opt.focusable && !opt.showSearch) {
 							//防止mousedown事件冒泡，保持控件不失去焦点
 							$.cancelBubble(ev);
 						}
@@ -1442,8 +1452,9 @@
 						nodes = $.extend([], results);
 					});
 				} else {
-					//var isSearchCode = opt.searchFields.indexOf('code') > -1, dic = {};
-					var isSearchCode = false, dic = {};
+					//var isSearchCode = (opt.searchFields || '').indexOf('code') > -1, dic = {};
+					var isSearchCode = opt.searchFields.indexOf('code') > -1, dic = {};
+					//var isSearchCode = false, dic = {};
 					for (var k in ddl.nodes) {
 						var n = ddl.nodes[k], k = n.id, code = n.data.code || '',
 							text = n.text || '';
@@ -1624,6 +1635,8 @@
 			display: false,
 			//是否显示搜索
 			showSearch: undefined,
+			//搜索字段，默认只搜索显示的名称，也可以指定code（搜索code字段）
+			searchFields: '',
 			//实时搜索
 			realSearch: undefined,
 			//选中搜索项后清除搜索
