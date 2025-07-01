@@ -926,7 +926,7 @@
 							css = elem.className,
 							lbl = elem;
 
-						if (opt.focusable && !opt.showSearch) {
+						if (opt.focusable && (!opt.showSearch && !opt.editable)) {
 							//防止mousedown事件冒泡，保持控件不失去焦点
 							$.cancelBubble(ev);
 						}
