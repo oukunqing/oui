@@ -3350,7 +3350,7 @@
 				}
 
 				// 被禁用的节点，不允许回调返回结果
-				if (node.disabled && !opt.fullCallback) {
+				if (node && node.disabled && !opt.fullCallback) {
 					return this;
 				}
 
