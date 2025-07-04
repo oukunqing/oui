@@ -446,8 +446,18 @@
 				return Config.IdPrefix + id + '_' + nodeId + (postfix || '');
 			},
 			buildNodeId: function (nodeId, nodeType) {
-				var type = nodeType || '';
-				return (type ? type + '_' : '') + nodeId;
+				var type = $.isString(nodeType, true) ? nodeType : '',
+					prefix = (type ? type + '_' : '');
+
+				if ($.isArray(nodeId)) {
+					var arr = [], c = nodeId.length;
+					for (var i = 0; i < c; i++) {
+						arr.push(prefix + nodeId[i]);
+					}
+					return arr;
+				} else {
+					return prefix + nodeId;
+				}
 			},
 			buildCacheId: function (treeId) {
 				return Config.IdPrefix + treeId;
@@ -4936,6 +4946,12 @@
 		sortDown: function (nodes, num, callback) {
 			return Factory.eachNodeIds(this.cache.nodes, nodes, 'sortDown', num, callback), this;
 		},
+		buildId: function (id, type) {
+			return Factory.buildNodeId(id, type);
+		},
+		buildNodeId: function (id, type) {
+			return Factory.buildNodeId(id, type);
+		},
 		getNodeIds: function(types) {
 			var nodes = [], node, 
 				arrType = $.isArray(types) ? types : $.isString(types, true) ? types.split(/[,|;]/g) : [],
@@ -5205,6 +5221,12 @@
 		},
 		collapseType: function (id, types, linkage) {
 			return Factory.action(id, 'expandType', types, linkage, false);
+		},
+		buildId: function (id, type) {
+			return Factory.buildNodeId(id, type);
+		},
+		buildNodeId: function (id, type) {
+			return Factory.buildNodeId(id, type);
 		}
 	});
 
