@@ -790,6 +790,7 @@
 				opt.showCount = $.isBoolean($.getParam(opt, 'showCount,showcount'), false);
 				opt.hideCountZero = $.isBoolean($.getParam(opt, 'hideCountZero,hideZero,hidecountZero,hidezero'), false);
 				opt.showDesc = $.isBoolean($.getParam(opt, 'showDesc,showdesc'), false);
+				opt.descField = $.getParam(opt, "descField") || 'desc';
 
 				opt.showButton = $.isBoolean($.getParam(opt, 'showButton,showbutton'), false);
 				opt.moveAble = $.isBoolean($.getParam(opt, 'moveAble,moveable'), true);
@@ -2953,7 +2954,7 @@
 				if (!$.isArray(list) || list.length <= 0) {
 					return this;
 				}
-				var i, d, type, ptype, iconType, nid, pnid, text, desc, code, p, node, 
+				var i, d, type, ptype, iconType, nid, pnid, text, desc, code, data, p, node, 
 					showStatus, showType, status, status2,
 					isSearchCode = opt.searchFields.indexOf('code') > -1;
 
@@ -2961,20 +2962,21 @@
 					if (typeof (d = list[i]).id === 'undefined' || d.except) {
 						continue;
 					}
+					data = $.extend({}, d.data || d);
 					type = d.nodeType || d.node || par.type;
 					ptype = d.pnodeType || d.pnode || par.ptype || type;
 					iconType = d.iconType || par.iconType || type;
 					nid = Factory.buildNodeId(d.id, type);
 					pnid = Factory.buildNodeId(d.pid, ptype);
 					text = (d.name || '').toString().trim().escapeHtml();
-					desc = (d.desc || '').toString().trim();
+					desc = opt.showDesc ? (d.desc || data[opt.descField.toString()] || '').toString().trim() : '';
 					code = (code || '').toString().trim();
 					if (desc) {
 						desc = desc.escapeHtml();
 					}
 					p = {
-						data: d.data || d, text: text,
-						title: text + (isSearchCode && code && code !== d.name ? ' [' + code + ']' : ''),
+						data: data, text: text,
+						title: opt.showTitle ? text + (isSearchCode && code && code !== d.name ? ' [' + code + ']' : '') : '',
 						nid: nid, pnid: pnid, type: type, ptype: ptype,
 						id: Factory.buildElemId(tid, nid),
 						pid: Factory.buildElemId(tid, pnid),
@@ -4585,6 +4587,8 @@
 				showCheck: undefined,
 				//是否显示描述
 				showDesc: undefined,
+				//若未指定desc内容，以另外的字段代替desc字段
+				descField: undefined,
 				//是否显示按钮
 				showButton: undefined,
 				//是否显示上移/下移按钮
