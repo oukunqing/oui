@@ -3730,6 +3730,10 @@
 			}
 
 			Factory.checkedCallback(that, that.tree, ev).setTargetValue(that, that.tree, true);
+			
+			if ($.isBoolean(ev, false)) {
+				that.position();
+			}
 
 			return that;
 		},
@@ -3889,7 +3893,8 @@
 		},
 		setSelected: function (selected, ev) {
 			var that = this.self(), opt = that.tree.options, 
-				set = $.isBoolean(selected, !that.selected);
+				set = $.isBoolean(selected, !that.selected),
+				position = $.isBoolean(ev, false);
 
 			if (set) {
 				if (that.disabled || !Factory.isReturnType(that.tree, that.type)) {
@@ -3924,8 +3929,13 @@
 				}
 			}
 
-			return that.setParam('selected', set).setSelectedClass()
-				.setStoreCache('selected', that, set);
+			that.setParam('selected', set).setSelectedClass().setStoreCache('selected', that, set);
+
+			if (position) {
+				that.position();
+			}
+
+			return that;
 		},
 		setDisabled: function (disabled) {
 			var that = this.self();
@@ -4156,11 +4166,11 @@
 			$.console.log('that.element:', that.element, offsetY);
 			return selected ? that.setSelected(true) : that;
 		},
-		select: function (selected) {
-			return this.self().setSelected($.isBoolean(selected, true));
+		select: function (selected, position) {
+			return this.self().setSelected($.isBoolean(selected, true), position);
 		},
-		check: function (checked) {
-			return this.self().setChecked($.isBoolean(checked, true));
+		check: function (checked, position) {
+			return this.self().setChecked($.isBoolean(checked, true), position);
 		},
 		getIconClass: function () {
 			var that = this.self(),
@@ -5172,14 +5182,14 @@
 		updateDesc: function (id, nodes, texts) {
 			return Factory.func(id, nodes, 'updateDesc', texts);
 		},
-		select: function (id, nodes, selected) {
-			return Factory.func(id, nodes, 'select', selected);
+		select: function (id, nodes, selected, position) {
+			return Factory.func(id, nodes, 'select', selected, position);
 		},
 		delete: function (id, nodes) {
 			return Factory.func(id, nodes, 'delete');
 		},
-		selected: function (id, nodes, selected) {
-			return Factory.func(id, nodes, 'select', selected);
+		selected: function (id, nodes, selected, position) {
+			return Factory.func(id, nodes, 'select', selected, position);
 		},
 		checked: function (id, nodes, checked, types) {
 			return Factory.func(id, nodes, 'checked', checked, types);
