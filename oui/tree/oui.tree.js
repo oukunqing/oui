@@ -2988,12 +2988,40 @@
 					};
 					showStatus = $.isBooleans([d.showStatus, opt.showStatus], false);
 					showType = $.isBooleans([d.showType, opt.showType], false);
+					/*
 					status = d.status;
 					status2 = d[opt.statusField];
 
 					if (showStatus && (!$.isUndefined(status) || !$.isUndefined(status2))) {
+
 						if (!$.isUndefinedOrNull(status2)) {
 							status = status2;
+						}
+						d.icon = $.extend({}, {status: status ? 'on' : 'off'}, d.icon);
+					}
+					*/
+					status = parseInt(d.status, 10);
+					status2 = parseInt(d[opt.statusField], 10);
+
+					if (showStatus) {
+						// 子节点状态分为两种模式：1.跟随模式，2.自由模式
+						// 跟随模式是 上级节点“在线”时，子节点可能“在线”，也可能“离线”；上级节点“离线”时，子节点必须“离线”
+						// 自由模式是 子节点状态不跟随上级节点
+						// 默认是跟随模式
+						if (d.freedom) {
+							if (!isNaN(status2)) {
+								status = status2;
+							} else if (isNaN(status)) {
+								status = 0;
+							}
+						} else {
+							if (!isNaN(status)) {
+								if (status && d.code && !isNaN(status2) && !status2) {
+									status = status2;
+								}
+							} else {
+								status = 0;
+							}
 						}
 						d.icon = $.extend({}, {status: status ? 'on' : 'off'}, d.icon);
 					}
