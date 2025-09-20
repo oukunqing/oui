@@ -153,6 +153,7 @@
 }
 label.oui-ddl-label {
     font-size: 14px;
+    font-family: Consolas,宋体;
     height: 30px;;
     line-height: 30px;
     padding: 0 9px;
@@ -167,6 +168,8 @@ label.oui-ddl-label span {
 	float: none;
 	line-height: 30px;
 	overflow: hidden;
+    font-size: 14px;
+    font-family: Consolas,宋体;
 }
 
 label.oui-ddl-label i {

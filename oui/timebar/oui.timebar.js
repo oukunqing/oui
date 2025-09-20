@@ -82,10 +82,10 @@
                     ] : [];
 
                 if (opt.showOrigin) {
-                    html.push('<a class="ori"></a>');
+                    html.push('<a class="ori" title="起始时间"></a>');
                 }
                 if (opt.showReload) {
-                    html.push('<a class="rel"></a>');
+                    html.push('<a class="rel" title="当前时间"></a>');
                 }
 
                 bar.className = 'oui-timebar-bar';
