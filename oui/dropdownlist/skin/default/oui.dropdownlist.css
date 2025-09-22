@@ -3,7 +3,8 @@
 	min-width: 40px;
 	box-sizing: border-box;
 	/*border-radius: 5px;*/
-	font-size:14px;font-family:Arial,宋体,微软雅黑;
+	font-size:14px;
+	font-family:Arial,宋体,微软雅黑;
 }
 
 .oui-ddl ul,
@@ -153,7 +154,6 @@
 }
 label.oui-ddl-label {
     font-size: 14px;
-    font-family: Consolas,宋体;
     height: 30px;;
     line-height: 30px;
     padding: 0 9px;
@@ -169,7 +169,11 @@ label.oui-ddl-label span {
 	line-height: 30px;
 	overflow: hidden;
     font-size: 14px;
-    font-family: Consolas,宋体;
+}
+
+.oui-ddl-panel li.oui-ddl-fixedwidth label span {
+	font-size: 15px;
+    font-family: Consolas;	
 }
 
 label.oui-ddl-label i {

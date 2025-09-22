@@ -482,8 +482,11 @@
 								(desc && txt !== desc ? '<span class="oui-ddl-li-txt i-t">' + desc + '</span>' : '');
 
 						html.push([
-							'<li class="oui-ddl-item', opt.tree ? ' oui-ddl-tree-item' : '', dr.disabled ? ' oui-ddl-item-disabled' : '', '"',
-							' style="',
+							'<li class="oui-ddl-item', 
+								opt.tree ? ' oui-ddl-tree-item' : '',
+								opt.fixedWidth ? ' oui-ddl-fixedwidth' : '', 
+								dr.disabled ? ' oui-ddl-item-disabled' : '', 
+							'" style="',
 							opt.layout !== Config.Layout.List ? 'float:left;' : '',
 							opt.layout === Config.Layout.Grid ? 'min-width:' + Factory.getStyleSize(minWidth || opt.itemWidth) + ';' : '',
 							'" opt-idx="', (num + i + 1), '" data-value="', val.toString().replace(/["]/g, '&quot;'), '"',
@@ -1629,6 +1632,8 @@
 			buttonLimit: undefined,
 			//选项文字对齐方式：left,center,right
 			textAlign: '',
+			//是否等宽字体
+			fixedWidth: false,
 			//是否显示序号(行号)
 			number: false,
 			//是否显示值内容
