@@ -508,7 +508,7 @@
 								'"></span>'
 							].join('') : '',
 							'<input class="oui-ddl-chb"', checked, disabled,
-							' type="', opt.multi ? 'checkbox' : 'radio', '"',
+							' type="', ((!dr.single || !opt.mixed) && opt.multi) ? 'checkbox' : 'radio', '"',
 							' id="', chbId, '"',
 							' name="', key, '"',
 							' value="', val, '"',
@@ -613,7 +613,7 @@
 						label: chb.parentNode,
 						input: chb,
 						disabled: chb.disabled ? true : false,
-						multi: opt.multi
+						multi: opt.multi && (!opt.mixed || !dr.single)
 					}));
 					that.indexs[chb.id] = i;
 				}
@@ -1290,7 +1290,8 @@
 						}
 						if (nid = $.getAttribute(elem, 'nid')) {
 							if (node = Factory.getNodeCache(ddl, nid)) {
-								if (ddl.options.multi) {
+								//if (ddl.options.multi) {
+								if (node.multi) {
 									node.set(true);
 									ddl.callback(ddl.options.callbackLevel);
 								} else {
@@ -1533,16 +1534,20 @@
 			};
 			return that;
 		},
-		set: function (checked, clickEvent) {
+		set: function (checked, clickEvent, clickNode) {
 			var that = this;
-			if (that.disabled) {
+			if (that.disabled || that.checked === checked) {
 				return that;
 			}
 			$.setClass(that.item, 'cur', checked);
 			that.checked = checked;
+			
+			var multi = clickNode ? clickNode.multi : true;
+			
 			if (that.input.type === 'checkbox') {
 				//复选框 点击事件 负负得正
-				that.input.checked = clickEvent ? !that.checked : that.checked;
+				//若是 复选、单选混合时，当前为单选时，则所有复选框取消勾选
+				that.input.checked = (clickEvent && multi) ? !that.checked : that.checked;
 			} else {
 				that.input.checked = that.checked;
 			}
@@ -1654,6 +1659,8 @@
 			border: false,
 			//是否多选，默认多选
 			multi: true,
+			//是否混合（在多选模式下包含单选项）
+			mixed: false,
 			//默认显示行数（列表模式下有效）
 			lines: undefined,
 			//多选项分隔符号
@@ -2135,17 +2142,34 @@
 				return that;
 			}
 
+			function _clickAction (nodes, node, multi) {
+				if (!multi) {
+					for (var i = 0; i < nodes.length; i++) {
+						nodes[i].set(nodes[i].idx === node.idx, true, node);
+					}
+					return;
+				}				
+				for (var i = 0; i < nodes.length; i++) {
+					if (!nodes[i].multi) {
+						nodes[i].set(false, true, node);
+					}
+				}
+			}
+
 			if (multi) {
 				//检测多选项的数量限制
 				if (!node.checked && opt.maxLimit && that.list(true).length >= opt.maxLimit) {
 					return that.msg();
 				}
-				node.set(!node.checked, par.click);
+				if (node.multi) {
+					node.set(!node.checked, par.click);
+					_clickAction(nodes, node, true);
+				} else {
+					_clickAction(nodes, node);
+				}
 				$.setClass(node.label, 'oui-ddl-hover', false);
 			} else {
-				for (var i = 0; i < nodes.length; i++) {
-					nodes[i].set(nodes[i].idx === node.idx, true);
-				}
+				_clickAction(nodes, node);
 				if (!par.show && par.click) {
 					that.hide();
 				}

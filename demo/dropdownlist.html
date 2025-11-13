@@ -6,8 +6,8 @@
 	<style type="text/css">
 		
 		body {font-size: 14px;}
-		select {min-width:240px;border:solid 1px #ccc; border-radius:5px;padding:0 5px;margin:0px;}
-		input {outline:none;padding:0 5px; border-radius:5px;min-width:240px;border:solid 1px #ccc;}
+		select {min-width:400px;border:solid 1px #ccc; border-radius:5px;padding:0 5px;margin:0px;}
+		input {outline:none;padding:0 5px; border-radius:5px;min-width:400px;border:solid 1px #ccc;}
 		table {}
 		table td {padding:0 10px 10px 0;}
 		
@@ -17,21 +17,21 @@
 </head>
 <body style="background: #eee;">
 <input type="text" />
+<select id="Enable" class="form-control select" data-type="int">
+    <option value="">未设置</option>
+    <option value="-1">是否启用</option>
+    <option value="1">启用</option>
+    <option value="0">禁用</option>
+</select>
 <br />
 <br />
 <table cellpadding="0" cellspacing="0">
 	<tr>
-		<td>
-			<select id="Enable" class="form-control select" data-type="int">
-                <option value="">未设置</option>
-                <option value="-1">是否启用</option>
-                <option value="1">启用</option>
-                <option value="0">禁用</option>
-            </select>
-		</td>
+		<td colspan="3"><select id="DeviceType" style="width:1000px;" data-type="int"></select></td>
 	</tr>
 	<tr>
-		<td><select id="DeviceType" style="" data-type="int"></select></td>
+		<td><select id="DeviceType1" data-type="int"></select>
+		</td>
 		<td><select id="ServerType" style="" onchange="print1(this);">
 			<option value="">请选择服务类型</option>
 		</select></td>
@@ -125,11 +125,56 @@ window.onload = function() {
 		{ id: 1, name: '视频设备', desc: '400万像素高清摄像机' },
 		{ id: 2, name: 'DTU设备', desc: '' },
 		{ id: 3, name: 'LED设备', desc: 'LED显示屏' },
-		{ id: 4, name: '雷达测距设备', desc: '', disabled: false },
-		{ id: 5, name: '传感器设备', desc: '传感器设备' },
-		{ id: 6, name: '激光测距设备', desc: '' }
+		{ id: 4, name: '传感器设备', desc: '传感器设备', single: true },
+		{ id: 5, name: '激光测距设备', desc: '', single: true },
+		{ id: 6, name: '智能安全带', desc: '', single: true },
+		{ id: 7, name: '北斗定位', desc: '', single: true },
+		{ id: 8, name: '雷达测距设备', desc: '', disabled: false },
 	];
 	var k = 'DeviceType';
+	$.dropdownlist({
+		id: k,
+		items: types,
+		//single: true,
+		// 是否多选，默认就是多选，所以这个参数可以不用加
+		multi: true,
+		// 是否启用混合模式，默认是不启用的，这个属于特殊应用场景
+		mixed: true,
+		//
+		value: '2,3',
+		layout: 'list',
+		boxWidth: 'follow',
+		itemBorder: true,
+		//回调等级：0-选项实时回调，1-全选/反选等按钮事件回调，2-确定按钮事件回调
+		//submit: 0,
+        callbackLevel: 0,
+       
+		title: '选择设备类型',
+		//是否显示“确定”按钮，复选框模式时默认为显示，如果不想显示，需要指定为false
+		button: false,
+		//是否显示值内容
+		display: true,
+		//number:true,
+		//是否显示选择框，默认：复选显示，单选不显示
+		//choose: true,
+		//按钮位置： left,center,right
+		//buttonPosition: 'right',
+		callback: function (value, initial, data, ddl) {
+			$.console.log(ddl.id, '[callback]', ', value:', value, ', initial:', initial, ', data:', data);
+		}
+	});
+
+	var types = [
+		{ id: 1, name: '视频设备', desc: '400万像素高清摄像机' },
+		{ id: 2, name: 'DTU设备', desc: '' },
+		{ id: 3, name: 'LED设备', desc: 'LED显示屏' },
+		{ id: 4, name: '传感器设备', desc: '传感器设备' },
+		{ id: 5, name: '激光测距设备', desc: ''},
+		{ id: 6, name: '智能安全带', desc: '' },
+		{ id: 7, name: '北斗定位', desc: '' },
+		{ id: 8, name: '雷达测距设备', desc: '', disabled: false },
+	];
+	var k = 'DeviceType1';
 	$.dropdownlist({
 		id: k,
 		items: types,

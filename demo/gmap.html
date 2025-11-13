@@ -2,20 +2,23 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>网格地图</title>
+    <style type="text/css">
+
+    </style>
 </head>
 <body>
-    <div style="width:600px;height:600px;border:solid 1px #f00;float:left;">
-        <canvas id="gridCanvas"></canvas>
+    <div style="width:1000px;height:500px;border:solid 1px #f00;">
+        <canvas id="gridCanvas" width="1000" height="500"></canvas>
     </div>
-    <div style="width:600px;height:600px;border:solid 1px #f00;float:left;margin-left:50px;">
+    <div style="width:600px;height:600px;border:solid 1px #f00;display: none;">
         <canvas id="gridCanvas2"></canvas>
     </div>
 </body>
 </html>
 <script type="text/javascript" src="../oui/oui.js?1"></script>
-<script type="text/javascript" src="../oui/gridmap/oui.gridmap.js"></script>
+<script type="text/javascript" src="../oui/gmap/oui.gmap.js"></script>
 <script type="text/javascript">
 window.onload = function() {
     var points = [{
@@ -39,8 +42,15 @@ window.onload = function() {
 
     points[0].lineTo = points[1];
 
-	$.gridmap('gridCanvas', {}).update(points);
-    $.gridmap('gridCanvas2', {vertical:true}).update(points);
+	$.gmap('gridCanvas', {}).size().update(points);
+
+    window.setTimeout(function() {
+        $.gmap('gridCanvas').scale(100).center({latitude: 29.8732976498,
+                longitude: 121.6011577513,
+                name: 'C2-9364'});
+    }, 3000);
+
+    $.gmap('gridCanvas2', {vertical:true}).size().update(points);
 };
 
 window.onresize = function() {

@@ -75,6 +75,21 @@
 			}
 			return false;
     	},
+	    getPolygonCenter: function (polygon) {
+	        let sumLat = 0;
+	        let sumLon = 0;
+	        var numPoints = polygon.length;
+	        for (var i = 0; i < numPoints; i++) {
+	            sumLat += polygon[i].latitude;
+	            sumLon += polygon[i].longitude;
+	        }
+	        const centerLat = sumLat / numPoints;
+	        const centerLon = sumLon / numPoints;
+
+	        return {
+	            latitude: centerLat, longitude: centerLon
+	        };
+	    },
     	buildScaleBar: function (map) {
     		var div = document.createElement('div');
     		div.id = 'oui-gridmap-tools-' + map.id;
@@ -223,6 +238,9 @@
 	        map.state.offsetY = 0;
 	        return this.drawGridMap(map, false);
     	},
+    	PolygonCenter: function(mai) {
+    		return this;
+    	},
     	getCanvasCenter: function (map) {
     		var canvas = map.canvas,
     			state = map.state,
@@ -359,18 +377,87 @@
 
     		return $.extend(point, { x: x, y: y });
     	},
-    	drawPoint: function (canvas, ctx, point, pointSize, state, origin) {
+    	drawLine: function (canvas, ctx, state, point1, point2, lineColor, lineWidth) {
+    		ctx.beginPath();
+
+    		// 将世界坐标转换为屏幕坐标
+            var px1 = point1.x * state.scale + state.offsetX;
+            var py1 = point1.y * state.scale + state.offsetY;
+            var px2 = point2.x * state.scale + state.offsetX;
+            var py2 = point2.y * state.scale + state.offsetY;
+
+    		ctx.moveTo(px1, py1);
+    		ctx.lineTo(px2, py2);
+    		ctx.strokeStyle = lineColor;
+    		ctx.lineWidth = lineWidth;
+    		ctx.lineCap = 'round';
+    		ctx.stroke();
+            ctx.fill();
+
+    		return this;
+    	},
+    	drawDashedLine: function (canvas, ctx, state, point1, point2, dashLength, gapLength, lineColor, lineWidth) {
+    		ctx.beginPath();
+    		ctx.strokeStyle = lineColor;
+    		ctx.lineWidth = lineWidth;
+
+            var px1 = point1.x * state.scale + state.offsetX;
+            var py1 = point1.y * state.scale + state.offsetY;
+            var px2 = point2.x * state.scale + state.offsetX;
+            var py2 = point2.y * state.scale + state.offsetY;
+
+    		var dx = px2 - px1,
+    			dy = py2 - py1,
+    			distance = Math.sqrt(dx * dx + dy * dy),
+    			angle = Math.atan2(dy, dx),
+    			//虚线总长度（段长+间距）
+    			dashTotal = dashLength + gapLength,
+    			//虚线段数
+    			segments = Math.ceil(distance / dashTotal);
+
+    		for (var i = 0; i < segments; i++) {
+    			//计算当前段的起点和终点
+    			var segmentStart = i * dashTotal,
+    				segmentEnd = segmentStart + dashLength,
+    				//如果超出总距离，调整终点
+    				actualEnd = Math.min(segmentEnd, distance);
+
+    			var x1 = px1 + segmentStart * Math.cos(angle),
+    				y1 = py1 + segmentStart * Math.sin(angle),
+    				x2 = px2 + actualEnd * Math.cos(angle),
+    				y2 = py2 + actualEnd * Math.sin(angle);
+
+    			ctx.moveTo(x1, y1);
+    			ctx.lineTo(x2, y2);
+    		}
+    		ctx.stroke();
+            ctx.fill();
+
+            $.console.log('drawDashedLine:', point1, point2);
+
+    		return this;
+    	},
+    	drawPoint: function (canvas, ctx, point, state, origin) {
+    		var that = this;
     		// 将世界坐标转换为屏幕坐标
             var screenX = point.x * state.scale + state.offsetX;
             var screenY = point.y * state.scale + state.offsetY;
+            var radius = point.radius,
+            	diameter = radius * 2;
             
-            if (screenX >= -pointSize && screenX <= canvas.width + pointSize && 
-                screenY >= -pointSize && screenY <= canvas.height + pointSize) {
+            if (screenX >= -diameter && screenX <= canvas.width + diameter && 
+                screenY >= -diameter && screenY <= canvas.height + diameter) {
                 ctx.beginPath();
-                ctx.arc(screenX, screenY, pointSize / 2, 0, Math.PI * 2);
+                ctx.arc(screenX, screenY, radius, 0, Math.PI * 2);
                 ctx.fill();
             }
-    		return this;
+
+            if (point.dashTo) {
+            	that.drawDashedLine(canvas, ctx, state, point, point.dashTo, 1, 5, '#f00', 1);
+            } else if (point.lineTo) {
+            	that.drawLine(canvas, ctx, state, point, point.lineTo, '#f00', 1);
+            }
+    		return that;
     	},
     	drawPoints: function (map) {
     		var that = this,
@@ -392,30 +479,38 @@
 
 			// 绘制点
             ctx.fillStyle = colors[0];
-            var pointSize = 6; // 点直径固定为3px
+            var pointRadius = 3; // 点直径固定为3px
 
     		var p, p0;
     		for (var i = 0; i < len; i++) {
-    			ctx.fillStyle = colors[i % colorCount];
     			p = points[i];
-    			p.radius = pointSize / 2;
+    			p.radius = p.radius || pointRadius;
+
+    			ctx.fillStyle = p.color || colors[i % colorCount];
 
     			if (0 === i) {
     				p0 = p = p.latitude ? Factory.calcPointPosition(map, p) : p;
-    			console.log('i:', i, ',p:', p);
-    				that.drawPoint(canvas, ctx, p, pointSize, map.state, true);
+    				that.drawPoint(canvas, ctx, p, map.state, true);
     			} else {
 	    			p = that.getPointPosition(map, p0, p, opt.vertical);
-    			console.log('i:', i, ',p:', p);
-    				that.drawPoint(canvas, ctx, p, pointSize, map.state, true);
+    				that.drawPoint(canvas, ctx, p, map.state, true);
 	    		}
     		}
 
-    		$.console.log('points:', points);
+    		if($.isDebug()) {
+	    		$.console.log('points:', points);
+	    	}
 
     		return this;
     	},
     	drawGridMap: function (map, resize) {
+    		var that = this,
+    			canvas = map.canvas,
+    			ctx = map.ctx;
+
+            // 清除Canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
     		if (resize) {
     			if (Factory.setCanvasSize(map)) {
     				Factory.setRatioRule(map).drawGrid(map).drawPoints(map);
@@ -424,6 +519,9 @@
     			Factory.setCanvasSize(map);
     			Factory.setRatioRule(map).drawGrid(map).drawPoints(map);
     		}
+    		if ($.isDebug()) {
+	    		$.console.log('state:', map.state);
+	    	}
     		return this;
     	},
     	showScaleRatio: function (map) {
@@ -559,6 +657,8 @@
 
     		Factory.buildScaleBar(that).drawGridMap(that);
 
+    		Factory.zoomAtCenter(that, 0, opt.scaleLevel);
+
     		$.addListener(window, 'resize', function() {
     			$.debounce({delay: 50, timeout: 3000}, function() {
     				Factory.drawGridMap(that);
@@ -605,17 +705,24 @@
 
 			$.addListener([canvas], 'wheel', function(e) {
 	            e.preventDefault();
-
+	            /*
 	            var left = canvas.parentNode.offsetLeft,
 	                top = canvas.parentNode.offsetTop;
 
 	            // 获取鼠标位置相对于画布的坐标
 	            const mouseX = e.clientX - left;
 	            const mouseY = e.clientY - top;
+	            */
+	            var left = e.clientX - canvas.getBoundingClientRect().left,
+	            	top = e.clientY - canvas.getBoundingClientRect().top;
+
+ 				const mouseX = e.clientX - canvas.getBoundingClientRect().left;
+            	const mouseY = e.clientY - canvas.getBoundingClientRect().top;
 
 	            //const delta = e.deltaY > 0 ? 1 / 1.1 : 1.1;
 	            const delta = e.deltaY > 0 ? -1 : 1;
-	            Factory.zoomAtPoint(that, delta, mouseX, mouseY, true);
+	            //Factory.zoomAtPoint(that, delta, mouseX, mouseY, true);
+	            Factory.zoomAtCenter(that, delta, true);
 	        });
 
 	        $.addListener([canvas], 'click', function(e) {

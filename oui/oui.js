@@ -1403,10 +1403,46 @@
                 return (prefix || '') + data;
             }
             return data;
-        }/*,
-        toJsonFormat: function (json) {
+        },
+        calcLocationDistance: function (p1, p2, earthRadius) {
+            if (!p1 || !p2) {
+                return -1;
+            }
+            var lat1 = $.getParam(p1, 'latitude,lat,x', 0), lat2 = $.getParam(p2, 'latitude,lat,x', 0),
+                lon1 = $.getParam(p1, 'longitude,lon,y', 0), lon2 = $.getParam(p2, 'longitude,lon,y', 0);
 
-        }*/
+            if (!$.isNumber(lat1) || !$.isNumber(lat2) || !$.isNumber(lon1) || !$.isNumber(lon2)) {
+                return -1;
+            }
+
+            var EarthRadius = earthRadius || 6378137,
+                dLat = (lat2 - lat1) * Math.PI / 180,
+                dLng = (lon2 - lon1) * Math.PI / 180,
+                a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + 
+                    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) * Math.sin(dLng / 2),
+                c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)),
+                d = EarthRadius * c;
+
+            return d;
+        },
+        calcRectangleDistance: function (p1, p2, ratio) {
+            if (!p1 || !p2) {
+                return null;
+            }
+            var lat1 = $.getParam(p1, 'latitude,lat,x', 0), lat2 = $.getParam(p2, 'latitude,lat,x', 0),
+                lon1 = $.getParam(p1, 'longitude,lon,y', 0), lon2 = $.getParam(p2, 'longitude,lon,y', 0);
+
+            if (!$.isNumber(lat1) || !$.isNumber(lat2) || !$.isNumber(lon1) || !$.isNumber(lon2)) {
+                return -1;
+            }
+
+            var Ratio = ratio || 111320;
+            var w = lat2 > lat1 ? lat2 - lat1 : lat1 - lat2, 
+                h = lon2 > lon1 ? lon2 - lon1 : lon1 - lon2,
+                d = Math.sqrt(w * w + h * h) * Ratio;
+
+            return d;
+        }
     }, '$');
 }(OUI);
 
@@ -2857,7 +2893,7 @@
             var a = this.delDecimalPoint(), b = arg.delDecimalPoint(), n = this.getDecimalLen(), m = arg.getDecimalLen();
             return (a / b).mul(Math.pow(10, m - n));
         },
-        round: function (len) {
+        round: function (len, force) {
             var m = Math.pow(10, len || 0);
             return Math.round(this * m) / m;
         },

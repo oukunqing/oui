@@ -1312,7 +1312,7 @@
                     type: opt.type, async: opt.async !== false,
                     dataType: opt.dataType,   //xml,html,script,json,jsonp,text
                     //contentType: "application/json",
-                    url: opt.url, data: opt.data,
+                    url: opt.url || opt.api, data: opt.data,
                     error: function (jqXHR, textStatus, errorThrown) {
                         showAjaxError(jqXHR, textStatus, errorThrown);
                     },
