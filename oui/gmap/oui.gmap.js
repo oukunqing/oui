@@ -10,6 +10,10 @@
 !function ($) {
     'use strict';
 
+    var Config = {
+        TextFont: '12px Arial'
+    };
+
     var Cache = {
     	caches: {},
     	getCache: function(id) {
@@ -59,7 +63,7 @@
     	latLngToCanvas: function (map, lat, lng) {
     		const view = map.view, 
     			canvas = map.canvas,
-    			center = view.curCenter ? view.curCenter : view.defCenter;
+    			center = map.center();
 
             // 简化的经纬度到平面坐标的转换
             // 实际应用中可能需要使用墨卡托投影等更精确的方法
@@ -67,12 +71,66 @@
             const y = (center.latitude - lat) * view.scale + canvas.height / 2 + view.offsetY;
             return { x, y };
     	},
+        setTextPosition: function (position, pointPos, radius, fontSize) {
+            let textPos = {}, pos = pointPos;
+
+            switch(position){
+            case 1:
+                textPos = { x: pos.x - radius, y: pos.y - radius };
+                break;
+            case 2:
+                textPos = { x: pos.x, y: pos.y - radius };
+                break;
+            case 3:
+                textPos = { x: pos.x + radius, y: pos.y - radius };
+                break;
+            case 5:
+                textPos = { x: pos.x + radius, y: pos.y };
+                break;
+            case 7:
+                textPos = { x: pos.x - radius, y: pos.y + radius + fontSize };
+                break;
+            case 8:
+                textPos = { x: pos.x, y: pos.y + radius + fontSize };
+                break;
+            case 9:
+                textPos = { x: pos.x + radius, y: pos.y + radius + fontSize };
+                break;
+            }
+            return textPos;
+        },
+        setDistancePosition: function (position, pointPos, posTo, radius, fontSize) {
+            let distancePos = {}, pos = pointPos;
+
+            switch(position) {
+            case 0:
+                distancePos = { x: pos.x + radius * 2, y: pos.y + radius + fontSize };
+                break;
+            case 1:
+                distancePos = { x: posTo.x + radius * 2, y: posTo.y + radius + fontSize };
+                break;
+            case 2:
+                distancePos = { x: (pos.x + posTo.x) / 2, y: (pos.y + posTo.y) / 2 };
+                break;
+            }
+
+            return distancePos;
+        },
+        calcPolygonCenter: function (points) {
+            let len = points.length, i, lat = 0, lng = 0;
+            for (i = 0; i < len; i++) {
+                lat += points[i].latitude;
+                lng += points[i].longitude;
+            }
+            lat /= len;
+            lng /= len;
+
+            return { latitude: lat, longitude: lng };
+        },
     	render: function (map) {
     		const view = map.view, canvas = map.canvas, ctx = map.ctx;
 
     		ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    		console.log('scale:', view.scale);
 
             // 保存当前状态
             //ctx.save();
@@ -113,24 +171,103 @@
             }
             return this;
     	},
-    	drawPoint: function (point) {
+        drawLine: function (map, ctx, pos1, pos2, lineStyle) {
+            var that = this,
+                style = $.extend({
+                    color: '#f00',
+                    width: 1,
+                    dash: false
+                }, lineStyle);
+
+            ctx.beginPath();
+            ctx.setLineDash(!style.dash ? [] : style.dash);
+
+            ctx.moveTo(pos1.x, pos1.y);
+            ctx.lineTo(pos2.x, pos2.y);
+
+            ctx.strokeStyle = style.color;
+            ctx.lineWidth = style.width;
+            ctx.lineCap = 'round';
+
+            ctx.stroke();
+            ctx.fill();
+
+            return that;
+        },
+        drawText: function (ctx, text, pos, textStyle) {
+            let style = $.extend({color: '#333', font: Config.TextFont}, textStyle);
+            // 绘制标签
+            ctx.fillStyle = style.color;
+            ctx.font = style.font;
+            ctx.fillText(text, pos.x, pos.y);
+            return this;
+        },
+    	drawPoint: function (point, map, ctx) {
+            let that = this,
+                opt = map.options,
+                radius = point.radius || 4,
+                pos = that.latLngToCanvas(map, point.latitude, point.longitude),
+                posTo;
+
+            // 绘制点
+            ctx.beginPath();
+            ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2);
+            ctx.fillStyle = point.color || '#f00';
+            ctx.fill();
+            
+            if (opt.showLine && point.lineTo) {
+                posTo = that.latLngToCanvas(map, point.lineTo.latitude, point.lineTo.longitude);
+                that.drawLine(map, ctx, pos, posTo, $.extend({color: point.color}, point.lineStyle));
+            }
+
+            if (opt.showDistance && point.distanceTo) {
+                let distanceStyle = $.extend({ 
+                    font: '16px Arial', position: 0, maxDistance: 0, ratio: 1, decimal: 3, unit: 'm'
+                }, point.distanceStyle),
+                    ratio = distanceStyle.ratio || 1,
+                    fontSize = parseInt(distanceStyle.font, 10),
+                    distancePos = {},
+                    distance = 0;
+
+                distance = $.calcLocationDistance(point, point.distanceTo, opt.plane);
+
+                if (!distanceStyle.maxDistance || distance <= distanceStyle.maxDistance) {
+                    if (!posTo) {
+                        posTo = that.latLngToCanvas(map, point.lineTo.latitude, point.distanceTo.longitude);
+                    }
+
+                    distancePos = that.setDistancePosition(distanceStyle.position, pos, posTo, radius, fontSize);
+
+                    if (ratio > 1) {
+                        distance = (distance * ratio).round(distanceStyle.decimal);
+                    } else if (distance > 1000) {
+                        distance = (distance / 1000).round(distanceStyle.decimal);
+                        distanceStyle.unit = 'km';
+                    } else {
+                        distance = distance.round(distanceStyle.decimal);
+                    }
+
+                    let distanceText = distance + distanceStyle.unit;
+
+                    that.drawText(ctx, distanceText, distancePos, distanceStyle);
+                }
+            }
+
+            if (opt.showText) {
+                let text = point.text || point.name || '',
+                    textStyle = $.extend({ font: Config.TextFont, position: 3 }, point.textStyle),
+                    fontSize = parseInt(textStyle.font, 10),
+                    textPos = that.setTextPosition(textStyle.position, pos, radius, fontSize);
+
+                that.drawText(ctx, text, textPos, textStyle);
+            }
+
     		return this;
     	},
     	drawPoints: function (map) {
-    		const points = map.view.points, ctx = map.ctx;
+            const that = this, points = map.view.points, ctx = map.ctx;
     		points.forEach(point => {
-    			const pos = Factory.latLngToCanvas(map, point.latitude, point.longitude);
-
-    			// 绘制点
-                ctx.beginPath();
-                ctx.arc(pos.x, pos.y, 5, 0, Math.PI * 2);
-                ctx.fillStyle = '#e74c3c';
-                ctx.fill();
-                
-                // 绘制标签
-                ctx.fillStyle = '#333';
-                ctx.font = '12px Arial';
-                ctx.fillText(point.name, pos.x + 8, pos.y - 8);
+    			that.drawPoint(point, map, ctx);
     		});
     		return this;
     	},
@@ -138,15 +275,49 @@
 
     		return this;
     	},
-    	setCenter: function (map, point) {
-    		map.view.curCenter = {
-    			latitude: point.latitude,
-    			longitude: point.longitude
-    		};
-    		Factory.render(map);
-    		return this;
-    	},
+        setCenter: function (map, point) {
+            map.view.curCenter = {
+                latitude: point.latitude,
+                longitude: point.longitude,
+                height: point.height
+            };
+            return this;
+        },
+        setScale: function (map, scale) {
+            if ($.isNumber(scale) && scale > 0) {
+                map.view.scale = scale;
+            } else {
+                let view = map.view,
+                    center = map.center(),
+                    maxLat = 0, maxLng = 0,
+                    points = view.points, len = points.length;
+
+                for (var i = 0; i < len; i++) {
+
+                }
+
+            }
+            return this;
+        },
+        setOverview: function (map) {
+            let that = this, 
+                view = map.view, 
+                center = map.center(), 
+                scale = view.scale,
+                points = view.points;
+
+            if (points.length > 0) {
+                center = that.calcPolygonCenter(points);
+                console.log('overview:', center);
+                that.setCenter(map, center);
+            }
+
+            that.setScale(map, null);
+
+            return that;
+        },
     	handleMouseDown: function (e, map) {
+            $.cancelBubble(e);
     		if (e.ctrlKey || e.metaKey) {
     			return this;	
     		}
@@ -156,22 +327,27 @@
 	    		map.view.lastX = e.clientX - rect.left;
 	    		map.view.lastY = e.clientY - rect.top;
     		}
+            return this;
     	},
     	handleMouseMove: function (e, map) {
+            $.cancelBubble(e);
     		const view = map.view, canvas = map.canvas,
+                opt = map.options,
     		 	rect = canvas.getBoundingClientRect(),
 			 	mouseX = e.clientX - rect.left,
-             	mouseY = e.clientY - rect.top,
-    			center = view.curCenter ? view.curCenter : view.defCenter;
+             	mouseY = e.clientY - rect.top;
 
-    		console.log('center:', center);
-			
-            // 计算鼠标位置对应的经纬度
-            const mouseLat = center.latitude - (mouseY - canvas.height / 2 - view.offsetY) / view.scale,
-            	mouseLng = (mouseX - canvas.width / 2 - view.offsetX) / view.scale + center.longitude;
+			if (opt.showPosition && e.target === canvas) {
+                const center = map.center();
+                // 计算鼠标位置对应的经纬度
+                const mouseLat = center.latitude - (mouseY - canvas.height / 2 - view.offsetY) / view.scale,
+                	mouseLng = (mouseX - canvas.width / 2 - view.offsetX) / view.scale + center.longitude;
 
-            $.console.log('mouseLat:', mouseLat, ', mouseLng:', mouseLng, ', scale:', view.scale);
-            
+                if ($.isFunction(opt.positionCallback)) {
+                    opt.positionCallback({ latitude: mouseLat, longitude: mouseLng }, map);
+                }
+            }
+
 			if (!view.isDragging) {
 				return this;
 			}
@@ -190,7 +366,9 @@
             return this;
     	},
     	handleMouseUp: function (e, map) {
+            $.cancelBubble(e);
     		map.view.isDragging = false;
+            return this;
     	},
     	handleWheel: function (e, map) {
     		const view = map.view, canvas = map.canvas;
@@ -200,8 +378,8 @@
     		var rect = canvas.getBoundingClientRect(),
     			mouseX = e.clientX - rect.left,
     			mouseY = e.clientY - rect.top,
-    			center = view.curCenter ? view.curCenter : view.defCenter;
-            
+    			center = map.center();
+
             // 计算鼠标位置对应的经纬度
             const mouseLat = center.latitude - (mouseY - canvas.height / 2 - view.offsetY) / view.scale;
             const mouseLng = (mouseX - canvas.width / 2 - view.offsetX) / view.scale + center.longitude;
@@ -224,12 +402,40 @@
             
             // 重绘
             Factory.render(map);
+
+            return this;
     	}
     };
 
     function Map(options) {
     	var opt = $.extend({
-
+            canvas: null,
+            // 是否平面地图
+            plane: false,
+            // 是否垂直高度地图
+            vertical: false,
+            // 缩放比例
+            scale: 1,
+            // 缩放等级
+            scaleLevel: 1,
+            // 网格大小
+            gridSize: 50,
+            // 是否固定网格的大小
+            gridFixed: true,
+            // 是否自动全览
+            showOverview: false,
+            // 是否显示点的名称标签
+            showText: true,
+            // 是否显示两点间的连线
+            showLine: true,
+            // 是否计算并显示两点之间的距离
+            showDistance: true,
+            // 是否显示当前鼠标位置的经纬度
+            showPosition: true,
+            positionCallback: function(pos, map) {
+                $.console.log('latitude:', pos.latitude, ', longitude:', pos.longitude, ', scale:', map.view.scale, ', center: ', );
+            },
+            points: [],
     	}, options);
 
     	this.canvas = opt.canvas;
@@ -237,31 +443,28 @@
     	this.id = this.canvas.id;
     	this.options = opt;
     	this.view = {
-    		gridSize: 50,
-    		gridFixed: true,
+    		gridSize: opt.gridSize,
+    		gridFixed: opt.gridFixed,
     		defCenter: {
     			latitude: 0,
-    			longitude: 0
+    			longitude: 0,
+                height: 0
     		},
     		curCenter: null,
-            scale: 5,        // 缩放比例
-            offsetX: 0,      // X轴偏移
-            offsetY: 0,       // Y轴偏移
+            scale: opt.scale,   // 缩放比例
+            offsetX: 0,         // X轴偏移
+            offsetY: 0,         // Y轴偏移
 
             isDragging: false,
             lastX: 0,
             lastY: 0,
 
-            points: [{
-            	latitude: 29.8732976498,
-            	longitude: 121.6011577513,
-            	name: 'C2-9364'
-            },{
-            	latitude: 29.8732976498,
-            	longitude: 122.6011577513,
-            	name: 'C1-9123'
-            }]
+            points: []
     	};
+
+    	if ($.isArray(opt.points)) {
+    		this.view.points = opt.points;
+    	}
 
     	this.initial(opt);
     }
@@ -273,19 +476,18 @@
     		var box = canvas.parentNode;
 			if (box.tagName === 'DIV') {
 				box.style.position = 'relative';
+				box.style.overflow = 'hidden';
 				this.box = box;
 			}
 
-			$.addListener(window, 'resize', function() {
-    			$.debounce({delay: 50, timeout: 3000}, function() {
-    				that.size();
-    			});
+			$.addListener(window, 'resize', function(e) {
+                that.size();
     		});
 			
     		$.addListener(canvas, 'mousedown', function(e) {
     			Factory.handleMouseDown(e, that);
     		});
-    		canvas.addEventListener('mousemove', function(e) {
+    		$.addListener([canvas, document], 'mousemove', function(e) {
     			Factory.handleMouseMove(e, that);
     		});
     		$.addListener([canvas, document], 'mouseup', function(e) {
@@ -295,11 +497,19 @@
     			Factory.handleWheel(e, that);
     		});
 
+            if (opt.showOverview) {
+                Factory.setOverview(that);
+            }
     		return Factory.render(that), that;
     	},
+        config: function (cfg) {
+            var that = this;
+
+
+            return Factory.render(that), that;
+        },
     	size: function (size) {
     		var that = this;
-    		console.log('size:', size);
     		if (size && size.width && size.height) {
     			that.canvas.width = size.width;
     			that.canvas.height = size.height;
@@ -307,27 +517,57 @@
     			that.canvas.width = that.box.clientWidth;
     			that.canvas.height = that.box.clientHeight;
     		}
+            if (that.options.showOverview) {
+                Factory.setOverview(that);
+            }
     		return Factory.render(that), that;
     	},
-    	center: function (point) {
-    		var that = this;
+    	center: function (point, scale) {
+    		var that = this, view = that.view;
     		if (Factory.isPoint(point)) {
     			Factory.setCenter(that, point);
-    			return that;
+                if (scale) {
+                    Factory.setScale(that, scale);
+                }
+                return Factory.render(that), that;
     		}
-    		return that.view.center;
+    		return view.curCenter ? view.curCenter : view.defCenter;
     	},
-    	scale: function (level) {
+    	scale: function (scale) {
     		var that = this;
-    		if (!level) {
+    		if (!scale) {
     			return that.view.scale;
     		}
-    		that.view.scale = level;
+            Factory.setScale(that, scale);
+
     		return Factory.render(that), that;
     	},
-    	update: function (points) {
-			return this;
-    	}
+        overview: function () {
+            Factory.setOverview(this).render(this);
+            return this;
+        },
+    	update: function (points, append) {
+            var that = this;
+            if ($.isArray(points)) {
+                if (append) {
+                    that.view.points.concat(points);
+                } else {
+                    that.view.points = points;
+                }
+                if (that.options.showOverview) {
+                    Factory.setOverview(that);
+                }
+                Factory.render(that);
+            }
+            return that;
+    	},
+        append: function (points) {
+            return this.update(points, true);
+        },
+        clear: function () {
+            this.view.points = [];
+            return Factory.render(this), this;
+        }
     };
 
     $.extend({

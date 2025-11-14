@@ -1404,7 +1404,7 @@
             }
             return data;
         },
-        calcLocationDistance: function (p1, p2, earthRadius) {
+        calcLocationDistance: function (p1, p2, earthRadius, plane) {
             if (!p1 || !p2) {
                 return -1;
             }
@@ -1413,6 +1413,21 @@
 
             if (!$.isNumber(lat1) || !$.isNumber(lat2) || !$.isNumber(lon1) || !$.isNumber(lon2)) {
                 return -1;
+            }
+            if ($.isBoolean(earthRadius)) {
+                plane = earthRadius;
+                earthRadius = 0;
+            } else {
+                plane = $.isBoolean(plane, false);
+            }
+
+            if (plane) {
+                var Ratio = earthRadius || 111320;
+                var w = lat2 > lat1 ? lat2 - lat1 : lat1 - lat2, 
+                    h = lon2 > lon1 ? lon2 - lon1 : lon1 - lon2,
+                    d = Math.sqrt(w * w + h * h) * Ratio;
+
+                return d;
             }
 
             var EarthRadius = earthRadius || 6378137,
@@ -1426,22 +1441,7 @@
             return d;
         },
         calcRectangleDistance: function (p1, p2, ratio) {
-            if (!p1 || !p2) {
-                return null;
-            }
-            var lat1 = $.getParam(p1, 'latitude,lat,x', 0), lat2 = $.getParam(p2, 'latitude,lat,x', 0),
-                lon1 = $.getParam(p1, 'longitude,lon,y', 0), lon2 = $.getParam(p2, 'longitude,lon,y', 0);
-
-            if (!$.isNumber(lat1) || !$.isNumber(lat2) || !$.isNumber(lon1) || !$.isNumber(lon2)) {
-                return -1;
-            }
-
-            var Ratio = ratio || 111320;
-            var w = lat2 > lat1 ? lat2 - lat1 : lat1 - lat2, 
-                h = lon2 > lon1 ? lon2 - lon1 : lon1 - lon2,
-                d = Math.sqrt(w * w + h * h) * Ratio;
-
-            return d;
+            return $.calcLocationDistance(p1, p2, ratio, true);
         }
     }, '$');
 }(OUI);

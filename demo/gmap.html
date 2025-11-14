@@ -9,7 +9,7 @@
     </style>
 </head>
 <body>
-    <div style="width:1000px;height:500px;border:solid 1px #f00;">
+    <div id="box1" style="width:80%;height:600px;border:solid 1px #f00;">
         <canvas id="gridCanvas" width="1000" height="500"></canvas>
     </div>
     <div style="width:600px;height:600px;border:solid 1px #f00;display: none;">
@@ -22,14 +22,50 @@
 <script type="text/javascript">
 window.onload = function() {
     var points = [{
-        "latitude": 29.8733256668,
-        "longitude": 121.6011558503,
-        "height": 103.406,
-    },{
-        "latitude": 29.8732978403,
-        "longitude": 121.6011578443,
-        "height": 106.915,
-    }];
+            latitude: 29.8732976498,
+            longitude: 121.6011577513,
+            name: 'C2-9364', color: '#f00',
+            radius: 5,
+            textStyle: { font:'14px Arial',color:'#f00',position:7 },
+            lineTo: {
+                latitude: 29.8732976498,
+                longitude: 125.6011577513,
+            },
+            lineStyle: {width:0.5}
+        },{
+            latitude: 29.8732976498,
+            longitude: 125.6011577513,
+            name: 'C1-9123', color: '#f00',
+            lineTo: {
+                latitude: 27.8732976498,
+                longitude: 122.6011577513,
+            },
+            distanceTo: {
+                latitude: 27.8732976498,
+                longitude: 122.6011577513,
+            },
+            distanceStyle: {
+                // 距离文字的位置：0 - 起点， 1 - 终点， 2 - 中心点
+                position: 0,
+                // 显示的最大距离，单位：米
+                maxDistance: 100 * 1000 * 10,
+                // 距离的默认单位是米，这里用厘米，所以倍率为100
+                ratio: 100,
+                // 单位和倍率是成对的，别搞错了
+                unit: '厘米',
+                decimal: 2,
+                font:'20px Arial',color:'#f00'
+            },
+            lineStyle: {width:1, color: '#00f', dash: [2,4]}
+        },{
+            latitude: 31.8732976498,
+            longitude: 122.6011577513,
+            name: 'B1-2345', color: '#000'
+        },{
+            latitude: 27.8732976498,
+            longitude: 122.6011577513,
+            name: 'B2-9527', color: '#000'
+        }];
     /*  
     points = [
         { x: 10, y: 10 },
@@ -40,15 +76,18 @@ window.onload = function() {
     ];
     */
 
-    points[0].lineTo = points[1];
-
-	$.gmap('gridCanvas', {}).size().update(points);
+	$.gmap('gridCanvas', {
+        //scale: 100,
+        plane:true, showOverview: true, showLine: true, showText: true, showDistance: true, points: points
+    }).size();
 
     window.setTimeout(function() {
-        $.gmap('gridCanvas').scale(100).center({latitude: 29.8732976498,
-                longitude: 121.6011577513,
-                name: 'C2-9364'});
-    }, 3000);
+        $.gmap('gridCanvas').scale(100).center({latitude: 29.8732976498, longitude: 121.6011577513});
+    }, 1000);
+
+    window.setTimeout(function() {
+        $.gmap('gridCanvas').overview();
+    }, 2000);
 
     $.gmap('gridCanvas2', {vertical:true}).size().update(points);
 };
