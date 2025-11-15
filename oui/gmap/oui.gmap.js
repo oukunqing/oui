@@ -71,61 +71,79 @@
             const y = (center.latitude - lat) * view.scale + canvas.height / 2 + view.offsetY;
             return { x, y };
     	},
-        setTextPosition: function (position, pointPos, radius, fontSize) {
-            let textPos = {}, pos = pointPos;
+        getTextSize: function (text, fontSize) {
+            return $.getContentSize(text, { cssText: 'font-size:' + fontSize + 'px;' });
+        },
+        setTextPosition: function (map, position, pointPos, radius, fontSize, text) {
+            let that = this, canvas = map.canvas,
+                textPos = {}, pos = pointPos, 
+                textSize = that.getTextSize(text, fontSize),
+                // 垂直居中的文字偏移
+                offsetY = fontSize / 3, fontPadding = 3,
+                leftPos = pos.x - radius - fontPadding,
+                rightPos = pos.x + radius + fontPadding;
 
             switch(position){
+            case 0:
+                if (rightPos + textSize.width > canvas.width) {
+                    rightPos = canvas.width - textSize.width;
+                }
+                textPos = { x: rightPos, y: pos.y + radius + textSize.height };
+                break;
             case 1:
-                textPos = { x: pos.x - radius, y: pos.y - radius };
+                textPos = { x: leftPos - textSize.width, y: pos.y - radius - fontPadding };
                 break;
-            case 2:
-                textPos = { x: pos.x, y: pos.y - radius };
-                break;
-            case 3:
-                textPos = { x: pos.x + radius, y: pos.y - radius };
-                break;
-            case 5:
-                textPos = { x: pos.x + radius, y: pos.y };
+            case 4:
+                textPos = { x: leftPos - textSize.width, y: pos.y + offsetY };
                 break;
             case 7:
-                textPos = { x: pos.x - radius, y: pos.y + radius + fontSize };
+                textPos = { x: leftPos - textSize.width, y: pos.y + radius + textSize.height + fontPadding };
+                break;
+            case 2:
+                textPos = { x: pos.x - textSize.width / 2, y: pos.y - radius - fontPadding };
+                break;
+            case 5:
+                textPos = { x: pos.x - textSize.width / 2, y: pos.y + offsetY };
                 break;
             case 8:
-                textPos = { x: pos.x, y: pos.y + radius + fontSize };
+                textPos = { x: pos.x - textSize.width / 2, y: pos.y + radius + textSize.height + fontPadding };
+                break;
+            case 3:
+                textPos = { x: rightPos, y: pos.y - radius - fontPadding };
+                break;
+            case 6:
+                textPos = { x: rightPos, y: pos.y + offsetY };
                 break;
             case 9:
-                textPos = { x: pos.x + radius, y: pos.y + radius + fontSize };
+                textPos = { x: rightPos, y: pos.y + radius + textSize.height + fontPadding };
                 break;
             }
             return textPos;
         },
-        setDistancePosition: function (position, pointPos, posTo, radius, fontSize) {
-            let distancePos = {}, pos = pointPos;
+        setDistancePosition: function (map, position, pointPos, posTo, radius, fontSize, text) {
+            let that = this, canvas = map.canvas,
+                distancePos = {}, pos = pointPos,
+                textSize = that.getTextSize(text, fontSize),
+                fontPadding = 3,
+                floatPos = pos.x + radius + fontPadding;
 
             switch(position) {
             case 0:
-                distancePos = { x: pos.x + radius * 2, y: pos.y + radius + fontSize };
+                distancePos = { x: floatPos, y: pos.y + radius + textSize.height  };
                 break;
             case 1:
-                distancePos = { x: posTo.x + radius * 2, y: posTo.y + radius + fontSize };
+                distancePos = { x: floatPos, y: posTo.y + radius + textSize.height  };
                 break;
             case 2:
                 distancePos = { x: (pos.x + posTo.x) / 2, y: (pos.y + posTo.y) / 2 };
                 break;
             }
 
-            return distancePos;
-        },
-        calcPolygonCenter: function (points) {
-            let len = points.length, i, lat = 0, lng = 0;
-            for (i = 0; i < len; i++) {
-                lat += points[i].latitude;
-                lng += points[i].longitude;
+            if (distancePos.x + textSize.width > canvas.width) {
+                distancePos.x = canvas.width - textSize.width - fontPadding;
             }
-            lat /= len;
-            lng /= len;
 
-            return { latitude: lat, longitude: lng };
+            return distancePos;
         },
     	render: function (map) {
     		const view = map.view, canvas = map.canvas, ctx = map.ctx;
@@ -138,35 +156,49 @@
             this.drawGrid(map);
             this.drawPoints(map);
             this.drawRules(map);
+            this.drawCenter(map);
 
             //ctx.restore();
 
             return this;
     	},
     	drawGrid: function (map) {
-    		const view = map.view, canvas = map.canvas, ctx = map.ctx;
+    		const opt = map.options;
             //const gridSize = 50 * view.scale;
-            const gridSize = view.gridSize * (view.gridFixed ? 1 : view.scale);
-            const startX = (view.offsetX % gridSize + gridSize) % gridSize;
-            const startY = (view.offsetY % gridSize + gridSize) % gridSize;
+
+            if (!opt.showGridSize) {
+                return this;
+            }
+            let view = map.view, canvas = map.canvas, ctx = map.ctx,
+                style = $.extend({
+                    width: 50, height: 50, fixed: true, lineWidth: 0.1, color: '#000', dash: [1, 1]
+                }, opt.gridStyle),
+                gridWidth = style.width * (style.fixed ? 1 : view.scale),
+                gridHeight = style.height * (style.fixed ? 1 : view.scale),
+                lineWidth = style.lineWidth,
+                startX = (view.offsetX % gridWidth + gridWidth) % gridWidth,
+                startY = (view.offsetY % gridHeight + gridHeight) % gridHeight;
             
-            ctx.strokeStyle = '#000';
-            ctx.lineWidth = 0.1;
-            ctx.setLineDash([1, 1]);
+            ctx.strokeStyle = style.color;
+            ctx.lineWidth = lineWidth;
+            ctx.setLineDash(!style.dash ? [] : style.dash);
+
+            // 细线条配置：关闭抗锯齿（提升清晰度）
+            ctx.imageSmoothingEnabled = false;
             
             // 绘制垂直线
-            for (let x = startX; x < canvas.width; x += gridSize) {
+            for (let x = startX; x < canvas.width; x += gridWidth) {
                 ctx.beginPath();
-                ctx.moveTo(x, 0);
-                ctx.lineTo(x, canvas.height);
+                ctx.moveTo(x + lineWidth, 0);
+                ctx.lineTo(x + lineWidth, canvas.height);
                 ctx.stroke();
             }
             
             // 绘制水平线
-            for (let y = startY; y < canvas.height; y += gridSize) {
+            for (let y = startY; y < canvas.height; y += gridHeight) {
                 ctx.beginPath();
-                ctx.moveTo(0, y);
-                ctx.lineTo(canvas.width, y);
+                ctx.moveTo(0, y + lineWidth);
+                ctx.lineTo(canvas.width, y + lineWidth);
                 ctx.stroke();
             }
             return this;
@@ -180,6 +212,7 @@
                 }, lineStyle);
 
             ctx.beginPath();
+
             ctx.setLineDash(!style.dash ? [] : style.dash);
 
             ctx.moveTo(pos1.x, pos1.y);
@@ -194,6 +227,16 @@
 
             return that;
         },
+        drawCenter: function (map) {
+            if (!map.options.showCenter) {
+                return this;
+            }
+            var point = map.center();
+            point = $.extend({radius: 5, color: '#000', name: '中心点', textStyle: {
+                color: '#f00', position: 8
+            }}, point);
+            return this.drawPoint(point, map);  
+        },
         drawText: function (ctx, text, pos, textStyle) {
             let style = $.extend({color: '#333', font: Config.TextFont}, textStyle);
             // 绘制标签
@@ -202,72 +245,83 @@
             ctx.fillText(text, pos.x, pos.y);
             return this;
         },
-    	drawPoint: function (point, map, ctx) {
+        drawPoint: function (map, point) {
             let that = this,
                 opt = map.options,
+                ctx = map.ctx,
                 radius = point.radius || 4,
                 pos = that.latLngToCanvas(map, point.latitude, point.longitude),
-                posTo;
+                lines = that.getParamArray(point.lines || point.line),
+                distances = that.getParamArray(point.distances || point.distance),
+                texts = that.getParamArray(point.texts || point.text || point.name, true),
+                i, pointTo, posTo, style = {},
+                text, textPos, fontSize;
 
             // 绘制点
             ctx.beginPath();
             ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2);
             ctx.fillStyle = point.color || '#f00';
             ctx.fill();
-            
-            if (opt.showLine && point.lineTo) {
-                posTo = that.latLngToCanvas(map, point.lineTo.latitude, point.lineTo.longitude);
-                that.drawLine(map, ctx, pos, posTo, $.extend({color: point.color}, point.lineStyle));
+
+            if (opt.showLine) {
+                for (i = 0; i < lines.length; i++) {
+                    // 找线条的另一个点，必须是在地图中已经注册过的点
+                    pointTo = that.getPointCache(map, lines[i]);
+                    style = $.extend({}, opt.lineStyle, point.lineStyle, lines[i]);
+                    if (pointTo) {
+                        posTo = that.latLngToCanvas(map, pointTo.latitude, pointTo.longitude);
+                        that.drawLine(map, ctx, pos, posTo, style);
+                    }
+                }
             }
+            if (opt.showText) {
+                for (i = 0; i < texts.length; i++) {
+                    style = $.extend({}, opt.textStyle, point.textStyle, texts[i]);
+                    fontSize = parseInt(style.font, 10);
+                    text = that.getPointText(texts[i]);
+                    textPos = that.setTextPosition(map, style.position, pos, radius, fontSize, text);
+                    that.drawText(ctx, text, textPos, style);
+                }
+            }
+            if (opt.showDistance) {
+                let distance;
+                for (i = 0; i < distances.length; i++) {
+                    // 找到要计算距离的点，必须是在地图中已经注册过的点
+                    pointTo = that.getPointCache(map, distances[i]);
+                    if (pointTo) {
+                        distance = $.calcLocationDistance(point, pointTo, opt.plane);
+                        style = $.extend({}, opt.distanceStyle, point.distanceStyle, distances[i]);
+                        fontSize = parseInt(style.font, 10);
 
-            if (opt.showDistance && point.distanceTo) {
-                let distanceStyle = $.extend({ 
-                    font: '16px Arial', position: 0, maxDistance: 0, ratio: 1, decimal: 3, unit: 'm'
-                }, point.distanceStyle),
-                    ratio = distanceStyle.ratio || 1,
-                    fontSize = parseInt(distanceStyle.font, 10),
-                    distancePos = {},
-                    distance = 0;
+                        if (style.maxDistance && distance > style.maxDistance) {
+                            continue;
+                        }
+                        posTo = that.latLngToCanvas(map, pointTo.latitude, pointTo.longitude);
+                        if (distance > 1000) {
+                            distance = (distance / 1000).round(style.decimal);
+                            style.unit = 'km';
+                        } else {
+                            if (style.ratio > 1) {
+                                distance = (distance * style.ratio).round(style.decimal);
+                            } else {
+                                distance = distance.round(style.decimal);
+                            }
+                        }
 
-                distance = $.calcLocationDistance(point, point.distanceTo, opt.plane);
+                        text = distance + style.unit;
+                        textPos = that.setDistancePosition(map, style.position, pos, posTo, radius, fontSize, text);
 
-                if (!distanceStyle.maxDistance || distance <= distanceStyle.maxDistance) {
-                    if (!posTo) {
-                        posTo = that.latLngToCanvas(map, point.lineTo.latitude, point.distanceTo.longitude);
+                        that.drawText(ctx, text, textPos, style);
                     }
-
-                    distancePos = that.setDistancePosition(distanceStyle.position, pos, posTo, radius, fontSize);
-
-                    if (ratio > 1) {
-                        distance = (distance * ratio).round(distanceStyle.decimal);
-                    } else if (distance > 1000) {
-                        distance = (distance / 1000).round(distanceStyle.decimal);
-                        distanceStyle.unit = 'km';
-                    } else {
-                        distance = distance.round(distanceStyle.decimal);
-                    }
-
-                    let distanceText = distance + distanceStyle.unit;
-
-                    that.drawText(ctx, distanceText, distancePos, distanceStyle);
                 }
             }
 
-            if (opt.showText) {
-                let text = point.text || point.name || '',
-                    textStyle = $.extend({ font: Config.TextFont, position: 3 }, point.textStyle),
-                    fontSize = parseInt(textStyle.font, 10),
-                    textPos = that.setTextPosition(textStyle.position, pos, radius, fontSize);
-
-                that.drawText(ctx, text, textPos, textStyle);
-            }
-
-    		return this;
-    	},
+            return that;
+        },
     	drawPoints: function (map) {
             const that = this, points = map.view.points, ctx = map.ctx;
     		points.forEach(point => {
-    			that.drawPoint(point, map, ctx);
+    			that.drawPoint(map, point);
     		});
     		return this;
     	},
@@ -275,31 +329,153 @@
 
     		return this;
     	},
+        setPointCache: function (map) {
+            let view = map.view, caches = {}, points = view.points, len = points.length, i, key, p;
+            for (i = 0; i < len; i++) {
+                p = points[i];
+                if (!p.id) {
+                    p.id = i;
+                }
+                key = 'pc_' + p.id;
+                caches[key] = points[i];
+            }
+            view.caches = caches;
+
+            return this;
+        },
+        getPointCache: function (map, pointTo) {
+            let caches = map.view.caches, key;
+            if (this.isPoint(pointTo)) {
+                return pointTo;
+            }
+            if ($.isObject(pointTo)) {
+                if (this.isPoint(pointTo.point || pointTo.id)) {
+                    return pointTo.point || pointTo.id;
+                }
+                key = 'pc_' + pointTo.id;
+            } else {
+                key = 'pc_' + pointTo;
+            }
+            var point = caches[key];
+
+            return this.isPoint(point) ? point : null;
+        },
+        getParamArray: function (arg, text) {
+            var arr = [];
+            if ($.isArray(arg)) {
+                arr = arg;
+            } else if ($.isObject(arg)) {
+                arr = [arg];
+            } else if($.isString(arg)) {
+                if (text) {
+                    arr = [{ text: arg }];
+                } else {
+                    arr = [{ id: arg }];
+                }
+            }
+            return arr;
+        },
+        getPointText: function (arg) {
+            if ($.isString(arg)) {
+                return arg;
+            }
+            if ($.isObject(arg)) {
+                return arg.text || arg.name;
+            }
+            return null;
+        },
         setCenter: function (map, point) {
+            if (!this.isPoint(point)) {
+                return this;
+            }
+            //console.log('setCenter:', point);
             map.view.curCenter = {
                 latitude: point.latitude,
                 longitude: point.longitude,
                 height: point.height
             };
+
             return this;
         },
-        setScale: function (map, scale) {
+        calcPolygonCenter: function (points) {
+            let len = points.length, i, lat = 0, lng = 0;
+            for (i = 0; i < len; i++) {
+                lat += points[i].latitude;
+                lng += points[i].longitude;
+            }
+            lat /= len;
+            lng /= len;
+
+            return { latitude: lat, longitude: lng };
+        },
+        // 计算多边形最小包围盒
+        calcPolygonBox: function (map, points) {
+            let minX = 0, minY = 0, maxX = 0, maxY = 0, len = points.length;
+            if (len <= 1) {
+                return null;
+            }
+            if (len > 3) {
+                minX = Math.min(...points.map(p => p.longitude));
+                maxX = Math.max(...points.map(p => p.longitude));
+
+                minY = Math.min(...points.map(p => p.latitude));
+                maxY = Math.max(...points.map(p => p.latitude));
+            } else {
+                minX = Math.min(points[0].longitude, points[1].longitude);
+                maxX = Math.max(points[0].longitude, points[1].longitude);
+
+                minY = Math.min(points[0].latitude, points[1].latitude);
+                maxY = Math.max(points[0].latitude, points[1].latitude);
+            }
+
+            return {
+                minX,
+                minY,
+                maxX,
+                maxY,
+                width: maxX - minX,
+                height: maxY - minY,
+                centerX: (minX + maxX) / 2,
+                centerY: (minY + maxY) / 2
+            };
+        },
+        setScale: function (map, scale, forceOverview) {
+            var that = this;
             if ($.isNumber(scale) && scale > 0) {
                 map.view.scale = scale;
             } else {
                 let view = map.view,
+                    opt = map.options,
+                    canvas = map.canvas,
                     center = map.center(),
-                    maxLat = 0, maxLng = 0,
+                    maxLat = 0, maxLng = 0, maxDegree = 0, maxHeight = 0,
                     points = view.points, len = points.length;
 
-                for (var i = 0; i < len; i++) {
-
+                if (forceOverview) {
+                    map.view.offsetX = 0;
+                    map.view.offsetY = 0;
                 }
 
+                if(len > 1) {
+                    // 计算多边形最小包围盒
+                    let box = that.calcPolygonBox(map, points), 
+                        ratio = opt.overviewRatio,
+                        widthScale = canvas.width / box.width * ratio,
+                        heightScale = canvas.height / box.height * ratio;
+
+                    // 取多边形包围盒的中点作为中心点
+                    that.setCenter(map, { latitude: box.centerY,  longitude: box.centerX });
+
+                    scale = Math.min(widthScale, heightScale) * ratio;
+                }
+
+                if (forceOverview || view.scale > scale) {
+                    view.scale = scale;
+                }
             }
             return this;
         },
-        setOverview: function (map) {
+        setOverview: function (map, force) {
             let that = this, 
                 view = map.view, 
                 center = map.center(), 
@@ -308,11 +484,10 @@
 
             if (points.length > 0) {
                 center = that.calcPolygonCenter(points);
-                console.log('overview:', center);
                 that.setCenter(map, center);
             }
 
-            that.setScale(map, null);
+            that.setScale(map, null, force);
 
             return that;
         },
@@ -371,8 +546,8 @@
             return this;
     	},
     	handleWheel: function (e, map) {
-    		const view = map.view, canvas = map.canvas;
-    		e.preventDefault();
+            e.preventDefault();
+    		const view = map.view, canvas = map.canvas, opt = map.options;
             
             // 获取鼠标在Canvas上的位置
     		var rect = canvas.getBoundingClientRect(),
@@ -392,6 +567,10 @@
             
             // 限制缩放范围
             view.scale = Math.max(1, Math.min(100*1000*1000, view.scale));
+
+            if ($.isFunction(opt.positionCallback)) {
+                opt.positionCallback({ latitude: mouseLat, longitude: mouseLng }, map);
+            }
             
             // 调整中心点，使鼠标位置保持固定
             const newMouseX = (mouseLng - center.longitude) * view.scale + canvas.width / 2 + view.offsetX;
@@ -418,12 +597,26 @@
             scale: 1,
             // 缩放等级
             scaleLevel: 1,
-            // 网格大小
-            gridSize: 50,
-            // 是否固定网格的大小
-            gridFixed: true,
+            // 网格样式
+            gridStyle: {
+                // 网格宽度
+                width: 50,
+                // 网格高度
+                height: 50,
+                // 是否固定网格的大小
+                fixed: true,
+                color: '#000',
+                lineWidth: 0.1,
+                dash: [1, 1]
+            },
+            // 是否显示网格线
+            showGridSize: true,
             // 是否自动全览
             showOverview: false,
+            // 全览比率，0.9表示缩放至90%
+            overviewRatio: 0.9,
+            // 是否显示中心点
+            showCenter: false,
             // 是否显示点的名称标签
             showText: true,
             // 是否显示两点间的连线
@@ -432,8 +625,30 @@
             showDistance: true,
             // 是否显示当前鼠标位置的经纬度
             showPosition: true,
+            distanceStyle: {
+                // 不限制距离，距离单位：米
+                maxDistance: 0,
+                // 距离文字的位置：0 - 起点， 1 - 终点， 2 - 中心点
+                position: 0,
+                // 默认单位是米，所以倍率是1
+                ratio: 1,
+                // 单位和倍率是成对的，别搞错了
+                unit: 'm',
+                // 保留小数位数
+                decimal: 3,
+                font:'20px Arial',color:'#f00'
+            },
+            textStyle: { 
+                font:'14px Arial', color:'#f00', position: 3 
+            },
+            lineStyle: {
+                width: 1, color: '#f00'
+            },
             positionCallback: function(pos, map) {
-                $.console.log('latitude:', pos.latitude, ', longitude:', pos.longitude, ', scale:', map.view.scale, ', center: ', );
+                $.console.log(
+                    'latitude:', pos.latitude, ', longitude:', pos.longitude, 
+                    ', scale:', map.view.scale, ', center: ', map.center()
+                );
             },
             points: [],
     	}, options);
@@ -443,8 +658,6 @@
     	this.id = this.canvas.id;
     	this.options = opt;
     	this.view = {
-    		gridSize: opt.gridSize,
-    		gridFixed: opt.gridFixed,
     		defCenter: {
     			latitude: 0,
     			longitude: 0,
@@ -459,7 +672,8 @@
             lastX: 0,
             lastY: 0,
 
-            points: []
+            points: [],
+            caches: {}
     	};
 
     	if ($.isArray(opt.points)) {
@@ -497,8 +711,10 @@
     			Factory.handleWheel(e, that);
     		});
 
+            Factory.setPointCache(that);
+
             if (opt.showOverview) {
-                Factory.setOverview(that);
+                Factory.setOverview(that, true);
             }
     		return Factory.render(that), that;
     	},
@@ -518,7 +734,7 @@
     			that.canvas.height = that.box.clientHeight;
     		}
             if (that.options.showOverview) {
-                Factory.setOverview(that);
+                Factory.setOverview(that, true);
             }
     		return Factory.render(that), that;
     	},
@@ -542,8 +758,8 @@
 
     		return Factory.render(that), that;
     	},
-        overview: function () {
-            Factory.setOverview(this).render(this);
+        overview: function (force) {
+            Factory.setOverview(this, force || this.options.showOverview).render(this);
             return this;
         },
     	update: function (points, append) {
@@ -554,8 +770,10 @@
                 } else {
                     that.view.points = points;
                 }
+                Factory.setPointCache(that);
+
                 if (that.options.showOverview) {
-                    Factory.setOverview(that);
+                    Factory.setOverview(that, true);
                 }
                 Factory.render(that);
             }

@@ -22,28 +22,24 @@
 <script type="text/javascript">
 window.onload = function() {
     var points = [{
+            id: 'C2-9364',
+            name: 'C2-9364', color: '#00f',
             latitude: 29.8732976498,
             longitude: 121.6011577513,
-            name: 'C2-9364', color: '#f00',
-            radius: 5,
-            textStyle: { font:'14px Arial',color:'#f00',position:7 },
-            lineTo: {
-                latitude: 29.8732976498,
-                longitude: 125.6011577513,
-            },
-            lineStyle: {width:0.5}
+            radius: 6,
+            textStyle: { font:'14px Arial',color:'#f00',position: 4 },
+            //lines: ['C1-9123','B2-9527'],
+            lines: [{id:'C1-9123',color:'#f00',width:1},{id:'B2-9527',color:'#000',width:1, dash:[2,4]}],
+            texts: [{text:'C2-9364',position:3,color:'#00f'}],
+            distances: [{id:'B1-2345'}],
+            lineStyle: {width:1, color: '#00f', dash: false}
         },{
+            id: 'C1-9123',
+            name: 'C1-9123', color: '#f00',
             latitude: 29.8732976498,
             longitude: 125.6011577513,
-            name: 'C1-9123', color: '#f00',
-            lineTo: {
-                latitude: 27.8732976498,
-                longitude: 122.6011577513,
-            },
-            distanceTo: {
-                latitude: 27.8732976498,
-                longitude: 122.6011577513,
-            },
+            lines: ['B2-9527'],
+            distances: 'B2-9527',
             distanceStyle: {
                 // 距离文字的位置：0 - 起点， 1 - 终点， 2 - 中心点
                 position: 0,
@@ -58,13 +54,15 @@ window.onload = function() {
             },
             lineStyle: {width:1, color: '#00f', dash: [2,4]}
         },{
+            id: 'B1-2345',
+            name: 'B1-2345', color: '#000',
             latitude: 31.8732976498,
             longitude: 122.6011577513,
-            name: 'B1-2345', color: '#000'
         },{
-            latitude: 27.8732976498,
-            longitude: 122.6011577513,
-            name: 'B2-9527', color: '#000'
+            id: 'B2-9527',
+            name: 'B2-9527', color: '#000',
+            latitude: 26.8732976498,
+            longitude: 122.6011577513
         }];
     /*  
     points = [
@@ -78,18 +76,33 @@ window.onload = function() {
 
 	$.gmap('gridCanvas', {
         //scale: 100,
-        plane:true, showOverview: true, showLine: true, showText: true, showDistance: true, points: points
+        plane: true, showOverview: true, showLine: true, showText: true, showDistance: true,
+        distanceStyle: {
+            // 距离文字的位置：0 - 起点， 1 - 终点， 2 - 中心点
+            position: 0,
+            // 显示的最大距离，单位：米
+            maxDistance: 100 * 1000 * 10,
+            // 距离的默认单位是米，这里用厘米，所以倍率为100
+            ratio: 100,
+            // 单位和倍率是成对的，别搞错了
+            unit: 'cm',
+            decimal: 0,
+            font: '20px Arial', color: '#f00'
+        },
+        lineStyle: { width: 1, color: '#00f' },
+        textStyle: { font: '14px Arial', color: '#f00', position: 3 },
+        points: points
     }).size();
 
     window.setTimeout(function() {
-        $.gmap('gridCanvas').scale(100).center({latitude: 29.8732976498, longitude: 121.6011577513});
+        $.gmap('gridCanvas').scale(60).center({latitude: 29.8732976498, longitude: 121.6011577513});
     }, 1000);
 
     window.setTimeout(function() {
-        $.gmap('gridCanvas').overview();
+        $.gmap('gridCanvas').overview(true);
     }, 2000);
 
-    $.gmap('gridCanvas2', {vertical:true}).size().update(points);
+    //$.gmap('gridCanvas2', {vertical:true}).size().update(points);
 };
 
 window.onresize = function() {

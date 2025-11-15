@@ -5545,23 +5545,26 @@
                 options = {};
             }
             var id = options.id || 'div-get-content-size-001',
-                css = ';position:absolute;top:-3000px;left:-5000px;font-size:14px;font-family:Arial,宋体,微软雅黑;',
+                css = [
+                    ';margin:0;padding:0;line-height:1em;position:absolute;top:-3000px;left:-5000px;',
+                    'font-size:14px;font-family:Arial,宋体,微软雅黑;'
+                ],
                 div = document.getElementById(id);
+
             if (!div) {
                 div = document.createElement('div');
                 div.id = id;
-                div.style.cssText = 'font-size:14px;' + css + ';margin:0;padding:0;';
                 document.body.appendChild(div);
             }
             if ($.isString(options.className, true)) {
                 div.className = options.className;
             }
             if ($.isString(options.cssText, true)) {
-                div.style.cssText = options.cssText + css;
+                css.push(options.cssText);
             }
+            div.style.cssText = css.join('');
             div.innerHTML = txt;
             var size = { width: div.offsetWidth, height: div.offsetHeight };
-            //return size;
             return div.innerHTML = '', size;
         },
         getInnerText = function (elem) {
