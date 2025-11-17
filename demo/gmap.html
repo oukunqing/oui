@@ -9,6 +9,8 @@
     </style>
 </head>
 <body>
+    <button onclick="setLevel(1);">+</button>
+    <button onclick="setLevel(-1);">-</button>
     <div id="box1" style="width:80%;height:600px;border:solid 1px #f00;">
         <canvas id="gridCanvas" width="1000" height="500"></canvas>
     </div>
@@ -24,22 +26,22 @@ window.onload = function() {
     var points = [{
             id: 'C2-9364',
             name: 'C2-9364', color: '#00f',
-            latitude: 29.8732976498,
-            longitude: 121.6011577513,
             radius: 6,
+            latitude: 26.8732976498,
+            longitude: 122.6011577513,
             textStyle: { font:'14px Arial',color:'#f00',position: 4 },
             //lines: ['C1-9123','B2-9527'],
             lines: [{id:'C1-9123',color:'#f00',width:1},{id:'B2-9527',color:'#000',width:1, dash:[2,4]}],
             texts: [{text:'C2-9364',position:3,color:'#00f'}],
-            distances: [{id:'B1-2345'}],
+            distances: [{id:'B2-9527'}],
             lineStyle: {width:1, color: '#00f', dash: false}
         },{
             id: 'C1-9123',
             name: 'C1-9123', color: '#f00',
             latitude: 29.8732976498,
             longitude: 125.6011577513,
-            lines: ['B2-9527'],
-            distances: 'B2-9527',
+            lines: ['B1-2345'],
+            distances: 'B1-2345',
             distanceStyle: {
                 // 距离文字的位置：0 - 起点， 1 - 终点， 2 - 中心点
                 position: 0,
@@ -50,19 +52,22 @@ window.onload = function() {
                 // 单位和倍率是成对的，别搞错了
                 unit: '厘米',
                 decimal: 2,
-                font:'20px Arial',color:'#f00'
+                font:'20px Arial',color:'#00f'
             },
             lineStyle: {width:1, color: '#00f', dash: [2,4]}
         },{
             id: 'B1-2345',
             name: 'B1-2345', color: '#000',
+            textStyle: {position: 1, color: '#000' },
             latitude: 31.8732976498,
             longitude: 122.6011577513,
+            lines: [{id:'B2-9527', color: '#000'}],
         },{
             id: 'B2-9527',
             name: 'B2-9527', color: '#000',
-            latitude: 26.8732976498,
-            longitude: 122.6011577513
+            textStyle: {position: 1, color: '#000' },
+            latitude: 29.8732976498,
+            longitude: 121.6011577513
         }];
     /*  
     points = [
@@ -104,6 +109,10 @@ window.onload = function() {
 
     //$.gmap('gridCanvas2', {vertical:true}).size().update(points);
 };
+
+function setLevel(action) {
+    $.gmap('gridCanvas').scaleLevel(null, action);
+}
 
 window.onresize = function() {
 

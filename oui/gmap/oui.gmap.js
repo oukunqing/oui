@@ -11,7 +11,81 @@
     'use strict';
 
     var Config = {
-        TextFont: '12px Arial'
+        TextFont: '12px Arial',
+        ScaleLevels: [
+            { val: 1000 * 1000, min: 500 * 1000, text: '1000公里' },
+            { val: 500 * 1000, min: 200 * 1000, text: '500公里' },
+            { val: 200 * 1000, min: 100 * 1000, text: '200公里' },
+            { val: 100 * 1000, min: 75 * 1000, text: '100公里' },
+            { val: 75 * 1000, min: 50 * 1000, text: '75公里' },
+            { val: 50 * 1000, min: 25 * 1000, text: '50公里' },
+            { val: 25 * 1000, min: 20 * 1000, text: '25公里' },
+            { val: 20 * 1000, min: 10 * 1000, text: '20公里' },
+            { val: 10 * 1000, min: 5 * 1000, text: '10公里' },
+            { val: 5 * 1000, min: 2 * 1000, text: '5公里' },
+            { val: 2 * 1000, min: 1 * 1000, text: '2公里' },
+            { val: 1 * 1000, min: 500, text: '1公里' },
+
+            { val: 500, min: 200, text: '500米' },
+            { val: 200, min: 100, text: '200米' },
+            { val: 100, min: 50, text: '100米' },
+            { val: 50, min: 25, text: '50米' },
+            { val: 25, min: 20, text: '25米' },
+            { val: 20, min: 10, text: '20米' },
+            { val: 10, min: 5, text: '10米' },
+            { val: 5, min: 2, text: '5米' },
+            { val: 2, min: 1, text: '2米' },
+            { val: 1, min: 0.5, text: '1米' },
+
+            { val: 0.5, min: 0.25, text: '50厘米' },
+            { val: 0.25, min: 0.2, text: '25厘米' },
+            { val: 0.2, min: 0.1, text: '20厘米' },
+            { val: 0.1, min: 0.05, text: '10厘米' },
+            { val: 0.05, min: 0.02, text: '5厘米' },
+            { val: 0.02, min: 0.01, text: '2厘米' },
+            { val: 0.01, min: 0.005, text: '1厘米' },
+            { val: 0.005, min: 0.004, text: '5毫米' }
+        ],
+        DegreeDistance: 111320,
+        DistanceWidth: 50,
+        //最小比例，50个像素所能代表的最大距离
+        MinScaleRatio: 1,
+        //最大比例，50个像素所能代表的最小距离
+        MaxScaleRatio: 1,
+        HeightLevels: [
+            { val: 5 * 1000, min: 2 * 1000, text: '5公里' },
+            { val: 2 * 1000, min: 1 * 1000, text: '2公里' },
+            { val: 1 * 1000, min: 750, text: '1公里' },
+            { val: 750, min: 500, text: '750米' },
+            { val: 500, min: 250, text: '500米' },
+            { val: 250, min: 200, text: '250米' },
+            { val: 200, min: 100, text: '200米' },
+            { val: 100, min: 75, text: '100米' },
+            { val: 75, min: 50, text: '75米' },
+            { val: 50, min: 25, text: '50米' },
+            { val: 25, min: 20, text: '25米' },
+            { val: 20, min: 15, text: '20米' },
+
+            { val: 15, min: 10, text: '15米' },
+            { val: 10, min: 7.5, text: '10米' },
+            { val: 7.5, min: 5, text: '7.5米' },
+            { val: 5, min: 2.5, text: '5米' },
+            { val: 2.5, min: 2, text: '2.5米' },
+            { val: 2, min: 1, text: '2米' },
+            { val: 1, min: 0.75, text: '1米' },
+            { val: 0.75, min: 0.5, text: '75厘米' },
+            { val: 0.5, min: 0.25, text: '50厘米' },
+            { val: 0.25, min: 0.2, text: '25厘米' },
+
+            { val: 0.2, min: 0.15, text: '20厘米' },
+            { val: 0.15, min: 0.1, text: '15厘米' },
+            { val: 0.1, min: 0.75, text: '10厘米' },
+            { val: 0.075, min: 0.05, text: '7.5厘米' },
+            { val: 0.05, min: 0.02, text: '5厘米' },
+            { val: 0.02, min: 0.01, text: '2厘米' },
+            { val: 0.01, min: 0.005, text: '1厘米' },
+            { val: 0.005, min: 0.004, text: '5毫米' }
+        ]
     };
 
     var Cache = {
@@ -325,10 +399,6 @@
     		});
     		return this;
     	},
-    	drawRules: function (map) {
-
-    		return this;
-    	},
         setPointCache: function (map) {
             let view = map.view, caches = {}, points = view.points, len = points.length, i, key, p;
             for (i = 0; i < len; i++) {
@@ -408,7 +478,7 @@
 
             return { latitude: lat, longitude: lng };
         },
-        // 计算多边形最小包围盒
+        // 计算多边形最小包围盒，
         calcPolygonBox: function (map, points) {
             let minX = 0, minY = 0, maxX = 0, maxY = 0, len = points.length;
             if (len <= 1) {
@@ -429,23 +499,128 @@
             }
 
             return {
-                minX,
-                minY,
-                maxX,
-                maxY,
+                minX, minY, maxX, maxY,
                 width: maxX - minX,
                 height: maxY - minY,
                 centerX: (minX + maxX) / 2,
                 centerY: (minY + maxY) / 2
             };
         },
+        drawRules: function (map) {
+            let that = this, opt = map.options, canvas = map.canvas, ctx = map.ctx, view = map.view, 
+                rulePadding = 10, ruleWidth = 50, minWidth = 50, distance = 0, sideHeight = 3,
+                ruleText = '', textStyle = { color: '#000', font: '12px Arial' };
+
+            if (!opt.showRule) {
+                return that;
+            }
+            let rule = that.getScaleLevel(map, view.scaleLevel, view.scale);
+
+            ruleWidth = rule.width || 50;
+            ruleText = rule.text;
+
+            ctx.beginPath();
+            ctx.setLineDash([]);
+
+            // 画水平比例尺
+            ctx.moveTo(canvas.width - rulePadding, canvas.height - rulePadding - sideHeight);
+            ctx.lineTo(canvas.width - rulePadding, canvas.height - rulePadding);
+
+            ctx.moveTo(canvas.width - rulePadding, canvas.height - rulePadding);
+            ctx.lineTo(canvas.width - rulePadding - ruleWidth, canvas.height - rulePadding);
+
+            ctx.moveTo(canvas.width - rulePadding - ruleWidth, canvas.height - rulePadding);
+            ctx.lineTo(canvas.width - rulePadding - ruleWidth, canvas.height - rulePadding - sideHeight);
+
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 2;
+
+            if (ruleText) {
+                that.drawText(ctx, ruleText, {
+                    x: canvas.width - rulePadding - ruleWidth / 2 - that.getTextSize(ruleText, 12).width / 2, 
+                    y: canvas.height - rulePadding - sideHeight - 3
+                }, textStyle);
+            }
+
+            // 画垂直比例尺
+
+            ctx.stroke();
+            ctx.fill();
+
+            return this;
+        },
+        initScaleLevel: function (map) {
+            var levels = map.options.scaleRules, len = levels.length;
+            for (var i = 0; i < len; i++) {
+                var dr = levels[i];
+                dr.level = i + 1;
+                dr.scale = {
+                    val: Config.DegreeDistance * Config.DistanceWidth / dr.val,
+                    // 请注意，这里的大小是相反的
+                    min: Config.DegreeDistance * Config.DistanceWidth / dr.val,
+                    max: Config.DegreeDistance * Config.DistanceWidth / dr.min
+                };
+            }
+
+            Config.MinScaleRatio = Config.DegreeDistance * Config.DistanceWidth / levels[0].val;
+            Config.MaxScaleRatio = Config.DegreeDistance * Config.DistanceWidth / levels[len - 1].min;
+
+            return this;
+        },
+        getScaleLevel: function (map, scaleLevel, scale) {
+            var rules = map.options.scaleRules, len = rules.length;
+            if (scaleLevel < 1) {
+                scaleLevel = 1;
+            } else if(scaleLevel > len) {
+                scaleLevel = len;
+            }
+            var rule = $.extend({ width: 50, }, rules[scaleLevel - 1]);
+            if (scale) {
+                rule.width = (rule.width * (scale / rule.scale.val)).round(3);
+            }
+
+            return rule;
+        },
+        setScaleLevel: function (map, scale, scaleLevel) {
+            var that = this, view = map.view,
+                rules = map.options.scaleRules, len = rules.length,
+                rule;
+
+            $.console.log('calcScaleLevel:', scale, scaleLevel);
+
+            if ($.isNumber(scaleLevel)) {
+                if (scaleLevel < 1) {
+                    scaleLevel = 1;
+                } else if(scaleLevel > len) {
+                    scaleLevel = len;
+                }
+                rule = that.getScaleLevel(map, scaleLevel);
+                view.scale = rule.scale.val;
+            } else if ($.isNumber(scale) && scale) {
+                var rules = map.options.scaleRules, len = rules.length;
+                scaleLevel = 1;
+                for (var i = 0; i < len; i++) {
+                    var dr = rules[i];
+                    if (scale > dr.scale.min && scale <= dr.scale.max) {
+                        scaleLevel = i + 1;
+                        break;
+                    }
+                }
+                rule = that.getScaleLevel(map, scaleLevel, scale);
+            }
+            view.scaleLevel = rule.level;
+
+            that.drawRules(map);
+
+            return that;
+        },
         setScale: function (map, scale, forceOverview) {
-            var that = this;
+            var that = this, view = map.view;
+
             if ($.isNumber(scale) && scale > 0) {
-                map.view.scale = scale;
+                view.scale = scale;
             } else {
-                let view = map.view,
-                    opt = map.options,
+                let opt = map.options,
                     canvas = map.canvas,
                     center = map.center(),
                     maxLat = 0, maxLng = 0, maxDegree = 0, maxHeight = 0,
@@ -465,7 +640,7 @@
 
                     // 取多边形包围盒的中点作为中心点
                     that.setCenter(map, { latitude: box.centerY,  longitude: box.centerX });
-
+                    // 计算新的缩放比率
                     scale = Math.min(widthScale, heightScale) * ratio;
                 }
 
@@ -473,6 +648,10 @@
                     view.scale = scale;
                 }
             }
+            that.setScaleLevel(map, view.scale);
+
+            console.log('setScale:', view.scale);
+
             return this;
         },
         setOverview: function (map, force) {
@@ -547,7 +726,7 @@
     	},
     	handleWheel: function (e, map) {
             e.preventDefault();
-    		const view = map.view, canvas = map.canvas, opt = map.options;
+    		const that = this, view = map.view, canvas = map.canvas, opt = map.options;
             
             // 获取鼠标在Canvas上的位置
     		var rect = canvas.getBoundingClientRect(),
@@ -566,7 +745,9 @@
             view.scale *= zoomFactor;
             
             // 限制缩放范围
-            view.scale = Math.max(1, Math.min(100*1000*1000, view.scale));
+            view.scale = Math.max(Config.MinScaleRatio, Math.min(Config.MaxScaleRatio, view.scale));
+
+            that.setScale(map, view.scale);
 
             if ($.isFunction(opt.positionCallback)) {
                 opt.positionCallback({ latitude: mouseLat, longitude: mouseLng }, map);
@@ -582,7 +763,7 @@
             // 重绘
             Factory.render(map);
 
-            return this;
+            return that;
     	}
     };
 
@@ -625,6 +806,8 @@
             showDistance: true,
             // 是否显示当前鼠标位置的经纬度
             showPosition: true,
+            // 是否显示比例尺
+            showRule: true,
             distanceStyle: {
                 // 不限制距离，距离单位：米
                 maxDistance: 0,
@@ -645,18 +828,22 @@
                 width: 1, color: '#f00'
             },
             positionCallback: function(pos, map) {
+                /*
                 $.console.log(
                     'latitude:', pos.latitude, ', longitude:', pos.longitude, 
                     ', scale:', map.view.scale, ', center: ', map.center()
                 );
-            },
-            points: [],
+                */
+            },           
+            scaleRules: $.extend([], Config.ScaleLevels),
+            heightLevels: $.extend([], Config.HeightLevels),
+            points: []
     	}, options);
 
+        this.options = opt;
     	this.canvas = opt.canvas;
     	this.ctx = this.canvas.getContext('2d');
     	this.id = this.canvas.id;
-    	this.options = opt;
     	this.view = {
     		defCenter: {
     			latitude: 0,
@@ -665,6 +852,7 @@
     		},
     		curCenter: null,
             scale: opt.scale,   // 缩放比例
+            scaleLevel: opt.scaleLevel,      // 缩放等级
             offsetX: 0,         // X轴偏移
             offsetY: 0,         // Y轴偏移
 
@@ -680,12 +868,12 @@
     		this.view.points = opt.points;
     	}
 
-    	this.initial(opt);
+    	this.initial();
     }
 
     Map.prototype = {
-    	initial: function(opt) {
-    		var that = this, canvas = that.canvas, view = that.view;
+    	initial: function() {
+    		var that = this, opt = that.options, canvas = that.canvas, view = that.view;
 
     		var box = canvas.parentNode;
 			if (box.tagName === 'DIV') {
@@ -693,6 +881,8 @@
 				box.style.overflow = 'hidden';
 				this.box = box;
 			}
+
+            Factory.setPointCache(that).initScaleLevel(that);
 
 			$.addListener(window, 'resize', function(e) {
                 that.size();
@@ -711,19 +901,11 @@
     			Factory.handleWheel(e, that);
     		});
 
-            Factory.setPointCache(that);
-
             if (opt.showOverview) {
                 Factory.setOverview(that, true);
             }
     		return Factory.render(that), that;
     	},
-        config: function (cfg) {
-            var that = this;
-
-
-            return Factory.render(that), that;
-        },
     	size: function (size) {
     		var that = this;
     		if (size && size.width && size.height) {
@@ -751,13 +933,30 @@
     	},
     	scale: function (scale) {
     		var that = this;
-    		if (!scale) {
+    		if (!$.isNumber(scale) || !scale) {
     			return that.view.scale;
     		}
             Factory.setScale(that, scale);
 
     		return Factory.render(that), that;
     	},
+        scaleLevel: function (level, action) {
+            var that = this;
+            if (!$.isNumber(level) && !$.isNumber(action)) {
+                return that;
+            }
+            switch(action) {
+            case 1:
+                level = that.view.scaleLevel + 1;
+                break;
+            case -1:
+                level = that.view.scaleLevel - 1;
+                break;
+            }
+            Factory.setScaleLevel(that, null, level);
+
+            return Factory.render(that), that;
+        },
         overview: function (force) {
             Factory.setOverview(this, force || this.options.showOverview).render(this);
             return this;

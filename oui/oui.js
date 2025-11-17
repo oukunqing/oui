@@ -1422,6 +1422,7 @@
             }
 
             if (plane) {
+                // 按平面算，1度所代表的距离，单位：米
                 var Ratio = earthRadius || 111320;
                 var w = lat2 > lat1 ? lat2 - lat1 : lat1 - lat2, 
                     h = lon2 > lon1 ? lon2 - lon1 : lon1 - lon2,
