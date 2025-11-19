@@ -1,0 +1,140 @@
+.oui-gmap-box {
+	position: relative;
+
+}
+.oui-gmap {
+	position: absolute;
+	left: 0;
+	top: 0;
+}
+
+.oui-gmap-scale {
+	position: absolute;
+	left: 10px;
+	top: 10px;
+
+	-moz-user-select: none;
+	-khtml-user-select: none;
+	user-select: none;
+	-ms-user-select: none;
+	z-index: 999999;
+}
+
+.oui-gmap-scale a {
+	width: 25px;
+	height: 25px;
+	margin: 1px 0 0 0;
+	padding: 0;
+	display: block;
+	border: solid 1px #ccc;
+	box-sizing: border-box;
+	line-height: 23px;
+	text-align: center;
+	font-size: 14px;
+	font-family: 宋体;
+	cursor: pointer;
+	clear: both;
+	text-decoration: none;
+	color: #000;
+	z-index: 999999;
+}
+
+.oui-gmap-scale a:hover {
+	color:#000;
+}
+
+.oui-gmap-scale .add {
+	margin-top: 1px;
+}
+.oui-gmap-scale .sub {
+	border-top:none;
+	margin-top:0;
+}
+
+.oui-gmap-rule {
+	position:absolute;
+	right:5px;
+	bottom:5px;
+	z-index: 999999;
+
+	-moz-user-select: none;
+	-khtml-user-select: none;
+	user-select: none;
+	-ms-user-select: none;
+}
+
+.oui-gmap-rule div {
+	border: none;
+	margin: 0;
+	padding: 0;
+	background: transparent;
+}
+
+.oui-gmap-rule .text {
+	margin-bottom:0px;
+	margin-left:-2px;
+	font-size:12px;
+	font-family:宋体;
+	text-align:center;
+}
+
+.oui-gmap-rule .line2 {
+	height:4px;border:solid 1px #000;border-top:none;box-sizing:border-box;
+}
+.oui-gmap-rule .line {
+	height:1px;background:#000;
+}
+
+.oui-gmap-rule-v {
+	position:absolute;
+	right:5px;
+	top:5px;
+	z-index: 999999;
+
+	-moz-user-select: none;
+	-khtml-user-select: none;
+	user-select: none;
+	-ms-user-select: none;	
+}
+
+.oui-gmap-rule-v div {
+	border: none;
+	margin: 0;
+	padding: 0;
+	background: transparent;
+	position: absolute;
+}
+
+.oui-gmap-rule-v .text {
+	margin-bottom:-1px;
+	font-size:12px;
+	line-height:13px;
+	font-family:Arial,宋体;
+	text-align:center;
+	right: 5px;
+}
+
+.oui-gmap-rule-v .line2 {
+	width:4px;border:solid 1px #000;border-left:none;box-sizing:border-box;
+	right: 0px;
+}
+.oui-gmap-rule-v .line {
+	width:2px;background:#000;
+}
+
+.oui-gmap-bottom {
+	position:absolute;bottom:0;left:0;height:25px;margin:0;padding:0;box-sizing:border-box;
+	border: none;
+}
+
+.oui-gmap-position {
+	font-size:12px;
+	font-family:宋体;
+	position:absolute;
+	left:0;max-width:300px;font-size:12px;
+	text-indent:8px;line-height:25px;
+}
+
+.oui-gmap-bottom .oui-gmap-shade {
+	position:absolute;left:0;opacity:0.3;height:25px;width:100%;background:#fff;display:block;
+}

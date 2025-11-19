@@ -11,6 +11,10 @@
 <body>
     <button onclick="setLevel(1);">+</button>
     <button onclick="setLevel(-1);">-</button>
+    <input type="text" id="txtLevel" />
+    <button onclick="setLevel(0);">缩放</button>
+    <button onclick="setCenter();">中心</button>
+    <button onclick="setOverview();">全览</button>
     <div id="box1" style="width:80%;height:600px;border:solid 1px #f00;">
         <canvas id="gridCanvas" width="1000" height="500"></canvas>
     </div>
@@ -81,7 +85,8 @@ window.onload = function() {
 
 	$.gmap('gridCanvas', {
         //scale: 100,
-        plane: true, showOverview: true, showLine: true, showText: true, showDistance: true,
+        vertical: true,
+        plane: true, showOverview: true, autoOverview: false, showLine: true, showText: true, showDistance: true,
         distanceStyle: {
             // 距离文字的位置：0 - 起点， 1 - 终点， 2 - 中心点
             position: 0,
@@ -111,7 +116,18 @@ window.onload = function() {
 };
 
 function setLevel(action) {
-    $.gmap('gridCanvas').scaleLevel(null, action);
+    if (!action) {
+        $.gmap('gridCanvas').scaleLevel($('#txtLevel').val().toInt());
+    } else {
+        $.gmap('gridCanvas').scaleLevel(null, action);
+    }
+}
+
+function setCenter() {
+    $.gmap('gridCanvas').center(true);
+}
+function setOverview() {
+    $.gmap('gridCanvas').overview(true);
 }
 
 window.onresize = function() {
