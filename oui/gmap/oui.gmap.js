@@ -329,6 +329,39 @@
             ctx.fillText(text, pos.x, pos.y);
             return this;
         },
+        dealDistance: function (distance, style) {
+            if (distance > 1000) {
+                distance = (distance / 1000).round(style.decimal);
+                style.unit = 'km';
+            } else {
+                if (style.ratio > 1) {
+                    distance = (distance * style.ratio).round(style.decimal);
+                } else {
+                    distance = distance.round(style.decimal);
+                }
+            }
+            return distance;
+        },
+        drawVerticalLine: function (map, point, pointTo, style) {
+            let that = this, ctx = map.ctx, 
+                pos = that.latLngToCanvas(map, point), 
+                posTo, potTmp;
+
+            if (point.distance === pointTo.distance || point.height === pointTo.height) {
+                posTo = that.latLngToCanvas(map, pointTo);
+                that.drawLine(map, ctx, pos, posTo, style);
+            } else {
+                let pointTmp = { distance: point.distance, height: pointTo.height };
+                potTmp = that.latLngToCanvas(map, pointTmp);
+                that.drawLine(map, ctx, pos, potTmp, style);
+
+                pointTmp = { distance: pointTo.distance, height: pointTo.height };
+                posTo = that.latLngToCanvas(map, pointTmp);
+                that.drawLine(map, ctx, potTmp, posTo, style);
+            }
+
+            return this;
+        },
         drawPoint: function (map, point) {
             let that = this,
                 opt = map.options,
@@ -353,8 +386,12 @@
                     pointTo = that.getPointCache(map, lines[i]);
                     style = $.extend({}, opt.lineStyle, point.lineStyle, lines[i]);
                     if (pointTo) {
-                        posTo = that.latLngToCanvas(map, pointTo);
-                        that.drawLine(map, ctx, pos, posTo, style);
+                        if (opt.vertical && style.vertical) {
+                            that.drawVerticalLine(map, point, pointTo, style);
+                        } else {
+                            posTo = that.latLngToCanvas(map, pointTo);
+                            that.drawLine(map, ctx, pos, posTo, style);
+                        }
                     }
                 }
             }
@@ -368,7 +405,7 @@
                 }
             }
             if (opt.showDistance) {
-                let distance;
+                let distance, heightDistance;
                 for (i = 0; i < distances.length; i++) {
                     // 找到要计算距离的点，必须是在地图中已经注册过的点
                     pointTo = that.getPointCache(map, distances[i]);
@@ -384,19 +421,17 @@
                         if (style.maxDistance && distance > style.maxDistance) {
                             continue;
                         }
-                        posTo = that.latLngToCanvas(map, pointTo);
-                        if (distance > 1000) {
-                            distance = (distance / 1000).round(style.decimal);
-                            style.unit = 'km';
-                        } else {
-                            if (style.ratio > 1) {
-                                distance = (distance * style.ratio).round(style.decimal);
-                            } else {
-                                distance = distance.round(style.decimal);
+                        distance = that.dealDistance(distance, style);
+
+                        text = (style.prefix || '') +  distance + style.unit;
+                        if (!opt.vertical && opt.showHeight) {
+                            style = $.extend({}, opt.distanceStyle, point.distanceStyle, distances[i]);
+                            heightDistance = point.height - pointTo.height;
+                            if (!isNaN(heightDistance)) {
+                                heightDistance = that.dealDistance(heightDistance, style);
+                                text += ' (高差:' + heightDistance + style.unit + ')';
                             }
                         }
-
-                        text = distance + style.unit;
                         textPos = that.setDistancePosition(map, style.position, pos, posTo, radius, fontSize, text);
 
                         that.drawText(ctx, text, textPos, style);
@@ -514,8 +549,8 @@
 
             if (opt.showScale) {
                 div = _build('oui-gmap-scale', zindex, [
-                    '<a class="center" title="中心点">中</a>',
-                    '<a class="overview', opt.showOverview ? ' press' : '', '" title="', opt.showOverview ? '退出全览' : '固定全览', '">全</a>',
+                    '<a class="center" title="中心点"></a>',
+                    '<a class="overview', opt.showOverview ? ' press' : '', '" title="', opt.showOverview ? '退出全览' : '固定全览', '"></a>',
                     '<a class="add level" title="放大一级">+</a>',
                     '<a class="sub level" title="缩小一级">-</a>',
                 ].join(''));
@@ -874,7 +909,7 @@
                 points = view.points;
 
             if (points.length > 0) {
-                center = that.calcPolygonCenter(points, opt.vertical);                
+                center = that.calcPolygonCenter(points, opt.vertical);
                 that.setCenter(map, center);
             }
 
@@ -1070,6 +1105,8 @@
             showLine: true,
             // 是否计算并显示两点之间的距离
             showDistance: true,
+            // 是否显示高差
+            showHeight: false,
             // 连线距离文字样式
             distanceStyle: {
                 // 不限制距离，距离单位：米
@@ -1082,6 +1119,8 @@
                 unit: 'm',
                 // 保留小数位数
                 decimal: 3,
+                // 距离文字前缀
+                prefix: '',
                 font:'20px Arial',color:'#f00'
             },
             textStyle: { 
@@ -1283,10 +1322,10 @@
 
                 if (opt.showOverview) {
                     Factory.setOverview(that, true);
-                } else if (opt.vertical) {
+                }/* else if (opt.vertical) {
                     let center = Factory.calcPolygonCenter(points, opt.vertical);
                     Factory.setCenter(that, center);
-                }
+                }*/
                 Factory.render(that);
             }
             return that;

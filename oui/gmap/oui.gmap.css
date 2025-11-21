@@ -21,13 +21,13 @@
 }
 
 .oui-gmap-scale a {
-	width: 25px;
-	height: 25px;
+	width: 24px;
+	height: 24px;
 	margin: 1px 0 0 0;
 	padding: 0;
 	display: block;
 	border: solid 1px #ccc;
-	box-sizing: border-box;
+	box-sizing: content-box;
 	line-height: 23px;
 	text-align: center;
 	font-size: 14px;
@@ -51,8 +51,21 @@
 	margin-top:0;
 }
 
-.oui-gmap-scale .press {
-	background: #eee;
+.oui-gmap-scale .center {
+	background: url("imgs/gmap.png") 0 0 no-repeat;
+}
+.oui-gmap-scale .center:hover {
+	background: url("imgs/gmap.png") -24px 0 no-repeat;
+}
+.oui-gmap-scale .overview {
+	background: url("imgs/gmap.png") 0 -24px no-repeat;
+}
+.oui-gmap-scale .overview:hover {
+	background: url("imgs/gmap.png") -24px -24px no-repeat;
+}
+
+.oui-gmap-scale .press,.oui-gmap-scale .press:hover {
+	background-color: #eee;
 	opacity: 0.8;
 }
 
@@ -76,9 +89,13 @@
 }
 
 .oui-gmap-rule .text {
+	margin: 0;
+	padding: 0;
 	margin-bottom:0px;
 	margin-left:-2px;
 	font-size:12px;
+	line-height: 1em;
+	height: 12px;
 	font-family:宋体;
 	text-align:center;
 }
@@ -95,6 +112,7 @@
 	top: 0;
 	left: 50%;
 	font-size:16px;
+	font-weight: bold;
 	font-family:宋体;
 	padding:3px 0;
 	margin: 0;

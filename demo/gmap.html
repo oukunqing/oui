@@ -73,18 +73,20 @@ function showScaleMap() {
             textStyle: {position: 1, color: '#000' },
             latitude: 31.8732976498,
             longitude: 122.6011577513,
+            height: 122.125,
             lines: [{id:'B2-9527', color: '#000'}],
         },{
             id: 'B2-9527',
             name: 'B2-9527', color: '#000',
             textStyle: {position: 1, color: '#000' },
             latitude: 29.8732976498,
-            longitude: 121.6011577513
+            longitude: 121.6011577513,
+            height: 122.123,
         }
     ];
     $.gmap('gridCanvas', {
         title: '水平位置图',
-        plane: true, showOverview: true, autoOverview: false, showPosition: true, showScale: true, 
+        plane: true, showOverview: true, autoOverview: false, showPosition: true, showScale: true,  showHeight: true,
         //这三个参数默认是启用的
         showLine: true, showText: true, showDistance: true,
         distanceStyle: {
@@ -97,6 +99,7 @@ function showScaleMap() {
             // 单位和倍率是成对的，别搞错了
             unit: 'cm',
             decimal: 0,
+            prefix: '距离:',
             font: '20px Arial', color: '#f00'
         },
         lineStyle: { width: 1, color: '#00f' },
@@ -135,7 +138,7 @@ function showVerticalMap() {
                 decimal: 2,
                 font:'20px Arial',color:'#00f'
             },
-            lineStyle: {width:1, color: '#00f', dash: [2,4]}
+            lineStyle: {width:1, color: '#00f', dash: [2,4], vertical:true}
         },{
             id: 'C2-9364',
             name: 'C2-9364', color: '#00f',
@@ -145,7 +148,7 @@ function showVerticalMap() {
             height: 124.123,
             textStyle: { font:'14px Arial',color:'#f00',position: 4 },
             //lines: ['C1-9123','B2-9527'],
-            lines: [{id:'C1-9123',color:'#f00',width:1},{id:'B2-9527',color:'#000',width:1, dash:[2,4]}],
+            lines: [{id:'C1-9123',color:'#f00',width:1},{id:'B2-9527',color:'#000',width:1, dash:[2,4], vertical:true}],
             texts: [{text:'C2-9364',position:3,color:'#00f'}],
             distances: [{id:'B2-9527'}],
             lineStyle: {width:1, color: '#00f', dash: false}
@@ -154,7 +157,7 @@ function showVerticalMap() {
             name: 'B1-2345', color: '#000',
             textStyle: {position: 1, color: '#000' },
             latitude: 31.8732976498,
-            longitude: 122.6011977513,
+            longitude: 122.6011877513,
             height: 121.123,
             lines: [{id:'B2-9527', color: '#000'}],
         },{
@@ -162,7 +165,7 @@ function showVerticalMap() {
             name: 'B2-9527', color: '#000',
             textStyle: {position: 1, color: '#000' },
             latitude: 31.8732976498,
-            longitude: 122.6011577513,
+            longitude: 122.6011677513,
             height: 121.123,
         }
     ];
@@ -173,7 +176,7 @@ function showVerticalMap() {
         plane: true,
         scaleLevel: 20,
         showScale: true,
-        showOverview: false,
+        showOverview: true,
         showPosition: true, showScale: true, 
 
         distanceStyle: {
@@ -186,6 +189,9 @@ function showVerticalMap() {
             // 单位和倍率是成对的，别搞错了
             unit: 'cm',
             decimal: 0,
+            prefix: '高差:',
+            //是否画垂直线
+            vertical: true,
             font: '20px Arial', color: '#f00'
         },
     }).size().update(points2);
