@@ -15,10 +15,10 @@
     <button onclick="setLevel(0);">缩放</button>
     <button onclick="setCenter();">中心</button>
     <button onclick="setOverview();">全览</button>
-    <div id="box1" style="width:80%;height:600px;border:solid 1px #f00;">
-        <canvas id="gridCanvas" width="1000" height="500"></canvas>
+    <div id="box1" style="width:70%;height:500px;border:solid 1px #f00;">
+        <canvas id="gridCanvas" width="800" height="500"></canvas>
     </div>
-    <div style="width:600px;height:600px;border:solid 1px #f00;display: none;">
+    <div style="width:70%;height:500px;border:solid 1px #f00;margin:50px 0 200px;">
         <canvas id="gridCanvas2"></canvas>
     </div>
 </body>
@@ -33,6 +33,7 @@ window.onload = function() {
             radius: 6,
             latitude: 26.8732976498,
             longitude: 122.6011577513,
+            height: 124.123,
             textStyle: { font:'14px Arial',color:'#f00',position: 4 },
             //lines: ['C1-9123','B2-9527'],
             lines: [{id:'C1-9123',color:'#f00',width:1},{id:'B2-9527',color:'#000',width:1, dash:[2,4]}],
@@ -44,6 +45,7 @@ window.onload = function() {
             name: 'C1-9123', color: '#f00',
             latitude: 29.8732976498,
             longitude: 125.6011577513,
+            height: 124.123,
             lines: ['B1-2345'],
             distances: 'B1-2345',
             distanceStyle: {
@@ -72,21 +74,13 @@ window.onload = function() {
             textStyle: {position: 1, color: '#000' },
             latitude: 29.8732976498,
             longitude: 121.6011577513
-        }];
-    /*  
-    points = [
-        { x: 10, y: 10 },
-        { x: 20, y: 15 },
-        { x: 30, y: 20 },
-        { x: 15, y: 30 },
-        { x: 25, y: 25 }
+        }
     ];
-    */
 
 	$.gmap('gridCanvas', {
-        //scale: 100,
-        vertical: true,
-        plane: true, showOverview: true, autoOverview: false, showLine: true, showText: true, showDistance: true,
+        plane: true, showOverview: true, autoOverview: false, showPosition: true, showScale: true, 
+        //这三个参数默认是启用的
+        showLine: true, showText: true, showDistance: true,
         distanceStyle: {
             // 距离文字的位置：0 - 起点， 1 - 终点， 2 - 中心点
             position: 0,
@@ -112,7 +106,78 @@ window.onload = function() {
         $.gmap('gridCanvas').overview(true);
     }, 2000);
 
-    //$.gmap('gridCanvas2', {vertical:true}).size().update(points);
+    var points2 = [{
+            id: 'C2-9364',
+            name: 'C2-9364', color: '#00f',
+            radius: 6,
+            latitude: 31.8732976498,
+            longitude: 122.6011577513,
+            height: 124.123,
+            textStyle: { font:'14px Arial',color:'#f00',position: 4 },
+            //lines: ['C1-9123','B2-9527'],
+            lines: [{id:'C1-9123',color:'#f00',width:1},{id:'B2-9527',color:'#000',width:1, dash:[2,4]}],
+            texts: [{text:'C2-9364',position:3,color:'#00f'}],
+            distances: [{id:'B2-9527'}],
+            lineStyle: {width:1, color: '#00f', dash: false}
+        },{
+            id: 'C1-9123',
+            name: 'C1-9123', color: '#f00',
+            latitude: 31.8732976498,
+            longitude: 122.6015577513,
+            height: 124.123,
+            lines: ['B1-2345'],
+            distances: 'B1-2345',
+            distanceStyle: {
+                // 距离文字的位置：0 - 起点， 1 - 终点， 2 - 中心点
+                position: 0,
+                // 显示的最大距离，单位：米
+                maxDistance: 100 * 1000 * 10,
+                // 距离的默认单位是米，这里用厘米，所以倍率为100
+                ratio: 100,
+                // 单位和倍率是成对的，别搞错了
+                unit: '厘米',
+                decimal: 2,
+                font:'20px Arial',color:'#00f'
+            },
+            lineStyle: {width:1, color: '#00f', dash: [2,4]}
+        },{
+            id: 'B1-2345',
+            name: 'B1-2345', color: '#000',
+            textStyle: {position: 1, color: '#000' },
+            latitude: 31.8732976498,
+            longitude: 122.6011577513,
+            height: 121.123,
+            lines: [{id:'B2-9527', color: '#000'}],
+        },{
+            id: 'B2-9527',
+            name: 'B2-9527', color: '#000',
+            textStyle: {position: 1, color: '#000' },
+            latitude: 31.8732976498,
+            longitude: 122.6025577513,
+            height: 121.123,
+        }
+    ];
+
+    $.gmap('gridCanvas2', {
+        vertical:true,
+        plane: true,
+        showScale: true,
+        showOverview: false,
+        showPosition: true, showScale: true, 
+
+        distanceStyle: {
+            // 距离文字的位置：0 - 起点， 1 - 终点， 2 - 中心点
+            position: 0,
+            // 显示的最大距离，单位：米
+            maxDistance: 100 * 1000 * 10,
+            // 距离的默认单位是米，这里用厘米，所以倍率为100
+            ratio: 100,
+            // 单位和倍率是成对的，别搞错了
+            unit: 'cm',
+            decimal: 0,
+            font: '20px Arial', color: '#f00'
+        },
+    }).size().update(points2);
 };
 
 function setLevel(action) {

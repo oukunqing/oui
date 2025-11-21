@@ -90,6 +90,7 @@
 	right:5px;
 	top:5px;
 	z-index: 999999;
+	border: none;
 
 	-moz-user-select: none;
 	-khtml-user-select: none;
@@ -119,7 +120,7 @@
 	right: 0px;
 }
 .oui-gmap-rule-v .line {
-	width:2px;background:#000;
+	width:1px;background:#000;
 }
 
 .oui-gmap-bottom {

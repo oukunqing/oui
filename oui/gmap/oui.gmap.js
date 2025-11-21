@@ -48,41 +48,46 @@
             { val: 0.01, min: 0.005, text: '1厘米' },
             { val: 0.005, min: 0.004, text: '5毫米' }
         ],
+        //经纬度距离，1度所表示的距离，单位：米
         DegreeDistance: 111320,
         DistanceWidth: 50,
         //最小比例，50个像素所能代表的最大距离
         MinScaleRatio: 1,
         //最大比例，50个像素所能代表的最小距离
         MaxScaleRatio: 1,
+        //高度距离，高度数字1所表示的距离，单位：米
+        HeightDistance: 1,
         HeightLevels: [
-            { val: 5 * 1000, min: 2 * 1000, text: '5公里' },
+            { val: 5 * 1000, min: 4.5 * 1000, text: '5公里' },
+            { val: 4.5 * 1000, min: 4 * 1000, text: '4.5公里' },
+            { val: 4 * 1000, min: 3.5 * 1000, text: '4公里' },
+            { val: 3.5 * 1000, min: 3 * 1000, text: '3.5公里' },
+            { val: 3 * 1000, min: 2.5 * 1000, text: '3公里' },
+            { val: 2.5 * 1000, min: 2 * 1000, text: '2.5公里' },
             { val: 2 * 1000, min: 1 * 1000, text: '2公里' },
-            { val: 1 * 1000, min: 750, text: '1公里' },
+            { val: 1 * 1000, min: 800, text: '1公里' },
+
             { val: 750, min: 500, text: '750米' },
-            { val: 500, min: 250, text: '500米' },
-            { val: 250, min: 200, text: '250米' },
+            { val: 500, min: 400, text: '500米' },
+            { val: 400, min: 300, text: '400米' },
+            { val: 300, min: 200, text: '300米' },
+
+
             { val: 200, min: 100, text: '200米' },
-            { val: 100, min: 75, text: '100米' },
+            { val: 100, min: 50, text: '100米' },
             { val: 75, min: 50, text: '75米' },
             { val: 50, min: 25, text: '50米' },
             { val: 25, min: 20, text: '25米' },
-            { val: 20, min: 15, text: '20米' },
-
-            { val: 15, min: 10, text: '15米' },
-            { val: 10, min: 7.5, text: '10米' },
-            { val: 7.5, min: 5, text: '7.5米' },
-            { val: 5, min: 2.5, text: '5米' },
-            { val: 2.5, min: 2, text: '2.5米' },
+            { val: 20, min: 10, text: '20米' },
+            { val: 10, min: 5, text: '10米' },
+            { val: 5, min: 2, text: '5米' },
             { val: 2, min: 1, text: '2米' },
-            { val: 1, min: 0.75, text: '1米' },
-            { val: 0.75, min: 0.5, text: '75厘米' },
+            { val: 1, min: 0.5, text: '1米' },
+
             { val: 0.5, min: 0.25, text: '50厘米' },
             { val: 0.25, min: 0.2, text: '25厘米' },
-
-            { val: 0.2, min: 0.15, text: '20厘米' },
-            { val: 0.15, min: 0.1, text: '15厘米' },
-            { val: 0.1, min: 0.75, text: '10厘米' },
-            { val: 0.075, min: 0.05, text: '7.5厘米' },
+            { val: 0.2, min: 0.1, text: '20厘米' },
+            { val: 0.1, min: 0.05, text: '10厘米' },
             { val: 0.05, min: 0.02, text: '5厘米' },
             { val: 0.02, min: 0.01, text: '2厘米' },
             { val: 0.01, min: 0.005, text: '1厘米' },
@@ -140,15 +145,25 @@
             return false;
         },
         // 经纬度转换为Canvas坐标
-        latLngToCanvas: function (map, lat, lng) {
-            const view = map.view, 
+        latLngToCanvas: function (map, lat, lng, height) {
+            let view = map.view, 
+                opt = map.options,
                 canvas = map.canvas,
-                center = map.center();
+                center = map.center(),
+                x, y;
 
-            // 简化的经纬度到平面坐标的转换
-            // 实际应用中可能需要使用墨卡托投影等更精确的方法
-            const x = (lng - center.longitude) * view.scale + canvas.width / 2 + view.offsetX;
-            const y = (center.latitude - lat) * view.scale + canvas.height / 2 + view.offsetY;
+            if (opt.vertical) {                
+                x = (lng - center.longitude) * view.scale + canvas.width / 2 + view.offsetX;
+                y = (center.height - height) * view.scaleVertical + canvas.height / 2 + view.offsetY;
+            console.log('latLngToCanvas-vertical', x, y, center.height, height);
+            } else {
+                // 简化的经纬度到平面坐标的转换
+                // 实际应用中可能需要使用墨卡托投影等更精确的方法
+                x = (lng - center.longitude) * view.scale + canvas.width / 2 + view.offsetX;
+                y = (center.latitude - lat) * view.scale + canvas.height / 2 + view.offsetY;
+            console.log('latLngToCanvas', x, y);
+            }
+
             return { x, y };
         },
         getTextSize: function (text, fontSize) {
@@ -328,7 +343,7 @@
                 opt = map.options,
                 ctx = map.ctx,
                 radius = point.radius || 4,
-                pos = that.latLngToCanvas(map, point.latitude, point.longitude),
+                pos = that.latLngToCanvas(map, point.latitude, point.longitude, point.height),
                 lines = that.getParamArray(point.lines || point.line),
                 distances = that.getParamArray(point.distances || point.distance),
                 texts = that.getParamArray(point.texts || point.text || point.name, true),
@@ -347,7 +362,7 @@
                     pointTo = that.getPointCache(map, lines[i]);
                     style = $.extend({}, opt.lineStyle, point.lineStyle, lines[i]);
                     if (pointTo) {
-                        posTo = that.latLngToCanvas(map, pointTo.latitude, pointTo.longitude);
+                        posTo = that.latLngToCanvas(map, pointTo.latitude, pointTo.longitude, pointTo.height);
                         that.drawLine(map, ctx, pos, posTo, style);
                     }
                 }
@@ -367,14 +382,18 @@
                     // 找到要计算距离的点，必须是在地图中已经注册过的点
                     pointTo = that.getPointCache(map, distances[i]);
                     if (pointTo) {
-                        distance = $.calcLocationDistance(point, pointTo, opt.plane);
+                        if (opt.vertical) {
+                            distance = point.height - pointTo.height;
+                        } else {
+                            distance = $.calcLocationDistance(point, pointTo, opt.plane);
+                        }
                         style = $.extend({}, opt.distanceStyle, point.distanceStyle, distances[i]);
                         fontSize = parseInt(style.font, 10);
 
                         if (style.maxDistance && distance > style.maxDistance) {
                             continue;
                         }
-                        posTo = that.latLngToCanvas(map, pointTo.latitude, pointTo.longitude);
+                        posTo = that.latLngToCanvas(map, pointTo.latitude, pointTo.longitude, pointTo.height);
                         if (distance > 1000) {
                             distance = (distance / 1000).round(style.decimal);
                             style.unit = 'km';
@@ -397,21 +416,25 @@
             return that;
         },
         drawPoints: function (map) {
-            const that = this, points = map.view.points, ctx = map.ctx;
-            points.forEach(point => {
-                that.drawPoint(map, point);
-            });
+            let that = this, points = map.view.points, ctx = map.ctx, len = points.length;
+            for (var i = 0; i < len; i++) {
+                that.drawPoint(map, points[i]);
+            }
             return this;
         },
         showRules: function (map, vertical) {
-            var that = this,
+            let that = this,
                 opt = map.options, view = map.view,
                 box = vertical ? map.panels.verticalRule : map.panels.scaleRule,
                 nodes = box ? box.querySelectorAll('div') : undefined,
                 attr = vertical ? 'height' : 'width',
-                rule = that.getScaleLevel(map, view.scaleLevel, view.scale),
+                rule = that.getScaleLevel(map, view.scaleLevel, view.scale, vertical),
                 ruleWidth = rule.width || 50,
                 ruleText = rule.text;
+
+            if (!box) {
+                return that;
+            }
 
             if (!nodes || !nodes.length) {
                 box.innerHTML = [
@@ -428,76 +451,21 @@
             nodes[1].style[attr] = ruleWidth + 'px';
             nodes[2].style[attr] = ruleWidth + 'px';
 
-            if (!vertical && opt.vertical && opt.heightRules && opt.heightRules.length > 0) {
-                this.setRatioRule(map, true);
-            }
-
-            return this;
-        },
-        drawRules: function (map, force) {
-            return this.showRules(map);
-            
-            let that = this, opt = map.options, canvas = map.canvas, ctx = map.ctx, view = map.view, 
-                rulePadding = 5, ruleWidth = 50, minWidth = 50, distance = 0, sideHeight = 3,
-                ruleText = '', textStyle = { color: '#000', font: '12px Arial' };
-
-            if (!opt.showRule) {
-                return that;
-            }
-            let rule = that.getScaleLevel(map, view.scaleLevel, view.scale);
-
-            ruleWidth = rule.width || 50;
-            ruleText = rule.text;
-
-            ctx.beginPath();
-            ctx.setLineDash([]);
-
-            // 画水平比例尺
-            ctx.moveTo(canvas.width - rulePadding, canvas.height - rulePadding - sideHeight);
-            ctx.lineTo(canvas.width - rulePadding, canvas.height - rulePadding);
-
-            ctx.moveTo(canvas.width - rulePadding, canvas.height - rulePadding);
-            ctx.lineTo(canvas.width - rulePadding - ruleWidth, canvas.height - rulePadding);
-
-            ctx.moveTo(canvas.width - rulePadding - ruleWidth, canvas.height - rulePadding);
-            ctx.lineTo(canvas.width - rulePadding - ruleWidth, canvas.height - rulePadding - sideHeight);
-
-            ctx.strokeStyle = '#000';
-            ctx.lineWidth = 2;
-
-            if (ruleText) {
-                that.drawText(ctx, ruleText, {
-                    // 设置水平比例尺的文字位置
-                    x: canvas.width - rulePadding - ruleWidth / 2 - that.getTextSize(ruleText, 12).width / 2, 
-                    y: canvas.height - rulePadding - sideHeight - 3
-                }, textStyle);
-            }
-
-            // 画垂直比例尺
-            if (opt.vertical) {
-                let ruleVertical = {};
-
-                let ruleHeight = ruleVertical.width || 50;
-                ruleText = '';
-
-                ctx.moveTo(canvas.width - rulePadding, rulePadding);
-                ctx.lineTo(canvas.width - rulePadding, ruleHeight + rulePadding);
-
-                ctx.moveTo(canvas.width - rulePadding, rulePadding);
-                ctx.lineTo(canvas.width - rulePadding - sideHeight, rulePadding);
-
-                ctx.moveTo(canvas.width - rulePadding, ruleHeight + rulePadding);
-                ctx.lineTo(canvas.width - rulePadding - sideHeight, ruleHeight + rulePadding);
-
-            }
-
-            ctx.stroke();
-            ctx.fill();
             return that;
         },
+        drawRules: function (map, force) {
+            this.showRules(map);
+            if (map.options.vertical) {
+                this.showRules(map, map.options.vertical);
+            }
+            return this;
+        },
         showPosition: function (map, point) {
-            let that = this, opt = map.options;
+            let that = this, opt = map.options, view = map.view;
 
+            if (!point) {
+                point = view.curPoint;
+            }
             if (!opt.showPosition || !that.isPoint(point)) {
                 map.panels.position.innerHTML = '';
                 return that;
@@ -516,49 +484,59 @@
 
                 return div;
             }
-            let zindex = parseInt('0' + $.getElementStyle(map.canvas, 'z-index'), 10) + 1,
+            let opt = map.options,
+                zindex = parseInt('0' + $.getElementStyle(map.canvas, 'z-index'), 10) + 1,
                 div = _build('oui-gmap-bottom', zindex, [
                     '<div class="oui-gmap-position" style="z-index:', zindex + 2, ';"></div>',
                     '<div class="oui-gmap-rule"></div>',
                     '<div class="oui-gmap-shade" style="z-index:', zindex + 1, ';"></div>'
                 ].join(''));
 
-            map.box.appendChild(div);
-            map.panels.bottom = div;
-            map.panels.position = div.childNodes[0];
-            map.panels.scaleRule = div.childNodes[1];
+            if (opt.showRule) {
+                map.box.appendChild(div);
+                map.panels.bottom = div;
+                map.panels.position = div.childNodes[0];
+                map.panels.scaleRule = div.childNodes[1];
 
-            div = _build('oui-gmap-scale', zindex, [
-                '<a class="center" title="中心点">中</a>',
-                '<a class="overview" title="全览">全</a>',
-                '<a class="add" title="放大一级">+</a>',
-                '<a class="sub" title="缩小一级">-</a>',
-            ].join(''));
-            map.panels.scale = div;
+                if (opt.vertical) {
+                    div = _build('oui-gmap-rule-v', zindex);
+                    map.panels.verticalRule = div;
+                }
+            }
 
-            let nodes = div.querySelectorAll('A');
-            for(var i = 0; i < nodes.length; i++) {
-                $.addListener(nodes[i], 'click', function(e) {
-                    let node = this;
-                    $.debounce({
-                        id:'oui-gmap-', delay:150, timeout:2000
-                    }, function(e) {
-                        switch(node.className) {
-                        case 'center':
-                            map.center(true);
-                            break;
-                        case 'overview':
-                            map.overview(true);
-                            break;
-                        case 'add':
-                            map.scaleLevel(null, 1);
-                            break;
-                        case 'sub':
-                            map.scaleLevel(null, -1);
-                            break;
-                        }
+            if (opt.showScale) {
+                div = _build('oui-gmap-scale', zindex, [
+                    '<a class="center" title="中心点">中</a>',
+                    '<a class="overview" title="全览">全</a>',
+                    '<a class="add" title="放大一级">+</a>',
+                    '<a class="sub" title="缩小一级">-</a>',
+                ].join(''));
+                map.panels.scale = div;
+
+                let nodes = div.querySelectorAll('A');
+                for(var i = 0; i < nodes.length; i++) {
+                    $.addListener(nodes[i], 'click', function(e) {
+                        let node = this;
+                        $.debounce({
+                            id:'oui-gmap-', delay:150, timeout:2000
+                        }, function(e) {
+                            switch(node.className) {
+                            case 'center':
+                                map.center(true);
+                                break;
+                            case 'overview':
+                                map.overview(true);
+                                break;
+                            case 'add':
+                                map.scaleLevel(null, 1);
+                                break;
+                            case 'sub':
+                                map.scaleLevel(null, -1);
+                                break;
+                            }
+                        });
                     });
-                });
+                }
             }
 
             return this;
@@ -570,32 +548,7 @@
             return this;
         },
         drawPosition: function (map, point) {
-            let that = this, opt = map.options, view = map.view, text;
-
-            if (!point) {
-                point = view.curPoint;
-            }
-            return that.showPosition(map, point);
-
-            if (!opt.showPosition || !that.isPoint(point)) {
-                return that;
-            }
-            let ctx = map.ctx, canvas = map.canvas,
-                style = { color: '#000', font: '12px Arial' };
-
-            if (opt.decimalLength > 0) {
-                text = point.latitude.round(opt.decimalLength) + ', ' + point.longitude.round(opt.decimalLength);
-            } else {
-                text = point.latitude + ', ' + point.longitude;
-            }
-
-            that.drawText(ctx, text, {
-                // 设置水平比例尺的文字位置
-                x: 10, 
-                y: canvas.height - 10
-            }, style);
-
-            return that;
+            return this.showPosition(map, point);
         },
         setPointCache: function (map) {
             let view = map.view, caches = {}, points = view.points, len = points.length, i, key, p;
@@ -652,6 +605,15 @@
             }
             return null;
         },
+        setOffset: function (map, offsetX, offsetY) {
+            if ($.isNumber(offsetY)) {
+                map.view.offsetX = offsetX;
+            }
+            if ($.isNumber(offsetY)) {
+                map.view.offsetY = offsetY;
+            }
+            return this;
+        },
         setCenter: function (map, point) {
             if (!this.isPoint(point)) {
                 return this;
@@ -660,9 +622,8 @@
                 latitude: point.latitude,
                 longitude: point.longitude,
                 height: point.height
-            };            
-            map.view.offsetX = 0;
-            map.view.offsetY = 0;
+            };
+            this.setOffset(map, 0, 0);
 
             return this;
         },
@@ -693,29 +654,22 @@
         },
         // 计算多边形最小包围盒，
         calcPolygonBox: function (map, points) {
-            let that = this, minX = 0, minY = 0, maxX = 0, maxY = 0, len = points.length;
+            let that = this, opt = map.options,
+                minX = 0, minY = 0, maxX = 0, maxY = 0, len = points.length;
             if (len <= 1) {
                 return null;
             }
             if (len > 3) {
-                /*
-                minX = Math.min(...points.map(p => p.longitude));
-                maxX = Math.max(...points.map(p => p.longitude));
-
-                minY = Math.min(...points.map(p => p.latitude));
-                maxY = Math.max(...points.map(p => p.latitude));
-                */
                 minX = that.getMin(points, 'longitude');
                 maxX = that.getMax(points, 'longitude');
-
-                minY = that.getMin(points, 'latitude');
-                maxY = that.getMax(points, 'latitude');
+                minY = that.getMin(points, opt.vertical ? 'height': 'latitude');
+                maxY = that.getMax(points, opt.vertical ? 'height': 'latitude');
             } else {
                 minX = Math.min(points[0].longitude, points[1].longitude);
                 maxX = Math.max(points[0].longitude, points[1].longitude);
 
-                minY = Math.min(points[0].latitude, points[1].latitude);
-                maxY = Math.max(points[0].latitude, points[1].latitude);
+                minY = Math.min(points[0].latitude, points[1][opt.vertical ? 'height': 'latitude']);
+                maxY = Math.max(points[0].latitude, points[1][opt.vertical ? 'height': 'latitude']);
             }
 
             return {
@@ -744,17 +698,35 @@
             Config.MinScaleRatio = Config.DegreeDistance * Config.DistanceWidth / levels[0].val;
             Config.MaxScaleRatio = Config.DegreeDistance * Config.DistanceWidth / levels[len - 1].min;
 
+            if (map.options.vertical) {
+                levels = map.options.heightRules, len = levels.length;
+                for (var i = 0; i < len; i++) {
+                    var dr = levels[i];
+                    dr.level = i + 1;
+                    dr.scale = {
+                        val: Config.HeightDistance * Config.DistanceWidth / dr.val,
+                        // 请注意，这里的大小是相反的
+                        min: Config.HeightDistance * Config.DistanceWidth / dr.val,
+                        max: Config.HeightDistance * Config.DistanceWidth / dr.min
+                    };
+                }
+
+                $.console.log('initScaleLevel:', levels);
+            }
+
             return this;
         },
-        getScaleLevel: function (map, scaleLevel, scale) {
-            var rules = map.options.scaleRules, len = rules.length;
+        getScaleLevel: function (map, scaleLevel, scale, vertical) {
+            var rules = vertical ? map.options.heightRules : map.options.scaleRules, 
+                len = rules.length;
+
             if (scaleLevel < 1) {
                 scaleLevel = 1;
             } else if(scaleLevel > len) {
                 scaleLevel = len;
             }
             var rule = $.extend({ width: 50, }, rules[scaleLevel - 1]);
-            if (scale) {
+            if (scale && rule.scale) {
                 rule.width = (rule.width * (scale / rule.scale.val)).round(3);
             }
             return rule;
@@ -814,8 +786,7 @@
                     points = view.points, len = points.length;
 
                 if (overview) {
-                    view.offsetX = 0;
-                    view.offsetY = 0;
+                    that.setOffset(map, 0, 0);
 
                     if(len > 1) {
                         // 计算多边形最小包围盒
@@ -825,7 +796,7 @@
                             heightScale = canvas.height / box.height * ratio;
 
                         // 取多边形包围盒的中点作为中心点
-                        that.setCenter(map, { latitude: box.centerY,  longitude: box.centerX });
+                        that.setCenter(map, { latitude: box.centerY, longitude: box.centerX });
                         // 计算新的缩放比率
                         scale = Math.min(widthScale, heightScale) * ratio;
                     }
@@ -1025,9 +996,9 @@
             // 是否显示比例尺
             showRule: true,
             // 是否显示缩放按钮
-            showScale: true,
+            showScale: false,
             // 是否显示当前鼠标位置的经纬度
-            showPosition: true,
+            showPosition: false,
             // 经纬度小数位数，0 表示不限制
             decimalLength: 0,
             // 是否显示两点间的连线
@@ -1063,7 +1034,7 @@
                 */
             },
             scaleRules: $.extend([], Config.ScaleLevels),
-            heightLevels: $.extend([], Config.HeightLevels),
+            heightRules: $.extend([], Config.HeightLevels),
             points: []
         }, options);
 
@@ -1177,6 +1148,9 @@
                 return Factory.render(that), that;
             }
             return centerPoint;
+        },
+        offset: function (map, x, y) {
+            return Factory.setOffset(map, x, y), this;
         },
         scale: function (scale) {
             let that = this;
