@@ -51,10 +51,6 @@
         //经纬度距离，1度所表示的距离，单位：米
         DegreeDistance: 111320,
         DistanceWidth: 50,
-        //最小比例，50个像素所能代表的最大距离
-        MinScaleRatio: 1,
-        //最大比例，50个像素所能代表的最小距离
-        MaxScaleRatio: 1,
         //高度距离，高度数字1所表示的距离，单位：米
         HeightDistance: 1,
         HeightLevels: [
@@ -641,10 +637,13 @@
                 return this;
             }
             let opt = map.options,
-                //lat = point[opt.vertical ? 'height' : 'latitude'],
-                //lng = point[opt.vertical ? 'distance' : 'longitude'];
                 lat = point['latitude'],
                 lng = point['longitude'];
+
+            if (opt.vertical && typeof point['distance'] !== 'undefined') {
+                lat = point['height'];
+                lng = point['distance'];
+            }
 
             map.view.curCenter = {
                 latitude: lat,
@@ -656,6 +655,9 @@
             return this;
         },
         calcPolygonCenter: function (points, vertical) {
+            if (!$.isArray(points) || points.length <= 0) {
+                return null;
+            }
             let len = points.length, i, lat = 0, lng = 0;
             if (vertical) {
                 for (i = 0; i < len; i++) {
@@ -720,7 +722,7 @@
             };
         },
         initScaleLevel: function (map) {
-            let opt = map.options,
+            let opt = map.options, view = map.view,
                 rules = map.rules(), len = rules.length,
                 distanceRatio = opt.vertical ? Config.HeightDistance : Config.DegreeDistance;
 
@@ -734,10 +736,12 @@
                     max: distanceRatio * Config.DistanceWidth / dr.min
                 };
             }
-            Config.MinScaleRatio = distanceRatio * Config.DistanceWidth / rules[0].val;
-            Config.MaxScaleRatio = distanceRatio * Config.DistanceWidth / rules[len - 1].min;
+            view.minScaleRatio = distanceRatio * Config.DistanceWidth / rules[0].val;
+            view.maxScaleRatio = distanceRatio * Config.DistanceWidth / rules[len - 1].min;
 
-            $.console.log('initScaleLevel:', Config.MinScaleRatio, Config.MaxScaleRatio, rules);
+            if (opt.showLog) {
+                $.console.log('initScaleLevel:', view.minScaleRatio, view.maxScaleRatio, rules);
+            }
 
             return this;
         },
@@ -757,7 +761,9 @@
                         }
                     }
                 }
-                $.console.log('initPoints:', points);
+                if (opt.showLog) {
+                    $.console.log('initPoints:', points);
+                }
             }
 
             return this;
@@ -778,11 +784,13 @@
             return rule;
         },
         setScaleLevel: function (map, scale, scaleLevel) {
-            let that = this, view = map.view,
+            let that = this, view = map.view, opt = map.options,
                 rules = map.rules(), len = rules.length,
                 rule, lastScale = view.scale;
 
-            $.console.log('setScaleLevel[0], scale:', view.scale, ', scaleLevel:', view.scaleLevel);
+            if (opt.showLog) {
+                $.console.log('setScaleLevel[0], scale:', view.scale, ', scaleLevel:', view.scaleLevel);
+            }
 
             if (!scale && !scaleLevel) {
                 return that;
@@ -812,8 +820,10 @@
 
             if (rule) {
                 view.scaleLevel = rule.level;
-                $.console.log('setScaleLevel[1], scale:', view.scale, ', scaleLevel:', view.scaleLevel, 
-                    ', center: ', map.center(), ', offsetX:', view.offsetX, ', offsetY:', view.offsetY);
+                if (opt.showLog) {
+                    $.console.log('setScaleLevel[1], scale:', view.scale, ', scaleLevel:', view.scaleLevel, 
+                        ', center: ', map.center(), ', offsetX:', view.offsetX, ', offsetY:', view.offsetY);
+                }
             }
 
             return that;
@@ -974,7 +984,7 @@
             view.scale *= zoomFactor;
             
             // 限制缩放范围
-            view.scale = Math.max(Config.MinScaleRatio, Math.min(Config.MaxScaleRatio, view.scale));
+            view.scale = Math.max(view.minScaleRatio, Math.min(view.maxScaleRatio, view.scale));
 
             // 鼠标缩放之后，退出全览模式
             view.overview = false;
@@ -993,6 +1003,8 @@
             
             view.offsetX += mouseX - newMouseX;
             view.offsetY += mouseY - newMouseY;
+
+            $.console.log('lastScale:', lastScale, view.scale);
             
             if (lastScale !== view.scale) {
                 Factory.render(map);
@@ -1050,6 +1062,8 @@
             showTitle: true,
             // 是否显示当前鼠标位置的经纬度
             showPosition: false,
+            // 是否打印日志信息
+            showLog: true,
             // 经纬度小数位数，0 表示不限制
             decimalLength: 0,
             // 是否显示两点间的连线
@@ -1095,6 +1109,10 @@
         this.ctx = this.canvas.getContext('2d');
         this.id = this.canvas.id;
         this.view = {
+            //最小比例，50个像素所能代表的最大距离
+            minScaleRatio: 1,
+            //最大比例，50个像素所能代表的最小距离
+            maxScaleRatio: 1,
             defCenter: {
                 latitude: 0,
                 longitude: 0,
@@ -1261,8 +1279,13 @@
                 Factory.initPoints(that, that.view.points);
                 Factory.setPointCache(that);
 
+                points = that.view.points;
+
                 if (opt.showOverview) {
                     Factory.setOverview(that, true);
+                } else if (opt.vertical) {
+                    let center = Factory.calcPolygonCenter(points, opt.vertical);
+                    Factory.setCenter(that, center);
                 }
                 Factory.render(that);
             }
