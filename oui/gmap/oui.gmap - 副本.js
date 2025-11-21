@@ -145,19 +145,24 @@
             return false;
         },
         // 经纬度转换为Canvas坐标
-        latLngToCanvas: function (map, point) {
+        latLngToCanvas: function (map, lat, lng, height) {
             let view = map.view, 
                 opt = map.options,
                 canvas = map.canvas,
                 center = map.center(),
-                lat = point[opt.vertical ? 'height' : 'latitude'],
-                lng = point[opt.vertical ? 'distance' : 'longitude'],
                 x, y;
 
-            // 简化的经纬度到平面坐标的转换
-            // 实际应用中可能需要使用墨卡托投影等更精确的方法
-            x = (lng - center.longitude) * view.scale + canvas.width / 2 + view.offsetX;
-            y = (center.latitude - lat) * view.scale + canvas.height / 2 + view.offsetY;
+            if (opt.vertical) {                
+                x = (lng - center.longitude) * view.scale + canvas.width / 2 + view.offsetX;
+                y = (center.height - height) * view.scaleVertical + canvas.height / 2 + view.offsetY;
+            console.log('latLngToCanvas-vertical', x, y, center.height, height);
+            } else {
+                // 简化的经纬度到平面坐标的转换
+                // 实际应用中可能需要使用墨卡托投影等更精确的方法
+                x = (lng - center.longitude) * view.scale + canvas.width / 2 + view.offsetX;
+                y = (center.latitude - lat) * view.scale + canvas.height / 2 + view.offsetY;
+            console.log('latLngToCanvas', x, y);
+            }
 
             return { x, y };
         },
@@ -338,7 +343,7 @@
                 opt = map.options,
                 ctx = map.ctx,
                 radius = point.radius || 4,
-                pos = that.latLngToCanvas(map, point),
+                pos = that.latLngToCanvas(map, point.latitude, point.longitude, point.height),
                 lines = that.getParamArray(point.lines || point.line),
                 distances = that.getParamArray(point.distances || point.distance),
                 texts = that.getParamArray(point.texts || point.text || point.name, true),
@@ -357,7 +362,7 @@
                     pointTo = that.getPointCache(map, lines[i]);
                     style = $.extend({}, opt.lineStyle, point.lineStyle, lines[i]);
                     if (pointTo) {
-                        posTo = that.latLngToCanvas(map, pointTo);
+                        posTo = that.latLngToCanvas(map, pointTo.latitude, pointTo.longitude, pointTo.height);
                         that.drawLine(map, ctx, pos, posTo, style);
                     }
                 }
@@ -388,7 +393,7 @@
                         if (style.maxDistance && distance > style.maxDistance) {
                             continue;
                         }
-                        posTo = that.latLngToCanvas(map, pointTo);
+                        posTo = that.latLngToCanvas(map, pointTo.latitude, pointTo.longitude, pointTo.height);
                         if (distance > 1000) {
                             distance = (distance / 1000).round(style.decimal);
                             style.unit = 'km';
@@ -420,9 +425,9 @@
         showRules: function (map, vertical) {
             let that = this,
                 opt = map.options, view = map.view,
-                box = map.panels.scaleRule,
+                box = vertical ? map.panels.verticalRule : map.panels.scaleRule,
                 nodes = box ? box.querySelectorAll('div') : undefined,
-                attr = 'width',
+                attr = vertical ? 'height' : 'width',
                 rule = that.getScaleLevel(map, view.scaleLevel, view.scale, vertical),
                 ruleWidth = rule.width || 50,
                 ruleText = rule.text;
@@ -449,47 +454,25 @@
             return that;
         },
         drawRules: function (map, force) {
-            this.showRules(map, map.options.vertical);
+            this.showRules(map);
+            if (map.options.vertical) {
+                this.showRules(map, map.options.vertical);
+            }
             return this;
         },
         showPosition: function (map, point) {
-            let that = this, 
-                opt = map.options, 
-                view = map.view, 
-                elem = map.panels.position;
-
-            if (!elem) {
-                return that;
-            }
+            let that = this, opt = map.options, view = map.view;
 
             if (!point) {
                 point = view.curPoint;
             }
             if (!opt.showPosition || !that.isPoint(point)) {
-                elem.innerHTML = '';
+                map.panels.position.innerHTML = '';
                 return that;
             }
-            if (opt.vertical) {
-                elem.innerHTML = [point.latitude.round(3), point.longitude.round(3)].join(',');
-            } else {
-                elem.innerHTML = [point.latitude, point.longitude].join(',');
-            }
+            map.panels.position.innerHTML = [point.latitude, point.longitude].join(',');
 
             return that;
-        },
-        showTitle: function (map, title) {
-            let opt = map.options, canvas = map.canvas, elem = map.panels.title;
-            if (!opt.showTitle || !elem) {
-                return this;
-            }
-
-            if (title !== null) {
-                title = title || opt.title;
-                elem.innerHTML = title;
-            }
-            elem.style.left = (canvas.width / 2 - elem.offsetWidth / 2) + 'px';
-
-            return this;
         },
         buildPanel: function (map) {
             function _build (className, zindex, html) {
@@ -514,14 +497,19 @@
                 map.panels.bottom = div;
                 map.panels.position = div.childNodes[0];
                 map.panels.scaleRule = div.childNodes[1];
+
+                if (opt.vertical) {
+                    div = _build('oui-gmap-rule-v', zindex);
+                    map.panels.verticalRule = div;
+                }
             }
 
             if (opt.showScale) {
                 div = _build('oui-gmap-scale', zindex, [
                     '<a class="center" title="中心点">中</a>',
-                    '<a class="overview', opt.showOverview ? ' press' : '', '" title="', opt.showOverview ? '退出全览' : '固定全览', '">全</a>',
-                    '<a class="add level" title="放大一级">+</a>',
-                    '<a class="sub level" title="缩小一级">-</a>',
+                    '<a class="overview" title="全览">全</a>',
+                    '<a class="add" title="放大一级">+</a>',
+                    '<a class="sub" title="缩小一级">-</a>',
                 ].join(''));
                 map.panels.scale = div;
 
@@ -532,17 +520,12 @@
                         $.debounce({
                             id:'oui-gmap-', delay:150, timeout:2000
                         }, function(e) {
-                            switch(node.className.split(' ')[0]) {
+                            switch(node.className) {
                             case 'center':
                                 map.center(true);
                                 break;
                             case 'overview':
-                                // 全览按钮为切换模式
-                                let overview = map.options.showOverview;
-                                map.options.showOverview = !overview;
-                                map.overview(map.options.showOverview);
-                                $.setClass(node, 'press', opt.showOverview ? 'add' : 'remove');
-                                node.title = opt.showOverview ? '退出全览' : '固定全览';
+                                map.overview(true);
                                 break;
                             case 'add':
                                 map.scaleLevel(null, 1);
@@ -554,11 +537,6 @@
                         });
                     });
                 }
-            }
-
-            if (opt.showTitle) {
-                div = _build('oui-gmap-title', zindex, [].join(''));
-                map.panels.title = div;
             }
 
             return this;
@@ -640,33 +618,20 @@
             if (!this.isPoint(point)) {
                 return this;
             }
-            let opt = map.options,
-                //lat = point[opt.vertical ? 'height' : 'latitude'],
-                //lng = point[opt.vertical ? 'distance' : 'longitude'];
-                lat = point['latitude'],
-                lng = point['longitude'];
-
             map.view.curCenter = {
-                latitude: lat,
-                longitude: lng,
-                height: point.height,
+                latitude: point.latitude,
+                longitude: point.longitude,
+                height: point.height
             };
             this.setOffset(map, 0, 0);
 
             return this;
         },
-        calcPolygonCenter: function (points, vertical) {
+        calcPolygonCenter: function (points) {
             let len = points.length, i, lat = 0, lng = 0;
-            if (vertical) {
-                for (i = 0; i < len; i++) {
-                    lat += points[i].height;
-                    lng += points[i].distance;
-                }
-            } else {
-                for (i = 0; i < len; i++) {
-                    lat += points[i].latitude;
-                    lng += points[i].longitude;
-                }
+            for (i = 0; i < len; i++) {
+                lat += points[i].latitude;
+                lng += points[i].longitude;
             }
             lat /= len;
             lng /= len;
@@ -690,25 +655,21 @@
         // 计算多边形最小包围盒，
         calcPolygonBox: function (map, points) {
             let that = this, opt = map.options,
-                minX = 0, minY = 0, maxX = 0, maxY = 0, len = points.length,
-                fieldLat = opt.vertical ? 'height' : 'latitude',
-                fieldLng = opt.vertical ? 'distance': 'longitude';
-
+                minX = 0, minY = 0, maxX = 0, maxY = 0, len = points.length;
             if (len <= 1) {
                 return null;
             }
-
             if (len > 3) {
-                minX = that.getMin(points, fieldLng);
-                maxX = that.getMax(points, fieldLng);
-                minY = that.getMin(points, fieldLat);
-                maxY = that.getMax(points, fieldLat);
+                minX = that.getMin(points, 'longitude');
+                maxX = that.getMax(points, 'longitude');
+                minY = that.getMin(points, opt.vertical ? 'height': 'latitude');
+                maxY = that.getMax(points, opt.vertical ? 'height': 'latitude');
             } else {
-                minX = Math.min(points[0].longitude, points[1][fieldLng]);
-                maxX = Math.max(points[0].longitude, points[1][fieldLng]);
+                minX = Math.min(points[0].longitude, points[1].longitude);
+                maxX = Math.max(points[0].longitude, points[1].longitude);
 
-                minY = Math.min(points[0].latitude, points[1][fieldLat]);
-                maxY = Math.max(points[0].latitude, points[1][fieldLat]);
+                minY = Math.min(points[0].latitude, points[1][opt.vertical ? 'height': 'latitude']);
+                maxY = Math.max(points[0].latitude, points[1][opt.vertical ? 'height': 'latitude']);
             }
 
             return {
@@ -720,50 +681,43 @@
             };
         },
         initScaleLevel: function (map) {
-            let opt = map.options,
-                rules = map.rules(), len = rules.length,
-                distanceRatio = opt.vertical ? Config.HeightDistance : Config.DegreeDistance;
-
+            var levels = map.options.scaleRules, len = levels.length;
             for (var i = 0; i < len; i++) {
-                let dr = rules[i];
+                var dr = levels[i];
                 dr.level = i + 1;
                 dr.scale = {
-                    val: distanceRatio * Config.DistanceWidth / dr.val,
+                    val: Config.DegreeDistance * Config.DistanceWidth / dr.val,
                     // 请注意，这里的大小是相反的
-                    min: distanceRatio * Config.DistanceWidth / dr.val,
-                    max: distanceRatio * Config.DistanceWidth / dr.min
+                    min: Config.DegreeDistance * Config.DistanceWidth / dr.val,
+                    max: Config.DegreeDistance * Config.DistanceWidth / dr.min
                 };
             }
-            Config.MinScaleRatio = distanceRatio * Config.DistanceWidth / rules[0].val;
-            Config.MaxScaleRatio = distanceRatio * Config.DistanceWidth / rules[len - 1].min;
 
-            $.console.log('initScaleLevel:', Config.MinScaleRatio, Config.MaxScaleRatio, rules);
+            $.console.log('initScaleLevel:', levels);
 
-            return this;
-        },
-        initPoints: function (map, points) {
-            let opt = map.options;
-            if (opt.vertical) {
-                let len = points.length, i, p0 = points[0];
-                for (i = 0; i < len; i++) {
-                    let p = points[i];
-                    if (i === 0) {
-                        // 第1个点的水平位置定位到地图中心点的位置
-                        p.distance = 0;
-                    } else {
-                        p.distance = $.calcLocationDistance(p0, p, opt.plane);
-                        if (p.longitude < p0.longitude) {
-                            p.distance *= -1;
-                        }
-                    }
+            Config.MinScaleRatio = Config.DegreeDistance * Config.DistanceWidth / levels[0].val;
+            Config.MaxScaleRatio = Config.DegreeDistance * Config.DistanceWidth / levels[len - 1].min;
+
+            if (map.options.vertical) {
+                levels = map.options.heightRules, len = levels.length;
+                for (var i = 0; i < len; i++) {
+                    var dr = levels[i];
+                    dr.level = i + 1;
+                    dr.scale = {
+                        val: Config.HeightDistance * Config.DistanceWidth / dr.val,
+                        // 请注意，这里的大小是相反的
+                        min: Config.HeightDistance * Config.DistanceWidth / dr.val,
+                        max: Config.HeightDistance * Config.DistanceWidth / dr.min
+                    };
                 }
-                $.console.log('initPoints:', points);
+
+                $.console.log('initScaleLevel:', levels);
             }
 
             return this;
         },
         getScaleLevel: function (map, scaleLevel, scale, vertical) {
-            let rules = map.rules(), 
+            var rules = vertical ? map.options.heightRules : map.options.scaleRules, 
                 len = rules.length;
 
             if (scaleLevel < 1) {
@@ -771,15 +725,15 @@
             } else if(scaleLevel > len) {
                 scaleLevel = len;
             }
-            let rule = $.extend({ width: 50, }, rules[scaleLevel - 1]);
+            var rule = $.extend({ width: 50, }, rules[scaleLevel - 1]);
             if (scale && rule.scale) {
                 rule.width = (rule.width * (scale / rule.scale.val)).round(3);
             }
             return rule;
         },
         setScaleLevel: function (map, scale, scaleLevel) {
-            let that = this, view = map.view,
-                rules = map.rules(), len = rules.length,
+            var that = this, view = map.view,
+                rules = map.options.scaleRules, len = rules.length,
                 rule, lastScale = view.scale;
 
             $.console.log('setScaleLevel[0], scale:', view.scale, ', scaleLevel:', view.scaleLevel);
@@ -798,9 +752,10 @@
                 rule = that.getScaleLevel(map, scaleLevel);
                 view.scale = rule.scale.val;
             } else if ($.isNumber(scale) && scale) {
+                var rules = map.options.scaleRules, len = rules.length;
                 scaleLevel = 1;
                 for (var i = 0; i < len; i++) {
-                    let dr = rules[i];
+                    var dr = rules[i];
                     if (scale > dr.scale.min && scale <= dr.scale.max) {
                         scaleLevel = i + 1;
                         break;
@@ -819,7 +774,7 @@
             return that;
         },
         setScale: function (map, scale, overview, autoOverview) {
-            let that = this, opt = map.options, view = map.view;
+            var that = this, opt = map.options, view = map.view;
 
             if ($.isNumber(scale) && scale > 0) {
                 view.scale = scale;
@@ -831,16 +786,17 @@
                     points = view.points, len = points.length;
 
                 if (overview) {
+                    that.setOffset(map, 0, 0);
+
                     if(len > 1) {
                         // 计算多边形最小包围盒
                         let box = that.calcPolygonBox(map, points), 
                             ratio = opt.overviewRatio,
                             widthScale = canvas.width / box.width * ratio,
-                            heightScale = canvas.height / box.height * ratio,
-                            point = { latitude: box.centerY, longitude: box.centerX };
+                            heightScale = canvas.height / box.height * ratio;
 
                         // 取多边形包围盒的中点作为中心点
-                        that.setCenter(map, point);
+                        that.setCenter(map, { latitude: box.centerY, longitude: box.centerX });
                         // 计算新的缩放比率
                         scale = Math.min(widthScale, heightScale) * ratio;
                     }
@@ -857,14 +813,13 @@
         },
         setOverview: function (map, overview, autoOverview) {
             let that = this, 
-                opt = map.options,
                 view = map.view, 
                 center = map.center(), 
                 scale = view.scale,
                 points = view.points;
 
             if (points.length > 0) {
-                center = that.calcPolygonCenter(points, opt.vertical);                
+                center = that.calcPolygonCenter(points);
                 that.setCenter(map, center);
             }
 
@@ -901,16 +856,13 @@
                 mouseY = e.clientY - rect.top;
 
             if (opt.showPosition && e.target === canvas) {
-                const center = map.center();
-                
+                let center = map.center();
                 // 计算鼠标位置对应的经纬度
-                const mouseLat = center.latitude - (mouseY - canvas.height / 2 - view.offsetY) / view.scale,
+                let mouseLat = center.latitude - (mouseY - canvas.height / 2 - view.offsetY) / view.scale,
                     mouseLng = (mouseX - canvas.width / 2 - view.offsetX) / view.scale + center.longitude,
                     point = { latitude: mouseLat, longitude: mouseLng };
 
-                that.setCurrentPoint(map, point);
-
-                that.drawPosition(map, point);
+                that.setCurrentPoint(map, point).drawPosition(map, point);
 
                 if ($.isFunction(opt.positionCallback)) {
                     opt.positionCallback(point, map);
@@ -964,11 +916,11 @@
                 overview = view.overview;
 
             // 计算鼠标位置对应的经纬度
-            const mouseLat = center.latitude - (mouseY - canvas.height / 2 - view.offsetY) / view.scale,
-                mouseLng = (mouseX - canvas.width / 2 - view.offsetX) / view.scale + center.longitude,
-                point = { latitude: mouseLat, longitude: mouseLng },
-                // 确定缩放方向
-                zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+            const mouseLat = center.latitude - (mouseY - canvas.height / 2 - view.offsetY) / view.scale;
+            const mouseLng = (mouseX - canvas.width / 2 - view.offsetX) / view.scale + center.longitude;
+            
+            // 确定缩放方向
+            const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
             
             // 更新缩放比例
             view.scale *= zoomFactor;
@@ -981,6 +933,7 @@
 
             that.setScale(map, view.scale);
 
+            let point = { latitude: mouseLat, longitude: mouseLng };
             that.setCurrentPoint(map, point);
 
             if ($.isFunction(opt.positionCallback)) {
@@ -1012,8 +965,6 @@
             plane: false,
             // 是否垂直高度地图
             vertical: false,
-            // 地图标题
-            title: '',
             // 缩放比例
             scale: 1,
             // 缩放等级
@@ -1046,8 +997,6 @@
             showRule: true,
             // 是否显示缩放按钮
             showScale: false,
-            // 是否显示地图标题
-            showTitle: true,
             // 是否显示当前鼠标位置的经纬度
             showPosition: false,
             // 经纬度小数位数，0 表示不限制
@@ -1140,10 +1089,8 @@
             }
 
             Factory.buildPanel(that)
-                .showTitle(that, opt.title)
                 .setPointCache(that)
                 .initScaleLevel(that)
-                .initPoints(that, view.points)
                 .setScaleLevel(that, null, view.scaleLevel);
 
             $.addListener(window, 'resize', function(e) {
@@ -1183,8 +1130,6 @@
             if (that.options.showOverview) {
                 Factory.setOverview(that, true);
             }
-            Factory.showTitle(that, null);
-
             return Factory.render(that), that;
         },
         center: function (point, scale) {
@@ -1206,18 +1151,6 @@
         },
         offset: function (map, x, y) {
             return Factory.setOffset(map, x, y), this;
-        },
-        rules: function (rules) {
-            let opt = this.options;
-            if ($.isArray(rules)) {
-                if (opt.vertical) {
-                    opt.heightRules = $.extend([], rules);
-                } else {
-                    opt.scaleRules = $.extend([], rules);
-                }
-                return this;
-            }
-            return opt.vertical ? opt.heightRules : opt.scaleRules;
         },
         scale: function (scale) {
             let that = this;
@@ -1247,21 +1180,20 @@
         },
         overview: function (overview) {
             overview = $.isBoolean(overview, true);
-            Factory.setOverview(this, overview, true).render(this);
+            Factory.setOverview(this, overview || this.options.showOverview, true).render(this);
             return this;
         },
         update: function (points, append) {
-            var that = this, opt = that.options;
+            var that = this;
             if ($.isArray(points)) {
                 if (append) {
                     that.view.points.concat(points);
                 } else {
                     that.view.points = points;
                 }
-                Factory.initPoints(that, that.view.points);
                 Factory.setPointCache(that);
 
-                if (opt.showOverview) {
+                if (that.options.showOverview) {
                     Factory.setOverview(that, true);
                 }
                 Factory.render(that);
