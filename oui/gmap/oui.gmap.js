@@ -135,7 +135,12 @@
             return map;
         },
         isPoint: function (point) {
-            if (point && $.isObject(point) && $.isNumber(point.latitude) && $.isNumber(point.longitude)) {
+            if (!point || !$.isObject(point)) {
+                return false;
+            }
+            if ($.isNumber(point.latitude) && $.isNumber(point.longitude)) {
+                return true;
+            } else if ($.isNumber(point.height) && $.isNumber(point.distance)) {
                 return true;
             }
             return false;
@@ -497,7 +502,7 @@
                 texts = that.getParamArray(point.texts || point.text || point.name, true),
                 polygons = that.getParamArray(point.polygons || point.polygon),
                 i, pointTo, posTo, style = {},
-                distanceStyle = $.extend({}, opt.distanceStyle),
+                distanceStyle = $.extend({}, opt.distanceStyle, point.distanceStyle),
                 text, textPos, fontSize;
 
             // 绘制点
@@ -512,7 +517,7 @@
                     pointTo = that.getPointCache(map, lines[i]);
                     style = $.extend({}, opt.lineStyle, point.lineStyle, lines[i]);
                     if (pointTo) {
-                        if (opt.vertical && distanceStyle.vertical) {
+                        if (opt.vertical && (style.vertical || distanceStyle.vertical)) {
                             that.drawVerticalLine(map, point, pointTo, style, distanceStyle);
                         } else {
                             posTo = that.latLngToCanvas(map, pointTo);
@@ -521,6 +526,7 @@
                     }
                 }
             }
+            //绘制多边形或者矩形
             if (opt.showPolygon && !opt.vertical) {
                 style = $.extend({}, opt.polygonStyle, point.polygonStyle);
                 that.drawPolygon(map, point, polygons, style);
