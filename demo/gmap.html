@@ -53,6 +53,9 @@ function showScaleMap() {
             longitude: 125.6011577513,
             height: 124.123,
             lines: ['B1-2345'],
+            lineStyle: {width:1, color: '#00f', dash: [2,4]},
+            polygon: 'C2-9364',
+            polygonStyle: {width:1,color:'#f00',dash:[2,4]},
             distances: 'B1-2345',
             distanceStyle: {
                 // 距离文字的位置：0 - 起点， 1 - 终点， 2 - 中心点
@@ -65,8 +68,7 @@ function showScaleMap() {
                 unit: '厘米',
                 decimal: 2,
                 font:'20px Arial',color:'#00f'
-            },
-            lineStyle: {width:1, color: '#00f', dash: [2,4]}
+            }
         },{
             id: 'B1-2345',
             name: 'B1-2345', color: '#000',
@@ -75,6 +77,8 @@ function showScaleMap() {
             longitude: 122.6011577513,
             height: 122.125,
             lines: [{id:'B2-9527', color: '#000'}],
+            polygons: 'B2-9527',
+            polygonStyle: {width:1,color:'#000',dash:[2,4]},
         },{
             id: 'B2-9527',
             name: 'B2-9527', color: '#000',
@@ -84,9 +88,11 @@ function showScaleMap() {
             height: 122.123,
         }
     ];
+     
     $.gmap('gridCanvas', {
         title: '水平位置图',
-        plane: true, showOverview: true, autoOverview: false, showPosition: true, showScale: true,  showHeight: true,
+        plane: true, showOverview: true, autoOverview: false, showPosition: true, 
+        showScale: true,  showHeight: true, showPolygon: true,
         //这三个参数默认是启用的
         showLine: true, showText: true, showDistance: true,
         distanceStyle: {
@@ -104,6 +110,7 @@ function showScaleMap() {
         },
         lineStyle: { width: 1, color: '#00f' },
         textStyle: { font: '14px Arial', color: '#f00', position: 3 },
+        polygonStyle: {width:1,color:'#000',dash:[2,4]},
         points: points
     }).size();
 
@@ -122,7 +129,7 @@ function showVerticalMap() {
             id: 'C1-9123',
             name: 'C1-9123', color: '#f00',
             latitude: 31.8732976498,
-            longitude: 122.6011977513,
+            longitude: 122.6011877513,
             height: 124.123,
             lines: ['B1-2345'],
             distances: 'B1-2345',
@@ -138,17 +145,17 @@ function showVerticalMap() {
                 decimal: 2,
                 font:'20px Arial',color:'#00f'
             },
-            lineStyle: {width:1, color: '#00f', dash: [2,4], vertical:true}
+            lineStyle: {width:1, color: '#00f', dash: [2,4]}
         },{
             id: 'C2-9364',
             name: 'C2-9364', color: '#00f',
             radius: 6,
             latitude: 31.8732976498,
-            longitude: 122.6011577513,
+            longitude: 122.6011677513,
             height: 124.123,
             textStyle: { font:'14px Arial',color:'#f00',position: 4 },
             //lines: ['C1-9123','B2-9527'],
-            lines: [{id:'C1-9123',color:'#f00',width:1},{id:'B2-9527',color:'#000',width:1, dash:[2,4], vertical:true}],
+            lines: [{id:'C1-9123',color:'#f00',width:1},{id:'B2-9527',color:'#000',width:1, dash:[2,4]}],
             texts: [{text:'C2-9364',position:3,color:'#00f'}],
             distances: [{id:'B2-9527'}],
             lineStyle: {width:1, color: '#00f', dash: false}
@@ -157,17 +164,17 @@ function showVerticalMap() {
             name: 'B1-2345', color: '#000',
             textStyle: {position: 1, color: '#000' },
             latitude: 31.8732976498,
-            longitude: 122.6011877513,
+            longitude: 122.6011977513,
             height: 121.123,
-            lines: [{id:'B2-9527', color: '#000'}],
-        },{
+            lines: [{id:'B2-9527', color: '#000'}]
+        }/*,{
             id: 'B2-9527',
             name: 'B2-9527', color: '#000',
             textStyle: {position: 1, color: '#000' },
             latitude: 31.8732976498,
-            longitude: 122.6011677513,
+            longitude: 122.6011577513,
             height: 121.123,
-        }
+        }*/
     ];
 
     $.gmap('gridCanvas2', {
@@ -192,6 +199,11 @@ function showVerticalMap() {
             prefix: '高差:',
             //是否画垂直线
             vertical: true,
+            //三角形模式: M - 上三角，W - 下三角, A - 自适应
+            verticalMode: 'W',
+            //高度调节，用于上下位置补偿
+            adjustHeight: -1.5,
+            adjustPrefix: '补差:',
             font: '20px Arial', color: '#f00'
         },
     }).size().update(points2);

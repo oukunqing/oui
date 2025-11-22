@@ -142,6 +142,9 @@
         },
         // 经纬度转换为Canvas坐标
         latLngToCanvas: function (map, point) {
+            if (!this.isPoint(point)) {
+                return null;
+            }
             let view = map.view, 
                 opt = map.options,
                 canvas = map.canvas,
@@ -236,6 +239,9 @@
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+            // 清除虚拟出的点
+            view.others = [];
+
             that.drawGrid(map);
             that.drawPoints(map);
             that.drawCenter(map);
@@ -295,6 +301,10 @@
                     dash: false
                 }, lineStyle);
 
+            if (!pos1 || !pos2) {
+                return that;
+            }
+
             ctx.beginPath();
 
             ctx.setLineDash(!style.dash ? [] : style.dash);
@@ -342,25 +352,139 @@
             }
             return distance;
         },
-        drawVerticalLine: function (map, point, pointTo, style) {
+        drawVerticalLine: function (map, point, pointTo, style, distanceStyle) {
             let that = this, ctx = map.ctx, 
                 pos = that.latLngToCanvas(map, point), 
-                posTo, potTmp;
+                posTo, potTmp, pointTmp;
 
             if (point.distance === pointTo.distance || point.height === pointTo.height) {
                 posTo = that.latLngToCanvas(map, pointTo);
                 that.drawLine(map, ctx, pos, posTo, style);
-            } else {
-                let pointTmp = { distance: point.distance, height: pointTo.height };
-                potTmp = that.latLngToCanvas(map, pointTmp);
-                that.drawLine(map, ctx, pos, potTmp, style);
-
-                pointTmp = { distance: pointTo.distance, height: pointTo.height };
-                posTo = that.latLngToCanvas(map, pointTmp);
-                that.drawLine(map, ctx, potTmp, posTo, style);
+                return this;
             }
 
+            posTo = that.latLngToCanvas(map, pointTo);
+            that.drawLine(map, ctx, pos, posTo, style);
+
+            switch(distanceStyle.verticalMode) {
+            //case 'A':
+            //    break;
+            case 'M':
+                pointTmp = { distance: point.distance, height: pointTo.height };
+                break;
+            case 'W':
+            default:
+                pointTmp = { distance: pointTo.distance, height: point.height };
+                break;
+            }            
+
+            potTmp = that.latLngToCanvas(map, pointTmp);
+            that.drawLine(map, ctx, pos, potTmp, style);
+
+            pointTmp = { distance: pointTo.distance, height: pointTo.height };
+            posTo = that.latLngToCanvas(map, pointTmp);
+            that.drawLine(map, ctx, potTmp, posTo, style);
+
             return this;
+        },
+        //根据矩形两个对角线顶点，计算另外两个顶点
+        calcRectangle: function (rectangle) {
+            let that = this, x = 'latitude', y = 'longitude';
+
+            if (!rectangle.p1 || !rectangle.p3) {
+                return that;
+            }
+
+            // 1. 计算对角线中点（矩形中心）
+            const center = {
+                x: (rectangle.p1[x] + rectangle.p3[x]) / 2,
+                y: (rectangle.p1[y] + rectangle.p3[y]) / 2
+            };
+
+            // 2. 计算从中心到p1的向量（半对角线向量）
+            const dx = rectangle.p1[x] - center.x;
+            const dy = rectangle.p1[y] - center.y;
+
+            // 3. 向量旋转90度得到相邻边向量（矩形邻边垂直且等长）
+            // 旋转公式：(x, y) → (-y, x) 或 (y, -x)（两种旋转方向，对应两种矩形）
+            const vec2 = { x: -dy, y: dx }; // 顺时针旋转90度
+            const vec4 = { x: dy, y: -dx }; // 逆时针旋转90度
+
+            // 4. 计算另外两个顶点（中心 ± 旋转后的向量）
+            rectangle.p2 = x === 'latitude' ? {
+                latitude: center.x + vec2.x, longitude: center.y + vec2.y
+            } : {
+                x: center.x + vec2.x,y: center.y + vec2.y
+            };
+            rectangle.p4 = x === 'latitude' ? {
+                latitude: center.x + vec4.x, longitude: center.y + vec4.y                
+            } : {
+                x: center.x + vec4.x, y: center.y + vec4.y
+            };
+            return that;
+        },
+        checkPolygon: function (map, point, polygons) {
+            let that = this, view = map.view, len = polygons.length, i;
+
+            if (1 === len) {
+                let rectangle = {
+                    p1: point, p2:null, 
+                    p3: that.getPointCache(map, polygons[0]), p4:null
+                };
+                that.calcRectangle(rectangle);
+                polygons = [rectangle.p1, rectangle.p2, rectangle.p3, rectangle.p4];
+                len = polygons.length;
+            } else if (len > 1) {
+                len = polygons.unshift(point);
+                for (i = 0; i < len; i++) {
+                    polygons[i] = that.getPointCache(map, polygons[i]);
+                }
+            }
+
+            for (i = 0; i < len; i++) {
+                if (polygons[i] === null) {
+                    polygons = [];
+                    break;
+                }
+                view.others.push(polygons[i]);
+            }
+
+            return polygons;
+        },
+        drawPolygon: function (map, point, polygons, style) {
+            let that = this, ctx = map.ctx;
+            polygons = that.checkPolygon(map, point, polygons);
+            let len = polygons.length, i, pos, posTo;
+
+            if (!len) {
+                return that;
+            }
+            ctx.beginPath();
+            ctx.setLineDash(!style.dash ? [] : style.dash);
+
+            for (i = 0; i < len; i++) {
+                pos = that.latLngToCanvas(map, polygons[i]);
+                if (pos) {
+                    ctx.moveTo(pos.x, pos.y);
+                    if (i >= len - 1) {
+                        posTo = that.latLngToCanvas(map, polygons[0]);
+                    } else {
+                        posTo = that.latLngToCanvas(map, polygons[i + 1]);
+                    }
+                    if (posTo) {
+                        ctx.lineTo(posTo.x, posTo.y);
+                    }
+                }
+            }
+
+            ctx.strokeStyle = style.color;
+            ctx.lineWidth = style.width;
+            ctx.lineCap = 'round';
+
+            ctx.stroke();
+            ctx.fill();
+
+            return that;
         },
         drawPoint: function (map, point) {
             let that = this,
@@ -371,7 +495,9 @@
                 lines = that.getParamArray(point.lines || point.line),
                 distances = that.getParamArray(point.distances || point.distance),
                 texts = that.getParamArray(point.texts || point.text || point.name, true),
+                polygons = that.getParamArray(point.polygons || point.polygon),
                 i, pointTo, posTo, style = {},
+                distanceStyle = $.extend({}, opt.distanceStyle),
                 text, textPos, fontSize;
 
             // 绘制点
@@ -386,14 +512,18 @@
                     pointTo = that.getPointCache(map, lines[i]);
                     style = $.extend({}, opt.lineStyle, point.lineStyle, lines[i]);
                     if (pointTo) {
-                        if (opt.vertical && style.vertical) {
-                            that.drawVerticalLine(map, point, pointTo, style);
+                        if (opt.vertical && distanceStyle.vertical) {
+                            that.drawVerticalLine(map, point, pointTo, style, distanceStyle);
                         } else {
                             posTo = that.latLngToCanvas(map, pointTo);
                             that.drawLine(map, ctx, pos, posTo, style);
                         }
                     }
                 }
+            }
+            if (opt.showPolygon && !opt.vertical) {
+                style = $.extend({}, opt.polygonStyle, point.polygonStyle);
+                that.drawPolygon(map, point, polygons, style);
             }
             if (opt.showText) {
                 for (i = 0; i < texts.length; i++) {
@@ -405,25 +535,31 @@
                 }
             }
             if (opt.showDistance) {
-                let distance, heightDistance;
+                let distance, heightDistance, realDistance;
                 for (i = 0; i < distances.length; i++) {
                     // 找到要计算距离的点，必须是在地图中已经注册过的点
                     pointTo = that.getPointCache(map, distances[i]);
                     if (pointTo) {
+                        style = $.extend({}, opt.distanceStyle, point.distanceStyle, distances[i]);
+                        fontSize = parseInt(style.font, 10);
+
                         if (opt.vertical) {
                             distance = point.height - pointTo.height;
+
+                            if (distanceStyle.adjustHeight) {
+                                realDistance= distance + distanceStyle.adjustHeight;
+                                realDistance = that.dealDistance(realDistance, style);
+                            }                        
                         } else {
                             distance = $.calcLocationDistance(point, pointTo, opt.plane);
                         }
-                        style = $.extend({}, opt.distanceStyle, point.distanceStyle, distances[i]);
-                        fontSize = parseInt(style.font, 10);
 
                         if (style.maxDistance && distance > style.maxDistance) {
                             continue;
                         }
                         distance = that.dealDistance(distance, style);
 
-                        text = (style.prefix || '') +  distance + style.unit;
+                        text = (style.prefix || '') + distance + style.unit;
                         if (!opt.vertical && opt.showHeight) {
                             style = $.extend({}, opt.distanceStyle, point.distanceStyle, distances[i]);
                             heightDistance = point.height - pointTo.height;
@@ -431,6 +567,9 @@
                                 heightDistance = that.dealDistance(heightDistance, style);
                                 text += ' (高差:' + heightDistance + style.unit + ')';
                             }
+                        }
+                        if (opt.vertical && distanceStyle.adjustHeight) {
+                            text += ' (' + (distanceStyle.adjustPrefix || '') + realDistance + style.unit + ')';
                         }
                         textPos = that.setDistancePosition(map, style.position, pos, posTo, radius, fontSize, text);
 
@@ -735,7 +874,7 @@
                 return null;
             }
 
-            if (len > 3) {
+            if (len >= 3) {
                 minX = that.getMin(points, fieldLng);
                 maxX = that.getMax(points, fieldLng);
                 minY = that.getMin(points, fieldLat);
@@ -873,7 +1012,14 @@
                     canvas = map.canvas,
                     center = map.center(),
                     maxLat = 0, maxLng = 0, maxDegree = 0, maxHeight = 0,
-                    points = view.points, len = points.length;
+                    points = view.points, len = points.length,
+                    others = view.others, len2 = others.length;
+
+                if (len2 > 0) {
+                    points = points.concat(others);
+                }
+
+                console.log('points:', points, len2);
 
                 if (overview) {
                     if(len > 1) {
@@ -883,6 +1029,8 @@
                             widthScale = canvas.width / box.width * ratio,
                             heightScale = canvas.height / box.height * ratio,
                             point = { latitude: box.centerY, longitude: box.centerX };
+
+                            console.log('box:', box);
 
                         // 取多边形包围盒的中点作为中心点
                         that.setCenter(map, point);
@@ -1107,6 +1255,8 @@
             showDistance: true,
             // 是否显示高差
             showHeight: false,
+            // 是否显示矩形
+            showRectangle: false,
             // 连线距离文字样式
             distanceStyle: {
                 // 不限制距离，距离单位：米
@@ -1121,6 +1271,13 @@
                 decimal: 3,
                 // 距离文字前缀
                 prefix: '',
+                //是否画垂直线
+                vertical: false,
+                //垂直线三角形模式: M - 上三角，W - 下三角, A - 自适应
+                verticalMode: 'W',
+                //高度调节，用于上下位置补偿
+                adjustHeight: 0,
+                adjustPrefix: '',
                 font:'20px Arial',color:'#f00'
             },
             textStyle: { 
@@ -1173,8 +1330,10 @@
             //光标最后的位置
             lastX: 0,           
             lastY: 0,
-
+            // 当前所有点
             points: [],
+            // 虚拟出的点
+            others: [],
             caches: {}
         };
 
@@ -1311,21 +1470,17 @@
             var that = this, opt = that.options;
             if ($.isArray(points)) {
                 if (append) {
-                    that.view.points.concat(points);
+                    points = that.view.points.concat(points);
+                    that.view.points = points;
                 } else {
                     that.view.points = points;
-                }
+                }                
                 Factory.initPoints(that, that.view.points);
                 Factory.setPointCache(that);
 
-                points = that.view.points;
-
                 if (opt.showOverview) {
                     Factory.setOverview(that, true);
-                }/* else if (opt.vertical) {
-                    let center = Factory.calcPolygonCenter(points, opt.vertical);
-                    Factory.setCenter(that, center);
-                }*/
+                }
                 Factory.render(that);
             }
             return that;
