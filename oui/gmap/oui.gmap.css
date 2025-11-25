@@ -128,10 +128,56 @@
 	font-size:12px;
 	font-family:宋体;
 	position:absolute;
-	left:0;max-width:300px;font-size:12px;
-	text-indent:8px;line-height:25px;
+	left:8px;max-width:300px;font-size:12px;
+	text-indent:0;line-height:25px;
 }
 
 .oui-gmap-bottom .oui-gmap-shade {
 	position:absolute;left:0;opacity:0.3;height:25px;width:100%;background:#fff;display:block;
+}
+
+.oui-gmap-remark {
+	font-size:12px;
+	font-family:宋体;
+	color: #000;
+	margin:0;
+	padding: 0;
+	opacity: 0.8;
+	position: absolute;
+	text-indent:0;
+	right: 5px;
+	top: 5px;
+	width: auto;
+	overflow: hidden;
+}
+.oui-gmap-remark .remark-title {
+	display: block;
+	margin:0;
+	padding: 0;
+	border: none;
+	font-weight:normal;
+	color: #000;
+}
+
+.oui-gmap-remark .remark-item {
+	clear: both;
+	margin: 3px 0;
+	padding: 0;
+	display: block;
+	overflow: hidden;
+}
+.oui-gmap-remark .color-bar {
+	width: 8px;
+	height: 8px;
+	border-radius: 4px;
+	display: block;
+	float: left;
+	margin:3px 0 0;
+	padding: 0;
+}
+
+.oui-gmap-remark .color-txt {
+	float: left;
+	margin:0 0 0 5px;
+	padding: 0;
 }

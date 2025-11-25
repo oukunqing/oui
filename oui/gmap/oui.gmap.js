@@ -10,91 +10,114 @@
 !function ($) {
     'use strict';
 
-    var Config = {
+    const Lang = {
+        // 公里
+        km: '\u516c\u91cc',
+        // 米
+        m: '\u7c73',
+        // 厘米
+        cm: '\u5398\u7c73',
+        // 毫米
+        mm: '\u6beb\u7c73',
+        // 高差
+        heightDistance: '\u9ad8\u5dee',
+        // 中心点
+        centerPoint: '\u4e2d\u5fc3\u70b9'
+    };
+
+    const Config = {
         FilePath: $.getScriptSelfPath(true),
         FileName: 'oui.gmap.',
         TextFont: '12px Arial',
+        MinScaleLevel: 1,
+        MaxScaleLevel: 32,
         ScaleLevels: [
-            { val: 1000 * 1000, min: 500 * 1000, text: '1000公里' },
-            { val: 500 * 1000, min: 200 * 1000, text: '500公里' },
-            { val: 200 * 1000, min: 100 * 1000, text: '200公里' },
-            { val: 100 * 1000, min: 75 * 1000, text: '100公里' },
-            { val: 75 * 1000, min: 50 * 1000, text: '75公里' },
-            { val: 50 * 1000, min: 25 * 1000, text: '50公里' },
-            { val: 25 * 1000, min: 20 * 1000, text: '25公里' },
-            { val: 20 * 1000, min: 10 * 1000, text: '20公里' },
-            { val: 10 * 1000, min: 5 * 1000, text: '10公里' },
-            { val: 5 * 1000, min: 2 * 1000, text: '5公里' },
-            { val: 2 * 1000, min: 1 * 1000, text: '2公里' },
-            { val: 1 * 1000, min: 500, text: '1公里' },
+            { val: 1000 * 1000, min: 500 * 1000, text: '1000' + Lang.km },
+            { val: 500 * 1000, min: 200 * 1000, text: '500' + Lang.km },
+            { val: 200 * 1000, min: 100 * 1000, text: '200' + Lang.km },
+            { val: 100 * 1000, min: 75 * 1000, text: '100' + Lang.km },
+            { val: 75 * 1000, min: 50 * 1000, text: '75' + Lang.km },
+            { val: 50 * 1000, min: 25 * 1000, text: '50' + Lang.km },
+            { val: 25 * 1000, min: 20 * 1000, text: '25' + Lang.km },
+            { val: 20 * 1000, min: 10 * 1000, text: '20' + Lang.km },
+            { val: 10 * 1000, min: 5 * 1000, text: '10' + Lang.km },
+            { val: 5 * 1000, min: 2 * 1000, text: '5' + Lang.km },
 
-            { val: 500, min: 200, text: '500米' },
-            { val: 200, min: 100, text: '200米' },
-            { val: 100, min: 50, text: '100米' },
-            { val: 50, min: 25, text: '50米' },
-            { val: 25, min: 20, text: '25米' },
-            { val: 20, min: 10, text: '20米' },
-            { val: 10, min: 5, text: '10米' },
-            { val: 5, min: 2, text: '5米' },
-            { val: 2, min: 1, text: '2米' },
-            { val: 1, min: 0.5, text: '1米' },
+            { val: 2 * 1000, min: 1 * 1000, text: '2' + Lang.km },
+            { val: 1 * 1000, min: 500, text: '1' + Lang.km },
+            { val: 500, min: 200, text: '500' + Lang.m },
+            { val: 200, min: 100, text: '200' + Lang.m },
+            { val: 100, min: 50, text: '100' + Lang.m },
+            { val: 50, min: 25, text: '50' + Lang.m },
+            { val: 25, min: 20, text: '25' + Lang.m },
+            { val: 20, min: 10, text: '20' + Lang.m },
+            { val: 10, min: 5, text: '10' + Lang.m },
+            { val: 5, min: 2, text: '5' + Lang.m },
 
-            { val: 0.5, min: 0.25, text: '50厘米' },
-            { val: 0.25, min: 0.2, text: '25厘米' },
-            { val: 0.2, min: 0.1, text: '20厘米' },
-            { val: 0.1, min: 0.05, text: '10厘米' },
-            { val: 0.05, min: 0.02, text: '5厘米' },
-            { val: 0.02, min: 0.01, text: '2厘米' },
-            { val: 0.01, min: 0.005, text: '1厘米' },
-            { val: 0.005, min: 0.004, text: '5毫米' }
+            { val: 2, min: 1, text: '2' + Lang.m },
+            { val: 1, min: 0.5, text: '1' + Lang.m },
+            { val: 0.5, min: 0.25, text: '50' + Lang.cm },
+            { val: 0.25, min: 0.2, text: '25' + Lang.cm },
+            { val: 0.2, min: 0.1, text: '20' + Lang.cm },
+            { val: 0.1, min: 0.05, text: '10' + Lang.cm },
+            { val: 0.05, min: 0.02, text: '5' + Lang.cm },
+            { val: 0.02, min: 0.01, text: '2' + Lang.cm },
+            { val: 0.01, min: 0.005, text: '1' + Lang.cm },
+            { val: 0.005, min: 0.002, text: '5' + Lang.mm },
+
+            { val: 0.002, min: 0.001, text: '2' + Lang.mm },
+            { val: 0.001, min: 0.0008, text: '1' + Lang.mm }
         ],
-        //经纬度距离，1度所表示的距离，单位：米
+        // 经纬度距离，1度所表示的距离，单位：米
         DegreeDistance: 111320,
         DistanceWidth: 50,
-        //高度距离，高度数字1所表示的距离，单位：米
+        // 点的默认半径大小，单位：像素
+        PointRadius: 5,
+        // 高度距离，高度数字1所表示的距离，单位：米
         HeightDistance: 1,
         HeightLevels: [
-            { val: 5 * 1000, min: 4.5 * 1000, text: '5公里' },
-            { val: 4.5 * 1000, min: 4 * 1000, text: '4.5公里' },
-            { val: 4 * 1000, min: 3.5 * 1000, text: '4公里' },
-            { val: 3.5 * 1000, min: 3 * 1000, text: '3.5公里' },
-            { val: 3 * 1000, min: 2.5 * 1000, text: '3公里' },
-            { val: 2.5 * 1000, min: 2 * 1000, text: '2.5公里' },
-            { val: 2 * 1000, min: 1 * 1000, text: '2公里' },
-            { val: 1 * 1000, min: 800, text: '1公里' },
+            { val: 5 * 1000, min: 4.5 * 1000, text: '5' + Lang.km },
+            { val: 4.5 * 1000, min: 4 * 1000, text: '4.5' + Lang.km },
+            { val: 4 * 1000, min: 3.5 * 1000, text: '4' + Lang.km },
+            { val: 3.5 * 1000, min: 3 * 1000, text: '3.5' + Lang.km },
+            { val: 3 * 1000, min: 2.5 * 1000, text: '3' + Lang.km },
+            { val: 2.5 * 1000, min: 2 * 1000, text: '2.5' + Lang.km },
+            { val: 2 * 1000, min: 1 * 1000, text: '2' + Lang.km },
+            { val: 1 * 1000, min: 800, text: '1' + Lang.km },
+            { val: 750, min: 500, text: '750' + Lang.m },
+            { val: 500, min: 400, text: '500' + Lang.m },
 
-            { val: 750, min: 500, text: '750米' },
-            { val: 500, min: 400, text: '500米' },
-            { val: 400, min: 300, text: '400米' },
-            { val: 300, min: 200, text: '300米' },
+            { val: 400, min: 300, text: '400' + Lang.m },
+            { val: 300, min: 200, text: '300' + Lang.m },
+            { val: 200, min: 100, text: '200' + Lang.m },
+            { val: 100, min: 50, text: '100' + Lang.m },
+            { val: 75, min: 50, text: '75' + Lang.m },
+            { val: 50, min: 25, text: '50' + Lang.m },
+            { val: 25, min: 20, text: '25' + Lang.m },
+            { val: 20, min: 10, text: '20' + Lang.m },
+            { val: 10, min: 5, text: '10' + Lang.m },
+            { val: 5, min: 2, text: '5' + Lang.m },
 
+            { val: 2, min: 1, text: '2' + Lang.m },
+            { val: 1, min: 0.5, text: '1' + Lang.m },
+            { val: 0.5, min: 0.25, text: '50' + Lang.cm },
+            { val: 0.25, min: 0.2, text: '25' + Lang.cm },
+            { val: 0.2, min: 0.1, text: '20' + Lang.cm },
+            { val: 0.1, min: 0.05, text: '10' + Lang.cm },
+            { val: 0.05, min: 0.02, text: '5' + Lang.cm },
+            { val: 0.02, min: 0.01, text: '2' + Lang.cm },
+            { val: 0.01, min: 0.005, text: '1' + Lang.cm },
+            { val: 0.005, min: 0.002, text: '5' + Lang.mm },
 
-            { val: 200, min: 100, text: '200米' },
-            { val: 100, min: 50, text: '100米' },
-            { val: 75, min: 50, text: '75米' },
-            { val: 50, min: 25, text: '50米' },
-            { val: 25, min: 20, text: '25米' },
-            { val: 20, min: 10, text: '20米' },
-            { val: 10, min: 5, text: '10米' },
-            { val: 5, min: 2, text: '5米' },
-            { val: 2, min: 1, text: '2米' },
-            { val: 1, min: 0.5, text: '1米' },
-
-            { val: 0.5, min: 0.25, text: '50厘米' },
-            { val: 0.25, min: 0.2, text: '25厘米' },
-            { val: 0.2, min: 0.1, text: '20厘米' },
-            { val: 0.1, min: 0.05, text: '10厘米' },
-            { val: 0.05, min: 0.02, text: '5厘米' },
-            { val: 0.02, min: 0.01, text: '2厘米' },
-            { val: 0.01, min: 0.005, text: '1厘米' },
-            { val: 0.005, min: 0.004, text: '5毫米' }
+            { val: 0.002, min: 0.001, text: '2' + Lang.mm },
+            { val: 0.001, min: 0.0008, text: '1' + Lang.mm }
         ]
     };
 
     //先加载样式文件
     $.loadJsScriptCss(Config.FilePath, '', function() {}, Config.FileName);
 
-    var Cache = {
+    const Cache = {
         caches: {},
         timers: {},
         getCache: function(id) {
@@ -109,7 +132,7 @@
         }
     };
 
-    var Factory = {
+    const Factory = {
         buildMap: function (id, options) {
             var opt = {};
             if ($.isElement(id)) {
@@ -223,10 +246,11 @@
 
             switch(position) {
             case 0:
+            default:
                 distancePos = { x: floatPos, y: pos.y + radius + textSize.height  };
                 break;
             case 1:
-                distancePos = { x: floatPos, y: posTo.y + radius + textSize.height  };
+                distancePos = { x: posTo.x, y: posTo.y + radius + textSize.height  };
                 break;
             case 2:
                 distancePos = { x: (pos.x + posTo.x) / 2, y: (pos.y + posTo.y) / 2 };
@@ -331,7 +355,7 @@
                 return this;
             }
             var point = map.center();
-            point = $.extend({radius: 5, color: '#000', name: '中心点', textStyle: {
+            point = $.extend({radius: 5, color: '#000', name: Lang.centerPoint, textStyle: {
                 color: '#f00', position: 8
             }}, point);
             return this.drawPoint(point, map);  
@@ -394,38 +418,18 @@
         },
         //根据矩形两个对角线顶点，计算另外两个顶点
         calcRectangle: function (rectangle) {
-            let that = this, x = 'latitude', y = 'longitude';
+            let that = this, x = 'longitude', y = 'latitude', loc = x === 'longitude';
 
             if (!rectangle.p1 || !rectangle.p3) {
                 return that;
             }
+            let p1 = { x: rectangle.p1[x], y: rectangle.p1[y] },
+                p3 = { x: rectangle.p3[x], y: rectangle.p3[y] },
+                ps = $.calcRectangleVertices(p1, p3);
 
-            // 1. 计算对角线中点（矩形中心）
-            const center = {
-                x: (rectangle.p1[x] + rectangle.p3[x]) / 2,
-                y: (rectangle.p1[y] + rectangle.p3[y]) / 2
-            };
+            rectangle.p2 = loc ? { latitude: ps[0].y, longitude: ps[0].x } : { x: ps[0].x, y: ps[0].y };
+            rectangle.p4 = loc ? { latitude: ps[1].y, longitude: ps[1].x } : { x: ps[1].x, y: ps[1].y };
 
-            // 2. 计算从中心到p1的向量（半对角线向量）
-            const dx = rectangle.p1[x] - center.x;
-            const dy = rectangle.p1[y] - center.y;
-
-            // 3. 向量旋转90度得到相邻边向量（矩形邻边垂直且等长）
-            // 旋转公式：(x, y) → (-y, x) 或 (y, -x)（两种旋转方向，对应两种矩形）
-            const vec2 = { x: -dy, y: dx }; // 顺时针旋转90度
-            const vec4 = { x: dy, y: -dx }; // 逆时针旋转90度
-
-            // 4. 计算另外两个顶点（中心 ± 旋转后的向量）
-            rectangle.p2 = x === 'latitude' ? {
-                latitude: center.x + vec2.x, longitude: center.y + vec2.y
-            } : {
-                x: center.x + vec2.x,y: center.y + vec2.y
-            };
-            rectangle.p4 = x === 'latitude' ? {
-                latitude: center.x + vec4.x, longitude: center.y + vec4.y                
-            } : {
-                x: center.x + vec4.x, y: center.y + vec4.y
-            };
             return that;
         },
         checkPolygon: function (map, point, polygons) {
@@ -495,7 +499,7 @@
             let that = this,
                 opt = map.options,
                 ctx = map.ctx,
-                radius = point.radius || 4,
+                radius = point.radius || Config.PointRadius,
                 pos = that.latLngToCanvas(map, point),
                 lines = that.getParamArray(point.lines || point.line),
                 distances = that.getParamArray(point.distances || point.distance),
@@ -510,6 +514,10 @@
             ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2);
             ctx.fillStyle = point.color || '#f00';
             ctx.fill();
+
+            // 保存点的x,y位置
+            point.pos = pos;
+            point.radius = radius;
 
             if (opt.showLine) {
                 for (i = 0; i < lines.length; i++) {
@@ -552,10 +560,8 @@
                         if (opt.vertical) {
                             distance = point.height - pointTo.height;
 
-                            if (distanceStyle.adjustHeight) {
-                                realDistance= distance + distanceStyle.adjustHeight;
-                                realDistance = that.dealDistance(realDistance, style);
-                            }                        
+                            realDistance= distance - Math.abs(point.adjustHeight || 0) - Math.abs(pointTo.adjustHeight || 0);
+                            realDistance = that.dealDistance(realDistance, style);                  
                         } else {
                             distance = $.calcLocationDistance(point, pointTo, opt.plane);
                         }
@@ -571,10 +577,10 @@
                             heightDistance = point.height - pointTo.height;
                             if (!isNaN(heightDistance)) {
                                 heightDistance = that.dealDistance(heightDistance, style);
-                                text += ' (高差:' + heightDistance + style.unit + ')';
+                                text += ' (' + Lang.heightDistance + ':' + heightDistance + style.unit + ')';
                             }
                         }
-                        if (opt.vertical && distanceStyle.adjustHeight) {
+                        if (opt.vertical && distance !== realDistance) {
                             text += ' (' + (distanceStyle.adjustPrefix || '') + realDistance + style.unit + ')';
                         }
                         textPos = that.setDistancePosition(map, style.position, pos, posTo, radius, fontSize, text);
@@ -667,6 +673,17 @@
 
             return this;
         },
+        showRemark: function (map, remark) {
+            let opt = map.options, elem = map.panels.remark;
+            if (!opt.showRemark || !elem) {
+                return this;
+            }
+            if (remark !== null) {
+                remark = remark || opt.remark;
+                elem.innerHTML = remark;
+            }
+            return this;
+        },
         buildPanel: function (map) {
             function _build (className, zindex, html) {
                 let div = document.createElement('DIV');
@@ -693,6 +710,7 @@
             }
 
             if (opt.showScale) {
+                //左上角缩放按钮
                 div = _build('oui-gmap-scale', zindex, [
                     '<a class="center" title="中心点"></a>',
                     '<a class="overview', opt.showOverview ? ' press' : '', '" title="', opt.showOverview ? '退出全览' : '固定全览', '"></a>',
@@ -735,6 +753,11 @@
             if (opt.showTitle) {
                 div = _build('oui-gmap-title', zindex, [].join(''));
                 map.panels.title = div;
+            }
+
+            if (opt.showRemark) {
+                div = _build('oui-gmap-remark', zindex, [].join(''));
+                map.panels.remark = div;
             }
 
             return this;
@@ -886,11 +909,11 @@
                 minY = that.getMin(points, fieldLat);
                 maxY = that.getMax(points, fieldLat);
             } else {
-                minX = Math.min(points[0].longitude, points[1][fieldLng]);
-                maxX = Math.max(points[0].longitude, points[1][fieldLng]);
+                minX = Math.min(points[0][fieldLng], points[1][fieldLng]);
+                maxX = Math.max(points[0][fieldLng], points[1][fieldLng]);
 
-                minY = Math.min(points[0].latitude, points[1][fieldLat]);
-                maxY = Math.max(points[0].latitude, points[1][fieldLat]);
+                minY = Math.min(points[0][fieldLat], points[1][fieldLat]);
+                maxY = Math.max(points[0][fieldLat], points[1][fieldLat]);
             }
 
             return {
@@ -901,12 +924,37 @@
                 centerY: (minY + maxY) / 2
             };
         },
+        checkOptions: function (map, options) {
+            let that = this, opt = $.extend({}, options);
+
+            let min = Math.min(opt.minScaleLevel, opt.maxScaleLevel);
+            let max = Math.max(opt.minScaleLevel, opt.maxScaleLevel);
+
+            if (min < Config.MinScaleLevel) {
+                min = Config.MinScaleLevel;
+            }
+            if (max > Config.MaxScaleLevel) {
+                max = Config.MaxScaleLevel;
+            }
+            opt.minScaleLevel = min;
+            opt.maxScaleLevel = max;
+
+            if (opt.scaleLevel < opt.minScaleLevel) {
+                opt.scaleLevel = opt.minScaleLevel;
+            }
+            if (opt.scaleLevel > opt.maxScaleLevel) {
+                opt.scaleLevel = opt.maxScaleLevel;
+            }
+
+            return opt;
+        },
         initScaleLevel: function (map) {
             let opt = map.options, view = map.view,
-                rules = map.rules(), len = rules.length,
-                distanceRatio = opt.vertical ? Config.HeightDistance : Config.DegreeDistance;
+                rules = map.rules(), len = rules.length, copys = [],
+                distanceRatio = opt.vertical ? Config.HeightDistance : Config.DegreeDistance,
+                i, c;
 
-            for (var i = 0; i < len; i++) {
+            for (i = 0; i < len; i++) {
                 let dr = rules[i];
                 dr.level = i + 1;
                 dr.scale = {
@@ -915,12 +963,19 @@
                     min: distanceRatio * Config.DistanceWidth / dr.val,
                     max: distanceRatio * Config.DistanceWidth / dr.min
                 };
+                if (dr.level >= opt.minScaleLevel && dr.level <= opt.maxScaleLevel) {
+                    copys.push(dr);
+                }
             }
-            view.minScaleRatio = distanceRatio * Config.DistanceWidth / rules[0].val;
-            view.maxScaleRatio = distanceRatio * Config.DistanceWidth / rules[len - 1].min;
+            c = copys.length;
+            view.minScaleRatio = distanceRatio * Config.DistanceWidth / copys[0].val;
+            view.maxScaleRatio = distanceRatio * Config.DistanceWidth / copys[c - 1].min;
+
+            opt.minScaleLevel = copys[0].level;
+            opt.maxScaleLevel = copys[c - 1].level;
 
             if (opt.showLog) {
-                $.console.log('initScaleLevel:', view.minScaleRatio, view.maxScaleRatio, rules);
+                $.console.log('initScaleLevel:', opt.minScaleLevel, opt.maxScaleLevel, view.minScaleRatio, view.maxScaleRatio, rules);
             }
 
             return this;
@@ -960,6 +1015,7 @@
             let rule = $.extend({ width: 50, }, rules[scaleLevel - 1]);
             if (scale && rule.scale) {
                 rule.width = (rule.width * (scale / rule.scale.val)).round(3);
+                $.console.log('getScaleLevel:', scale, rule.scale.val, vertical, rule);
             }
             return rule;
         },
@@ -986,12 +1042,26 @@
                 rule = that.getScaleLevel(map, scaleLevel);
                 view.scale = rule.scale.val;
             } else if ($.isNumber(scale) && scale) {
+                // 限制缩放范围
+                scale = Math.max(view.minScaleRatio, Math.min(view.maxScaleRatio, scale));
+
                 scaleLevel = 1;
+                let found = false;
                 for (var i = 0; i < len; i++) {
                     let dr = rules[i];
-                    if (scale > dr.scale.min && scale <= dr.scale.max) {
+                    if (scale >= dr.scale.min && scale <= dr.scale.max) {
                         scaleLevel = i + 1;
+                        found = true;
                         break;
+                    }
+                }
+                if (!found) {
+                    if (scale <= rules[0].scale.val) {
+                        scale = rules[0].scale.val;
+                        scaleLevel = 1;
+                    } else  if (scale > rules[len - 1].scale.max) {
+                        scale = rules[len - 1].scale.max;
+                        scaleLevel = len;
                     }
                 }
                 rule = that.getScaleLevel(map, scaleLevel, scale);
@@ -1025,8 +1095,6 @@
                     points = points.concat(others);
                 }
 
-                console.log('points:', points, len2);
-
                 if (overview) {
                     if(len > 1) {
                         // 计算多边形最小包围盒
@@ -1036,12 +1104,12 @@
                             heightScale = canvas.height / box.height * ratio,
                             point = { latitude: box.centerY, longitude: box.centerX };
 
-                            console.log('box:', box);
-
                         // 取多边形包围盒的中点作为中心点
                         that.setCenter(map, point);
                         // 计算新的缩放比率
-                        scale = Math.min(widthScale, heightScale) * ratio;
+                        scale = Math.min(widthScale, heightScale) * ratio;                        
+                        // 限制缩放范围
+                        scale = Math.max(view.minScaleRatio, Math.min(view.maxScaleRatio, scale));
                     }
 
                     // 当前比例大于新比例，或者新比例大于当前比例的两倍时，启用新的比例
@@ -1203,6 +1271,35 @@
             view.overview = overview;
 
             return that;
+        },
+        handleClick: function (e, map) {
+            let that = this, 
+                opt = map.options, view = map.view, 
+                points = view.points,
+                func = opt.clickCallback;
+
+            if (!$.isFunction(func)) {
+                return that;
+            }
+
+            let rect = map.canvas.getBoundingClientRect(),
+                clickX = e.clientX - rect.left,
+                clickY = e.clientY - rect.top,
+                i;
+
+            for (i = 0; i < points.length; i++) {
+                var p = points[i],
+                    px = p.pos.x,
+                    py = p.pos.y,
+                    distance = Math.sqrt((clickX - px) ** 2 + (clickY - py) ** 2);
+
+                if (distance <= p.radius) {
+                    func(e, p, that);
+                    break;
+                }
+            }
+
+            return that;
         }
     };
 
@@ -1215,10 +1312,16 @@
             vertical: false,
             // 地图标题
             title: '',
-            // 缩放比例
+            // 备注说明
+            remark: '',
+            // 默认缩放比例
             scale: 1,
-            // 缩放等级
+            // 默认缩放等级
             scaleLevel: 5,
+            // 最小缩放等级限制
+            minScaleLevel: Config.MinScaleLevel,
+            // 最大缩放等级限制
+            maxScaleLevel: Config.MaxScaleLevel,
             // 网格样式
             gridStyle: {
                 // 网格宽度
@@ -1249,6 +1352,8 @@
             showScale: false,
             // 是否显示地图标题
             showTitle: true,
+            // 是否显示备注说明
+            showRemark: true,
             // 是否显示当前鼠标位置的经纬度
             showPosition: false,
             // 是否打印日志信息
@@ -1300,12 +1405,17 @@
                 );
                 */
             },
+            clickCallback: function (e, point, map) {
+                console.log('point:', point);
+            },
             scaleRules: $.extend([], Config.ScaleLevels),
             heightRules: $.extend([], Config.HeightLevels),
             points: []
         }, options);
 
         this.options = opt;
+        this.options = Factory.checkOptions(this, this.options);
+
         this.canvas = opt.canvas;
         this.panels = {};
         this.ctx = this.canvas.getContext('2d');
@@ -1363,6 +1473,7 @@
 
             Factory.buildPanel(that)
                 .showTitle(that, opt.title)
+                .showRemark(that, opt.remark)
                 .setPointCache(that)
                 .initScaleLevel(that)
                 .initPoints(that, view.points)
@@ -1386,6 +1497,9 @@
             });
             $.addListener(canvas, 'wheel', function(e) {
                 Factory.handleWheel(e, that);
+            });
+            $.addListener(canvas, 'click', function(e) {
+                Factory.handleClick(e, that);
             });
 
             if (opt.showOverview) {
@@ -1497,6 +1611,12 @@
         clear: function () {
             this.view.points = [];
             return Factory.render(this), this;
+        },
+        title: function (title) {
+            return Factory.showTitle(this, title), this;
+        },
+        remark: function (remark) {
+            return Factory.showRemark(this, remark), this;
         }
     };
 
@@ -1504,6 +1624,26 @@
         gmap: function (id, options) {
             return Factory.buildMap(id, options);
         }
-    })
+    });
+
+    $.gmap.buildRemark = function (options) {
+        let opt = $.extend({title: '', colors:[]}, options);
+
+        let html = [], len = opt.colors.length, i;
+        if ($.isString(opt.title, true)) {
+            html.push('<dt class="remark-title">', opt.title, '</dt>');
+        }
+        for (i = 0; i < len; i++) {
+            let dr = opt.colors[i];
+            html.push([
+                '<dd class="remark-item">',
+                '<span class="color-bar" style="background:', dr.color, ';"></span>',
+                '<span class="color-txt">', dr.text, '</span>',
+                '</dd>'
+            ].join(''));
+        }
+
+        return html.join('');
+    };
 
 } (OUI);

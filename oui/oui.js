@@ -1443,6 +1443,64 @@
         },
         calcRectangleDistance: function (p1, p2, ratio) {
             return $.calcLocationDistance(p1, p2, ratio, true);
+        },
+        /*
+         * 已知对角线两点，计算矩形另外两个顶点
+         * @param {Object} p1 - 对角线起点 {x, y}
+         * @param {Object} p3 - 对角线终点 {x, y}
+         * @returns {Array} 另外两个顶点 [p2, p4]
+         */
+        calcRectangleVertices: function (p1, p3) {
+            // 1. 计算对角线中点（矩形中心）
+            const center = {
+                x: (p1.x + p3.x) / 2,
+                y: (p1.y + p3.y) / 2
+            };
+
+            // 2. 计算从中心到p1的向量（半对角线向量）
+            const dx = p1.x - center.x;
+            const dy = p1.y - center.y;
+
+            // 3. 向量旋转90度得到相邻边向量（顺时针旋转）
+            const vec2 = { x: -dy, y: dx };
+            const vec4 = { x: dy, y: -dx };
+
+            // 4. 计算另外两个顶点
+            const p2 = { x: center.x + vec2.x, y: center.y + vec2.y };
+            const p4 = { x: center.x + vec4.x, y: center.y + vec4.y };
+
+            return [p2, p4];
+        },
+        /*
+         * 延长对角线（双向等距延长）
+         * @param {Object} p1 - 原对角线起点 {x, y}
+         * @param {Object} p3 - 原对角线终点 {x, y}
+         * @param {number} dist - 延长距离（两端各延长dist长度）
+         * @returns {Array} 新的对角线顶点 [q1, q3]（q1是p1延长后，q3是p3延长后）
+         */
+        extendDiagonal: function(p1, p3, dist) {
+            // 1. 计算原对角线的长度和单位向量（方向：p1→p3）
+            const diagLen = Math.hypot(p3.x - p1.x, p3.y - p1.y);
+            if (diagLen === 0) {
+                return [p1, p3]; // 避免除以0
+            }
+
+            const unitX = (p3.x - p1.x) / diagLen; // x方向单位向量
+            const unitY = (p3.y - p1.y) / diagLen; // y方向单位向量
+
+            // 2. 计算延长后的两个顶点
+            // q1：从p1向远离p3的方向延长dist
+            const q1 = {
+                x: p1.x - unitX * dist,
+                y: p1.y - unitY * dist
+            };
+            // q3：从p3向远离p1的方向延长dist
+            const q3 = {
+                x: p3.x + unitX * dist,
+                y: p3.y + unitY * dist
+            };
+
+            return [q1, q3];
         }
     }, '$');
 }(OUI);
