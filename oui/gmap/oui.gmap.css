@@ -20,12 +20,13 @@
 	z-index: 999999;
 }
 
-.oui-gmap-scale a {
+.oui-gmap-scale .item {
 	width: 24px;
 	height: 24px;
 	margin: 1px 0 0 0;
 	padding: 0;
 	display: block;
+	overflow: hidden;
 	border: solid 1px #ccc;
 	box-sizing: content-box;
 	line-height: 23px;
@@ -37,6 +38,7 @@
 	text-decoration: none;
 	color: #000;
 	z-index: 999999;
+	opacity: 0.8;
 }
 
 .oui-gmap-scale a:hover {
@@ -46,6 +48,18 @@
 .oui-gmap-scale .add {
 	margin-top: 1px;
 }
+.oui-gmap-scale .set {
+	outline: none;
+	width: 24px;
+	border: solid 1px #ccc;
+	background-color: transparent;
+}
+.oui-gmap-scale .set:focus {
+	border: solid 1px #66afe9;
+	background-color: transparent;
+	font-weight: normal;
+}
+
 .oui-gmap-scale .sub {
 	border-top:none;
 	margin-top:0;
@@ -128,6 +142,7 @@
 	font-size:12px;
 	font-family:宋体;
 	position:absolute;
+	cursor: default;
 	left:8px;max-width:300px;font-size:12px;
 	text-indent:0;line-height:25px;
 }

@@ -1426,7 +1426,9 @@
                 var Ratio = earthRadius || 111320;
                 var w = lat2 > lat1 ? lat2 - lat1 : lat1 - lat2, 
                     h = lon2 > lon1 ? lon2 - lon1 : lon1 - lon2,
-                    d = Math.sqrt(w * w + h * h) * Ratio;
+                    //d = Math.sqrt(w * w + h * h) * Ratio;
+                    //d = Math.sqrt(w ** 2 + h ** 2) * Ratio;
+                    d = Math.hypot(w, h) * Ratio;
 
                 return d;
             }

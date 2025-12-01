@@ -22,7 +22,17 @@
         // 高差
         heightDistance: '\u9ad8\u5dee',
         // 中心点
-        centerPoint: '\u4e2d\u5fc3\u70b9'
+        centerPoint: '\u4e2d\u5fc3\u70b9',
+        // 退出全览
+        exitOverview: '\u9000\u51fa\u5168\u89c8',
+        // 固定全览
+        fixOverview: '\u56fa\u5b9a\u5168\u89c8',
+        // 缩放等级
+        scaleLevel: '\u7f29\u653e\u7b49\u7ea7',
+        // 放大一级
+        zoomIn: '\u653e\u5927\u4e00\u7ea7',
+        // 缩小一级
+        zoomOut: '\u7f29\u5c0f\u4e00\u7ea7'
     };
 
     const Config = {
@@ -146,7 +156,8 @@
             }
 
             if (!opt.canvas || !$.isElement (opt.canvas)) {
-                return null;
+                opt.id = 'gmap_canvas_null_001';
+                $.console.warn('oui.gmap build:', 'canvas is null');
             }
             var cache = Cache.getCache(opt.id), map;
             if (cache) {
@@ -195,7 +206,6 @@
             let that = this, canvas = map.canvas,
                 textPos = {}, pos = pointPos, 
                 textSize = that.getTextSize(text, fontSize),
-                // 垂直居中的文字偏移
                 offsetY = fontSize / 3, fontPadding = 3,
                 leftPos = pos.x - radius - fontPadding,
                 rightPos = pos.x + radius + fontPadding;
@@ -238,12 +248,15 @@
             return textPos;
         },
         setDistancePosition: function (map, position, pointPos, posTo, radius, fontSize, text) {
-            let that = this, view = map.view, canvas = map.canvas,
+            let that = this, canvas = map.canvas,
+                view = map.view, opt = map.options,
                 distancePos = {}, pos = pointPos,
                 textSize = that.getTextSize(text, fontSize),
-                fontPadding = 3,
-                floatPos = pos.x + radius + fontPadding;
+                fontPadding = 3, floatPos = pos.x + radius + fontPadding;
 
+            if (!opt.vertical && (position < 0 || position > 2)) {
+                position = 2;
+            }
             switch(position) {
             case 0:
             default:
@@ -255,9 +268,12 @@
             case 2:
                 distancePos = { x: (pos.x + posTo.x) / 2, y: (pos.y + posTo.y) / 2 };
                 break;
+            case 3:     //直角线左边中间
+            case 6:     //直角线右边中间
+                break;
             }
 
-            if (view.overview && distancePos.x + textSize.width > canvas.width) {
+            if ($.isNumber(distancePos.x) && view.overview && distancePos.x + textSize.width > canvas.width) {
                 distancePos.x = canvas.width - textSize.width - fontPadding;
             }
 
@@ -382,9 +398,9 @@
             return distance;
         },
         drawVerticalLine: function (map, point, pointTo, style, distanceStyle) {
-            let that = this, ctx = map.ctx, 
+            let that = this, ctx = map.ctx, opt = map.options,
                 pos = that.latLngToCanvas(map, point), 
-                posTo, potTmp, pointTmp;
+                posTo, potTmp, pointTmp, textPos = {};
 
             if (point.distance === pointTo.distance || point.height === pointTo.height) {
                 posTo = that.latLngToCanvas(map, pointTo);
@@ -392,8 +408,10 @@
                 return this;
             }
 
-            posTo = that.latLngToCanvas(map, pointTo);
-            that.drawLine(map, ctx, pos, posTo, style);
+            if (!distanceStyle.hideDiagonal) {
+                posTo = that.latLngToCanvas(map, pointTo);
+                that.drawLine(map, ctx, pos, posTo, style);
+            }
 
             switch(distanceStyle.verticalMode) {
             //case 'A':
@@ -405,16 +423,19 @@
             default:
                 pointTmp = { distance: pointTo.distance, height: point.height };
                 break;
-            }            
+            }
 
             potTmp = that.latLngToCanvas(map, pointTmp);
             that.drawLine(map, ctx, pos, potTmp, style);
+
+            textPos = { distance: pointTmp.distance, height: (point.height + pointTo.height) / 2 };
+            textPos = that.latLngToCanvas(map, textPos);
 
             pointTmp = { distance: pointTo.distance, height: pointTo.height };
             posTo = that.latLngToCanvas(map, pointTmp);
             that.drawLine(map, ctx, potTmp, posTo, style);
 
-            return this;
+            return textPos;
         },
         //根据矩形两个对角线顶点，计算另外两个顶点
         calcRectangle: function (rectangle) {
@@ -507,7 +528,8 @@
                 polygons = that.getParamArray(point.polygons || point.polygon),
                 i, pointTo, posTo, style = {},
                 distanceStyle = $.extend({}, opt.distanceStyle, point.distanceStyle),
-                text, textPos, fontSize;
+                text, textPos, fontSize,
+                heightTextPos;
 
             // 绘制点
             ctx.beginPath();
@@ -525,10 +547,11 @@
                     pointTo = that.getPointCache(map, lines[i]);
                     style = $.extend({}, opt.lineStyle, point.lineStyle, lines[i]);
                     if (pointTo) {
+                        posTo = that.latLngToCanvas(map, pointTo);
+
                         if (opt.vertical && (style.vertical || distanceStyle.vertical)) {
-                            that.drawVerticalLine(map, point, pointTo, style, distanceStyle);
+                            heightTextPos = that.drawVerticalLine(map, point, pointTo, style, distanceStyle);
                         } else {
-                            posTo = that.latLngToCanvas(map, pointTo);
                             that.drawLine(map, ctx, pos, posTo, style);
                         }
                     }
@@ -559,7 +582,7 @@
 
                         if (opt.vertical) {
                             distance = point.height - pointTo.height;
-
+                            //偏差校准后的高度距离
                             realDistance= distance - Math.abs(point.adjustHeight || 0) - Math.abs(pointTo.adjustHeight || 0);
                             realDistance = that.dealDistance(realDistance, style);                  
                         } else {
@@ -572,6 +595,7 @@
                         distance = that.dealDistance(distance, style);
 
                         text = (style.prefix || '') + distance + style.unit;
+
                         if (!opt.vertical && opt.showHeight) {
                             style = $.extend({}, opt.distanceStyle, point.distanceStyle, distances[i]);
                             heightDistance = point.height - pointTo.height;
@@ -580,11 +604,26 @@
                                 text += ' (' + Lang.heightDistance + ':' + heightDistance + style.unit + ')';
                             }
                         }
+                        // 是否显示校准后的高度值
                         if (opt.vertical && distance !== realDistance) {
                             text += ' (' + (distanceStyle.adjustPrefix || '') + realDistance + style.unit + ')';
                         }
+                        posTo = that.latLngToCanvas(map, pointTo);
                         textPos = that.setDistancePosition(map, style.position, pos, posTo, radius, fontSize, text);
-
+                        if (!$.isNumber(textPos.x)) {
+                            textPos = $.extend({}, heightTextPos);
+                            let textSize = that.getTextSize(text, fontSize);
+                            switch(style.position) {
+                            case 3:
+                                textPos.x -= textSize.width + 5;
+                                break;
+                            case 6:
+                                textPos.x += 5;
+                                break;
+                            }
+                            // 这里除以3，不是除以2
+                            textPos.y += textSize.height / 3;
+                        }
                         that.drawText(ctx, text, textPos, style);
                     }
                 }
@@ -636,9 +675,11 @@
         },
         showPosition: function (map, point) {
             let that = this, 
-                opt = map.options, 
+                opt = map.options,
+                prefix = $.isString(opt.positionPrefix, true) ? opt.positionPrefix : '',
                 view = map.view, 
-                elem = map.panels.position;
+                elem = map.panels.position,
+                text;
 
             if (!elem) {
                 return that;
@@ -651,11 +692,17 @@
                 elem.innerHTML = '';
                 return that;
             }
+
             if (opt.vertical) {
-                elem.innerHTML = [point.latitude.round(3), point.longitude.round(3)].join(',');
+                text = prefix + [point.latitude.round(3), point.longitude.round(3)].join(',');
             } else {
-                elem.innerHTML = [point.latitude, point.longitude].join(',');
+                text = prefix + [point.latitude, point.longitude].join(',');
             }
+
+            if (opt.showMousePosition) {
+                text += ' (' + point.x + ',' + point.y + ')';
+            }
+            elem.innerHTML = text;
 
             return that;
         },
@@ -684,6 +731,11 @@
             }
             return this;
         },
+        showScaleLevel: function (map) {
+            let that = this;
+
+            return that;
+        },
         buildPanel: function (map) {
             function _build (className, zindex, html) {
                 let div = document.createElement('DIV');
@@ -694,7 +746,9 @@
 
                 return div;
             }
-            let opt = map.options,
+            let that = this,
+                opt = map.options,
+                panels = map.panels,
                 zindex = parseInt('0' + $.getElementStyle(map.canvas, 'z-index'), 10) + 1,
                 div = _build('oui-gmap-bottom', zindex, [
                     '<div class="oui-gmap-position" style="z-index:', zindex + 2, ';"></div>',
@@ -704,27 +758,32 @@
 
             if (opt.showRule) {
                 map.box.appendChild(div);
-                map.panels.bottom = div;
-                map.panels.position = div.childNodes[0];
-                map.panels.scaleRule = div.childNodes[1];
+                panels.bottom = div;
+                panels.position = div.childNodes[0];
+                panels.scaleRule = div.childNodes[1];
             }
 
             if (opt.showScale) {
                 //左上角缩放按钮
                 div = _build('oui-gmap-scale', zindex, [
-                    '<a class="center" title="中心点"></a>',
-                    '<a class="overview', opt.showOverview ? ' press' : '', '" title="', opt.showOverview ? '退出全览' : '固定全览', '"></a>',
-                    '<a class="add level" title="放大一级">+</a>',
-                    '<a class="sub level" title="缩小一级">-</a>',
+                    '<a class="center item" title="', Lang.centerPoint, '"></a>',
+                    '<a class="overview item', opt.showOverview ? ' press' : '', '"',
+                    ' title="', opt.showOverview ? Lang.exitOverview : Lang.fixOverview, '"></a>',
+                    '<input class="set level item" title="', Lang.scaleLevel, '" maxlength="2" />',
+                    '<a class="add level item item" title="', Lang.zoomIn, '">+</a>',
+                    '<a class="sub level item" title="', Lang.zoomOut, '">-</a>',
                 ].join(''));
-                map.panels.scale = div;
+                panels.scale = div;
 
-                let nodes = div.querySelectorAll('A');
+                let nodes = div.querySelectorAll('.item');
                 for(var i = 0; i < nodes.length; i++) {
+                    if (nodes[i].className.indexOf('set level') >= 0) {
+                        map.panels.level = nodes[i];
+                    }
                     $.addListener(nodes[i], 'click', function(e) {
                         let node = this;
                         $.debounce({
-                            id:'oui-gmap-', delay:150, timeout:2000
+                            id: 'oui-gmap-level-set', delay: 200, timeout: 2000
                         }, function(e) {
                             switch(node.className.split(' ')[0]) {
                             case 'center':
@@ -748,24 +807,69 @@
                         });
                     });
                 }
+                if (panels.level) {
+                    $.addListener(panels.level, 'keyup', function (e) {
+                        $.cancelBubble(e);
+                        let elem = this;
+                        $.debounce({
+                            id: 'oui-gmap-level-input', delay: 300, timeout: 2000
+                        }, function(ev) {
+                            let keyCode = e.keyCode,
+                                v = parseInt(elem.value.trim(), 10);
+
+                            switch(keyCode) {
+                            case 37: v = map.view.minScaleLevel; break;
+                            case 38: v = map.view.scaleLevel - 1; break;
+                            case 39: v = map.view.maxScaleLevel; break;
+                            case 40: v = map.view.scaleLevel + 1; break;
+                            }
+
+                            $.console.log('v:', v, e.keyCode);
+
+                            if (isNaN(v)) {
+                                return false;
+                            }
+                            if (v < map.view.minScaleLevel) {
+                                v = map.view.minScaleLevel;
+                            } else if (v > map.view.maxScaleLevel) {
+                                v = map.view.maxScaleLevel;
+                            }
+                            map.scaleLevel(v);
+                        });
+                    });
+                }
             }
 
             if (opt.showTitle) {
                 div = _build('oui-gmap-title', zindex, [].join(''));
-                map.panels.title = div;
+                panels.title = div;
             }
 
             if (opt.showRemark) {
                 div = _build('oui-gmap-remark', zindex, [].join(''));
-                map.panels.remark = div;
+                panels.remark = div;
             }
 
             return this;
         },
         showPanel: function (map) {
-            let panels = map.panels, canvas = map.canvas;
-
-            panels.bottom.style.width = canvas.width + 'px';
+            let panels = map.panels, canvas = map.canvas, view = map.view;
+            if (panels.bottom) {
+                panels.bottom.style.width = canvas.width + 'px';
+            }
+            if (panels.level) {
+                switch(panels.level.tagName) {
+                case 'INPUT':
+                case 'TEXTAREA':
+                    panels.level.value = view.scaleLevel;
+                    break;
+                case 'SELECT':
+                    break;
+                default:
+                    panels.level.innerHTML = view.scaleLevel;
+                    break;
+                }
+            }
             return this;
         },
         drawPosition: function (map, point) {
@@ -968,11 +1072,16 @@
                 }
             }
             c = copys.length;
+            
+            // 根据实际的缩放比例限制和比例尺设置缩放比例等级
+
             view.minScaleRatio = distanceRatio * Config.DistanceWidth / copys[0].val;
             view.maxScaleRatio = distanceRatio * Config.DistanceWidth / copys[c - 1].min;
+            view.minScaleLevel = copys[0].level;
+            view.maxScaleLevel = copys[c - 1].level;
 
-            opt.minScaleLevel = copys[0].level;
-            opt.maxScaleLevel = copys[c - 1].level;
+            opt.minScaleLevel = view.minScaleLevel;
+            opt.maxScaleLevel = view.maxScaleLevel;
 
             if (opt.showLog) {
                 $.console.log('initScaleLevel:', opt.minScaleLevel, opt.maxScaleLevel, view.minScaleRatio, view.maxScaleRatio, rules);
@@ -1005,6 +1114,7 @@
         },
         getScaleLevel: function (map, scaleLevel, scale, vertical) {
             let rules = map.rules(), 
+                opt = map.options,
                 len = rules.length;
 
             if (scaleLevel < 1) {
@@ -1015,7 +1125,9 @@
             let rule = $.extend({ width: 50, }, rules[scaleLevel - 1]);
             if (scale && rule.scale) {
                 rule.width = (rule.width * (scale / rule.scale.val)).round(3);
-                $.console.log('getScaleLevel:', scale, rule.scale.val, vertical, rule);
+                if (opt.showLog) {
+                    $.console.log('getScaleLevel:', scale, rule.scale.val, vertical, rule);
+                }
             }
             return rule;
         },
@@ -1147,7 +1259,7 @@
             return this;
         },
         handleMouseDown: function (e, map) {
-            $.cancelBubble(e);
+            //$.cancelBubble(e);
             if (e.ctrlKey || e.metaKey) {
                 return this;    
             }
@@ -1160,20 +1272,20 @@
             return this;
         },
         handleMouseMove: function (e, map) {
-            $.cancelBubble(e);
+            //$.cancelBubble(e);
             let that = this, opt = map.options, 
                 view = map.view, canvas = map.canvas,
                 rect = canvas.getBoundingClientRect(),
                 mouseX = e.clientX - rect.left,
                 mouseY = e.clientY - rect.top;
 
-            if (opt.showPosition && e.target === canvas) {
+            if (opt.showPosition && (e.target === canvas || $.isOnElement(canvas, e))) {
                 const center = map.center();
                 
                 // 计算鼠标位置对应的经纬度
                 const mouseLat = center.latitude - (mouseY - canvas.height / 2 - view.offsetY) / view.scale,
                     mouseLng = (mouseX - canvas.width / 2 - view.offsetX) / view.scale + center.longitude,
-                    point = { latitude: mouseLat, longitude: mouseLng };
+                    point = { latitude: mouseLat, longitude: mouseLng, x: mouseX, y: mouseY };
 
                 that.setCurrentPoint(map, point);
 
@@ -1209,7 +1321,7 @@
             return that;
         },
         handleMouseUp: function (e, map) {
-            $.cancelBubble(e);
+            //$.cancelBubble(e);
             map.view.dragging = false;
             return this;
         },
@@ -1291,7 +1403,8 @@
                 var p = points[i],
                     px = p.pos.x,
                     py = p.pos.y,
-                    distance = Math.sqrt((clickX - px) ** 2 + (clickY - py) ** 2);
+                    //distance = Math.sqrt((clickX - px) ** 2 + (clickY - py) ** 2);
+                    distance = Math.hypot(clickX - px, clickY - py);
 
                 if (distance <= p.radius) {
                     func(e, p, that);
@@ -1356,6 +1469,10 @@
             showRemark: true,
             // 是否显示当前鼠标位置的经纬度
             showPosition: false,
+            // 是否显示当前鼠标位置的x,y值
+            showMousePosition: false,
+            // 左下角位置信息前缀
+            positionPrefix: '',
             // 是否打印日志信息
             showLog: true,
             // 经纬度小数位数，0 表示不限制
@@ -1366,8 +1483,9 @@
             showDistance: true,
             // 是否显示高差
             showHeight: false,
-            // 是否显示矩形
-            showRectangle: false,
+            // 是否显示多边形（水平模式下启用）
+            // 如果只有两个点的多边形，则表示为矩形
+            showPolygon: false,
             // 连线距离文字样式
             distanceStyle: {
                 // 不限制距离，距离单位：米
@@ -1384,9 +1502,12 @@
                 prefix: '',
                 //是否画垂直线
                 vertical: false,
+                //是否隐藏斜线
+                //若启用垂直线，则此参数无效
+                hideDiagonal: false,
                 //垂直线三角形模式: M - 上三角，W - 下三角, A - 自适应
                 verticalMode: 'W',
-                //高度调节，用于上下位置补偿
+                //高度调节，用于上下位置补偿，若已在外面数据中调整过了，这里不要设置
                 adjustHeight: 0,
                 adjustPrefix: '',
                 font:'20px Arial',color:'#f00'
@@ -1413,18 +1534,22 @@
             points: []
         }, options);
 
-        this.options = opt;
-        this.options = Factory.checkOptions(this, this.options);
-
-        this.canvas = opt.canvas;
+        this.options = Factory.checkOptions(this, opt);
         this.panels = {};
-        this.ctx = this.canvas.getContext('2d');
-        this.id = this.canvas.id;
+        this.canvas = opt.canvas;
+        if (opt.canvas) {            
+            this.ctx = this.canvas.getContext('2d');
+            this.id = this.canvas.id;
+        }
         this.view = {
             //最小比例，50个像素所能代表的最大距离
             minScaleRatio: 1,
             //最大比例，50个像素所能代表的最小距离
             maxScaleRatio: 1,
+            // 最小缩放等级限制
+            minScaleLevel: Config.MinScaleLevel,
+            // 最大缩放等级限制
+            maxScaleLevel: Config.MaxScaleLevel,
             defCenter: {
                 latitude: 0,
                 longitude: 0,
@@ -1464,6 +1589,9 @@
         initial: function() {
             var that = this, opt = that.options, canvas = that.canvas, view = that.view;
 
+            if (!canvas) {
+                return that;
+            }
             var box = canvas.parentNode;
             if (box.tagName === 'DIV') {
                 box.style.position = 'relative';
@@ -1492,7 +1620,7 @@
             $.addListener([canvas, document], 'mouseup', function(e) {
                 Factory.handleMouseUp(e, that);
             });
-            $.addListener(canvas, 'mouseout', function(e) {
+            $.addListener([canvas, box], 'mouseout', function(e) {
                 Factory.handleMouseOut(e, that);
             });
             $.addListener(canvas, 'wheel', function(e) {
@@ -1500,6 +1628,9 @@
             });
             $.addListener(canvas, 'click', function(e) {
                 Factory.handleClick(e, that);
+            });
+            $.addListener(canvas, 'contextmenu', function(e) {
+                return false;
             });
 
             if (opt.showOverview) {
@@ -1509,6 +1640,9 @@
         },
         size: function (size) {
             let that = this;
+            if (!that.canvas) {
+                return that;
+            }
             if (size && size.width && size.height) {
                 that.canvas.width = size.width;
                 that.canvas.height = size.height;
@@ -1526,6 +1660,10 @@
         center: function (point, scale) {
             let that = this, view = that.view,
                 centerPoint = view.curCenter ? view.curCenter : view.defCenter;
+
+            if (!that.canvas) {
+                return that;
+            }
 
             if ($.isBoolean(point, false)) {
                 that.overview(false);
@@ -1560,13 +1698,16 @@
             if (!$.isNumber(scale) || !scale) {
                 return that.view.scale;
             }
+            if (!that.canvas) {
+                return that;
+            }
             Factory.setScale(that, scale);
 
             return Factory.render(that), that;
         },
         scaleLevel: function (level, action) {
             var that = this;
-            if (!$.isNumber(level) && !$.isNumber(action)) {
+            if (!that.canvas || (!$.isNumber(level) && !$.isNumber(action))) {
                 return that;
             }
             switch(action) {
@@ -1582,12 +1723,18 @@
             return Factory.render(that), that;
         },
         overview: function (overview) {
+            if (!this.canvas) {
+                return this;
+            }
             overview = $.isBoolean(overview, true);
             Factory.setOverview(this, overview, true).render(this);
             return this;
         },
         update: function (points, append) {
             var that = this, opt = that.options;
+            if (!that.canvas) {
+                return that;
+            }
             if ($.isArray(points)) {
                 if (append) {
                     points = that.view.points.concat(points);
