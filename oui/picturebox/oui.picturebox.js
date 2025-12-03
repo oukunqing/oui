@@ -83,7 +83,15 @@
                 point.y = cfg.top + cfg.h;
             }
             return point;
-        },        
+        },
+        isInRange: function (ev, img) {
+            let rect = img.getBoundingClientRect(),
+                x = ev.clientX, y = ev.clientY;
+            if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+                return true;
+            }
+            return false;
+        }, 
         setImgSize: function (that) {
             that.img.style.width = that.cfg.w + 'px';
             that.img.style.height = that.cfg.h + 'px';
@@ -93,6 +101,9 @@
             //图片尺寸是否大于容器框
             var bigImg = that.cfg.width > that.cfg.offset.width || that.cfg.height > that.cfg.offset.height;
 
+            if (that.cfg.curScale >= 1) {
+                this.hideMagnifier(that);
+            }
             return bigImg;
         },
         getOffsetSize: function(elem) {
@@ -113,6 +124,72 @@
                 ratio = 10000;
             }
             return Math.round(num * ratio) / ratio;
+        },
+        showMagnifier: function (ev, that) {
+            let cfg = that.cfg,
+                style = cfg.magnifierStyle,
+                rect = that.box.getBoundingClientRect();
+
+            if (!cfg.showMagnifier || cfg.curScale >= 1 || that.cfg.pointerdown || !this.isInRange(ev, that.img)) {
+                this.hideMagnifier(that);
+                return this;
+            }
+            that.img.style.cursor = 'crosshair';
+
+            if (!that.magnifier) {
+                let div = document.createElement('DIV'), 
+                    zindex = $.getElementStyle(that.img, 'z-index'),
+                    radius = $.getParamCon(style.radius, (style.width + style.height) / 4);
+
+                div.className = 'oui-picbox-magnifier';
+                div.style.cssText = [
+                    'width:', style.width, 'px;height:', style.width, 'px;',
+                    'border-radius:', radius, 'px;',
+                    'position:absolute;right:0;top:0;border:solid 1px #ddd;',
+                    'overflow:hidden;',
+                    $.isNumber(style.opacity) ? 'opacity:' + style.opacity + ';' : '',
+                    'z-index:', (zindex + 1), ';'
+                ].join('');
+
+                div.innerHTML = '<img class="magnifier-img" src="' + that.img.src + '" />';
+                that.box.appendChild(div);
+
+                that.magnifier = div;
+                that.magnifierImg = div.childNodes[0];
+            } else if (that.magnifier.style.display === 'none') {
+                that.magnifier.style.display = 'block';
+            }
+
+            let elem = that.magnifier, img = that.magnifierImg;
+            if (['custom', 'cursor'].indexOf(style.position) > -1) {
+
+                let left = ev.clientX - rect.left,
+                    top = ev.clientY - rect.top;
+                if (left + style.width >= rect.right - rect.left) {
+                    left -= (left + style.width) - (rect.right - rect.left);
+                }
+                if (top + style.height >= rect.bottom - rect.top) {
+                    top -= (top + style.height) - (rect.bottom - rect.top);
+                }
+                elem.style.left = left + 'px';
+                elem.style.top = top + 'px';
+            }
+
+            let size = that.img.getBoundingClientRect(),
+                pos = { x: ev.clientX - size.left, y:  ev.clientY - size.top },
+                css = [
+                    'position:absolute;',
+                    'left:', -pos.x / cfg.curScale + style.width / 2, 'px;',
+                    'top:', -pos.y / cfg.curScale + style.height / 2, 'px;'
+                ].join('');
+
+            img.style.cssText = css;
+        },
+        hideMagnifier: function (that) {
+            if (that.magnifier) {
+                that.magnifier.style.display = 'none';
+                that.img.style.cursor = 'default';
+            }
         }
     };
 
@@ -132,9 +209,15 @@
                     showScale: true,
                     fill: false,
                     margin: 0,
-                    fullScreen: true
+                    fullScreen: true,
+                    showMagnifier: true,
+                    magnifierStyle: null
                 }, options),
                 update = false;
+
+            opt.magnifierStyle = $.extend({
+                width:150, height:150, opacity:0.85, position:'custom' 
+            }, options.magnifierStyle);
 
             if(that.img) {
                 that.box.removeChild(that.img);
@@ -218,7 +301,9 @@
                         left: bs.left, top: bs.top
                     },
                     showScale: that.opt.showScale,
-                    showTitle: that.opt.showTitle
+                    showTitle: that.opt.showTitle,
+                    showMagnifier: that.opt.showMagnifier,
+                    magnifierStyle: that.opt.magnifierStyle
                 };
 
                 Factory.setImgSize(that);
@@ -349,6 +434,9 @@
                     if (ev.target.className.indexOf('oui-picbox-img') < 0) {
                         return false;
                     }
+                    // 图片移动时隐藏放大镜
+                    Factory.hideMagnifier(that);
+
                     var cur = $.getEventPos(ev);
                     that.cfg.diffpointer.x = cur.x - that.cfg.lastpointer.x;
                     that.cfg.diffpointer.y = cur.y - that.cfg.lastpointer.y;
@@ -360,6 +448,7 @@
                     var left = that.cfg.x - that.cfg.w / 2,
                         top = that.cfg.y - that.cfg.h / 2;
 
+                    that.img.style.cursor = 'move';
                     that.img.style.left = left + 'px';
                     that.img.style.top = top + 'px';
 
@@ -367,6 +456,9 @@
                     that.cfg.top = top;
                 }
                 ev.preventDefault();
+            });
+            $.addListener(that.box, 'pointermove', function (ev) {
+                Factory.showMagnifier(ev, that);
             });
             $.addListener(that.img, 'pointerup', function (ev) {
                 if (that.cfg.pointerdown) {
@@ -378,6 +470,8 @@
                 if (that.cfg.pointerdown) {
                     $.cancelBubble(ev);
                     that.cfg.pointerdown = false;
+                } else {
+                    Factory.hideMagnifier(that);
                 }
             });
             $.addListener(that.img, 'pointercancel', function (ev) {

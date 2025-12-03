@@ -91,3 +91,21 @@
     width: 100%;
     height: 100%;
 }
+
+.oui-picbox-magnifier {
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    top: 0;
+    right: 0;
+    opacity: 0.9;
+    border: solid 1px #ddd;
+    box-sizing: border-box;
+}
+
+.oui-picbox-magnifier .magnifier-img {
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    border: none;
+}

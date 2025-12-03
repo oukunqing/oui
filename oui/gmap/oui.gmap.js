@@ -385,14 +385,17 @@
             return this;
         },
         dealDistance: function (distance, style) {
+            let ratio = style.ratio || 1;
+
             if (distance > 1000) {
                 distance = (distance / 1000).round(style.decimal);
                 style.unit = 'km';
             } else {
-                if (style.ratio > 1) {
+                if (style.ratio > 1 && distance < 1) {
                     distance = (distance * style.ratio).round(style.decimal);
                 } else {
                     distance = distance.round(style.decimal);
+                    style.unit = 'm';
                 }
             }
             return distance;
@@ -731,8 +734,30 @@
             }
             return this;
         },
-        showScaleLevel: function (map) {
+        showScaleLevel: function (map, elem, e) {
             let that = this;
+
+            let keyCode = e.keyCode,
+                v = parseInt(elem.value.trim(), 10);
+
+            switch(keyCode) {
+            case 37: v = map.view.minScaleLevel; break;
+            case 38: v = map.view.scaleLevel - 1; break;
+            case 39: v = map.view.maxScaleLevel; break;
+            case 40: v = map.view.scaleLevel + 1; break;
+            }
+
+            $.console.log('v:', v, e.keyCode);
+
+            if (isNaN(v)) {
+                return false;
+            }
+            if (v < map.view.minScaleLevel) {
+                v = map.view.minScaleLevel;
+            } else if (v > map.view.maxScaleLevel) {
+                v = map.view.maxScaleLevel;
+            }
+            map.scaleLevel(v);
 
             return that;
         },
@@ -748,6 +773,7 @@
             }
             let that = this,
                 opt = map.options,
+                view = map.view,
                 panels = map.panels,
                 zindex = parseInt('0' + $.getElementStyle(map.canvas, 'z-index'), 10) + 1,
                 div = _build('oui-gmap-bottom', zindex, [
@@ -769,7 +795,7 @@
                     '<a class="center item" title="', Lang.centerPoint, '"></a>',
                     '<a class="overview item', opt.showOverview ? ' press' : '', '"',
                     ' title="', opt.showOverview ? Lang.exitOverview : Lang.fixOverview, '"></a>',
-                    '<input class="set level item" title="', Lang.scaleLevel, '" maxlength="2" />',
+                    opt.showScaleLevel ? ['<input class="set level item" title="', Lang.scaleLevel, '" maxlength="2" />'].join('') : '',
                     '<a class="add level item item" title="', Lang.zoomIn, '">+</a>',
                     '<a class="sub level item" title="', Lang.zoomOut, '">-</a>',
                 ].join(''));
@@ -808,33 +834,18 @@
                     });
                 }
                 if (panels.level) {
+                    if (!opt.editableLevel) {
+                        panels.level.disabled = true;
+                    }
                     $.addListener(panels.level, 'keyup', function (e) {
-                        $.cancelBubble(e);
-                        let elem = this;
+                        if (!opt.editableLevel) {
+                            panels.level.value = view.scaleLevel;
+                            return false;
+                        }
                         $.debounce({
                             id: 'oui-gmap-level-input', delay: 300, timeout: 2000
                         }, function(ev) {
-                            let keyCode = e.keyCode,
-                                v = parseInt(elem.value.trim(), 10);
-
-                            switch(keyCode) {
-                            case 37: v = map.view.minScaleLevel; break;
-                            case 38: v = map.view.scaleLevel - 1; break;
-                            case 39: v = map.view.maxScaleLevel; break;
-                            case 40: v = map.view.scaleLevel + 1; break;
-                            }
-
-                            $.console.log('v:', v, e.keyCode);
-
-                            if (isNaN(v)) {
-                                return false;
-                            }
-                            if (v < map.view.minScaleLevel) {
-                                v = map.view.minScaleLevel;
-                            } else if (v > map.view.maxScaleLevel) {
-                                v = map.view.maxScaleLevel;
-                            }
-                            map.scaleLevel(v);
+                            that.showScaleLevel(map, panels.level, e);
                         });
                     });
                 }
@@ -1385,6 +1396,7 @@
             return that;
         },
         handleClick: function (e, map) {
+            //e.preventDefault();
             let that = this, 
                 opt = map.options, view = map.view, 
                 points = view.points,
@@ -1407,7 +1419,7 @@
                     distance = Math.hypot(clickX - px, clickY - py);
 
                 if (distance <= p.radius) {
-                    func(e, p, that);
+                    func(e, p, map);
                     break;
                 }
             }
@@ -1462,7 +1474,11 @@
             // 是否显示比例尺
             showRule: true,
             // 是否显示缩放按钮
-            showScale: false,
+            showScale: true,
+            // 是否显示缩放等级数字
+            showScaleLevel: true,
+            // 缩放等级是否可编辑（输入）
+            editableLevel: true,
             // 是否显示地图标题
             showTitle: true,
             // 是否显示备注说明
@@ -1611,16 +1627,16 @@
                 that.size();
             });
             
-            $.addListener(canvas, 'mousedown', function(e) {
+            $.addListener(canvas, 'pointerdown', function(e) {
                 Factory.handleMouseDown(e, that);
             });
-            $.addListener([canvas, document], 'mousemove', function(e) {
+            $.addListener([canvas, document], 'pointermove', function(e) {
                 Factory.handleMouseMove(e, that);
             });
-            $.addListener([canvas, document], 'mouseup', function(e) {
+            $.addListener([canvas, document], 'pointerup', function(e) {
                 Factory.handleMouseUp(e, that);
             });
-            $.addListener([canvas, box], 'mouseout', function(e) {
+            $.addListener([canvas, box], 'pointerout', function(e) {
                 Factory.handleMouseOut(e, that);
             });
             $.addListener(canvas, 'wheel', function(e) {
