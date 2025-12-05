@@ -1,94 +1,18 @@
 .oui-dialog-zyrh {
-    padding: 0px; 
-    margin: 0px;
-    /*width: auto; */
-    position: absolute;
     border: solid 1px #cdcdcd;
     background: #cdcdcd;
-    border-radius: 5px;
-    box-sizing: border-box;
-    box-shadow: 0 2px 3px 0 rgba(0,0,0,.32);
-    box-shadow: 0 2px 3px 0 rgba(153,187,232,.32);
-    font-size: 14px;
-    /*
-    font-family: 微软雅黑, 宋体, Arial;
-    */
-    line-height: 1.25em;
-    cursor: default;
-
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
-}
-
-.oui-dialog-zyrh .dialog-main {
-    background: #cdcdcd;
-}
-
-.oui-dialog-max {
-    width: 100%; height: 100%; 
-    border-radius: 0px;
-    box-sizing: border-box;
-    top: 0; left: 0;
-    /*border: none 0;*/
 }
 
 .oui-dialog-zyrh .dialog-head{
-    padding:2px 2px 1px; margin:0;
-    border: none 0;
     background: #cdcdcd;
-    /*左右圆角与总的背景互斥*/
-    
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
-    
-    width: 100%;
-    height: 32px;
-    max-height: 50px;
-    /*border-bottom: solid 1px #ddd;*/
-    box-sizing: border-box;
-    clear: both; 
-    overflow: hidden;
-    /*cursor: move;*/
-    
-    -moz-user-select:none;
-    -khtml-user-select:none;
-    user-select:none;
-    -ms-user-select: none;
 }
 
 .oui-dialog-zyrh .dialog-head .dialog-title {
-    margin: 0; 
-    padding: 0;
-    width: auto;
-    height: 29px;
-    text-indent: 6px;
-    line-height: 27px;
-    /*font-weight: bold;*/
-    float: left;
     color: #333;
-    box-sizing: border-box;
-    font-size: 14px;
-    text-align: left;
-    text-overflow: ellipsis;
-    overflow: hidden;
-}
-
-.oui-dialog-zyrh .dialog-head .btn-panel {
-    margin: 2px 2px 0 0;
-    float: right;
 }
 
 .oui-dialog-zyrh .dialog-head .dialog-btn {
-    border: solid 1px #cdcdcd;
-    border-radius: 3px;
-    background-color: transparent;
-
-    cursor: pointer;
-    width: 20px; height: 20px;
-    display: inline-block;
-    margin: 0 0 0 5px; padding: 0;
-    box-sizing: content-box;
+    border: none;
 }
 
 .oui-dialog-zyrh .dialog-body .dialog-icon {

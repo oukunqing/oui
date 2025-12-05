@@ -127,10 +127,12 @@
         },
         showMagnifier: function (ev, that) {
             let cfg = that.cfg,
-                style = cfg.magnifierStyle,
+                opt = cfg.magnifierStyle,
                 rect = that.box.getBoundingClientRect();
 
-            if (!cfg.showMagnifier || cfg.curScale >= 1 || that.cfg.pointerdown || !this.isInRange(ev, that.img)) {
+            if (!cfg.showMagnifier || cfg.curScale >= 1 || that.cfg.pointerdown 
+                || !this.isInRange(ev, that.img) 
+                || !this.isInRange(ev, that.box)) {
                 this.hideMagnifier(that);
                 return this;
             }
@@ -139,17 +141,15 @@
             if (!that.magnifier) {
                 let div = document.createElement('DIV'), 
                     zindex = $.getElementStyle(that.img, 'z-index'),
-                    radius = $.getParamCon(style.radius, (style.width + style.height) / 4);
+                    radius = $.getParamCon(opt.radius, (opt.width + opt.height) / 4);
 
                 div.className = 'oui-picbox-magnifier';
                 div.style.cssText = [
-                    'width:', style.width, 'px;height:', style.width, 'px;',
+                    'width:', opt.width, 'px;height:', opt.width, 'px;',
                     'border-radius:', radius, 'px;',
-                    'position:absolute;right:0;top:0;border:solid 1px #ddd;',
-                    'overflow:hidden;',
-                    $.isNumber(style.opacity) ? 'opacity:' + style.opacity + ';' : '',
+                    $.isNumber(opt.opacity) ? 'opacity:' + opt.opacity + ';' : '',
                     'z-index:', (zindex + 1), ';'
-                ].join('');
+                ].join('') + opt.cssText;
 
                 div.innerHTML = '<img class="magnifier-img" src="' + that.img.src + '" />';
                 that.box.appendChild(div);
@@ -161,15 +161,15 @@
             }
 
             let elem = that.magnifier, img = that.magnifierImg;
-            if (['custom', 'cursor'].indexOf(style.position) > -1) {
+            if (['custom', 'cursor'].indexOf(opt.position) > -1) {
 
                 let left = ev.clientX - rect.left,
                     top = ev.clientY - rect.top;
-                if (left + style.width >= rect.right - rect.left) {
-                    left -= (left + style.width) - (rect.right - rect.left);
+                if (left + opt.width >= rect.right - rect.left) {
+                    left -= (left + opt.width) - (rect.right - rect.left);
                 }
-                if (top + style.height >= rect.bottom - rect.top) {
-                    top -= (top + style.height) - (rect.bottom - rect.top);
+                if (top + opt.height >= rect.bottom - rect.top) {
+                    top -= (top + opt.height) - (rect.bottom - rect.top);
                 }
                 elem.style.left = left + 'px';
                 elem.style.top = top + 'px';
@@ -177,13 +177,17 @@
 
             let size = that.img.getBoundingClientRect(),
                 pos = { x: ev.clientX - size.left, y:  ev.clientY - size.top },
+                scaleRatio = cfg.curScale / opt.scaleRatio,
                 css = [
-                    'position:absolute;',
-                    'left:', -pos.x / cfg.curScale + style.width / 2, 'px;',
-                    'top:', -pos.y / cfg.curScale + style.height / 2, 'px;'
-                ].join('');
+                    'left:', -pos.x / scaleRatio + opt.width / 2, 'px;',
+                    'top:', -pos.y / scaleRatio + opt.height / 2, 'px;'
+                ];
 
-            img.style.cssText = css;
+            if (opt.scaleRatio > 1) {
+                css.push('width:', cfg.width * opt.scaleRatio, 'px;');
+            }
+
+            img.style.cssText = css.join('');
         },
         hideMagnifier: function (that) {
             if (that.magnifier) {
@@ -216,7 +220,7 @@
                 update = false;
 
             opt.magnifierStyle = $.extend({
-                width:150, height:150, opacity:0.85, position:'custom' 
+                width:150, height:150, scaleRatio: 1, position:'custom' /*,opacity:0.95*/
             }, options.magnifierStyle);
 
             if(that.img) {
@@ -457,7 +461,7 @@
                 }
                 ev.preventDefault();
             });
-            $.addListener(that.box, 'pointermove', function (ev) {
+            $.addListener([that.box, document], 'pointermove', function (ev) {
                 Factory.showMagnifier(ev, that);
             });
             $.addListener(that.img, 'pointerup', function (ev) {
@@ -793,11 +797,11 @@
     };
 
     $.extend({
-        picturebox: function(opt, callback) {
-            return new PictureBox($.extend(opt, { callback: callback })); 
+        picturebox: function(options, callback) {
+            return new PictureBox($.extend(options, { callback: callback })); 
         },
-        picbox: function(opt, callback) {
-            return $.picturebox(opt, callback);
+        picbox: function(options, callback) {
+            return $.picturebox(options, callback);
         }
     });
 

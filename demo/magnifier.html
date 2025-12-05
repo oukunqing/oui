@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>图片放大镜</title>
+    <style type="text/css">
+        .img-box {float:left;margin:10px;}
+        .img {width:400px;;display:block;border:solid 1px #ccc;}
+    </style>
+</head>
+<body>
+    <div class="img-box"><img class="img" src="magnifier_imgs/20251203100000_01_866663060823117_000_01_thumb.jpg" /></div>
+    <div class="img-box"><img class="img" src="magnifier_imgs/20251203120002_01_866663060820881_000_01_thumb.jpg" /></div>
+    <div class="img-box"><img class="img" src="magnifier_imgs/20251203124002_01_866663060821608_000_01_thumb.jpg" /></div>
+</body>
+</html>
+<script type="text/javascript" src="../oui/oui.js?1"></script>
+<script type="text/javascript" src="../oui/magnifier/oui.magnifier.js"></script>
+<script type="text/javascript">
+window.onload = function() {
+    initMagnifier({ target:document.body, position:0 });
+};
+
+function initMagnifier(opt) {
+    $.magnifier(opt);
+}
+
+window.onresize = function() {
+
+};
+</script>

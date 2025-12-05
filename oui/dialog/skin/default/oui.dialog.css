@@ -88,8 +88,9 @@
 }
 
 .oui-dialog .dialog-head{
-    padding:2px 2px 1px; margin:0;
-    border: none 0;
+    padding: 0;
+    margin: 0;
+    border: none;
     width: 100%;
     height: 32px;
     max-height: 50px;
@@ -114,8 +115,8 @@
     margin: 0; 
     padding: 0;
     width: auto;
-    height: 29px;
-    line-height: 27px;
+    height: 32px;
+    line-height: 30px;
     text-indent: 6px;
     /*font-weight: bold;*/
     float: left;
@@ -152,23 +153,20 @@
     padding: 0;
     float: left;
     width: auto;
-    height: 29px;
-    line-height: 27px;
+    height: 32px;
+    line-height: 30px;
     font-size: 14px;
     text-align: left;
     text-indent: 6px;
 }
 
 .oui-dialog .dialog-head .dialog-logo {
-    width: 20px; height: 20px;
-    margin: 3px 3px 0 2px;
-    padding: 0;
-    /*border: solid 1px #f5f5f5;*/
-    border: none 0;
-    border-radius: 3px;
+    width: 32px; height: 32px;
+    margin: 0; padding: 0;
+    border: none;
     box-sizing: content-box;
     float: left;
-    background:transparent url('imgs/icon.png?202309111') no-repeat 0 0;
+    background:transparent url('imgs/icon.png?251205') no-repeat 0 0;
 }
 
 .oui-dialog .dialog-head .dialog-logo:hover {
@@ -178,9 +176,10 @@
 
 .oui-dialog .dialog-head .dialog-timing {
     margin: 0; 
-    padding: 5px 5px;
+    height: 32px;
+    padding: 0;
     font-size: 14px;
-    line-height: 1.25em;
+    line-height: 30px;
     color: #999;
     float: left;
     text-align: left;
@@ -188,8 +187,10 @@
 }
 
 .oui-dialog .dialog-head .btn-panel {
-    margin: 2px 2px 0 0;
     float: right;
+    margin: 0;
+    display: block;
+    border: none;
 
     -webkit-touch-callout: none;
     -webkit-user-select: none;
@@ -200,15 +201,15 @@
 }
 
 .oui-dialog .dialog-head .dialog-btn {
-    border: solid 1px #fff;
-    border-radius: 3px;
+    border: none;
+    border-radius: 0;
     background-color: transparent;
 
     cursor: pointer;
-    width: 20px; height: 20px;
+    width: 32px; height: 32px;
     display: inline-block;
-    margin: 0 0 0 5px; padding: 0;
-    box-sizing: content-box;
+    margin: 0; padding: 0;
+    box-sizing: border-box;
 
     -webkit-touch-callout: none;
     -webkit-user-select: none;
@@ -220,32 +221,32 @@
 
 .oui-dialog .dialog-head .dialog-btn:hover {
     background-color: #f8f8f8;
-    border: solid 1px #ddd;
+    /*border: solid 1px #ddd;*/
 }
 
 .oui-dialog .dialog-head .btn-min {
-    background:transparent url('imgs/icon.png?202309111') no-repeat -20px 0;
+    background:transparent url('imgs/icon.png?251205') no-repeat -32px 0;
 }
 
 .oui-dialog .dialog-head .btn-max {
-    background:transparent url('imgs/icon.png?202309111') no-repeat -40px 0;
+    background:transparent url('imgs/icon.png?251205') no-repeat -64px 0;
 }
 
 .oui-dialog .dialog-head .btn-normal {
-    background:transparent url('imgs/icon.png?202309111') no-repeat -60px 0;
+    background:transparent url('imgs/icon.png?251205') no-repeat -96px 0;
 }
 
 .oui-dialog .dialog-head .btn-close {
-    background:transparent url('imgs/icon.png?202309111') no-repeat -80px 0;
+    background:transparent url('imgs/icon.png?251205') no-repeat -128px 0;
 }
 
 .oui-dialog .dialog-head .btn-reload {
-    background:transparent url('imgs/icon.png?202309111') no-repeat -320px 0;
+    background:transparent url('imgs/icon.png?251205') no-repeat -160px 0;
 }
 
 .oui-dialog .dialog-head .left-reload {
 	float: left; 
-	margin: 3px 0 0 0;
+	margin: 0;
 }
 
 .oui-dialog .dialog-body, .oui-dialog-max .dialog-body {
@@ -255,20 +256,8 @@
     margin: 0;
 	padding: 0;
     border: none 0; 
-    /*
-    border: solid 1px #eee;
-    border-radius: 4px;
-    */
     box-sizing: border-box;
     overflow: auto;
-
-    /*
-    -moz-user-select:none;
-    -khtml-user-select:none;
-    user-select:none;
-    -ms-user-select: none;
-    */
-    /*margin-bottom: 40px;*/
 }
 
 .oui-dialog .dialog-body .btn-panel {
@@ -286,29 +275,30 @@
     margin: 3px 2px 0 5px; padding: 0;
     box-sizing: content-box;
 
-    background:transparent url('imgs/icon.png?202309111') no-repeat -80px 0;
+    background:transparent url('imgs/icon.png?251205') no-repeat -128px 0;
 }
 
-
+/*
 .oui-dialog .dialog-body .close0 {
     border: none 0;
-    background:transparent url('imgs/icon.png?202309111') no-repeat -80px 0;
+    background:transparent url('imgs/icon.png?251205') no-repeat -128px 0;
 }
 
 .oui-dialog .dialog-body .close1 {
     border: none 0;
-    background:transparent url('imgs/icon.png?202309111') no-repeat -100px 0;
+    background:transparent url('imgs/icon.png?251205') no-repeat -100px 0;
 }
 
 .oui-dialog .dialog-body .close2 {
     border: none 0;
-    background:transparent url('imgs/icon.png?202309111') no-repeat -120px 0;
+    background:transparent url('imgs/icon.png?251205') no-repeat -120px 0;
 }
 
 .oui-dialog .dialog-body .close3 {
     border: none 0;
-    background:transparent url('imgs/icon.png?202309111') no-repeat -140px 0;
+    background:transparent url('imgs/icon.png?251205') no-repeat -140px 0;
 }
+*/
 
 .oui-dialog .dialog-body .dialog-content {
     border: none 0;
@@ -338,35 +328,35 @@
 }
 
 .oui-dialog .dialog-body .icon-warning {
-    background: url('imgs/icon.png') no-repeat 0px -140px;
+    background: url('imgs/icon.png') no-repeat 0px -160px;
 }
 
 .oui-dialog .dialog-body .icon-error {
-    background: url('imgs/icon.png') no-repeat -40px -140px;
+    background: url('imgs/icon.png') no-repeat -32px -160px;
 }
 
 .oui-dialog .dialog-body .icon-stop {
-    background: url('imgs/icon.png') no-repeat -80px -140px;
+    background: url('imgs/icon.png') no-repeat -64px -160px;
 }
 
 .oui-dialog .dialog-body .icon-success {
-    background: url('imgs/icon.png') no-repeat -120px -140px;
+    background: url('imgs/icon.png') no-repeat -96px -160px;
 }
 
 .oui-dialog .dialog-body .icon-question {
-    background: url('imgs/icon.png') no-repeat -160px -140px;
+    background: url('imgs/icon.png') no-repeat -128px -160px;
 }
 
 .oui-dialog .dialog-body .icon-info {
-    background: url('imgs/icon.png') no-repeat -200px -140px;
+    background: url('imgs/icon.png') no-repeat -160px -160px;
 }
 
 .oui-dialog .dialog-body .icon-cry {
-    background: url('imgs/icon.png') no-repeat -240px -140px;
+    background: url('imgs/icon.png') no-repeat -192px -160px;
 }
 
 .oui-dialog .dialog-body .icon-smile {
-    background: url('imgs/icon.png') no-repeat -280px -140px;
+    background: url('imgs/icon.png') no-repeat -224px -160px;
 }
 
 .oui-dialog .dialog-body .icon-loading {
@@ -380,35 +370,35 @@
 }
 
 .oui-dialog .dialog-head .icon-warning {
-    background: url('imgs/icon.png') no-repeat -160px 0;
+    background: url('imgs/icon.png') no-repeat 0px -96px;
 }
 
 .oui-dialog .dialog-head .icon-error {
-    background: url('imgs/icon.png') no-repeat -180px 0;
+    background: url('imgs/icon.png') no-repeat -32px -96px;
 }
 
 .oui-dialog .dialog-head .icon-stop {
-    background: url('imgs/icon.png') no-repeat -200px 0;
+    background: url('imgs/icon.png') no-repeat -64px -96px;
 }
 
 .oui-dialog .dialog-head .icon-success {
-    background: url('imgs/icon.png') no-repeat -220px 0;
+    background: url('imgs/icon.png') no-repeat -96px -96px;
 }
 
 .oui-dialog .dialog-head .icon-question {
-    background: url('imgs/icon.png') no-repeat -240px 0;
+    background: url('imgs/icon.png') no-repeat -128px -96px;
 }
 
 .oui-dialog .dialog-head .icon-info {
-    background: url('imgs/icon.png') no-repeat -260px 0;
+    background: url('imgs/icon.png') no-repeat -160px -96px;
 }
 
 .oui-dialog .dialog-head .icon-cry {
-    background: url('imgs/icon.png') no-repeat -280px 0;
+    background: url('imgs/icon.png') no-repeat -192px -96px;
 }
 
 .oui-dialog .dialog-head .icon-smile {
-    background: url('imgs/icon.png') no-repeat -300px 0;
+    background: url('imgs/icon.png') no-repeat -224px -96px;
 }
 
 .oui-dialog .dialog-body .dialog-iframe {

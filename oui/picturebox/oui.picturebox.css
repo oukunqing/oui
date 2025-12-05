@@ -95,11 +95,13 @@
 .oui-picbox-magnifier {
     margin: 0;
     padding: 0;
-    position: absolute;
+    position:absolute;
+    overflow:hidden;
     top: 0;
     right: 0;
-    opacity: 0.9;
-    border: solid 1px #ddd;
+    opacity: 0.95;
+    border: solid 1px #4285f4;
+    box-shadow: 0 0 10px 1px rgba(66, 133, 244, 0.6); /* 发光效果 */
     box-sizing: border-box;
 }
 

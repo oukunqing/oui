@@ -1538,7 +1538,6 @@
                         } else {
                             $.createElement('a', function (elem) {
                                 elem.className = 'dialog-btn btn-reload left-reload';
-                                elem.style.margin = '3px 0 0 2px';
                                 $.setAttribute(elem, { title: reload, code: 'reload', key: 'reload' });
                                 pNode.insertBefore((ctls.reload = elem), ctls.title);
                                 util.setButtonEvent(that, [elem], 'click', true);
@@ -3342,16 +3341,16 @@
                 var util = this, p = this.getParam(that), opt = p.options, ctls = p.controls;
                 if (p.none) { return this; }
 
-                var ismsg = opt.type === 'message',
-                    cs = ismsg ? $.getContentSize(ctls.content.innerHTML) : {},
+                var isMsg = opt.type === 'message',
+                    //cs = isMsg ? $.getContentSize(ctls.content.innerHTML) : {},
                     pH = parseInt($.getElementStyle(ctls.dialog, 'padding', 0), 10),
                     cH = parseInt($.getElementStyle(ctls.main, 'padding', 0), 10),
                     pdW = parseInt('0' + $.getElementStyle(ctls.content, 'padding'), 10),
                     btnW = !ctls.head && ctls.btnPanel ? ctls.btnPanel.offsetWidth + 5 : 0,
                     s = {
                         width: ctls.content.offsetWidth + pH * 2 + cH * 2 + pdW + btnW,
-                        //height: ctls.content.offsetHeight + pH * 2 + cH * 2,
-                        height: (ismsg ? cs.height : ctls.content.offsetHeight) + pH * 2 + cH * 2
+                        height: ctls.content.offsetHeight + pH * 2 + cH * 2,
+                        //height: (isMsg ? cs.height : ctls.content.offsetHeight) + pH * 2 + cH * 2
                     };
 
                 if (ctls.head) {
@@ -3362,13 +3361,13 @@
                     s.height += ctls.foot.offsetHeight;
                 }
 
-                if (ismsg) {
+                if (isMsg) {
                     ctls.body.style.overflow = 'hidden';
                     ctls.content.style.overflow = 'hidden';
                 }
 
                 //增加20px高度留白
-                s.height += ismsg ? 10 : 20;
+                s.height += isMsg ? 2 : 20;
 
                 if (isLimit) {
                     var mw = parseInt('0' + opt.minWidth, 10) || s.width,

@@ -1,161 +1,33 @@
 .oui-dialog-blue {
-    padding: 0px; 
-    margin: 0px;
-    /*width: auto; */
-    position: absolute;
     /*border: solid 1px #99bbe8;*/
     /*border: solid 1px #96c2f1;*/
     /*border: solid 1px #c9d9ee;*/
     border: solid 1px #96c2f1;
     background: #eff7ff;
-    border-radius: 5px;
-    box-sizing: border-box;
     box-shadow: 0 2px 3px 0 rgba(0,0,0,.32);
     box-shadow: 0 2px 3px 0 rgba(153,187,232,.32);
-    font-size: 14px;
     /*
     font-family: 微软雅黑, 宋体, Arial;
     */
-    line-height: 1.25em;
-    cursor: default;
-
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
-}
-
-.oui-dialog-blue .dialog-main {
-    /*background: #c9d9ee;*/
-}
-
-.oui-dialog-max {
-    width: 100%; height: 100%; 
-    border-radius: 0px;
-    box-sizing: border-box;
-    top: 0; left: 0;
-    /*border: none 0;*/
 }
 
 .oui-dialog-blue .dialog-head{
-    padding:2px 2px 1px; margin:0;
-    border: none 0;
     background: #cae3ff;
-    /*
-    background: #99bbe8;
-    background: #e8f5fe;
-    background: #cae3ff;
-    background: #d3e3fd;
-    */
-    /*左右圆角与总的背景互斥*/
-    /*
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-    */
-
-    width: 100%;
-    height: 30px;
-    max-height: 50px;
-    /*
-    border-bottom: solid 1px #d3e3fd;
-    border-bottom: solid 1px #cceff5;
-    */
     border-bottom: solid 1px #add0fa;
-    box-sizing: border-box;
-    clear: both; 
-    overflow: hidden;
-    /*cursor: move;*/
-    
-    -moz-user-select:none;
-    -khtml-user-select:none;
-    user-select:none;
-    -ms-user-select: none;
 }
 
 .oui-dialog-blue .dialog-head .dialog-title {
-    margin: 0; 
-    padding: 0;
-    width: auto;
-    height: 29px;
-    text-indent: 6px;
-    line-height: 27px;
-    /*font-weight: bold;*/
-    float: left;
     color: #333;
-    box-sizing: border-box;
-    font-size: 14px;
-    text-align: left;
-    text-overflow: ellipsis;
-    overflow: hidden;
-}
-
-
-.oui-dialog-blue .dialog-head .dialog-logo {
-    width: 20px; height: 20px;
-    margin: 3px 0 0 2px;
-    padding: 0;
-    /*border: solid 1px #f5f5f5;*/
-    border: none 0;
-    border-radius: 3px;
-    box-sizing: content-box;
-    float: left;
-    background:transparent url('imgs/icon-blue.png') no-repeat 0 0;
-}
-
-.oui-dialog-blue .dialog-head .dialog-logo:hover {
-    /*border: solid 1px #ddd;*/
-    border: none 0;
-}
-
-.oui-dialog-blue .dialog-head .btn-panel {
-    margin: 2px 2px 0 0;
-    float: right;
 }
 
 .oui-dialog-blue .dialog-head .dialog-btn {
-    border: none 0;
-    border-radius: 3px;
-    background-color: transparent;
-
-    cursor: pointer;
-    width: 20px; height: 20px;
-    display: inline-block;
-    margin: 0 0 0 5px; padding: 0;
-    box-sizing: content-box;
+    border: none;
 }
 
 .oui-dialog-blue .dialog-head .dialog-btn:hover {
     /*background-color: transparent;*/
     border: none 0;
 }
-/*
-.oui-dialog-blue .dialog-head .btn-min {
-    background:transparent url('imgs/icon-blue.png') no-repeat -20px 0;
-}
-.oui-dialog-blue .dialog-head .btn-min:hover {
-    background:transparent url('imgs/icon-blue.png') no-repeat -20px -20px;
-}
-
-.oui-dialog-blue .dialog-head .btn-max {
-    background:transparent url('imgs/icon-blue.png') no-repeat -40px 0;
-}
-.oui-dialog-blue .dialog-head .btn-max:hover {
-    background:transparent url('imgs/icon-blue.png') no-repeat -40px -20px;
-}
-
-.oui-dialog-blue .dialog-head .btn-normal {
-    background:transparent url('imgs/icon-blue.png') no-repeat -60px 0;
-}
-.oui-dialog-blue .dialog-head .btn-normal:hover {
-    background:transparent url('imgs/icon-blue.png') no-repeat -60px -20px;
-}
-
-.oui-dialog-blue .dialog-head .btn-close {
-    background:transparent url('imgs/icon-blue.png') no-repeat -80px 0;
-}
-.oui-dialog-blue .dialog-head .btn-close:hover {
-    background:transparent url('imgs/icon-blue.png') no-repeat -80px -20px;
-}
-*/
 .oui-dialog-blue .dialog-head .btn-reload:hover {
     background-color: #fff;
 }

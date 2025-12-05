@@ -5989,7 +5989,7 @@
             }
             if (!$.isFunction(callback)) {
                 callback = function (par) {
-                    console.log('getImgRealSize: ', par);
+                    //console.log('getImgRealSize: ', par);
                 };
             }
             //HTML5
@@ -6027,7 +6027,7 @@
         getImgSize = function (img_url, callback) {
             if (!$.isFunction(callback)) {
                 callback = function (par) {
-                    console.log('getImgSize: ', par);
+                    //console.log('getImgSize: ', par);
                 };
             }
              var img = new Image();
