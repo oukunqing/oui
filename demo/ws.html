@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>WebSocket 示例</title>
+    <style type="text/css">
+        .img-box {float:left;margin:10px;}
+        .img {width:400px;;display:block;border:solid 1px #ccc;}
+        .txt {height:28px;margin:0;padding:0 5px; border:solid 1px #ccc; border-radius: 4px;float:left;}
+        .btn {height:30px;float:left;margin:0 0 0 10px;}
+        .lbl {float:left;line-height: 30px;margin: 0 3px; font-family: Arial;}
+    </style>
+</head>
+<body>
+    <input type="text" id="txtIp" class="txt" value="112.54.97.178" style="width:120px;" placeholder="IP" />
+    <span class="lbl">:</span>
+    <input type="text" id="txtPort" class="txt" value="89" style="width:60px;" placeholder="Port" />
+    <input type="button" class="btn" onclick="connectWS();" value="连接WS服务" />
+    <input type="button" class="btn" onclick="pauseWS();" value="暂停" />
+    <input type="button" class="btn" onclick="closeWS();" value="关闭连接" />
+    <input type="button" class="btn" onclick="openWS();" value="打开连接" />
+</body>
+</html>
+<script type="text/javascript" src="../oui/oui.js?1"></script>
+<script type="text/javascript" src="../oui/ws/oui.ws.js"></script>
+<script type="text/javascript">
+
+function connectWS() {
+
+    var ip = $('#txtIp').val(),
+        port = $('#txtPort').val().toInt();
+
+    if (!ip) {
+        return false;
+    }
+    var topic = 'walkboard:ALLDEVICE';
+    var par = { action: 'register', topic: topic };
+    var data = JSON.stringify(par);
+    $.ws('walkboard', { 
+        url: 'ws://{0}:{1}/ws/'.format(ip, port),
+        //subscribe: data,
+        heartbeat: '{"action":"heartbeat"}',
+        onmessage: function (data, ws) {
+            var d = JSON.parse(data);
+            if (d.action === 'heartbeat') {
+                //ws.send("{\"action\":\"heartbeat\"}");
+            } else if (d.action === 'location') {
+                
+            } else if (d.action === 'walkboard') {
+                
+            }
+        }
+    }).subscribe(JSON.stringify(par));
+
+    window.setTimeout(function() {
+        let data = { action: 'subscribe', topic: 'location:ALLDEVICE' };
+        $.ws('walkboard').subscribe(JSON.stringify(data));
+    }, 5000);
+
+}
+
+function openWS() {
+    $.ws('walkboard').open();
+}
+
+function pauseWS() {
+    $.ws('walkboard').pause();
+}
+function closeWS() {
+    $.ws('walkboard').close();
+}
+
+window.onload = function() {
+
+};
+
+</script>

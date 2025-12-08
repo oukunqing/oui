@@ -113,6 +113,7 @@
                 <div></div>
                 <label class="chb-label" title="显示连线时不可用"><input type="checkbox" id="chbFullWidth" /><span>整行全宽</span></label>
                 <label class="chb-label" title="显示连线时不可用"><input type="checkbox" id="chbHighHeight" /><span>增加行高</span></label>
+                <label class="chb-label" title="显示连线时不可用"><input type="checkbox" id="chbMobileHeight" /><span>移动端高度</span></label>
                 <label class="chb-label" title="同一层级下仅展开一个节点"><input type="checkbox" id="chbOnlyOpenOne" /><span>仅展开一个节点</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbTreeMenu" /><span>树形导航菜单</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbRightSwitch" /><span>右侧切换图标</span></label>
@@ -508,6 +509,7 @@
             onlyOpenOne = $('#chbOnlyOpenOne').checked(),
             fullWidth = $('#chbFullWidth').checked(),
             highHeight = $('#chbHighHeight').checked(),
+            mobileHeight = $('#chbMobileHeight').checked(),
             treeMenu = $('#chbTreeMenu').checked(),
             rightSwitch = $('#chbRightSwitch').checked(),
             customCss = $('#chbCustomCss').checked(),
@@ -560,6 +562,7 @@
             hoverLine: hoverLine,
             fullWidth: fullWidth,
             highHeight: highHeight,
+            //mobileHeight: mobileHeight,
             customCss: customCss ? 'my-tree' : '',
             treeMenu: treeMenu,
             rightSwitch: rightSwitch,
