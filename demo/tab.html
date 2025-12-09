@@ -8,33 +8,36 @@
     var WEB_LANG = 'English';
 	</script>
 	<style type="text/css">
-	.tab-content {
-		border:solid 1px #ddd;
-		border-top:none;
-		overflow:hidden;
-        padding-top: 0px;
-	}
-    .tab-con {
-        border-bottom: solid 1px #eee;
-    }
-	#nav5 .tab2,#nav6 .tab2 {padding: 0 15px;}
+
+        button {height:26px;min-width: 26px;line-height: 24px;float:left;margin:0 5px 0 0;cursor: pointer;}
+        input {height: 26px; border:solid 1px #ccc; border-radius: 4px; box-sizing: border-box;float:left;margin:0 5px 0 0;}
+    	.tab-content {
+    		border:solid 1px #ddd;
+    		border-top:none;
+    		overflow:hidden;
+            padding-top: 0px;
+    	}
+        .tab-con {
+            border-bottom: solid 1px #eee;
+        }
+    	#nav5 .tab2,#nav6 .tab2 {padding: 0 15px;}
 	</style>
     <!--<script type="text/javascript" src="../oui/tab/oui.tab.js?12&skin=orange&lang=english"></script>-->
     <script type="text/javascript" src="../oui/tab/oui.tab.js?12&skin="></script>
 </head>
 <body>
     <div style="clear:both;">
-	<input type="button" value="添加" onclick="addTab();" />
-    <input type="text" id="txtTabId" value="tab1" placeholder="tab id" />
-    <input type="text" id="txtItemId" placeholder="item id" />
-    <input type="button" value="显示" onclick="show();" />
-    <input type="button" value="显示2" onclick="show(true);" />
-    <input type="button" value="关闭全部" onclick="closeAll();" />
-    <input type="button" value="关闭全部2" onclick="closeAll(true);" />
-    <input type="button" value="关闭" onclick="close2();" />
-    <input type="button" value="关闭2" onclick="close2(true);" />
-</div>
-    <div style="float:left;margin:10px 10px 10px 0;overflow: hidden;">
+    	<button onclick="addTab();">添加</button>
+        <input type="text" id="txtTabId" value="tab1" placeholder="tab id" />
+        <input type="text" id="txtItemId" placeholder="item id" />
+        <button onclick="show();">显示</button>
+        <button onclick="show(true);">显示2</button>
+        <button onclick="closeAll();">关闭全部</button>
+        <button onclick="closeAll(true);">关闭全部2</button>
+        <button onclick="close2();">关闭</button>
+        <button onclick="close2(true);">关闭2</button>
+    </div>
+    <div style="clear:both;float:left;margin:10px 10px 10px 0;overflow: hidden;">
         <div id="nav" style="width:700px;"></div>
         <div id="content" style="width:700px;" class="tab-content"></div>
     </div>

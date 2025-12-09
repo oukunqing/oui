@@ -6,7 +6,7 @@
 	<style type="text/css">
 		
 		body {font-size: 14px;}
-		select {min-width:400px;border:solid 1px #ccc; border-radius:5px;padding:0 5px;margin:0px;}
+		select {min-width:400px;height:32px;border:solid 1px #ccc; border-radius:5px;padding:0 5px;margin:0px;}
 		input {outline:none;padding:0 5px; border-radius:5px;min-width:400px;border:solid 1px #ccc;}
 		table {}
 		table td {padding:0 10px 10px 0;}
@@ -16,7 +16,12 @@
 	<script type="text/javascript" src="../oui/dropdownlist/oui.dropdownlist.js"></script>
 </head>
 <body style="background: #eee;">
-<input type="text" />
+<select id="Origin" class="form-control select" data-type="int">
+    <option value="">未设置</option>
+    <option value="-1">是否启用</option>
+    <option value="1">启用</option>
+    <option value="0">禁用</option>
+</select>
 <select id="Enable" class="form-control select" data-type="int">
     <option value="">未设置</option>
     <option value="-1">是否启用</option>

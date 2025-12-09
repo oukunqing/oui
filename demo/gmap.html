@@ -5,18 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>网格地图</title>
     <style type="text/css">
-
+        button {height:26px;min-width: 26px;line-height: 24px;float:left;margin:0 5px 0 0;}
+        input {height: 26px; border:solid 1px #ccc; border-radius: 4px; box-sizing: border-box;float:left;margin:0 5px 0 0;}
     </style>
 </head>
 <body>
-    <button onclick="setLevel(1);">+</button>
-    <button onclick="setLevel(-1);">-</button>
-    <input type="text" id="txtLevel" />
-    <button onclick="setLevel(0);">缩放</button>
-    <button onclick="setCenter();">中心</button>
-    <button onclick="setOverview();">全览</button>
-    <button onclick="setTest();">测试</button>
-    <div id="box1" style="width:70%;height:500px;border:solid 1px #f00;">
+    <div style="clear: both;overflow: hidden;">
+        <button onclick="setLevel(1);">+</button>
+        <button onclick="setLevel(-1);">-</button>
+        <input type="text" id="txtLevel" />
+        <button onclick="setLevel(0);">缩放</button>
+        <button onclick="setCenter();">中心</button>
+        <button onclick="setOverview();">全览</button>
+        <button onclick="setTest();">测试</button>
+    </div>
+    <div id="box1" style="width:70%;height:500px;border:solid 1px #f00;clear:both;margin-top:5px;">
         <canvas id="gridCanvas" width="800" height="500"></canvas>
     </div>
     <div style="width:70%;height:500px;border:solid 1px #f00;margin:50px 0 200px;">
