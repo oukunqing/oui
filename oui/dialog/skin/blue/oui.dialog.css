@@ -1,14 +1,8 @@
 .oui-dialog-blue {
-    /*border: solid 1px #99bbe8;*/
-    /*border: solid 1px #96c2f1;*/
-    /*border: solid 1px #c9d9ee;*/
     border: solid 1px #96c2f1;
     background: #eff7ff;
     box-shadow: 0 2px 3px 0 rgba(0,0,0,.32);
     box-shadow: 0 2px 3px 0 rgba(153,187,232,.32);
-    /*
-    font-family: 微软雅黑, 宋体, Arial;
-    */
 }
 
 .oui-dialog-blue .dialog-head{
@@ -25,27 +19,8 @@
 }
 
 .oui-dialog-blue .dialog-head .dialog-btn:hover {
-    /*background-color: transparent;*/
     border: none 0;
 }
 .oui-dialog-blue .dialog-head .btn-reload:hover {
     background-color: #fff;
-}
-
-.oui-dialog-blue .dialog-body .dialog-icon {
-    border: none 0;
-    width: 32px;
-    height: 32px;
-    position: absolute;
-    left: 3px; top: 3px;
-    display: block;
-}
-
-.oui-dialog-blue .dialog-foot .button-panel {
-    border: none 0;
-    box-sizing: border-box;
-    /*border-top: solid 1px #ddd;*/
-    text-align: right;
-    margin: 6px 6px 5px;
-    padding: 0;
 }

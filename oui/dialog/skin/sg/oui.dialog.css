@@ -17,24 +17,6 @@
     border: none;
 }
 
-.oui-dialog-sg .dialog-body .dialog-icon {
-    border: none 0;
-    width: 32px;
-    height: 32px;
-    position: absolute;
-    left: 3px; top: 3px;
-    display: block;
-}
-
-.oui-dialog-sg .dialog-foot .button-panel {
-    border: none 0;
-    box-sizing: border-box;
-    /*border-top: solid 1px #ddd;*/
-    text-align: right;
-    margin: 6px 6px 5px;
-    padding: 0;
-}
-
 .oui-dialog-sg .btn-primary {
     color: #fff;
     background-color: #00706b;

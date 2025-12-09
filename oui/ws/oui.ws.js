@@ -45,6 +45,7 @@
     			ws = cache.ws;
     			if ($.isString(opt.subscribe, true)) {
     				$.extend(ws.options, opt);
+    				ws.subscribe(opt.subscribe);
     			}
     		} else {
     			ws = new WS(opt);

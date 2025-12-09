@@ -10,6 +10,10 @@
             /*visibility: hidden;*/
 
         }
+        select {height: 30px;border:solid 1px #ccc; box-sizing: border-box; margin: 0 0 5px 0; border-radius: 4px;}
+        input {height: 30px;border:solid 1px #ccc; box-sizing: border-box; margin: 0 0 5px 0; border-radius: 4px;}
+        button {height: 30px; margin:0 0 5px 0;border:solid 1px #ccc;cursor: pointer; border-radius: 4px;}
+        button:hover {background: #fafafa;}
     </style>
     <script type="text/javascript" src="../oui/oui.js?12"></script>
     <!--<script type="text/javascript" src="../oui/dialog/oui.dialog.js?12&skin=default&lang=english"></script>-->
@@ -281,7 +285,7 @@ function alert2(){
         param: {id:123, name:'Tom'},
         styles: {
             'content': {
-                'background': '#f1f1f1',
+                //'background': '#f1f1f1',
                 //'border': 'solid 1px #00f',
                 'color': '#ff0000',
                 'border-color': '#f00'
@@ -675,7 +679,7 @@ function form2() {
 }
 
 function percent() {
-    var win = $.dialog.form('百分比尺寸的窗口', '登录窗口 <span style="color:#f00;">标题栏文字比较多</span> 隐藏文字显示', {
+    var win = $.dialog.form('百分比尺寸的窗口，100%窗口大小，边距20像素', '登录窗口 <span style="color:#f00;">标题栏文字比较多</span> 隐藏文字显示', {
         //lang: 'Chinese',
         //lang: 'English',
         //status: 'max',
@@ -687,7 +691,7 @@ function percent() {
         //margin: 30,
         //margin: {top:20, right: 50, bottom: 100, left: 80},
         //margin: [50, 100],
-        margin: [5],
+        margin: [20],
         lock: true,
         fixed: true,
         moveAble: true,
@@ -925,7 +929,6 @@ function getCon(rows, txt) {
     return str;
 }
 
-
 function update2() {
     var str = getCon(3);
     var dialog = $.dialog('Hello!对话框22<br />' + str, {
@@ -955,14 +958,13 @@ function update2() {
     }, 10000);
 }
 
-
 $.setAttribute($I('txt1'), {
     tree: {id:1, pid:0, level:0}, list: [1,2,3], arr:[{id:1},{id:2}], name: 'txt',
     obj: $I('txt2')
 }, true, true);
 
 var txt1 = $I('txt1');
-txt1.style.cssText += 'background:#f00;';
+txt1.style.cssText += 'background:#ccc;';
 
 var tree = $I('txt1').getAttribute('tree');
 console.log(tree, typeof tree, typeof $.toJson(tree), $.toJson(tree).id);
