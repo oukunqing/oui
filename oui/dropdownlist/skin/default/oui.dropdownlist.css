@@ -155,7 +155,7 @@
 label.oui-ddl-label {
     font-size: 14px;
     height: 30px;;
-    line-height: 30px;
+    line-height: 28px;
     padding: 0 9px;
     margin: 0;
     display: block;
@@ -166,7 +166,6 @@ label.oui-ddl-label {
 label.oui-ddl-label span {
 	margin: 0 0 0 0;
 	float: none;
-	line-height: 30px;
 	overflow: hidden;
     font-size: 14px;
 }
@@ -214,13 +213,13 @@ label.oui-ddl-label-border {
     border-radius: 5px;
     padding: 0 5px;
     margin: 0 0 5px 0;
-    line-height: 28px;
+    display: block;
 }
 label.oui-ddl-label-border:hover {
     border: solid 1px #f1f1f1;
 }
 label.oui-ddl-label-border span {
-	line-height: 28px;
+
 }
 
 input.oui-ddl-chb {
@@ -260,13 +259,13 @@ ul.oui-ddl-box li.oui-ddl-item:hover label.oui-ddl-label {
 ul.oui-ddl-flow li.oui-ddl-item, ul.oui-ddl-grid li.oui-ddl-item {
 	float:left;
 	border: none 0;
-	height: 35px;
-	margin: 0;
+	margin: 3px 0 2px 0;
 	padding: 0;
+	box-sizing: ;
 }
 ul.oui-ddl-flow label.oui-ddl-label,ul.oui-ddl-grid label.oui-ddl-label {
 	padding: 0 5px;
-	margin: 2px 3px 2px 2px;
+	margin: 0px 3px 0px 2px;
 }
 ul.oui-ddl-flow li.cur label.oui-ddl-label,ul.oui-ddl-grid li.cur label.oui-ddl-label {
 	background: #cce8ff;

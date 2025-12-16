@@ -382,11 +382,13 @@
                 cache = ts.cache;
 
             if ($.isFunction(opt.callback)) {
-                var range = $.toJsonString(Factory.getTimeRange(ts, clientX));
-                if (range === cache.range) {
+                var range = Factory.getTimeRange(ts, clientX),
+                    strRange = $.toJsonString(range);
+                    
+                if (strRange === cache.range) {
                     return that;
                 }
-                cache.range = range;
+                cache.range = strRange;
 
                 $.debounce({
                     id: 'oui-timebar' + ts.id,
@@ -466,6 +468,9 @@
             }, options);
 
             if (!$.isDate(opt.time)) {
+                if ($.isNumber(opt.time)) {
+                    opt.time = parseInt(opt.time, 10);
+                }
                 opt.time = opt.time.toString().toDate();
             }
             if (!$.isDate(opt.minTime) && ($.isString(opt.minTime, true) || $.isNumber(opt.minTime))) {

@@ -992,7 +992,7 @@
 
                 // 启用整行全宽，不显示连线
                 // 树形导航菜单，不显示连线
-                if (opt.fullWidth || opt.highHeight || opt.treeMenu) {
+                if (opt.fullWidth || opt.highHeight || opt.mobileHeight || opt.treeMenu) {
                     opt.showLine = false;
 
                     // 树形导航菜单，不用整行全宽，不启用复选框

@@ -87,7 +87,7 @@
 .oui-tree li.cur > .item a.name{background: #cce8ff;border-color: #cce8ff;}
 .oui-tree li.cur > .item a.name:hover{background: #cce8ff;border-color: #99d1ff;}
 
-.oui-tree-drag li .item a.name span {height:14px;line-height:14px;margin:4px 0;}
+.oui-tree-drag li .item a.name span {height:14px;line-height:14px;margin:0px 0;}
 
 .oui-tree li .item span i,
 .oui-tree li .item span b {display:inline-block;white-space:nowrap;}
@@ -937,6 +937,9 @@
 .oui-tree-high li .item a.name,.oui-tree-high li .item a.name span,.oui-tree-high li .item span {
 	height:30px;line-height:28px;
 }
+.oui-tree-high li .item .button {
+	margin-top:2px;
+}
 
 /*移动端*/
 .oui-tree-mobile {}
@@ -950,6 +953,9 @@
 }
 .oui-tree-mobile li .item a.name,.oui-tree-mobile li .item a.name span,.oui-tree-mobile li .item span {
 	height:40px;line-height:38px;
+}
+.oui-tree-mobile li .item .button {
+	margin-top:8px;
 }
 
 /*整行全宽*/
@@ -967,6 +973,9 @@
 }
 .oui-tree-full li .item a.name,.oui-tree-full li .item a.name span,.oui-tree-full li .item span {
 	height:30px;line-height:28px;
+}
+.oui-tree-full li .item .button {
+	margin-top:2px;
 }
 
 .oui-tree-full li > .item:hover {background:#e5f3ff;cursor:pointer;}
@@ -989,6 +998,9 @@
 
 .oui-tree-menu li .item a.name,.oui-tree-menu li .item a.name span,.oui-tree-menu li .item span {
 	height:34px;line-height:32px;
+}
+.oui-tree-menu li .item .button {
+	margin-top:5px;
 }
 .oui-tree-menu li .item span.switch {height: 24px;margin-top:5px;}
 .oui-tree-menu li .item span.switch-none {background: none;}

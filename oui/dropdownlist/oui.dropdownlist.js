@@ -54,7 +54,9 @@
 			// 当高度超过浏览器窗口大小时，保留边距
 			BodyPadding: 10,
 			// 选项高度
-			BoxItemHeight: 30,
+			BoxItemHeight: 32,
+			// 复选框上边距
+			ChbMarginTop: 7,
 			// 选项底部高度
 			BoxBarHeight: 42,
 			// 选项默认显示行数
@@ -199,6 +201,10 @@
 				opt.style = $.getParamValue(opt.style, opt.css);
 
 				opt.maxHeight = options.maxHeight || (opt.layout === 'grid' ? Config.BoxGridMaxHeight : Config.BoxMaxHeight);
+
+				if ($.isNumber(opt.itemHeight) && opt.itemHeight < Config.BoxItemHeight) {
+					opt.itemHeight = Config.BoxItemHeight;
+				}
 
 				opt.dataType = $.getParam(opt, 'dataType,datatype,valueType,valuetype');
 				opt.buttonPosition = $.getParam(opt, 'buttonPosition,buttonPos,btnPos', opt.tree ? 'right' : 'center');
@@ -479,7 +485,18 @@
 								(opt.display && val !== '' && val !== txt ? val + '<u>-</u>' + txt : txt === '' ? val : txt) + 
 								//(opt.display && val !== '' && val !== txt ? val + ' - ' + txt : txt === '' ? val : txt) + 
 								'</span>' +
-								(desc && txt !== desc ? '<span class="oui-ddl-li-txt i-t">' + desc + '</span>' : '');
+								(desc && txt !== desc ? '<span class="oui-ddl-li-txt i-t">' + desc + '</span>' : ''),
+							isBorder = opt.layout !== Config.Layout.List && opt.border,
+							itemHeight = $.isNumber(opt.itemHeight) && opt.itemHeight > 0 ? opt.itemHeight : 0,
+							chbMargin = Config.ChbMarginTop;
+
+						if (itemHeight) {							
+							chbMargin += parseInt((itemHeight - Config.BoxItemHeight) / 2, 10) + 1;
+							if (isBorder) {
+								itemHeight -= 2;
+								chbMargin -= 1;
+							}
+						}
 
 						html.push([
 							'<li class="oui-ddl-item', 
@@ -489,13 +506,17 @@
 							'" style="',
 							opt.layout !== Config.Layout.List ? 'float:left;' : '',
 							opt.layout === Config.Layout.Grid ? 'min-width:' + Factory.getStyleSize(minWidth || opt.itemWidth) + ';' : '',
+							itemHeight ? 'height:' + itemHeight + 'px;' : '',
 							'" opt-idx="', (num + i + 1), '" data-value="', val.toString().replace(/["]/g, '&quot;'), '"',
 							'>',
 							'<label class="oui-ddl-label', 
-								opt.layout !== Config.Layout.List && opt.border ? ' oui-ddl-label-border' : '', 
+								isBorder ? ' oui-ddl-label-border' : '', 
 								(use || typeof use === 'undefined') ? '' : ' del',
 							'"',
-							' style="',	opt.number ? 'padding-left:4px;' : '', align, '"',
+							' style="',	
+							opt.number ? 'padding-left:4px;' : '', align, 
+							itemHeight ? 'height:' + (itemHeight) + 'px;line-height:' + (itemHeight - (isBorder ? 2 : 0)) + 'px;' : '',
+							'"',
 							' opt-idx="', (num + i + 1), '"',
 							'>',
 							opt.number ? [
@@ -515,7 +536,10 @@
 							' code="', con, '"',
 							' text="', (txt).filterHtml(true).replace(/["]/g, '&quot;'), '"',
 							' desc="', (desc).filterHtml(true).replace(/["]/g, '&quot;'), '"',
-							' style="display:' + (opt.choose ? '' : 'none') + ';"',
+							' style="',
+							'display:' + (opt.choose ? '' : 'none') + ';',
+							'margin-top:', chbMargin, 'px;',
+							'"',
 							' />',
 							title,
 							'</label>',
@@ -922,15 +946,15 @@
 				var that = ddl,
 					opt = that.options;
 
-				if (!this.isRepeat(that.id + '-mousedown')) {
-					$.addListener(that.box, 'mousedown', function(ev) {
+				if (!this.isRepeat(that.id + '-mouseup')) {
+					$.addListener(that.box, 'mouseup', function(ev) {
 						var elem = ev.target,
 							tag = elem.tagName.toLowerCase(),
 							css = elem.className,
 							lbl = elem;
 
 						if (opt.focusable && (!opt.showSearch && !opt.editable)) {
-							//防止mousedown事件冒泡，保持控件不失去焦点
+							//防止mouseup事件冒泡，保持控件不失去焦点
 							$.cancelBubble(ev);
 						}
 						if (tag === 'u') {
@@ -1614,11 +1638,14 @@
 			//输入框宽度，默认跟随下拉框宽度
 			textWidth: undefined,
 			//输入框高度，默认不指定
+			//textHeight: undefined,
 			textHeight: undefined,
 			//输入框最小高度，默认与bootstrap form-control 高度相同
 			textMinHeight: 34,
 			//网格布局时选项宽度: auto, cell, 百分比,如：50% 33%
 			itemWidth: undefined,
+			//选项高度
+			itemHeight: Config.BoxItemHeight,
 			//列数（当列数设置不正确时，自动调整显示的列数）
 			columns: undefined,
 			//停靠位置：left-左下，right-右下
@@ -2158,8 +2185,11 @@
 
 			if (multi) {
 				//检测多选项的数量限制
-				if (!node.checked && opt.maxLimit && that.list(true).length >= opt.maxLimit) {
-					return that.msg();
+				//
+				if (node.multi && !node.checked && opt.maxLimit && that.list(true).length >= opt.maxLimit) {
+					that.msg(node);
+					node.input.checked = !node.input.checked;
+					return that;
 				}
 				if (node.multi) {
 					node.set(!node.checked, par.click);
@@ -2176,10 +2206,14 @@
 			}
 			return that.callback(par.level);
 		},
-		msg: function() {
+		msg: function(node) {
 			var that = this, opt = that.options;
 			//$.alert(opt.maxLimitMsg || ((opt.name || '') + '最多只能选择' + opt.maxLimit + '个'));
-			$.alert(opt.maxLimitMsg || ((opt.name || '') + '\u6700\u591a\u53ea\u80fd\u9009\u62e9' + opt.maxLimit + '\u4e2a'));
+			if ($.isFunction($.alert)) {
+				$.alert(opt.maxLimitMsg || ((opt.name || '') + '\u6700\u591a\u53ea\u80fd\u9009\u62e9' + opt.maxLimit + '\u4e2a'));
+			} else {
+				$.console.warn(opt.maxLimitMsg || ((opt.name || '') + '\u6700\u591a\u53ea\u80fd\u9009\u62e9' + opt.maxLimit + '\u4e2a'));
+			}
 			return that;
 		},
 		set: function (val, arg) {
@@ -2270,6 +2304,7 @@
 					for (var i = opt.maxLimit; i < len; i++) {
 						vals.push(list[i]);
 					}
+					$.console.log('limit:', vals);
 					that.set(vals, {action: false});
 				}
 			}

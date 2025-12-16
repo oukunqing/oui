@@ -135,6 +135,7 @@ window.onload = function() {
 		{ id: 6, name: '智能安全带', desc: '', single: true },
 		{ id: 7, name: '北斗定位', desc: '', single: true },
 		{ id: 8, name: '雷达测距设备', desc: '', disabled: false },
+		{ id: 9, name: '高精定位设备', desc: '' },
 	];
 	var k = 'DeviceType';
 	$.dropdownlist({
@@ -153,8 +154,9 @@ window.onload = function() {
 		//回调等级：0-选项实时回调，1-全选/反选等按钮事件回调，2-确定按钮事件回调
 		//submit: 0,
         callbackLevel: 0,
+        maxLimit: 3,
        
-		title: '选择设备类型',
+		title: '选择设备类型（单选或多选，多选最多3个)',
 		//是否显示“确定”按钮，复选框模式时默认为显示，如果不想显示，需要指定为false
 		button: false,
 		//是否显示值内容
@@ -193,7 +195,8 @@ window.onload = function() {
 		//submit: 0,
         callbackLevel: 0,
        
-		title: '选择设备类型',
+        maxLimit: 5,
+		title: '选择设备类型(最多5个)',
 		//强制显示“确定”按钮
 		button: true,
 		//是否显示值内容
