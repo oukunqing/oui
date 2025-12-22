@@ -125,10 +125,28 @@
             }
             return Math.round(num * ratio) / ratio;
         },
+        getPosition: function (ev, opt, bs) {
+            let left = ev.clientX - bs.left,
+                top = ev.clientY - bs.top;
+
+            switch (opt.position) {
+                default:
+                    if (left + opt.width >= bs.width) {
+                        left = ev.clientX - bs.left - opt.width - 10;
+                    }
+                    if (top + opt.height >= bs.height) {
+                        top = ev.clientY - bs.top - opt.height - 10;
+                    }
+                    break;
+            }
+            return { left: left, top: top };
+        },
         showMagnifier: function (ev, that) {
             let cfg = that.cfg,
                 opt = cfg.magnifierStyle,
                 rect = that.box.getBoundingClientRect();
+
+                console.log('showMagnifier:', rect);
 
             if (!cfg.showMagnifier || cfg.curScale >= 1 || that.cfg.pointerdown 
                 || !this.isInRange(ev, that.img) 
@@ -136,7 +154,7 @@
                 this.hideMagnifier(that);
                 return this;
             }
-            that.img.style.cursor = 'crosshair';
+            that.img.style.cursor = opt.cursor;
 
             if (!that.magnifier) {
                 let div = document.createElement('DIV'), 
@@ -162,17 +180,9 @@
 
             let elem = that.magnifier, img = that.magnifierImg;
             if (['custom', 'cursor'].indexOf(opt.position) > -1) {
-
-                let left = ev.clientX - rect.left,
-                    top = ev.clientY - rect.top;
-                if (left + opt.width >= rect.right - rect.left) {
-                    left -= (left + opt.width) - (rect.right - rect.left);
-                }
-                if (top + opt.height >= rect.bottom - rect.top) {
-                    top -= (top + opt.height) - (rect.bottom - rect.top);
-                }
-                elem.style.left = left + 'px';
-                elem.style.top = top + 'px';
+                let pos = Factory.getPosition(ev, opt, rect);
+                elem.style.left = pos.left + 'px';
+                elem.style.top = pos.top + 'px';
             }
 
             let size = that.img.getBoundingClientRect(),
@@ -220,7 +230,7 @@
                 update = false;
 
             opt.magnifierStyle = $.extend({
-                width:150, height:150, scaleRatio: 1, position:'custom' /*,opacity:0.95*/
+                width:150, height:150, scaleRatio: 1, cursor: 'crosshair', position:'custom' /*,opacity:0.95*/
             }, options.magnifierStyle);
 
             if(that.img) {
