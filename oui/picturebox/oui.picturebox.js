@@ -126,18 +126,24 @@
             return Math.round(num * ratio) / ratio;
         },
         getPosition: function (ev, opt, bs) {
-            let left = ev.clientX - bs.left,
-                top = ev.clientY - bs.top;
+            // 请注意，这里必须保留最少1个像素的间距留白，防止放大镜图像抖动
+            let margin = 2,
+                left = ev.clientX - bs.left + margin,
+                top = ev.clientY - bs.top + margin;
 
             switch (opt.position) {
-                default:
-                    if (left + opt.width >= bs.width) {
-                        left = ev.clientX - bs.left - opt.width - 10;
-                    }
-                    if (top + opt.height >= bs.height) {
-                        top = ev.clientY - bs.top - opt.height - 10;
-                    }
-                    break;
+            case 'center':
+                left = ev.clientX - bs.left - opt.width / 2;
+                top = ev.clientY - bs.top - opt.height / 2;
+                break;
+            default:
+                if (left + opt.width >= bs.width) {
+                    left = ev.clientX - bs.left - opt.width - margin;
+                }
+                if (top + opt.height >= bs.height) {
+                    top = ev.clientY - bs.top - opt.height - margin;
+                }
+                break;
             }
             return { left: left, top: top };
         },
@@ -145,8 +151,6 @@
             let cfg = that.cfg,
                 opt = cfg.magnifierStyle,
                 rect = that.box.getBoundingClientRect();
-
-                console.log('showMagnifier:', rect);
 
             if (!cfg.showMagnifier || cfg.curScale >= 1 || that.cfg.pointerdown 
                 || !this.isInRange(ev, that.img) 
@@ -179,7 +183,7 @@
             }
 
             let elem = that.magnifier, img = that.magnifierImg;
-            if (['custom', 'cursor'].indexOf(opt.position) > -1) {
+            if (['custom', 'cursor', 'center'].indexOf(opt.position) > -1) {
                 let pos = Factory.getPosition(ev, opt, rect);
                 elem.style.left = pos.left + 'px';
                 elem.style.top = pos.top + 'px';
@@ -471,9 +475,11 @@
                 }
                 ev.preventDefault();
             });
-            $.addListener([that.box, document], 'pointermove', function (ev) {
-                Factory.showMagnifier(ev, that);
-            });
+            if (that.cfg.showMagnifier) {
+                $.addListener([that.box, document], 'pointermove', function (ev) {
+                    Factory.showMagnifier(ev, that);
+                });
+            }
             $.addListener(that.img, 'pointerup', function (ev) {
                 if (that.cfg.pointerdown) {
                     $.cancelBubble(ev);

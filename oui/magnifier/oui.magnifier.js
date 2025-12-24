@@ -74,20 +74,52 @@
             return $.getImgSize(url);
         },
         getPosition: function (ev, opt, bs) {
-            let left = ev.clientX,
-                top = ev.clientY;
+            // 请注意，这里必须保留最少1个像素的间距留白，防止放大镜图像抖动
+            let margin = 4,
+                left = ev.clientX + margin,
+                top = ev.clientY + margin;
 
             switch (opt.position) {
-                default:
-                    if (left + opt.width >= bs.width) {
-                        left = ev.clientX - opt.width - 10;
-                    }
-                    if (top + opt.height >= bs.height) {
-                        top = ev.clientY - opt.height - 10;
-                    }
-                    break;
+            case 5:
+                left = ev.clientX - opt.width / 2;
+                top = ev.clientY - opt.height / 2;
+                break;
+            default:
+                if (left + opt.width >= bs.width) {
+                    left = ev.clientX - opt.width - margin;
+                }
+                if (top + opt.height >= bs.height) {
+                    top = ev.clientY - opt.height - margin;
+                }
+                break;
             }
             return { left: left, top: top };
+        },
+        initMagnifier: function (ev, that) {
+            $.cancelBubble(ev);
+            let opt = that.options;
+            $.debounce({
+                id: 'oui-magnifier-move', delay: 5, timeout: 2000
+            }, function (e) {
+                let img = ev.target, tag = img.tagName, css = img.className;
+                //if (tag === 'IMG' && css.indexOf('magnifier') < 0) {
+                if (tag === 'IMG' && css.indexOf('oui-magnifier-img-self') < 0) {
+                    if (!img.oriCursor) {
+                        img.oriCursor = img.style.cursor;
+                        img.style.cursor = opt.cursor;
+                    }
+                    if (!opt.imgClass || css.indexOf(opt.imgClass) > -1) {
+                        Factory.showMagnifier(ev, that, img, img.src);
+                    }
+                } else {
+                    Factory.hideMagnifier(that);
+                    if (img.oriCursor) {
+                        img.style.cursor = img.oriCursor;
+                        delete img.oriCursor;
+                    }
+                }
+            });
+            return this;
         },
         showMagnifier: function (ev, that, box, url) {
             let opt = that.options,
@@ -100,7 +132,7 @@
 
                 mag = document.createElement('DIV');
                 mag.className = 'oui-magnifier';
-                mag.innerHTML = '<img class="magnifier-img" src="' + url + '" />';
+                mag.innerHTML = '<img class="magnifier-img oui-magnifier-img-self" src="' + url + '" />';
                 mag.style.cssText = [
                     'width:', opt.width, 'px;height:', opt.width, 'px;',
                     'border-radius:', radius, 'px;',
@@ -113,6 +145,13 @@
 
                 that.magnifier = mag;
                 that.magnifierImg = mag.childNodes[0];
+
+                $.addListener(that.magnifier, 'pointermove', function(ev) {
+                    Factory.initMagnifier(ev, that);
+                });
+                $.addListener(that.magnifierImg, 'pointermove', function(ev) {
+                    Factory.initMagnifier(ev, that);
+                });
 
             } else if (that.magnifier.style.display === 'none') {
                 that.magnifier.style.display = 'block';
@@ -153,6 +192,7 @@
             }
 
             img.style.cssText = css.join('');
+            return this;
         },
         hideMagnifier: function (that) {
             let mag = Cache.magnifier(that.id);
@@ -192,29 +232,10 @@
         initial: function (options) {
             let that = this, opt = options, elem = options.target;
 
+            $.console.log('elem:', elem);
             if ($.isElement(elem)) {
-                $.addListener(elem, 'pointermove', function (ev) {
-                    $.debounce({
-                        id: 'oui-magnifier-move', delay: 5, timeout: 2000
-                    }, function (e) {
-                        let img = ev.target, tag = img.tagName, css = img.className;
-                        //if (tag === 'IMG' && css.indexOf('magnifier') < 0) {
-                        if (tag === 'IMG') {
-                            if (!img.oriCursor) {
-                                img.oriCursor = img.style.cursor;
-                                img.style.cursor = opt.cursor;
-                            }
-                            if (!opt.imgClass || css.indexOf(opt.imgClass) > -1) {
-                                Factory.showMagnifier(ev, that, img, img.src);
-                            }
-                        } else {
-                            Factory.hideMagnifier(that);
-                            if (img.oriCursor) {
-                                img.style.cursor = img.oriCursor;
-                                delete img.oriCursor;
-                            }
-                        }
-                    });
+                $.addListener(elem, 'pointermove', function(ev) {
+                    Factory.initMagnifier(ev, that);
                 });
 
                 $.addListener(elem, 'pointerout', function (ev) {
