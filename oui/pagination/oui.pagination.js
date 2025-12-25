@@ -304,7 +304,12 @@
         keyPaging = function (ev, that, obj) {
             //H-72 J-74 K-75 L-76 M-77
             //D-68 F-70 B-66 U-85
-            var op = that.options, pageIndex = 0, kc = ev.keyCode;
+            var op = that.options, pageIndex = 0, kc = ev.keyCode,
+                // 增加快捷键分页 shiftKey 快进功能
+                // 当按住shift键时，快捷键分页不再是一页一页增减，而是一屏一屏增减
+                num = ev.shiftKey ? op.markCount: 1,
+                half = parseInt(op.markCount / 2, 10);
+
             if (kc === 13) {
                 pageIndex = getValue(obj);
             } else if ((kc === 38 || kc === 72) && op.pageIndex > op.pageStart) {
@@ -312,16 +317,16 @@
             } else if ((kc === 40 || kc === 76) && (op.pageIndex + op.minuend) < op.pageCount) {
                 pageIndex = op.pageCount;
             } else if ((kc === 37 || kc === 75) && (op.pageIndex - op.minuend - op.pageStart) >= op.pageStart) {
-                pageIndex = op.pageIndex - 1 + op.minuend;
+                pageIndex = op.pageIndex - num + op.minuend;
             } else if ((kc === 39 || kc === 74) && (op.pageIndex + op.minuend) < op.pageCount) {
-                pageIndex = op.pageIndex + 1 + op.minuend;
+                pageIndex = op.pageIndex + num + op.minuend;
             } else if (kc === 77) {     //M-77
                 //pageIndex = Math.ceil(op.pageCount / 2);
                 pageIndex = parseInt(op.pageCount / 2, 10);
             } else if (kc === 68 || kc === 70) {    //D-68 F-70
-                pageIndex = op.pageIndex + (kc === 68 ? 5 : 10) + op.minuend;
+                pageIndex = op.pageIndex + (kc === 68 ? half : op.markCount) + op.minuend;
             } else if (kc === 66 || kc === 85) {    //B-66 U-85
-                pageIndex = op.pageIndex - (kc === 85 ? 5 : 10) + op.minuend;
+                pageIndex = op.pageIndex - (kc === 85 ? half : op.markCount) + op.minuend;
             } else {
                 obj.value = obj.value.replace(/[^\d]/, '');
                 return false;
@@ -477,7 +482,7 @@
             }
 
             $.addListener(document, 'keypress', function (e) {
-                if (!e.shiftKey ) {
+                if (!e.shiftKey) {
                     return false;
                 }
                 var keyCode = $.getKeyCode(e),

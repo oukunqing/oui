@@ -17,9 +17,8 @@
 //说明： 
 //defaultZoom(defaultScale,defZoom,defScale), minZoom(minScale) 是相对于外框容器的大小，
 //maxZoom(maxScale)是相对于图片本身的大小
-var picbox;
 window.onload = function() {
-	picbox = $.picbox({
+	$.picbox({
 		obj: 'box', img: 'imgs/map_bg.jpg', width: 600, height: 400, defaultZoom: 0.5, minZoom: 0.5, maxScale: 1, showScale: true, showTitle: true,
 		showMagnifier: true, magnifierStyle: { 
 			//position: 'custom', 
@@ -33,6 +32,7 @@ window.onload = function() {
 
 function switchpic() {
 	//picbox.initial({ obj: 'box', img: 'imgs/pic.jpg', width: 600, height: 400, defaultZoom: 0.5, minZoom: 0.5 });
-	picbox.update({ img: 'imgs/pic.jpg' });
+	//picbox.update({ img: 'imgs/pic.jpg' });
+	$.picbox({element:'box', img: 'imgs/pic.jpg'});
 }
 </script>

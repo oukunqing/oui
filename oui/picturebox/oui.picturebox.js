@@ -9,14 +9,55 @@
 !function ($) {
     'use strict';
 
-    var Config = {
+    const Config = {
         FilePath: $.getScriptSelfPath(true),
         FileName: 'oui.picturebox.'
+    },
+    Cache = {
+        caches: {},
+        timers: {},
+        picbox: {},
+        getCache: function (id) {
+            return Cache.caches['picbox_' + id];
+        },
+        setCache: function (id, box) {
+            Cache.caches['picbox_' + id] = {
+                id: id,
+                box: box,
+            };
+            return this;
+        }
     },
     Factory = {
         loadCss: function (skin, func) {
             $.loadJsScriptCss(Config.FilePath, skin, func, Config.FileName);
             return this;
+        },
+        checkOptions: function (options) {
+            let opt = $.extend({}, options);
+            opt.element = $.toElement(opt.element || opt.box || opt.obj || opt.id);
+            if (!$.isElement(opt.element)) {
+                return null;
+            }
+            opt.id = opt.element.id;
+
+            return opt;
+        },
+        buildPictureBox: function (options) {
+            let opt = Factory.checkOptions(options);
+            if (opt === null) {
+                return null;
+            }
+
+            var cache = Cache.getCache(opt.id), box;
+            if (cache) {
+                box = cache.box;
+                box.update(opt);
+            } else {
+                box = new PictureBox(opt);
+                Cache.setCache(opt.id, box);
+            }
+            return box;
         },
         getSize: function(boxWidth, boxHeight, width, height, defZoom, minZoom) {
             var w, h, left, top;
@@ -179,6 +220,10 @@
                 that.magnifier = div;
                 that.magnifierImg = div.childNodes[0];
             } else if (that.magnifier.style.display === 'none') {
+                // 图片被修改后，放大镜中的图片也要更新
+                if (that.magnifierImg.src !== that.img.src) {
+                    that.magnifierImg.src = that.img.src;
+                }
                 that.magnifier.style.display = 'block';
             }
 
@@ -245,7 +290,7 @@
                 that.opt = opt;
             }
 
-            var box = $.toElement(that.opt.box || that.opt.obj);
+            var box = $.toElement(that.opt.element);
             box.className += ' oui-picbox-box';
             box.style.cssText += 'overflow:hidden;position:relative;' + (!opt.showBorder ? 'border:none;' : '');
             that.box = box;
@@ -360,8 +405,12 @@
 
             return this;
         },
-        update: function (opt) {
-            return this.initial(opt);
+        update: function (options) {
+            let opt = Factory.checkOptions(options);
+            if (opt) {
+                return this.initial(opt);
+            }
+            return this;
         },
         control: function () {
             var that = this;
@@ -814,7 +863,7 @@
 
     $.extend({
         picturebox: function(options, callback) {
-            return new PictureBox($.extend(options, { callback: callback })); 
+            return Factory.buildPictureBox($.extend(options, { callback: callback })); 
         },
         picbox: function(options, callback) {
             return $.picturebox(options, callback);

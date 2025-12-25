@@ -7,9 +7,20 @@
     right: 0;
     opacity: 0.95;
     border: solid 1px #4285f4;
-    box-shadow: 0 0 10px 1px rgba(66, 133, 244, 0.6); /* 发光效果 */
     box-sizing: border-box;
+    box-shadow: 
+    /* 发光效果 */
+    0 0 10px 1px rgba(66, 133, 244, 0.6), 
+    /* 内阴影模拟玻璃反光 */
+    inset 0 0 0 2px rgba(255,255,255,0.8),
+    inset 0 2px 10px rgba(255,255,255,0.5),
+    inset 0 -2px 10px rgba(0,0,0,0.1);
     background-color: transparent;
+    /* 玻璃质感渐变 */
+    background: linear-gradient(135deg, 
+    rgba(255,255,255,0.1) 0%, 
+    rgba(255,255,255,0.05) 50%, 
+    rgba(0,0,0,0.05) 100%);
 }
 
 .oui-magnifier .magnifier-img {
