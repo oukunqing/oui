@@ -4612,7 +4612,7 @@
                 //是否整行全宽
                 fullWidth: undefined,
                 //是否增加行高，默认行高是24px，增高后为30px
-                highHeight: undefined,
+                highHeight: true,
                 //是否移动端，默认行高是24px，移动端为40px
                 mobileHeight: undefined,
                 //自定义样式className

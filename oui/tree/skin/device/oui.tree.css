@@ -65,7 +65,7 @@
 .oui-tree-device li .item span.helmet-off{background:url("imgs/tree-device-other.png?1") no-repeat -50px center;}
 
 /*用于搜索列表*/
-.oui-tree-box .search-result-panel li span.unit{background:url("imgs/tree-device-other.png?1") no-repeat 0 0;}
-.oui-tree-box .search-result-panel li span.device{background:url("imgs/tree-device.png?2") no-repeat -50px 0;}
-.oui-tree-box .search-result-panel li span.camera{background:url("imgs/tree-device.png?2") no-repeat -150px 0;}
-.oui-tree-box .search-result-panel li span.preset-off{background:url("imgs/tree-device.png?2") no-repeat -225px 0;}
+.oui-tree-box .search-result-panel li span.unit{background:url("imgs/tree-device.png?2") no-repeat 0 -11px;}
+.oui-tree-box .search-result-panel li span.device{background:url("imgs/tree-device.png?2") no-repeat -75px -11px;}
+.oui-tree-box .search-result-panel li span.camera{background:url("imgs/tree-device.png?2") no-repeat -225px -11px;}
+.oui-tree-box .search-result-panel li span.preset-off{background:url("imgs/tree-device-other.png?2") no-repeat 0 -11px;}

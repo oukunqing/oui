@@ -826,14 +826,14 @@
 	border: none;
 	box-sizing: border-box;
 	float:left;
-	margin: 1px 1px 0 0;
+	margin: 0 1px 0 0;
 	padding: 0;
 	cursor: default;
 }
 
 /*用于搜索列表*/
-.oui-tree-box .search-result-panel li .icon{background:transparent url("imgs/tree-icon.png?2") no-repeat 0 center;}
-.oui-tree-box .search-result-panel li .icon-page{background:transparent url("imgs/tree-icon.png?2") no-repeat -50px center;}
+.oui-tree-box .search-result-panel li .icon{background:transparent url("imgs/tree-icon.png?2") no-repeat 0 -11px;}
+.oui-tree-box .search-result-panel li .icon-page{background:transparent url("imgs/tree-icon.png?2") no-repeat -75px -11px;}
 
 .oui-tree-box .goto-tree-top {
 	width: 25px; height: 25px;

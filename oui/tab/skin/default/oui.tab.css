@@ -1,10 +1,10 @@
 .oui-tabs {
-    height: 30px;
+    height: 32px;
     padding: 0;
     margin: 0;
     border: none 0;
     font-size: 14px;
-    line-height: 28px;
+    line-height: 30px;
     position: relative;
     box-sizing: border-box;
     overflow: visible;
@@ -12,7 +12,7 @@
 }
 
 .oui-tabs .tab-box {  
-    height: 28px;
+    height: 30px;
     padding: 0;
     border: none 0;
     margin: 0 3px;
@@ -25,7 +25,7 @@
 
 .oui-tabs .tab-switch {
     width: 16px;
-    height: 28px;
+    height: 30px;
     display: inline-block;
     float: left;
     padding: 0;
@@ -91,7 +91,7 @@
 }
 
 .oui-tabs-sep {
-    height: 33px;
+    height: 35px;
     border-bottom: none;
 }
 
@@ -154,7 +154,7 @@
     display: inline-block;
     margin: 0 3px 0 0;
     padding: 0;
-    height: 28px;
+    height: 30px;
     /*width: auto;*/
     max-width: 240px;
     overflow: hidden;

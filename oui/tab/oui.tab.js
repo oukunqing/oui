@@ -1053,7 +1053,7 @@
             // Tab标签最大宽度
             maxWidth: 240,
             // Tab高度
-            tabHeight: 30,
+            tabHeight: 32,
             conHeight: 400,
             //是否隐藏选项卡
             hideTab: false,
