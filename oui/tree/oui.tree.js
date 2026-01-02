@@ -990,23 +990,18 @@
 
                 /* 以下参数有互斥关系 */
 
-                // 启用整行全宽，不显示连线
-                // 树形导航菜单，不显示连线
-                if (opt.fullWidth || opt.highHeight || opt.mobileHeight || opt.treeMenu) {
-                    if (opt.fullWidth) {
-                        opt.showLine = false;
-                    }
-
-                    // 树形导航菜单，不用整行全宽，不启用复选框
-                    if (opt.treeMenu) {
-                        opt.fullWidth = false;
-                        opt.highHeight = false;
-                        opt.showCheck = false;
-                        opt.showScrollIcon = false;
-                        opt.clickExpand = true;
-                    } else if (opt.fullWidth) {
-                        opt.highHeight = false;
-                    }
+                // 树形导航菜单，不用整行全宽，不启用复选框
+                if (opt.treeMenu) {
+                    // 树形导航菜单，不显示连线
+                    opt.showLine = false;
+                    opt.fullWidth = false;
+                    opt.highHeight = false;
+                    opt.showCheck = false;
+                    opt.showScrollIcon = false;
+                    opt.clickExpand = true;
+                } else if (opt.fullWidth) {
+                    opt.showLine = false;
+                    opt.highHeight = false;
                 }
                 // 非树形导航菜单时，不启用右侧切换图标
                 if (!opt.treeMenu) {
@@ -1972,21 +1967,7 @@
             },
             getPanelClass: function (opt) {
                 var css = ['oui-tree'];
-                if (!Factory.isDefaultSkin(opt.skin)) {
-                    css.push('oui-tree-' + opt.skin);
-                }
-                if (opt.moveAble && opt.dragAble && opt.dragMove) {
-                    css.push('oui-tree-drag');
-                }
-                if (opt.showLine) {
-                    css.push('oui-tree-line');
-                    if (!Factory.isDefaultSkin(opt.skin)) {
-                        css.push('oui-tree-' + opt.skin + '-line');
-                    }
-                    if (opt.hoverLine) {
-                        css.push('oui-tree-line-hover');
-                    }
-                }
+
                 if (opt.fullWidth) {
                     css.push('oui-tree-full');
                 }
@@ -1999,14 +1980,34 @@
                 if (opt.treeMenu) {
                     css.push('oui-tree-menu');
                 }
-                if (opt.customCss) {
-                    css.push(opt.customCss);
+                
+                if (!Factory.isDefaultSkin(opt.skin)) {
+                    css.push('oui-tree-' + opt.skin);
+                }
+                if (opt.moveAble && opt.dragAble && opt.dragMove) {
+                    css.push('oui-tree-drag');
                 }
                 if (opt.switch) {
                     css.push('oui-tree-' + (opt.showLine ? 'line' : 'switch') + opt.switch);
                     if (opt.showLine && opt.hoverLine) {
                         css.push('oui-tree-line' + opt.switch + '-hover');
                     }
+                }
+                if (opt.showLine) {
+                    css.push('oui-tree-line');
+                    if (opt.hoverLine) {
+                        css.push('oui-tree-line-hover');
+                    }
+                    if (!Factory.isDefaultSkin(opt.skin)) {
+                        css.push('oui-tree-' + opt.skin + '-line');
+
+                        if (opt.showLine && opt.hoverLine) {
+                            css.push('oui-tree-' + opt.skin + '-line-hover');
+                        }
+                    }
+                }
+                if (opt.customCss) {
+                    css.push(opt.customCss);
                 }
                 return css.join(' ');
             },
