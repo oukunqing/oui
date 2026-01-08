@@ -7422,7 +7422,17 @@
     var $size = function ($fn, key, val) {
         if ($.isUndefined(val)) {
             var self = $fn, elem = self[0] || null;
-            return $.getElementSize(elem)[key];
+            if (!elem) {
+                return 0;
+            }
+            var size = $.getElementSize(elem)[key];
+            if (window.getZoomRatio() < 100 && key.toString().toLowerCase() === 'width') {
+                var w = parseFloat(elem.style.width || 0, 10);
+                if (w && w !== parseInt(w, 10)) {
+                    size += 1;
+                }
+            }
+            return size;
         } else {
             var _val = $.isNumeric(val) ? val + 'px' : val;
             return $fn.each(function (i, obj) {
