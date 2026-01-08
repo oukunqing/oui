@@ -106,6 +106,7 @@
                 <label class="chb-label"><input type="checkbox" id="chbClickExpand" /><span>点击切换</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbClickChecked" /><span>点击选中</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbCallbackLevel" /><span>确认再返回</span></label>
+                <label class="chb-label"><input type="checkbox" id="chbItemBody" /><span>ItemBody</span></label>
                 <label class="chb-label" title="启用自定义样式可以实现节点样式自由，可增加行高或全宽，或改变背景及字体颜色等等&#10;需要注意的是：自定义的样式符合节点结构设计，否则可能会引起节点布局混乱">
                     <input type="checkbox" id="chbCustomCss" />
                     <span style="color:#f00;">自定义样式</span>
@@ -506,6 +507,7 @@
             dynamicCamera = $('#chbCamera').checked(),
             dynamic = $('#chbDynamic').checked(),
             callbackLevel = $('#chbCallbackLevel').checked(),
+            itemBody = $('#chbItemBody').checked(),
             onlyOpenOne = $('#chbOnlyOpenOne').checked(),
             fullWidth = $('#chbFullWidth').checked(),
             highHeight = $('#chbHighHeight').checked(),
@@ -563,6 +565,7 @@
             fullWidth: fullWidth,
             highHeight: highHeight,
             mobileHeight: mobileHeight,
+            itemBody: itemBody,
             customCss: customCss ? 'my-tree' : '',
             treeMenu: treeMenu,
             rightSwitch: rightSwitch,

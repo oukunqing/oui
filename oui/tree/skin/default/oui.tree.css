@@ -67,6 +67,11 @@
 	float:left;display:inline-block;height:24px;overflow:visible;margin-bottom:0px;
 	border-radius:4px;width:auto;clear:both;
 }
+.oui-tree li .item .item-body {
+	display:inline-block;overflow:visible;margin:0;padding:0px;
+	border-radius:4px;width:auto;border:solid 1px transparent;box-sizing:border-box;
+}
+
 .oui-tree li .item:hover{}
 .oui-tree li.cur .item{}
 .oui-tree li.cur .item:hover{}
@@ -76,6 +81,9 @@
 	outline:none;overflow:visible;white-space:nowrap;
 	text-align:center; font-size:14px;margin:0;padding:0;
 }
+.oui-tree li .item .item-body a.name,.oui-tree li .item .item-body a.name span,.oui-tree li .item .item-body span {
+	height:22px;line-height:22px;
+}
 .oui-tree li .item a.name span {float:left;display:inline-block;}
 
 .oui-tree li .item a.name{
@@ -83,9 +91,18 @@
 	border:solid 1px transparent;border-radius:4px;
 	width:auto;white-space:nowrap;float:left;
 }
-.oui-tree li .item a.name:hover{background: #e5f3ff;}
-.oui-tree li.cur > .item a.name{background: #cce8ff;border-color: #cce8ff;}
-.oui-tree li.cur > .item a.name:hover{background: #cce8ff;border-color: #99d1ff;}
+
+.oui-tree li .item a.name:hover{background-color: #e5f3ff;}
+.oui-tree li.cur > .item a.name{background-color: #cce8ff;border-color: #cce8ff;}
+.oui-tree li.cur > .item a.name:hover{background-color: #cce8ff;border-color: #99d1ff;}
+
+.oui-tree li .item .item-body:hover{background-color: #e5f3ff;}
+.oui-tree li.cur > .item .item-body{background-color: #cce8ff;border-color: #cce8ff;}
+.oui-tree li.cur > .item .item-body:hover{background-color: #cce8ff;border-color: #99d1ff;}
+
+.oui-tree li .item .item-body a.name:hover{background-color:transparent; }
+.oui-tree li.cur > .item .item-body a.name{background-color:transparent;}
+.oui-tree li.cur > .item .item-body:hover a.name:hover{border-color:transparent;}
 
 .oui-tree-drag li .item a.name span {/*height:14px;line-height:14px;*/margin:0px 0;}
 
@@ -95,11 +112,20 @@
 /*关于ICON图标*/
 .oui-tree li .item .icon{background:transparent url("imgs/tree-icon.png?6") no-repeat 0 center;width:24px;float:left;cursor:pointer;box-sizing:border-box;}
 .oui-tree li .item .icon:hover{background-color:none;}
+
 .oui-tree li .item .icon-open{background:url("imgs/tree-icon.png?6") no-repeat -25px center;}
+
 /*连线时的打开图标*/
 .oui-tree-line li .item .icon-open,
 .oui-tree-line:hover li .item .icon-open{background:url("imgs/tree-icon.png?6") no-repeat -50px center;}
-.oui-tree-line-hover li .item .icon-open{background:url("imgs/tree-icon.png?6") no-repeat -25px center;}
+
+.oui-tree-line-hover li .item .icon-open,
+.oui-tree-line-hover li .item .item-body .icon-open {
+	background:url("imgs/tree-icon.png?6") no-repeat -25px center;
+}
+.oui-tree-line li .item .item-body .icon-open {
+	background:url("imgs/tree-icon.png?6") no-repeat -26px center;
+}
 
 .oui-tree li .item .icon-page{background:transparent url("imgs/tree-icon.png?6") no-repeat -75px center;}
 .oui-tree li .item .icon-none{background:none;}
@@ -134,15 +160,16 @@
 .oui-tree li .item .button{
 	margin:0 0 0 5px;padding:0;height:24px;
 	display:inline-block;overflow:hidden;border:none;background:transparent;
-	box-sizing:border-box;visibility:hidden;
+	box-sizing:border-box;
+	visibility:hidden;
 	width: 125px;
 }
-.oui-tree li > .item:hover .button {visibility:visible;}
+.oui-tree li > .item:hover .button {margin:0 0 0 5px;padding:0;height:24px;visibility:visible;}
 
-.oui-tree li .item .button .btn{
+.oui-tree li .item .button .btn,.oui-tree li .item:hover .button .btn {
 	margin:0;padding:0;display:inline-block;
 	border:none;box-sizing:border-box;border-radius:5px;
-	cursor:pointer;width:25px; height:24px;
+	cursor:pointer;width:25px; height:24px;line-height:22px;
 	background-color: transparent;
 }
 
@@ -990,16 +1017,24 @@
 .oui-tree-high li .item {
 	height:30px; line-height: 28px;width:100%;
 }
+.oui-tree-high li .item .item-body {
+	height:30px; line-height: 28px;
+}
 .oui-tree-high li .item span.switch {height:30px;margin:0;}
-.oui-tree-high li .item span.check {margin-top:3px;}
-.oui-tree-high li .item .icon,.oui-tree-high li .item .icon-open {
+.oui-tree-high li .item span.check,.oui-tree-high li .item .item-body span.check {height:24px;margin-top:3px;}
+.oui-tree-high li .item span.icon,.oui-tree-high li .item span.icon-open {
 	width:24px;height:30px;margin-top:0px;
 }
 .oui-tree-high li .item a.name,.oui-tree-high li .item a.name span,.oui-tree-high li .item span {
 	height:30px;line-height:28px;
 }
-.oui-tree-high li .item .button {
-	margin-top:2px;
+.oui-tree-high li .item .item-body a.name,.oui-tree-high li .item .item-body a.name span{
+	height:28px;line-height:28px;
+}
+.oui-tree-high li .item .button,.oui-tree-high li .item:hover .button {
+	line-height: 24px;
+	margin-top:3px;
+	margin-bottom:3px;
 }
 
 /*移动端*/
@@ -1007,16 +1042,24 @@
 .oui-tree-mobile li .item {
 	height:40px; line-height: 38px;width:100%;
 }
+.oui-tree-mobile li .item .item-body {
+	height:40px; line-height: 38px;
+}
 .oui-tree-mobile li .item span.switch {height:40px;margin:0;}
-.oui-tree-mobile li .item span.check {margin-top:8px;}
-.oui-tree-mobile li .item .icon,.oui-tree-mobile li .item .icon-open {
+.oui-tree-mobile li .item span.check,.oui-tree-mobile li .item .item-body span.check {height:24px;margin-top:8px;}
+.oui-tree-mobile li .item span.icon,.oui-tree-mobile li .item span.icon-open {
 	width:24px;height:40px;margin-top:0px;
 }
 .oui-tree-mobile li .item a.name,.oui-tree-mobile li .item a.name span,.oui-tree-mobile li .item span {
 	height:40px;line-height:38px;
 }
-.oui-tree-mobile li .item .button {
+.oui-tree-mobile li .item .item-body a.name,.oui-tree-mobile li .item .item-body a.name span {
+	height:38px;line-height:38px;
+}
+.oui-tree-mobile li .item .button,.oui-tree-mobile li .item:hover .button {
+	line-height: 24px;
 	margin-top:8px;
+	margin-bottom:8px;
 }
 
 /*整行全宽*/
@@ -1026,17 +1069,25 @@
 .oui-tree-full li .item {
 	height:30px; line-height: 28px;width:100%;
 }
+.oui-tree-full li .item .item-body,.oui-tree-full li .item .item-body:hover {
+	height:30px; line-height: 28px;border:none;
+}
 .oui-tree-full li .item span.switch {height:30px;margin:0;}
 .oui-tree-full li .item span.switch-none {background: none;}
-.oui-tree-full li .item span.check {margin-top:3px;}
-.oui-tree-full li .item .icon,.oui-tree-full li .item .icon-open {
-	width:24px;height:24px;margin-top:3px;
+.oui-tree-full li .item span.check,.oui-tree-full li .item .item-body span.check {height:24px;margin-top:3px;}
+.oui-tree-full li .item span.icon,.oui-tree-full li .item span.icon-open {
+	width:24px;height:30px;margin-top:0px;
 }
 .oui-tree-full li .item a.name,.oui-tree-full li .item a.name span,.oui-tree-full li .item span {
 	height:30px;line-height:28px;
 }
-.oui-tree-full li .item .button {
-	margin-top:2px;
+.oui-tree-full li .item .item-body a.name,.oui-tree-full li .item .item-body a.name span {
+	height:30px;line-height:28px;
+}
+.oui-tree-full li .item .button,.oui-tree-full li .item:hover .button {
+	line-height: 24px;
+	margin-top:3px;
+	margin-bottom:3px;
 }
 
 .oui-tree-full li > .item:hover {background:#e5f3ff;cursor:pointer;}
@@ -1055,13 +1106,24 @@
 .oui-tree-menu li > .item {
 	height:34px; line-height: 32px;width:100%;box-sizing: border-box;
 }
+.oui-tree-menu li .item .item-body,.oui-tree-menu li .item .item-body:hover {
+	height:34px; line-height: 32px;border:none;
+}
 .oui-tree-menu li > .item:hover {background:#e5f3ff;cursor:pointer;}
 
+.oui-tree-menu li .item span.icon,.oui-tree-menu li .item span.icon-open {
+	width:24px;height:34px;margin-top:0;
+}
 .oui-tree-menu li .item a.name,.oui-tree-menu li .item a.name span,.oui-tree-menu li .item span {
 	height:34px;line-height:32px;
 }
-.oui-tree-menu li .item .button {
+.oui-tree-menu li .item .item-body a.name,.oui-tree-menu li .item .item-body a.name span {
+	height:32px;line-height:32px;
+}
+.oui-tree-menu li .item .button,.oui-tree-menu li .item:hover .button {
+	line-height: 24px;
 	margin-top:5px;
+	margin-bottom:5px;
 }
 .oui-tree-menu li .item span.switch {height: 24px;margin-top:5px;}
 .oui-tree-menu li .item span.switch-none {background: none;}

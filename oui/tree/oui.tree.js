@@ -979,6 +979,8 @@
                 opt.highHeight = $.isBoolean($.getParam(opt, 'highHeight,lineHeight'), false);
                 // 移动端行高
                 opt.mobileHeight = $.isBoolean($.getParam(opt, 'mobileHeight,wapHeight'), false);
+                // item-body
+                opt.itemBody = $.isBoolean($.getParam(opt, 'itemBody,showItemBody'), false);
                 // 切换图标是否显示在右边，仅树形导航菜单时启用
                 opt.rightSwitch = $.isBoolean($.getParam(opt, 'rightSwitch'), false);
 
@@ -2920,6 +2922,7 @@
                     html = [
                         '<div class="item" nid="', p.nid, '"', pad, '>',
                         opt.showSwitch ? '<span class="' + node.getSwitchClass(true) + '" nid="' + p.nid + '"' + float + '></span>' : '',
+                        opt.itemBody ? '<div class="item-body" nid="' + p.nid + '">' : '',
                         opt.showIcon ? '<span class="' + node.getIconClass() + '" nid="' + p.nid + '"></span>' : '',
                         opt.showCheck ? '<span class="check" nid="' + p.nid + '"></span>' : '',
                         '<a class="name" nid="', p.nid, '"', title, '>',
@@ -2927,6 +2930,7 @@
                         opt.showCount ? '<span class="count" nid="' + p.nid + '"></span>' : '',
                         opt.showDesc ? '<span class="desc" nid="' + p.nid + '">' + (p.desc || '') + '</span>' : '',
                         '</a>',
+                        opt.itemBody ? '</div>' : '',
                         opt.showButton ? '<div class="button" nid="' + p.nid + '"></div>' : '',
                         opt.showInfo ? '<span class="info" nid="' + p.nid + '"></span>' : '',
                         '</div>'
@@ -4616,6 +4620,8 @@
                 highHeight: true,
                 //是否移动端，默认行高是24px，移动端为40px
                 mobileHeight: undefined,
+                //是否启用<div class="item-body">
+                itemBody: true,
                 //自定义样式className
                 customCss: undefined,
                 //树形导航菜单
