@@ -92,11 +92,11 @@
 	width:auto;white-space:nowrap;float:left;
 }
 
-.oui-tree li .item a.name:hover{background-color: #e5f3ff;}
+.oui-tree li .item a.name:hover,.oui-tree li.hover > .item a.name{background-color: #e5f3ff;}
 .oui-tree li.cur > .item a.name{background-color: #cce8ff;border-color: #cce8ff;}
 .oui-tree li.cur > .item a.name:hover{background-color: #cce8ff;border-color: #99d1ff;}
 
-.oui-tree li .item .item-body:hover{background-color: #e5f3ff;}
+.oui-tree li .item .item-body:hover,.oui-tree li.hover > .item .item-body{background-color: #e5f3ff;}
 .oui-tree li.cur > .item .item-body{background-color: #cce8ff;border-color: #cce8ff;}
 .oui-tree li.cur > .item .item-body:hover{background-color: #cce8ff;border-color: #99d1ff;}
 
@@ -872,7 +872,7 @@
 .oui-tree-box .search-result-panel li:last-child {
 	border-bottom: none;
 }
-.oui-tree-box .search-result-panel li:hover {
+.oui-tree-box .search-result-panel li:hover,.oui-tree-box .search-result-panel li.cur {
 	background: #e5f3ff;
 }
 .oui-tree-box .search-result-panel li b {
@@ -890,8 +890,12 @@
 }
 
 /*用于搜索列表*/
-.oui-tree-box .search-result-panel li .icon{background:transparent url("imgs/tree-icon.png?6") no-repeat 0 center;}
-.oui-tree-box .search-result-panel li .icon-page{background:transparent url("imgs/tree-icon.png?6") no-repeat -75px center;}
+.oui-tree-box .search-result-panel li .icon{
+	background:transparent url("imgs/tree-icon.png?6") no-repeat 0 center;
+}
+.oui-tree-box .search-result-panel li .icon-page{
+	background:transparent url("imgs/tree-icon.png?6") no-repeat -75px center;
+}
 
 .oui-tree-box .goto-tree-top {
 	width: 25px; height: 25px;

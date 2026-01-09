@@ -285,6 +285,158 @@
                 }, 10);
                 return this;
             },
+            keydown: function (ev, tree) {
+                var opt = tree.options;
+                if (opt.shortcutKey &&
+                    ev.target.tagName === 'INPUT' && 
+                    ev.target.className.indexOf('oui-tree-focus') > -1 && 
+                    ev.target.parentNode === tree.panel) {
+                    ev.target.value = '';
+                } else {
+                    return this;
+                }
+                if (tree.cache.count <= 0 || !Factory.isNode(tree.cache.root)) {
+                    return this;
+                }
+                var panelHeight = tree.panel.clientHeight,
+                    rowHeight = tree.cache.root.element.childNodes[0].offsetHeight;
+
+                var curNode = tree.cache.current.hovered || tree.cache.current.selected;
+                var kc = $.getKeyCode(ev);
+
+                switch(kc) {
+                case KCA.H:
+                case KCA.Left:
+                    tree.panel.scrollTop = 0;
+                    break;
+                case KCA.J:
+                case KCA.Down:
+                    curNode = Factory.getNodeNextSibling(tree, curNode);
+                    if (curNode) {
+                        tree.cache.current.hovered = curNode;
+                        Factory.setElementHoverClass(tree, curNode.element);
+                        $.scrollTo(curNode.element, tree.panel, -rowHeight * 2);
+                    }
+                    break;
+                case KCA.K:
+                case KCA.Up:
+                    curNode = Factory.getNodePreviousSibling(tree, curNode);
+                    if (curNode) {
+                        tree.cache.current.hovered = curNode;
+                        Factory.setElementHoverClass(tree, curNode.element);
+                        $.scrollTo(curNode.element, tree.panel, -rowHeight * 2);
+                    }                    
+                    break;
+                case KCA.L:
+                case KCA.Right:
+                    tree.panel.scrollTop = tree.panel.scrollHeight;
+                    break;
+                case KCC.M: // 77 - M(中间)
+                    tree.panel.scrollTop = tree.panel.scrollHeight / 2;
+                    break;
+                case KCC.U: // 85 - U(向上半屏)
+                    tree.panel.scrollTop -= panelHeight / 2;
+                    break;
+                case KCC.D: // 68 - D(向下半屏）
+                    tree.panel.scrollTop += panelHeight / 2;
+                    break;
+                case KCC.B: // 66 - B(向上一屏)
+                    tree.panel.scrollTop -= panelHeight;
+                    break;
+                case KCC.F: // 70 - F(向下一屏)
+                    if (!ev.shiftKey){
+                        tree.panel.scrollTop += panelHeight;
+                    }
+                    break;
+                case KCC.C: // 67 - C 依次找到选中项的位置
+                    Factory.gotoCurrent(tree);
+                    break;
+                case KC.Esc:
+                    Factory.showSearchPanel(tree, false);
+                    break;
+                case KC.Enter:
+                    if (curNode = tree.cache.current.hovered) {
+                        if (opt.showCheck) {
+                            curNode.setChecked();
+                            Factory.checkedCallback(curNode, tree, null).setTargetValue(curNode, tree, true);
+                        } else {
+                            curNode.setSelected(true);
+                            Factory.setTargetValue(curNode, tree).clickCallback(curNode, tree, null);
+                        }
+                    }
+                    break;
+                }
+                return this;
+            },
+            keyup: function (ev, tree) {
+                var opt = tree.options, kc = $.getKeyCode(ev);
+                if (ev.shiftKey && kc === KCC.F && $.isElement(tree.keywords)) {
+                    tree.keywords.focus();
+                } else if (kc === KCC.E) {
+                    var curNode = tree.cache.current.hovered || tree.cache.current.selected;
+                    if (curNode) {
+                        curNode.setExpand();
+                    }
+                }
+                return this;
+            },
+            searchKeydown: function (ev, tree) {
+                var kc = $.getKeyCode(ev);
+                if (kc === KC.Esc) {
+                    Factory.showSearchPanel(tree, false);
+                    return this;
+                }
+                var panel = tree.cache.searchPanel, 
+                    nodes = tree.cache.searchNodes || [], 
+                    c = nodes.length,
+                    oldIdx = tree.cache.searchIndex,
+                    curIdx = oldIdx, nid, node, v = 1;
+
+                if (ev.shiftKey && kc === KC.Enter && panel.style.display !== 'none') {
+                    if (curIdx >= 0) {
+                        node = Factory.getNodeByElem(tree, nodes[curIdx]);
+                        if (node) {
+                            node.position().select();
+                            Factory.showSearchPanel(tree, false);
+                        }
+                    }
+                    return this;
+                }
+
+                if (!panel || c <= 0 || !ev.shiftKey) {
+                    return this;
+                }
+                var rowHeight = nodes[0].offsetHeight;
+
+                if (!$.isNumber(curIdx) || curIdx < 0) {
+                    curIdx = -1;
+                }
+
+                switch (kc) {
+                case KCA.Left:
+                    panel.scrollTop = 0;
+                    curIdx = 0;
+                    break;
+                case KCA.Down:
+                    curIdx += curIdx < (c - 1) ? v : 0;
+                    $.scrollTo(nodes[curIdx], panel);
+                    break;
+                case KCA.Up:
+                    curIdx -= curIdx > 0 ? v : 0;
+                    $.scrollTo(nodes[curIdx], panel);
+                    break;
+                case KCA.Right:
+                    panel.scrollTop = panel.scrollHeight;
+                    curIdx = c - 1;
+                    break;
+                }
+                $.removeClass(nodes[oldIdx], 'cur');
+                $.addClass(nodes[curIdx], 'cur');
+
+                tree.cache.searchIndex = curIdx;
+
+                return this;
+            },
             dragstart: function (ev, tree) {
                 var ep = Event.target(ev, tree),
                     op = tree.options;
@@ -562,10 +714,17 @@
                         types: {},
                         //按层级存储节点
                         levels: [],
+                        //第一个根节点
+                        root: undefined,
                         //当前被选中或定位的节点
                         current: {
+                            // 当前选中的
                             selected: null,
+                            // 当前快捷键选中的
+                            hovered: null,
+                            // 当前位置
                             position: null,
+                            // 当前被勾选的
                             checked: {
                                 length: 0
                             },
@@ -981,6 +1140,8 @@
                 opt.mobileHeight = $.isBoolean($.getParam(opt, 'mobileHeight,wapHeight'), false);
                 // item-body
                 opt.itemBody = $.isBoolean($.getParam(opt, 'itemBody,showItemBody'), false);
+                // shortcutKey                
+                opt.shortcutKey = $.isBoolean($.getParam(opt, 'shortcutKey'), false);
                 // 切换图标是否显示在右边，仅树形导航菜单时启用
                 opt.rightSwitch = $.isBoolean($.getParam(opt, 'rightSwitch'), false);
 
@@ -1117,6 +1278,14 @@
                     Factory.dealEvent(ev, tree, ev.type);
                 });
 
+                $.addListener(div, 'keydown', function (ev) {
+                    Factory.dealEvent(ev, tree, ev.type);
+                });
+
+                $.addListener(div, 'keyup', function (ev) {
+                    Factory.dealEvent(ev, tree, ev.type);
+                });
+
                 return this;
             },
             dealEvent: function (ev, tree, evType, opt) {
@@ -1129,9 +1298,12 @@
                     && (which !== Config.MouseWhichRight && type === 'contextmenu')) {
                     return this;
                 }
+
+                Factory.setFocus(tree);
+
                 var events = [
                     'mousedown', 'mouseup', 'click', 'dblclick', 'contextmenu',
-                    'mouseover', 'scroll'
+                    'mouseover', 'scroll', 'keydown', 'keyup', 'keypress'
                 ];
 
                 if (events.indexOf(type) > -1) {
@@ -1151,6 +1323,12 @@
                 }
                 return this;
             },
+            setFocus: function (tree) {
+                if (tree.focus) {
+                    tree.focus.focus();
+                }
+                return this;
+            },
             setNodeCache: function (tree, node) {
                 tree.cache.nodes[node.id] = node;
 
@@ -1161,6 +1339,10 @@
 
                 if (!tree.cache.levels[node.level]) {
                     tree.cache.levels[node.level] = {};
+
+                    if (!node.level) {
+                        tree.cache.root = node;
+                    }
                 }
                 tree.cache.levels[node.level][node.id] = node;
 
@@ -1189,6 +1371,8 @@
                     delete cache.nodes[nid];
                 }
 
+                cache.root = null;
+
                 return this;
             },
             getNodeCache: function (tree, nodeId) {
@@ -1199,6 +1383,60 @@
                     return node;
                 }
                 return tree.cache.nodes[node];
+            },
+            getNodeByElem: function (tree, elem) {
+                var nid = $.getAttribute(elem, 'nid');
+                var node = Factory.getNode(tree, nid);
+                return node;
+            },
+            getNodeNextSibling: function (tree, node) {
+                if (!node) {
+                    return tree.cache.root;
+                }
+                var elem = node.element, next;
+                if (node.childs.length > 0 && node.expanded) {
+                    next = node.childs[0];
+                } else if (elem.nextSibling) {
+                    next = Factory.getNodeByElem(tree, elem.nextSibling);
+                } else {
+                    var parent = node.parent;
+                    while (parent && !parent.root) {
+                        if (parent.element.nextSibling) {
+                            next = Factory.getNodeByElem(tree, parent.element.nextSibling);
+                            break;
+                        }
+                        parent = parent.parent;
+                    }
+                }
+                return next;
+            },
+            getNodePreviousSibling: function (tree, node) {
+                if (!node) {
+                    return tree.cache.root;
+                }
+                var elem = node.element, pre, len;
+                if (node.parent === node) {
+                    return node;
+                }
+                if (elem.previousSibling && elem.previousSibling.tagName === 'LI') {
+                    pre = Factory.getNodeByElem(tree, elem.previousSibling);
+                    len = pre.childs.length;
+
+                    while (len > 0 && pre.expanded) {
+                        pre = pre.childs[len - 1];
+                        len = pre.childs.length;
+                    }
+                } else if (node.parent && !node.parent.root) {
+                    pre = node.parent;
+                }
+                return pre;
+            },
+            setElementHoverClass: function (tree, elem) {
+                $.removeClass(tree.panel.querySelectorAll('li.hover'), 'hover');
+                if ($.isElement(elem)) {
+                    $.addClass(elem, 'hover');
+                }
+                return this;
             },
             setStoreCache: function (tree, key, nodes, action) {
                 var opt = tree.options;
@@ -1317,7 +1555,12 @@
                         last.setSelected(false);
                     }
                     data[key] = action ? node : undefined;
+
+                    // 清除快捷选中的节点
+                    tree.cache.current.hovered = undefined;
+                    Factory.setElementHoverClass(tree);
                 }
+
                 return this;
             },
             delCurrentCache: function (tree, key) {
@@ -1847,6 +2090,10 @@
                     opt = tree.options,
                     isEvent = ev && ev.target && ev.target.className.indexOf('sizebar');
 
+                if (!opt.dragSize) {
+                    return this;
+                }
+
                 if (isEvent) {
                     var key = 'oui-tree-resize';
                     if (Cache.timers[key]) {
@@ -2071,6 +2318,8 @@
                     btn = box.querySelector('a.btn-search'),
                     no = box.querySelector('a.btn-cancel');
 
+                tree.keywords = txt;
+
                 $.addListener(btn, 'mousedown', function (ev) {
                     Factory.searchNodes(tree, txt, this);
                 });
@@ -2082,6 +2331,9 @@
 
                 $.addListener(txt, 'mousedown', function (ev) {
                     Factory.showSearchPanel(tree, true);
+                });
+                $.addListener(txt, 'keydown', function (ev) {
+                    Event['searchKeydown'] (ev, tree);
                 });
                 $.addListener(txt, 'keyup', function (ev) {
                     var kc = $.getKeyCode(ev);
@@ -2304,6 +2556,10 @@
                         $.setElemClass(cfg.no, 'hide', true);
                     }
                     Factory.setSearchCache(tree, { search: false, key: '' });
+                    // 清除搜索节点列表
+                    tree.cache.searchNodes = [];
+                    tree.cache.searchPanel = null;
+                    tree.cache.searchIndex = -1;
                 }
                 var display = $.isBoolean(show, div.style.display === 'none');
                 div.style.display = display ? 'block' : 'none';
@@ -2346,15 +2602,14 @@
                         if (tag != 'li' && elem.parentNode) {
                             elem = elem.parentNode;
                         }
-                        if (nid = $.getAttribute(elem, 'nid')) {
-                            if (node = Factory.getNodeCache(tree, nid)) {
-                                node.position().select();
-                                if (ev.type === 'dblclick') {
-                                    Factory.showSearchPanel(tree, false);
-                                }
-                                if (tree.options.clearSearch) {
-                                    Factory.clearSearch(tree);
-                                }
+                        node = Factory.getNodeByElem(tree, elem);
+                        if (node) {
+                            node.position().select();
+                            if (ev.type === 'dblclick') {
+                                Factory.showSearchPanel(tree, false);
+                            }
+                            if (tree.options.clearSearch) {
+                                Factory.clearSearch(tree);
                             }
                         }
                     });
@@ -2413,6 +2668,11 @@
 
                 cache.title.childNodes[0].innerHTML = title;
                 cache.panel.innerHTML = c > 0 ? html.join('') : '';
+
+                // 设置搜索列表、索引
+                tree.cache.searchPanel = cache.panel;
+                tree.cache.searchNodes = cache.panel.querySelectorAll('li');
+                tree.cache.searchIndex = -1;
 
                 return Factory.showSearchPanel(tree, display);
             },
@@ -2571,6 +2831,22 @@
                 });
                 return node;
             },
+            buildFocusElem: function (tree) {
+                if (tree.panel) {                    
+                    // 清除内容
+                    tree.panel.innerHTML = '';
+
+                    // 创建一个文本框，用于获取焦点
+                    tree.panel.innerHTML = [
+                        '<input type="text" class="oui-tree-focus" style="',
+                        'position:absolute;margin:0;padding:0;width:1px;height:1px;top:-2000px;left:-3000px;',
+                        '" />'
+                    ].join('');
+                    tree.focus = tree.panel.childNodes[0];
+                    tree.focus.focus();
+                }
+                return this;
+            },
             buildNode: function (tree, opt) {
                 var cache = tree.cache,
                     root = Factory.buildRootNode(tree, true);
@@ -2631,8 +2907,7 @@
                     }
                     Factory.initStatus(tree, true).checkOnlyOpenOne(tree);
 
-                    // 清除内容
-                    tree.panel.innerHTML = '';
+                    Factory.buildFocusElem(tree);
 
                     tree.panel.appendChild(root.fragment);
                     delete root.fragment;
@@ -4622,6 +4897,8 @@
                 mobileHeight: undefined,
                 //是否启用<div class="item-body">
                 itemBody: true,
+                //是否启用快捷键
+                shortcutKey: true,
                 //自定义样式className
                 customCss: undefined,
                 //树形导航菜单

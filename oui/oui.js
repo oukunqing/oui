@@ -182,7 +182,8 @@
             Space: 32,
             Delete: 46,
             Arrow: {
-                Left: 37, Top: 38, Right: 39, Bottom: 40,
+                Left: 37, Right: 39,
+                Up: 38, Down: 40, Top: 38, Bottom: 40,
                 H: 72, K: 75, J: 74, L: 76
             },
             CtrlList: [8, 9, 13, 27, 32, 37, 38, 39, 40, 46],

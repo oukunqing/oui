@@ -34,7 +34,7 @@
     <div style="float:left;padding:0;margin:6px 0 0;clear:none;">
         <div class="box">
             <div>
-                <label class="chb-label"><input type="checkbox" value="root" name="chbData" checked="checked" /><span>根节点</span></label>
+                <label class="chb-label"><input type="checkbox" value="root" name="chbData" /><span>根节点</span></label>
                 <label class="chb-label"><input type="checkbox" value="unit" name="chbData" checked="checked" /><span>目录</span></label>
                 <label class="chb-label"><input type="checkbox" value="device" name="chbData" /><span>设备</span></label>
                 <label class="chb-label"><input type="checkbox" value="camera" name="chbData" /><span>通道</span></label>
@@ -106,14 +106,14 @@
                 <label class="chb-label"><input type="checkbox" id="chbClickExpand" /><span>点击切换</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbClickChecked" /><span>点击选中</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbCallbackLevel" /><span>确认再返回</span></label>
-                <label class="chb-label"><input type="checkbox" id="chbItemBody" /><span>ItemBody</span></label>
+                <label class="chb-label"><input type="checkbox" id="chbItemBody" checked="checked" /><span>ItemBody</span></label>
                 <label class="chb-label" title="启用自定义样式可以实现节点样式自由，可增加行高或全宽，或改变背景及字体颜色等等&#10;需要注意的是：自定义的样式符合节点结构设计，否则可能会引起节点布局混乱">
                     <input type="checkbox" id="chbCustomCss" />
                     <span style="color:#f00;">自定义样式</span>
                 </label>
                 <div></div>
                 <label class="chb-label" title="显示连线时不可用"><input type="checkbox" id="chbFullWidth" /><span>整行全宽</span></label>
-                <label class="chb-label" title="显示连线时不可用"><input type="checkbox" id="chbHighHeight" /><span>增加行高</span></label>
+                <label class="chb-label" title="显示连线时不可用"><input type="checkbox" id="chbHighHeight" checked="checked" /><span>增加行高</span></label>
                 <label class="chb-label" title="显示连线时不可用"><input type="checkbox" id="chbMobileHeight" /><span>移动端高度</span></label>
                 <label class="chb-label" title="同一层级下仅展开一个节点"><input type="checkbox" id="chbOnlyOpenOne" /><span>仅展开一个节点</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbTreeMenu" /><span>树形导航菜单</span></label>
@@ -757,6 +757,7 @@
             },
             onchecked: function (node, tree) {
                 $.console.log('onchecked:', tree.id, node);
+                $.console.log('onchecked:', tree.getChecked());
             },
             //onexpand: function (node, tree, resolve) {
             onexpand: function (node, tree, resolve, reject) {

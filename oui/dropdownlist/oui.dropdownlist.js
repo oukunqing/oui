@@ -890,7 +890,7 @@
 					var kc = $.getKeyCode(ev),
 						idx = Factory.getItemIdx(elem),
 						div = $I($.getAttribute(elem, 'opt-id')),
-						ArrList	= [KCA.Left, KCA.Top, KCA.Bottom, KCA.Right], //左 上 下 右
+						ArrList	= [KCA.Left, KCA.Up, KCA.Down, KCA.Right], //左 上 下 右
 						VimList = [KCA.H, KCA.K, KCA.J, KCA.L],	//vim方向键 H  K  J  L
 						// 77 - M(中间); 85 - U(向上半屏); 68 - D(向下半屏）; 66 - B(向上一屏); 70 - F(向下一屏)
 						// 67 - C 依次找到选中项的位置
