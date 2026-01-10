@@ -524,7 +524,22 @@
             //data.units[0].showType = true;
             //data.units[0].icon = {path: 'imgs/tree/area.png'};
         }
-        
+                
+        $.tree('tree1', {
+            skin: 'device', 
+            data: testData2.list,
+            callback: function(node, tree) {
+                $.console.log('callback:', node, tree.cache, tree);
+            }
+        });
+
+        $.tree('tree1', {
+            skin: 'device', 
+            data: testData1.list,
+            callback: function(node, tree) {
+                $.console.log('callback:', node, tree.cache, tree);
+            }
+        });
 
         $.tree(TreeId, {
             target: TreeId === 'unit' ? 'unit' : null,
@@ -834,22 +849,6 @@
             }
         });
         $.console.log('test finish:');
-
-        $.tree('tree1', {
-            skin: 'device', 
-            data: testData2.list,
-            callback: function(node, tree) {
-                $.console.log('callback:', node, tree.cache, tree);
-            }
-        });
-
-        $.tree('tree1', {
-            skin: 'device', 
-            data: testData1.list,
-            callback: function(node, tree) {
-                $.console.log('callback:', node, tree.cache, tree);
-            }
-        });
     }
   
 </script>

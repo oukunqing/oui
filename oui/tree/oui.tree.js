@@ -1,11 +1,36 @@
 
 /*
-	@Title: OUI
-	@Description：JS通用代码库
-	@Author: oukunqing
-	@License：MIT
+    @Title: OUI
+    @Description：JS通用代码库
+    @Author: oukunqing
+    @License：MIT
 
-	$.tree 树形菜单
+    $.tree 树形菜单
+*/
+/*
+    快捷键：
+    C: 依次定位到当前选中或勾选的节点
+    H: 定位到第一行节点   （方向键向左）
+    J: 定位到下一行节点   （方向键向下）
+    K: 定位到上一行节点   （方向键向上）
+    L: 定位到最后一行节点 （方向键向右）
+    N: 定位到同一级的下一行节点
+    P: 定位到同一级的上一行节点
+
+    E: 展开或收缩当前节点的子节点
+
+    P + shift: 定位到当前节点的上级节点
+    F + shift: 搜索框获取焦点
+
+    M: 滚动到中间位置
+    U: 向上滚动半屏
+    D: 向下滚动半屏
+    B: 向上滚动一屏
+    F: 向下滚动一屏
+
+    Enter: 选中当前位置的节点，并回调
+
+    Esc: 若当前正在显示搜索面板，则关闭搜索面板；搜索框获取焦点/树节点（隐藏的输入框）获取焦点
 */
 
 !function ($) {
@@ -46,19 +71,19 @@
             //缓存Cookie过期时间，单位：分钟
             CacheCookieExpire: 10,
             Lang: {
-                Add: '\u65b0\u5efa', 		//新建
-                Edit: '\u7f16\u8f91', 		//编辑
-                Del: '\u5220\u9664',		//删除
-                Up: '\u4e0a\u79fb',			//上移
-                Down: '\u4e0b\u79fb',		//下移
-                Update: '\u66f4\u65b0',		//更新
-                Modify: '\u4fee\u6539'		//修改
+                Add: '\u65b0\u5efa',        //新建
+                Edit: '\u7f16\u8f91',       //编辑
+                Del: '\u5220\u9664',        //删除
+                Up: '\u4e0a\u79fb',         //上移
+                Down: '\u4e0b\u79fb',       //下移
+                Update: '\u66f4\u65b0',     //更新
+                Modify: '\u4fee\u6539'      //修改
             },
             EmptyTreeId: 'OuiTreeNone',
             TreeBoxMinHeight: 135,
             TreeItemMinWidth: 100,
             TreeBoxDefaultHeight: 400,
-            SearchResultBoxHeight: 390, 	//12 * 30 + 30
+            SearchResultBoxHeight: 390,     //12 * 30 + 30
             SearchResultItemHeight: 30,
             SearchResultTitleHeight: 30,
             //搜索框字符长度限制
@@ -298,39 +323,45 @@
                 if (tree.cache.count <= 0 || !Factory.isNode(tree.cache.root)) {
                     return this;
                 }
-                var panelHeight = tree.panel.clientHeight,
-                    rowHeight = tree.cache.root.element.childNodes[0].offsetHeight;
-
                 var curNode = tree.cache.current.hovered || tree.cache.current.selected;
-                var kc = $.getKeyCode(ev);
+                var kc = $.getKeyCode(ev), 
+                    keyMove = [KCA.J, KCA.Down, KCA.K, KCA.Up].indexOf(kc) > -1 
+                        || [KCA.H, KCA.Left, KCA.L, KCA.Right].indexOf(kc) > -1
+                        || [KCC.P, KCC.N].indexOf(kc) > -1;
 
                 switch(kc) {
                 case KCA.H:
                 case KCA.Left:
-                    tree.panel.scrollTop = 0;
+                    //tree.panel.scrollTop = 0;
+                    curNode = Factory.getNodeByHover(tree, 'first');
                     break;
                 case KCA.J:
                 case KCA.Down:
                     curNode = Factory.getNodeNextSibling(tree, curNode);
-                    if (curNode) {
-                        tree.cache.current.hovered = curNode;
-                        Factory.setElementHoverClass(tree, curNode.element);
-                        $.scrollTo(curNode.element, tree.panel, -rowHeight * 2);
-                    }
                     break;
                 case KCA.K:
                 case KCA.Up:
-                    curNode = Factory.getNodePreviousSibling(tree, curNode);
-                    if (curNode) {
-                        tree.cache.current.hovered = curNode;
-                        Factory.setElementHoverClass(tree, curNode.element);
-                        $.scrollTo(curNode.element, tree.panel, -rowHeight * 2);
-                    }                    
+                    curNode = Factory.getNodePreviousSibling(tree, curNode);                  
                     break;
                 case KCA.L:
                 case KCA.Right:
-                    tree.panel.scrollTop = tree.panel.scrollHeight;
+                    //tree.panel.scrollTop = tree.panel.scrollHeight;
+                    curNode = Factory.getNodeByHover(tree, 'last');
                     break;
+                case KCC.N: //同一级的下一个节点
+                    curNode = Factory.getNodeNextSibling(tree, curNode, true);
+                    break;
+                case KCC.P: //同一级的上一个节点
+                    curNode = Factory.getNodePreviousSibling(tree, curNode, true);
+                    break;
+                }
+                if (keyMove) {
+                    Factory.setNodeFocus(tree, curNode);
+                    return this;
+                }
+                var panelHeight = tree.panel.clientHeight;
+
+                switch(kc) {
                 case KCC.M: // 77 - M(中间)
                     tree.panel.scrollTop = tree.panel.scrollHeight / 2;
                     break;
@@ -352,12 +383,16 @@
                     Factory.gotoCurrent(tree);
                     break;
                 case KC.Esc:
-                    Factory.showSearchPanel(tree, false);
+                    if (Factory.isSearchPanelShow(tree)) {
+                        Factory.showSearchPanel(tree, false);
+                    } else {
+                        Factory.setSearchFocus(tree);
+                    }
                     break;
                 case KC.Enter:
                     if (curNode = tree.cache.current.hovered) {
                         if (opt.showCheck) {
-                            curNode.setChecked();
+                            curNode.setChecked().setSelected(true);
                             Factory.checkedCallback(curNode, tree, null).setTargetValue(curNode, tree, true);
                         } else {
                             curNode.setSelected(true);
@@ -370,12 +405,34 @@
             },
             keyup: function (ev, tree) {
                 var opt = tree.options, kc = $.getKeyCode(ev);
-                if (ev.shiftKey && kc === KCC.F && $.isElement(tree.keywords)) {
-                    tree.keywords.focus();
-                } else if (kc === KCC.E) {
-                    var curNode = tree.cache.current.hovered || tree.cache.current.selected;
+                var curNode = tree.cache.current.hovered || tree.cache.current.selected;
+
+                switch(kc) {
+                case KCC.E:
                     if (curNode) {
                         curNode.setExpand();
+                    }
+                    break;
+                case KCC.F:
+                    if (ev.shiftKey && $.isElement(tree.keywords)) {
+                        tree.keywords.focus();
+                    }
+                    break;
+                case KCC.P: //上级节点
+                    if (ev.shiftKey && curNode && curNode.parent && !curNode.parent.root) {
+                        Factory.setNodeFocus(tree, curNode.parent);
+                    }
+                    break;
+                }
+                return this;
+            },
+            documentKeyup: function (ev, tree) {
+                var kc = $.getKeyCode(ev);
+                if (kc === KC.Esc) {
+                    if (Factory.isSearchPanelShow(tree)) {
+                        Factory.setSearchFocus(tree);
+                    } else {
+                        Factory.setFocus(tree);
                     }
                 }
                 return this;
@@ -383,7 +440,11 @@
             searchKeydown: function (ev, tree) {
                 var kc = $.getKeyCode(ev);
                 if (kc === KC.Esc) {
-                    Factory.showSearchPanel(tree, false);
+                    if (Factory.isSearchPanelShow(tree)) {
+                        Factory.showSearchPanel(tree, false);
+                    } else {
+                        Factory.setFocus(tree);
+                    }
                     return this;
                 }
                 var panel = tree.cache.searchPanel, 
@@ -825,10 +886,10 @@
             },
             parseTrees: function (trees) {
                 var ot = [], p,
-                    type,		//节点类型
-                    key,		//节点数据字段
-                    ptype,		//父节点类型
-                    icon;		//图标类型
+                    type,       //节点类型
+                    key,        //节点数据字段
+                    ptype,      //父节点类型
+                    icon;       //图标类型
 
                 for (var i = 0; i < trees.length; i++) {
                     p = trees[i];
@@ -1286,6 +1347,10 @@
                     Factory.dealEvent(ev, tree, ev.type);
                 });
 
+                $.addListener(document, 'keyup', function (ev) {
+                    Event['documentKeyup'](ev, tree);
+                });
+
                 return this;
             },
             dealEvent: function (ev, tree, evType, opt) {
@@ -1299,7 +1364,11 @@
                     return this;
                 }
 
-                Factory.setFocus(tree);
+                if (Factory.isSearchPanelShow(tree)) {
+                    Factory.setSearchFocus(tree);
+                } else {
+                    Factory.setFocus(tree);
+                }
 
                 var events = [
                     'mousedown', 'mouseup', 'click', 'dblclick', 'contextmenu',
@@ -1326,6 +1395,21 @@
             setFocus: function (tree) {
                 if (tree.focus) {
                     tree.focus.focus();
+                }
+                return this;
+            },
+            setSearchFocus: function (tree) {
+                if (tree.keywords) {
+                    tree.keywords.focus();
+                }
+                return this;
+            },
+            setNodeFocus: function (tree, node) {
+                if (node) {
+                    var rowHeight = tree.cache.root.element.childNodes[0].offsetHeight;
+                    tree.cache.current.hovered = node;
+                    Factory.setElementHoverClass(tree, node.element);
+                    $.scrollTo(node.element, tree.panel, -rowHeight * 2);
                 }
                 return this;
             },
@@ -1389,11 +1473,17 @@
                 var node = Factory.getNode(tree, nid);
                 return node;
             },
-            getNodeNextSibling: function (tree, node) {
+            getNodeNextSibling: function (tree, node, sameLevel) {
                 if (!node) {
                     return tree.cache.root;
                 }
                 var elem = node.element, next;
+                if (sameLevel) {
+                    if (elem.nextSibling) {
+                        next = Factory.getNodeByElem(tree, elem.nextSibling);
+                    }
+                    return next;
+                }
                 if (node.childs.length > 0 && node.expanded) {
                     next = node.childs[0];
                 } else if (elem.nextSibling) {
@@ -1410,13 +1500,16 @@
                 }
                 return next;
             },
-            getNodePreviousSibling: function (tree, node) {
+            getNodePreviousSibling: function (tree, node, sameLevel) {
                 if (!node) {
                     return tree.cache.root;
                 }
-                var elem = node.element, pre, len;
-                if (node.parent === node) {
-                    return node;
+                var elem = node.element, pre, len;                
+                if (sameLevel) {
+                    if (elem.previousSibling) {
+                        pre = Factory.getNodeByElem(tree, elem.previousSibling);
+                    }
+                    return pre;
                 }
                 if (elem.previousSibling && elem.previousSibling.tagName === 'LI') {
                     pre = Factory.getNodeByElem(tree, elem.previousSibling);
@@ -1430,6 +1523,29 @@
                     pre = node.parent;
                 }
                 return pre;
+            },
+            getNodeByHover: function (tree, action) {
+                var node = null, arr;
+                switch (action) {
+                case 'first':
+                    node = tree.cache.root;
+                    break;
+                case 'last':
+                    arr = tree.panel.querySelectorAll('li.node');
+                    if (arr.length <= 0 || !(node = Factory.getNodeByElem(tree, arr[arr.length - 1]))) {
+                        return node;
+                    }
+                    var temp = node;
+                    while(!temp.parent.root) {
+                        if (!temp.parent.expanded) {
+                            node = temp.parent;
+                        }
+                        temp = temp.parent;
+                    }
+                    break;
+                }
+
+                return node;
             },
             setElementHoverClass: function (tree, elem) {
                 $.removeClass(tree.panel.querySelectorAll('li.hover'), 'hover');
@@ -1819,11 +1935,11 @@
                     tag = elem.tagName.toLowerCase(),
                     type = elem.type.toLowerCase(),
                     evName = 'mousedown';
-				/*
-				if (tag !== 'select' && (tag !== 'input' || !type.inArray(['text']))) {
-					return this;
-				}
-				*/
+                /*
+                if (tag !== 'select' && (tag !== 'input' || !type.inArray(['text']))) {
+                    return this;
+                }
+                */
                 $.addClass(elem, 'oui-tree-elem');
 
                 $.addListener(document, 'mousedown', function (ev) {
@@ -2336,6 +2452,7 @@
                     Event['searchKeydown'] (ev, tree);
                 });
                 $.addListener(txt, 'keyup', function (ev) {
+                    $.cancelBubble(ev);
                     var kc = $.getKeyCode(ev);
                     if (kc === KC.Enter || opt.realSearch || txt.value.trim() === '') {
                         Factory.searchNodes(tree, txt, this);
@@ -2410,9 +2527,9 @@
                         }
                     }
                     html = [
-                        count > 0 ? '<a class="btn btn-ok btn-primary">' + names[0] + '</a>' : '',	//确定
-                        count > 1 ? '<a class="btn btn-cancel">' + names[1] + '</a>' : '',			//取消
-                        count > 2 ? '<a class="btn btn-origin">' + names[2] + '</a>' : ''			//还原
+                        count > 0 ? '<a class="btn btn-ok btn-primary">' + names[0] + '</a>' : '',  //确定
+                        count > 1 ? '<a class="btn btn-cancel">' + names[1] + '</a>' : '',          //取消
+                        count > 2 ? '<a class="btn btn-origin">' + names[2] + '</a>' : ''           //还原
                     ].join('');
                 }
 
@@ -2572,6 +2689,18 @@
                 }
                 return this;
             },
+            isSearchPanelShow: function (tree) {
+                var show = false;
+                if (!tree.box || !tree.options.showSearch) {
+                    return show;
+                }
+                var div = tree.box.querySelector('div.search-result-panel');
+                if (div) {
+                    show = div.style.display !== 'none';
+                }
+
+                return show;
+            },
             showSearchResult: function (tree, nodes, keys) {
                 var div = tree.box.querySelector('div.search-result-panel'),
                     show = nodes ? true : undefined, elems,
@@ -2583,7 +2712,7 @@
                     div.innerHTML = [
                         '<div class="search-title">',
                         '<span class="ots-title"></span>',
-                        '<span class="ots-close">\u5173\u95ed</span>',		//关闭
+                        '<span class="ots-close">\u5173\u95ed</span>',      //关闭
                         '</div>',
                         '<div class="search-list"></div>'
                     ].join('');
@@ -2791,8 +2920,8 @@
                     box.appendChild(div);
                     Factory.buildEvent(tree);
                 }/* else {
-					div.innerHTML = '';
-				}*/
+                    div.innerHTML = '';
+                }*/
                 //先不清除内容，等节点创建好之后再清除，以减少DOM界面内容切换抖动的幅度
 
                 tag = that.element.tagName.toLowerCase();
@@ -3863,25 +3992,25 @@
                 that.childs = [];
                 //节点数据
                 that.data = $.extend({
-                    id: 0,			//ID
-                    name: '',		//名称
-                    code: ''		//编码
+                    id: 0,          //ID
+                    name: '',       //名称
+                    code: ''        //编码
                 }, par.data);
                 //节点图标样式
                 that.icon = $.extend({
-                    type: '',		//类型，示例: unit,device,camera 等
-                    status: '',		//在线状态，示例: on,off 等
-                    play: '',		//播放状态, 示例: play,pause,stop|''
-                    path: ''		//自定义图标URL
+                    type: '',       //类型，示例: unit,device,camera 等
+                    status: '',     //在线状态，示例: on,off 等
+                    play: '',       //播放状态, 示例: play,pause,stop|''
+                    path: ''        //自定义图标URL
                 }, par.icon);
 
-                that.initParam('dynamic', par)		//是否动态加载
-                    .initParam('expanded', par)		//是否展开
-                    .initParam('checked', par)		//是否选中复选框
-                    .initParam('selected', par)		//是否选中节点
-                    .initParam('disabled', par)		//是否禁用节点
-                    .initParam('parent', par)		//父节点
-                    .initParam('childbox', par)		//子节点容器DOM元素
+                that.initParam('dynamic', par)      //是否动态加载
+                    .initParam('expanded', par)     //是否展开
+                    .initParam('checked', par)      //是否选中复选框
+                    .initParam('selected', par)     //是否选中节点
+                    .initParam('disabled', par)     //是否禁用节点
+                    .initParam('parent', par)       //父节点
+                    .initParam('childbox', par)     //子节点容器DOM元素
                     .initParam('showType', par)
                     .initParam('showStatus', par);
 
