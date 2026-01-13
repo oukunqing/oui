@@ -1404,9 +1404,12 @@
                 }
                 return this;
             },
+            getNodeRowHeight: function (tree) {
+                return tree.cache.root.element.childNodes[0].offsetHeight;
+            },
             setNodeFocus: function (tree, node) {
                 if (node) {
-                    var rowHeight = tree.cache.root.element.childNodes[0].offsetHeight;
+                    var rowHeight = Factory.getNodeRowHeight(tree);
                     tree.cache.current.hovered = node;
                     Factory.setElementHoverClass(tree, node.element);
                     $.scrollTo(node.element, tree.panel, -rowHeight * 2);
@@ -3329,8 +3332,8 @@
                         opt.itemBody ? '<div class="item-body" nid="' + p.nid + '">' : '',
                         opt.showIcon ? '<span class="' + node.getIconClass() + '" nid="' + p.nid + '"></span>' : '',
                         opt.showCheck ? '<span class="check" nid="' + p.nid + '"></span>' : '',
-                        '<a class="name" nid="', p.nid, '"', title, '>',
-                        '<span class="text" nid="', p.nid, '">', p.text, '</span>',
+                        '<a class="name" nid="', p.nid, '"', '>',
+                        '<span class="text" nid="', p.nid, '"', title, '>', p.text, '</span>',
                         opt.showCount ? '<span class="count" nid="' + p.nid + '"></span>' : '',
                         opt.showDesc ? '<span class="desc" nid="' + p.nid + '">' + (p.desc || '') + '</span>' : '',
                         '</a>',
@@ -4600,10 +4603,11 @@
             return this.self().expandChild(linkage, self, types, false);
         },
         position: function (selected) {
-            var that = this.self(), offsetY = -50;
+            var that = this.self(),
+                offsetY = -Factory.getNodeRowHeight(that.tree) * 2;
             Factory.setCurrentCache(that.tree, 'position', that).expandTo(that.tree, that, true);
             $.scrollTo(that.element, that.tree.panel, offsetY);
-            $.console.log('that.element:', that.element, offsetY);
+            //$.console.log('that.element:', that.element, offsetY);
             return selected ? that.setSelected(true) : that;
         },
         select: function (selected, position) {

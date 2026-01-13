@@ -7865,3 +7865,194 @@ $.debounce
         }
     });
 }(OUI);
+
+/*
+$.title
+*/
+!function ($) {
+    'use strict';
+
+    const Cache = {
+        caches: {},
+        timers: {},
+        titles: {},
+        getCache: function (id) {
+            return Cache.caches['title_' + id];
+        },
+        setCache: function (id, elem) {
+            return Cache.caches['title_' + id] = { id: id, elem: elem }, this;
+        }
+    };
+
+    var Factory = {
+        buildTitle: function (options) {
+            var opt = $.extend({
+                id: '',
+                // 目标元素
+                element: document.body,
+                attribute: 'data-title',
+                // 是否跟随光标移动
+                move: true,
+                // 自动关闭的时间，单位：毫秒
+                timeout: 15 * 1000,
+                //自定义样式
+                style: ''
+            }, options);
+
+            if (!$.isElement($.toElement(opt.element))) {
+                return null;
+            }
+
+            var cache = Cache.getCache(opt.id), elem;
+            if (cache) {
+                elem = cache.elem;
+                elem.options = opt;
+            } else {
+                elem = new Title(opt);
+                Cache.setCache(opt.id, elem);
+            }
+            return elem;
+        },
+        buildElement: function(that) {
+            var elem = document.createElement('DIV'),
+                opt = that.options;
+
+            elem.className = 'oui-title-panel-element';
+
+            document.body.appendChild(elem);
+            that.element = elem;
+
+            return elem;
+        },
+        showTitle: function(ev, title, that) {
+            var elem = that.element, bs = $.getBodySize(),
+                opt = that.options;
+
+            if (!elem) {
+                elem = Factory.buildElement(that);
+            }
+            var left = ev.clientX + 10,
+                top = ev.clientY + 10;
+
+            if (!title) {
+                elem.style.left = left + 'px';
+                elem.style.top = top + 'px';
+            } else {
+                elem.style.cssText = [
+                    'border:solid 1px #ccc;',
+                    'margin:0;padding:3px 5px;border-radius:5px;',
+                    'background:#fff; opacity:0.98;',
+                    'z-index:99999999;',
+                    'font-size:14px;',
+                    'line-height:1.5em;',
+                    'font-family:Arial,宋体;'
+                ].join('') + (opt.style || '') + [
+                    'position:absolute;white-space:pre;',
+                    'display:block;overflow:hidden;',
+                    'text-overflow:ellipsis;',
+                    'max-width:', bs.width - 20, 'px;',
+                    'max-height:', bs.height - 20, 'px;',
+                    'top:', top, 'px;',
+                    'left:', left, 'px;',
+                ].join('');
+
+                elem.innerHTML = title;
+            }
+
+            if (elem.offsetWidth + elem.offsetLeft > bs.width) {
+                elem.style.left = (bs.width - elem.offsetWidth - 5) + 'px';
+            }
+
+            if (opt.timeout) {                
+                if (that.timer) {
+                    window.clearTimeout(that.timer);
+                }
+                that.timer = window.setTimeout(function() {
+                    Factory.hideTitle(that);
+                }, opt.timeout);
+            }
+
+            return this;
+        },
+        hideTitle: function (that) {
+            if (that.element) {
+                that.element.style.display = 'none';
+            }
+            return this;
+        }
+    };
+
+    function Title(options) {
+        var opt = $.extend({}, options);
+
+        this.id = opt.id;
+        this.options = opt;
+        this.timer = null;
+        this.element = null;
+        this.target = null;
+        this.current = null;
+
+        this.initial(opt);
+    }
+
+    Title.prototype = {
+        initial: function (opt) {
+            var that = this;
+
+            $.addListener(opt.element, 'mousemove', function(ev) {
+                $.cancelBubble(ev);
+                var elem = ev.target, tempName = 'oui-data-title-temp', attrName = opt.attribute;
+                if (that.current === elem) {
+                    if (!opt.move) {
+                        return false;
+                    }
+                }
+                that.current = elem;
+                if (elem.title) {
+                    if (!elem.getAttribute(attrName)) {
+                        elem.setAttribute(attrName, elem.title);
+                    }
+                    elem.removeAttribute('title');
+                }
+                var tag = elem.tagName.toLowerCase(), title = $.getAttribute(elem, tempName) || $.getAttribute(elem, attrName);
+                if (title) {
+                    if (that.target === elem) {
+                        Factory.showTitle(ev, null, that);
+                        return false;
+                    }
+                    that.target = elem;
+                    that.attrName = attrName;
+                    elem.removeAttribute(attrName);
+                    elem.setAttribute(tempName, title);
+
+                    Factory.showTitle(ev, title, that);
+
+                    if (!elem.mouseout) {
+                        $.addListener(elem, 'mouseout', function() {
+                            Factory.hideTitle(that);
+                        });
+                        elem.mouseout = 1;
+                    }
+                }
+                if (that.target && that.target !== elem) {
+                    //鼠标移出
+                    that.target.setAttribute(that.attrName, that.target.getAttribute(tempName));
+                    that.target.removeAttribute(tempName);
+                    that.target = null;
+
+                    Factory.hideTitle(that);
+                }
+                return true;
+            });
+            return this;
+        }
+    };
+
+    $.extend($, {
+        title: function (options) {
+            return Factory.buildTitle(options);
+        }
+    });
+
+    $.title({ id:'oui-title' });
+}(OUI);

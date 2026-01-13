@@ -21,11 +21,19 @@
 </head>
 
 <body>
-    <div class="img-box"><img class="img" src="magnifier_imgs/20251203100000_01_866663060823117_000_01_thumb.jpg" />
+    <div id="div0">
+        <div class="img-box"><img class="img" src="magnifier_imgs/20251203100000_01_866663060823117_000_01_thumb.jpg" />
+            <a href="#" title="第一张图片-866663060823117-&#13;magnifier_imgs/20251203100000_01_866663060823117_000_01_thumb.jpg">第一张图片</a>
+        </div>
+        <div class="img-box"><img class="img" src="magnifier_imgs/20251203120002_01_866663060820881_000_01_thumb.jpg" />
+            <a href="#" title="第二张图片-866663060820881-&#10;magnifier_imgs/20251203120002_01_866663060820881_000_01_thumb.jpg">第二张图片</a>
+        </div>
+        <div class="img-box"><img class="img" src="magnifier_imgs/20251203124002_01_866663060821608_000_01_thumb.jpg" />
+            <a href="#" title="第三张图片-866663060821608-magnifier_imgs/20251203124002_01_866663060821608_000_01_thumb.jpg">第三张图片</a>
+        </div>
     </div>
-    <div class="img-box"><img class="img" src="magnifier_imgs/20251203120002_01_866663060820881_000_01_thumb.jpg" />
-    </div>
-    <div class="img-box"><img class="img" src="magnifier_imgs/20251203124002_01_866663060821608_000_01_thumb.jpg" />
+    <div id="div1">
+        <a href="#" title="指定的Title内容-866663060821608">测试内容</a>
     </div>
 </body>
 
@@ -35,6 +43,7 @@
 <script type="text/javascript">
     window.onload = function () {
         initMagnifier({ target: document.body, position: 0, targetCursor: null });
+
     };
 
     function initMagnifier(opt) {
