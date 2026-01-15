@@ -7867,6 +7867,200 @@ $.debounce
 }(OUI);
 
 /*
+    判断HTML元素是否被（上级元素）遮挡
+*/
+!function ($) {
+    'use strict';
+    /**
+    * 获取目标元素的视口矩形
+    * @param {HTMLElement} elem 目标DOM元素
+    * @returns {DOMRect|null} 元素矩形信息
+    */
+    function getTargetElementRect(elem) {
+        if (!(elem instanceof HTMLElement)) {
+            //console.error("参数必须是有效的HTMLElement");
+            return null;
+        }
+        // 若元素本身display: none或visibility: hidden，直接返回不可见
+        const style = window.getComputedStyle(elem);
+        if (style.display === "none" || style.visibility === "hidden") {
+            //console.warn("目标元素本身不可见");
+            return null;
+        }
+        return elem.getBoundingClientRect();
+    }
+
+    /**
+    * 判断HTML元素是否存在滚动条
+    * @param {HTMLElement} element 目标DOM元素
+    * @param {string} direction 可选，滚动条方向：'vertical'（垂直，默认）/'horizontal'（水平）
+    * @returns {boolean} 是否存在对应方向的滚动条
+    */
+    function hasScrollbar(elem, direction) {
+        if (!(elem instanceof HTMLElement)) {
+            //console.error("参数必须是有效的HTMLElement");
+            return false;
+        }
+        const style = window.getComputedStyle(elem);
+        let hasScroll = false;
+
+        if (direction === 'horizontal') {
+            // 水平滚动条判断：内容宽度 > 可视宽度，且overflow允许水平滚动
+            const overflowX = style.overflowX || style.overflow;
+            const isScrollAllowed = ['auto', 'scroll'].includes(overflowX);
+            hasScroll = elem.scrollWidth > elem.clientWidth && isScrollAllowed;
+        } else {
+            // 垂直滚动条判断：内容高度 > 可视高度，且overflow允许垂直滚动
+            const overflowY = style.overflowY || style.overflow;
+            const isScrollAllowed = ['auto', 'scroll'].includes(overflowY);
+            hasScroll = elem.scrollHeight > elem.clientHeight && isScrollAllowed;
+        }
+        return hasScroll;
+    }
+
+    /**
+    * 获取HTML元素滚动条的尺寸（宽度/高度）
+    * @param {HTMLElement} element 目标DOM元素
+    * @param {string} direction 可选，滚动条方向：'vertical'（垂直，默认）/'horizontal'（水平）
+    * @returns {number} 滚动条尺寸（像素值，无对应滚动条返回0）
+    */
+    function getScrollbarSize(elem, direction) {
+        // 先判断是否存在对应方向的滚动条，不存在直接返回0
+        if (!hasScrollbar(elem, direction)) {
+            return 0;
+        }
+
+        let scrollbarSize = 0;
+        if (direction === 'horizontal') {
+            // 水平滚动条高度 = 元素整体高度 - 可视区域高度（offsetHeight - clientHeight）
+            scrollbarSize = elem.offsetHeight - elem.clientHeight;
+        } else {
+            // 垂直滚动条宽度 = 元素整体宽度 - 可视区域宽度（offsetWidth - clientWidth）
+            scrollbarSize = elem.offsetWidth - elem.clientWidth;
+        }
+
+        // 兼容极端场景（差值为负数或0），返回合理值
+        return Math.max(0, Math.round(scrollbarSize));
+    }
+
+    /**
+    * 计算单个父元素的可见区域矩形（相对于视口）
+    * @param {HTMLElement} elem 父级DOM元素
+    * @returns {DOMRect} 父元素的可见区域矩形
+    */
+    function getParentVisibleRect(elem) {
+        const rect = elem.getBoundingClientRect();
+        const style = window.getComputedStyle(elem);
+
+        // 父元素的内边距（影响可见区域）
+        const p = {
+            left: parseFloat(style.paddingLeft) || 0,
+            top: parseFloat(style.paddingTop) || 0,
+            right: parseFloat(style.paddingRight) || 0,
+            bottom: parseFloat(style.paddingBottom) || 0
+        };
+        // 计算父元素内容区域的可见矩形（排除内边距、滚动偏移）
+        const v = {
+            left: rect.left + p.left,
+            top: rect.top + p.top,
+            //right: rect.right - p.right - elem.scrollLeft,
+            right: rect.right - p.right - getScrollbarSize(elem),
+            //bottom: rect.bottom - p.bottom - elem.scrollTop
+            bottom: rect.bottom - p.bottom - getScrollbarSize(elem, 'horizontal')
+        };
+
+        // 返回标准化的DOMRect（兼容getBoundingClientRect返回格式）
+        return new DOMRect(
+            v.left,
+            v.top,
+            v.right - v.left,
+            v.bottom - v.top
+        );
+    }
+
+    /**
+     * 检查父元素是否存在裁剪能力（overflow属性）
+     * @param {HTMLElement} elem 父级DOM元素
+     * @returns {boolean} 是否可能裁剪子元素
+     */
+    function hasClipCapability(elem) {
+        const style = window.getComputedStyle(elem);
+        const p = { overflow: style.overflow, x: style.overflowX, y: style.overflowY };
+
+        // 以下取值均可能导致子元素被裁剪
+        const clipValues = ["hidden", "scroll", "auto"];
+        return clipValues.includes(p.overflow) || clipValues.includes(p.x) || clipValues.includes(p.y);
+    }
+
+    /**
+     * 递归遍历所有上级元素，判断是否存在遮挡
+     * @param {HTMLElement} elem 目标DOM元素
+     * @param {DOMRect} targetRect 目标元素的视口矩形
+     * @returns {boolean} 是否被上级元素遮挡/显示不全
+     */
+    function checkParentClip(elem, rect) {
+        let parent = elem.parentNode;
+
+        // 递归终止条件：遍历至<body>或null
+        while (parent && parent.tagName !== "BODY") {
+            // 仅当父元素具备裁剪能力时，才需要判断区域重叠
+            if (hasClipCapability(parent)) {
+                const parentVisibleRect = getParentVisibleRect(parent);
+
+                // 判断目标元素是否完全在父元素可见区域内
+                const isFullyContained = (
+                    rect.left >= parentVisibleRect.left &&
+                    rect.top >= parentVisibleRect.top &&
+                    rect.right <= parentVisibleRect.right &&
+                    rect.bottom <= parentVisibleRect.bottom
+                );
+
+                // 若不完全包含，说明被该父元素遮挡/显示不全
+                if (!isFullyContained) {
+                    //console.log(`被父元素 <${parent.tagName.toLowerCase()}> 遮挡`);
+                    return true;
+                }
+            }
+            // 向上遍历下一个父元素
+            parent = parent.parentNode;
+        }
+
+        // 遍历完所有父元素，均未遮挡
+        return false;
+    }
+
+    /**
+     * 判断HTML元素是否被上级元素遮挡或显示不全（多级嵌套兼容）
+     * @param {HTMLElement} elem 目标DOM元素
+     * @returns {boolean} true=被遮挡/显示不全，false=完全可见
+     */
+    function isElementObscuredByParent(elem) {
+        // 步骤1：获取目标元素矩形
+        const rect = getTargetElementRect(elem);
+        if (!rect) {
+            return true; // 元素本身不可见，视为"显示不全"
+        }
+        // 步骤2：检查所有上级父元素是否遮挡
+        return checkParentClip(elem, rect);
+    }
+
+    $.extend($, {
+        isElementObscured: function (elem) {
+            return isElementObscuredByParent(elem);
+        },
+        isElemObscured: function (elem) {
+            return isElementObscuredByParent(elem);
+        },
+        isElementCovered: function (elem) {
+            return isElementObscuredByParent(elem);
+        },
+        isElemCovered: function (elem) {
+            return isElementObscuredByParent(elem);
+        }
+    });
+}(OUI);
+
+/*
 $.title
 */
 !function ($) {
@@ -7888,6 +8082,7 @@ $.title
         buildTitle: function (options) {
             var opt = $.extend({
                 id: '',
+                enabled: true,
                 // 目标元素
                 element: document.body,
                 attribute: 'data-title',
@@ -7928,6 +8123,10 @@ $.title
             var elem = that.element, bs = $.getBodySize(),
                 opt = that.options;
 
+            if (!opt.enabled) {
+                return this;
+            }
+
             if (!elem) {
                 elem = Factory.buildElement(that);
             }
@@ -7963,7 +8162,7 @@ $.title
                 elem.style.left = (bs.width - elem.offsetWidth - 5) + 'px';
             }
 
-            if (opt.timeout) {                
+            if (opt.timeout) {
                 if (that.timer) {
                     window.clearTimeout(that.timer);
                 }
@@ -7979,6 +8178,9 @@ $.title
                 that.element.style.display = 'none';
             }
             return this;
+        },
+        isCovered: function (elem) {
+            return $.isElemObscured(elem);
         }
     };
 
@@ -7998,10 +8200,13 @@ $.title
     Title.prototype = {
         initial: function (opt) {
             var that = this;
-
+            if (!opt.enabled) {
+                return that;
+            }
             $.addListener(opt.element, 'mousemove', function(ev) {
                 $.cancelBubble(ev);
-                var elem = ev.target, tempName = 'oui-data-title-temp', attrName = opt.attribute;
+
+                var elem = ev.target, tmpAttr = 'oui-data-title-tmp', delAttr = 'oui-data-title-del', tarAttr = opt.attribute;
                 if (that.current === elem) {
                     if (!opt.move) {
                         return false;
@@ -8009,21 +8214,30 @@ $.title
                 }
                 that.current = elem;
                 if (elem.title) {
-                    if (!elem.getAttribute(attrName)) {
-                        elem.setAttribute(attrName, elem.title);
+                    if (!elem.getAttribute(tarAttr)) {
+                        elem.setAttribute(tarAttr, elem.title);
+                        //elem.setAttribute('oui-title', 1);
                     }
                     elem.removeAttribute('title');
                 }
-                var tag = elem.tagName.toLowerCase(), title = $.getAttribute(elem, tempName) || $.getAttribute(elem, attrName);
+                var tag = elem.tagName.toLowerCase(), con,
+                    title = $.getAttribute(elem, tmpAttr) || $.getAttribute(elem, delAttr) || $.getAttribute(elem, tarAttr);
                 if (title) {
+                    con = elem.innerHTML;
+                    if (con === title && !Factory.isCovered(elem)) {
+                        elem.removeAttribute(tarAttr);
+                        elem.setAttribute(delAttr, title);
+                        return false;
+                    }
+                    
                     if (that.target === elem) {
                         Factory.showTitle(ev, null, that);
                         return false;
                     }
                     that.target = elem;
-                    that.attrName = attrName;
-                    elem.removeAttribute(attrName);
-                    elem.setAttribute(tempName, title);
+                    that.attribute = tarAttr;
+                    elem.removeAttribute(tarAttr);
+                    elem.setAttribute(tmpAttr, title);
 
                     Factory.showTitle(ev, title, that);
 
@@ -8036,8 +8250,12 @@ $.title
                 }
                 if (that.target && that.target !== elem) {
                     //鼠标移出
-                    that.target.setAttribute(that.attrName, that.target.getAttribute(tempName));
-                    that.target.removeAttribute(tempName);
+                    con = that.target.getAttribute(tmpAttr) || that.target.getAttribute(delAttr);
+                    if (con) {
+                        that.target.setAttribute(that.attribute, con);
+                        that.target.removeAttribute(tmpAttr);
+                        that.target.removeAttribute(delAttr);
+                    }
                     that.target = null;
 
                     Factory.hideTitle(that);
@@ -8054,5 +8272,7 @@ $.title
         }
     });
 
-    $.title({ id:'oui-title' });
+    if (parseInt('0' + $.getQueryString(location.href, 'origin-title'), 10) !== 1) {
+        $.title({ id:'oui-title' });
+    }
 }(OUI);
