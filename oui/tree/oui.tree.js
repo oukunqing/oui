@@ -64,10 +64,6 @@
             },
             DebounceDelay: 256,
             DebounceTimeout: 4000,
-            //需要显示title的最小层级
-            TitleTextLevel: 2,
-            //需要显示title的最小文字长度
-            TitleTextLength: 12,
             //缓存Cookie过期时间，单位：分钟
             CacheCookieExpire: 10,
             Lang: {
@@ -1065,7 +1061,6 @@
                 opt.showInfo = $.isBoolean($.getParam(opt, 'showInfo,showinfo'), false);
 
                 opt.showTitle = $.isBoolean($.getParam(opt, 'showTitle,showtitle'), false);
-                opt.forceTitle = $.isBoolean($.getParam(opt, 'forceTitle,forcetitle'), false);
 
                 opt.showSearch = $.isBoolean($.getParam(opt, 'showSearch,showForm,showsearch'), opt.target ? true : false);
                 opt.realSearch = $.isBoolean($.getParam(opt, 'realSearch'), false);
@@ -3324,7 +3319,7 @@
                 if (opt.treeMenu && opt.rightSwitch) {
                     float = ' style="float:right;margin-right:5px;"';
                 }
-                var title = opt.showTitle && (opt.forceTitle || p.title.length > Config.TitleTextLength) ? ' title="' + p.title + '"' : '',
+                var title = opt.showTitle ? ' title="' + p.title + '"' : '',
                     pad = pw > 0 ? ' style="padding-left:' + (p.level * pw + (opt.rightSwitch ? 5 : 0)) + 'px;"' : '',
                     html = [
                         '<div class="item" nid="', p.nid, '"', pad, '>',
@@ -5077,8 +5072,6 @@
                 showStatus: undefined,
                 //是否显示title
                 showTitle: undefined,
-                //是否强制显示title
-                forceTitle: undefined,
                 //是否显示搜索
                 showSearch: undefined,
                 //实时搜索

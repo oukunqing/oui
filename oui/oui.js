@@ -7949,8 +7949,10 @@ $.debounce
     * @returns {DOMRect} 父元素的可见区域矩形
     */
     function getParentVisibleRect(elem) {
-        const rect = elem.getBoundingClientRect();
-        const style = window.getComputedStyle(elem);
+        let rect = elem.getBoundingClientRect(), style = {};
+        if (elem.tagName !== "BODY" && elem.tagName !== 'HTML') {
+            style = window.getComputedStyle(elem);
+        }
 
         // 父元素的内边距（影响可见区域）
         const p = {
@@ -7984,8 +7986,16 @@ $.debounce
      * @returns {boolean} 是否可能裁剪子元素
      */
     function hasClipCapability(elem) {
-        const style = window.getComputedStyle(elem);
-        const p = { overflow: style.overflow, x: style.overflowX, y: style.overflowY };
+        if (!elem.tagName) {
+            return false;
+        }
+        if (elem.tagName === 'BODY' || elem.tagName === 'HTML') {
+            return true;
+        }
+        let style = window.getComputedStyle(elem),
+            p = { 
+                overflow: style.overflow, x: style.overflowX, y: style.overflowY 
+            };
 
         // 以下取值均可能导致子元素被裁剪
         const clipValues = ["hidden", "scroll", "auto"];
@@ -8000,9 +8010,9 @@ $.debounce
      */
     function checkParentClip(elem, rect) {
         let parent = elem.parentNode;
-
         // 递归终止条件：遍历至<body>或null
-        while (parent && parent.tagName !== "BODY") {
+        //while (parent && parent.tagName !== 'BODY') {
+        while (parent && parent.tagName) {
             // 仅当父元素具备裁剪能力时，才需要判断区域重叠
             if (hasClipCapability(parent)) {
                 const parentVisibleRect = getParentVisibleRect(parent);
@@ -8130,8 +8140,9 @@ $.title
             if (!elem) {
                 elem = Factory.buildElement(that);
             }
-            var left = ev.clientX + 10,
-                top = ev.clientY + 10;
+            var scroll = $.getScrollPosition();
+            var left = scroll.left + ev.clientX + 10,
+                top = scroll.top + ev.clientY + 10;
 
             if (!title) {
                 elem.style.left = left + 'px';
@@ -8214,6 +8225,16 @@ $.title
                     if (!opt.move) {
                         return false;
                     }
+                } else if (that.current) {
+                    //鼠标移出
+                    var con = that.current.getAttribute(tmpAttr) || that.current.getAttribute(delAttr);
+                    if (con) {
+                        that.current.setAttribute(tarAttr, con);
+                        that.current.removeAttribute(tmpAttr);
+                        that.current.removeAttribute(delAttr);
+                        that.current.removeAttribute(coverAttr);
+                        that.current.removeAttribute(timeAttr);
+                    }
                 }
                 that.current = elem;
                 if (elem.title) {
@@ -8234,7 +8255,7 @@ $.title
                             // 是否被遮挡：0-未设置，1-遮挡，2-未遮挡
                             var covered = parseInt('0' + elem.getAttribute(coverAttr), 10),
                                 time = parseInt('0' + elem.getAttribute(timeAttr), 10);
-
+                            // 2秒钟之内已经检测过，不再重复检测
                             if (covered && new Date().getTime() - time <= 2000) {
                                 if (covered === 2) {
                                     elem.removeAttribute(tarAttr);
