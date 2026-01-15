@@ -7959,7 +7959,7 @@ $.debounce
             right: parseFloat(style.paddingRight) || 0,
             bottom: parseFloat(style.paddingBottom) || 0
         };
-        // 计算父元素内容区域的可见矩形（排除内边距、滚动偏移）
+        // 计算父元素内容区域的可见矩形（排除内边距、滚动条）
         const v = {
             left: rect.left + p.left,
             top: rect.top + p.top,
@@ -8206,7 +8206,10 @@ $.title
             $.addListener(opt.element, 'mousemove', function(ev) {
                 $.cancelBubble(ev);
 
-                var elem = ev.target, tmpAttr = 'oui-data-title-tmp', delAttr = 'oui-data-title-del', tarAttr = opt.attribute;
+                var elem = ev.target, tarAttr = opt.attribute, 
+                    tmpAttr = 'oui-data-title-tmp', delAttr = 'oui-data-title-del',
+                    coverAttr = 'data-cover', timeAttr = 'data-cover-ts';
+
                 if (that.current === elem) {
                     if (!opt.move) {
                         return false;
@@ -8220,46 +8223,78 @@ $.title
                     }
                     elem.removeAttribute('title');
                 }
-                var tag = elem.tagName.toLowerCase(), con,
-                    title = $.getAttribute(elem, tmpAttr) || $.getAttribute(elem, delAttr) || $.getAttribute(elem, tarAttr);
-                if (title) {
-                    con = elem.innerHTML;
-                    if (con === title && !Factory.isCovered(elem)) {
+
+                function _title() {
+                    var tag = elem.tagName.toLowerCase(), con,
+                        title = $.getAttribute(elem, tmpAttr) || $.getAttribute(elem, delAttr) || $.getAttribute(elem, tarAttr);
+                    if (title) {
+                        con = elem.innerHTML;
+                        if (con === title) {
+                            // 优化处理，减少重复检测
+                            // 是否被遮挡：0-未设置，1-遮挡，2-未遮挡
+                            var covered = parseInt('0' + elem.getAttribute(coverAttr), 10),
+                                time = parseInt('0' + elem.getAttribute(timeAttr), 10);
+
+                            if (covered && new Date().getTime() - time <= 2000) {
+                                if (covered === 2) {
+                                    elem.removeAttribute(tarAttr);
+                                    elem.setAttribute(delAttr, title);
+                                    return false;
+                                }
+                            } else if (!Factory.isCovered(elem)) {
+                                elem.setAttribute(coverAttr, 2);
+                                elem.setAttribute(timeAttr, new Date().getTime());
+                                elem.removeAttribute(tarAttr);
+                                elem.setAttribute(delAttr, title);
+                                return false;
+                            } else {
+                                elem.setAttribute(coverAttr, 1);
+                                elem.setAttribute(timeAttr, new Date().getTime());
+                            }
+                        }
+                        
+                        if (that.target === elem) {
+                            Factory.showTitle(ev, null, that);
+                            return false;
+                        }
+                        that.target = elem;
+                        that.attribute = tarAttr;
                         elem.removeAttribute(tarAttr);
-                        elem.setAttribute(delAttr, title);
-                        return false;
-                    }
-                    
-                    if (that.target === elem) {
-                        Factory.showTitle(ev, null, that);
-                        return false;
-                    }
-                    that.target = elem;
-                    that.attribute = tarAttr;
-                    elem.removeAttribute(tarAttr);
-                    elem.setAttribute(tmpAttr, title);
+                        elem.setAttribute(tmpAttr, title);
 
-                    Factory.showTitle(ev, title, that);
+                        Factory.showTitle(ev, title, that);
 
-                    if (!elem.mouseout) {
-                        $.addListener(elem, 'mouseout', function() {
-                            Factory.hideTitle(that);
-                        });
-                        elem.mouseout = 1;
+                        if (!elem.mouseout) {
+                            $.addListener(elem, 'mouseout', function() {
+                                Factory.hideTitle(that);
+                            });
+                            elem.mouseout = 1;
+                        }
                     }
+                    if (that.target && that.target !== elem) {
+                        //鼠标移出
+                        con = that.target.getAttribute(tmpAttr) || that.target.getAttribute(delAttr);
+                        if (con) {
+                            that.target.setAttribute(that.attribute, con);
+                            that.target.removeAttribute(tmpAttr);
+                            that.target.removeAttribute(delAttr);
+                            that.target.removeAttribute(coverAttr);
+                            that.target.removeAttribute(timeAttr);
+                        }
+                        that.target = null;
+
+                        Factory.hideTitle(that);
+                    }
+                    return true;
                 }
-                if (that.target && that.target !== elem) {
-                    //鼠标移出
-                    con = that.target.getAttribute(tmpAttr) || that.target.getAttribute(delAttr);
-                    if (con) {
-                        that.target.setAttribute(that.attribute, con);
-                        that.target.removeAttribute(tmpAttr);
-                        that.target.removeAttribute(delAttr);
-                    }
-                    that.target = null;
-
-                    Factory.hideTitle(that);
-                }
+                $.debounce({
+                    id: 'oui-title-debounce',
+                    delay: 5,
+                    timeout: 3000,
+                }, function () {
+                    return _title();
+                });
+                
                 return true;
             });
             return this;
