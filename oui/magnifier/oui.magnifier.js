@@ -207,6 +207,7 @@
         let opt = $.extend({
             width: 150,
             height: 150,
+            //opacity: 0.95,
             //radius: 0
             //大图缩放比例，默认为1
             scaleRatio: 1,

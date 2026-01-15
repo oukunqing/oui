@@ -8005,7 +8005,7 @@ $.debounce
     /**
      * 递归遍历所有上级元素，判断是否存在遮挡
      * @param {HTMLElement} elem 目标DOM元素
-     * @param {DOMRect} targetRect 目标元素的视口矩形
+     * @param {DOMRect} rect 目标元素的视口矩形
      * @returns {boolean} 是否被上级元素遮挡/显示不全
      */
     function checkParentClip(elem, rect) {
@@ -8149,19 +8149,21 @@ $.title
                 elem.style.top = top + 'px';
             } else {
                 elem.style.cssText = [
-                    'border:solid 1px #ccc;',
+                    'border:solid 1px #ddd;',
                     'margin:0;padding:3px 5px;border-radius:5px;',
                     'background:#fff; opacity:0.98;',
                     'z-index:99999999;',
                     'font-size:14px;',
                     'line-height:1.5em;',
-                    'font-family:Arial,宋体;'
+                    'font-family:Arial,宋体;',
+                    //边框灰色阴影
+                    'box-shadow:0 0 6px 1px rgba(204, 204, 204, 0.5);'
                 ].join('') + (opt.style || '') + [
                     'position:absolute;white-space:pre;',
                     'display:block;overflow:hidden;',
                     'text-overflow:ellipsis;',
-                    'max-width:', bs.width - 20, 'px;',
-                    'max-height:', bs.height - 20, 'px;',
+                    'max-width:', bs.width - 10, 'px;',
+                    'max-height:', bs.height - 10, 'px;',
                     'top:', top, 'px;',
                     'left:', left, 'px;',
                 ].join('');
@@ -8170,7 +8172,7 @@ $.title
             }
 
             if (elem.offsetWidth + elem.offsetLeft > bs.width) {
-                elem.style.left = (bs.width - elem.offsetWidth - 5) + 'px';
+                elem.style.left = (bs.width - elem.offsetWidth) + 'px';
             }
 
             if (opt.timeout) {
