@@ -43,6 +43,7 @@
             FileDir: $.getFilePath(SelfPath),
             DefaultSkin: 'default',
             Skin: '',
+            ShowTitle: $.getQueryString(SelfPath, 'title') === '1',
             GetSkin: function () {
                 if (!Config.Skin) {
                     Config.Skin = $.getQueryString(Config.FilePath, 'skin') || Config.DefaultSkin;
@@ -1060,7 +1061,7 @@
 
                 opt.showInfo = $.isBoolean($.getParam(opt, 'showInfo,showinfo'), false);
 
-                opt.showTitle = $.isBoolean($.getParam(opt, 'showTitle,showtitle'), false);
+                opt.showTitle = $.isBoolean($.getParam(opt, 'showTitle,showtitle'), Config.ShowTitle);
 
                 opt.showSearch = $.isBoolean($.getParam(opt, 'showSearch,showForm,showsearch'), opt.target ? true : false);
                 opt.realSearch = $.isBoolean($.getParam(opt, 'realSearch'), false);

@@ -8054,6 +8054,53 @@ $.debounce
         return checkParentClip(elem, rect);
     }
 
+    /**
+    * 判断HTML元素是否因宽度限制导致显示不完整（内容宽度超过元素可视宽度）
+    * @param {HTMLElement} element 目标DOM元素
+    * @returns {boolean} true=宽度不足、显示不完整；false=宽度充足、内容完整显示
+    */
+    function isElementWidthIncomplete(elem, content) {
+        // 1. 参数合法性校验
+        if (!(elem instanceof HTMLElement)) {
+            //console.error("参数必须是有效的HTMLElement");
+            return false;
+        }
+
+        // 2. 获取元素的计算样式（避免内联样式遗漏，确保判断准确）
+        const style = window.getComputedStyle(elem);
+
+        // 3. 特殊情况排除：元素本身不可见（无需判断显示是否完整）
+        if (style.display === "none" || style.visibility === "hidden") {
+            //console.warn("目标元素本身不可见，无需判断宽度显示完整性");
+            return false;
+        }
+
+        if (elem.tagName === 'SELECT') {
+            let clientWidth = elem.clientWidth,
+                paddingWidth = $.getPaddingSize(elem).paddingWidth;
+            // 这里要减去SELECT元素的右边箭头的宽度大约是15像素
+            // 再减去留白的像素
+            return $.getContentSize(content).width > clientWidth - 15 - paddingWidth;
+        }
+
+        // 4. 核心判断：内容完整宽度 > 元素可视宽度 或者 内容完整高度 > 元素可视高度
+        const hasContentOverflow = elem.scrollWidth > elem.clientWidth || elem.scrollHeight > elem.clientHeight;
+
+        // 5. 结合横向溢出属性，判断是否真的"显示不完整"（裁剪/滚动）
+        // 仅当溢出内容被处理（裁剪/滚动）时，才视为"显示不完整"；visible时内容溢出但完整显示在外部
+        const p = { overflow: style.overflow, x: style.overflowX, y: style.overflowY };
+
+        // 以下取值均可能导致子元素被裁剪
+        const clipValues = ["hidden", "scroll", "auto"];
+        const isContentClipped = clipValues.includes(p.overflow) || clipValues.includes(p.x) || clipValues.includes(p.y);
+
+        // 6. 补充：文本不换行场景（nowrap），即使overflow为visible，视觉上也可能被父元素遮挡（可选增强）
+        const isTextNoWrap = style.whiteSpace === "nowrap";
+
+        // 7. 综合判定：内容溢出 + （裁剪/滚动 或 文本不换行）= 显示不完整
+        return hasContentOverflow && (isContentClipped || isTextNoWrap);
+    }
+
     $.extend($, {
         isElementObscured: function (elem) {
             return isElementObscuredByParent(elem);
@@ -8066,6 +8113,12 @@ $.debounce
         },
         isElemCovered: function (elem) {
             return isElementObscuredByParent(elem);
+        },
+        isContentObscured: function (elem, content) {
+            return isElementWidthIncomplete(elem, content);
+        },
+        isContentCovered: function (elem, content) {
+            return isElementWidthIncomplete(elem, content);
         }
     });
 }(OUI);
@@ -8149,18 +8202,18 @@ $.title
                 elem.style.top = top + 'px';
             } else {
                 elem.style.cssText = [
-                    'border:solid 1px #ddd;',
-                    'margin:0;padding:3px 5px;border-radius:5px;',
-                    'background:#fff; opacity:0.98;',
-                    'z-index:99999999;',
-                    'font-size:14px;',
-                    'line-height:1.5em;',
-                    'font-family:Arial,宋体;',
+                    'border:solid 1px #ddd;border-radius:5px;',
+                    'box-sizing:border-box;',
+                    'margin:0;padding:3px 5px;',
+                    'background:#fff;color:#333;',
+                    'opacity:0.98;z-index:99999999;',
+                    'font-size:14px;font-family:Arial,宋体;',
+                    'min-height:30px;line-height:1.5em;',
                     //边框灰色阴影
                     'box-shadow:0 0 6px 1px rgba(204, 204, 204, 0.5);'
                 ].join('') + (opt.style || '') + [
                     'position:absolute;white-space:pre;',
-                    'display:block;overflow:hidden;',
+                    'display:inline-block;overflow:hidden;',
                     'text-overflow:ellipsis;',
                     'max-width:', bs.width - 10, 'px;',
                     'max-height:', bs.height - 10, 'px;',
@@ -8171,8 +8224,12 @@ $.title
                 elem.innerHTML = title;
             }
 
-            if (elem.offsetWidth + elem.offsetLeft > bs.width) {
-                elem.style.left = (bs.width - elem.offsetWidth) + 'px';
+            if (elem.offsetWidth + elem.offsetLeft > bs.width + scroll.left) {
+                elem.style.left = (bs.width + scroll.left - elem.offsetWidth - 5) + 'px';
+            }
+            if (elem.offsetHeight + elem.offsetTop > bs.height + scroll.top) {
+                //elem.style.top = (bs.height + scroll.top - elem.offsetHeight - 5) + 'px';
+                elem.style.top = scroll.top + ev.clientY - elem.offsetHeight - 5 + 'px';
             }
 
             if (opt.timeout) {
@@ -8192,8 +8249,13 @@ $.title
             }
             return this;
         },
-        isCovered: function (elem) {
-            return $.isElemObscured(elem);
+        isCovered: function (elem, content) {
+            return $.isContentCovered(elem, content) || $.isElemObscured(elem);
+        },
+        getSelectedText: function (elem) {
+            const selectedIndex = elem.selectedIndex; // 获取选中项索引
+            const selectedText = elem.options[selectedIndex].text; // 获取选中文本
+            return selectedText || '';
         }
     };
 
@@ -8217,8 +8279,7 @@ $.title
                 return that;
             }
             $.addListener(opt.element, 'mousemove', function(ev) {
-                $.cancelBubble(ev);
-
+                //$.cancelBubble(ev);
                 var elem = ev.target, tarAttr = opt.attribute, 
                     tmpAttr = 'oui-data-title-tmp', delAttr = 'oui-data-title-del',
                     coverAttr = 'data-cover', timeAttr = 'data-cover-ts';
@@ -8228,7 +8289,7 @@ $.title
                         return false;
                     }
                 } else if (that.current) {
-                    //鼠标移出
+                    //鼠标移出时，判断是否有相应的临时属性，若有，则消除之
                     var con = that.current.getAttribute(tmpAttr) || that.current.getAttribute(delAttr);
                     if (con) {
                         that.current.setAttribute(tarAttr, con);
@@ -8251,8 +8312,18 @@ $.title
                     var tag = elem.tagName.toLowerCase(), con,
                         title = $.getAttribute(elem, tmpAttr) || $.getAttribute(elem, delAttr) || $.getAttribute(elem, tarAttr);
                     if (title) {
-                        con = elem.innerHTML;
-                        if (con === title) {
+                        if (tag !== 'select') {
+                            con = elem.value || elem.innerText || elem.innerHTML;
+                        } else {
+                            con = Factory.getSelectedText(elem);
+                        }
+                        const p = {
+                            con: con.trim(),
+                            str: title.replace(/(\r|\n)/, '').trim()
+                        };
+                        // 若文字内容与Title内容相同（忽略Title内容的换行符），
+                        // 判断文字内容是否被遮挡，若无遮挡则不显示Title
+                        if (p.con === p.str || p.con.indexOf(p.str) > -1) {
                             // 优化处理，减少重复检测
                             // 是否被遮挡：0-未设置，1-遮挡，2-未遮挡
                             var covered = parseInt('0' + elem.getAttribute(coverAttr), 10),
@@ -8264,7 +8335,7 @@ $.title
                                     elem.setAttribute(delAttr, title);
                                     return false;
                                 }
-                            } else if (!Factory.isCovered(elem)) {
+                            } else if (!Factory.isCovered(elem, con)) {
                                 elem.setAttribute(coverAttr, 2);
                                 elem.setAttribute(timeAttr, new Date().getTime());
                                 elem.removeAttribute(tarAttr);

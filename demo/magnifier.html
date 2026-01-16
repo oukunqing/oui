@@ -17,6 +17,13 @@
             border: solid 1px #ccc;
             cursor: pointer;
         }
+        .lbl {color:#999;font-size:14px;line-height:24px;display: inline-block; float:left;}
+        a {line-height:24px;padding:0 5px;}
+        dl,dt,dd {padding:0;margin:0;}
+        dt,dd {min-height: 40px;}
+        button {cursor: pointer; padding:3px 5px;float:left;margin-right:5px;}
+        input {line-height: 24px;padding:0px 5px;float:left;margin-right:5px;}
+        select {height:30px;}
     </style>
 </head>
 
@@ -33,9 +40,62 @@
         </div>
     </div>
     <div id="div1" style="clear:both;">
-        <a href="#" title="指定的Title内容-866663060821608">测试内容</a>
-        <br />
-        <a href="#" title="测试内容测试内容测试内容测试内容测试内容测试内容" style="white-space:nowrap;">测试内容测试内容测试内容测试内容测试内容测试内容</a>
+        <dl>
+            <dt>测试$.title()功能</dt>
+            <dd>                
+                <span class="lbl">1.文字内容与Title不一致（显示Title）：</span>
+                <a href="#" title="指定的Title内容-866663060821608">测试内容</a>
+            </dd>
+            <dd>
+                <span class="lbl">2.文字内容与Title一致且完全显示（不显示Title）：</span>
+                <a href="#" title="测试内容测试内容测试内容测试内容测试内容测试内容" style="white-space:nowrap;">测试内容测试内容测试内容测试内容测试内容测试内容</a>
+            </dd>
+            <dd>
+                <span class="lbl">3.文字内容与Title一致，限制宽度，内容不能换行（显示Title）：</span>
+                <a href="#" title="测试内容测试内容测试内容1234567890" style="display:inline-block;white-space:nowrap;width:150px;overflow:hidden;border:solid 1px #f00;">测试内容测试内容测试内容1234567890</a>
+            </dd>
+            <dd>
+                <span class="lbl">4.文字内容与Title一致，限制宽度和高度，内容能换行（显示Title）：</span>
+                <a href="#" title="测试内容测试内容测试内容1234567890" style="display:inline-block;width:150px;height:25px;overflow:hidden;border:solid 1px #f00;">测试内容测试内容测试内容1234567890</a>
+            </dd>
+            <dd>
+                <span class="lbl">5.文字内容与Title一致，限制宽度和高度，内容能换行（显示Title）：</span>
+                <a href="#" title="测试内容测试内容测试内容1234567890" style="display:inline-block;width:150px;height:25px;padding-top:25px;overflow:hidden;border:solid 1px #f00;">测试内容测试内容测试内容1234567890</a>
+            </dd>
+            <dd>
+                <span class="lbl">6.文字内容与Title（排除换行符）一致，限制高度不限宽度，内容能换行（不显示Title）：</span>
+                <a href="#" title="测试内容测试内容&#10;测试内容1234567890" style="display:inline-block;width:auto;height:25px;overflow:hidden;border:solid 1px #f00;">测试内容测试内容测试内容1234567890</a>
+            </dd>
+            <dd>
+                <span class="lbl">7.文字内容与Title（排除换行符）一致，限制高度和宽度，内容能换行（显示Title）：</span>
+                <a href="#" title="测试内容测试内容&#10;测试内容1234567890" style="display:inline-block;width:150px;height:25px;overflow:hidden;border:solid 1px #f00;">测试内容测试内容测试内容1234567890</a>
+            </dd>
+            <dd>
+                <span class="lbl">8.文字内容本身无遮挡但被上层元素遮挡（显示Title）：</span>
+                <div style="float:left;width:150px;border:solid 1px #00f;padding:3px 20px;overflow:hidden;">
+                    <a href="#" title="测试内容测试内容测试内容1234567890" style="display:inline-block;white-space:nowrap;overflow:hidden;border:solid 1px #f00;">测试内容测试内容测试内容1234567890</a>
+                </div>
+            </dd>
+            <dd>
+                <span class="lbl">9.按钮的提示文字（显示Title）：</span>
+                <button title="这是一个测试Title功能的按钮">一个测试按钮</button>
+                <span class="lbl">9.1.按钮的提示文字相同（不显示Title）：</span>
+                <button title="另一个测试按钮">另一个测试按钮</button>
+                <span class="lbl">9.2.按钮的提示文字包含Title内容（不显示Title）：</span>
+                <button title="一个测试按钮">这是一个测试按钮</button>
+            </dd>
+            <dd>
+                <span class="lbl">10.输入框的提示文字（显示Title）：</span>
+                <input title="这是一个输入框" />
+            </dd>
+            <dd>
+                <span class="lbl">11.下拉列表框文字（显示Title）：</span>
+                <select title="列表选项列表选项二" id="ddl2">
+                    <option value="">列表选项列表选项一</option>
+                    <option value="">列表选项列表选项二</option>
+                </select>
+            </dd>
+        </dl>
         <br />
         <br />
         <br />
@@ -49,7 +109,15 @@
     window.onload = function () {
         initMagnifier({ target: document.body, position: 0, targetCursor: null });
 
-        //$.title({ id: 'oui-title', style: 'border:solid 1px #f00;' });
+        window.setTimeout(function() {
+            $.title({ id: 'oui-title', style: 'border:solid 1px #f00;' });
+        }, 2000);
+        
+        window.setTimeout(function() {
+            $.title({ id: 'oui-title', style: 'border:solid 1px #00f;background:#f8f8f8;' });
+        }, 5000);
+
+        $.console.log($I('ddl2').clientWidth);
     };
 
     function initMagnifier(opt) {

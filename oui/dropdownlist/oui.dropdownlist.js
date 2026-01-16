@@ -2396,6 +2396,9 @@
 			//设置值
 			that.elem.options.length = 0;
 			that.elem.options.add(new Option(txt, val));
+			if (opt.multi) {
+				$.setAttribute(that.elem, 'data-title', txt);
+			}
 			$.setAttribute(that.elem, 'code', con);
 
 			if (that.text) {
