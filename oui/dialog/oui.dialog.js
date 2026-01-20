@@ -2480,6 +2480,7 @@
                     direction: opt.direction,
                     parent: opt.parent,
                     position: opt.position,
+                    outside: opt.outside,
                     width: opt.width,
                     height: opt.height,
                     x: opt.x,
@@ -2606,6 +2607,7 @@
                     direction: opt.direction,
                     parent: null,
                     position: 7,    //默认停靠在目标控件左下方位置
+                    outside: 0,
                     x: null,
                     y: null
                 }, options);
@@ -2847,6 +2849,7 @@
                         direction: 'auto',
                         parent: null,
                         position: 'bottomleft',    //默认停靠在目标控件左下方位置
+                        outside: 0,
                         x: null,
                         y: null
                     }, options);
@@ -2978,34 +2981,52 @@
                         break;
                     case 'topleft':
                     case 'bottomleft':
-                        res.left = fs.x;
-                        res.css = 'left: ' + distance + 'px;';
+                        if (par.outside) {
+                            res.left = fs.x - w;
+                            res.css = 'left: ' + distance + 'px;';
+                            if (res.left < 0) {
+                                res.left = 0;
+                                res.css = 'left: ' + distance + 'px;';
+                            }
+                        } else {
+                            res.left = fs.x;
+                            res.css = 'left: ' + distance + 'px;';
 
-                        if (res.left + w > bs.width) {
-                            res.left = fs.x - (w - fs.w);
-                            res.css = 'left: ' + (w - distance) + 'px;';
+                            if (res.left + w > bs.width) {
+                                res.left = fs.x - (w - fs.w);
+                                res.css = 'left: ' + (w - distance) + 'px;';
 
-                            if (res.left < bs.x) {
-                                res.left = fs.x - (w - fs.w) / 2;
-                                if (fs.w < w) {
-                                    res.css = 'left: ' + (w / 2 + res.moveX) + 'px;';
+                                if (res.left < bs.x) {
+                                    res.left = fs.x - (w - fs.w) / 2;
+                                    if (fs.w < w) {
+                                        res.css = 'left: ' + (w / 2 + res.moveX) + 'px;';
+                                    }
                                 }
                             }
                         }
                         break;
                     case 'topright':
                     case 'bottomright':
-                        res.left = fs.x - (w - fs.w);
-                        res.css = 'left: ' + (w - distance) + 'px;';
-
-                        if (res.left < bs.x) {
-                            res.left = fs.x;
-                            res.css = 'left: ' + distance + 'px;';
-
+                        if (par.outside) {                            
+                            res.left = fs.x + fs.w;
+                            res.css = 'left: ' + (w - distance) + 'px;';
                             if (res.left + w > bs.width) {
-                                res.left = fs.x - (w - fs.w) / 2;
-                                if (fs.w < w) {
-                                    res.css = 'left: ' + (w / 2 + res.moveX) + 'px;';
+                                res.left = bs.width - w;
+                                res.css = 'left: ' + (w / 2 + res.moveX) + 'px;';
+                            }
+                        } else {
+                            res.left = fs.x - (w - fs.w);
+                            res.css = 'left: ' + (w - distance) + 'px;';
+
+                            if (res.left < bs.x) {
+                                res.left = fs.x;
+                                res.css = 'left: ' + distance + 'px;';
+
+                                if (res.left + w > bs.width) {
+                                    res.left = fs.x - (w - fs.w) / 2;
+                                    if (fs.w < w) {
+                                        res.css = 'left: ' + (w / 2 + res.moveX) + 'px;';
+                                    }
                                 }
                             }
                         }
@@ -4009,6 +4030,7 @@
                     direction: opt.direction,
                     parent: opt.parent,
                     position: opt.position,    //默认停靠在目标控件左下方位置
+                    outside: opt.outside,
                     x: opt.x || 7,
                     y: opt.y || 7
                 };
@@ -4051,6 +4073,7 @@
                 maxWidth: '100%',           //最大宽度
                 maxHeight: '100%',          //最大高度
                 position: 5,            //对话框初始位置, 0,1,2,3,4,5,6,7,8,9，共10种位置设置
+                outside: 0,             //位置类型：0-内侧，1-外侧
                 maxPosition: 0,         //对话框最大化时的位置, 0,1,2,3 (只有在最大化的宽度小于当前容器宽度时才启用)
                 noScroll: false,        //对话框主体没有滚动条，固定宽高
                 x: 0,                   //x轴(left)偏移量，单位：px

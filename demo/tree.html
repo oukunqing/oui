@@ -379,13 +379,13 @@
 
     function setHeight(rate) {
         var size = $('#ddlAddSize').val().toInt();
-        //$('#tree').height($('#tree').height() + 50 * rate);
-        $.tree().resize(sizesize * rate, true);
+        $('#tree').height($('#tree').height() + 50 * rate);
+        $.tree(TreeId).resize(size * rate, true);
     }
     function setWidth(rate) {
         var size = $('#ddlAddSize').val().toInt();
         $('#tree').width($('#tree').width() + size * rate);
-        $.tree().resize();
+        $.tree(TreeId).resize();
     }
 
     function expand(linkage) {

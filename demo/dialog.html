@@ -1096,7 +1096,11 @@ function showTable(){
 }
 
 function showTooltip(obj) {
-	var win = $.tips('Tooltip提示信息示例', obj, {position: 1, id: 'tooltip001'});
+	var win = $.tips('Tooltip提示信息示例', obj, {
+        position: 3, 
+        outside: 0,
+        id: 'tooltip001'
+    });
 }
 
 function hideTooltip() {

@@ -7876,7 +7876,7 @@ $.debounce
     * @param {HTMLElement} elem 目标DOM元素
     * @returns {DOMRect|null} 元素矩形信息
     */
-    function getTargetElementRect(elem) {
+    function getElementRect(elem) {
         if (!(elem instanceof HTMLElement)) {
             //console.error("参数必须是有效的HTMLElement");
             return null;
@@ -8015,14 +8015,14 @@ $.debounce
         while (parent && parent.tagName) {
             // 仅当父元素具备裁剪能力时，才需要判断区域重叠
             if (hasClipCapability(parent)) {
-                const parentVisibleRect = getParentVisibleRect(parent);
+                const p_rect = getParentVisibleRect(parent);
 
                 // 判断目标元素是否完全在父元素可见区域内
                 const isFullyContained = (
-                    rect.left >= parentVisibleRect.left &&
-                    rect.top >= parentVisibleRect.top &&
-                    rect.right <= parentVisibleRect.right &&
-                    rect.bottom <= parentVisibleRect.bottom
+                    rect.left >= p_rect.left &&
+                    rect.top >= p_rect.top &&
+                    rect.right <= p_rect.right &&
+                    rect.bottom <= p_rect.bottom
                 );
 
                 // 若不完全包含，说明被该父元素遮挡/显示不全
@@ -8044,9 +8044,9 @@ $.debounce
      * @param {HTMLElement} elem 目标DOM元素
      * @returns {boolean} true=被遮挡/显示不全，false=完全可见
      */
-    function isElementObscuredByParent(elem) {
+    function isElementObscured(elem) {
         // 步骤1：获取目标元素矩形
-        const rect = getTargetElementRect(elem);
+        const rect = getElementRect(elem);
         if (!rect) {
             return true; // 元素本身不可见，视为"显示不全"
         }
@@ -8103,16 +8103,16 @@ $.debounce
 
     $.extend($, {
         isElementObscured: function (elem) {
-            return isElementObscuredByParent(elem);
+            return isElementObscured(elem);
         },
         isElemObscured: function (elem) {
-            return isElementObscuredByParent(elem);
+            return isElementObscured(elem);
         },
         isElementCovered: function (elem) {
-            return isElementObscuredByParent(elem);
+            return isElementObscured(elem);
         },
         isElemCovered: function (elem) {
-            return isElementObscuredByParent(elem);
+            return isElementObscured(elem);
         },
         isContentObscured: function (elem, content) {
             return isElementWidthIncomplete(elem, content);
@@ -8401,7 +8401,7 @@ $.title
         }
     });
 
-    if (parseInt('0' + $.getQueryString(location.href, 'origin-title'), 10) !== 1) {
+    if (typeof location !== 'undefined' && parseInt('0' + $.getQueryString(location.href, 'origin-title'), 10) !== 1) {
         $.title({ id:'oui-title' });
     }
 }(OUI);

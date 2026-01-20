@@ -1071,7 +1071,7 @@
                 opt.searchText = $.getParam(opt, 'searchText,searchtext');
                 opt.searchPrompt = $.getParam(opt, 'searchPrompt,searchPlaceholder');
                 opt.keywordsLength = parseInt($.getParam(opt, 'keywordsLength,searchLength,maxlength'), 10);
-                if (isNaN(opt.keywordsLength) && opt.keywordsLength <= 0) {
+                if (isNaN(opt.keywordsLength) || opt.keywordsLength <= 0) {
                     opt.keywordsLength = Config.SearchKeywordsLength;
                 }
                 opt.searchCallback = $.getParam(opt, 'searchCallback');
@@ -2205,10 +2205,9 @@
                     opt = tree.options,
                     isEvent = ev && ev.target && ev.target.className.indexOf('sizebar');
 
-                if (!opt.dragSize) {
+                if (ev && !opt.dragSize) {
                     return this;
                 }
-
                 if (isEvent) {
                     var key = 'oui-tree-resize';
                     if (Cache.timers[key]) {
@@ -2218,7 +2217,7 @@
                         _size();
                     }, 5);
                 } else {
-                    _size();
+                   _size();
                 }
 
                 function _size() {
@@ -2654,7 +2653,7 @@
                 }
                 return this;
             },
-            showSearchPanel: function (tree, show, force) {
+            showSearchPanel: function (tree, show, force, resize) {
                 if (!tree.box || (!force && !tree.options.showSearch)) {
                     return this;
                 }
@@ -2665,6 +2664,11 @@
                     return this;
                 } else if (!cfg.search) {
                     show = false;
+                }
+                // 显示搜索结果时，容器尺寸改变，只需要同时改变搜索面板的尺寸
+                if (resize && Factory.isSearchPanelShow(tree)) {
+                    div.style.width = cfg.elem.offsetWidth + 'px';
+                    return this;
                 }
                 if (!$.isBoolean(show, true) && force) {
                     if (cfg && cfg.elem) {
@@ -2845,6 +2849,7 @@
                     return this;
                 }
                 if (!ev) {
+                    Factory.showSearchPanel(tree, null, null, true);
                     _resize();
                 } else {
                     $.debounce({
@@ -2852,6 +2857,7 @@
                         delay: 100,
                         timeout: 5000
                     }, function () {
+                        Factory.showSearchPanel(tree, null, null, true);
                         _resize();
                     });
                 }
@@ -2865,9 +2871,12 @@
                     if (ph > 0 && (fh > 0 || bh > 0)) {
                         tree.panel.style.height = ph + 'px';
                     }
+                    /*
+                    // 不再指定搜索框的宽度，改用样式width:100%
                     if (cache && cache.elem) {
                         cache.elem.style.width = (form.offsetWidth - 8) + 'px';
                     }
+                    */
                 }
                 return this;
             },
