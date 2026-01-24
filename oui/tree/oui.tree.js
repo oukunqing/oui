@@ -572,7 +572,7 @@
                 }
                 Cache.timers[key] = window.setTimeout(function () {
                     var ep = Event.target(ev, tree), obj = Factory.getDragNode(tree);
-                    if (!ep.node
+                    if (!ep || !ep.node
                         //判断是否是同组节点（或父节点）
                         //这里只实现同组上下拖动排序，不改变节点父级关系
                         //若拖动改变父级关系，随意拖动之后，极易引起节点混乱
@@ -1187,20 +1187,22 @@
                 // 外部函数：将参数中的数据传给外部函数，由外部函数决定是否可以选中
                 opt.selectedCondition = $.getParam(opt, 'selectedCondition');
 
+                // 树形列表
+                opt.treeList = $.isBoolean($.getParam(opt, 'treeList'), false);
                 // 树形导航菜单
                 opt.treeMenu = $.isBoolean($.getParam(opt, 'treeMenu'), false);
                 // 整行全宽
                 opt.fullWidth = $.isBoolean($.getParam(opt, 'fullWidth,lineWidth'), false);
                 // 增加行高
                 opt.highHeight = $.isBoolean($.getParam(opt, 'highHeight,lineHeight'), false);
-                // 移动端行高
-                opt.mobileHeight = $.isBoolean($.getParam(opt, 'mobileHeight,wapHeight'), false);
                 // item-body
-                opt.itemBody = $.isBoolean($.getParam(opt, 'itemBody,showItemBody'), false);
+                opt.itemBody = $.isBoolean($.getParam(opt, 'itemBody,showItemBody'), true);
                 // shortcutKey                
-                opt.shortcutKey = $.isBoolean($.getParam(opt, 'shortcutKey'), false);
+                opt.shortcutKey = $.isBoolean($.getParam(opt, 'shortcutKey'), true);
                 // 切换图标是否显示在右边，仅树形导航菜单时启用
                 opt.rightSwitch = $.isBoolean($.getParam(opt, 'rightSwitch'), false);
+                //是否启用焦点获取（WAP端可不启用）
+                opt.focus = $.isBoolean($.getParam(opt, 'focused,focus'), true);
 
                 // 自定义样式（谨慎使用，需要对html/css比较熟悉）
                 opt.customCss = $.getParam(opt, 'customCss');
@@ -1214,14 +1216,12 @@
                 if (opt.treeMenu) {
                     // 树形导航菜单，不显示连线
                     opt.showLine = false;
-                    opt.fullWidth = false;
-                    opt.highHeight = false;
                     opt.showCheck = false;
                     opt.showScrollIcon = false;
                     opt.clickExpand = true;
                 } else if (opt.fullWidth) {
                     opt.showLine = false;
-                    opt.highHeight = false;
+                    opt.clickExpand = true;
                 }
                 // 非树形导航菜单时，不启用右侧切换图标
                 if (!opt.treeMenu) {
@@ -2331,17 +2331,17 @@
             getPanelClass: function (opt) {
                 var css = ['oui-tree'];
 
-                if (opt.fullWidth) {
-                    css.push('oui-tree-full');
+                if (opt.treeList) {
+                    css.push('oui-tree-list');
+                }
+                if (opt.treeMenu) {
+                    css.push('oui-tree-menu');
                 }
                 if (opt.highHeight) {
                     css.push('oui-tree-high');
                 }
-                if (opt.mobileHeight) {
-                    css.push('oui-tree-mobile');
-                }
-                if (opt.treeMenu) {
-                    css.push('oui-tree-menu');
+                if (opt.fullWidth) {
+                    css.push('oui-tree-full');
                 }
                 
                 if (!Factory.isDefaultSkin(opt.skin)) {
@@ -2872,7 +2872,7 @@
                         tree.panel.style.height = ph + 'px';
                     }
                     /*
-                    // 不再指定搜索框的宽度，改用样式width:100%
+                    // 不再指定搜索框的宽度，改用样式width:100% [2026-01-20]
                     if (cache && cache.elem) {
                         cache.elem.style.width = (form.offsetWidth - 8) + 'px';
                     }
@@ -2969,10 +2969,12 @@
                 return node;
             },
             buildFocusElem: function (tree) {
-                if (tree.panel) {                    
-                    // 清除内容
-                    tree.panel.innerHTML = '';
+                var opt = tree.options;
 
+                // 清除内容
+                tree.panel.innerHTML = '';
+
+                if (tree.panel && opt.focus) {
                     // 创建一个文本框，用于获取焦点
                     tree.panel.innerHTML = [
                         '<input type="text" class="oui-tree-focus" style="',
@@ -5029,17 +5031,19 @@
                 hoverLine: undefined,
                 //是否整行全宽
                 fullWidth: undefined,
-                //是否增加行高，默认行高是24px，增高后为30px
-                highHeight: true,
-                //是否移动端，默认行高是24px，移动端为40px
-                mobileHeight: undefined,
+                //是否增加行高，默认行高是30px，增高后为40px
+                highHeight: undefined,
                 //是否启用<div class="item-body">
-                itemBody: true,
+                itemBody: undefined,
+                //是否启用焦点获取
+                focus: undefined,
                 //是否启用快捷键
-                shortcutKey: true,
+                shortcutKey: undefined,
                 //自定义样式className
                 customCss: undefined,
-                //树形导航菜单
+                //树型数据列表，默认行高是30px，数据列表为36px
+                treeList: undefined,
+                //树型导航菜单，默认行高是30px，导航菜单为36px
                 treeMenu: undefined,
                 //是否显示切换图标
                 showSwitch: undefined,

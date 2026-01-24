@@ -232,6 +232,7 @@
 
     var version = '1.0.0',
         trim = function (s) { return s.replace(/(^[\s]*)|([\s]*$)/g, ''); },
+        compress = function (s) { return sreplace(/[\s]/g, ''); },
         isUndefined = function (o) { return typeof o === 'undefined'; },
         isString = function (s, nonempty) { return typeof s === 'string' && (nonempty ? trim(s) !== '' : true); },
         isNumber = function (n, min, max) { 
@@ -1310,7 +1311,7 @@
     };
 
     $.extendNative($, {
-        trim: trim, value: value,
+        trim: trim, compress: compress, value: value,
         isUndefined: isUndefined, isUndef: isUndefined, isString: isString, isNumber: isNumber,
         isFunction: isFunction, isFunc: isFunction, isObject: isObject, isArray: isArray, isDate: isDate, 
         isDateString: isDateString, isDateStr: isDateString,
@@ -2142,6 +2143,8 @@
         trimEnd: function () { return this.replace(/([\s]*$)/g, ''); },
         trimLeft: function () { return this.trimStart(); },
         trimRight: function () { return this.trimEnd(); },
+        compress: function () { return $.compress(this); },
+        splitLine: function () { return this.split(/\r?\n|\r/); },
         padStart: function (totalWidth, paddingChar) { return $.padLeft(this, totalWidth, paddingChar || ' '); },
         padEnd: function (totalWidth, paddingChar) { return $.padRight(this, totalWidth, paddingChar || ' '); },
         padLeft: function (totalWidth, paddingChar) { return $.padLeft(this, totalWidth, paddingChar || '0'); },
@@ -4813,7 +4816,6 @@
                 height: (parseFloat('0' + panel.style.height, 10) || panel.offsetHeight).round(2),
                 position: pos
             }
-            //return this;
         },
         isArrayLike = function (obj) {
             if ($.isUndefinedOrNull(obj) || $.isString(obj) || $.isElement(obj)) {
@@ -7041,7 +7043,7 @@
                 return document.selection.createRange().text;
             }
             return '';
-        },        
+        },
         getElementValue: function (elements, defaultValue, attributeName, func) {
             if ($.isUndefined(defaultValue)) {
                 defaultValue = '';
@@ -8328,6 +8330,7 @@ $.title
                             // 是否被遮挡：0-未设置，1-遮挡，2-未遮挡
                             var covered = parseInt('0' + elem.getAttribute(coverAttr), 10),
                                 time = parseInt('0' + elem.getAttribute(timeAttr), 10);
+
                             // 2秒钟之内已经检测过，不再重复检测
                             if (covered && new Date().getTime() - time <= 2000) {
                                 if (covered === 2) {
@@ -8346,11 +8349,12 @@ $.title
                                 elem.setAttribute(timeAttr, new Date().getTime());
                             }
                         }
-                        
+
                         if (that.target === elem) {
                             Factory.showTitle(ev, null, that);
                             return false;
                         }
+
                         that.target = elem;
                         that.attribute = tarAttr;
                         elem.removeAttribute(tarAttr);
@@ -8401,6 +8405,7 @@ $.title
         }
     });
 
+    // 若不想启用$.title，还是想用原生的title，可以在页面URL参数中加入origin-title=1
     if (typeof location !== 'undefined' && parseInt('0' + $.getQueryString(location.href, 'origin-title'), 10) !== 1) {
         $.title({ id:'oui-title' });
     }

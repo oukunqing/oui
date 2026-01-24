@@ -112,12 +112,12 @@
                     <span style="color:#f00;">自定义样式</span>
                 </label>
                 <div></div>
-                <label class="chb-label" title="显示连线时不可用"><input type="checkbox" id="chbFullWidth" /><span>整行全宽</span></label>
-                <label class="chb-label" title="显示连线时不可用"><input type="checkbox" id="chbHighHeight" checked="checked" /><span>增加行高</span></label>
-                <label class="chb-label" title="显示连线时不可用"><input type="checkbox" id="chbMobileHeight" /><span>移动端高度</span></label>
-                <label class="chb-label" title="同一层级下仅展开一个节点"><input type="checkbox" id="chbOnlyOpenOne" /><span>仅展开一个节点</span></label>
+                <label class="chb-label" title="显示连线时不可用"><input type="checkbox" id="chbTreeList" /><span>树形数据列表</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbTreeMenu" /><span>树形导航菜单</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbRightSwitch" /><span>右侧切换图标</span></label>
+                <label class="chb-label" title="同一层级下仅展开一个节点"><input type="checkbox" id="chbOnlyOpenOne" /><span>仅展开一个节点</span></label>
+                <label class="chb-label" title="显示连线时不可用"><input type="checkbox" id="chbHighHeight" /><span>增加行高</span></label>
+                <label class="chb-label" title="显示连线时不可用"><input type="checkbox" id="chbFullWidth" /><span>整行全宽</span></label>
 
                 <div>
                     <button onclick="test(0);">加载树菜单</button>
@@ -529,7 +529,7 @@
             onlyOpenOne = $('#chbOnlyOpenOne').checked(),
             fullWidth = $('#chbFullWidth').checked(),
             highHeight = $('#chbHighHeight').checked(),
-            mobileHeight = $('#chbMobileHeight').checked(),
+            treeList = $('#chbTreeList').checked(),
             treeMenu = $('#chbTreeMenu').checked(),
             rightSwitch = $('#chbRightSwitch').checked(),
             customCss = $('#chbCustomCss').checked(),
@@ -565,6 +565,7 @@
             //positionFixed: true,
             //boxHeight: 500,
             skin: skin, 
+            focus: false,
             async: true, 
             keepStatus: keepStatus,
             keepCookie: keepCookie,
@@ -597,9 +598,9 @@
             hoverLine: hoverLine,
             fullWidth: fullWidth,
             highHeight: highHeight,
-            mobileHeight: mobileHeight,
             itemBody: itemBody,
             customCss: customCss ? 'my-tree' : '',
+            treeList: treeList,
             treeMenu: treeMenu,
             rightSwitch: rightSwitch,
             showIcon: showIcon,
