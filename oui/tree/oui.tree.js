@@ -211,8 +211,29 @@
                 var p = Event.target(ev, tree), node;
                 if (p.node && Factory.isNodeBody(p)) {
                     node = p.node;
-                }
+                }                
                 return Factory.contextmenuCallback(node, tree, ev), this;
+            },
+            touchstart: function (ev, tree) {
+                var ep = tree.panel;
+                if (ep) {
+                    $.setAttribute(ep, 'data-touchstart', new Date().getTime());
+                }
+                return this;
+            },
+            touchend: function (ev, tree) {
+                var ep = tree.panel, node;
+                if (ep) {
+                    var ts = parseInt($.getAttribute(ep, 'data-touchstart'), 10);
+                    $.delAttribute(ep, 'data-touchstart');
+                    if (!isNaN(ts) && new Date().getTime() - ts > 500) {
+                        return Event['contextmenu'](ev, tree);
+                    }
+                }
+                return this;
+            },
+            touchcancel: function (ev, tree) {
+                return Event['touchend'](ev, tree);
             },
             mouseover: function (ev, tree) {
                 var key = 'tree_node_over_' + tree.id;
@@ -1202,7 +1223,7 @@
                 // 切换图标是否显示在右边，仅树形导航菜单时启用
                 opt.rightSwitch = $.isBoolean($.getParam(opt, 'rightSwitch'), false);
                 //是否启用焦点获取（WAP端可不启用）
-                opt.focus = $.isBoolean($.getParam(opt, 'focused,focus'), true);
+                opt.focus = $.isBoolean($.getParam(opt, 'focused,focus'), !$.isWap);
 
                 // 自定义样式（谨慎使用，需要对html/css比较熟悉）
                 opt.customCss = $.getParam(opt, 'customCss');
@@ -1292,16 +1313,10 @@
                 //var div = tree.target ? tree.element : tree.panel;
                 var div = tree.panel;
 
-                $.addListener(div, 'mousedown', function (ev) {
+                $.addListener(div, 'mousedown,click,dblclick,contextmenu', function (ev) {
                     Factory.dealEvent(ev, tree, ev.type);
                 });
-                $.addListener(div, 'click', function (ev) {
-                    Factory.dealEvent(ev, tree, ev.type);
-                });
-                $.addListener(div, 'dblclick', function (ev) {
-                    Factory.dealEvent(ev, tree, ev.type);
-                });
-                $.addListener(div, 'contextmenu', function (ev) {
+                $.addListener(div, 'touchstart,touchend,touchcancel', function (ev) {
                     Factory.dealEvent(ev, tree, ev.type);
                 });
 
@@ -1310,24 +1325,8 @@
                     Factory.dealEvent(ev, tree, ev.type);
                 });
 
-                /*用于拖动（同级）节点排序*/
-                $.addListener(div, 'dragstart', function (ev) {
-                    Factory.dealEvent(ev, tree, ev.type);
-                });
-                $.addListener(div, 'dragover', function (ev) {
-                    Factory.dealEvent(ev, tree, ev.type);
-                });
-                $.addListener(div, 'drop', function (ev) {
-                    Factory.dealEvent(ev, tree, ev.type);
-                });
-
-                $.addListener(div, 'dragenter', function (ev) {
-                    Factory.dealEvent(ev, tree, ev.type);
-                });
-                $.addListener(div, 'dragend', function (ev) {
-                    Factory.dealEvent(ev, tree, ev.type);
-                });
-                $.addListener(div, 'dragleave', function (ev) {
+                /*关于节点拖动*/
+                $.addListener(div, 'dragstart,dragover,drop,dragenter,dragend,dragleave', function (ev) {
                     Factory.dealEvent(ev, tree, ev.type);
                 });
 
@@ -1335,11 +1334,7 @@
                     Factory.dealEvent(ev, tree, ev.type);
                 });
 
-                $.addListener(div, 'keydown', function (ev) {
-                    Factory.dealEvent(ev, tree, ev.type);
-                });
-
-                $.addListener(div, 'keyup', function (ev) {
+                $.addListener(div, 'keydown,keyup', function (ev) {
                     Factory.dealEvent(ev, tree, ev.type);
                 });
 
@@ -1368,7 +1363,8 @@
 
                 var events = [
                     'mousedown', 'mouseup', 'click', 'dblclick', 'contextmenu',
-                    'mouseover', 'scroll', 'keydown', 'keyup', 'keypress'
+                    'mouseover', 'scroll', 'keydown', 'keyup', 'keypress',
+                    'touchstart', 'touchend', 'touchcancel'
                 ];
 
                 if (events.indexOf(type) > -1) {
@@ -1389,13 +1385,13 @@
                 return this;
             },
             setFocus: function (tree) {
-                if (tree.focus) {
+                if (tree.focus && !$.isWap) {
                     tree.focus.focus();
                 }
                 return this;
             },
             setSearchFocus: function (tree) {
-                if (tree.keywords) {
+                if (tree.keywords && !$.isWap) {
                     tree.keywords.focus();
                 }
                 return this;
@@ -1738,8 +1734,13 @@
                         for (var i = 0; i < Cache.ids.length; i++) {
                             var d = Factory.getTreeCache(Cache.ids[i].id);
                             if (d && d.tree) {
-                                if (d.tree.target) {
-                                    d.tree.hide();
+                                if (d.tree.target && !d.tree.isHide()) {
+                                    // 手机端浏览器，若树菜单对话框是显示的，则重新显示（以便位置跟随）
+                                    if ($.isWap) {
+                                        d.tree.show();
+                                    } else {
+                                        d.tree.hide();
+                                    }
                                 }
                                 Factory.setPanelSize(d.tree, ev);
                             }
@@ -2837,6 +2838,9 @@
                         var es = $.getOffset(tree.target2 || opt.target);
                         tree.box.style.left = es.left + es.width - tree.box.offsetWidth + 'px';
                     }
+                    if ($.isNumber(opt.zindex) && opt.zindex > 0) {
+                        tree.box.style.zIndex = opt.zindex;
+                    }
 
                     var boxH = tree.box.offsetHeight;
                     if (opt.maxHeight && boxH > opt.maxHeight) {
@@ -2917,9 +2921,6 @@
                         that.element.appendChild(box);
                     }
                     box.className = css.join(' ');
-                    if ($.isNumber(opt.zindex) && opt.zindex > 0) {
-                        box.style.zIndex = opt.zindex;
-                    }
                 }
 
                 if (!div) {
@@ -5221,6 +5222,9 @@
         hide: function () {
             var that = this;
             return Factory.setBoxDisplay(that, false), that;
+        },
+        close: function() {
+            return this.hide();
         },
         isHide: function () {
             var that = this;

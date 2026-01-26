@@ -565,6 +565,7 @@
             //positionFixed: true,
             //boxHeight: 500,
             skin: skin, 
+            zindex: 1003,
             focus: false,
             async: true, 
             keepStatus: keepStatus,
@@ -754,7 +755,7 @@
                         obj: 'tree',
                         width: 150,
                         items: [
-                            { name: '新增子目录', func: function () { } },
+                            { name: '新增子目录', func: function () { $.console.log(node.data); } },
                             { name: '展开', func: function () { node.expand(); } },
                             { name: '收缩', func: function () { node.collapse(); } },
                             //true: linkage, true: self

@@ -305,7 +305,7 @@
 
                                 if (!disabled) {
                                     $.disableEvent(elem, 'mousedown', $.cancelBubble);
-                                    $.addListener(elem, 'mouseover', function (ev) {
+                                    $.addListener(elem, 'mouseover,touchstart', function (ev) {
                                         $.cancelBubble();
                                         if (param.hasChild) {
                                             $.addClass(elem, 'cur');
@@ -322,7 +322,7 @@
                                     txt += '<i class="cmenu-arrow"></i>';
                                     if (!dr.node && !dr.leaf) {
                                         elem.innerHTML = txt;
-                                        $.addListener(elem, 'mouseup', function (ev) {
+                                        $.addListener(elem, 'mouseup,touchend', function (ev) {
                                             $.cancelBubble(ev);
                                         });
                                         return false;
@@ -330,15 +330,16 @@
                                 }
                                 var func = Factory.buildMenuCallback(dr, cfg);
                                 if (!disabled && $.isFunction(func)) {
-                                    $.addListener(elem, 'mouseup', function (ev) {
+                                    $.addListener(elem, 'mouseup,touchend', function (ev) {
                                         $.cancelBubble(ev);
                                         var par = Factory.buildMenuPar(elem.data, cfg, elem.chbId);
                                         Factory.setChecked(box.menuId, par).hideContextMenu(ev, box.menuId, true);
                                         func(Factory.dealChecked(par, elem), this, menu);
                                     });
                                 } else {
-                                    $.addListener(elem, 'mouseup', function (ev) {
+                                    $.addListener(elem, 'mouseup,touchend', function (ev) {
                                         $.cancelBubble(ev);
+                                        return false;
                                     });
                                 }
                                 elem.innerHTML = Factory.buildMenuText(txt, dr, disabled);
@@ -388,8 +389,8 @@
 
                         if (!disabled) {
                             $.disableEvent(elem, 'mousedown', $.cancelBubble);
-                            $.addListener(elem, 'mouseover', function (ev) {
-                                $.cancelBubble();
+                            $.addListener(elem, 'mouseover,touchstart', function (ev) {
+                                $.cancelBubble(ev);
                                 if (hasChild) {
                                     $.addClass(elem, 'cur');
                                     Factory.buildSubMenu(elem, $.getEventPosition(ev), dr.items, false, cfg, cache, autoWidth, menu);
@@ -405,21 +406,22 @@
                             txt += '<i class="cmenu-arrow"></i>';
                             if (!dr.node && !dr.leaf) {
                                 elem.innerHTML = txt;
-                                $.addListener(elem, 'mouseup', function (ev) {
+                                $.addListener(elem, 'mouseup,touchend', function (ev) {
                                     $.cancelBubble(ev);
                                 });
                                 return false;
                             }
                         }
                         if (!disabled && $.isFunction(func)) {
-                            $.addListener(elem, 'mouseup', function (ev) {
+                            $.addListener(elem, 'mouseup,touchend', function (ev) {
                                 $.cancelBubble(ev);
                                 Factory.setChecked(menuId, par).hideContextMenu(ev, menuId, true);
                                 func(Factory.dealChecked(par, elem), this, menu);
                             });
                         } else {
-                            $.addListener(elem, 'mouseup', function (ev) {
+                            $.addListener(elem, 'mouseup,touchend', function (ev) {
                                 $.cancelBubble(ev);
+                                return false;
                             });
                         }
                         elem.innerHTML = Factory.buildMenuText(txt, dr, disabled);
@@ -806,12 +808,12 @@
                 var obj = $I('oui-context-menu-' + id);
                 if (obj) {
                     if (null === ev && hide) {
-                        //return $.removeElement(obj), Cache.count--, this;
-                        return $.removeElement(obj), this;
+                        return $.removeElement(obj), Cache.count--, this;
+                        //return $.removeElement(obj), this;
                     };
                     if (hide || !$.isOnElement(obj, ev)) {
                         $.removeElement(obj);
-                        //Cache.count--;
+                        Cache.count--;
                     }
                 }
                 return this;
@@ -823,10 +825,12 @@
                 return this;
             },
             hideAllContextMenu: function () {
+                $.console.log('hideAllContextMenu', Cache.count);
                 if (Cache.count > 0) {
                     $('.oui-context-menu').each(function (i, obj) {
                         $.removeElement(obj);
                     });
+                    Cache.count = 0;
                     //$.removeListener(document, 'keydown', Factory.escContextMenu);
                 }
                 return this;
@@ -893,6 +897,11 @@
             $.addListener(document, 'keydown', Factory.escContextMenu)
                 .addListener(document, 'mousedown', function (ev) {
                     Factory.hideContextMenu(ev, that.id);
+                })
+                .addListener(document, 'touchstart', function (ev) {
+                    if (ev.target.className.indexOf('cmenu-item') < 0) {
+                        Factory.hideAllContextMenu();
+                    }
                 });
 
             return that;

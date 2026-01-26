@@ -6364,19 +6364,6 @@
             //TODO:
         };
 
-    var browser = {
-        ua: function () { try { return navigator.userAgent; } catch (e) { return ''; } },
-        getua: function (ua) { return (ua || browser.ua()).toLowerCase(); },
-        isFirefox: function (ua) { ua = browser.getua(ua); return ua.indexOf('firefox/') > -1; },
-        isEdge: function (ua) { ua = browser.getua(ua); return ua.indexOf('edge/') > -1 || ua.indexOf('edg/') > -1; },
-        isOpera: function (ua) { ua = browser.getua(ua); return ua.indexOf('opera/') > -1 || ua.indexOf('opr/') > -1; },
-        isSafari: function (ua) { ua = browser.getua(ua); return ua.indexOf('safari/') > -1 && ua.indexOf('chrome/') < 0; },
-        isIE: function (ua) { ua = browser.getua(ua); return ua.indexOf('trident/') > -1 || (ua.indexOf('msie') > -1 && ua.indexOf('compatible') > -1); },
-        isChrome: function (ua) { ua = browser.getua(ua); return ua.indexOf('chrome/') > -1 && !browser.isOpera(ua) && !browser.isEdge(ua) && !browser.isSafari(ua); },
-        isWap: function (ua) { ua = browser.getua(ua); return /android|webos|iphone|ipod|ipad|blackberry/i.test(ua); },
-        isWechar: function (ua) { ua = browser.getua(ua); return /micromessenger/i.test(ua); },
-        isMobile: function (ua) { return browser.isWap(ua); }
-    };
     var ua = function () { try { return navigator.userAgent.toLowerCase(); } catch (e) { return ''; } }(),
         //mc = ua.match(/([A-Z]+)\/([\d\.]+)/ig) || [], ut = mc.join('_').replace(/\//g,''),
         isFirefox = ua.indexOf('firefox/') > -1,
@@ -6385,9 +6372,40 @@
         isSafari = ua.indexOf('safari/') > -1 && ua.indexOf('chrome/') < 0,
         isChrome = !isOpera && !isEdge && !isSafari && ua.indexOf('chrome/') > -1,
         isIE = ua.indexOf('trident/') > -1 || (ua.indexOf('msie') > -1 && ua.indexOf('compatible') > -1),
-        isWap = /android|webos|iphone|ipod|ipad|blackberry/i.test(ua),
         isWechar = /micromessenger/i.test(ua),
-        ieVersion = isIE ? parseFloat('0' + (ua.match(/(msi\s|rv:)([\d\.]+)[;]?/) || [])[2], 10) : 0;
+        ieVersion = isIE ? parseFloat('0' + (ua.match(/(msi\s|rv:)([\d\.]+)[;]?/) || [])[2], 10) : 0,
+        isMobileBrowser = function () {
+            // 1. UA判断
+            const isMobileUA = /mobile|android|webos|iphone|ipod|ipad|blackberry/i.test(ua);
+
+            if (typeof window !== 'undefined') {                
+                // 2. 屏幕尺寸判断（通常移动端屏幕宽度≤768px）
+                const isSmallScreen = window.innerWidth <= 768;
+                
+                // 3. 检测是否支持触摸事件（移动端核心特征）
+                const isTouchSupport = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+                
+                // 综合判断：UA匹配 或 （小屏幕+支持触摸）
+                return isMobileUA || (isSmallScreen && isTouchSupport);
+
+            }
+            return isMobileUA;
+        },
+        isWap = isMobileBrowser();
+
+
+    var browser = {
+        isFirefox: function () { return isFirefox; },
+        isEdge: function () { return isEdge; },
+        isOpera: function () { return isOpera; },
+        isSafari: function () { return isSafari; },
+        isIE: function () { return isIE; },
+        isChrome: function () { return isChrome; },
+        isWap: function () { return isWap; },
+        isWechar: function () { return isWechar; },
+        isMobile: function () { return isWap; }
+    };
+
     $.extendNative($, {
         isChrome: isChrome,
         isFirefox: isFirefox,
@@ -8405,8 +8423,10 @@ $.title
         }
     });
 
-    // 若不想启用$.title，还是想用原生的title，可以在页面URL参数中加入origin-title=1
-    if (typeof location !== 'undefined' && parseInt('0' + $.getQueryString(location.href, 'origin-title'), 10) !== 1) {
-        $.title({ id:'oui-title' });
+    if (!$.isWap) {
+        // 若不想启用$.title，还是想用原生的title，可以在页面URL参数中加入origin-title=1
+        if (typeof location !== 'undefined' && parseInt('0' + $.getQueryString(location.href, 'origin-title'), 10) !== 1) {
+            $.title({ id:'oui-title' });
+        }
     }
 }(OUI);
