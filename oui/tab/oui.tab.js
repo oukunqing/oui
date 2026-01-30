@@ -599,7 +599,7 @@
                     });
                 }
             }
-            $.addListener(document, 'keydown', Util.escContextMenu);
+            $.addListener(document, 'keydown,touchstart', Util.escContextMenu);
 
             return this;
         },

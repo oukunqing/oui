@@ -4716,6 +4716,14 @@
 
             return $.extend(par, os);
         },
+        getElemSize = function (elem, basic) {
+            var ns = { left: 0, top: 0, width: 0, height: 0 };
+            if (!$.isElement(elem = $.toElement(elem))) {
+                return ns;
+            }
+            var os = getOffsetSize(elem, basic);
+            return os;
+        },
         getBodySize = function (isOffset) {
             var doc;
             if (typeof document.compatMode !== 'undefined' && document.compatMode === 'CSS1Compat') {
@@ -5526,11 +5534,12 @@
         },
         getEventPosition = function (ev, elem) {
             var e = ev || getEvent();
-            if (e.pageX || e.pageY) {
-                return { 
-                    x: e.pageX, 
-                    y: e.pageY
-                };
+            if (e.type.startsWith('touch')) {
+                var p = e.changedTouches ? e.changedTouches[0] : {};
+                return { x: p.pageX || p.clientX, y: p.pageY || p.clientY };
+            }
+            if ($.isNumber(e.pageX) || $.isNumber(e.pageY)) {
+                return { x: e.pageX, y: e.pageY };
             }
             var scroll = getScrollPosition();
             return {
@@ -5639,121 +5648,62 @@
             }
         },
         isOnElem = function (elem, pos) {
-            var offset = getOffsetSize(elem);
-            if (pos.x >= offset.left && pos.y >= offset.top
-                && pos.x <= (offset.left + offset.width)
-                && pos.y <= (offset.top + offset.height)) {
-                return true;
-            }
-            return false;
+            const rect = elem.getBoundingClientRect();
+            return pos.x >= rect.left && pos.x <= rect.right
+                && pos.y >= rect.top && pos.y <= rect.bottom;
         },
         isOnElement = function (elem, ev) {
-            function _onElement(elem, ev) {
-                if (!isElement(elem = toElement(elem)) || !ev) {
-                    return false;
+            if (!ev || !$.isElement(ev.target)) {
+                return false;
+            }
+            if (ev.target === elem) {
+                return true;
+            }
+            var pos, scroll;
+            if (ev.fromElement || typeof ev.x === 'undefined') {
+                pos = getEventPosition(ev);
+            } else {
+                scroll = getScrollPosition();
+                pos = { x: ev.x + scroll.left, y: ev.y + scroll.top };
+            }
+            var elems = $.isArray(elem) ? elem : [elem];
+            for(var i = 0; i < elems.length; i++) {
+                if (_onElement(elems[i], pos)) {
+                    return true;
                 }
-                var pos, scroll;
-                if (ev.fromElement || typeof ev.x === 'undefined') {
-                    pos = getEventPosition(ev);
-                } else {
-                    scroll = getScrollPosition();
-                    pos = { x: ev.x + scroll.left, y: ev.y + scroll.top };
+            }
+            function _onElement (elem, pos) {
+                if (!isElement(elem = toElement(elem))) {
+                    return false;
                 }
                 if (isOnElem(elem, pos)) {
                     return true;
                 }
-                /*
-                var childs = elem.childNodes;
-                for (var i = 0; i < childs.length; i++) {
-                    var sub = childs[i];
-                    if (sub.childNodes.length > 0) {
-                        return isOnElement(sub, pos);
-                    } else if (isOnElem(sub, pos)) {
-                        return true;
-                    }
-                }
-                */
-                //不再采用递归
-                var childs = elem.querySelectorAll('*'),
-                    c = childs.length, k, i, j, m, n;
-
-                //若子元素数量超过8个，则每次同时比较4个元素
-                //比较方向：开始向右，结束向左，中间向左，中间向右
-                if (c >= 8) {
-                    k = Math.ceil(c / 4);
-                    for (i = 0; i < k; i++) {
-                        j = k * 4 - 1 - i;
-                        j = j >= c ? c - 1 : j;
-                        m = k * 2 + i,
-                        n = k * 2 - 1 - i;
-                        if (isOnElem(childs[i], pos) || isOnElem(childs[j], pos) || isOnElem(childs[m], pos) || isOnElem(childs[n], pos)) {
-                            return true;
-                        }
-                    }
-                } else {
-                    //每次同时比较2个元素
-                    k = Math.ceil(c / 2);
-                    for (i = 0; i < k; i++) {
-                        j = k * 2 - 1 - i;
-                        j = j >= c ? c - 1 : j;
-                        if (isOnElem(childs[i], pos) || isOnElem(childs[j], pos)) {
-                            return true;
-                        }
-                    }
-                }
                 return false;
-            }
-
-            var elems = $.isArray(elem) ? elem : [elem];
-            for(var i = 0; i < elems.length; i++) {
-                if (_onElement(elems[i], ev)) {
-                    return true;
-                }
             }
             return false;
         },
         isInElement = function (elem, ev) {
-            function _inElement(elem, ev) {
-                if (!isElement(elem = toElement(elem)) || !ev) {
-                    return false;
-                }
-                var t = ev.target;
-                if (!$.isElement(t)) {
-                    return false;
-                } else if (elem === t) {
-                    return true;
-                }
-                var childs = elem.querySelectorAll('*'),
-                    c = childs.length, k, i, j, m, n;
-
-                if (c >= 8) {
-                    k = Math.ceil(c / 4);
-                    for (i = 0; i < k; i++) {
-                        j = k * 4 - 1 - i;
-                        j = j >= c ? c - 1 : j;
-                        m = k * 2 + i,
-                        n = k * 2 - 1 - i;
-                        if (childs[i] === t || childs[j] === t || childs[m] === t || childs[n] === t) {
-                            return true;
-                        }
-                    }
-                } else {
-                    k = Math.ceil(c / 2);
-                    for (i = 0; i < k; i++) {
-                        j = k * 2 - 1 - i;
-                        j = j >= c ? c - 1 : j;
-                        if (childs[i] === t || childs[j] === t) {
-                            return true;
-                        }
-                    }
-                }
+            if (!ev || !$.isElement(ev.target)) {
                 return false;
             }
             var elems = $.isArray(elem) ? elem : [elem];
             for(var i = 0; i < elems.length; i++) {
-                if (_inElement(elems[i], ev)) {
+                if (_inElement(elems[i], ev.target)) {
                     return true;
                 }
+            }
+            function _inElement(p, t) {
+                if (!isElement(p = toElement(p))) {
+                    return false;
+                }
+                while(t && $.isElement(t)) {
+                    if (t === p) {
+                        return true;
+                    }
+                    t = t.parentNode;
+                }
+                return false;
             }
             return false;
         },
@@ -6479,6 +6429,7 @@
         getScrollSize: getScrollSize,
         getElementSize: getElementSize,
         elemSize: getElementSize,
+        getElemSize: getElemSize,
         offset: getOffsetSize,
         setPanelPosition: setPanelPosition,
         isArrayLike: isArrayLike,
@@ -7441,10 +7392,13 @@
     }, '$');
 
     var $size = function ($fn, key, val) {
-        if ($.isUndefined(val)) {
+        if ($.isUndefined(key) || $.isUndefined(val)) {
             var self = $fn, elem = self[0] || null;
             if (!elem) {
                 return 0;
+            }
+            if ($.isUndefined(key)) {
+                return $.getElemSize(elem);
             }
             var size = $.getElementSize(elem)[key];
             if (window.getZoomRatio() < 100 && key.toString().toLowerCase() === 'width') {

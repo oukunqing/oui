@@ -5268,6 +5268,11 @@
             if (!cur[key]) {
                 return [];
             }
+            if (dataKey !== null && $.isObject(dataKey)) {
+                var par = $.extend({}, dataKey);
+                dataKey = par.dataKey || par.key;
+                nodeType = par.nodeType || par.type;
+            }
             for (k in cur[key]) {
                 if (k !== 'length' && Factory.getNodeValue(cur[key][k], dataKey, nodeType, kv)) {
                     arr.push(kv.val);
@@ -5278,6 +5283,12 @@
         getValue: function (dataKey, nodeType) {
             var cur = this.cache.current,
                 key = 'selected', kv = {};
+
+            if (dataKey !== null && $.isObject(dataKey)) {
+                var par = $.extend({}, dataKey);
+                dataKey = par.dataKey || par.key;
+                nodeType = par.nodeType || par.type;
+            }
 
             if (Factory.getNodeValue(cur[key], dataKey, nodeType, kv)) {
                 return kv.val;

@@ -29,7 +29,6 @@
         Cache = {
             menus: {},
             checks: {},
-            count: 0,
             itemId: 1
         },
         Factory = {
@@ -78,9 +77,6 @@
                     }, options),
                     itemId: 1
                 };
-                if (!isUpdate) {
-                    Cache.count += 1;
-                }
                 return this;
             },
             updateCache: function (menuId, options) {
@@ -390,7 +386,9 @@
                         if (!disabled) {
                             $.disableEvent(elem, 'mousedown', $.cancelBubble);
                             $.addListener(elem, 'mouseover,touchstart', function (ev) {
-                                $.cancelBubble(ev);
+                                if (ev.type === 'mouseover') {
+                                    $.cancelBubble(ev);
+                                }
                                 if (hasChild) {
                                     $.addClass(elem, 'cur');
                                     Factory.buildSubMenu(elem, $.getEventPosition(ev), dr.items, false, cfg, cache, autoWidth, menu);
@@ -701,7 +699,8 @@
                             pos = { x: x, y: y, self: true };
                             break;
                     }
-                } else if (ev && (ev.type === 'contextmenu' || ['follow', 'mousedown'].indexOf(opt.position) > -1)) {
+                } else if (ev && (['contextmenu','touchend'].indexOf(ev.type) > -1 
+                    || ['follow', 'mousedown','touchstart'].indexOf(opt.position) > -1)) {
                     //鼠标事件，右键菜单或position位置跟随鼠标
                     pos = $.getEventPosition(ev);
                 } else if ($.isElement(obj)) {
@@ -722,7 +721,7 @@
                     pos = Factory.getMenuPosition(ev, obj, bs, ss, op, ts),
                     opt = $.extend({
                         width: 240,
-                        height: 'auto'
+                        height: 'auto;'
                     }, cache.options, pos),
                     id = Factory.buildMenuId(menu.id),
                     box = $I(id),
@@ -779,8 +778,14 @@
                         if (items.length <= 0) {
                             elem.style.display = 'none';
                         }
+                        _boxpos(elem);
+                        
                     }, parentNode);
 
+                }
+                Factory.setMenuIconWidth(menu);
+
+                function _boxpos (box) {
                     var xs = $.elemSize(box);
                     if (pos.self) {
                         box.style.left = (pos.x - xs.width) + 'px';
@@ -793,7 +798,6 @@
                         box.style.top = (bs.height + ss.top - xs.outerHeight - 2) + 'px';
                     }
                 }
-                Factory.setMenuIconWidth(menu);
 
                 var first = !menu.box;
                 menu.box = box;
@@ -808,12 +812,10 @@
                 var obj = $I('oui-context-menu-' + id);
                 if (obj) {
                     if (null === ev && hide) {
-                        return $.removeElement(obj), Cache.count--, this;
-                        //return $.removeElement(obj), this;
+                        return $.removeElement(obj), this;
                     };
                     if (hide || !$.isOnElement(obj, ev)) {
                         $.removeElement(obj);
-                        Cache.count--;
                     }
                 }
                 return this;
@@ -825,14 +827,9 @@
                 return this;
             },
             hideAllContextMenu: function () {
-                $.console.log('hideAllContextMenu', Cache.count);
-                if (Cache.count > 0) {
-                    $('.oui-context-menu').each(function (i, obj) {
-                        $.removeElement(obj);
-                    });
-                    Cache.count = 0;
-                    //$.removeListener(document, 'keydown', Factory.escContextMenu);
-                }
+                $('.oui-context-menu').each(function (i, obj) {
+                    $.removeElement(obj);
+                });
                 return this;
             }
         };
@@ -898,7 +895,7 @@
                 .addListener(document, 'mousedown', function (ev) {
                     Factory.hideContextMenu(ev, that.id);
                 })
-                .addListener(document, 'touchstart', function (ev) {
+                .addListener(document, 'touchstart,touchend', function (ev) {
                     if (ev.target.className.indexOf('cmenu-item') < 0) {
                         Factory.hideAllContextMenu();
                     }
