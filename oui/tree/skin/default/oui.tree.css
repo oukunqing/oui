@@ -114,24 +114,27 @@
 .oui-tree li .item span b {display:inline-block;white-space:nowrap;}
 
 /*关于ICON图标*/
-.oui-tree li .item .icon{background:transparent url("imgs/tree-icon.png?6") no-repeat -1px center;width:25px;float:left;cursor:pointer;box-sizing:border-box;}
+.oui-tree li .item .icon{
+	background:transparent url("imgs/tree-icon.png?6") no-repeat -1px center;
+	width:25px;float:left;cursor:pointer;box-sizing:border-box;
+}
 .oui-tree li .item .icon:hover{background-color:none;}
 
-.oui-tree li .item .icon-open{background:url("imgs/tree-icon.png?6") no-repeat -25px center;width:25px;}
+.oui-tree li .item .icon-open{background-position-x:-25px;}
 
 /*连线时的打开图标*/
 .oui-tree-line li .item .icon-open,
-.oui-tree-line:hover li .item .icon-open{background:url("imgs/tree-icon.png?6") no-repeat -50px center;width:25px;}
+.oui-tree-line:hover li .item .icon-open{background-position-x:-50px;}
 
 .oui-tree-line-hover li .item .icon-open,
 .oui-tree-line-hover li .item .item-body .icon-open {
-	background:url("imgs/tree-icon.png?6") no-repeat -25px center;width:25px;
+	background-position-x:-25px;
 }
 .oui-tree-line li .item .item-body .icon-open {
-	background:url("imgs/tree-icon.png?6") no-repeat -25px center;width:25px;
+	background-position-x:-25px;
 }
 
-.oui-tree li .item .icon-page{background:transparent url("imgs/tree-icon.png?6") no-repeat -75px center;width:25px;}
+.oui-tree li .item .icon-page{background-position-x:-75px;}
 .oui-tree li .item .icon-none{background:none;}
 
 
@@ -156,19 +159,22 @@
 }
 
 /*关于复选框*/
-.oui-tree li .item .check{float:left;width:25px;height:100%;margin:0;border:none;box-sizing:border-box;background-color:transparent;}
-.oui-tree li .item .check{background:url("imgs/tree-check.png?1") no-repeat 0 center;}
-.oui-tree li .item .check-true{background:url("imgs/tree-check.png?1") no-repeat -25px center;}
-.oui-tree li .item .check-part-true{background:url("imgs/tree-check.png?1") no-repeat -50px center;}
-.oui-tree li .item .check-disabled{background:url("imgs/tree-check.png?1") no-repeat -75px center;cursor:not-allowed;}
-.oui-tree li .item .check-disabled:hover{background:url("imgs/tree-check.png?6") no-repeat -75px center;}
+.oui-tree li .item .check{
+	float:left;width:25px;height:100%;margin:0;border:none;box-sizing:border-box;background-color:transparent;
+	background:url("imgs/tree-check.png?1") no-repeat 3000px center;
+}
+.oui-tree li .item .check{background-position-x: 0;}
+.oui-tree li .item .check-true{background-position-x:-25px;}
+.oui-tree li .item .check-part-true{background-position-x:-50px;}
+.oui-tree li .item .check-disabled{background-position-x:-75px;cursor:not-allowed;}
+.oui-tree li .item .check-disabled:hover{background-position-x:-75px;}
 
 .oui-tree li .item .item-body .check {margin:0px;}
 
-.oui-tree li .item .check:hover {background:url("imgs/tree-check.png?6") no-repeat -100px center;}
-.oui-tree li .item .check-true:hover {background:url("imgs/tree-check.png?6") no-repeat -125px center;}
-.oui-tree li .item .check-part-true:hover {background:url("imgs/tree-check.png?6") no-repeat -150px center;}
-.oui-tree li .item .check-disabled-true{background:url("imgs/tree-check.png?6") no-repeat -175px center;cursor:not-allowed;}
+.oui-tree li .item .check:hover {background-position-x:-100px;}
+.oui-tree li .item .check-true:hover {background-position-x:-125px;}
+.oui-tree li .item .check-part-true:hover {background-position-x:-150px;}
+.oui-tree li .item .check-disabled-true{background-position-x:-175px;cursor:not-allowed;}
 
 /*关于按钮*/
 .oui-tree li .item .button{
@@ -234,7 +240,10 @@
 .oui-tree li .item .switch {}
 .oui-tree li:hover .item .switch {}
 
-.oui-tree li .item .switch {width:25px;cursor:pointer;float:left;}
+.oui-tree li .item .switch {
+	width:25px;cursor:pointer;float:left;
+	background:transparent url("imgs/tree-switch.png?6") no-repeat 0px center;
+}
 .oui-tree li .item .switch:hover {background-color:transparent;border-radius:4px;}
 
 .oui-tree li .item .switch-close,
@@ -243,7 +252,7 @@
 .oui-tree-device li .item .switch-close:hover,
 .oui-tree-switch-default li .item .switch-close,
 .oui-tree-switch-default li .item .switch-close:hover {
-	background:transparent url("imgs/tree-switch.png?6") no-repeat 0 center;
+	background-position-x:0;
 }
 .oui-tree li .item .switch-open,
 .oui-tree li .item .switch-open:hover,
@@ -251,29 +260,29 @@
 .oui-tree-device li .item .switch-open:hover,
 .oui-tree-switch-default li .item .switch-open,
 .oui-tree-switch-default li .item .switch-open:hover {
-	background:url("imgs/tree-switch.png?6") no-repeat -25px center;
+	background-position-x:-25px;
 }
 
 .oui-tree-switch-radius li .item .switch-close,
-.oui-tree-switch-radius li .item .switch-close:hover {background:transparent url("imgs/tree-switch.png?6") no-repeat -50px center;}
+.oui-tree-switch-radius li .item .switch-close:hover {background-position-x:-50px;}
 .oui-tree-switch-radius li .item .switch-open,
-.oui-tree-switch-radius li .item .switch-open:hover {background:url("imgs/tree-switch.png?6") no-repeat -75px center;}
+.oui-tree-switch-radius li .item .switch-open:hover {background-position-x:-75px;}
 
 .oui-tree-switch-device li .item .switch-close,
-.oui-tree-switch-device li .item .switch-close:hover {background:transparent url("imgs/tree-switch.png?6") no-repeat -100px center;}
+.oui-tree-switch-device li .item .switch-close:hover {background-position-x:-100px;}
 .oui-tree-switch-device li .item .switch-open,
-.oui-tree-switch-device li .item .switch-open:hover {background:url("imgs/tree-switch.png?6") no-repeat -125px center;}
+.oui-tree-switch-device li .item .switch-open:hover {background-position-x:-125px;}
 
 /*以下4行的图标偏移位置是组合的，不是上下对应的*/
-.oui-tree-switch-arrow li .item .switch-close{background:transparent url("imgs/tree-switch.png?6") no-repeat -150px center;}
-.oui-tree-switch-arrow li .item .switch-open{background:url("imgs/tree-switch.png?6") no-repeat -250px center;}
-.oui-tree-switch-arrow li .item .switch-close:hover {background:transparent url("imgs/tree-switch.png?6") no-repeat -175px center;}
-.oui-tree-switch-arrow li .item .switch-open:hover {background:url("imgs/tree-switch.png?6") no-repeat -275px center;}
+.oui-tree-switch-arrow li .item .switch-close{background-position-x:-150px;}
+.oui-tree-switch-arrow li .item .switch-open{background-position-x:-250px;}
+.oui-tree-switch-arrow li .item .switch-close:hover {background-position-x:-175px;}
+.oui-tree-switch-arrow li .item .switch-open:hover {background-position-x:-275px;}
 
-.oui-tree-switch-updown li .item .switch-close{background:transparent url("imgs/tree-switch.png?6") no-repeat -200px center;}
-.oui-tree-switch-updown li .item .switch-open{background:url("imgs/tree-switch.png?6") no-repeat -250px center;}
-.oui-tree-switch-updown li .item .switch-close:hover {background:transparent url("imgs/tree-switch.png?6") no-repeat -225px center;}
-.oui-tree-switch-updown li .item .switch-open:hover {background:url("imgs/tree-switch.png?6") no-repeat -275px center;}
+.oui-tree-switch-updown li .item .switch-close{background-position-x:-200px;}
+.oui-tree-switch-updown li .item .switch-open{background-position-x:-250px;}
+.oui-tree-switch-updown li .item .switch-close:hover {background-position-x:-225px;}
+.oui-tree-switch-updown li .item .switch-open:hover {background-position-x:-275px;}
 
 .oui-tree li .item .switch-none {background:none;cursor:default;}
 .oui-tree li .item .switch-none:hover {background:none;}
@@ -293,39 +302,44 @@
 }
 .oui-tree-line-hover ul.line {background: none;}
 
+.oui-tree-line li .item .switch,.oui-tree-line li .item .switch:hover,
+.oui-tree-box:hover .oui-tree-line-hover li .item .switch  {
+	background:transparent url("imgs/tree-switch-1.png?6") no-repeat 0px center;
+}
 .oui-tree-line li .item .one-close,.oui-tree-line li .item .one-close:hover,
 .oui-tree-box:hover .oui-tree-line-hover li .item .one-close {
-	background: url("imgs/tree-switch-1.png?6") no-repeat 0 center;
+	background-position-x:0;
 }
 .oui-tree-line li .item .one-open,.oui-tree-line li .item .one-open:hover,
 .oui-tree-box:hover .oui-tree-line-hover li .item .one-open {
-	background: url("imgs/tree-switch-1.png?6") no-repeat -25px center;
+	background-position-x:-25px;
 }
 .oui-tree-line li .item .first-close,.oui-tree-line li .item .first-close:hover,
 .oui-tree-box:hover .oui-tree-line-hover li .item .first-close {
-	background: url("imgs/tree-switch-1.png?6") no-repeat -50px center;
+	background-position-x:-50px;
 }
 .oui-tree-line li .item .first-open,.oui-tree-line li .item .first-open:hover,
 .oui-tree-box:hover .oui-tree-line-hover li .item .first-open {
-	background: url("imgs/tree-switch-1.png?6") no-repeat -75px center;
+	background-position-x:-75px;
 }
 .oui-tree-line li .item .switch-close,.oui-tree-line li .item .switch-close:hover,
 .oui-tree-box:hover .oui-tree-line-hover li .item .switch-close {
-	background: url("imgs/tree-switch-1.png?6") no-repeat -100px center;
+	background-position-x:-100px;
 }
 .oui-tree-line li .item .switch-open,.oui-tree-line li .item .switch-open:hover,
 .oui-tree-box:hover .oui-tree-line-hover li .item .switch-open {
-	background: url("imgs/tree-switch-1.png?6") no-repeat -125px center;
+	background-position-x:-125px;
 }
 .oui-tree-line li .item .last-close,.oui-tree-line li .item .last-close:hover,
 .oui-tree-box:hover .oui-tree-line-hover li .item .last-close {
-	background: url("imgs/tree-switch-1.png?6") no-repeat -150px center;
+	background-position-x:-150px;
 }
 .oui-tree-line li .item .last-open,.oui-tree-line li .item .last-open:hover,
 .oui-tree-box:hover .oui-tree-line-hover li .item .last-open {
-	background: url("imgs/tree-switch-1.png?6") no-repeat -175px center;
+	background-position-x:-175px;
 }
 
+/* 这里是定制的鼠标悬停显示连线的样式，这个一定要放在.oui-tree-line的下面 */
 .oui-tree-line-hover li .item .one-close,
 .oui-tree-line-hover li .item .first-close,
 .oui-tree-line-hover li .item .last-close,
@@ -339,38 +353,41 @@
 	background:url("imgs/tree-switch.png?6") no-repeat -25px center;
 }
 
-
+.oui-tree-line-radius li .item .switch,.oui-tree-line-radius li .item .switch:hover,
+.oui-tree-box:hover .oui-tree-line-radius-hover li .item .switch  {
+	background:transparent url("imgs/tree-switch-2.png?6") no-repeat 0px center;
+}
 .oui-tree-line-radius li .item .one-close,.oui-tree-line-radius li .item .one-close:hover,
 .oui-tree-box:hover .oui-tree-line-radius-hover li .item .one-close {
-	background: url("imgs/tree-switch-2.png?6") no-repeat 0 center;
+	background-position-x:0;
 }
 .oui-tree-line-radius li .item .one-open,.oui-tree-line-radius li .item .one-open:hover,
 .oui-tree-box:hover .oui-tree-line-radius-hover li .item .one-open {
-	background: url("imgs/tree-switch-2.png?6") no-repeat -25px center;
+	background-position-x:-25px;
 }
 .oui-tree-line-radius li .item .first-close,.oui-tree-line-radius li .item .first-close:hover,
 .oui-tree-box:hover .oui-tree-line-radius-hover li .item .first-close {
-	background: url("imgs/tree-switch-2.png?6") no-repeat -5px center;
+	background-position-x:-50px;
 }
 .oui-tree-line-radius li .item .first-open,.oui-tree-line-radius li .item .first-open:hover,
 .oui-tree-box:hover .oui-tree-line-radius-hover li .item .first-open {
-	background: url("imgs/tree-switch-2.png?6") no-repeat -75px center;
+	background-position-x:-75px;
 }
 .oui-tree-line-radius li .item .switch-close,.oui-tree-line-radius li .item .switch-close:hover,
 .oui-tree-box:hover .oui-tree-line-radius-hover li .item .switch-close {
-	background: url("imgs/tree-switch-2.png?6") no-repeat -100px center;
+	background-position-x:-100px;
 }
 .oui-tree-line-radius li .item .switch-open,.oui-tree-line-radius li .item .switch-open:hover,
 .oui-tree-box:hover .oui-tree-line-radius-hover li .item .switch-open {
-	background: url("imgs/tree-switch-2.png?6") no-repeat -125px center;
+	background-position-x:-125px;
 }
 .oui-tree-line-radius li .item .last-close,.oui-tree-line-radius li .item .last-close:hover,
 .oui-tree-box:hover .oui-tree-line-radius-hover li .item .last-close {
-	background: url("imgs/tree-switch-2.png?6") no-repeat -150px center;
+	background-position-x:-150px;
 }
 .oui-tree-line-radius li .item .last-open,.oui-tree-line-radius li .item .last-open:hover,
 .oui-tree-box:hover .oui-tree-line-radius-hover li .item .last-open {
-	background: url("imgs/tree-switch-2.png?6") no-repeat -175px center;
+	background-position-x:-175px;
 }
 
 .oui-tree-line-radius-hover li .item .one-close,
@@ -386,38 +403,41 @@
 	background:url("imgs/tree-switch.png?6") no-repeat -75px center;
 }
 
-
+.oui-tree-line-device li .item .switch,.oui-tree-line-device li .item .switch:hover,
+.oui-tree-box:hover .oui-tree-line-device-hover li .item .switch  {
+	background:transparent url("imgs/tree-switch-3.png?6") no-repeat 0px center;
+}
 .oui-tree-line-device li .item .one-close,.oui-tree-line-device li .item .one-close:hover,
 .oui-tree-box:hover .oui-tree-line-device-hover li .item .one-close {
-	background: url("imgs/tree-switch-3.png?6") no-repeat 0 center;
+	background-position-x:0;
 }
 .oui-tree-line-device li .item .one-open,.oui-tree-line-device li .item .one-open:hover,
 .oui-tree-box:hover .oui-tree-line-device-hover li .item .one-open {
-	background: url("imgs/tree-switch-3.png?6") no-repeat -25px center;
+	background-position-x:-25px;
 }
 .oui-tree-line-device li .item .first-close,.oui-tree-line-device li .item .first-close:hover,
 .oui-tree-box:hover .oui-tree-line-device-hover li .item .first-close {
-	background: url("imgs/tree-switch-3.png?6") no-repeat -50px center;
+	background-position-x:-50px;
 }
 .oui-tree-line-device li .item .first-open,.oui-tree-line-device li .item .first-open:hover,
 .oui-tree-box:hover .oui-tree-line-device-hover li .item .first-open {
-	background: url("imgs/tree-switch-3.png?6") no-repeat -75px center;
+	background-position-x:-75px;
 }
 .oui-tree-line-device li .item .switch-close,.oui-tree-line-device li .item .switch-close:hover,
 .oui-tree-box:hover .oui-tree-line-device-hover li .item .switch-close {
-	background: url("imgs/tree-switch-3.png?6") no-repeat -100px center;
+	background-position-x:-100px;
 }
 .oui-tree-line-device li .item .switch-open,.oui-tree-line-device li .item .switch-open:hover,
 .oui-tree-box:hover .oui-tree-line-device-hover li .item .switch-open {
-	background: url("imgs/tree-switch-3.png?6") no-repeat -125px center;
+	background-position-x:-125px;
 }
 .oui-tree-line-device li .item .last-close,.oui-tree-line-device li .item .last-close:hover,
 .oui-tree-box:hover .oui-tree-line-device-hover li .item .last-close {
-	background: url("imgs/tree-switch-3.png?6") no-repeat -150px center;
+	background-position-x:-150px;
 }
 .oui-tree-line-device li .item .last-open,.oui-tree-line-device li .item .last-open:hover,
 .oui-tree-box:hover .oui-tree-line-device-hover li .item .last-open {
-	background: url("imgs/tree-switch-3.png?6") no-repeat -175px center;
+	background-position-x:-175px;
 }
 
 .oui-tree-line-device-hover li .item .one-close,
@@ -433,39 +453,45 @@
 	background:url("imgs/tree-switch.png?6") no-repeat -125px center;
 }
 
+.oui-tree-line-arrow li .item .switch,
+.oui-tree-box:hover .oui-tree-line-arrow-hover li .item .switch { background: url("imgs/tree-switch-4.png?6") no-repeat 0 center; }
+
 .oui-tree-line-arrow li .item .one-close,
-.oui-tree-box:hover .oui-tree-line-arrow-hover li .item .one-close { background: url("imgs/tree-switch-4.png?6") no-repeat 0 center; }
+.oui-tree-box:hover .oui-tree-line-arrow-hover li .item .one-close { background-position-x:0; }
 .oui-tree-line-arrow li .item .one-open,
-.oui-tree-box:hover .oui-tree-line-arrow-hover li .item .one-open { background: url("imgs/tree-switch-4.png?6") no-repeat -25px center; }
+.oui-tree-box:hover .oui-tree-line-arrow-hover li .item .one-open { background-position-x:-25px; }
 .oui-tree-line-arrow li .item .first-close,
-.oui-tree-box:hover .oui-tree-line-arrow-hover li .item .first-close { background: url("imgs/tree-switch-4.png?6") no-repeat -50px center; }
+.oui-tree-box:hover .oui-tree-line-arrow-hover li .item .first-close { background-position-x:-50px; }
 .oui-tree-line-arrow li .item .first-open,
-.oui-tree-box:hover .oui-tree-line-arrow-hover li .item .first-open { background: url("imgs/tree-switch-4.png?6") no-repeat -75px center; }
+.oui-tree-box:hover .oui-tree-line-arrow-hover li .item .first-open { background-position-x:-75px; }
 .oui-tree-line-arrow li .item .switch-close,
-.oui-tree-box:hover .oui-tree-line-arrow-hover li .item .switch-close { background: url("imgs/tree-switch-4.png?6") no-repeat -100px center; }
+.oui-tree-box:hover .oui-tree-line-arrow-hover li .item .switch-close { background-position-x:-100px; }
 .oui-tree-line-arrow li .item .switch-open,
-.oui-tree-box:hover .oui-tree-line-arrow-hover li .item .switch-open { background: url("imgs/tree-switch-4.png?6") no-repeat -125px center; }
+.oui-tree-box:hover .oui-tree-line-arrow-hover li .item .switch-open { background-position-x:-125px; }
 .oui-tree-line-arrow li .item .last-close,
-.oui-tree-box:hover .oui-tree-line-arrow-hover li .item .last-close { background: url("imgs/tree-switch-4.png?6") no-repeat -150px center; }
+.oui-tree-box:hover .oui-tree-line-arrow-hover li .item .last-close { background-position-x:-150px; }
 .oui-tree-line-arrow li .item .last-open,
-.oui-tree-box:hover .oui-tree-line-arrow-hover li .item .last-open { background: url("imgs/tree-switch-4.png?6") no-repeat -175px center; }
+.oui-tree-box:hover .oui-tree-line-arrow-hover li .item .last-open { background-position-x:-175px; }
+
+.oui-tree-line-arrow li .item .switch:hover,
+.oui-tree-box:hover .oui-tree-line-arrow-hover li .item .switch:hover { background: url("imgs/tree-switch-5.png?6") no-repeat 0 center; }
 
 .oui-tree-line-arrow li .item .one-close:hover,
-.oui-tree-box:hover .oui-tree-line-arrow-hover li .item .one-close:hover { background: url("imgs/tree-switch-5.png?6") no-repeat 0 center; }
+.oui-tree-box:hover .oui-tree-line-arrow-hover li .item .one-close:hover { background-position-x:0; }
 .oui-tree-line-arrow li .item .one-open:hover,
-.oui-tree-box:hover .oui-tree-line-arrow-hover li .item .one-open:hover { background: url("imgs/tree-switch-5.png?6") no-repeat -25px center; }
+.oui-tree-box:hover .oui-tree-line-arrow-hover li .item .one-open:hover { background-position-x:-25px; }
 .oui-tree-line-arrow li .item .first-close:hover,
-.oui-tree-box:hover .oui-tree-line-arrow-hover li .item .first-close:hover { background: url("imgs/tree-switch-5.png?6") no-repeat -50px center; }
+.oui-tree-box:hover .oui-tree-line-arrow-hover li .item .first-close:hover { background-position-x:-50px; }
 .oui-tree-line-arrow li .item .first-open:hover,
-.oui-tree-box:hover .oui-tree-line-arrow-hover li .item .first-open:hover { background: url("imgs/tree-switch-5.png?6") no-repeat -75px center; }
+.oui-tree-box:hover .oui-tree-line-arrow-hover li .item .first-open:hover { background-position-x:-75px; }
 .oui-tree-line-arrow li .item .switch-close:hover,
-.oui-tree-box:hover .oui-tree-line-arrow-hover li .item .switch-close:hover {	background: url("imgs/tree-switch-5.png?6") no-repeat -100px center; }
+.oui-tree-box:hover .oui-tree-line-arrow-hover li .item .switch-close:hover { background-position-x:-100px; }
 .oui-tree-line-arrow li .item .switch-open:hover,
-.oui-tree-box:hover .oui-tree-line-arrow-hover li .item .switch-open:hover { background: url("imgs/tree-switch-5.png?6") no-repeat -125px center; }
+.oui-tree-box:hover .oui-tree-line-arrow-hover li .item .switch-open:hover { background-position-x:-125px; }
 .oui-tree-line-arrow li .item .last-close:hover,
-.oui-tree-box:hover .oui-tree-line-arrow-hover li .item .last-close:hover { background: url("imgs/tree-switch-5.png?6") no-repeat -150px center; }
+.oui-tree-box:hover .oui-tree-line-arrow-hover li .item .last-close:hover { background-position-x:-150px; }
 .oui-tree-line-arrow li .item .last-open:hover,
-.oui-tree-box:hover .oui-tree-line-arrow-hover li .item .last-open:hover { background: url("imgs/tree-switch-5.png?6") no-repeat -175px center; }
+.oui-tree-box:hover .oui-tree-line-arrow-hover li .item .last-open:hover { background-position-x:-175px; }
 
 
 .oui-tree-line-arrow-hover li .item .one-close,
@@ -494,40 +520,46 @@
 	background:url("imgs/tree-switch.png?6") no-repeat -275px center;
 }
 
+.oui-tree-line-updown li .item .switch,
+.oui-tree-box:hover .oui-tree-line-updown-hover li .item .switch { background: url("imgs/tree-switch-6.png?6") no-repeat 0 center; }
 
 .oui-tree-line-updown li .item .one-close,
-.oui-tree-box:hover .oui-tree-line-updown-hover li .item .one-close { background: url("imgs/tree-switch-6.png?6") no-repeat 0 center; }
+.oui-tree-box:hover .oui-tree-line-updown-hover li .item .one-close { background-position-x:0; }
 .oui-tree-line-updown li .item .one-open,
-.oui-tree-box:hover .oui-tree-line-updown-hover li .item .one-open { background: url("imgs/tree-switch-6.png?6") no-repeat -25px center; }
+.oui-tree-box:hover .oui-tree-line-updown-hover li .item .one-open { background-position-x:-25px; }
 .oui-tree-line-updown li .item .first-close,
-.oui-tree-box:hover .oui-tree-line-updown-hover li .item .first-close { background: url("imgs/tree-switch-6.png?6") no-repeat -50px center; }
+.oui-tree-box:hover .oui-tree-line-updown-hover li .item .first-close { background-position-x:-50px; }
 .oui-tree-line-updown li .item .first-open,
-.oui-tree-box:hover .oui-tree-line-updown-hover li .item .first-open { background: url("imgs/tree-switch-6.png?6") no-repeat -75px center; }
+.oui-tree-box:hover .oui-tree-line-updown-hover li .item .first-open { background-position-x:-75px; }
 .oui-tree-line-updown li .item .switch-close,
-.oui-tree-box:hover .oui-tree-line-updown-hover li .item .switch-close { background: url("imgs/tree-switch-6.png?6") no-repeat -100px center; }
+.oui-tree-box:hover .oui-tree-line-updown-hover li .item .switch-close { background-position-x:-100px; }
 .oui-tree-line-updown li .item .switch-open,
-.oui-tree-box:hover .oui-tree-line-updown-hover li .item .switch-open { background: url("imgs/tree-switch-6.png?6") no-repeat -125px center; }
+.oui-tree-box:hover .oui-tree-line-updown-hover li .item .switch-open { background-position-x:-125px; }
 .oui-tree-line-updown li .item .last-close,
-.oui-tree-box:hover .oui-tree-line-updown-hover li .item .last-close { background: url("imgs/tree-switch-6.png?6") no-repeat -150px center; }
+.oui-tree-box:hover .oui-tree-line-updown-hover li .item .last-close { background-position-x:-150px; }
 .oui-tree-line-updown li .item .last-open,
-.oui-tree-box:hover .oui-tree-line-updown-hover li .item .last-open { background: url("imgs/tree-switch-6.png?6") no-repeat -175px center; }
+.oui-tree-box:hover .oui-tree-line-updown-hover li .item .last-open { background-position-x:-175px; }
+
+
+.oui-tree-line-updown li .item .switch:hover,
+.oui-tree-box:hover .oui-tree-line-updown-hover li .item .switch:hover { background: url("imgs/tree-switch-7.png?6") no-repeat 0 center; }
 
 .oui-tree-line-updown li .item .one-close:hover,
-.oui-tree-box:hover .oui-tree-line-updown-hover li .item .one-close:hover { background: url("imgs/tree-switch-7.png?6") no-repeat 0 center; }
+.oui-tree-box:hover .oui-tree-line-updown-hover li .item .one-close:hover { background-position-x:0; }
 .oui-tree-line-updown li .item .one-open:hover,
-.oui-tree-box:hover .oui-tree-line-updown-hover li .item .one-open:hover { background: url("imgs/tree-switch-7.png?6") no-repeat -25px center; }
+.oui-tree-box:hover .oui-tree-line-updown-hover li .item .one-open:hover { background-position-x:-25px; }
 .oui-tree-line-updown li .item .first-close:hover,
-.oui-tree-box:hover .oui-tree-line-updown-hover li .item .first-close:hover { background: url("imgs/tree-switch-7.png?6") no-repeat -50px center; }
+.oui-tree-box:hover .oui-tree-line-updown-hover li .item .first-close:hover { background-position-x:-50px; }
 .oui-tree-line-updown li .item .first-open:hover,
-.oui-tree-box:hover .oui-tree-line-updown-hover li .item .first-open:hover { background: url("imgs/tree-switch-7.png?6") no-repeat -75px center; }
+.oui-tree-box:hover .oui-tree-line-updown-hover li .item .first-open:hover { background-position-x:-75px; }
 .oui-tree-line-updown li .item .switch-close:hover,
-.oui-tree-box:hover .oui-tree-line-updown-hover li .item .switch-close:hover {	background: url("imgs/tree-switch-7.png?6") no-repeat -100px center; }
+.oui-tree-box:hover .oui-tree-line-updown-hover li .item .switch-close:hover { background-position-x:-100px; }
 .oui-tree-line-updown li .item .switch-open:hover,
-.oui-tree-box:hover .oui-tree-line-updown-hover li .item .switch-open:hover { background: url("imgs/tree-switch-7.png?6") no-repeat -125px center; }
+.oui-tree-box:hover .oui-tree-line-updown-hover li .item .switch-open:hover { background-position-x:-125px; }
 .oui-tree-line-updown li .item .last-close:hover,
-.oui-tree-box:hover .oui-tree-line-updown-hover li .item .last-close:hover { background: url("imgs/tree-switch-7.png?6") no-repeat -150px center; }
+.oui-tree-box:hover .oui-tree-line-updown-hover li .item .last-close:hover { background-position-x:-150px; }
 .oui-tree-line-updown li .item .last-open:hover,
-.oui-tree-box:hover .oui-tree-line-updown-hover li .item .last-open:hover { background: url("imgs/tree-switch-7.png?6") no-repeat -175px center; }
+.oui-tree-box:hover .oui-tree-line-updown-hover li .item .last-open:hover { background-position-x:-175px; }
 
 
 .oui-tree-line-updown-hover li .item .one-close,

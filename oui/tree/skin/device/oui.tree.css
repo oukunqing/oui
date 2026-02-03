@@ -2,52 +2,51 @@
 	margin:0;padding:5px 20px 50px 5px;overflow:hidden;display:block;
 }
 
+.oui-tree-device li .item span.icon{background:url("imgs/tree-device.png?6") no-repeat -1px center;}
 
-.oui-tree li .item span.unit,
-.oui-tree-device li .item span.unit{background:url("imgs/tree-device.png?6") no-repeat -1px center;}
+.oui-tree-device li .item span.unit{background-position-x:-1px;}
 
-.oui-tree li .item span.unit-open,
-.oui-tree-device li .item span.unit-open{background:url("imgs/tree-device.png?6") no-repeat -25px center;}
+.oui-tree-device li .item span.unit-open{background-position-x:-25px;}
 
 .oui-tree-device-line li .item span.unit-open,
 .oui-tree-device-line:hover li .item span.unit-open,
 .oui-tree-device-line-hover:hover li .item span.unit-open{
-	background:url("imgs/tree-device.png?6") no-repeat -50px center;
+	background-position-x:-50px;
 }
 .oui-tree-device-line-hover li .item span.unit-open{
-	background:url("imgs/tree-device.png?6") no-repeat -25px center;
+	background-position-x:-25px;
 }
 .oui-tree-device-line li .item .item-body span.unit-open{
-	background:url("imgs/tree-device.png?6") no-repeat -26px center;
+	background-position-x:-26px;
 }
 
 .oui-tree li .item span.device,
 .oui-tree li .item span.device-on,
 .oui-tree-device li .item span.device,
-.oui-tree-device li .item span.device-on{background:url("imgs/tree-device.png?6") no-repeat -76px center;}
+.oui-tree-device li .item span.device-on{background-position-x:-76px;}
 
 .oui-tree li .item span.device-open,
 .oui-tree li .item span.device-on-open,
 .oui-tree-device li .item span.device-open,
-.oui-tree-device li .item span.device-on-open{background:url("imgs/tree-device.png?6") no-repeat -100px center;}
+.oui-tree-device li .item span.device-on-open{background-position-x:-100px;}
 
 .oui-tree-device-line li .item span.device-on-open,
 .oui-tree-device-line:hover li .item span.device-on-open,
-.oui-tree-device-line:hover li .item span.device-on-open{background:url("imgs/tree-device.png?6") no-repeat -125px center;}
-.oui-tree-device-line li .item .item-body span.device-on-open{background:url("imgs/tree-device.png?6") no-repeat -101px center;}
+.oui-tree-device-line:hover li .item span.device-on-open{background-position-x:-125px;}
+.oui-tree-device-line li .item .item-body span.device-on-open{background-position-x:-101px;}
 
-.oui-tree-device-line-hover li .item span.device-on-open{background:url("imgs/tree-device.png?6") no-repeat -100px center;}
+.oui-tree-device-line-hover li .item span.device-on-open{background-position-x:-100px;}
 
 .oui-tree li .item span.device-off,
-.oui-tree-device li .item span.device-off{background:url("imgs/tree-device.png?6") no-repeat -151px center;}
+.oui-tree-device li .item span.device-off{background-position-x:-151px;}
 
 .oui-tree li .item span.device-off-open,
-.oui-tree-device li .item span.device-off-open{background:url("imgs/tree-device.png?6") no-repeat -175px center;}
+.oui-tree-device li .item span.device-off-open{background-position-x:-175px;}
 .oui-tree-device-line li .item span.device-off-open,
-.oui-tree-device-line:hover li .item span.device-off-open{background:url("imgs/tree-device.png?6") no-repeat -200px center;}
-.oui-tree-device-line li .item .item-body span.device-off-open{background:url("imgs/tree-device.png?6") no-repeat -176px center;}
+.oui-tree-device-line:hover li .item span.device-off-open{background-position-x:-200px;}
+.oui-tree-device-line li .item .item-body span.device-off-open{background-position-x:-176px;}
 
-.oui-tree-device-line-hover li .item span.device-off-open{background:url("imgs/tree-device.png?6") no-repeat -175px center;}
+.oui-tree-device-line-hover li .item span.device-off-open{background-position-x:-175px;}
 
 .oui-tree li .item span.camera,
 .oui-tree li .item span.camera-on,
@@ -56,17 +55,17 @@
 .oui-tree-device li .item span.camera,
 .oui-tree-device li .item span.camera-on,
 .oui-tree-device li .item span.camera-open,
-.oui-tree-device li .item span.camera-on-open{background:url("imgs/tree-device.png?6") no-repeat -225px center;}
+.oui-tree-device li .item span.camera-on-open{background-position-x:-225px;}
 
 .oui-tree li .item span.camera-off,
 .oui-tree li .item span.camera-off-open,
 .oui-tree-device li .item span.camera-off,
-.oui-tree-device li .item span.camera-off-open{background:url("imgs/tree-device.png?6") no-repeat -250px center;}
+.oui-tree-device li .item span.camera-off-open{background-position-x:-250px;}
 
 .oui-tree li .item span.camera-play,
 .oui-tree li .item span.camera-play-open,
 .oui-tree-device li .item span.camera-play,
-.oui-tree-device li .item span.camera-play-open{background:url("imgs/tree-device.png?6") no-repeat -275px center;}
+.oui-tree-device li .item span.camera-play-open{background-position-x:-275px;}
 
 
 .oui-tree li .item span.preset,
