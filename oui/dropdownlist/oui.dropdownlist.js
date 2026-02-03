@@ -276,7 +276,7 @@
 				opt.id = opt.id || (opt.element ? opt.element.id : '');
 
 				var arr = $.isArrayLike(opt.id) ? opt.id : $.isString(opt.id) ? opt.id.split(/[,;\|，]/) : opt.id.toString().split(/[,;\|，]/);
-				if (arr.length > 1) {
+				if (arr.length > 0) {
 					var list = [];
 					for (var i = 0; i < arr.length; i++) {
 						var id = arr[i], elem;

@@ -79,7 +79,7 @@
 .oui-tree li.cur .item:hover{}
 
 .oui-tree li .item a.name,.oui-tree li .item a.name span,.oui-tree li .item span {
-	display:inline-block;height:100%;box-sizing:border-box;
+	display:inline-block;height:100%;line-height:26px;box-sizing:border-box;
 	outline:none;overflow:visible;white-space:nowrap;
 	text-align:center; font-size:14px;margin:0;padding:0;
 }

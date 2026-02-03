@@ -24,6 +24,8 @@
         positions = {
             left: 1, right: 0
         },
+        elemIdIndex = 1,
+        timerSelect = null,
         minPageSize = 1,                //pageSize最小值
         //默认的每页显示条数选项
         defaultPageSizeItems = [1, 2, 5, 10, 15, 20, 25, 30, 40, 50, 60, 100, 150, 200],
@@ -533,7 +535,7 @@
         buildPageSize = function (enabled, that, arr, minuend) {
             var op = that.options,
                 html = [
-                    '<select class="select" style="height:', op.height, 'px;',
+                    '<select class="select oui-pagination-pagesize" id="oui-pagination-pagesize-', elemIdIndex++, '" style="height:', op.height, 'px;',
                     enabled ? '' : 'display:none;',
                     '">'
                 ];
@@ -752,7 +754,9 @@
             buildDataStat(op.showStatText && op.showDataStatLeft, that, html, op.markText[dataStatKey]);
             buildPageStat(op.showStatText && op.showPageStatLeft, that, html, op.markText['pageStat']);
 
-            buildPageSize(op.showPageSize, that, html, op.minuend);
+            if (op.dataCount > 0) {
+                buildPageSize(op.showPageSize, that, html, op.minuend);
+            }
 
             if (op.pageCount > 1 || op.alwaysShow || !op.hideOne) {
                 if (op.pageIndex != min && op.pageCount > 0) {
@@ -839,6 +843,19 @@
                     page: { count: op.pageCount, index: op.pageIndex, number: stat.page, size: op.pageSize, start: op.pageStart },
                     data: { count: op.dataCount, start: stat.min, end: stat.max }
                 }, that);
+            }
+
+            if (op.dataCount > 0) {
+                if (timerSelect) {
+                    window.clearTimeout(timerSelect);
+                }
+                timerSelect = window.setTimeout(function() {
+                    var singlelist = typeof $.singlelist === 'function';
+                    if (singlelist) {
+                        var elements = document.querySelectorAll('.oui-pagination-pagesize');
+                        $.singlelist(elements);
+                    }
+                }, 256);
             }
 
             return this;
