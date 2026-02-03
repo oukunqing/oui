@@ -74,7 +74,8 @@
                 Up: '\u4e0a\u79fb',         //上移
                 Down: '\u4e0b\u79fb',       //下移
                 Update: '\u66f4\u65b0',     //更新
-                Modify: '\u4fee\u6539'      //修改
+                Modify: '\u4fee\u6539',     //修改
+                Location: '\u5b9a\u4f4d'    //定位
             },
             EmptyTreeId: 'OuiTreeNone',
             TreeBoxMinHeight: 135,
@@ -164,6 +165,9 @@
                             case 'down':
                                 ep.node.sortIndex(1, Factory.sortCallback);
                                 break;
+                            case 'location':
+                                Factory.locationCallback(ep.node, tree, ev);
+                                break;
                             default:
                                 Factory.buttonCallback(ep.node, tree, ev, $.getAttribute(ep.elem, 'key'));
                                 break;
@@ -182,8 +186,8 @@
                     if (Factory.isReturnType(tree, ep.node.type)) {
                         Factory.setTargetValue(ep.node, tree).clickCallback(ep.node, tree, ev);
                         ep.node.setSelected(true, ev);
-                        if (op.clickChecked) {
-                            ep.node.setChecked(null, ev);
+                        if (op.clickCheck) {
+                            ep.node.setChecked(op.clickChecked, ev);
                         }
                     }
                     if (op.clickExpand) {
@@ -1037,6 +1041,12 @@
                 opt.dragTypes = Factory.parseArrayParam($.getParam(opt, 'dragTypes,dragType'));
                 opt.dragMove = $.isBoolean($.getParam(opt, 'dragMove,dragmove'), false);
 
+                opt.showLocation = $.isBoolean($.getParam(opt, 'showLocation,showGps'), false);
+                opt.locationFunc = $.getParam(opt, 'locationCallback,locationFunc,gpsCallback,gpsFunc');
+                if (!$.isFunction(opt.locationFunc)) {
+                    opt.locationFunc = undefined;
+                }
+
                 opt.buttonConfig = $.extend({ types: [], buttons: [] }, opt.buttonConfig);
                 var types = opt.buttonConfig.types, buttons = opt.buttonConfig.buttons;
                 if (!$.isArray(types)) {
@@ -1150,8 +1160,13 @@
                     opt.openLevel = -1;
                 }
 
-                opt.clickChecked = $.isBoolean($.getParam(opt, 'clickChecked'), false);
-                //点击节点时切换节点false-只收缩, undefined-切换
+                //点击节点时是否勾选复选框
+                opt.clickCheck = $.isBoolean($.getParam(opt, 'clickCheck'), false);
+                //点击节点时切换的方式，true-只勾选，false-只取消, undefined-切换
+                var checked = $.getParam(opt, 'clickChecked');
+                opt.clickChecked = $.isBoolean(checked) ? checked : undefined;
+
+                //点击节点时是否收/缩节点
                 opt.clickExpand = $.isBoolean($.getParam(opt, 'clickExpand'), false);
                 //点击节点时切换的方式，true-只展开，false-只收缩, undefined-切换
                 var expanded = $.getParam(opt, 'clickExpanded');
@@ -1208,6 +1223,11 @@
                 // 外部函数：将参数中的数据传给外部函数，由外部函数决定是否可以选中
                 opt.selectedCondition = $.getParam(opt, 'selectedCondition');
 
+                opt.dot = $.getParam(opt, 'dot');
+                if (!$.isFunction(opt.dot)) {
+                    opt.dot = undefined;
+                }
+
                 // 树形列表
                 opt.treeList = $.isBoolean($.getParam(opt, 'treeList'), false);
                 // 树形导航菜单
@@ -1218,7 +1238,7 @@
                 opt.highHeight = $.isBoolean($.getParam(opt, 'highHeight,lineHeight'), false);
                 // item-body
                 opt.itemBody = $.isBoolean($.getParam(opt, 'itemBody,showItemBody'), true);
-                // shortcutKey                
+                // shortcutKey
                 opt.shortcutKey = $.isBoolean($.getParam(opt, 'shortcutKey'), true);
                 // 切换图标是否显示在右边，仅树形导航菜单时启用
                 opt.rightSwitch = $.isBoolean($.getParam(opt, 'rightSwitch'), false);
@@ -1681,13 +1701,13 @@
                         node = cur[key];
                         break;
                     case 'selected':
-                        if (node = cur[key]) {
+                        if ((node = cur[key])) {    // 先赋值，再比较
                             node.setSelected(false);
                         }
                         break;
                     case 'checked':
                         for (k in cur[key]) {
-                            if (node = cur[key][k]) {
+                            if ((node = cur[key][k])) {    // 先赋值，再比较
                                 node.setChecked(false);
                             }
                         }
@@ -3317,7 +3337,7 @@
             buildLi: function (tree, p, node, opt) {
                 var li = document.createElement('LI'),
                     pw = opt.treeMenu ? 15 : opt.fullWidth ? (opt.showLine ? 22 : 10) : 0,
-                    float = '';
+                    float = '', showLocation = opt.showLocation, loc;
 
                 li.className = ('node level' + p.level + (Config.IE ? ' ie' : '') + (p.disabled ? ' disabled' : ''));
                 li.setAttribute('nid', p.nid);
@@ -3332,6 +3352,14 @@
                 if (opt.treeMenu && opt.rightSwitch) {
                     float = ' style="float:right;margin-right:5px;"';
                 }
+                if (showLocation) {
+                    loc = $.getParam(node.data, 'location,loc,gps');
+                    if (!loc || ['0,0'].indexOf(loc) > -1) {
+                        showLocation = false;
+                    } else {
+                        node.data.location = loc;
+                    }
+                }
                 var title = opt.showTitle ? ' title="' + p.title + '"' : '',
                     pad = pw > 0 ? ' style="padding-left:' + (p.level * pw + (opt.rightSwitch ? 5 : 0)) + 'px;"' : '',
                     html = [
@@ -3345,6 +3373,7 @@
                         opt.showCount ? '<span class="count" nid="' + p.nid + '"></span>' : '',
                         opt.showDesc ? '<span class="desc" nid="' + p.nid + '">' + (p.desc || '') + '</span>' : '',
                         '</a>',
+                        showLocation ? '<a class="btn location" key="location" nid="' + p.nid + '" title="' + Config.Lang.Location + ':' + loc + '"></a>' : '',
                         opt.itemBody ? '</div>' : '',
                         opt.showButton ? '<div class="button" nid="' + p.nid + '"></div>' : '',
                         opt.showInfo ? '<span class="info" nid="' + p.nid + '"></span>' : '',
@@ -3401,6 +3430,11 @@
                     text = (d.name || '').toString().trim().escapeHtml();
                     desc = opt.showDesc ? (d.desc || data[opt.descField.toString()] || '').toString().trim() : '';
                     code = (code || '').toString().trim();
+
+                    if (opt.dot && opt.dot(data)) {
+                        text += '.';
+                    }
+
                     if (desc) {
                         desc = desc.escapeHtml();
                     }
@@ -3919,6 +3953,11 @@
                     tree.options.buttonCallback(node, tree, ev, btnKey);
                 }
                 return this;
+            },
+            locationCallback: function (node, tree, ev) {
+                if ($.isFunction(tree.options.locationFunc)) {
+                    tree.options.locationFunc(node, tree, ev, node.data.location);
+                }
             },
             dragCallback: function (node, tree, dest, dragKey, num, idx) {
                 if ($.isFunction(tree.options.dragCallback)) {
@@ -5063,6 +5102,10 @@
                 showButton: undefined,
                 //是否显示上移/下移按钮
                 showMove: undefined,
+                //是否显示定位图标
+                showLocation: undefined,
+                //定位图标事件
+                locationFunc: undefined,
                 //是否允许移动节点
                 moveAble: undefined,
                 //是否允许拖动节点
@@ -5118,9 +5161,13 @@
                 //是否单选模式
                 single: undefined,
                 //是否单击选中
+                clickCheck: undefined,
+                //选中的方式：true-仅选中，false-仅取消，undefined-切换
                 clickChecked: undefined,
                 //是否单击切换（展开/收缩）
                 clickExpand: undefined,
+                //切换的方式：true-仅展开，false-仅收缩，undefined-切换
+                clickExpanded: undefined,
                 //关联元素
                 target: undefined,
                 //窗体宽度：仅用于点击弹出窗体
@@ -5154,6 +5201,8 @@
                 fullCallback: undefined,
                 //节点能不能被选中的条件
                 selectedCondition: undefined,
+                //外部函数，指示是否需要给名称加“点”
+                dot: undefined,
                 //以下是回调事件
                 callback: undefined,
                 complete: undefined,

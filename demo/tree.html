@@ -100,11 +100,12 @@
                 </select>
                 <label class="chb-label"><input type="checkbox" id="chbDesc" checked="checked" /><span>显示备注</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbInfo" /><span>显示信息</span></label>
+                <label class="chb-label"><input type="checkbox" id="chbLocation" /><span>显示定位</span></label>
                 <div></div>
                 <label class="chb-label"><input type="checkbox" id="chbKeepStatus" /><span>保持状态</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbKeepCookie" /><span>保存COOKIE</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbClickExpand" /><span>点击切换</span></label>
-                <label class="chb-label"><input type="checkbox" id="chbClickChecked" /><span>点击选中</span></label>
+                <label class="chb-label"><input type="checkbox" id="chbClickCheck" /><span>点击选中</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbCallbackLevel" /><span>确认再返回</span></label>
                 <label class="chb-label"><input type="checkbox" id="chbItemBody" checked="checked" /><span>ItemBody</span></label>
                 <label class="chb-label" title="启用自定义样式可以实现节点样式自由，可增加行高或全宽，或改变背景及字体颜色等等&#10;需要注意的是：自定义的样式符合节点结构设计，否则可能会引起节点布局混乱">
@@ -505,6 +506,7 @@
             showType = $('#chbType').checked(),
             showStatus = $('#chbStatus').checked(),
             showCount = $('#chbCount').checked(),
+            showLocation = $('#chbLocation').checked(),
             showDesc = $('#chbDesc').checked(),
             showButton = $('#chbButton').checked(),
             showBottom = $('#chbBottom').checked(),
@@ -521,7 +523,7 @@
             dragSize = $('#chbDragSize').checked(),
             switchIcon = $('#ddlSwitch').val(),
             clickExpand = $('#chbClickExpand').checked(),
-            clickChecked = $('#chbClickChecked').checked(),
+            clickCheck = $('#chbClickCheck').checked(),
             dynamicCamera = $('#chbCamera').checked(),
             dynamic = $('#chbDynamic').checked(),
             callbackLevel = $('#chbCallbackLevel').checked(),
@@ -608,6 +610,7 @@
             showType: showType,
             showStatus: showStatus,
             showCount: showCount,
+            showLocation: showLocation,
             //hideCountZero: true,
             showDesc: showDesc,
             showButton: showButton,
@@ -657,7 +660,9 @@
             //点击切换时，切换的方式：toggle, true, false
             //toggle等同于undefined
             clickExpanded: 'toggle',
-            clickChecked: clickChecked,
+            clickCheck: clickCheck,
+            //toggle等同于undefined
+            //clickChecked: 'toggle',
             callbackLevel: callbackLevel,
             //仅用于IE浏览器节点内容最小宽度设置
             //IE浏览器不支持width:max-content,无奈之下只能特殊定制处理
@@ -866,6 +871,9 @@
             },
             sortCallback: function (node, tree, dest, num, idx) {
                 $.console.log('sortCallback:', tree.id, node, dest, num, idx);
+            },
+            locationCallback: function (node, tree, ev, location) {
+                $.console.log('locationCallback:', node, tree, ev, location);
             }
         });
         $.console.log('test finish:');

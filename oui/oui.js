@@ -280,6 +280,31 @@
             }
             return dvb ? (bool ? b : dv) : bool;
         },
+        isBool = function (b, dv) {
+            var bool = typeof b === 'boolean';
+            if (!bool) {
+                bool = b === 1 || b === 0;
+                if (bool) {
+                    b = b === 1 ? true : false;
+                }
+            }
+            return typeof dv === 'boolean' ? (bool ? b : dv) : bool;
+        },
+        isBools = function (bs, dv) {
+            var bool = false, b, dvb = typeof dv === 'boolean';
+            for (var i = 0; i < bs.length; i++) {
+                bool = typeof bs[i] === 'boolean';
+                if (bool) {
+                    b = bs[i];
+                    break;
+                } else if (bs[i] === 1 || bs[i] === 0) {
+                    bool = true;
+                    b = bs[i] === 1 ? true : false;
+                    break;
+                }
+            }
+            return dvb ? (bool ? b : dv) : bool;
+        },
         isDate = function (obj) {
             return (obj instanceof Date || Object.prototype.toString.call(obj) === '[object Date]') && !isNaN(obj.getFullYear());
         },
@@ -1315,7 +1340,7 @@
         isUndefined: isUndefined, isUndef: isUndefined, isString: isString, isNumber: isNumber,
         isFunction: isFunction, isFunc: isFunction, isObject: isObject, isArray: isArray, isDate: isDate, 
         isDateString: isDateString, isDateStr: isDateString,
-        isBoolean: isBoolean, isBool: isBoolean, isBooleans: isBooleans, isBools: isBooleans,
+        isBoolean: isBoolean, isBool: isBool, isBooleans: isBooleans, isBools: isBools,
         isTrue: isTrue, isFalse: isFalse, isNull: isNull, isEmpty: isEmpty,
         isProperty: isProperty, isPercent: isPercent, isPercentSize: isPercent, version: version,
         isNumeric: isNumeric, isDecimal: isDecimal, isInteger: isInteger, isFloat: isDecimal, isInt: isInteger,
