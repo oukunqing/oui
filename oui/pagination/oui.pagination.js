@@ -853,7 +853,7 @@
                     var singlelist = typeof $.singlelist === 'function';
                     if (singlelist) {
                         var elements = document.querySelectorAll('.oui-pagination-pagesize');
-                        $.singlelist(elements);
+                        //$.singlelist(elements);
                     }
                 }, 256);
             }

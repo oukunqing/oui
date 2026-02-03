@@ -840,7 +840,7 @@
 					opt = that.options,
 					elem = opt.select ? that.elem : that.text;
 
-				$.addListener(document, 'mousedown', function (ev) {
+				$.addListener(document, 'mousedown,touchstart', function (ev) {
 					if (!$.isInElement(that.box, ev) && !$.isInElement(opt.select ? that.elem : that.text, ev)) {
 						that.hide();
 					}
@@ -875,7 +875,7 @@
 					return false;
 				});
 
-				$.addListener(elem, 'mousedown', function (ev) {
+				$.addListener(elem, 'mousedown,touchstart', function (ev) {
 					$.cancelBubble(ev);
 					that.show(this);
 					this.focus();
@@ -1176,16 +1176,16 @@
 					btn = box.querySelector('a.btn-search'),
 					no = box.querySelector('a.btn-cancel');
 
-				$.addListener(btn, 'mousedown', function(ev) {
+				$.addListener(btn, 'mousedown,touchstart', function(ev) {
 					Factory.searchNodes(ddl, txt, this);
 				});
-				$.addListener(no, 'mousedown', function(ev) {
+				$.addListener(no, 'mousedown,touchstart', function(ev) {
 					Factory.showSearchPanel(ddl, false, true);
 					txt.value = '';
 					$.setElemClass(no, 'hide', true);
 				});
 				
-				$.addListener(txt, 'mousedown', function(ev) {
+				$.addListener(txt, 'mousedown,touchstart', function(ev) {
 					Factory.showSearchPanel(ddl, true);
 				});
 				$.addListener(txt, 'keyup', function(ev) {
