@@ -13,7 +13,7 @@
 	padding:0;margin:0;border:none;
 }
 
-.oui-ddl:focus,.oui-ddl-elem:focus,.oui-ddl-cur {
+.oui-ddl-cur {
 	outline:none;
 	border-color: #66afe9;
 	box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);
@@ -64,13 +64,13 @@
 	opacity: 1;
 }
 
-.oui-ddl-bottom {
+select.oui-ddl-bottom,input.oui-ddl-bottom {
 	border-bottom-left-radius: 0px;
 	border-bottom-right-radius: 0px;
 	border-bottom-color: #fff;
 }
 
-.oui-ddl-top {
+select.oui-ddl-top,input.oui-ddl-top {
 	border-top-left-radius: 0px;
 	border-top-right-radius: 0px;
 }

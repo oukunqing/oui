@@ -54,9 +54,9 @@
 			// 当高度超过浏览器窗口大小时，保留边距
 			BodyPadding: 10,
 			// 选项高度
-			BoxItemHeight: 32,
+			BoxItemHeight: $.isWap ? 40 : 32,
 			// 复选框上边距
-			ChbMarginTop: 7,
+			ChbMarginTop: $.isWap ? 11 : 7,
 			// 选项底部高度
 			BoxBarHeight: 42,
 			// 选项默认显示行数
@@ -199,6 +199,8 @@
 				opt.textHeight = $.getParamValue(opt.textHeight, opt.elemHeight, opt.height);
 				opt.textMinHeight = $.getParamValue(opt.textMinHeight, opt.elemMinHeight);
 				opt.style = $.getParamValue(opt.style, opt.css);
+
+				opt.keepColor = $.isBoolean($.getParam(opt, 'keepColor'), true);
 
 				opt.maxHeight = options.maxHeight || (opt.layout === 'grid' ? Config.BoxGridMaxHeight : Config.BoxMaxHeight);
 
@@ -1635,6 +1637,8 @@
 			maxHeight: Config.BoxMaxHeight,
 			//布局： list-下拉列表，flow-流布局，grid-网格
 			layout: 'list', //list, flow, grid
+			//列表框边框颜色与下拉框是否保持一致
+			keepColor: undefined,
 			//输入框宽度，默认跟随下拉框宽度
 			textWidth: undefined,
 			//输入框高度，默认不指定
@@ -1938,7 +1942,15 @@
 		build: function (element) {
 			var that = this,
 				opt = that.options,
-				elem = element || (opt.select ? that.elem : that.text);
+				elem = element || (opt.select ? that.elem : that.text),
+				borderColor = opt.keepColor ? $.getElementStyle(elem, 'border-color') : '',
+				color = borderColor.replace(/[rgb()\s]/g, '');
+
+			// 若边框颜色未设置(#767676)，或边框颜色是#cccccc,#dddddd,#eeeeee
+			if (['118,118,118', '204,204,204', '221,221,221', '238,238,238'].indexOf(color) > -1) {
+				opt.keepColor = false;
+			}
+			//$.console.log('build:', borderColor, color);
 
 			$.createElement('DIV', function (box) {
 				var offset = $.getOffset(opt.select ? that.elem : that.text),
@@ -1996,6 +2008,7 @@
 					bs.width ? 'width:' + Factory.getStyleSize(bs.width) + ';' : '',
 					'min-height:', Factory.getStyleSize(opt.minHeight), ';',
 					opt.maxHeight ? 'max-height:' + Factory.getStyleSize(maxHeight+ (btn.len || btn.form ? Config.BoxFormHeight : 0)) + ';' : '',
+					opt.keepColor ? 'border-color:' + borderColor + ';' : '',
 					opt.boxStyle || ''
 				].join('');
 
@@ -2483,9 +2496,11 @@
 				//再显示下拉列表
 				box.style.display = show ? 'block' : 'none';
 				box.show = show;
-				$.setClass(opt.select ? that.elem : that.text, 'oui-ddl-cur', show);
-				if (!Config.IsDefaultSkin(opt.skin)) {
-					$.setClass(opt.select ? that.elem : that.text, 'oui-ddl-cur-' + opt.skin, show);
+				if (!opt.keepColor) {
+					$.setClass(opt.select ? that.elem : that.text, 'oui-ddl-cur', show);
+					if (!Config.IsDefaultSkin(opt.skin)) {
+						$.setClass(opt.select ? that.elem : that.text, 'oui-ddl-cur-' + opt.skin, show);
+					}
 				}
 
 				that.get();

@@ -253,6 +253,11 @@
                 that.magnifier.style.display = 'none';
                 that.img.style.cursor = 'default';
             }
+        },
+        getTouchDistance: function (touches) {
+            const x = touches[1].clientX - touches[0].clientX;
+            const y = touches[1].clientY - touches[0].clientY;
+            return Math.sqrt(x * x + y * y); // 勾股定理计算距离
         }
     };
 
@@ -417,7 +422,7 @@
 
             var titlebar = document.createElement('DIV');
             titlebar.className = 'oui-picbox-title oui-picbox-unselect';
-            $.addListener(titlebar, 'dblclick', function() {
+            $.addListener(titlebar, 'dblclick,touchstart', function() {
                 $.cancelBubble();
                 that.scale(that.cfg.boxScale).center();
             });
@@ -430,7 +435,7 @@
 
             var statusbar = document.createElement('DIV');
             statusbar.className = 'oui-picbox-status oui-picbox-unselect';
-            $.addListener(statusbar, 'dblclick', function() {
+            $.addListener(statusbar, 'dblclick,touchstart', function() {
                 $.cancelBubble();
                 that.center();
             });
@@ -782,18 +787,39 @@
         },
         touchZoom: function() {
             var that = this;
-            /*
-            $.addListener(that.img, 'touchstart', function(ev) {
-                if (e.touches.length === 2) {
-                    var x = Math.abs(e.touches[0].clientX - e.touches[1].clientX);
-                    var y = Math.abs(e.touches[0].clientY - e.touches[1].clientY);
-                    var startDistance = Math.sqrt(x * x + y * y);
-                    that.cfg.startDistance = startDistance
-                }
+            
+            $.addListener(that.img, 'touchstart', function(e) {
+                if (e.touches.length === 1) {
+                    var x = Math.abs(e.touches[0].clientX );
+                    var y = Math.abs(e.touches[0].clientY);
+                    that.cfg.diffpointer = { x: 0, y: 0 };
+                    that.cfg.lastpointer = { x: x, y: y };
+                } else if (e.touches.length === 2) {
+                    that.cfg.startDistance = Factory.getTouchDistance(e.touches);
+                }                
             });
 
-            $.addListener(that.img, 'touchmove', function(ev) {
-                if (e.touches.length === 2) {
+            $.addListener(that.img, 'touchmove', function(e) {
+                if (e.touches.length === 1) {
+                    var cur = $.getEventPos(e);
+                    that.cfg.diffpointer.x = cur.x - that.cfg.lastpointer.x;
+                    that.cfg.diffpointer.y = cur.y - that.cfg.lastpointer.y;
+                    that.cfg.lastpointer = { x: cur.x, y: cur.y };
+
+                    that.cfg.x += that.cfg.diffpointer.x;
+                    that.cfg.y += that.cfg.diffpointer.y;
+
+                    var left = that.cfg.x - that.cfg.w / 2,
+                        top = that.cfg.y - that.cfg.h / 2;
+
+                    that.img.style.cursor = 'move';
+                    that.img.style.left = left + 'px';
+                    that.img.style.top = top + 'px';
+
+                    that.cfg.left = left;
+                    that.cfg.top = top;
+                } else if (e.touches.length === 2) {
+                    $.cancelBubble(e);
                     e.preventDefault();
                     var x = Math.abs(e.touches[0].clientX - e.touches[1].clientX);
                     var y = Math.abs(e.touches[0].clientY - e.touches[1].clientY);
@@ -802,28 +828,24 @@
                         curScale = that.cfg.curScale,
                         newScale = curScale * (currentDistance / startDistance);
 
-                    //that.img.style.transform = `scale(${newScale})`;
-
                     that.cfg.curScale = newScale;
-
                     that.scale(newScale);
                 }
             });
-
-            $.addListener(that.img, 'touchend', function(ev) {
-                if (e.touches.length === 0) {
+            
+            $.addListener(that.img, 'touchend', function(e) {
+                if (e.touches.length === 2) {
+                    /*
                     var x = Math.abs(e.changedTouches[0].clientX - e.changedTouches[1].clientX);
                     var y = Math.abs(e.changedTouches[0].clientY - e.changedTouches[1].clientY);
                     var endDistance = Math.sqrt(x * x + y * y),
                         startDistance = that.cfg.startDistance,
                         curScale = that.cfg.curScale;
+                        */
 
-                    curScale = curScale * (endDistance / startDistance);
-
-                    that.cfg.curScale = curScale;
                 }
             });
-            */
+            
             return that;
         },
         resize: function(size, fill, margin) {

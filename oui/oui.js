@@ -1106,7 +1106,7 @@
             return urlpath.replace(/[\/]{2,}/g, '/').replace(/(http:\/|https:\/)/ig, '$1/');
         },
         iniToJson = function (cfg) {
-            var arr = cfg.split(/\r\n|\n/), len = arr.length;
+            var arr = cfg.split(/\r?\n|\r/), len = arr.length;
             var json = {}, obj = json, dir, key, val;
 
             for (var i = 0; i < len; i++) {

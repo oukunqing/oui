@@ -29,8 +29,8 @@
         minPageSize = 1,                //pageSize最小值
         //默认的每页显示条数选项
         defaultPageSizeItems = [1, 2, 5, 10, 15, 20, 25, 30, 40, 50, 60, 100, 150, 200],
-        defaultInputWidth = 35,         //输入框默认宽度，单位：px
-        defaultInputHeight = 28,        //按钮、输入框默认高度，单位：px
+        defaultInputWidth = $.isWap ? 40 : 35,         //输入框默认宽度，单位：px
+        defaultInputHeight = $.isWap ? 32 : 28,        //按钮、输入框默认高度，单位：px
         defaultDebounceTime = 50,       //防抖最小时长，单位：毫秒
         defaultLongPressTime = 1024,    //长按最小时长，单位：毫秒
         defaultLongPressInterval = 50,          //长按分页间隔，单位：毫秒
@@ -73,21 +73,47 @@
 
             return opt;
         },
+        Lang = {
+            //共
+            total: '\u5171',
+            //页
+            page: '\u9875',
+            //条
+            item: '\u6761',
+            //跳转
+            goto: '\u8df3\u8f6c',
+            //重载
+            reload: '\u91cd\u8f7d',
+            //页码
+            input: '\u9875\u7801',
+            //首页
+            first: '\u9996\u9875',
+            //上一页
+            previous: '\u4e0a\u4e00\u9875',
+            //下一页
+            next: '\u4e0b\u4e00\u9875',
+            //末页
+            last: '\u672b\u9875'
+        },
         setOptions = function (op, options, dataCount) {
             var texts = {
                 symbol: {
                     first: '&laquo;', previous: '&lsaquo;', next: '&rsaquo;', last: '&raquo;',
                     ellipsis: '&middot;&middot;&middot;', goto: 'Goto', reload: 'Reload',
-                    pageCount: '共{0}页', dataCount: '共{0}条',
-                    pageStat: '{0}/{1}页', dataStat: '{1}-{2}条 / 共{0}条', dataStatOne: '共{0}条',
-                    input: '页码:'
+                    pageCount: Lang.total + '{0}' + Lang.page, dataCount: Lang.total + '{0}' + Lang.item,
+                    pageStat: '{0}/{1}' + Lang.page, 
+                    dataStat: '{1}-{2}' + Lang.item + ' / ' + Lang.total + '{0}' + Lang.item, 
+                    dataStatOne: Lang.total + '{0}' + Lang.item,
+                    input: Lang.input + ':'
                 },
                 chinese: {
-                    first: '首页', previous: '上一页', next: '下一页', last: '末页',
-                    ellipsis: '&middot;&middot;&middot;', goto: '跳转', reload: '重载',
-                    pageCount: '共{0}页', dataCount: '共{0}条',
-                    pageStat: '{0}/{1}页', dataStat: '{1}-{2}条 / 共{0}条', dataStatOne: '共{0}条',
-                    input: '页码:'
+                    first: Lang.first, previous: Lang.previous, next: Lang.next, last: Lang.last,
+                    ellipsis: '&middot;&middot;&middot;', goto: Lang.goto, reload: Lang.reload,
+                    pageCount: Lang.total + '{0}' + Lang.page, dataCount: Lang.total + '{0}' + Lang.item,
+                    pageStat: '{0}/{1}' + Lang.page, 
+                    dataStat: '{1}-{2}' + Lang.item + ' / ' + Lang.total + '{0}' + Lang.item, 
+                    dataStatOne: Lang.total + '{0}' + Lang.item,
+                    input: Lang.input + ':'
                 },
                 english: {
                     first: 'First', previous: 'Prev', next: 'Next', last: 'Last',
@@ -441,16 +467,16 @@
             for (var i = 0; i < c; i++) {
                 var a = links[i];
                 if (op.useLongPress && (a.className.indexOf('prev') >= 0 || a.className.indexOf('next') >= 0)) {
-                    $.addEventListener(a, 'mousedown', function () {
+                    $.addEventListener(a, 'mousedown,touchstart', function (ev) {
                         var obj = this;
                         op.timerLongPress = window.setTimeout(function () {
                             longPressPaging(that, obj, false);
                         }, op.longPressTime);
                     });
-                    $.addEventListener(op.element, 'mouseup', function () {
+                    $.addEventListener([a, op.element], 'mouseup,touchend', function (ev) {
                         longPressPaging(that, null, true);
                     });
-                    $.addEventListener(op.element, 'mouseout', function () {
+                    $.addEventListener([a, op.element], 'mouseout,touchmove', function () {
                         longPressPaging(that, null, true);
                     });
                 }
@@ -458,7 +484,7 @@
             }
 
             var select = op.element.getElementsByTagName('Select')[0];
-            if (select !== null) { select.value = op.pageSize; }
+            if (select) { select.value = op.pageSize; }
             setCallback(that, select, 'change', 0, function (val) { op.pageSize = val; }, true);
 
             var inputs = op.element.getElementsByTagName('Input'), ic = inputs.length;
@@ -853,7 +879,7 @@
                     var singlelist = typeof $.singlelist === 'function';
                     if (singlelist) {
                         var elements = document.querySelectorAll('.oui-pagination-pagesize');
-                        //$.singlelist(elements);
+                        $.singlelist(elements, { keepColor: true });
                     }
                 }, 256);
             }
