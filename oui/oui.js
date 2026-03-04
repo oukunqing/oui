@@ -8025,8 +8025,6 @@ $.debounce 防抖
             if (hasClipCapability(parent)) {
                 const p_rect = getParentVisibleRect(parent);
 
-
-
                 // 判断目标元素是否完全在父元素可见区域内
                 const isFullyContained = (
                     rect.left >= p_rect.left &&
@@ -8034,7 +8032,7 @@ $.debounce 防抖
                     rect.right <= p_rect.right &&
                     rect.bottom <= p_rect.bottom
                 );
-        $.console.log('checkParentClip:', rect, p_rect, isFullyContained, elem);
+                //$.console.log('checkParentClip:', rect, p_rect, isFullyContained, elem);
 
                 // 若不完全包含，说明被该父元素遮挡/显示不全
                 if (!isFullyContained) {
@@ -8058,7 +8056,6 @@ $.debounce 防抖
     function isElementObscured(elem) {
         // 步骤1：获取目标元素矩形
         const rect = getElementRect(elem);
-        $.console.log('isElementObscured:', rect);
         if (!rect) {
             return true; // 元素本身不可见，视为"显示不全"
         }
@@ -8109,7 +8106,7 @@ $.debounce 防抖
         // 6. 补充：文本不换行场景（nowrap），即使overflow为visible，视觉上也可能被父元素遮挡（可选增强）
         const isTextNoWrap = style.whiteSpace === "nowrap";
 
-        $.console.log('isElementWidthIncomplete:', hasContentOverflow, isContentClipped, isTextNoWrap);
+        //$.console.log('isElementWidthIncomplete:', hasContentOverflow, isContentClipped, isTextNoWrap);
 
         // 7. 综合判定：内容溢出 + （裁剪/滚动 或 文本不换行）= 显示不完整
         return hasContentOverflow && (isContentClipped || isTextNoWrap);

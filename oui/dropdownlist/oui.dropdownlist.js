@@ -465,8 +465,6 @@
 					columns = opt.columns || 0,
 					foreColor = Factory.getForeColor(that.elem, opt);
 
-					$.console.log('buildItems:', that.element, foreColor);
-
 				if (!opt.multi && opt.allowEmpty) {
 					items.unshift({val: '', txt: opt.allowEmpty });
 					//items.splice(0, 0, {val: '', txt: opt.allowEmpty });
@@ -906,7 +904,7 @@
 				$.addListener(document, 'wheel', function (ev) {
 					if (that.box.style.display !== 'none') {
 						if ($.isOnElement(that.box, ev)) {
-							$.cancelBubble(ev);
+							//$.cancelBubble(ev);
 						} else {
 							that.hide();
 						}
@@ -1971,6 +1969,26 @@
 					parseInt($.getElementStyle(elem, 'borderRightWidth'), 10) <= 0) {
 					opt.w = 1;
 				}
+				
+				Object.defineProperty(elem, 'dataoptions', {
+                    get: function () {
+                        return elem.options;
+                    },
+                    set: function (options) {
+                        $.console.log('options:', options);
+                        that.update(options);
+                    }
+                });
+
+                // 定义属性datavalue
+				Object.defineProperty(elem, 'datavalue', {
+                    get: function () {
+                        return elem.value;
+                    },
+                    set: function (value) {
+                        that.set(value);
+                    }
+                });
 			} else {
 				var rid = opt.element.id || '';
 
