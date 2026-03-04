@@ -40,19 +40,32 @@
         LongPressScrollDistance: 10,     //长按时一次滚动的距离，单位：px
         LongPressScrollMaxDistance: 50,     //长按时一次滚动的距离，单位：px
         LangText: {
-            loading: { chinese: '正在努力加载，请稍候...', english: 'Loading, please wait a moment!' },
-            overrun: { chinese: '标签页数量已超出限制', english: 'Tabs count exceeded limit.' },
-            closetab: { chinese: '关闭', english: 'Close tab' },
-            close: { chinese: '关闭标签页', english: 'Close tab' },
-            closeCon: { chinese: '关闭标签内容', english: 'Close tab\'s content' },
-            closeall: { chinese: '关闭全部标签页', english: 'Close all tabs' },
-            closeother: { chinese: '关闭其他标签页', english: 'Close other tabs' },
-            closeleft: { chinese: '关闭左侧标签页', english: 'Close tabs to the left' },
-            closeright: { chinese: '关闭右侧标签页', english: 'Close tabs to the right' },
-            reload: { chinese: '重新加载', english: 'Reload' },
-            reloadall: { chinese: '全部重新加载', english: 'Reload all' },
-            reopen: { chinese: '重新打开关闭的标签页', english: 'Reopen closed tabs' },
-            reopenall: { chinese: '重新打开关闭的全部标签页', english: 'Reopen all closed tabs' }
+            // 正在努力加载，请稍候
+            loading: { chinese: '\u6b63\u5728\u52aa\u529b\u52a0\u8f7d\uff0c\u8bf7\u7a0d\u5019...', english: 'Loading, please wait a moment!' },
+            // 标签页数量已超出限制
+            overrun: { chinese: '\u6807\u7b7e\u9875\u6570\u91cf\u5df2\u8d85\u51fa\u9650\u5236', english: 'Tabs count exceeded limit.' },
+            // 关闭
+            closetab: { chinese: '\u5173\u95ed', english: 'Close tab' },
+            // 关闭标签页
+            close: { chinese: '\u5173\u95ed\u6807\u7b7e\u9875', english: 'Close tab' },
+            // 关闭标签内容
+            closeCon: { chinese: '\u5173\u95ed\u6807\u7b7e\u5185\u5bb9', english: 'Close tab\'s content' },
+            // 关闭全部标签页
+            closeall: { chinese: '\u5173\u95ed\u5168\u90e8\u6807\u7b7e\u9875', english: 'Close all tabs' },
+            // 关闭其他标签页
+            closeother: { chinese: '\u5173\u95ed\u5176\u4ed6\u6807\u7b7e\u9875', english: 'Close other tabs' },
+            // 关闭左侧标签页
+            closeleft: { chinese: '\u5173\u95ed\u5de6\u4fa7\u6807\u7b7e\u9875', english: 'Close tabs to the left' },
+            // 关闭右侧标签页
+            closeright: { chinese: '\u5173\u95ed\u53f3\u4fa7\u6807\u7b7e\u9875', english: 'Close tabs to the right' },
+            // 重新加载
+            reload: { chinese: '\u91cd\u65b0\u52a0\u8f7d', english: 'Reload' },
+            // 全部重新加载
+            reloadall: { chinese: '\u5168\u90e8\u91cd\u65b0\u52a0\u8f7d', english: 'Reload all' },
+            // 重新打开关闭的标签页
+            reopen: { chinese: '\u91cd\u65b0\u6253\u5f00\u5173\u95ed\u7684\u6807\u7b7e\u9875', english: 'Reopen closed tabs' },
+            // 重新打开关闭的全部标签页
+            reopenall: { chinese: '\u91cd\u65b0\u6253\u5f00\u5173\u95ed\u7684\u5168\u90e8\u6807\u7b7e\u9875', english: 'Reopen all closed tabs' }
         },
         IdPrefix: 'oui-tabs-'
     },
@@ -246,7 +259,7 @@
                     //txt.style.width = (cfg.maxWidth - ps.width - ms.width - btnW - es.border.width - 2) + 'px';
                     //减去14是因为文字缩略显示之后多出省略号
                     txt.style.width = (cfg.maxWidth - ms.width - btnW - es.border.width - 14) + 'px';
-                    txt.title = $.getInnerText(txt);
+                    txt.title = $.getParam(opt, 'title,name');
                 }
             });
 

@@ -194,10 +194,10 @@
     border-top-left-radius: 0; border-bottom-left-radius: 0;
 }
 
-
 .oui-pagination .select {
     padding: 1px 3px;
     margin: 0 2px 0 0;
+    box-sizing: border-box;
     border: solid 1px #005eac;
     -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
     box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
@@ -216,7 +216,7 @@
 .oui-pagination .default { }
 .oui-pagination .default input.text { border:solid 1px #66afe9; }
 .oui-pagination .default input.text:focus {background: #eff7ff; }
-.oui-pagination .default .select { border:solid 1px #66afe9; }
+.oui-pagination .default .select { border:solid 1px #66afe9;color:#f00; }
 .oui-pagination .default a.link { border: solid 1px #66afe9; }
 .oui-pagination .default a.link:hover { background: #e8f5fe;color: #000; }
 .oui-pagination .default a.cur {background: #e8f5fe;color: #000; }
@@ -288,3 +288,23 @@
 .oui-pagination .dark a.cur { background: #666;}
 .oui-pagination .dark button.btn { background: #666; border-color: #777; color: #000; }
 .oui-pagination .dark button.btn:hover { background: #fafafa; color: #000; }
+
+
+/* 下拉列表样式，用于分页数量下拉列表的美化 */
+.oui-ddl-cur {
+    outline:none;
+    border-color: #66afe9;
+    box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);
+    -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);
+}
+select.oui-ddl-bottom,input.oui-ddl-bottom {
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px;
+    border-bottom-color: #fff;
+}
+
+select.oui-ddl-top,input.oui-ddl-top {
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    padding: 1px 3px;
+}

@@ -6,7 +6,9 @@
 	<style type="text/css">
 		
 		body {font-size: 14px;}
-		select {min-width:400px;height:32px;border:solid 1px #ccc; border-radius:5px;padding:0 5px;margin:0px;}
+		select {
+			min-width:400px;
+			height:32px;border:solid 1px #ccc; border-radius:5px;padding:0 5px;margin:0px;}
 		input {outline:none;padding:0 5px; border-radius:5px;min-width:400px;border:solid 1px #ccc;}
 		table {}
 		table td {padding:0 10px 10px 0;}
@@ -37,13 +39,13 @@
 	<tr>
 		<td><select id="DeviceType1" data-type="int"></select>
 		</td>
-		<td><select id="ServerType" style="" onchange="print1(this);">
+		<td><select id="ServerType" style="border:solid 1px #00f;" onchange="print1(this);">
 			<option value="">请选择服务类型</option>
 		</select></td>
 		<td><select id="tree1" style=""></select></td>
 	</tr>
 	<tr>
-		<td><select id="ServerType1" style="" onchange="print1(this);"></select></td>
+		<td><select id="ServerType1" style="border:solid 1px #f00;" onchange="print1(this);"></select></td>
 		<td><input type="text" id="ServerType2" style="" /></td>
 		<td><select id="tree2" style=""></select></td>
 	</tr>

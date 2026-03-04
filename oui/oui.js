@@ -181,6 +181,9 @@
             Esc: 27,
             Space: 32,
             Delete: 46,
+            F1: 112, F2: 113, F3: 114, F4: 115, 
+            F5: 116, F6: 117, F7: 118, F8: 119, 
+            F9: 120, F10: 121, F11: 122, F12: 123,
             Arrow: {
                 Left: 37, Right: 39,
                 Up: 38, Down: 40, Top: 38, Bottom: 40,
@@ -210,12 +213,14 @@
                 Num: { 0: 96, 1: 97, 2: 98, 3: 99, 4: 100, 5: 101, 6: 102, 7: 103, 8: 104, 9: 105 },
                 NumList: [96, 97, 98, 99, 100, 101, 102, 103, 104, 105],
             },
-            //F1 F2 ... F12
+            // F1 F2 ... F12
             Func: {
                 1: 112, 2: 113, 3: 114, 4: 115, 5: 116, 6: 117, 
                 7: 118, 8: 119, 9: 120, 10: 121, 11: 122, 12: 123
             },
-            FuncList: [112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123]
+            // F1 F2 ... F12
+            // 第1个元素0 仅仅是为了补数据索引下标0
+            FuncList: [0, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123]
         },
         POSITION: {
             Cursor: 0, Custom: 0,
@@ -5644,7 +5649,7 @@
             }
             var id = options.id || 'div-get-content-size-001',
                 css = [
-                    ';margin:0;padding:0;line-height:1em;position:absolute;top:-3000px;left:-5000px;',
+                    ';max-width:fit-content;margin:0;padding:0;line-height:1em;position:absolute;top:-3000px;left:-5000px;',
                     'font-size:14px;font-family:Arial,宋体,微软雅黑;'
                 ],
                 div = document.getElementById(id);
@@ -5688,8 +5693,9 @@
             if (ev.fromElement || typeof ev.x === 'undefined') {
                 pos = getEventPosition(ev);
             } else {
-                scroll = getScrollPosition();
-                pos = { x: ev.x + scroll.left, y: ev.y + scroll.top };
+                //scroll = getScrollPosition();
+                //pos = { x: ev.x + scroll.left, y: ev.y + scroll.top };
+                pos = { x: ev.x, y: ev.y };
             }
             var elems = $.isArray(elem) ? elem : [elem];
             for(var i = 0; i < elems.length; i++) {
@@ -6061,6 +6067,9 @@
             if (!$.isNullOrUndefined(curVal)) {
                 elem.value = curVal;
             }
+            if (typeof $.singlelist === 'function') {
+                $.singlelist(elem);
+            }
             return this;
         },
         buildOption = function (value, text) {
@@ -6204,10 +6213,10 @@
             return this;
         },
         isSubWindow = function() {
-            return window.location !== top.window.location;
+            return typeof window !== 'undefined' && window.location !== top.window.location;
         },
         isTopWindow = function() {
-            return window.location === top.window.location;
+            return typeof window !== 'undefined' && window.location === top.window.location;
         },
         setSelectValue = function(elem, value, append, text) {
             if (!$.isElement(elem = $.toElement(elem))) {
@@ -7736,7 +7745,7 @@
 }(OUI);
 
 /*
-$.debounce
+$.debounce 防抖
 */
 !function ($) {
     'use strict';
@@ -8016,6 +8025,8 @@ $.debounce
             if (hasClipCapability(parent)) {
                 const p_rect = getParentVisibleRect(parent);
 
+
+
                 // 判断目标元素是否完全在父元素可见区域内
                 const isFullyContained = (
                     rect.left >= p_rect.left &&
@@ -8023,6 +8034,7 @@ $.debounce
                     rect.right <= p_rect.right &&
                     rect.bottom <= p_rect.bottom
                 );
+        $.console.log('checkParentClip:', rect, p_rect, isFullyContained, elem);
 
                 // 若不完全包含，说明被该父元素遮挡/显示不全
                 if (!isFullyContained) {
@@ -8046,6 +8058,7 @@ $.debounce
     function isElementObscured(elem) {
         // 步骤1：获取目标元素矩形
         const rect = getElementRect(elem);
+        $.console.log('isElementObscured:', rect);
         if (!rect) {
             return true; // 元素本身不可见，视为"显示不全"
         }
@@ -8096,6 +8109,8 @@ $.debounce
         // 6. 补充：文本不换行场景（nowrap），即使overflow为visible，视觉上也可能被父元素遮挡（可选增强）
         const isTextNoWrap = style.whiteSpace === "nowrap";
 
+        $.console.log('isElementWidthIncomplete:', hasContentOverflow, isContentClipped, isTextNoWrap);
+
         // 7. 综合判定：内容溢出 + （裁剪/滚动 或 文本不换行）= 显示不完整
         return hasContentOverflow && (isContentClipped || isTextNoWrap);
     }
@@ -8140,9 +8155,9 @@ $.title
         }
     };
 
-    var Factory = {
+    const Factory = {
         buildTitle: function (options) {
-            var opt = $.extend({
+            let opt = $.extend({
                 id: '',
                 enabled: true,
                 // 目标元素
@@ -8160,10 +8175,11 @@ $.title
                 return null;
             }
 
-            var cache = Cache.getCache(opt.id), elem;
+            let cache = Cache.getCache(opt.id), elem;
             if (cache) {
                 elem = cache.elem;
                 elem.options = opt;
+                elem.initial();
             } else {
                 elem = new Title(opt);
                 Cache.setCache(opt.id, elem);
@@ -8171,7 +8187,7 @@ $.title
             return elem;
         },
         buildElement: function(that) {
-            var elem = document.createElement('DIV'),
+            let elem = document.createElement('DIV'),
                 opt = that.options;
 
             elem.className = 'oui-title-panel-element';
@@ -8182,7 +8198,7 @@ $.title
             return elem;
         },
         showTitle: function(ev, title, that) {
-            var elem = that.element, bs = $.getBodySize(),
+            let elem = that.element, bs = $.getBodySize(),
                 opt = that.options;
 
             if (!opt.enabled) {
@@ -8192,8 +8208,8 @@ $.title
             if (!elem) {
                 elem = Factory.buildElement(that);
             }
-            var scroll = $.getScrollPosition();
-            var left = scroll.left + ev.clientX + 10,
+            let scroll = $.getScrollPosition(),
+                left = scroll.left + ev.clientX + 10,
                 top = scroll.top + ev.clientY + 10;
 
             if (!title) {
@@ -8212,7 +8228,8 @@ $.title
                     'box-shadow:0 0 6px 1px rgba(204, 204, 204, 0.5);'
                 ].join('') + (opt.style || '') + [
                     'position:absolute;white-space:pre;',
-                    'display:inline-block;overflow:hidden;',
+                    'display:inline-block;',
+                    'overflow:hidden;',
                     'text-overflow:ellipsis;',
                     'max-width:', bs.width - 10, 'px;',
                     'max-height:', bs.height - 10, 'px;',
@@ -8259,7 +8276,7 @@ $.title
     };
 
     function Title(options) {
-        var opt = $.extend({}, options);
+        let opt = $.extend({}, options);
 
         this.id = opt.id;
         this.options = opt;
@@ -8273,15 +8290,22 @@ $.title
 
     Title.prototype = {
         initial: function (opt) {
-            var that = this;
+            let that = this;
+            if (!opt) {
+                opt = that.options;
+            }
             if (!opt.enabled) {
                 return that;
             }
-            $.addListener(opt.element, 'mousemove', function(ev) {
-                //$.cancelBubble(ev);
-                var elem = ev.target, tarAttr = opt.attribute, 
+            
+            function _title(ev) {
+                let elem = ev.target,
+                    type = ev.type,
+                    tarAttr = opt.attribute, 
                     tmpAttr = 'oui-data-title-tmp', delAttr = 'oui-data-title-del',
-                    coverAttr = 'data-cover', timeAttr = 'data-cover-ts';
+                    coverAttr = 'data-cover', timeAttr = 'data-cover-ts',
+                    oriTitle = '',
+                    curTs = new Date().getTime();
 
                 if (that.current === elem) {
                     if (!opt.move) {
@@ -8289,7 +8313,7 @@ $.title
                     }
                 } else if (that.current) {
                     //鼠标移出时，判断是否有相应的临时属性，若有，则消除之
-                    var con = that.current.getAttribute(tmpAttr) || that.current.getAttribute(delAttr);
+                    let con = that.current.getAttribute(tmpAttr) || that.current.getAttribute(delAttr);
                     if (con) {
                         that.current.setAttribute(tarAttr, con);
                         that.current.removeAttribute(tmpAttr);
@@ -8300,6 +8324,7 @@ $.title
                 }
                 that.current = elem;
                 if (elem.title) {
+                    oriTitle = elem.title;
                     if (!elem.getAttribute(tarAttr)) {
                         elem.setAttribute(tarAttr, elem.title);
                         //elem.setAttribute('oui-title', 1);
@@ -8307,89 +8332,93 @@ $.title
                     elem.removeAttribute('title');
                 }
 
-                function _title() {
-                    var tag = elem.tagName.toLowerCase(), con,
-                        title = $.getAttribute(elem, tmpAttr) || $.getAttribute(elem, delAttr) || $.getAttribute(elem, tarAttr);
-                    if (title) {
-                        if (tag !== 'select') {
-                            con = elem.value || elem.innerText || elem.innerHTML;
-                        } else {
-                            con = Factory.getSelectedText(elem);
-                        }
-                        const p = {
-                            con: con.trim(),
-                            str: title.replace(/(\r|\n)/, '').trim()
-                        };
-                        // 若文字内容与Title内容相同（忽略Title内容的换行符），
-                        // 判断文字内容是否被遮挡，若无遮挡则不显示Title
-                        if (p.con === p.str || p.con.indexOf(p.str) > -1) {
-                            // 优化处理，减少重复检测
-                            // 是否被遮挡：0-未设置，1-遮挡，2-未遮挡
-                            var covered = parseInt('0' + elem.getAttribute(coverAttr), 10),
-                                time = parseInt('0' + elem.getAttribute(timeAttr), 10);
+                let tag = elem.tagName.toLowerCase(), con,
+                    title = oriTitle || $.getAttribute(elem, tmpAttr) || $.getAttribute(elem, delAttr) || $.getAttribute(elem, tarAttr);
+                if (title) {
+                    if (tag !== 'select') {
+                        con = elem.value || elem.innerText || elem.innerHTML;
+                    } else {
+                        con = Factory.getSelectedText(elem);
+                    }
+                    const p = {
+                        con: con.trim(),
+                        str: title.replace(/(\r|\n)/, '').trim()
+                    };
+                    // 若文字内容与Title内容相同（忽略Title内容的换行符），
+                    // 判断文字内容是否被遮挡，若无遮挡则不显示Title
+                    if (p.con === p.str || p.con.indexOf(p.str) > -1) {
+                        // 优化处理，减少重复检测
+                        // 是否被遮挡：0-未设置，1-遮挡，2-显示
+                        const Config = { None: 0, Cover: 1, Show: 2};
+                        let cover = parseInt('0' + elem.getAttribute(coverAttr), 10),
+                            time = parseInt('0' + elem.getAttribute(timeAttr), 10);
 
-                            // 2秒钟之内已经检测过，不再重复检测
-                            if (covered && new Date().getTime() - time <= 2000) {
-                                if (covered === 2) {
-                                    elem.removeAttribute(tarAttr);
-                                    elem.setAttribute(delAttr, title);
-                                    return false;
-                                }
-                            } else if (!Factory.isCovered(elem, con)) {
-                                elem.setAttribute(coverAttr, 2);
-                                elem.setAttribute(timeAttr, new Date().getTime());
+                        // 2秒钟之内已经检测过，不再重复检测
+                        if (cover && !oriTitle && new Date().getTime() - time <= 2000) {
+                            if (cover === Config.Show) {
                                 elem.removeAttribute(tarAttr);
                                 elem.setAttribute(delAttr, title);
                                 return false;
-                            } else {
-                                elem.setAttribute(coverAttr, 1);
-                                elem.setAttribute(timeAttr, new Date().getTime());
                             }
-                        }
-
-                        if (that.target === elem) {
-                            Factory.showTitle(ev, null, that);
+                        } else if (!Factory.isCovered(elem, con)) {
+                            // 设置为未遮挡
+                            elem.setAttribute(coverAttr, Config.Show);
+                            elem.setAttribute(timeAttr, new Date().getTime());
+                            elem.removeAttribute(tarAttr);
+                            elem.setAttribute(delAttr, title);
                             return false;
-                        }
-
-                        that.target = elem;
-                        that.attribute = tarAttr;
-                        elem.removeAttribute(tarAttr);
-                        elem.setAttribute(tmpAttr, title);
-
-                        Factory.showTitle(ev, title, that);
-
-                        if (!elem.mouseout) {
-                            $.addListener(elem, 'mouseout', function() {
-                                Factory.hideTitle(that);
-                            });
-                            elem.mouseout = 1;
+                        } else {
+                            // 设置为遮挡
+                            elem.setAttribute(coverAttr, Config.Cover);
+                            elem.setAttribute(timeAttr, new Date().getTime());
                         }
                     }
-                    if (that.target && that.target !== elem) {
-                        //鼠标移出
-                        con = that.target.getAttribute(tmpAttr) || that.target.getAttribute(delAttr);
-                        if (con) {
-                            that.target.setAttribute(that.attribute, con);
-                            that.target.removeAttribute(tmpAttr);
-                            that.target.removeAttribute(delAttr);
-                            that.target.removeAttribute(coverAttr);
-                            that.target.removeAttribute(timeAttr);
-                        }
-                        that.target = null;
 
-                        Factory.hideTitle(that);
+                    if (that.target === elem) {
+                        Factory.showTitle(ev, null, that);
+                        return false;
                     }
-                    return true;
+
+                    that.target = elem;
+                    that.attribute = tarAttr;
+                    elem.removeAttribute(tarAttr);
+                    elem.setAttribute(tmpAttr, title);
+
+                    Factory.showTitle(ev, title, that);
+
+                    if (!elem.mouseout) {
+                        $.addListener(elem, 'mouseout', function() {
+                            Factory.hideTitle(that);
+                        });
+                        elem.mouseout = 1;
+                        delete elem.mouseover;
+                    }
                 }
+                if (that.target && that.target !== elem) {
+                    //鼠标移出
+                    con = that.target.getAttribute(tmpAttr) || that.target.getAttribute(delAttr);
+                    if (con) {
+                        that.target.setAttribute(that.attribute, con);
+                        that.target.removeAttribute(tmpAttr);
+                        that.target.removeAttribute(delAttr);
+                        that.target.removeAttribute(coverAttr);
+                        that.target.removeAttribute(timeAttr);
+                    }
+                    that.target = null;
+
+                    Factory.hideTitle(that);
+                }
+                return true;
+            }
+
+            $.addListener(opt.element, 'mousemove', function (ev) {
                 $.debounce({
                     id: 'oui-title-debounce',
                     delay: 5,
                     timeout: 3000,
                 }, function () {
-                    return _title();
+                    return _title(ev);
                 });
-                
                 return true;
             });
             return this;
@@ -8401,11 +8430,34 @@ $.title
             return Factory.buildTitle(options);
         }
     });
+}(OUI);
 
-    if (!$.isWap) {
-        // 若不想启用$.title，还是想用原生的title，可以在页面URL参数中加入origin-title=1
-        if (typeof location !== 'undefined' && parseInt('0' + $.getQueryString(location.href, 'origin-title'), 10) !== 1) {
-            $.title({ id:'oui-title' });
+/* 统一定制处理，提升体验度 */
+!function ($) {
+    'use strict';
+
+    /* 优化F5刷新(仅子页面有效) */
+    if (typeof window !== 'undefined') {
+        $.addListener(window, 'load', function() {
+            /* 优化Title */
+            if (!$.isWap) {
+                if (typeof location !== 'undefined') {
+                    // 若页面URL参数中加入origin-title=1，不启用$.title，还是用原生的title
+                    if (parseInt('0' + $.getQueryString(location.href, 'origin-title'), 10) !== 1) {
+                        $.title({ id:'oui-title' });
+                    }
+                }
+            }
+        });
+        if (!$.isTopWindow()) {            
+            $.addListener(document, 'keydown', function (e) {
+                //捕获F5键值
+                if ($.getKeyCode(e) === $.KEY_CODE.F5) {
+                    $.cancelBubble();
+                    location.href = location.href;
+                    return false;
+                }
+            });
         }
     }
 }(OUI);

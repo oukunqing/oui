@@ -2,7 +2,7 @@
 	width:100%;height:100%;border:none 0;
 	display:block;overflow:hidden;
 	position: relative;
-	z-index: 1;
+	z-index: 2;
 	padding:0;margin:0;
 	/*background: #fff;*/
 	-moz-user-select: none;
@@ -115,7 +115,7 @@
 
 /*关于ICON图标*/
 .oui-tree li .item .icon{
-	background:transparent url("imgs/tree-icon.png?6") no-repeat -1px center;
+	background:transparent url("imgs/tree-icon.png?2") no-repeat 0px center;
 	width:25px;float:left;cursor:pointer;box-sizing:border-box;
 }
 .oui-tree li .item .icon:hover{background-color:none;}
@@ -640,7 +640,7 @@
 .oui-tree li.node-drop > .item .switch,
 .oui-tree-box:hover .oui-tree li.node-drop > .item .switch {
 	opacity: 1;
-	background:url("imgs/tree-icon.png?6") no-repeat -200px center;
+	background:url("imgs/tree-icon.png?2") no-repeat -200px center;
 }
 .oui-tree li.drop-up > .item {	
 	border-top: dotted 1px #008000;
@@ -652,18 +652,18 @@
 }
 .oui-tree li.drop-up > .item .switch,
 .oui-tree-box:hover .oui-tree li.drop-up > .item .switch {
-	background:url("imgs/tree-icon.png?6") no-repeat -200px center
+	background:url("imgs/tree-icon.png?2") no-repeat -200px center
 }
 .oui-tree li.drop-down > .item .switch,
 .oui-tree-box:hover .oui-tree li.drop-down > .item .switch {
-	background:url("imgs/tree-icon.png?6") no-repeat -225px center
+	background:url("imgs/tree-icon.png?2") no-repeat -225px center
 }
 .oui-tree li.drop-on > .item {
 	border: dotted 1px #008000;
 }
 .oui-tree li.drop-on > .item .switch,
 .oui-tree-box:hover .oui-tree li.drop-on > .item .switch {
-	background:url("imgs/tree-icon.png?6") no-repeat -275px center
+	background:url("imgs/tree-icon.png?2") no-repeat -275px center
 }
 
 .oui-tree li.node-drop .button {
@@ -680,14 +680,14 @@
 .oui-tree-clone li.node-clone .switch,
 .oui-tree-box:hover .oui-tree-clone li.node-clone .switch {
 	/*visibility: hidden;*/
-	background:#cce8ff url("imgs/tree-icon.png?6") no-repeat -175px center;
+	background:#cce8ff url("imgs/tree-icon.png?2") no-repeat -175px center;
 }
 .oui-tree-clone li.node-clone .button {
 	display: none;
 }
 .oui-tree-clone li.node-move .switch,
 .oui-tree-box:hover .oui-tree-clone li.node-move .switch{
-	background:#cce8ff url("imgs/tree-icon.png?6") no-repeat -250px center;
+	background:#cce8ff url("imgs/tree-icon.png?2") no-repeat -250px center;
 }
 
 .oui-tree li.node-drag {opacity: 0.5;height:30px;}
@@ -927,10 +927,10 @@
 
 /*用于搜索列表*/
 .oui-tree-box .search-result-panel li .icon{
-	background:transparent url("imgs/tree-icon.png?6") no-repeat 0 center;
+	background:transparent url("imgs/tree-icon.png?2") no-repeat 0 center;
 }
 .oui-tree-box .search-result-panel li .icon-page{
-	background:transparent url("imgs/tree-icon.png?6") no-repeat -75px center;
+	background:transparent url("imgs/tree-icon.png?2") no-repeat -75px center;
 }
 
 .oui-tree-box .goto-tree-top {

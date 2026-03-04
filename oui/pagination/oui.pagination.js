@@ -628,24 +628,30 @@
             return this.caches[key];
         },
         buildOptions: function(args, options) {
-            if(args.length >= 4) {
-                options = {
+
+            var opt = {};
+            if (args.length >= 5) {
+                opt = {
                     element: args[0],
                     dataCount: args[1],
                     pageIndex: args[2],
                     pageSize: args[3],
                     callback: args[4],
-                    skin: args[5]
+                    showList: false,
+                    showPageJump: false,
+                    showDataStat: true
                 };
-                if($.isString(args[6], true)) {
-                    options.markText = { dataCount: args[6] };
+                if ($.isObject(args[5])) {
+                    opt = $.extend(opt, args[5]);
                 }
+            } else {
+                opt = $.extend({}, args, options);
             }
-            //若指定pageSize为0，则表示不分页（仅显示数据条数）
-            if (options.pageSize === 0) {
-                options.paging = false;
+            //若pageSize为0，则表示不分页（仅显示数据条数）
+            if (opt.pageSize === 0) {
+                opt.paging = false;
             }
-            return options;
+            return opt;
         },
         show: function(options, dataCount) {
             var opt = $.extend({}, options);
@@ -879,7 +885,7 @@
                     var singlelist = typeof $.singlelist === 'function';
                     if (singlelist) {
                         var elements = document.querySelectorAll('.oui-pagination-pagesize');
-                        $.singlelist(elements, { keepColor: true });
+                        $.singlelist(elements, { keepColor: true, elemWidth: 'follow' });
                     }
                 }, 256);
             }

@@ -28,6 +28,7 @@
 	            return Config.Skin;
 	        },
 			CloseLinkageClassName: 'oui-popup-panel',
+			IdIndex: 1,
 			IdPrefix: 'oui_ddl_panel_id_',
 			ItemPrefix: 'oui_ddl_chb_item_',
 			Layout: {
@@ -59,6 +60,8 @@
 			ChbMarginTop: $.isWap ? 11 : 7,
 			// 选项底部高度
 			BoxBarHeight: 42,
+			// 空下拉框最小宽度
+			ElemMinWidth: 100,
 			// 选项默认显示行数
 			ItemDisplayLines: 12,
 			// 选项序号(单个数字)宽度
@@ -122,7 +125,7 @@
 			setCache: function (opt, ddl) {
 				var key = this.buildKey(opt.id);
 				Cache.lists[key] = {
-					elem: opt.element,
+					elem: ddl.elem,
 					opt: opt,
 					ddl: ddl
 				};
@@ -157,6 +160,10 @@
 				}
 				if ((!opt.id && !opt.id.toString()) && $.isElement(opt.element)) {
 					opt.id = opt.element.id;
+				}
+				if ($.isElement(opt.id)) {
+					opt.id = 'oui-ddl-' + opt.element.tagName + '-' + Config.IdIndex++;
+					opt.element.id = opt.id;
 				}
 
                 if ($.isString(opt.skin, true)) {
@@ -195,12 +202,14 @@
 
 				opt.allowEmpty = $.getParamValue(opt.allowEmpty, opt.empty);
 				opt.boxWidth = $.getParamValue(opt.boxWidth, opt.panelWidth);
+				//opt.textWidth = $.getParamValue(opt.textWidth, opt.elemWidth, opt.width, 'auto');
 				opt.textWidth = $.getParamValue(opt.textWidth, opt.elemWidth, opt.width);
 				opt.textHeight = $.getParamValue(opt.textHeight, opt.elemHeight, opt.height);
 				opt.textMinHeight = $.getParamValue(opt.textMinHeight, opt.elemMinHeight);
 				opt.style = $.getParamValue(opt.style, opt.css);
 
 				opt.keepColor = $.isBoolean($.getParam(opt, 'keepColor'), true);
+				opt.showShadow = $.isBoolean($.getParam(opt, 'showShadow'), false);
 
 				opt.maxHeight = options.maxHeight || (opt.layout === 'grid' ? Config.BoxGridMaxHeight : Config.BoxMaxHeight);
 
@@ -253,6 +262,9 @@
 
 				return opt;
 			},
+			buildBoxClass: function (opt) {
+				return 'oui-ddl-box oui-ddl-' + opt.layout;
+			},
 			buildList: function (id, par, single) {
 				var elem;
 				if ($.isElement(id)) {
@@ -288,21 +300,43 @@
 						}
 						var p = $.extend(opt, {id: id, element: elem});
 						if ((cache = Factory.getCache(id))) {
+							var op = Factory.checkOptions(opt);
+							cache.ddl.options = $.extend(cache.ddl.options, op);
+							if (op.layout) {
+								cache.ddl.con.className = Factory.buildBoxClass(op);
+							}
+							if (typeof opt.items !== 'undefined') {
+								cache.ddl.update(cache.ddl.options).updateButtons();
+							}
 							list.push(cache.ddl);
 						} else {
 							Factory.setCache(p, (ddl = new DropDownList(p)));
 							list.push(ddl);
 						}
+						
 					}
-					return list;
+					return list.length <= 1 ? list[0] : list;
 				}
 				if ((cache = Factory.getCache(opt.id))) {
 					return cache.ddl;
 				}
 				return Factory.setCache(opt, (ddl = new DropDownList(opt))), ddl;
 			},
-			getStyleSize: function (size, offsetSize) {
-				if (size === 'auto' || $.isUndefinedOrNull(size)) {
+			isEmptyOptions: function (ddl, options) {
+				var len = options.length;
+				if (len <= 0) {
+					return true;
+				} else if (len <= 1) {
+					var val = options[0].val.trim();
+					return !val || val === '-1';
+				}
+				return false;
+			},
+			getStyleSize: function (size, offsetSize, empty) {
+				if (size === 'auto' || size === 'follow' || $.isUndefinedOrNull(size)) {
+					if (empty && offsetSize < Config.ElemMinWidth) {
+						offsetSize = Config.ElemMinWidth;
+					}
 					return offsetSize + 'px';
 				} else {
 					if ($.isNumber(size)) {
@@ -421,14 +455,17 @@
 				panel = $.toElement(panel);
 				if ($.isElement(panel)) {
 					panel.innerHTML = '';
-					panel.style.height = 0 + 'px';
+					panel.style.height = 'auto';
 				}
 				return this;
 			},
 			buildItems: function (ddl, items, listbox) {
 				var that = ddl,
 					opt = that.options,
-					columns = opt.columns || 0;
+					columns = opt.columns || 0,
+					foreColor = Factory.getForeColor(that.elem, opt);
+
+					$.console.log('buildItems:', that.element, foreColor);
 
 				if (!opt.multi && opt.allowEmpty) {
 					items.unshift({val: '', txt: opt.allowEmpty });
@@ -483,7 +520,7 @@
 							use = dr.enabled || dr.use,
 							disabled = dr.disabled ? ' disabled="disabled"' : '',
 							desc = dr.desc || (opt.desc ? val.toString() : ''),
-							title = '<span class="oui-ddl-li-txt">' + 
+							title = '<span class="oui-ddl-li-txt"' + (foreColor ? ' style="color:' + foreColor + ';"' : '') + '>' + 
 								(opt.display && val !== '' && val !== txt ? val + '<u>-</u>' + txt : txt === '' ? val : txt) + 
 								//(opt.display && val !== '' && val !== txt ? val + ' - ' + txt : txt === '' ? val : txt) + 
 								'</span>' +
@@ -551,11 +588,12 @@
 				}
 				if ($.isElement(listbox)) {
 					listbox.innerHTML = html.join('');
+
 					return this;
 				}
 				return html.join('');
 			},
-			buildButtons: function (ddl) {
+			buildButtons: function (ddl, update) {
 				var that = ddl,
 					opt = that.options,
 					html = [],
@@ -577,7 +615,7 @@
 
 				if (!opt.multi && opt.editable) {
 					html.push([
-						'<div class="oui-ddl-edit" id="', key + '_form"', opt.config.show ? '' : ' style="display:none;"', '>',
+						update ? '' : ['<div class="oui-ddl-edit" id="', key + '_form"', opt.config.show ? '' : ' style="display:none;"', '>'].join(''),
 						'<div class="oui-ddl-form">',
 						'<input type="text" class="oui-ddl-val oui-ddl-new"',
 						' placeholder="', opt.config.placeholder, '" id="', key + '_val"',
@@ -585,7 +623,7 @@
 						' tabindex="-1" />',
 						'<button class="btn btn-default btn-sm oui-ddl-btn oui-ddl-new" tabindex="-1">', opt.config.button, '</button>',
 						'</div>',
-						'</div>'
+						update ? '' : '</div>'
 					].join(''));
 				}
 
@@ -643,7 +681,9 @@
 					}));
 					that.indexs[chb.id] = i;
 				}
-				that.items = document.querySelectorAll('#' + Config.IdPrefix + opt.id + ' li');
+				if (that.con) {
+					that.items = that.con.querySelectorAll('li');
+				}
 
 				return this;
 			},
@@ -653,7 +693,7 @@
 					cfg = $.extend({}, opt.config),
 					elem = opt.select ? that.elem : that.text;
 
-				that.texts = document.querySelectorAll('#' + Config.IdPrefix + opt.id + ' .oui-ddl-edit .oui-ddl-new');
+				that.texts = that.box.querySelectorAll('.oui-ddl-edit .oui-ddl-new');
 
 				if (opt.editable && that.texts.length > 0) {
 					var text = that.texts[0];
@@ -805,7 +845,7 @@
 					opt = that.options,
 					elem = opt.select ? that.elem : that.text;
 				
-				that.buttons = document.querySelectorAll('#' + Config.IdPrefix + opt.id + ' .oui-ddl-oper .oui-ddl-btn');
+				that.buttons = that.box.querySelectorAll('.oui-ddl-oper .oui-ddl-btn');
 
 				if (that.buttons.length <= 0) {
 					return this;
@@ -864,8 +904,12 @@
 				});
 				
 				$.addListener(document, 'wheel', function (ev) {
-					if (that.box.style.display !== 'none' && !$.isOnElement(that.box, ev)) {
-						that.hide();
+					if (that.box.style.display !== 'none') {
+						if ($.isOnElement(that.box, ev)) {
+							$.cancelBubble(ev);
+						} else {
+							that.hide();
+						}
 					}
 					return false;
 				});
@@ -949,11 +993,20 @@
 					opt = that.options;
 
 				if (!this.isRepeat(that.id + '-mouseup')) {
+					$.addListener(that.box, 'mousedown', function(ev) {
+						that.box.evMouseDown = true;
+					});
+
 					$.addListener(that.box, 'mouseup', function(ev) {
+						if (!that.box.evMouseDown) {
+							return false;
+						}
 						var elem = ev.target,
 							tag = elem.tagName.toLowerCase(),
 							css = elem.className,
 							lbl = elem;
+
+						that.box.evMouseDown = false;
 
 						if (opt.focusable && (!opt.showSearch && !opt.editable)) {
 							//防止mouseup事件冒泡，保持控件不失去焦点
@@ -994,6 +1047,9 @@
 				var that = ddl,
 					elem = that.elem;
 
+				if (typeof elem.val !== 'undefined') {
+					return this;
+				}
 				Object.defineProperty(elem, 'val', {
 					/*
 					value: 'hello',
@@ -1515,6 +1571,41 @@
 				Factory.setSearchCache(ddl, { key: key, elem: txt, search: true, nodes: nodes });
 
 				return Factory.showSearchResult(ddl, nodes, keys);
+			},
+			getBorderColor: function (elem, opt) {
+				var borderColor = opt.keepColor ? $.getElementStyle(elem, 'border-color') : '',
+					color = borderColor ? borderColor.replace(/[rgb()\s]/g, '') : '';
+
+				// 若边框颜色未设置(#767676)，或边框颜色是#cccccc,#dddddd,#eeeeee
+				if (color && ['118,118,118', '204,204,204', '221,221,221', '238,238,238'].indexOf(color) > -1) {
+					borderColor = '';
+				}
+				return borderColor;
+			},
+			getForeColor: function (elem, opt) {
+				var foreColor = opt.keepColor ? $.getElementStyle(elem, 'color') : '',
+					color = foreColor ? foreColor.replace(/[rgb()\s]/g, '') : '';
+
+				// 若边框颜色未设置(#000000)，或边框颜色是#000000,#999999,#cce8ff,#e5f3ff
+				// #999999是禁用项的文字颜色，#cce8ff,#e5f3ff 这两个是 背景色
+				if (color && ['0,0,0','153,153,153','204,232,255','229,243,255'].indexOf(color) > -1) {
+					foreColor = '';
+				}
+				return foreColor;
+			},
+			updateBoxShadowColor: function (box, newColor, opt) {
+				if (!opt || !opt.showShadow) {
+					box.style.boxShadow = 'none';
+					return this;
+				}
+				const shadow = $.getElementStyle(box, 'box-shadow');
+				if (shadow && shadow !== 'none') {
+					if (newColor) {
+						const newShadow = shadow.replace(/rgb\(.*\)|rgba\(.*\)|#[\da-fA-F]+|[\w-]+/, newColor);
+	    				box.style.boxShadow = newShadow;
+					}
+				}
+				return this;
 			}
 		};
 
@@ -1568,14 +1659,19 @@
 			$.setClass(that.item, 'cur', checked);
 			that.checked = checked;
 			
-			var multi = clickNode ? clickNode.multi : true;
+			var multi = clickNode ? clickNode.multi : true,
+				input = that.input.id ? document.querySelector('#' + that.input.id) : that.input;
+
+			if (!input) {
+				return that;
+			}
 			
-			if (that.input.type === 'checkbox') {
+			if (input.type === 'checkbox') {
 				//复选框 点击事件 负负得正
 				//若是 复选、单选混合时，当前为单选时，则所有复选框取消勾选
-				that.input.checked = (clickEvent && multi) ? !that.checked : that.checked;
+				input.checked = (clickEvent && multi) ? !that.checked : that.checked;
 			} else {
-				that.input.checked = that.checked;
+				input.checked = that.checked;
 			}
 			return that;
 		},
@@ -1591,7 +1687,7 @@
 		}
 	};
 
-	function DropDownList(options) {
+	function DropDownList (options) {
 		var opt = Factory.checkOptions($.extend({
 			id: '',
             skin: Config.DefaultSkin,       //样式: default, blue等
@@ -1639,6 +1735,8 @@
 			layout: 'list', //list, flow, grid
 			//列表框边框颜色与下拉框是否保持一致
 			keepColor: undefined,
+			//是否显示阴影
+			showShadow: undefined,
 			//输入框宽度，默认跟随下拉框宽度
 			textWidth: undefined,
 			//输入框高度，默认不指定
@@ -1783,9 +1881,14 @@
 				return that;
 			}
 
-			var tag = elem.tagName.toLowerCase(), type = elem.type;
+			var tag = elem.tagName.toLowerCase(), type = elem.type, css = elem.className;
 			//下拉列表或文本框有效
 			if (!tag.inArray('select,input') || (tag === 'input' && !type.inArray('text'))) {
+				return that;
+			}
+			//防止重复
+			if (css.indexOf('oui-ddl') > -1 && css.indexOf('oui-ddl-elem') > -1) {
+				$.console.log('repeat:', elem, opt);
 				return that;
 			}
 
@@ -1816,18 +1919,20 @@
 			var evchange = elem.onchange || null,
 				evblur = elem.onblur || null;
 
+			var pageUrl = '',//location.href.split('?')[0].toLowerCase(),
+				isEditPage = false,//pageUrl.indexOf('edit') > -1 || pageUrl.indexOf('form') > -1,
+				isEditForm = elem.parentNode.className.indexOf('col-sm') > -1;
+
 			if (!opt.textWidth && (!opt.multi || opt.layout === 'list') 
-				&& (isEditPage && elem.className.indexOf('form-control') > -1)) {
+				&& ((isEditPage || isEditForm) && elem.className.indexOf('form-control') > -1)) {
 				opt.textWidth = 'auto';
 			}
-			var txtWidth = Factory.getStyleSize(opt.textWidth, offset.width),
+			var empty = Factory.isEmptyOptions(that, that.cache['originOptions']),
+				txtWidth = Factory.getStyleSize(opt.textWidth, offset.width, empty),
 				realWidth = parseInt(txtWidth, 10);
 
 			if (tag === 'select') {
 				that.elem = elem;
-				var pageUrl = location.href.split('?')[0].toLowerCase(),
-					isEditPage = pageUrl.indexOf('edit') > -1 || pageUrl.indexOf('form') > -1;
-
 				if (!opt.select) {
 					var txt = document.createElement('INPUT');
 					txt.className = 'form-control oui-ddl-txt' + (opt.className ? ' ' + opt.className : '');
@@ -1852,8 +1957,10 @@
 					if (opt.textWidth !== 'auto' && realWidth) {
 						elem.style.width =  txtWidth;
 					}
+					$.console.log('txtwidth:', txtWidth, elem, $.getElementStyle(elem, 'padding'), $.getElementStyle(elem, 'width'), elem.offsetWidth);
 					//设置select默认显示的行数为1，即显示1行
 					elem.size = 1;
+					elem.minWidth = elem.offsetWidth;
 				}
 				elem.className = elem.className.addClass('oui-ddl oui-ddl-elem')
 					.addClass(Factory.buildSkinClass(opt.skin, 'oui-ddl-elem'));
@@ -1872,7 +1979,7 @@
 				that.text.style.cssText = (that.text.style.cssText || '') + [
 					'background-color:#fff;padding: 0 20px 0 9px;',
 					opt.style ? opt.style + ';' : '',
-					opt.textWidth === 'auto' ? '' : 'width:' + Factory.getStyleSize(opt.textWidth, offset.width) + ';',
+					opt.textWidth === 'auto' ? '' : 'width:' + Factory.getStyleSize(opt.textWidth, offset.width, opt.multi) + ';',
 				].join('');
 				var ddl = document.createElement('SELECT');
 				ddl.className = that.text.className.addClass('oui-ddl oui-ddl-elem')
@@ -1943,14 +2050,7 @@
 			var that = this,
 				opt = that.options,
 				elem = element || (opt.select ? that.elem : that.text),
-				borderColor = opt.keepColor ? $.getElementStyle(elem, 'border-color') : '',
-				color = borderColor.replace(/[rgb()\s]/g, '');
-
-			// 若边框颜色未设置(#767676)，或边框颜色是#cccccc,#dddddd,#eeeeee
-			if (['118,118,118', '204,204,204', '221,221,221', '238,238,238'].indexOf(color) > -1) {
-				opt.keepColor = false;
-			}
-			//$.console.log('build:', borderColor, color);
+				borderColor = Factory.getBorderColor(elem, opt);
 
 			$.createElement('DIV', function (box) {
 				var offset = $.getOffset(opt.select ? that.elem : that.text),
@@ -1962,6 +2062,8 @@
 					},
 					maxHeight = opt.maxHeight,
 					className = 'oui-ddl oui-ddl-panel'.addClass(Factory.buildSkinClass(opt.skin, 'oui-ddl-panel'));
+
+				$.console.log('offset:', offset);
 
 				if (!isNaN(bs.width) && bs.width > opt.maxWidth) {
 					opt.maxWidth = bs.width;
@@ -2008,13 +2110,12 @@
 					bs.width ? 'width:' + Factory.getStyleSize(bs.width) + ';' : '',
 					'min-height:', Factory.getStyleSize(opt.minHeight), ';',
 					opt.maxHeight ? 'max-height:' + Factory.getStyleSize(maxHeight+ (btn.len || btn.form ? Config.BoxFormHeight : 0)) + ';' : '',
-					opt.keepColor ? 'border-color:' + borderColor + ';' : '',
+					borderColor ? 'border-color:' + borderColor + ';' : '',
 					opt.boxStyle || ''
 				].join('');
 
-
 				var html = [
-					'<ul class="oui-ddl-box oui-ddl-', opt.layout, '" id="', key, '_list">',
+					'<ul class="', Factory.buildBoxClass(opt), '" id="', key, '_list">',
 					Factory.buildItems(that, opt.items),
 					'</ul>',
 					btn.html
@@ -2074,9 +2175,31 @@
 			Factory.clearItems(that, key + '_list')
 				.buildItems(that, opt.items, key + '_list')
 				.setNodes(that)
-				.initValue(that);
+				.initValue(that)
+				.setItemEvent(that);
 
 			return that.size().position().set(par.value).complete();
+		},
+		updateButtons: function () {
+			var that = this,
+				opt = that.options,
+				bar = that.bar,
+				btn = Factory.buildButtons(that, bar ? true : false);
+
+			if (btn.html) {
+				if (!that.bar) {
+					that.box.innerHTML += btn.html;
+					that.bar = that.box.childNodes[1];
+				} else {
+					that.bar.innerHTML = btn.html;
+				}
+
+				Factory.setEditEvent(that).setButtonEvent(that);
+			} else if (that.bar) {
+				that.bar.style.display = 'none';
+			}
+
+			return that;
 		},
 		select: function (num, arg) {
 			var that = this,
@@ -2496,7 +2619,12 @@
 				//再显示下拉列表
 				box.style.display = show ? 'block' : 'none';
 				box.show = show;
-				if (!opt.keepColor) {
+
+				var borderColor = Factory.getBorderColor(elem, opt);
+				if (borderColor) {
+					box.style.borderColor = borderColor;
+					Factory.updateBoxShadowColor(box, borderColor, opt);
+				} else {					
 					$.setClass(opt.select ? that.elem : that.text, 'oui-ddl-cur', show);
 					if (!Config.IsDefaultSkin(opt.skin)) {
 						$.setClass(opt.select ? that.elem : that.text, 'oui-ddl-cur-' + opt.skin, show);
@@ -2614,8 +2742,9 @@
 			}
 			//先清除选项内容框高度
 			that.con.style.height = 'auto';
+			var h = ($.getOffset(box).height - barH - frmH - 2);
 			//再设置选项内容框高度
-			that.con.style.height = ($.getOffset(box).height - barH - frmH - 2) + 'px';
+			that.con.style.height = h + 'px';
 			
 			return that;
 		},
@@ -2881,6 +3010,20 @@
 		},
 		value: function(elem, value, append) {
 			return $.dropdownlist.value(elem, value, append);
+		}
+	});
+
+	/* 定制功能，获取 */
+	$.addListener(window, 'load', function() {
+		let elements = document.querySelectorAll('select[data-mode="single"]');
+		if (elements) {
+			$.singlelist(elements);
+		}
+		elements = document.querySelectorAll('select[data-mode="multi"]');
+		if (elements) {
+			$.dropdownlist(elements, { 
+				multi: true, layout: 'list', callbackLevel: 2, debounce: false, itemWidth: 'cell' 
+			});
 		}
 	});
 }(OUI);
