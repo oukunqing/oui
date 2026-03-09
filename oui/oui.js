@@ -8196,7 +8196,8 @@ $.title
         },
         showTitle: function(ev, title, that) {
             let elem = that.element, bs = $.getBodySize(),
-                opt = that.options;
+                opt = that.options,
+                zindex = 2147483647;
 
             if (!opt.enabled) {
                 return this;
@@ -8218,7 +8219,7 @@ $.title
                     'box-sizing:border-box;',
                     'margin:0;padding:3px 5px;',
                     'background:#fff;color:#333;',
-                    'opacity:0.98;z-index:99999999;',
+                    'opacity:0.98;z-index:', zindex, ';',
                     'font-size:14px;font-family:Arial,宋体;',
                     'min-height:30px;line-height:1.5em;',
                     //边框灰色阴影

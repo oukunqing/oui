@@ -1955,7 +1955,6 @@
 					if (opt.textWidth !== 'auto' && realWidth) {
 						elem.style.width =  txtWidth;
 					}
-					$.console.log('txtwidth:', txtWidth, elem, $.getElementStyle(elem, 'padding'), $.getElementStyle(elem, 'width'), elem.offsetWidth);
 					//设置select默认显示的行数为1，即显示1行
 					elem.size = 1;
 					elem.minWidth = elem.offsetWidth;
@@ -2080,8 +2079,6 @@
 					},
 					maxHeight = opt.maxHeight,
 					className = 'oui-ddl oui-ddl-panel'.addClass(Factory.buildSkinClass(opt.skin, 'oui-ddl-panel'));
-
-				$.console.log('offset:', offset);
 
 				if (!isNaN(bs.width) && bs.width > opt.maxWidth) {
 					opt.maxWidth = bs.width;
