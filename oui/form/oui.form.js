@@ -1449,15 +1449,20 @@
 
 // $.input {}, $.setInputFormat ()
 !function ($) {
-    var KC = $.KEY_CODE,
+    const KC = $.KEY_CODE,
         KCA = KC.Arrow,
         KCC = KC.Char,
         CloseLinkageClassName = 'oui-popup-panel';
 
-    var FilePath = $.getScriptSelfPath(true),
+    const FilePath = $.getScriptSelfPath(true),
         FileDir = FilePath.substr(0, FilePath.lastIndexOf('/') + 1);
 
-    var Util = {
+    const Config = {
+        // 图标宽度
+        ICON_WIDTH: 30
+    };
+
+    const Util = {
         timer: {},
         checkElemArray: function (elements) {
             var elems = [];
@@ -2151,7 +2156,7 @@
                 return opt;
             },
             buildIcon: function (elem, opt, parent) {
-                var icons = $.extend({}, opt.icon), idx = 0;
+                var that = this, icons = $.extend({}, opt.icon), idx = 0;
 
                 if (!elem.icons) {
                     elem.icons = {};
@@ -2215,8 +2220,8 @@
                 function _create(elem, key, arg, idx) {
                     $.createElement('A', '', function (el) {
                         var zIndex = parseInt('0' + _getElementStyle(elem, 'z-index'), 10) + 1,
-                            ps = $.getOffset(elem), iconSize = 30, h = ps.height - 2, css = [],
-                            func = null, w = 30, txt = '', color = '', bg = '',
+                            ps = $.getOffset(elem), iconSize = Config.ICON_WIDTH, h = ps.height - 2, css = [],
+                            func = null, w = Config.ICON_WIDTH, txt = '', color = '', bg = '',
                             primary = false, follow = false;
 
                         if (key.indexOf('btn') > -1) {
@@ -2289,11 +2294,13 @@
                                 'border-bottom-left-radius:', _getElementStyle(elem, 'borderBottomLeftRadius'), ';'
                             ].join(''));
                             elem.style.cssText = (elem.style.cssText || '') + 'padding-left:' + (w + $.getPaddingSize(elem).left) + 'px;';
+                            //$.setClass(el, 'oui-form-txt-icon-left', true);
                         } else {
                             css.push([
                                 'border-top-right-radius:', _getElementStyle(elem, 'borderTopRightRadius'), ';',
                                 'border-bottom-right-radius:', _getElementStyle(elem, 'borderBottomRightRadius'), ';'
                             ].join(''));
+                            //$.setClass(el, 'oui-form-txt-icon-right', true);
                         }
 
                         el.style.cssText = css.join('');
@@ -2349,13 +2356,36 @@
                 for (var k in icons) {
                     if (['del', 'pwd', 'txt', 'query', 'len', 'btn', 'lbl', 'pre', 'post', 'unit'].indexOf(k) > -1) {
                         _create(elem, k, icons[k], idx++);
+                        that.setElemPadding(elem, k, elem.icons[k].icon);
                     } else if (k === 'enter' && $.isFunction(icons[k])) {
                         _enter(elem, icons[k]);
                     } else if (['ico', 'pic', 'icon'].indexOf(k) > -1) {
                         _background(elem, icons[k]);
                     }
                 }
-                return this;
+                return that;
+            },
+            setElemPadding: function (elem, key, icon) {
+                var that = this;
+                if (['pre', 'lbl'].indexOf(key) > -1) {
+
+                } else {
+                    if (!elem.paddingCount) {
+                        elem.paddingCount = 0;
+                        elem.paddingRight = parseInt('0' + $.getElementStyle(elem, 'padding-right'), 10);
+                    }
+                    elem.paddingCount += 1;
+
+                    let pw = parseInt('0' + elem.getAttribute('data-icon-width'), 10),
+                        cw = pw + (icon.getBoundingClientRect().width || parseInt('0' + $.getElementStyle(icon, 'width'), 10));
+
+                    if (cw) {
+                        elem.setAttribute('data-icon-width', cw);
+                        //elem.style.paddingRight = cw + (elem.paddingCount > 1 ? 2 : elem.paddingRight) + 'px';
+                        elem.style.paddingRight = cw + (elem.paddingCount > 1 ? 2 : 3) + 'px';
+                    }
+                }
+                return that;
             },
             showIcon: function (elem, key, idx, first) {
                 var d = elem.icons[key], offsetWidth = 0, i = 0;
