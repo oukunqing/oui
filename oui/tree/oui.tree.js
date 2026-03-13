@@ -1378,7 +1378,14 @@
                 if (Factory.isSearchPanelShow(tree)) {
                     Factory.setSearchFocus(tree);
                 } else {
-                    Factory.setFocus(tree);
+                    var focusedElem = document.activeElement;
+                    if (focusedElem !== tree.focus || (evType === 'mouseover' && focusedElem && focusedElem === tree.keywords)) {
+                        ;
+                        //$.console.log('keywords focused');
+                        // 已获取焦点 或者 mouseover事件时 焦点位于搜索框中，则不获取焦点
+                    } else {
+                        Factory.setFocus(tree);
+                    }
                 }
 
                 var events = [
@@ -2423,10 +2430,10 @@
                 return this;
             },
             buildForm: function (tree, box) {
-                var opt = tree.options;
+                var that = this, opt = tree.options;
 
                 if (!opt.showSearch) {
-                    return this;
+                    return that;
                 }
                 var div = document.createElement('div'), first = box.childNodes[0];
                 div.className = 'form oui-tree-form';
@@ -2455,20 +2462,21 @@
 
                 tree.keywords = txt;
 
-                $.addListener(btn, 'mousedown', function (ev) {
+                $.addListener(btn, 'mousedown,touchstart', function (ev) {
                     Factory.searchNodes(tree, txt, this);
                 });
-                $.addListener(no, 'mousedown', function (ev) {
+                $.addListener(no, 'mousedown,touchstart', function (ev) {
                     Factory.showSearchPanel(tree, false, true);
                     txt.value = '';
                     $.setElemClass(no, 'hide', true);
                 });
 
-                $.addListener(txt, 'mousedown', function (ev) {
+                $.addListener(txt, 'mousedown,touchstart', function (ev) {
                     Factory.showSearchPanel(tree, true);
                 });
                 $.addListener(txt, 'keydown', function (ev) {
                     Event['searchKeydown'] (ev, tree);
+                    that.showDelIcon(txt, no);
                 });
                 $.addListener(txt, 'keyup', function (ev) {
                     $.cancelBubble(ev);
@@ -2476,17 +2484,22 @@
                     if (kc === KC.Enter || opt.realSearch || txt.value.trim() === '') {
                         Factory.searchNodes(tree, txt, this);
                     }
+                    that.showDelIcon(txt, no);
                 });
                 $.addListener(txt, 'blur', function (ev) {
-                    if (txt.value.trim()) {
-                        $.setElemClass(no, 'hide', false);
-                    } else {
-                        $.setElemClass(no, 'hide', true);
-                    }
+                    that.showDelIcon(txt, no);
                 });
 
-                Factory.setSearchCache(tree, { form: div, elem: txt, btn: btn, no: no });
+                that.setSearchCache(tree, { form: div, elem: txt, btn: btn, no: no });
 
+                return that;
+            },
+            showDelIcon: function (txt, btn) {
+                if (txt.value.trim()) {
+                    $.setElemClass(btn, 'hide', false);
+                } else {
+                    $.setElemClass(btn, 'hide', true);
+                }
                 return this;
             },
             clearSearch: function (tree) {
