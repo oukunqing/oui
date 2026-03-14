@@ -1531,26 +1531,33 @@
                 'box-sizing:border-box;text-align:center;font-size:14px;font-family:Arial,宋体;font-weight:normal;',
                 'width:30px;height:30px;color:#999;margin:0;padding:0;text-decoration:none;',
                 '-moz-user-select: none;-khtml-user-select: none;user-select: none;-ms-user-select: none;',
-                'background:transparent url("', FileDir, 'form-icon.png?12") no-repeat 0 0;}',
+                'background:transparent url("', FileDir, 'form-icon.png?11") no-repeat 0 0;}',
 
                 '.oui-form-txt-icon:hover{background-position-y:-30px;text-decoration:none;}',
+
+                '.oui-form-icon-none{background-position:0 -3000px;}',
+                '.oui-form-icon-none:hover{background-position:0 -3000px;}',
 
                 '.oui-form-icon-del{background-position:0 center;}',
                 '.oui-form-icon-del:hover{background-position:-30px center;}',
 
-                '.oui-form-icon-right{background-position:-60 center;}',
+                '.oui-form-icon-right{background-position:-60px center;}',
                 '.oui-form-icon-right:hover{background-position:-90px center;}',
 
-                '.oui-form-icon-disable{background-position:-120 center;}',
-                '.oui-form-icon-disable:hover{background-position:-150px center;}',
+                '.oui-form-icon-disable,.oui-form-icon-disabled{background-position:-120px center;}',
+                '.oui-form-icon-disable:hover,.oui-form-icon-disabled:hover{background-position:-150px center;}',
 
                 '.oui-form-icon-query{background-position:-180px center;}',
                 '.oui-form-icon-query:hover{background-position:-210px center;}',
 
-                '.oui-form-icon-pwd{background-position:-240px center;}',
-                '.oui-form-icon-pwd:hover{background-position:-270px center;}',
-                '.oui-form-icon-txt{background-position:-300px center;}',
-                '.oui-form-icon-txt:hover{background-position:-330px center;}',
+                '.oui-form-icon-warn{background-position:-240px center;}',
+                '.oui-form-icon-warn:hover{background-position:-270px center;}',
+
+                '.oui-form-icon-pwd{background-position:-300px center;}',
+                '.oui-form-icon-pwd:hover{background-position:-330px center;}',
+
+                '.oui-form-icon-txt{background-position:-360px center;}',
+                '.oui-form-icon-txt:hover{background-position:-390px center;}',
 
                 '.oui-form-icon-len,.oui-form-icon-unit,.oui-form-icon-post,.oui-form-icon-btn{',
                 'width:30px;cursor:default;',
@@ -1728,21 +1735,21 @@
                 }
                 return false;
             },
-            checkFormat: function (elem, options, isPattern, editable) {
+            checkFormat: function (elem, options, isPattern, editable, opt) {
                 var v = elem.value.trim(), vs = $.extend([], options);
                 if ('' === v || vs.length <= 0) {
-                    return $.input.setWarnColor(elem, true);
+                    return $.input.setWarnColor(opt, elem, true);
                 }
                 for (var i = 0; i < vs.length; i++) {
                     if (isPattern) {
                         var p = vs[i];
                         if (($.isRegexp(p) && p.test(v)) || ($.isFunction(p) && p(v)) || p.toString() === v) {
-                            return $.input.setWarnColor(elem, true);
+                            return $.input.setWarnColor(opt, elem, true);
                         }
                     } else {
                         var val = $.isObject(vs[i]) ? $.getParam(vs[i], 'value,val,v') : $.isArray(vs[i]) ? vs[i][0] : vs[i];
                         if (editable || val.toString().trim() === v) {
-                            return $.input.setWarnColor(elem, true);
+                            return $.input.setWarnColor(opt, elem, true);
                         }
                     }
                 }
@@ -1779,7 +1786,7 @@
                 }
                 return { replace: replace, val: val };
             },
-            setWarnColor: function (elem, pass, focus) {
+            setWarnColor: function (opt, elem, pass, focus) {
                 if (!pass) {
                     if (!elem.oldColor) {
                         elem.oldColor = $.getElementStyle(elem, 'color');
@@ -1790,6 +1797,9 @@
                     elem.style.color = '#f00';
                 } else if (elem.oldColor) {
                     elem.style.color = elem.oldColor;
+                }
+                if (opt) {
+                    opt.callback(elem, pass);
                 }
                 return pass;
             },
@@ -1819,9 +1829,9 @@
                     }
 
                     if (opt.valLen && opt.valLen > 0 && val.length !== opt.valLen) {
-                        $.input.setWarnColor(elem, false, true);
+                        $.input.setWarnColor(opt, elem, false, true);
                     } else if (opt.minLen && opt.minLen > 0 && val.length < opt.minLen) {
-                        $.input.setWarnColor(elem, false, true);
+                        $.input.setWarnColor(opt, elem, false, true);
                     }
                 }
                 return true;
@@ -2172,6 +2182,7 @@
                 function _build(key, icon) {
                     elem.icons[key] = {
                         icon: icon,
+                        key: key,
                         show: true
                     };
                 }
@@ -2260,7 +2271,15 @@
                             el.parent = elem.parentNode;
                             elem.parentNode.style.position = 'relative';
                         }
-                        el.className = 'oui-form-txt-icon oui-form-icon-' + key + (primary ? '-primary': '');
+
+                        let cssKey = 'oui-form-icon-' + key;
+                        el.className = [
+                            'oui-form-txt-icon',
+                            'oui-form-icon-' + elem.id,
+                            cssKey,
+                            (primary ? cssKey + '-primary': '')
+                        ].join(' ');
+
                         css = ['width:', w, 'px;', 'height:', h, 'px;line-height:', h, 'px;z-index:', zIndex, ';'];
                         if (['lbl', 'len', 'btn', 'pre', 'post', 'unit'].indexOf(key) > -1) {
                             //按钮，需要边框，边框颜色可以指定或者取文本框的边框颜色
@@ -2338,6 +2357,8 @@
                                 if (el.className.indexOf('oui-form-icon-pwd') > -1) {
                                     $.replaceClass(el, 'oui-form-icon-pwd', 'oui-form-icon-txt');
                                     elem.type = 'text';
+                                    //光标指向最后
+                                    $.setTextCursorPosition(elem);
                                 } else {
                                     $.replaceClass(el, 'oui-form-icon-txt', 'oui-form-icon-pwd');
                                     elem.type = 'password';
@@ -2361,13 +2382,46 @@
                 }
 
                 for (var k in icons) {
-                    if (['del', 'pwd', 'txt', 'query', 'len', 'btn', 'lbl', 'pre', 'post', 'unit'].indexOf(k) > -1) {
+                    if (['del', 'right', 'disable', 'disabled', 'warn', 'query',  
+                        'pwd', 'txt', 'len', 'btn', 'lbl', 'pre', 'post', 'unit'].indexOf(k) > -1) {
                         _create(elem, k, icons[k], idx++);
                         that.setElemPadding(elem, k, elem.icons[k].icon);
                     } else if (k === 'enter' && $.isFunction(icons[k])) {
                         _enter(elem, icons[k]);
                     } else if (['ico', 'pic', 'icon'].indexOf(k) > -1) {
                         _background(elem, icons[k]);
+                    }
+                }
+                return that;
+            },
+            updateIcon: function (elem, key, oldKey) {
+                var that = this, id = elem.id;
+
+                function _set () {
+                    var opt = {};
+                    opt[key] = true;
+                    $.setInputIcon(elem, opt);
+                }
+                if (!elem.icons) {
+                    _set();
+                } else {
+                    var pass = false, idx = 0, dr;
+                    if ($.isUndefined(oldKey)) {
+                        oldKey = 0;
+                    }
+                    for (var k in elem.icons) {
+                        dr = elem.icons[k];
+                        if (($.isNumber(oldKey) && oldKey !== idx) || ($.isString(oldKey) && oldKey !== dr.key)) {
+                            continue;
+                        }
+                        $.removeClass(dr.icon, 'oui-form-icon-' + dr.key);
+                        $.addClass(dr.icon, 'oui-form-icon-' + key);
+                        dr.key = key;
+                        pass = true;
+                        idx += 1;
+                    }
+                    if (!pass) {
+                        _set();
                     }
                 }
                 return that;
@@ -2570,6 +2624,12 @@
 
                 opt.config = cfg;
 
+                opt.callback = $.getParam(opt, 'callback');
+                if (!$.isFunction(opt.callback)) {
+                    opt.callback = function(elem) {
+
+                    };
+                }
                 opt.change = $.isBoolean($.getParam(opt, 'change,trigger'), false);
                 opt.minLen = $.getParam(opt, 'minLength,minLen');
                 opt.maxLen = $.getParam(opt, 'maxLength,maxLen');
@@ -2783,6 +2843,12 @@
                     $.addClass(elem, 'oui-form-elem');
                     $.addClass(elem, 'oui-input-fmt');
 
+                    if ($.isFunction(par.change)) {
+                        $.addListener(elem, 'change', function(ev) {
+                            par.change(this);
+                        });
+                    }
+
                     if (isSelect) {
                         if (opt.config.minWidth) {
                             elem.style.minWidth = opt.config.minWidth + 'px';
@@ -2987,6 +3053,7 @@
                                 }
                                 if ((ctl = $.input.replaceValue(ev, elem, val, isCnAble, converts, ps)).replace) {
                                     $.setAttribute(this, 'opt-typed', $.input.isInputTyped(ps, ctl.val) ? 1 : 0);
+                                    opt.callback(elem, false);
                                     return false;
                                 }
                                 //设置功能图标
@@ -2994,7 +3061,7 @@
 
                                 val = ctl.val;
 
-                                if (!$.input.checkFormat(this, $.extend([], opt.options), false, opt.config.editable)) {
+                                if (!$.input.checkFormat(this, $.extend([], opt.options), false, opt.config.editable, opt)) {
                                     this.focus();
                                     return false;
                                 }
@@ -3008,7 +3075,7 @@
                             //内容指定，当输入的内容与选项不匹配时，输入框锁定焦点
                             $.addListener(elem, 'blur', function (ev) {
                                 $.input.replaceValue(ev, this, this.value.trim(), isCnAble, converts, $.input.getOptionValues(opt.options));
-                                if (!$.input.checkFormat(this, $.extend([], opt.options), false, opt.config.editable)) {
+                                if (!$.input.checkFormat(this, $.extend([], opt.options), false, opt.config.editable, opt)) {
                                     this.focus();
                                 }
                             });
@@ -3125,7 +3192,7 @@
                             }
                             var kc = $.getKeyCode(ev), val = this.value.trim(), ctl;
                             if ((ctl = $.input.replaceValue(ev, this, val, isCnAble, converts, $.input.getOptionValues(opt.options))).replace) {
-                                return false;
+                                return opt.callback(elem, false), false;
                             }
                             if (opt.change) {
                                 $.trigger(elem, 'change');
@@ -3136,14 +3203,14 @@
                             val = ctl.val;
                             if (isVal) {
                                 if (!$.input.checkFormat(this, patterns, true, opt.config.editable)) {
-                                    return $.input.setWarnColor(this, false, true);
+                                    return $.input.setWarnColor(opt, this, false, true);
                                 }
                             } else {
                                 if ((!isVal && !$.input.checkVal(val, types, opt, false, this)) || !$.input.checkValLen(val, opt, false, false, this)) {
-                                    return $.input.setWarnColor(this, false);
+                                    return $.input.setWarnColor(opt, this, false);
                                 }
                             }
-                            return $.input.setWarnColor(elem, true);
+                            return $.input.setWarnColor(opt, elem, true);
                         });
                         $.addListener(elem, 'blur', function (ev) {
                             if (opt.types[0] === 'none') {
@@ -3155,17 +3222,17 @@
                             var val = this.value.trim(), len = val.length;
                             $.input.replaceValue(ev, this, val, isCnAble, converts, $.input.getOptionValues(opt.options));
                             if (isNum && (val.endsWith('-') || val.endsWith('.'))) {
-                                return $.input.setWarnColor(this, false, true);
+                                return $.input.setWarnColor(opt, this, false, true);
                             } else if (!$.input.checkVal(val, types, opt, false, this)) {
-                                return $.input.setWarnColor(this, false, true);
+                                return $.input.setWarnColor(opt, this, false, true);
                             } else if (isVal && (!$.input.checkFormat(this, patterns, true, opt.config.editable) || $.input.checkExcept(val, opt))) {
                                 $.console.log('\u5185\u5bb9\u683c\u5f0f\u9519\u8bef', val);   //内容格式错误
-                                return $.input.setWarnColor(this, false, true);
+                                return $.input.setWarnColor(opt, this, false, true);
                             }
                             if (len > 0 && opt.minVal && parseFloat('0' + val, 10) < opt.minVal) {
-                                return $.input.setWarnColor(this, false, true);
+                                return $.input.setWarnColor(opt, this, false, true);
                             }
-                            return $.input.setWarnColor(this, true);
+                            return $.input.setWarnColor(opt, this, true);
                         });
                         if (!opt.paste) {
                             elem.onpaste = function () {
@@ -3180,7 +3247,7 @@
                                 }
                                 //如果输入框的内容已经超出长度限制，则不能再粘贴内容
                                 if (!$.input.checkValLen(this.value.trim(), opt, true, false, this)) {
-                                    return $.input.setWarnColor(this, false);
+                                    return $.input.setWarnColor(opt, this, false);
                                 }
                                 //设置功能图标
                                 $.input.setIcon(ev, elem, opt);
@@ -3230,6 +3297,15 @@
                 $.addListener(elem, 'keyup', function (ev) {
                     $.input.setIcon(ev, elem);
                 });
+            }
+            return $;
+        },
+        updateInputIcon: function (elements, key, oldKey) {
+            var elems = Util.checkElemArray(elements);
+            for (var i = 0; i < elems.length; i++) {
+                if ($.isElement(elem = $.toElement(elems[i]))) {
+                    $.input.updateIcon(elem, key, oldKey);
+                }
             }
             return $;
         }

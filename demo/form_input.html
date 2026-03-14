@@ -40,7 +40,7 @@ button {width:120px;height:30px;}
             </tr>
             <tr>
                 <td></td>
-                <td><input type="password" id="fmt_pwd" placeholder="请输入密码" autocomplete="off" maxlength="128" /></td>
+                <td><input type="password" id="fmt_pwd" placeholder="请输入密码" autocomplete="off" maxlength="128" value="123456" /></td>
             </tr>
             <tr>
                 <td></td>
@@ -167,7 +167,7 @@ button {width:120px;height:30px;}
 </body>
 </html>
 <script type="text/javascript" src="../oui/oui.js?"></script>
-<script type="text/javascript" src="../oui/form/oui.form.min.js?"></script>
+<script type="text/javascript" src="../oui/form/oui.form.js?"></script>
 <script type="text/javascript" src="../oui/dialog/oui.dialog.js?12"></script>
 <script type="text/javascript">
     //没有引用jquery.js
@@ -233,7 +233,7 @@ button {width:120px;height:30px;}
         */
 
         $.setInputIcon('fmt_del5', {
-            //types: ['number'],
+            types: ['number'],
             //内容长度固定为15个字节
             //valLen: 10,
             //icon: { 
@@ -249,7 +249,7 @@ button {width:120px;height:30px;}
 
         //$.setInputIcon('fmt_pwd', 'pwd');
         $.setInputIcon('fmt_pwd', {
-            len:true,pwd:true,del:true,
+            len: true, pwd: true, del: true, /*right: true, disable: true, warn: true,*/
             icon: {path: 'imgs/warning.png', width:14, left: 5, right: 5}
         });
 
@@ -272,16 +272,25 @@ button {width:120px;height:30px;}
             types: ['number'],
             //内容长度固定为15个字节
             valLen: 15,
-            icon: { del: function(elem) {
-                $.console.log('icon-del:', elem)
+            icon: { del: function (elem) {
+                $.console.log('icon-del:', elem);
             }}
         });
 
         $.setInputFormat('fmt_num_max', {
             types: ['int'],
             minVal: 100,
-            maxVal: 240
-        });
+            maxVal: 240,
+            callback: function (elem, pass) {
+                $.console.log('change callback:', elem, pass);
+                if (!elem.value.trim()) {
+                    $.updateInputIcon('fmt_num_max', 'none');
+                    return false;
+                }
+                $.updateInputIcon('fmt_num_max', pass ? 'right' : 'warn');
+            }
+            //icon: { warn: true }
+        });        
 
         $.setInputFormat('fmt_num_float_max', {
             types: ['float'],
@@ -310,7 +319,10 @@ button {width:120px;height:30px;}
 
         $.setInputFormat('fmt_num_max_15', {
             types: ['number'],
-            maxLen: 15
+            maxLen: 15,
+            icon: {
+                warn: true
+            }
         });
 
         $.setInputFormat('fmt_int', {
