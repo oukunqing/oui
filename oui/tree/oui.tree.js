@@ -1379,7 +1379,7 @@
                     Factory.setSearchFocus(tree);
                 } else {
                     var focusedElem = document.activeElement;
-                    if (focusedElem !== tree.focus || (evType === 'mouseover' && focusedElem && focusedElem === tree.keywords)) {
+                    if (focusedElem === tree.focus || (evType === 'mouseover' && focusedElem && focusedElem === tree.keywords)) {
                         ;
                         //$.console.log('keywords focused');
                         // 已获取焦点 或者 mouseover事件时 焦点位于搜索框中，则不获取焦点

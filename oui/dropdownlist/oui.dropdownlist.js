@@ -459,6 +459,13 @@
 				}
 				return this;
 			},
+			buildItemIdVal: function (val) {
+				if ($.isNumber(val) || ($.isString(val) && /$[\dA-Z_\-\.:]^/gi.test(val))) {
+					return val;
+				} else {
+					return $.md5(val, true);
+				}
+			},
 			buildItems: function (ddl, items, listbox) {
 				var that = ddl,
 					opt = that.options,
@@ -512,8 +519,8 @@
 						if (val === '' && txt === '') {
 							continue;
 						}
-
-						var chbId = key + val,
+						// 因为html-element的id不能包含空白字符和制表符等，作md5编码处理
+						var chbId = key + Factory.buildItemIdVal(val),
 							checked = dr.checked || dr.dc ? ' checked="checked" dc="1"' : '',
 							use = dr.enabled || dr.use,
 							disabled = dr.disabled ? ' disabled="disabled"' : '',
@@ -527,7 +534,7 @@
 							itemHeight = $.isNumber(opt.itemHeight) && opt.itemHeight > 0 ? opt.itemHeight : 0,
 							chbMargin = Config.ChbMarginTop;
 
-						if (itemHeight) {							
+						if (itemHeight) {
 							chbMargin += parseInt((itemHeight - Config.BoxItemHeight) / 2, 10) + 1;
 							if (isBorder) {
 								itemHeight -= 2;
@@ -618,7 +625,8 @@
 						'<input type="text" class="oui-ddl-val oui-ddl-new"',
 						' placeholder="', opt.config.placeholder, '" id="', key + '_val"',
 						' maxlength="', opt.config.maxLength, '" data-type="', opt.config.dataType, '"',
-						' tabindex="-1" />',
+						' tabindex="-1" autocomplete="off" />',
+						'<a class="btn btn-cancel oui-ddl-cancel hide" title="', '\u53d6\u6d88', '"></a>',
 						'<button class="btn btn-default btn-sm oui-ddl-btn oui-ddl-new" tabindex="-1">', opt.config.button, '</button>',
 						'</div>',
 						update ? '' : '</div>'
@@ -689,7 +697,8 @@
 				var that = ddl,
 					opt = that.options,
 					cfg = $.extend({}, opt.config),
-					elem = opt.select ? that.elem : that.text;
+					elem = opt.select ? that.elem : that.text,
+					no = that.box.querySelector('.oui-ddl-edit .btn-cancel');
 
 				that.texts = that.box.querySelectorAll('.oui-ddl-edit .oui-ddl-new');
 
@@ -755,10 +764,15 @@
 						*/
 						if (!opt.config.keep) {
 							text.value = '';
-						}						
+						}
 						that.set(val, {edit: true});
 						that.callback(opt.callbackLevel);
 					}
+
+					$.addListener(no, 'mousedown,touchstart', function(ev) {
+						text.value = '';
+						Factory.showDelIcon(text, no);
+					});
 					
 					text.onkeyup = function(ev) {
 						var kc = $.getKeyCode(ev);
@@ -771,11 +785,13 @@
 						} else if (ev.shiftKey && (kc >= KC.Char.A && kc <= KC.Char.Z)) {
 							$.cancelBubble(ev);
 						}
+						Factory.showDelIcon(this, no);
 						return false;
 					};
 					
 					text.onkeydown = function(ev) {
 						var kc = $.getKeyCode(ev), val, pos = $.getTextCursorPosition(text);
+						$.console.log('onkeydown:', kc);
 						if (kc.inArray(KC.CtrlList) || kc.inArray(KC.FuncList)) {
 							if (kc.inArray([KC.Tab, KC.Esc])) {
 								$.cancelBubble(ev);
@@ -818,6 +834,8 @@
 							}
 							return pass;
 						}
+						Factory.showDelIcon(this, no);
+
 						return true;
 					};
 					$.addListener(that.texts[1], 'click', function(ev) {
@@ -1202,10 +1220,10 @@
 				return null;
 			},
 			buildSearch: function (ddl, box) {
-				var opt = ddl.options;
+				var that = this, opt = ddl.options;
 
 				if (!opt.showSearch || ddl.nodes.length <= Config.SearchConditionCount) {
-					return this;
+					return that;
 				}
 				var div = document.createElement('div'), first = box.childNodes[0];
 				div.className = 'search oui-ddl-search';
@@ -1213,7 +1231,7 @@
 					'<input type="text" class="keywords oui-ddl-keywords" placeholder="', 
 					//opt.searchPrompt || '请输入关键字',
 					opt.searchPrompt || '\u8bf7\u8f93\u5165\u5173\u952e\u5b57',
-					'" maxlength="', opt.keywordsLength, '" />',
+					'" maxlength="', opt.keywordsLength, '" autocomplete="off" />',
 					//搜索
 					//'<a class="search oui-ddl-search" title="', opt.searchText || '\u641c\u7d22', '"></a>',
 					//查找
@@ -1244,26 +1262,34 @@
 				$.addListener(txt, 'mousedown,touchstart', function(ev) {
 					Factory.showSearchPanel(ddl, true);
 				});
+                $.addListener(txt, 'keydown', function (ev) {
+                    that.showDelIcon(txt, no);
+                });
 				$.addListener(txt, 'keyup', function(ev) {
 					var kc = $.getKeyCode(ev);
 					if (kc === KC.Enter || opt.realSearch || txt.value.trim() === '') {
 						Factory.searchNodes(ddl, txt, this);
 					}
+                    that.showDelIcon(txt, no);
 				});
 				$.addListener(txt, 'blur', function(ev) {
-					if (txt.value.trim()) {
-						$.setElemClass(no, 'hide', false);
-					} else {
-						$.setElemClass(no, 'hide', true);
-					}
+                    that.showDelIcon(txt, no);
 				});
 
 				ddl.frm = div;
 
 				Factory.setSearchCache(ddl, { form: div, elem: txt, btn: btn, no: no });
 
-				return this;
+				return that;
 			},
+            showDelIcon: function (txt, btn) {
+                if (txt.value.trim()) {
+                    $.setElemClass(btn, 'hide', false);
+                } else {
+                    $.setElemClass(btn, 'hide', true);
+                }
+                return this;
+            },
 			clearSearch: function(ddl) {
 				var txt = ddl.box.querySelector('input.keywords'),
 					no = ddl.box.querySelector('a.btn-cancel');
@@ -1381,6 +1407,8 @@
 								if (ddl.options.clearSearch) {
 									Factory.clearSearch(ddl);
 								}
+								//选中选项后，关闭搜索结果面板
+								Factory.showSearchPanel(ddl, false);
 							}
 						}
 					});

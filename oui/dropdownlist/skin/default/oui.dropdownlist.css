@@ -504,7 +504,7 @@ li.oui-ddl-item-disabled label.oui-ddl-label {
 
 	height: 30px;
 	margin: 0 2px 0 0;
-	padding: 0 5px;
+	padding: 0 25px 0 5px;
 	box-sizing: border-box;
 	border: solid 1px #ccc;
 	border-radius: 5px;
@@ -546,6 +546,23 @@ li.oui-ddl-item-disabled label.oui-ddl-label {
 	border-left: none 0;
 }
 
+.oui-ddl-edit .btn-cancel {
+	width: 25px;
+	height: 25px;
+	top: 8px;
+	min-width: 25px;
+	border: none;
+	border-radius: none;
+	right: 56px;
+	opacity: 0.9;
+	z-index: 10;
+	background:#fff url("dropdownlist.png?1") no-repeat 0 0px;
+}
+.oui-ddl-edit .btn-cancel:hover {	
+	border: none;
+	top: 9px;
+	background:#fff url("dropdownlist.png?1") no-repeat 0px -25px;
+}
 
 /*用于搜索*/
 
