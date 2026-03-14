@@ -791,48 +791,49 @@
 					
 					text.onkeydown = function(ev) {
 						var kc = $.getKeyCode(ev), val, pos = $.getTextCursorPosition(text);
-						$.console.log('onkeydown:', kc);
-						if (kc.inArray(KC.CtrlList) || kc.inArray(KC.FuncList)) {
-							if (kc.inArray([KC.Tab, KC.Esc])) {
-								$.cancelBubble(ev);
-								//按Tab或Esc键，退出编辑框，焦点返回选项框
-								that.focus(false);
-								//设置esc按键事件，防止document esc冒泡
-								elem.esc = 1;
-							}
-						} else if (num) {
-							val = text.value.trim();
-							text.tempValue = val;
-
-							var pass = kc.inArray(KC.NumList) || kc.inArray(KC.Min.NumList)
-								|| (cfg.minus && kc.inArray([KC.Symbol.Minus, KC.Min.Symbol.Minus]))
-								|| (floatVal && kc.inArray([KC.Symbol.Dot, KC.Min.Symbol.Dot]));
-
-							if (pass) {
-								if (kc.inArray([KC.Symbol.Minus, KC.Min.Symbol.Minus]) && pos > 0) {
-									return false;
+						if (kc) {
+							if (kc.inArray(KC.CtrlList) || kc.inArray(KC.FuncList)) {
+								if (kc.inArray([KC.Tab, KC.Esc])) {
+									$.cancelBubble(ev);
+									//按Tab或Esc键，退出编辑框，焦点返回选项框
+									that.focus(false);
+									//设置esc按键事件，防止document esc冒泡
+									elem.esc = 1;
 								}
-								if (kc.inArray([KC.Symbol.Dot, KC.Min.Symbol.Dot]) && val.indexOf('.') > -1) {
-									return false;
-								}
-								var arr = val.split('');
-								arr.splice(pos, 0, $.getKeyChar(ev));
-								val = arr.join('');
+							} else if (num) {
+								val = text.value.trim();
+								text.tempValue = val;
 
-								//验证最大值
-								if (max && parseFloat(val, 10) > max) {
-									return false;
-								}
+								var pass = kc.inArray(KC.NumList) || kc.inArray(KC.Min.NumList)
+									|| (cfg.minus && kc.inArray([KC.Symbol.Minus, KC.Min.Symbol.Minus]))
+									|| (floatVal && kc.inArray([KC.Symbol.Dot, KC.Min.Symbol.Dot]));
 
-								//验证小数位长度
-								if (floatVal && $.isNumber(cfg.decimalLen)) {
-									var dlen = (val.split('.')[1] || '').trim().length;
-									if (dlen > cfg.decimalLen) {
+								if (pass) {
+									if (kc.inArray([KC.Symbol.Minus, KC.Min.Symbol.Minus]) && pos > 0) {
 										return false;
 									}
+									if (kc.inArray([KC.Symbol.Dot, KC.Min.Symbol.Dot]) && val.indexOf('.') > -1) {
+										return false;
+									}
+									var arr = val.split('');
+									arr.splice(pos, 0, $.getKeyChar(ev));
+									val = arr.join('');
+
+									//验证最大值
+									if (max && parseFloat(val, 10) > max) {
+										return false;
+									}
+
+									//验证小数位长度
+									if (floatVal && $.isNumber(cfg.decimalLen)) {
+										var dlen = (val.split('.')[1] || '').trim().length;
+										if (dlen > cfg.decimalLen) {
+											return false;
+										}
+									}
 								}
+								return pass;
 							}
-							return pass;
 						}
 						Factory.showDelIcon(this, no);
 
@@ -871,7 +872,8 @@
 						if (opt.shortcutNum) {
 							that.buttons[i].innerHTML += '<em>(<u>' + (i + 1) + '</u>)</em>';
 						}
-						that.buttons[i].title += '快捷键: shift + ' + (i + 1);
+						//that.buttons[i].title += '快捷键: alt + ' + (i + 1);
+						that.buttons[i].title += '\u5feb\u6377\u952e: alt + ' + (i + 1);
 					}
 				}
 				$.addListener(that.buttons[0].parentNode, 'click', function(ev) {
@@ -949,8 +951,18 @@
 					if (elem.tagName !== 'SELECT' && opt.dataType === 'string') {
 						return false;
 					}
-					var kc = $.getKeyCode(ev),
-						idx = Factory.getItemIdx(elem),
+					var kc = $.getKeyCode(ev);
+
+					// alt 键 + 数字键，触发按钮快捷键
+					if (ev.altKey && kc > KCC[0] && kc <= KCC[9]) {
+						var num = ev.code.replace(/(Digit)/i, '').toInt(),
+							btn = that.buttons[num - 1];
+						if (btn) {
+							btn.click();
+						}
+						return false;
+					}
+					var idx = Factory.getItemIdx(elem),
 						div = $I($.getAttribute(elem, 'opt-id')),
 						ArrList	= [KCA.Left, KCA.Up, KCA.Down, KCA.Right], //左 上 下 右
 						VimList = [KCA.H, KCA.K, KCA.J, KCA.L],	//vim方向键 H  K  J  L

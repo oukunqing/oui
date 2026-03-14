@@ -111,7 +111,23 @@
 	            <option value="2">仅推送报警图</option>
 	            <option value="3">都不推送</option>
 			</select>
-	</td>
+		</td>
+		<td>可编辑<br />
+			<select id="at_cmd">
+				<option value="AT+CCLK?">AT+CCLK?</option>
+	            <option value="AT+CGREG?">AT+CGREG?</option>
+	            <option value="AT+LTEINFO?">AT+LTEINFO?</option>
+	            <option value="AT+CGPSPOS=3">AT+CGPSPOS=3</option>
+			</select>
+		</td>
+		<td>可编辑(并保留输入)<br />
+			<select id="at_cmd2">
+				<option value="AT+CCLK?">AT+CCLK?</option>
+	            <option value="AT+CGREG?">AT+CGREG?</option>
+	            <option value="AT+LTEINFO?">AT+LTEINFO?</option>
+	            <option value="AT+CGPSPOS=3">AT+CGPSPOS=3</option>
+			</select>
+		</td>
 	</tr>
 </table>
 <div style="height:500px;"></div>
@@ -553,32 +569,59 @@ window.onload = function() {
 	}
 	
 	$.dropdownlist({
-			id: 'origin1',
-			element: 'origin1',
-			items: [],
-			origin: true,
-			boxWidth: 'follow',
-			itemWidth: '48%',
-			//maxHeight: 70,
-			//maxHeight: 'auto',
-			itemBorder: true,
-			single: true,
-	        //callbackLevel: 0,
-	        
-	        //是否单选，默认多选
-	        multi: true,
-	        //是否支持按钮快捷键（默认支持）
-	        shortcutKey: true,
-	        //是否显示快捷键数字（默认不显示）
-	        //shortcutNum: true,
-			title: '',
-			//按钮位置： left,center,right
-			buttonPosition: 'right',
-			callback: function (value, initial, data, ddl) {
-				$.console.log(ddl.id, '[callback]', ', value:', value, ', initial:', initial, ', data:', data);
-				getDeviceList();
-			}
-		});
+		id: 'origin1',
+		element: 'origin1',
+		items: [],
+		origin: true,
+		boxWidth: 'follow',
+		itemWidth: '48%',
+		//maxHeight: 70,
+		//maxHeight: 'auto',
+		itemBorder: true,
+		single: true,
+        //callbackLevel: 0,
+        
+        //是否单选，默认多选
+        multi: true,
+        //是否支持按钮快捷键（默认支持）
+        shortcutKey: true,
+        //是否显示快捷键数字（默认不显示）
+        //shortcutNum: true,
+		title: '',
+		//按钮位置： left,center,right
+		buttonPosition: 'right',
+		callback: function (value, initial, data, ddl) {
+			$.console.log(ddl.id, '[callback]', ', value:', value, ', initial:', initial, ', data:', data);
+			getDeviceList();
+		}
+	});
+
+	$.dropdownlist({
+		id: 'at_cmd',
+		editable: true,
+		config: {
+			keep: false
+		},
+		single: true,
+		title: '',
+		callback: function (value, initial, data, ddl) {
+			$.console.log(ddl.id, '[callback]', ', value:', value, ', initial:', initial, ', data:', data);
+		}
+	});
+
+	$.dropdownlist({
+		id: 'at_cmd2',
+		editable: true,
+		config: {
+			// 默认就是保持的，可以不加这个参数
+			keep: true
+		},
+		single: true,
+		title: '',
+		callback: function (value, initial, data, ddl) {
+			$.console.log(ddl.id, '[callback]', ', value:', value, ', initial:', initial, ', data:', data);
+		}
+	});
 };
 
 function getDeviceList() {

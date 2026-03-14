@@ -210,7 +210,7 @@
                             required = !$.isUndefined($.getAttribute(element, Config.DATA_REQUIRED));
 
                         required = $.isBoolean($.getParamCon(field.required, required), false);
-                        $.console.log('get:', element.id, $.getAttribute(element, Config.DATA_REQUIRED), field.required);
+                        //$.console.log('get:', element.id, $.getAttribute(element, Config.DATA_REQUIRED), field.required);
 
                         if (value === 'on') {
                             value = element.checked ? 1 : 0;
@@ -1531,24 +1531,30 @@
                 'box-sizing:border-box;text-align:center;font-size:14px;font-family:Arial,宋体;font-weight:normal;',
                 'width:30px;height:30px;color:#999;margin:0;padding:0;text-decoration:none;',
                 '-moz-user-select: none;-khtml-user-select: none;user-select: none;-ms-user-select: none;',
-                'background:url("', FileDir, 'form-icon.png") no-repeat 0 0;}',
+                'background:transparent url("', FileDir, 'form-icon.png?12") no-repeat 0 0;}',
 
                 '.oui-form-txt-icon:hover{background-position-y:-30px;text-decoration:none;}',
 
-                '.oui-form-icon-del{background-position:0 0;}',
-                '.oui-form-icon-del:hover{background-position:0 -30px;}',
+                '.oui-form-icon-del{background-position:0 center;}',
+                '.oui-form-icon-del:hover{background-position:-30px center;}',
 
-                '.oui-form-icon-pwd{background-position:-30px 0;}',
-                '.oui-form-icon-pwd:hover{background-position:-30px -30px;}',
-                '.oui-form-icon-txt{background-position:-60px 0;}',
-                '.oui-form-icon-txt:hover{background-position:-60px -30px;}',
+                '.oui-form-icon-right{background-position:-60 center;}',
+                '.oui-form-icon-right:hover{background-position:-90px center;}',
 
-                '.oui-form-icon-query{background-position:-90px 0;}',
-                '.oui-form-icon-query:hover{background-position:-90px -30px;}',
+                '.oui-form-icon-disable{background-position:-120 center;}',
+                '.oui-form-icon-disable:hover{background-position:-150px center;}',
+
+                '.oui-form-icon-query{background-position:-180px center;}',
+                '.oui-form-icon-query:hover{background-position:-210px center;}',
+
+                '.oui-form-icon-pwd{background-position:-240px center;}',
+                '.oui-form-icon-pwd:hover{background-position:-270px center;}',
+                '.oui-form-icon-txt{background-position:-300px center;}',
+                '.oui-form-icon-txt:hover{background-position:-330px center;}',
 
                 '.oui-form-icon-len,.oui-form-icon-unit,.oui-form-icon-post,.oui-form-icon-btn{',
                 'width:30px;cursor:default;',
-                'border-left:solid 1px #ddd;background:#fff;opacity:0.9;',
+                'border-left:solid 1px #ddd;background:transparent;opacity:0.9;',
                 //'border-top-right-radius:4px;border-bottom-right-radius:4px;',
                 '}',
                 '.oui-form-icon-btn{cursor:pointer;background:#eee;color:#000;border:solid 1px #ccc;border-box:box-sizing;text-decoration:none;}',
@@ -1557,7 +1563,7 @@
                 '.oui-form-icon-btn-primary:hover{background:#286090;border:solid 1px #204d74;color:#fff;}',
 
                 '.oui-form-icon-pre,.oui-form-icon-lbl{width:30px;cursor:default;',
-                'border-right:solid 1px #ddd;background:#fff;opacity:0.9;}',
+                'border-right:solid 1px #ddd;background:transparent;opacity:0.9;}',
 
                 'input[type="password"]::-webkit-credentials-cramble-button{appearance: none;}',
                 'input[type="password"]::-ms-reveal{display: none;}',
@@ -2205,6 +2211,7 @@
                         return false;
                     }
                     var css = [
+                        'background-color:transparent;',
                         'background-image:url("', opt.path, '");',
                         'background-repeat:no-repeat;background-position:', opt.left, 'px center;',
                         'padding-left:', (opt.width || 20) + opt.left + (opt.right || opt.left), 'px;'
@@ -2220,7 +2227,7 @@
                 function _create(elem, key, arg, idx) {
                     $.createElement('A', '', function (el) {
                         var zIndex = parseInt('0' + _getElementStyle(elem, 'z-index'), 10) + 1,
-                            ps = $.getOffset(elem), iconSize = Config.ICON_WIDTH, h = ps.height - 2, css = [],
+                            ps = $.getOffset(elem), iconSize = Config.ICON_WIDTH, h = ps.height, css = [],
                             func = null, w = Config.ICON_WIDTH, txt = '', color = '', bg = '',
                             primary = false, follow = false;
 
@@ -2237,7 +2244,7 @@
                             }
                             txt = arg.text || arg.txt;
                             color = arg.color || '';
-                            bg = arg.background || arg.bg || '';
+                            bg = arg.background || arg.bg || 'transparent';
                             primary = $.isBoolean(arg.primary, false);
                             follow = $.isBoolean(arg.follow, false);
                         } else if ($.isString(arg)) {
@@ -2260,7 +2267,7 @@
                             if (key.indexOf('btn') > -1) {
                                 if (follow) {
                                     css.push([
-                                        'background-color:', bg || _getElementStyle(elem, 'backgroundColor'), ';',
+                                        'background-color:', bg, ';',
                                         'color:', color || _getElementStyle(elem, 'color'), ';'
                                     ].join(''));
                                 } else {
@@ -2283,7 +2290,7 @@
                                     css.push(['border-left:', _getElementStyle(elem, 'borderLeft'), ';border-right:none;'].join(''));
                                 }
                                 css.push([
-                                    'background-color:', bg || _getElementStyle(elem, 'backgroundColor'), ';',
+                                    'background-color:', bg, ';',
                                     'color:', color || _getElementStyle(elem, 'color'), ';'
                                 ].join(''));
                             }
@@ -2435,14 +2442,14 @@
 
                     if (d.icon.parent) {
                         selfW = d.icon.offsetWidth || parseInt('0' + d.icon.style.width, 10);
-                        d.icon.style.top = (key.indexOf('btn') < 0 ? 1 : 0) + offset + 'px';
+                        d.icon.style.top = (key.indexOf('btn') < 0 ? 0 : 0) + offset + 'px';
                         if (['pre', 'lbl'].indexOf(key) > -1) {
                             d.icon.style.left = 1 + 'px';
                         } else {
                             d.icon.style.right = (offsetWidth - selfW) + 'px';
                         }
                     } else {
-                        d.icon.style.top = (ps.top + (key.indexOf('btn') < 0 ? 1 : 0) + offset) + 'px';
+                        d.icon.style.top = (ps.top + (key.indexOf('btn') < 0 ? 0 : 0) + offset) + 'px';
                         if (['pre', 'lbl'].indexOf(key) > -1) {
                             d.icon.style.left = ps.left + 1 + 'px';
                         } else {

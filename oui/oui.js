@@ -1691,7 +1691,6 @@
 // md5
 !function ($) {
     function _filter (string) {
-        console.log('md5:', string, typeof string);
         if (typeof string === 'string') {
             return string;
         }

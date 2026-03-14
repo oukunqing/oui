@@ -547,21 +547,21 @@ li.oui-ddl-item-disabled label.oui-ddl-label {
 }
 
 .oui-ddl-edit .btn-cancel {
-	width: 25px;
-	height: 25px;
-	top: 8px;
-	min-width: 25px;
+	width: 30px;
+	height: 30px;
+	top: 6x;
+	min-width: 30px;
 	border: none;
 	border-radius: none;
 	right: 56px;
 	opacity: 0.9;
 	z-index: 10;
-	background:#fff url("dropdownlist.png?1") no-repeat 0 0px;
+	background:transparent url("dropdownlist.png?12") no-repeat 0 center;
 }
 .oui-ddl-edit .btn-cancel:hover {	
 	border: none;
-	top: 9px;
-	background:#fff url("dropdownlist.png?1") no-repeat 0px -25px;
+	top: 7x;
+	background:transparent url("dropdownlist.png?12") no-repeat -30px center;
 }
 
 /*用于搜索*/
@@ -581,13 +581,13 @@ li.oui-ddl-item-disabled label.oui-ddl-label {
 .oui-ddl-panel .oui-ddl-search input,
 .oui-ddl-panel .oui-ddl-search .btn {
 	float: left;
-	margin: 4px 0 0 0;
-	height: 26px;
+	margin: 5px 0 0 0;
+	height: 30px;
 	outline: none;
 }
 
 .oui-ddl-panel .oui-ddl-search .btn {
-	width:25px;height:24px;
+	width:30px;height:30px;
 	position: absolute;
 	cursor: pointer;
 	top: 0px;
@@ -598,11 +598,10 @@ li.oui-ddl-item-disabled label.oui-ddl-label {
 	border-radius: 4px;
 }
 .oui-ddl-panel .oui-ddl-search .btn:hover {
+	margin: 5px 0 0 0;
 	text-decoration: none;
 	background-color: transparent;
 	border: none;
-	border-top:solid 1px #fff;
-	border-bottom:solid 1px #fff;
 }
 .oui-ddl-panel .oui-ddl-search .btn:focus {
 	outline: none;
@@ -612,18 +611,18 @@ li.oui-ddl-item-disabled label.oui-ddl-label {
 
 .oui-ddl-panel .oui-ddl-search .btn-search {
 	right: 7px;
-	background:transparent url("dropdownlist.png?2") no-repeat -25px 0px;
+	background:transparent url("dropdownlist.png?12") no-repeat -60px center;
 }
 .oui-ddl-panel .oui-ddl-search .btn-search:hover {
-	background-position-y: -25px;
+	background-position-x: -90px;
 }
 .oui-ddl-panel .oui-ddl-search .btn-cancel {
-	right: 32px;
+	right: 37px;
 	opacity: 0.9;
-	background:#fff url("dropdownlist.png?1") no-repeat 0 0px;
+	background:transparent url("dropdownlist.png?12") no-repeat 0 center;
 }
 .oui-ddl-panel .oui-ddl-search .btn-cancel:hover {
-	background:#fff url("dropdownlist.png?1") no-repeat 0px -25px;
+	background:transparent url("dropdownlist.png?12") no-repeat -30px center;
 }
 
 .oui-ddl-panel .oui-ddl-search .keywords {
