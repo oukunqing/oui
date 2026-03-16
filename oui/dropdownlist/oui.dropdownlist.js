@@ -880,8 +880,11 @@
 					$.cancelBubble(ev);
 					elem.focus();
 					var btn = ev.target, tag = btn.tagName, ac;
-					if (tag !== 'BUTTON') {
-						return false;
+
+					//若当前点击的是按钮的内容子元素，则冒泡到按钮
+					while(btn && tag !== 'BUTTON') {
+						btn = btn.parentNode;
+						tag = btn.tagName;
 					}
 					if ((ac = $.getAttribute(btn, 'ac')) === 'no') {
 						that.hide();
@@ -1021,11 +1024,11 @@
 					opt = that.options;
 
 				if (!this.isRepeat(that.id + '-mouseup')) {
-					$.addListener(that.box, 'mousedown', function(ev) {
+					$.addListener(that.box, 'mousedown,touchstart', function(ev) {
 						that.box.evMouseDown = true;
 					});
 
-					$.addListener(that.box, 'mouseup', function(ev) {
+					$.addListener(that.box, 'mouseup,touchend', function(ev) {
 						if (!that.box.evMouseDown) {
 							return false;
 						}
@@ -1644,6 +1647,30 @@
 					}
 				}
 				return this;
+			},
+			/*以下为开关组功能代码*/
+			buildSwitch: function (id, par) {
+				var elem;
+				if ($.isElement(id)) {
+					elem = id;
+					id = Factory.buildId(id);
+				} else if ($.isArrayLike(id)) {
+
+				} else if ($.isObject(id) && $.isUndefined(par)) {
+					par = id;
+					id = null;
+				} else if ($.isString(id, true)) {
+					par = $.extend({}, par, {id: id});
+				}
+				var opt = $.extend({
+					id: id,
+					element: elem
+				}, par), cache, group;
+
+				return group;
+			},
+			buildSwitchItems: function (group, options) {
+
 			}
 		};
 
@@ -3068,6 +3095,46 @@
 		}
 	});
 
+	/* 开关组 */
+	function SwitchGroup (options) {
+		let opt = $.extend({
+
+		}, options);
+
+		this.options = opt;
+
+		this.initial();
+	}
+
+	SwitchGroup.prototype = {
+		initial: function () {
+			let that = this;
+
+			Factory.buildSwitch(that.options);
+
+			return that;
+		},
+		update: function (options) {
+			let that = this;
+
+			return that;
+		},
+		get: function () {
+
+		},
+		set: function (values) {
+			let that = this;
+
+			return that;
+		}
+	};
+
+	$.extend({
+		switchgroup: function (id, par) {
+			return Factory.buildSwitch(id, par);
+		}
+	});
+
 	/* 定制功能，获取 */
 	$.addListener(window, 'load', function() {
 		let elements = document.querySelectorAll('select[data-mode="single"]');
@@ -3079,6 +3146,10 @@
 			$.dropdownlist(elements, { 
 				multi: true, layout: 'list', callbackLevel: 2, debounce: false, itemWidth: 'cell' 
 			});
+		}
+		elements = document.querySelectorAll('select[data-mode="switchgroup"]');
+		if (elements) {
+			$.switchgroup(elements, {});
 		}
 	});
 }(OUI);

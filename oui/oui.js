@@ -1901,7 +1901,12 @@
 
     $.extendNative(String.prototype, {
         md5: function (shorter) {
-            return $.md5(this, shorter);
+            return $.md5(this.toString(), shorter);
+        }
+    });
+    $.extendNative(Number.prototype, {
+        md5: function (shorter) {
+            return $.md5(this.toString(), shorter);
         }
     });
 }(OUI);
@@ -3158,6 +3163,9 @@
                 return s + (s ? ' ' : '') + className;
             }
             return s;
+        },
+        md5: function (shorter) {
+            $.md5(this.toString(), shorter);
         }
     }, 'String.prototype');
 
@@ -3425,6 +3433,9 @@
         inArray: function (numArray) {
             var arr = $.isArray(numArray) ? numArray : $.isNumber(numArray) ? [numArray] : [];
             return arr.length > 0 ? arr.indexOf(this) > -1 : false;
+        },
+        md5: function (shorter) {
+            $.md5(this.toString(), shorter);
         }
     }, 'Number.prototype');
 

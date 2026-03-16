@@ -756,3 +756,47 @@ li.oui-ddl-item-disabled label.oui-ddl-label {
 .oui-ddl-panel button.hide{
 	display:none;
 }
+
+.oui-switch-group {
+
+}
+
+.oui-switch-group ul,.oui-switch-group li {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+.oui-switch-group .item {
+
+}
+
+.oui-switch-group .item .bar {
+	width:44px;
+	height:24px;
+	background: #ddd;
+	border-radius: 12px;
+	overflow: hidden;
+	box-sizing: border-box;
+	position: relative;
+}
+
+.oui-switch-group .item .bar-open {
+	background: #409eff;
+}
+
+.oui-switch-group .item .bar .dot {
+	width:18px;
+	height: 18px;
+	border-radius: 9px;
+	background: #fff;
+	box-sizing: border-box;
+	overflow: hidden;
+	top: 3px;
+	left: 3px;
+}
+
+.oui-switch-group .item .bar-open .dot {
+	left: none;
+	right: 3px;
+}

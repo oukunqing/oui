@@ -1,0 +1,117 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>下拉菜单（多选）</title>
+	<link type="text/css" href="../oui/dropdownlist/skin/default/oui.dropdownlist.css" />
+	<style type="text/css">
+		
+		body {font-size: 14px;}
+		select {min-width:400px;height:32px;border:solid 1px #ccc; border-radius:5px;padding:0 5px;margin:0px;}
+		input {outline:none;padding:0 5px; border-radius:5px;min-width:400px;border:solid 1px #ccc;}
+		table {}
+		table td {padding:0 10px 10px 0;}
+		
+	</style>
+	<script type="text/javascript" src="../oui/oui.js"></script>
+	<script type="text/javascript" src="../oui/dropdownlist/oui.dropdownlist.js"></script>
+</head>
+<body style="background: #eee;">
+<br />
+<br />
+<ul class="oui-swtich-group">
+	<li class="item"><em class="bar"><i class="dot"></i></em><span>启用</span></li>
+	<li class="item"><em class="bar"><i class="dot"></i></em><span>禁用</span></li>
+</ul>
+<table cellpadding="0" cellspacing="0">
+	<tr>
+		<td><select id="ServerType1" style="border:solid 1px #f00;" onchange="print1(this);"></select></td>
+		<td><select id="ServerType2" style="" data-mode="single">
+			<option value="-1">请选择</option>
+			<option value="1">WEB服务WEB服务</option>
+			<option value="2">设备服务</option>
+			<option value="3">图片推送服务</option>
+			<option value="3">图片推送服务</option>
+			<option value="3">图片推送服务</option>
+			<option value="3">图片推送服务</option>
+			<option value="3">图片推送服务</option>
+			<option value="3">图片推送服务</option>
+		</select>
+		<td><select id="tree2" style=""></select></td>
+	</tr>
+</table>
+<br />
+<div style="height:500px;"></div>
+</body>
+</html>
+<script type="text/javascript" src="dropdownlist.json"></script>
+<script type="text/javascript">
+window.onload = function() {
+	
+
+	$.dropdownlist({
+		id: 'ServerType233',
+		items: [
+			
+			
+
+		],
+		layout: 'grid',
+		//boxWidth: 400,
+		boxWidth: 'follow',
+		//textWidth: 200,
+		itemWidth: 'cell',
+		columns: 2,
+		itemBorder: true,
+		//回调等级：0-选项实时回调，1-全选/反选等按钮事件回调，2-确定按钮事件回调
+		//submit: 0,
+        //callbackLevel: 0,
+        
+        //是否单选，默认多选
+        //multi: true,
+        multi: true,
+		title: '选择服务类型',
+		//按钮位置： left,center,right
+		buttonPosition: 'right',
+		callback: function (value, initial, data, ddl) {
+			$.console.log(ddl.id, '[callback]', ', value:', value, ', initial:', initial, ', data:', data);
+		}
+	});
+
+	window.setTimeout(function() {
+		$.dropdownlist({
+			id: 'ServerType2',
+			items: [
+				
+				{ id: 1, name: 'WEB服务WEB服务', desc: '' },
+				{ id: 2, name: '设备服务', desc: '' },
+				{ id: 3, name: '图片推送服务', desc: '', checked: true },
+				{ id: 4, name: '视频服务', desc: '' },
+				{ id: 5, name: '图片采集服务', desc: '' },
+				{ id: 6, name: '平台级联服务', desc: '' },
+				{ id: 7, name: '设备级联服务', desc: '' },
+			],
+			layout: 'grid',
+			//boxWidth: 400,
+			boxWidth: 'follow',
+			//textWidth: 200,
+			itemWidth: 'cell',
+			columns: 2,
+			itemBorder: true,
+			//回调等级：0-选项实时回调，1-全选/反选等按钮事件回调，2-确定按钮事件回调
+			//submit: 0,
+	        callbackLevel: 1,
+	        
+	        //是否单选，默认多选
+	        multi: true,
+			title: '选择服务类型',
+			//按钮位置： left,center,right
+			buttonPosition: 'right',
+			callback: function (value, initial, data, ddl) {
+				$.console.log(ddl.id, '[callback]', ', value:', value, ', initial:', initial, ', data:', data);
+			}
+		});
+	}, 4000);
+};
+
+</script>
