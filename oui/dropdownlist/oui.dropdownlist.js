@@ -11,7 +11,7 @@
 !function ($) {
     'use strict';
 
-	var SelfPath = $.getScriptSelfPath(true),
+	const SelfPath = $.getScriptSelfPath(true),
 		Config = {
 			FilePath: SelfPath,
         	FileName: 'oui.dropdownlist.',
@@ -98,9 +98,8 @@
 		KC = $.KEY_CODE, KCA = KC.Arrow, KCC = KC.Char, KCM = KC.Min,
 		Cache = {
 			ids: [],
-			lists: {},
-			events: {},
 			caches: {},
+			events: {},
 			search: {}
 		},
 		Factory = {
@@ -119,30 +118,30 @@
 			},
 			getCache: function (id) {
 				var key = this.buildKey(id),
-					obj = Cache.lists[key];
+					obj = Cache.caches[key];
 				return obj || null;
 			},
 			setCache: function (opt, ddl) {
 				var key = this.buildKey(opt.id);
-				Cache.lists[key] = {
+				Cache.caches[key] = {
 					elem: ddl.elem,
 					opt: opt,
 					ddl: ddl
 				};
 				Cache.ids.push({ key: key, id: opt.id });
 
-				return Cache.lists[key];
+				return Cache.caches[key];
 			},
 			getList: function (key) {
-				if (typeof Cache.lists[key] !== 'undefined') {
-					return Cache.lists[key]['ddl'];
+				if (typeof Cache.caches[key] !== 'undefined') {
+					return Cache.caches[key]['ddl'];
 				}
 				return null;
 			},
 			closeOther: function (ddl) {
-				for (var k in Cache.lists) {
+				for (var k in Cache.caches) {
 					if (k !== Factory.buildKey(ddl.id)) {
-						var obj = Cache.lists[k];
+						var obj = Cache.caches[k];
 						if (obj && obj.ddl && obj.ddl.box && obj.ddl.box.show) {
 							obj.ddl.hide();
 						}
@@ -1647,30 +1646,6 @@
 					}
 				}
 				return this;
-			},
-			/*以下为开关组功能代码*/
-			buildSwitch: function (id, par) {
-				var elem;
-				if ($.isElement(id)) {
-					elem = id;
-					id = Factory.buildId(id);
-				} else if ($.isArrayLike(id)) {
-
-				} else if ($.isObject(id) && $.isUndefined(par)) {
-					par = id;
-					id = null;
-				} else if ($.isString(id, true)) {
-					par = $.extend({}, par, {id: id});
-				}
-				var opt = $.extend({
-					id: id,
-					element: elem
-				}, par), cache, group;
-
-				return group;
-			},
-			buildSwitchItems: function (group, options) {
-
 			}
 		};
 
@@ -2108,7 +2083,8 @@
 
 			if (opt.select) {
 				that.elem.options.length = 0;
-				that.elem.options.add(new Option(opt.title || 'abcde', 'abc'));
+				//that.elem.options.add(new Option(opt.title || 'abcde', 'abc'));
+				that.elem.options.add(new Option(opt.title || '', ''));
 			} else {
 				that.text.value = opt.title || '';
 				if (opt.form || opt.anchor) {
@@ -3094,14 +3070,197 @@
 			return $.dropdownlist.value(elem, value, append);
 		}
 	});
+}(OUI);
 
-	/* 开关组 */
+/* 开关组 */
+!function ($) {
+    'use strict';
+
+	const Cache = {
+		ids: [],
+		caches: {},
+	}, Factory = {
+		setCache: function (opt, group) {
+			var key = 'switch-group-' + opt.id;
+			Cache.caches[key] = {
+				elem: group.elem,
+				opt: opt,
+				group: group
+			};
+			Cache.ids.push({ key: key, id: opt.id });
+
+			return Cache.caches[key];
+		},
+		getCache: function (id) {
+			var key = 'switch-group-' + id,
+				obj = Cache.caches[key];
+			return obj || null;
+		},		
+		getList: function (key) {
+			if (typeof Cache.caches[key] !== 'undefined') {
+				return Cache.caches[key]['ddl'];
+			}
+			return null;
+		},
+		getElementOptionConfig: function (elem) {
+			var options = [], arr = [], i;
+			if (!$.isElement(elem = $.toElement(elem))) {
+				return options;
+			}
+			if (elem.tagName === 'SELECT') {
+				arr = elem.options;
+				for (i = 0; i < arr.length; i++) {
+					options.push({val: arr[i].value, txt: arr[i].text});
+				}
+			} else {
+				arr = ($.getAttribute(elem, 'options') || '').split(/[,;\|]/);
+				for (i = 0; i < arr.length; i++) {
+					if (arr[i] !== '') {
+						if (arr[i].indexOf(':') > 0) {
+							var tmp = arr[i].split(':');
+							options.push({val: tmp[0], txt: tmp[1] || tmp[0]});
+						} else {
+							options.push({val: arr[i], txt: arr[i]});
+						}
+					}
+				}
+			}
+			return options;
+		}
+	};
+
+	$.extend(Factory, {
+		buildSwitch: function (id, par) {
+			var elem;
+			if ($.isElement(id)) {
+				elem = id;
+				id = Factory.buildId(id);
+			} else if ($.isArrayLike(id)) {
+
+			} else if ($.isObject(id) && $.isUndefined(par)) {
+				par = id;
+				id = null;
+			} else if ($.isString(id, true)) {
+				par = $.extend({}, par, {id: id});
+				elem = $.toElement(id);
+			}
+			var opt = $.extend({
+				id: id,
+				element: elem
+			}, par), cache, group;
+
+			opt.id = opt.id || (opt.element ? opt.element.id : '');
+
+			var arr = $.isArrayLike(opt.id) ? opt.id : $.isString(opt.id) ? opt.id.split(/[,;\|，]/) : opt.id.toString().split(/[,;\|，]/);
+			if (arr.length > 0) {
+				var list = [];
+				for (var i = 0; i < arr.length; i++) {
+					var id = arr[i], elem;
+					if ($.isElement(id)) {
+						elem = id;
+						id = elem.id || id;
+					}
+					var p = $.extend(opt, {id: id, element: elem});
+					if ((cache = Factory.getCache(id))) {
+						var op = Factory.checkOptions(opt);
+						cache.group.options = $.extend(cache.group.options, op);
+
+						if (typeof opt.items !== 'undefined') {
+							cache.group.update(cache.group.options);
+						}
+						list.push(cache.group);
+					} else {
+						Factory.setCache(p, (group = new SwitchGroup(p)));
+						list.push(group);
+					}
+					
+				}
+				return list.length <= 1 ? list[0] : list;
+			}
+			if ((cache = Factory.getCache(opt.id))) {
+				return cache.group;
+			}
+			return Factory.setCache(opt, (group = new SwitchGroup(opt))), group;
+		},
+		buildSwitchItems: function (group, options) {
+			let opt = group.options;
+			if (!opt.element) {
+				return this;
+			}
+			$.console.log('buildSwitchItems:', group, opt);
+			let id = 'switchgroup_box_' + opt.id, box = $I(id);
+			if (!box) {
+				$.createElement('DIV', id, function (elem) {
+					opt.element.parentNode.appendChild(elem);
+					elem.className = 'oui-switch-group';
+					box = elem;
+
+					group.box = box;
+				});
+			}
+			let html = [], items = Factory.getElementOptionConfig(opt.element);
+
+			for (let i = 0; i < items.length; i++) {
+				let dr = items[i];
+				html.push([
+					'<label class="item">',
+					'<input type="checkbox" value="', dr.val, '" />',
+					'<em class="bar"><i class="dot"></i></em>',
+					'<span>', dr.txt, '</span>',
+					'</label>'
+				].join(''));
+			}
+			opt.element.style.display = 'none';
+
+			box.innerHTML = html.join('');
+
+			Factory.setSwitchEvent(group);
+
+			return this;
+		},
+		setSwitchEvent: function(group) {
+			let elements = group.box.querySelectorAll('.item');
+			$.addListener(group.box, 'click', function(ev) {
+				$.cancelBubble(ev);
+				let elem = ev.target, tag = elem.tagName;
+				while(elem && tag !== 'LABEL') {
+					elem = elem.parentNode;
+					tag = elem.tagName;
+				}
+				elem.open = !elem.open ? true : false;
+				$.console.log('ev.target:', elem, tag);
+				$.setClass(elem, 'item-open', !elem.open);
+			});
+		}
+	});
+
+	function Node(par) {
+		this.initial(par);
+	}
+
+	Node.prototype = {
+		initial: function (par) {
+			let that = this;
+
+			that.id = par.id;
+			that.value = par.value || par.val;
+			that.code = par.code;
+			that.name = par.name || par.txt;
+
+			that.checked = par.checked || false;
+
+			return this;
+		}
+	};
+
 	function SwitchGroup (options) {
 		let opt = $.extend({
-
+			multi: false
 		}, options);
 
+		this.id = opt.id;
 		this.options = opt;
+		this.nodes = [];
 
 		this.initial();
 	}
@@ -3110,7 +3269,10 @@
 		initial: function () {
 			let that = this;
 
-			Factory.buildSwitch(that.options);
+			this.items = Factory.getElementOptionConfig(that.options.element);
+
+			Factory.buildSwitchItems(that);
+
 
 			return that;
 		},
@@ -3134,6 +3296,10 @@
 			return Factory.buildSwitch(id, par);
 		}
 	});
+}(OUI);
+
+!function ($) {
+    'use strict';
 
 	/* 定制功能，获取 */
 	$.addListener(window, 'load', function() {
