@@ -1698,7 +1698,7 @@
 			}
 			$.setClass(that.item, 'cur', checked);
 			that.checked = checked;
-			
+
 			var multi = clickNode ? clickNode.multi : true,
 				input = that.input.id ? document.querySelector('#' + that.input.id) : that.input;
 
@@ -3073,6 +3073,7 @@
 }(OUI);
 
 /* 开关组 */
+/*
 !function ($) {
     'use strict';
 
@@ -3204,7 +3205,7 @@
 				let dr = items[i];
 				html.push([
 					'<label class="item">',
-					'<input type="checkbox" value="', dr.val, '" />',
+					'<input type="checkbox" value="', dr.val, '" name="switch_group_node_', opt.id, '" />',
 					'<em class="bar"><i class="dot"></i></em>',
 					'<span>', dr.txt, '</span>',
 					'</label>'
@@ -3228,6 +3229,9 @@
 					tag = elem.tagName;
 				}
 				elem.open = !elem.open ? true : false;
+				if (elem.open) {
+
+				}
 				$.console.log('ev.target:', elem, tag);
 				$.setClass(elem, 'item-open', !elem.open);
 			});
@@ -3297,6 +3301,7 @@
 		}
 	});
 }(OUI);
+*/
 
 !function ($) {
     'use strict';
@@ -3315,7 +3320,11 @@
 		}
 		elements = document.querySelectorAll('select[data-mode="switchgroup"]');
 		if (elements) {
-			$.switchgroup(elements, {});
+			if (typeof $.switchgroup !== 'undefined') {
+				$.switchgroup(elements, {});
+			} else {
+				$.singlelist(elements);
+			}
 		}
 	});
 }(OUI);

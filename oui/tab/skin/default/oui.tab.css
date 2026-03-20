@@ -1,5 +1,7 @@
 .oui-tabs {
     height: 32px;
+    min-height: 32px;
+    min-width: 0;
     padding: 0;
     margin: 0;
     border: none 0;
@@ -13,6 +15,8 @@
 
 .oui-tabs .tab-box {  
     height: 30px;
+    min-height: 30px;
+    min-width: 0;
     padding: 0;
     border: none 0;
     margin: 0 3px;
@@ -26,6 +30,8 @@
 .oui-tabs .tab-switch {
     width: 16px;
     height: 30px;
+    min-height: 30px;
+    min-width: 0;
     display: inline-block;
     float: left;
     padding: 0;
@@ -64,6 +70,8 @@
 .oui-tabs .tab-switch .arrow {
     width: 0;
     height: 0;
+    min-height: 0;
+    min-width: 0;
     margin: 50% 0;
     padding: 0;
     font-size: 12px;
@@ -92,6 +100,7 @@
 
 .oui-tabs-sep {
     height: 35px;
+    min-height: 0; min-width: 0;
     border-bottom: none;
 }
 
@@ -104,6 +113,7 @@
     z-index: 10000;
     height: 4px;
     width: 100%;
+    min-height: 0; min-width: 0;
     margin: 0;
     padding: 0;
     background: #fff;
@@ -126,6 +136,7 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    min-height: 0; min-width: 0;
     position: absolute;
     bottom: 0;
     white-space: nowrap;
@@ -140,6 +151,7 @@
     list-style: none;
     margin: 0;
     padding: 0;
+    min-height: 0; min-width: 0;
 }
 
 .oui-tabs .tab-item {
@@ -155,6 +167,7 @@
     margin: 0 3px 0 0;
     padding: 0;
     height: 30px;
+    min-height: 0; min-width: 0;
     /*width: auto;*/
     max-width: 240px;
     overflow: hidden;
@@ -186,6 +199,7 @@
 .oui-tabs .tab-item .tab-icon {
     width: 20px;
     height: 20px;
+    min-height: 0; min-width: 0;
     float: left;
     display: inline-block;
     border: none;
@@ -208,6 +222,7 @@
     display: inline-block;
     float: left;
     padding: 0 10px;
+    min-height: 0; min-width: 0;
     margin: 0;
     border: none 0;
     box-sizing: border-box;
@@ -254,6 +269,7 @@
     padding: 0 0 0;
     width: 17px;
     height: 17px;
+    min-height: 0; min-width: 0;
     line-height: 18px;
     border: none 0;
     box-sizing: border-box;
@@ -271,6 +287,7 @@
 .oui-tabs-contents {
     margin: 0;
     padding: 0;
+    min-height: 0; min-width: 0;
     display: block;
     background: #fff;
     box-sizing: border-box;
@@ -287,6 +304,7 @@
 
 .oui-tabs-contents .tab-iframe {
     width: 100%;
+    min-height: 0; min-width: 0;
     padding: 0;
     margin: 0;
     box-sizing: border-box;
@@ -297,6 +315,7 @@
 .oui-tabs-contents .tab-loading {
     padding: 5px 10px;
     margin: 5px;
+    min-height: 0; min-width: 0;
     border: solid 1px #ddd;
     background: #fff;
     z-index: 1001;
@@ -324,6 +343,7 @@
     background: #fff;
     margin: 0;
     padding: 0;
+    min-height: 0; min-width: 0;
     /*box-shadow: 5px 5px 2px 0 rgba(0,0,0,.32);*/
     box-shadow: 4px 4px 4px -4px #ccc;
     border: solid 1px #dadce0;
@@ -333,6 +353,7 @@
 .oui-tabs-context-menu .cmenu-item {
     height: 28px;
     line-height: 28px;
+    min-height: 0; min-width: 0;
     display: block;
     text-align: left;
     margin: 4px 4px;
@@ -375,4 +396,5 @@
     background: #e8eaed;
     font-size: 1px;
     height: 1px;
+    min-height: 0; min-width: 0;
 }

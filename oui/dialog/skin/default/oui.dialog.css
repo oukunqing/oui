@@ -1,6 +1,7 @@
 
 .oui-dialog-shade {
     width: 100%; height: 100%;
+    min-height: 0;min-width: 0;
     position: fixed; top: 0; left: 0;
     margin: 0; padding: 0;
     background: #909090; opacity: 0.2;
@@ -9,6 +10,7 @@
 
 .oui-dialog-container {
     width: 100%; height: 100%;
+    min-height: 0;min-width: 0;
     position: fixed; top: 0; left: 0; right: 0; bottom: 0;
     margin: 0; padding: 0;
     background: transparent;
@@ -22,6 +24,7 @@
     padding: 0px; 
     margin: 0px;
     /*width: auto; */
+    min-height: 0;min-width: 0;
     position: absolute;
     border: solid 1px #ddd;
     background: #fff;
@@ -41,7 +44,8 @@
 }
 
 .oui-dialog-max {
-    width: 100%; height: 100%; 
+    width: 100%; height: 100%;
+    min-height: 0;min-width: 0;
     border-radius: 0px;
     box-sizing: border-box;
     top: 0; left: 0;
@@ -93,6 +97,8 @@
     border: none;
     width: 100%;
     height: 32px;
+    min-height: 32px;
+    min-width: 0;
     max-height: 50px;
     /*border-bottom: solid 1px #ddd;*/
     box-sizing: border-box;
@@ -116,6 +122,8 @@
     padding: 0;
     width: auto;
     height: 32px;
+    min-height: 32px;
+    min-width: 0;
     line-height: 30px;
     text-indent: 6px;
     /*font-weight: bold;*/
@@ -154,6 +162,8 @@
     float: left;
     width: auto;
     height: 32px;
+    min-height: 32px;
+    min-width: 0;
     line-height: 30px;
     font-size: 14px;
     text-align: left;
@@ -162,6 +172,8 @@
 
 .oui-dialog .dialog-head .dialog-logo {
     width: 32px; height: 32px;
+    min-height: 32px;
+    min-width: 32px;
     margin: 0; padding: 0;
     border: none;
     box-sizing: content-box;
@@ -177,6 +189,8 @@
 .oui-dialog .dialog-head .dialog-timing {
     margin: 0; 
     height: 32px;
+    min-height: 32px;
+    min-width: 0;
     padding: 0 5px;
     font-size: 14px;
     line-height: 30px;
@@ -207,6 +221,7 @@
 
     cursor: pointer;
     width: 32px; height: 32px;
+    min-height: 32px;min-width: 32px;
     display: inline-block;
     margin: 0; padding: 0;
     box-sizing: border-box;
@@ -271,6 +286,7 @@
 
     cursor: pointer;
     width: 20px; height: 20px;
+    min-height: 20px;min-width: 20px;
     display: inline-block;
     margin: 3px 2px 0 5px; padding: 0;
     box-sizing: content-box;
@@ -282,6 +298,7 @@
     border: none 0;
     padding: 6px 8px; margin: 0px;
     line-height: 24px;
+    min-width: 0;min-width: 0;
     text-align: left;
     box-sizing: border-box;
     text-decoration: none;
@@ -291,13 +308,14 @@
     padding-left: 45px;
     background-color: transparent;
     min-height: 41px;
+    min-width: 0;
     line-height: 28px;
 }
 
 .oui-dialog .dialog-body .dialog-icon {
     border: none 0;
-    width: 32px;
-    height: 32px;
+    width: 32px;height: 32px;
+    min-height: 32px;min-width: 32px;
     position: absolute;
     left: 5px; top: 5px;
     display: block;
@@ -428,6 +446,7 @@
     box-sizing: border-box;
     clear:both; overflow: hidden;
     width: 100%;
+    min-height: 0; min-width: 0;
     height: auto;
     max-height: 50px;
 
@@ -444,6 +463,7 @@
     text-align: right;
     margin: 6px 4px 4px;
     padding: 0;
+    min-height: 0; min-width: 0;
 
     -webkit-touch-callout: none;
     -webkit-user-select: none;
@@ -462,6 +482,7 @@
     cursor: pointer;
     padding: 0 20px;
     height: 30px;
+    min-height: 30px;min-width: 0;
     font-size: 14px;
     line-height: 1.8em;
     line-height: 28px;
@@ -564,6 +585,8 @@
 .oui-dialog .drag-switch {
     background: transparent;
     margin: 0; padding: 0; 
+    min-height: 0;min-width: 0;
+    border: none 0;
     position: absolute;
     box-sizing: border-box;
     display: inline-block;
@@ -579,12 +602,14 @@
     cursor: ew-resize;
 }
 
-.oui-dialog .top-switch,.oui-dialog .left-switch{
+.oui-dialog .top-switch,.oui-dialog .left-switch {
     top: 0; left: 0;
+    right: unset;bottom: unset;
 }
 
 .oui-dialog .bottom-switch,.oui-dialog .right-switch {
     bottom: 0; right: 0;
+    top: unset;left: unset;
 }
 
 .oui-dialog .top-left-switch,.oui-dialog .top-right-switch,

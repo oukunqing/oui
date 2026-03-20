@@ -7,6 +7,7 @@
     border: none 0 #ccc;
     margin: 0;
     padding: 2px 5px;
+    min-height: 0;min-width: 0;
 
     /*禁止选中内容*/
     moz-user-select: -moz-none;
@@ -24,10 +25,12 @@
 	font-weight: normal;
     color: #000;
     background-color: transparent;
+    min-height: 0;min-width: 0;
 }
 
 .oui-pagination .left, .oui-pagination .label {
 	width: auto;
+    min-height: 0;min-width: 0;
     float: left;
 	color: #000;
 	border: none 0;
@@ -46,11 +49,11 @@
 
 .oui-pagination ul,.oui-pagination li {
     margin: 0; padding: 0; float: left; list-style: normal; display: inline-table;
-    background-color: transparent;
+    background-color: transparent;min-height: 0;min-width: 0;box-sizing: border-box;
 }
 
 .oui-pagination a,.oui-pagination input,.oui-pagination button,.oui-pagination select {
-    font-family: Arial,宋体; outline: none;
+    font-family: Arial,宋体; outline: none;min-height: 0;min-width: 0;
     margin: 0; padding: 0; float: left; height: 28px; font-size: 14px; font-weight: normal; text-align: center; 
     border-radius: 5px 5px 5px 5px; box-sizing: border-box; background-image: none; background-color: transparent;    
     border: 1px solid #ccc; color: #000; background: #fff; white-space: nowrap; vertical-align: middle; display: inline-block;
@@ -216,7 +219,7 @@
 .oui-pagination .default { }
 .oui-pagination .default input.text { border:solid 1px #66afe9; }
 .oui-pagination .default input.text:focus {background: #eff7ff; }
-.oui-pagination .default .select { border:solid 1px #66afe9;color:#f00; }
+.oui-pagination .default .select { border:solid 1px #66afe9; }
 .oui-pagination .default a.link { border: solid 1px #66afe9; }
 .oui-pagination .default a.link:hover { background: #e8f5fe;color: #000; }
 .oui-pagination .default a.cur {background: #e8f5fe;color: #000; }

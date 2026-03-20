@@ -9,6 +9,15 @@ input {width:400px; height: 32px; font-size:14px; border:solid 1px #ccc; box-siz
 select{width:412px; height:34px;border:solid 1px #ccc;margin:0; padding: 0 8px;border-radius:4px; box-sizing: border-box;}
 /*select:focus{border:solid 1px #00f;}*/
 button {width:120px;height:30px;}
+
+
+        a {min-height:60px;}
+        li {min-height:60px;}
+        li a {min-height:60px;min-width: 400px;border:soild 2px #f00;}
+        .keywords {min-height: 100px;margin: 50px;}
+        .btn {min-height: 50px;}
+        .btn-cancel:hover {min-height: 100px;}
+        .item-body {min-height:60px;min-width: 500px;border: solid 5px #f00;}
 </style>
 </head>
 <body>
@@ -237,7 +246,7 @@ button {width:120px;height:30px;}
             //内容长度固定为15个字节
             //valLen: 10,
             //icon: { 
-                btn: {text:'设置',width:40, primary: false, func:function() { alert('设置'); } },
+                btn: {text:'设置',width:40, primary: true, func:function() { alert('设置'); } },
                 unit: '秒', 
                 lbl: {text:'时长', width:40, color: '#f00' }, 
                 del: function(elem) {

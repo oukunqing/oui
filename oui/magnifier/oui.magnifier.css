@@ -6,6 +6,7 @@
     top: 0;
     right: 0;
     opacity: 0.98;
+    min-height: 0;min-width: 0;
     border: solid 1px #4285f4;
     box-sizing: border-box;
     box-shadow: 

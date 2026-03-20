@@ -8,6 +8,7 @@
     margin: 0;
     padding: 0;
     background: transparent;
+    min-height: 0;min-width: 0;
 }
 .oui-picbox-status {
     position: absolute;
@@ -15,6 +16,7 @@
     left: 0;
     bottom: 0;
     height: 24px;
+    min-height: 0;min-width: 0;
     border: none;
     margin: 0;
     padding: 0;
@@ -32,7 +34,7 @@
     z-index: 10001;
     left: 0;
     top: 0;
-    min-height: 24px;
+    min-height: 24px;min-width: 0;
     border: none;
     margin: 0;
     padding: 0;
@@ -47,7 +49,8 @@
 }
 .oui-picbox-title a {
     margin: 0;
-    position: 0;
+    padding: 0;
+    min-height: 0;min-width: 0;
     border: none;
     font-size: 14px;
     text-decoration: none;
@@ -66,6 +69,7 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    min-height: 0;min-width: 0;
     display: block;
     z-index: 1000;
     cursor: default;
@@ -79,6 +83,7 @@
     background-color: transparent;
     margin: 0;
     padding: 0;
+    min-height: 0;min-width: 0;
     z-index: 1010;
 }
 .oui-picbox-range-panel {
@@ -86,6 +91,7 @@
     opacity: 0.25;
     margin: 0;
     padding: 0;
+    min-height: 0;min-width: 0;
     border: none 0;
     display: block;
     width: 100%;
@@ -95,6 +101,7 @@
 .oui-picbox-magnifier {
     margin: 0;
     padding: 0;
+    min-height: 0;min-width: 0;
     position:absolute;
     overflow:hidden;
     top: 0;

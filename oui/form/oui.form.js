@@ -1509,7 +1509,7 @@
                 '.input-opt-ul{margin:0;padding:1px 0;border:none;background:transparent;}',
                 '.input-opt-ul i{font-style:normal;color:#ccc;display:inline-block;text-align:right;',
                 ' border:none;margin:0 7px 0 0;padding:0;font-size:14px;}',
-                '.input-opt-ul li{margin:0 1px;list-style:none;line-height:30px;height:30px;overflow:hidden;font-size:14px;',
+                '.input-opt-ul li{margin:0 1px;list-style:none;line-height:30px;height:30px;min-height:30px;min-width:0;overflow:hidden;font-size:14px;',
                 '   border:none;cursor:default;}',
                 '.input-opt-ul li:last-child{border-bottom:none;}',
                 '.input-opt-ul li:hover,.input-opt-ul li.cur:hover{background:#f5f5f5;color:#000;}',
@@ -1529,9 +1529,9 @@
                 '.oui-input-parent-div{margin:0;padding:0;border:none;overflow:hidden;border-radius:0;border-box:box-sizing;position:relative;}',
                 '.oui-form-txt-icon{cursor:pointer;position:absolute;border:none;overflow:hidden;',
                 'box-sizing:border-box;text-align:center;font-size:14px;font-family:Arial,宋体;font-weight:normal;',
-                'width:30px;height:30px;color:#999;margin:0;padding:0;text-decoration:none;',
+                'width:30px;height:30px;min-width:30px;min-height:30px;color:#999;margin:0;padding:0;text-decoration:none;',
                 '-moz-user-select: none;-khtml-user-select: none;user-select: none;-ms-user-select: none;',
-                'background:transparent url("', FileDir, 'form-icon.png?11") no-repeat 0 0;}',
+                'background:transparent url("', FileDir, 'form-icon.png?123") no-repeat 0 0;}',
 
                 '.oui-form-txt-icon:hover{background-position-y:-30px;text-decoration:none;}',
 
@@ -1560,7 +1560,7 @@
                 '.oui-form-icon-txt:hover{background-position:-390px center;}',
 
                 '.oui-form-icon-len,.oui-form-icon-unit,.oui-form-icon-post,.oui-form-icon-btn{',
-                'width:30px;cursor:default;',
+                'width:30px;min-width:0;min-height:0;cursor:default;',
                 'border-left:solid 1px #ddd;background:transparent;opacity:0.9;',
                 //'border-top-right-radius:4px;border-bottom-right-radius:4px;',
                 '}',
@@ -1569,8 +1569,8 @@
                 '.oui-form-icon-btn-primary{cursor:pointer;background:#337ab7;color:#fff;border:solid 1px #2e6da4;border-box:box-sizing;text-decoration:none;}',
                 '.oui-form-icon-btn-primary:hover{background:#286090;border:solid 1px #204d74;color:#fff;}',
 
-                '.oui-form-icon-pre,.oui-form-icon-lbl{width:30px;cursor:default;',
-                'border-right:solid 1px #ddd;background:transparent;opacity:0.9;}',
+                '.oui-form-icon-pre,.oui-form-icon-lbl{width:30px;min-width:0;min-height:0;cursor:default;',
+                'border:solid 1px #ddd;background:transparent;opacity:0.9;}',
 
                 'input[type="password"]::-webkit-credentials-cramble-button{appearance: none;}',
                 'input[type="password"]::-ms-reveal{display: none;}',
@@ -2255,7 +2255,7 @@
                             }
                             txt = arg.text || arg.txt;
                             color = arg.color || '';
-                            bg = arg.background || arg.bg || 'transparent';
+                            bg = arg.background || arg.bg || '';
                             primary = $.isBoolean(arg.primary, false);
                             follow = $.isBoolean(arg.follow, false);
                         } else if ($.isString(arg)) {

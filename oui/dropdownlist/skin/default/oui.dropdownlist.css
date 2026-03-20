@@ -235,7 +235,6 @@ input.oui-ddl-chb {
 	float: left;
 	display: inline-block;
     border: solid 1px #eee;
-    min-width: 14px;
     width: 14px;
     height: 14px;
 	min-width: 14px;
@@ -806,8 +805,8 @@ li.oui-ddl-item-disabled label.oui-ddl-label {
 }
 
 .oui-switch-group .item .bar {
-	width:44px;
-	height:24px;
+	width:20px;
+	height:20px;
 	display: block;
 	float:left;
 	cursor: pointer;
@@ -823,8 +822,8 @@ li.oui-ddl-item-disabled label.oui-ddl-label {
 }
 
 .oui-switch-group .item .bar .dot {
-	width:18px;
-	height: 18px;
+	width:14px;
+	height: 14px;
 	display: block;
 	border-radius: 9px;
 	background: #fff;

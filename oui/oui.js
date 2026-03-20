@@ -6349,6 +6349,107 @@
             }
             return html.join('');
         },
+        //$.buildIntervalOptions([1,2,3,4,5,90,120,300], 'ms');
+        //$.buildIntervalOptions(1,15,'MS');
+        //$.buildIntervalOptions('1-5,8,9,12-20,120', 'ms');
+        //$.buildIntervalOptions([5,10,20,50,100,200,300,500,3000,75000,90001,120000,300000],'MS');
+        //$.buildIntervalOptions([1,2,3,4,5,91,120,300,1800,7200], 'ms');
+        //$.buildIntervalOptions([5,10,20,50,100,200,300,500],'MS').concat($.buildIntervalOptions([1,2,3,4,5,91,120,300], 'ms'));
+        //$.buildIntervalOptions('1-5,8,9,12-20,120', 'ms');
+        //$.buildIntervalOptions('1-5,8,9,12-20,120', 'mS');
+        //$.buildIntervalOptions('1-5,8,9,12-20,120', 's');
+        //$.buildIntervalOptions('1-5,8,9,12-20,120', 'S');
+        //$.buildIntervalOptions('1-5,8,9,12-20,120');
+        //$.buildTimeOptions
+        //输出参数：[[],[]] 或 [{},{}]
+        buildIntervalOptions = function (options) {
+            var list = [], i, c, val, txt, 
+                args = arguments, obj = false,
+                // 最后1个参数：MS,Ms,ms,mS,S,s等。若最后为.(点) 则表示输出结构数组
+                /*
+                MS      - 表示传入的参数以毫秒为单位
+                Ms      - 表示传入的参数以毫秒为单位，输出参数值为毫秒，显示单位锁定为毫秒
+                ms      - 表示传入的参数以秒为单位，输出参数值转换为毫秒，显示单位为秒
+                mS      - 表示传入的参数以秒为单位，输出参数值转换为毫秒，显示单位锁定为秒
+                S       - 表示传入的参数以秒为单位，输出参数值为秒，显示单位锁定为秒
+                s       - 表示传入的参数以秒为单位，输出参数值为秒，显示单位为秒
+                        - 其余情况同s的规则
+                */
+                par = args[args.length - 1];
+
+            if ($.isString(par)) {
+                if (par.toLowerCase().endsWith('.')) {
+                    par = par.substr(0, par.length - 1);
+                    console.log('par:', par);
+                    obj = true;
+                }
+            } else {
+                par = '';
+            }
+
+            var mul = ['ms', 'mS'].indexOf(par) > -1 ? 1000 : 1,
+                ms = ['MS', 'Ms'].indexOf(par) > -1, 
+                fixed = ['Ms', 'mS', 'S'].indexOf(par) > -1;
+
+            if ($.isString(options, true)) {
+                options = options.expandNumbers(true);
+            }
+
+            if ($.isArray(options)) {
+                c = options.length;
+                for (i = 0; i < c; i++) {
+                    val = options[i] * mul;
+                    txt = _getText(ms, mul, val, fixed);
+                    list.push(obj ? { val: val, txt: txt } : [val, txt]);
+                }
+            } else if ($.isNumber(options) && $.isNumber(args[1])) {
+                i = options;
+                c = args[1];
+                for (i; i <= c; i++) {
+                    val = i * mul;
+                    txt = _getText(ms, mul, val, fixed);
+                    list.push(obj ? { val: val, txt: txt } : [val, txt]);
+                }
+            }
+
+            function _getText (ms, mul, val, fixed) {
+                let num = val / mul, unit = '秒', minute = 60;
+                if (ms) {
+                    unit = '毫秒';
+                    if (!fixed && num >= 1000) {
+                        minute *= 1000;
+                        if (!(num % minute)) {
+                            num /= minute;
+                            unit = '分钟';
+                        } else if (num > minute) {
+                            let m = parseInt(num / minute, 10);
+                            num -= m * minute;
+                            let s = parseInt(num / 1000, 10);
+                            num -= s * 1000;
+                            return m + '分' + s + '秒' + (num ? num + '毫秒' : '');
+                        } else if (!(num % 1000)) {
+                            num /= 1000;
+                            unit = '毫秒';
+                        }
+                    }
+                } else if (!fixed && num >= minute) {
+                    if (!(num % minute)) {
+                        num /= minute;
+                        unit = '分钟';
+                    } else {
+                        let m = parseInt(num / minute, 10);
+                        num -= m * minute;
+                        return m + '分' + num + '秒';
+                    }
+                } else if (num < 1 || (!fixed && parseInt(num, 10) < num)) {
+                    num *= mul;
+                    unit = '毫秒';
+                }
+                return num + unit;
+            }
+
+            return list;
+        },
         buildNumbers = function (list, minVal, maxVal, stepVal) {
             var arr = [];
             if ($.isNumber(list)) {
@@ -6783,6 +6884,8 @@
         buildOption: buildOption,
         buildOptions: buildOptions,
         buildNumbers: buildNumbers,
+        buildIntervalOptions: buildIntervalOptions,
+        buildTimeOptions: buildIntervalOptions,
         clearEmptyItem: clearEmptyItem,
         fullScreen: fullScreen,
         exitFullScreen: exitFullScreen,
