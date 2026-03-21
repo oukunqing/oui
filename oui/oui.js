@@ -6380,7 +6380,6 @@
             if ($.isString(par)) {
                 if (par.toLowerCase().endsWith('.')) {
                     par = par.substr(0, par.length - 1);
-                    console.log('par:', par);
                     obj = true;
                 }
             } else {
@@ -6412,38 +6411,63 @@
                 }
             }
 
+            function _build (list, cfg, num) {
+                let d, h, m, s;
+                if (num >= cfg.days) {
+                    d = parseInt(num.div(cfg.days), 10);
+                    num = num.sub(d * cfg.days);
+                    list.push(d + '天');
+                }
+                if (num >= cfg.hours) {
+                    h = parseInt(num.div(cfg.hours), 10);
+                    num = num.sub(h * cfg.hours);
+                    list.push(h + '小时');
+                }
+                if (num >= cfg.minutes) {
+                    m = parseInt(num.div(cfg.minutes), 10);
+                    num = num.sub(m * cfg.minutes);
+                    list.push(m + '分' + (!num ? '钟' : ''));
+                }
+                if (num >= cfg.seconds) {
+                    s = parseInt(num.div(cfg.seconds), 10);
+                    num = num.sub(s * cfg.seconds);
+                    list.push(s + '秒');
+                }
+                return num;
+            }
+
             function _getText (ms, mul, val, fixed) {
-                let num = val / mul, unit = '秒', minute = 60;
+                let num = val.div(mul), unit = '秒', cfg = {
+                    seconds: 1,
+                    minutes: 60, 
+                    hours: 60 * 60, 
+                    days: 60 * 60 * 24
+                }, list = [];
+
                 if (ms) {
                     unit = '毫秒';
                     if (!fixed && num >= 1000) {
-                        minute *= 1000;
-                        if (!(num % minute)) {
-                            num /= minute;
-                            unit = '分钟';
-                        } else if (num > minute) {
-                            let m = parseInt(num / minute, 10);
-                            num -= m * minute;
-                            let s = parseInt(num / 1000, 10);
-                            num -= s * 1000;
-                            return m + '分' + s + '秒' + (num ? num + '毫秒' : '');
-                        } else if (!(num % 1000)) {
-                            num /= 1000;
-                            unit = '毫秒';
+                        cfg.seconds *= 1000;
+                        cfg.minutes *= 1000;
+                        cfg.hours *= 1000;
+                        cfg.days *= 1000;
+
+                        num = _build(list, cfg, num);
+
+                        if (num > 0) {
+                            list.push(num + '毫秒');
                         }
+                        return list.join('');
                     }
-                } else if (!fixed && num >= minute) {
-                    if (!(num % minute)) {
-                        num /= minute;
-                        unit = '分钟';
-                    } else {
-                        let m = parseInt(num / minute, 10);
-                        num -= m * minute;
-                        return m + '分' + num + '秒';
+                } else if (!fixed && num >= cfg.seconds) {
+                    num = _build(list, cfg, num);
+                    if (num > 0) {
+                        list.push(num * 1000 + '毫秒');
                     }
-                } else if (num < 1 || (!fixed && parseInt(num, 10) < num)) {
+                    return list.join('');
+                } else if (!fixed && parseInt(num, 10) < num) {
                     num *= mul;
-                    unit = '毫秒';
+                    unit = mul === 1000 ? '毫秒' : '秒';
                 }
                 return num + unit;
             }
