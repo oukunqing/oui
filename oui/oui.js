@@ -5333,14 +5333,17 @@
                 elems = [elem];
             }
             for (var i = 0, c = elems.length; i < c; i++) {
-                var classes = classesToArray(value), j = 0, curValue, cur, finalValue, css,
-                    obj = $.toElement(elems[i]);
+                var classes = classesToArray(value),
+                    obj = $.toElement(elems[i]),
+                    j = 0, curValue, cur, finalValue, css;
+
                 if ($.isElement(obj) && classes.length > 0) {
                     if (obj.tagName === 'OPTION') {
                         obj = obj.parentNode;
                     }
-                    curValue = getClass(elems[i]);
+                    curValue = getClass(obj);
                     cur = obj.nodeType === 1 && stripAndCollapse(curValue).space();
+
                     if (cur) {
                         while ((css = classes[j++])) {
                             if ('toggle' === action) {
@@ -5349,6 +5352,7 @@
                                 cur = setClassValue(cur, css, action);
                             }
                         }
+                        
                         finalValue = stripAndCollapse(cur);
                         if (curValue != finalValue) {
                             obj.setAttribute('class', finalValue);

@@ -9,6 +9,8 @@ input {width: 500px; height: 28px; border:solid 1px #000; margin:0; padding: 0 5
 select{width: 512px; height:30px;border:solid 1px #000;margin:0; padding: 0 5px;border-radius:3px;}
 select:focus{border:solid 1px #00f;}
 button {width:120px;height:30px;}
+.name {color: #00f;}
+.cur {color: #f00;}
 </style>
 </head>
 <body>
@@ -20,7 +22,7 @@ button {width:120px;height:30px;}
                 <td><input type="text" id="txtId" minvalue="12" max-value="100" data-show="0" /></td> </tr>
             <tr>
                 <td><label for="txtName">姓名</label></td>
-                <td><input type="text" id="txtName" /></td>
+                <td><input type="text" id="txtName" class="name user-name" /></td>
             </tr>
             <tr>
                 <td><label for="txtSex">性别</label></td>
@@ -121,6 +123,8 @@ button {width:120px;height:30px;}
 		$.addKeyListener(document, 'keyup',  function(e, n) {
 			console.log('e:', e, n);
 		}, false);
+
+        $.setClass('txtName', 'cur', 'add');
     };
 
     /*
