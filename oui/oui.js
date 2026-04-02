@@ -8562,6 +8562,9 @@ $.title
             if (!opt.enabled) {
                 return this;
             }
+            if (Cache.timers['hide-timer']) {
+                window.clearTimeout(Cache.timers['hide-timer']);
+            }
 
             if (!elem) {
                 elem = Factory.buildElement(that);
@@ -8617,11 +8620,38 @@ $.title
 
             return this;
         },
-        hideTitle: function (that) {
+        hideTitle: function (that, delay) {
             if (that.element) {
-                that.element.style.display = 'none';
+                if (delay) {
+                    if (Cache.timers['hide-timer']) {
+                        window.clearTimeout(Cache.timers['hide-timer']);
+                    }
+                    Cache.timers['hide-timer'] = window.setTimeout(function() {
+                        that.element.style.display = 'none';
+                    }, delay);
+                } else {
+                    that.element.style.display = 'none';
+                }
             }
             return this;
+        },
+        hasTitle: function (elem) {
+            return $.isElement(elem) && elem.title || elem.getAttribute('data-title');
+        },
+        getTitle: function (elem, tarAttr) {
+            return elem.title || $.getAttribute(elem, tarAttr);
+        },
+        convertTitle: function (elem, tarAttr) {
+            let update = false;
+            while ($.isElement(elem)) {
+                if (elem.title) {
+                    update = true;
+                    elem.setAttribute(tarAttr, elem.title);
+                    elem.removeAttribute('title');
+                }
+                elem = elem.parentNode;
+            }
+            return update;
         },
         isCovered: function (elem, content) {
             return $.isContentCovered(elem, content) || $.isElemObscured(elem);
@@ -8659,39 +8689,30 @@ $.title
             function _title(ev) {
                 let elem = ev.target,
                     type = ev.type,
-                    tarAttr = opt.attribute, 
-                    tmpAttr = 'oui-data-title-tmp', delAttr = 'oui-data-title-del',
-                    coverAttr = 'data-cover', timeAttr = 'data-cover-ts',
-                    oriTitle = '',
-                    curTs = new Date().getTime();
+                    tarAttr = opt.attribute,
+                    coverAttr = 'data-cover', 
+                    timeAttr = 'data-cover-ts',
+                    curTs = new Date().getTime(),
+                    update = false;
 
                 if (that.current === elem) {
                     if (!opt.move) {
+                        //Factory.hideTitle(that);
                         return false;
                     }
                 } else if (that.current) {
-                    //鼠标移出时，判断是否有相应的临时属性，若有，则消除之
-                    let con = that.current.getAttribute(tmpAttr) || that.current.getAttribute(delAttr);
-                    if (con) {
-                        that.current.setAttribute(tarAttr, con);
-                        that.current.removeAttribute(tmpAttr);
-                        that.current.removeAttribute(delAttr);
-                        that.current.removeAttribute(coverAttr);
-                        that.current.removeAttribute(timeAttr);
-                    }
+                    Factory.hideTitle(that);
                 }
                 that.current = elem;
-                if (elem.title) {
-                    oriTitle = elem.title;
-                    if (!elem.getAttribute(tarAttr)) {
-                        elem.setAttribute(tarAttr, elem.title);
-                        //elem.setAttribute('oui-title', 1);
-                    }
-                    elem.removeAttribute('title');
+
+                if (!Factory.hasTitle(elem) && Factory.hasTitle(elem.parentNode)) {
+                    elem = elem.parentNode;
                 }
+                update = Factory.convertTitle(elem, tarAttr);
 
                 let tag = elem.tagName.toLowerCase(), con,
-                    title = oriTitle || $.getAttribute(elem, tmpAttr) || $.getAttribute(elem, delAttr) || $.getAttribute(elem, tarAttr);
+                    title = Factory.getTitle(elem, tarAttr);
+
                 if (title) {
                     if (tag !== 'select') {
                         con = elem.value || elem.innerText || elem.innerHTML;
@@ -8712,18 +8733,16 @@ $.title
                             time = parseInt('0' + elem.getAttribute(timeAttr), 10);
 
                         // 2秒钟之内已经检测过，不再重复检测
-                        if (cover && !oriTitle && new Date().getTime() - time <= 2000) {
+                        if (cover && !update && new Date().getTime() - time <= 2000) {
                             if (cover === Config.Show) {
-                                elem.removeAttribute(tarAttr);
-                                elem.setAttribute(delAttr, title);
+                                Factory.hideTitle(that);
                                 return false;
                             }
                         } else if (!Factory.isCovered(elem, con)) {
                             // 设置为未遮挡
                             elem.setAttribute(coverAttr, Config.Show);
                             elem.setAttribute(timeAttr, new Date().getTime());
-                            elem.removeAttribute(tarAttr);
-                            elem.setAttribute(delAttr, title);
+                            Factory.hideTitle(that);
                             return false;
                         } else {
                             // 设置为遮挡
@@ -8739,41 +8758,25 @@ $.title
 
                     that.target = elem;
                     that.attribute = tarAttr;
-                    elem.removeAttribute(tarAttr);
-                    elem.setAttribute(tmpAttr, title);
 
                     Factory.showTitle(ev, title, that);
-
-                    if (!elem.mouseout) {
-                        $.addListener(elem, 'mouseout', function() {
-                            Factory.hideTitle(that);
-                        });
-                        elem.mouseout = 1;
-                        delete elem.mouseover;
-                    }
                 }
                 if (that.target && that.target !== elem) {
                     //鼠标移出
-                    con = that.target.getAttribute(tmpAttr) || that.target.getAttribute(delAttr);
-                    if (con) {
-                        that.target.setAttribute(that.attribute, con);
-                        that.target.removeAttribute(tmpAttr);
-                        that.target.removeAttribute(delAttr);
-                        that.target.removeAttribute(coverAttr);
-                        that.target.removeAttribute(timeAttr);
-                    }
+                    that.target.removeAttribute(coverAttr);
+                    that.target.removeAttribute(timeAttr);
                     that.target = null;
 
-                    Factory.hideTitle(that);
+                    //Factory.hideTitle(that);
                 }
                 return true;
             }
 
-            $.addListener(opt.element, 'mousemove', function (ev) {
+            $.addListener(opt.element, 'mouseover,mousemove', function (ev) {
                 $.debounce({
                     id: 'oui-title-debounce',
                     delay: 5,
-                    timeout: 3000,
+                    timeout: 2000,
                 }, function () {
                     return _title(ev);
                 });
