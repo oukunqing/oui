@@ -3411,7 +3411,7 @@
         },
         formatTo: function (fmt) {
             fmt = (!$.isString(fmt, true) ? '{0}' : fmt).trim();
-            if (!fmt.startsWith('{') || !fmt.endWith('}')) {
+            if (!fmt.startsWith('{') || !fmt.endsWith('}')) {
                 return this.toString();
             }
             //这里转换成浮点数的原因是this的数据类型是object, 而不是number
@@ -4026,7 +4026,7 @@
                 //循环分隔, 分隔长度0-35(9+26), \\ 表示换行符\r\n, / 表示 <br />, | 表示截断(不显示之后的内容)
                 p5 = /^([S_\-\.\:])([\dA-Z\/\|\\]{0,}?((\[[\dA-Z\/\|\\]{0,}\])(<[\d]+>)?|[.])[\dA-Z\/\|\\]{0,}?)+$/gi,
                 //结尾是否自由组合，与p3规则配套使用
-                freedom = ss.endsWith('.') || ss.endWith('-'),
+                freedom = ss.endsWith('.') || ss.endsWith('-'),
                 //是否循环分隔，与p5规则配套使用
                 loop = p5.test(ss),
                 nv, dn, n;
@@ -4279,7 +4279,7 @@
         var con = this;
         fmt = (!$.isString(fmt, true) ? '{0}' : fmt).trim();
         $.console.log('[content]', con, '[format]', fmt);
-        return (!fmt.startsWith('{') || !fmt.endWith('}')) ? con : fmt.format(con);
+        return (!fmt.startsWith('{') || !fmt.endsWith('}')) ? con : fmt.format(con);
     };
 
     String.prototype.formatTest = function (con) {
@@ -4508,7 +4508,7 @@
                 var host = $.getUrlHost(location.href, true),
                     url = fileUrl.trim();
                 //目前只能获取相同域的文件大小
-                if (url.toLowerCase().startWith('http') && !url.startWith(host)) {
+                if (url.toLowerCase().startsWith('http') && !url.startsWith(host)) {
                     return -1;
                 }
                 var xhr = new XMLHttpRequest();
@@ -4554,9 +4554,9 @@
                 return filePath;
             }
             var tmp = filePath.toLowerCase();
-            if (tmp.startWith('http://')) {
+            if (tmp.startsWith('http://')) {
                 return filePath.substr(0, 7) + filePath.substr(7).replace(/[\/]{2,}/g, '/');
-            } else if (tmp.startWith('https://')) {
+            } else if (tmp.startsWith('https://')) {
                 return filePath.substr(0, 8) + filePath.substr(8).replace(/[\/]{2,}/g, '/');
             } else {
                 return filePath.replace(/[\/]{2,}/g, '/');
@@ -5520,9 +5520,9 @@
             $.throwError('Invalid JSON: ' + data);
         },
         isJsonLike = function (data) {
-            if (data.startWith('{') && data.endWith('}')) {
+            if (data.startsWith('{') && data.endsWith('}')) {
                 return /[:]/.test(data);
-            } else if (data.startWith('[') && data.endWith(']')) {
+            } else if (data.startsWith('[') && data.endsWith(']')) {
                 return true;
             }
             return false;
@@ -8603,20 +8603,20 @@ $.title
                     'left:', left, 'px;',
                 ];
 
-                if (title.indexOf('|') > -1 || title.startWith('[img:')) {
+                if (title.indexOf('|') > -1 || title.startsWith('[img:')) {
                     let arr = title.split('|'), img, url, css = [], txt = [], w = 0, h = 0;
                     for (let i = 0; i < arr.length; i++) {
                         let s = arr[i];
-                        if (s.startWith('[') && s.endWith(']')) {
+                        if (s.startsWith('[') && s.endsWith(']')) {
                             s = s.substr(1, s.length - 2);
-                            if (s.startWith('img:')) {
+                            if (s.startsWith('img:')) {
                                 url = s.substr(4);
                                 img = true;
-                            } else if (s.startWith('size:')) {
+                            } else if (s.startsWith('size:')) {
                                 let sizes = s.substr(5).split(',');
                                 w = sizes[0].toInt();
                                 h = (sizes[1] || sizes[0]).toInt();
-                            } else if (s.startWith('css:')) {
+                            } else if (s.startsWith('css:')) {
                                 css.push(s.substr(4));
                             } else {
                                 txt.push(s.replace(/[ ]/g, '&nbsp;'));
