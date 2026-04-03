@@ -8587,7 +8587,8 @@ $.title
                     'background:#fff;color:#333;',
                     'opacity:0.98;z-index:', zindex, ';',
                     'font-size:14px;font-family:Arial,宋体;',
-                    'min-height:30px;line-height:1.5em;',
+                    //指定最小宽度和最小高度
+                    'min-width:30px;min-height:30px;line-height:1.5em;',
                     //边框灰色阴影
                     'box-shadow:0 0 6px 1px rgba(204, 204, 204, 0.5);',
                     (opt.style || ''),
