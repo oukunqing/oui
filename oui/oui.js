@@ -8620,10 +8620,10 @@ $.title
                             } else if (s.startsWith('css:')) {
                                 css.push(s.substr(4));
                             } else {
-                                txt.push(s.replace(/[ ]/g, '&nbsp;'));
+                                txt.push(s.replace(/[ ]/g, '&nbsp;').replace(/(\r\n|\n|\r)/g, '<br />'));
                             }
                         } else {
-                            txt.push(s.replace(/[ ]/g, '&nbsp;'));
+                            txt.push(s.replace(/[ ]/g, '&nbsp;').replace(/(\r\n|\n|\r)/g, '<br />'));
                         }
                     }
                     let width = w || maxWidth - (img ? 20 : 0),
@@ -8642,7 +8642,7 @@ $.title
 
                     elem.innerHTML = html;
                 } else {
-                    title = title.replace(/[ ]/g, '&nbsp;').replace(/(\r\n|\n)/g, '<br />');
+                    title = title.replace(/[ ]/g, '&nbsp;').replace(/(\r\n|\n|\r)/g, '<br />');
                     elem.innerHTML = title;
                 }
                 elem.style.cssText = cssText.join('');
