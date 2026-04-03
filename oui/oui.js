@@ -8392,7 +8392,6 @@ $.debounce 防抖
                     rect.right <= p_rect.right &&
                     rect.bottom <= p_rect.bottom
                 );
-                //$.console.log('checkParentClip:', rect, p_rect, isFullyContained, elem);
 
                 // 若不完全包含，说明被该父元素遮挡/显示不全
                 if (!isFullyContained) {
@@ -8465,8 +8464,6 @@ $.debounce 防抖
 
         // 6. 补充：文本不换行场景（nowrap），即使overflow为visible，视觉上也可能被父元素遮挡（可选增强）
         const isTextNoWrap = style.whiteSpace === "nowrap";
-
-        //$.console.log('isElementWidthIncomplete:', hasContentOverflow, isContentClipped, isTextNoWrap);
 
         // 7. 综合判定：内容溢出 + （裁剪/滚动 或 文本不换行）= 显示不完整
         return hasContentOverflow && (isContentClipped || isTextNoWrap);
@@ -8566,7 +8563,7 @@ $.title
             if (maxWidth > 800) {
                 maxWidth = 800;
             } else {
-                maxWidth -= 10;
+                maxWidth -= 20;
             }
             if (Cache.timers['hide-timer']) {
                 window.clearTimeout(Cache.timers['hide-timer']);
@@ -8583,17 +8580,17 @@ $.title
                 elem.style.left = left + 'px';
                 elem.style.top = top + 'px';
             } else {
-                elem.style.cssText = [
+                let cssText = [
                     'border:solid 1px #ddd;border-radius:5px;',
                     'box-sizing:border-box;',
-                    'margin:0;padding:3px 5px;',
+                    'margin:0;padding:5px 5px;',
                     'background:#fff;color:#333;',
                     'opacity:0.98;z-index:', zindex, ';',
                     'font-size:14px;font-family:Arial,宋体;',
                     'min-height:30px;line-height:1.5em;',
                     //边框灰色阴影
-                    'box-shadow:0 0 6px 1px rgba(204, 204, 204, 0.5);'
-                ].join('') + (opt.style || '') + [
+                    'box-shadow:0 0 6px 1px rgba(204, 204, 204, 0.5);',
+                    (opt.style || ''),
                     'position:absolute;',
                     //这里不再启用 pre
                     //'white-space:pre;',
@@ -8604,9 +8601,50 @@ $.title
                     'max-height:', maxHeight, 'px;',
                     'top:', top, 'px;',
                     'left:', left, 'px;',
-                ].join('');
+                ];
 
-                elem.innerHTML = title.replace(/(\r\n|\n)/g, '<br />');
+                if (title.indexOf('|') > -1 || title.startWith('[img:')) {
+                    let arr = title.split('|'), img, url, css = [], txt = [], w = 0, h = 0;
+                    for (let i = 0; i < arr.length; i++) {
+                        let s = arr[i];
+                        if (s.startWith('[') && s.endWith(']')) {
+                            s = s.substr(1, s.length - 2);
+                            if (s.startWith('img:')) {
+                                url = s.substr(4);
+                                img = true;
+                            } else if (s.startWith('size:')) {
+                                let sizes = s.substr(5).split(',');
+                                w = sizes[0].toInt();
+                                h = (sizes[1] || sizes[0]).toInt();
+                            } else if (s.startWith('css:')) {
+                                css.push(s.substr(4));
+                            } else {
+                                txt.push(s.replace(/[ ]/g, '&nbsp;'));
+                            }
+                        } else {
+                            txt.push(s.replace(/[ ]/g, '&nbsp;'));
+                        }
+                    }
+                    let width = w || maxWidth - (img ? 20 : 0),
+                        height = h || maxHeight - (img ? 20 : 0),
+                        html = img ? [
+                            '<img class="oui-title-img" src="', url, '" style="',
+                            'max-width:', width, 'px;max-height:', height, 'px;margin:0;padding:0px;',
+                            'box-sizing:border-box;border:none;border-radius:5px;display:block;', css.join(';'),
+                            '" />', txt.join('<br />')
+                        ].join('') : txt.join('<br />');
+
+                    if (!img) {
+                        css.push('max-width:' + width + 'px;max-height:' + height + 'px;');
+                        cssText = cssText.concat(css);
+                    }
+
+                    elem.innerHTML = html;
+                } else {
+                    title = title.replace(/[ ]/g, '&nbsp;').replace(/(\r\n|\n)/g, '<br />');
+                    elem.innerHTML = title;
+                }
+                elem.style.cssText = cssText.join('');
             }
 
             if (elem.offsetWidth + elem.offsetLeft > bs.width + scroll.left) {
@@ -8713,7 +8751,7 @@ $.title
                         con: con.trim(),
                         str: title.replace(/(\r|\n)/, '').trim()
                     };
-                    // 若文字内容与Title内容相同（忽略Title内容的换行符），
+                    // 若文字内容与Title内容相同（忽略Title内容的换行符）
                     // 判断文字内容是否被遮挡，若无遮挡则不显示Title
                     if (p.con === p.str || p.con.indexOf(p.str) > -1) {
                         // 优化处理，减少重复检测
@@ -8825,7 +8863,7 @@ $.title
                 }
             }
         });
-        if (!$.isTopWindow()) {            
+        if (!$.isTopWindow()) {
             $.addListener(document, 'keydown', function (e) {
                 //捕获F5键值
                 if ($.getKeyCode(e) === $.KEY_CODE.F5) {
