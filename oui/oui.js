@@ -8548,19 +8548,25 @@ $.title
                 opt = that.options;
 
             elem.className = 'oui-title-panel-element';
-
-            document.body.appendChild(elem);
             that.element = elem;
 
-            return elem;
+            return document.body.appendChild(elem), elem;
         },
         showTitle: function(ev, title, that) {
-            let elem = that.element, bs = $.getBodySize(),
+            let elem = that.element, 
+                bs = $.getBodySize(),
                 opt = that.options,
-                zindex = 2147483647;
+                zindex = 2147483647,
+                maxWidth = bs.width,
+                maxHeight = bs.height;
 
             if (!opt.enabled) {
                 return this;
+            }
+            if (maxWidth > 800) {
+                maxWidth = 800;
+            } else {
+                maxWidth -= 10;
             }
             if (Cache.timers['hide-timer']) {
                 window.clearTimeout(Cache.timers['hide-timer']);
@@ -8588,17 +8594,19 @@ $.title
                     //边框灰色阴影
                     'box-shadow:0 0 6px 1px rgba(204, 204, 204, 0.5);'
                 ].join('') + (opt.style || '') + [
-                    'position:absolute;white-space:pre;',
+                    'position:absolute;',
+                    //这里不再启用 pre
+                    //'white-space:pre;',
                     'display:inline-block;',
                     'overflow:hidden;',
                     'text-overflow:ellipsis;',
-                    'max-width:', bs.width - 10, 'px;',
-                    'max-height:', bs.height - 10, 'px;',
+                    'max-width:', maxWidth, 'px;',
+                    'max-height:', maxHeight, 'px;',
                     'top:', top, 'px;',
                     'left:', left, 'px;',
                 ].join('');
 
-                elem.innerHTML = title;
+                elem.innerHTML = title.replace(/(\r\n|\n)/g, '<br />');
             }
 
             if (elem.offsetWidth + elem.offsetLeft > bs.width + scroll.left) {
@@ -8678,42 +8686,24 @@ $.title
 
     Title.prototype = {
         initial: function (opt) {
-            let that = this;
+            let that = this, disabled = $.getQueryString(location.href, 'origin-title').toInt();
             if (!opt) {
                 opt = that.options;
             }
             if (!opt.enabled) {
                 return that;
             }
-            
-            function _title(ev) {
-                let elem = ev.target,
-                    type = ev.type,
-                    tarAttr = opt.attribute,
-                    coverAttr = 'data-cover', 
+
+            function _show(elem, tarAttr, ev) {
+                let coverAttr = 'data-cover', 
                     timeAttr = 'data-cover-ts',
                     curTs = new Date().getTime(),
-                    update = false;
-
-                if (that.current === elem) {
-                    if (!opt.move) {
-                        //Factory.hideTitle(that);
-                        return false;
-                    }
-                } else if (that.current) {
-                    Factory.hideTitle(that);
-                }
-                that.current = elem;
-
-                if (!Factory.hasTitle(elem) && Factory.hasTitle(elem.parentNode)) {
-                    elem = elem.parentNode;
-                }
-                update = Factory.convertTitle(elem, tarAttr);
-
-                let tag = elem.tagName.toLowerCase(), con,
+                    update = Factory.convertTitle(elem, tarAttr),
                     title = Factory.getTitle(elem, tarAttr);
 
                 if (title) {
+                    let tag = elem.tagName.toLowerCase(), con;
+                    
                     if (tag !== 'select') {
                         con = elem.value || elem.innerText || elem.innerHTML;
                     } else {
@@ -8769,7 +8759,29 @@ $.title
 
                     //Factory.hideTitle(that);
                 }
-                return true;
+            }
+            
+            function _title(ev, disabled) {
+                if (disabled) {
+                    return false;
+                }
+                let elem = ev.target,
+                    type = ev.type,
+                    tarAttr = opt.attribute || 'data-title';
+
+                if (that.current === elem) {
+                    if (!opt.move) {
+                        return false;
+                    }
+                } else if (that.current) {
+                    Factory.hideTitle(that);
+                }
+                that.current = elem;
+
+                if (!Factory.hasTitle(elem) && Factory.hasTitle(elem.parentNode)) {
+                    elem = elem.parentNode;
+                }
+                return _show(elem, tarAttr, ev), true;
             }
 
             $.addListener(opt.element, 'mouseover,mousemove', function (ev) {
@@ -8778,9 +8790,12 @@ $.title
                     delay: 5,
                     timeout: 2000,
                 }, function () {
-                    return _title(ev);
+                    return _title(ev, disabled);
                 });
-                return true;
+            });
+
+            $.addListener(document, 'keydown', function (ev) {
+                Factory.hideTitle(that);
             });
             return this;
         }
