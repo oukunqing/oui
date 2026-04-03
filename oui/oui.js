@@ -8673,10 +8673,14 @@ $.title
                         window.clearTimeout(Cache.timers['hide-timer']);
                     }
                     Cache.timers['hide-timer'] = window.setTimeout(function() {
-                        that.element.style.display = 'none';
+                        if (that.element && that.element.style.display !== 'none') {
+                            that.element.style.display = 'none';
+                        }
                     }, delay);
                 } else {
-                    that.element.style.display = 'none';
+                    if (that.element && that.element.style.display !== 'none') {
+                        that.element.style.display = 'none';
+                    }
                 }
             }
             return this;
@@ -8684,12 +8688,21 @@ $.title
         hasTitle: function (elem) {
             return $.isElement(elem) && elem.title || elem.getAttribute('data-title');
         },
+        parentTitle: function (elem) {
+            while ($.isElement(elem)) {
+                if (Factory.hasTitle(elem)) {
+                    return elem;
+                }
+                elem = elem.parentNode;
+            }
+            return null;
+        },
         getTitle: function (elem, tarAttr) {
             return elem.title || $.getAttribute(elem, tarAttr);
         },
         convertTitle: function (elem, tarAttr) {
             let update = false;
-            while ($.isElement(elem)) {
+            while ($.isElement(elem) && elem.setAttribute) {
                 if (elem.title) {
                     update = true;
                     elem.setAttribute(tarAttr, elem.title);
@@ -8706,6 +8719,9 @@ $.title
             const selectedIndex = elem.selectedIndex; // 获取选中项索引
             const selectedText = elem.options[selectedIndex].text; // 获取选中文本
             return selectedText || '';
+        },
+        getElementValue: function (elem) {
+            return elem.value || elem.innerText || elem.innerHTML;
         }
     };
 
@@ -8717,7 +8733,6 @@ $.title
         this.timer = null;
         this.element = null;
         this.target = null;
-        this.current = null;
 
         this.initial(opt);
     }
@@ -8740,42 +8755,41 @@ $.title
                     title = Factory.getTitle(elem, tarAttr);
 
                 if (title) {
-                    let tag = elem.tagName.toLowerCase(), con;
+                    let tag = (elem.tagName || '').toLowerCase();
                     
-                    if (tag !== 'select') {
-                        con = elem.value || elem.innerText || elem.innerHTML;
-                    } else {
-                        con = Factory.getSelectedText(elem);
-                    }
-                    const p = {
-                        con: con.trim(),
-                        str: title.replace(/(\r|\n)/, '').trim()
-                    };
-                    // 若文字内容与Title内容相同（忽略Title内容的换行符）
-                    // 判断文字内容是否被遮挡，若无遮挡则不显示Title
-                    if (p.con === p.str || p.con.indexOf(p.str) > -1) {
-                        // 优化处理，减少重复检测
-                        // 是否被遮挡：0-未设置，1-遮挡，2-显示
-                        const Config = { None: 0, Cover: 1, Show: 2};
-                        let cover = parseInt('0' + elem.getAttribute(coverAttr), 10),
-                            time = parseInt('0' + elem.getAttribute(timeAttr), 10);
+                    if (tag !== 'body') {
+                        const con = (tag !== 'select' ? Factory.getElementValue(elem) : Factory.getSelectedText(elem)) || '';
+                        const p = {
+                            con: con.trim(),
+                            str: title.replace(/(\r|\n)/, '').trim()
+                        };
 
-                        // 2秒钟之内已经检测过，不再重复检测
-                        if (cover && !update && new Date().getTime() - time <= 2000) {
-                            if (cover === Config.Show) {
+                        // 若文字内容与Title内容相同（忽略Title内容的换行符）
+                        // 判断文字内容是否被遮挡，若无遮挡则不显示Title
+                        if (p.con === p.str || p.con.indexOf(p.str) > -1) {
+                            // 优化处理，减少重复检测
+                            // 是否被遮挡：0-未设置，1-遮挡，2-显示
+                            const Config = { None: 0, Cover: 1, Show: 2};
+                            let cover = parseInt('0' + elem.getAttribute(coverAttr), 10),
+                                time = parseInt('0' + elem.getAttribute(timeAttr), 10);
+
+                            // 2秒钟之内已经检测过，不再重复检测
+                            if (cover && !update && new Date().getTime() - time <= 2000) {
+                                if (cover === Config.Show) {
+                                    Factory.hideTitle(that);
+                                    return false;
+                                }
+                            } else if (!Factory.isCovered(elem, con)) {
+                                // 设置为未遮挡
+                                elem.setAttribute(coverAttr, Config.Show);
+                                elem.setAttribute(timeAttr, new Date().getTime());
                                 Factory.hideTitle(that);
                                 return false;
+                            } else {
+                                // 设置为遮挡
+                                elem.setAttribute(coverAttr, Config.Cover);
+                                elem.setAttribute(timeAttr, new Date().getTime());
                             }
-                        } else if (!Factory.isCovered(elem, con)) {
-                            // 设置为未遮挡
-                            elem.setAttribute(coverAttr, Config.Show);
-                            elem.setAttribute(timeAttr, new Date().getTime());
-                            Factory.hideTitle(that);
-                            return false;
-                        } else {
-                            // 设置为遮挡
-                            elem.setAttribute(coverAttr, Config.Cover);
-                            elem.setAttribute(timeAttr, new Date().getTime());
                         }
                     }
 
@@ -8807,17 +8821,13 @@ $.title
                     type = ev.type,
                     tarAttr = opt.attribute || 'data-title';
 
-                if (that.current === elem) {
-                    if (!opt.move) {
-                        return false;
+                if (!Factory.hasTitle(elem)) {
+                    let parent = Factory.parentTitle(elem);
+                    if (parent) {
+                        elem = parent;
+                    } else {
+                        Factory.hideTitle(that);
                     }
-                } else if (that.current) {
-                    Factory.hideTitle(that);
-                }
-                that.current = elem;
-
-                if (!Factory.hasTitle(elem) && Factory.hasTitle(elem.parentNode)) {
-                    elem = elem.parentNode;
                 }
                 return _show(elem, tarAttr, ev), true;
             }
@@ -8832,7 +8842,7 @@ $.title
                 });
             });
 
-            $.addListener(document, 'keydown', function (ev) {
+            $.addListener(document, 'keydown,mousedown', function (ev) {
                 Factory.hideTitle(that);
             });
             return this;
