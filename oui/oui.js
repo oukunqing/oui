@@ -3139,6 +3139,10 @@
         unescapeHtml: function () {
             return $.unescapeHtml(this);
         },
+        preHtml: function () {
+            var s = this;
+            return s.replace(/[ ]/g, '&nbsp;').replace(/(\r\n|\n|\r)/g, '<br />');
+        },
         isTrue: function (strict) {
             var s = this;
             return s === 'true' || !strict && s === '1';
@@ -8497,10 +8501,15 @@ $.title
 !function ($) {
     'use strict';
 
+    const Config = {
+        MaxWidth: 800
+    };
+
     const Cache = {
         caches: {},
         timers: {},
         titles: {},
+        panels: {},
         getCache: function (id) {
             return Cache.caches['title_' + id];
         },
@@ -8549,19 +8558,42 @@ $.title
 
             return document.body.appendChild(elem), elem;
         },
+        getMinWidth: function (content) {
+            let div = Cache.panels['text'];
+            if (!div) {
+                div = document.createElement('DIV');
+                div.style.cssText = [
+                    'position:absolute;left:-5000px;top:-5000px;',
+                    'display:inline-block;overflow:hidden;',
+                    'min-width:0;min-height:0;max-width:auto;max-height:auto;',
+                    'border:none;box-sizing:border-box;margin:0;padding:3px 10px;',
+                    'font-size:14px;line-height:22px;'
+                ];
+                Cache.panels['text'] = div;
+                document.body.appendChild(div);
+            }
+            div.innerHTML = content;
+
+            let size = { width: div.offsetWidth };
+
+            div.innerHTML = '';
+
+            return size;
+        },
         showTitle: function(ev, title, that) {
             let elem = that.element, 
                 bs = $.getBodySize(),
                 opt = that.options,
                 zindex = 2147483647,
                 maxWidth = bs.width,
-                maxHeight = bs.height;
+                maxHeight = bs.height,
+                img, txt = [];
 
             if (!opt.enabled) {
                 return this;
             }
-            if (maxWidth > 800) {
-                maxWidth = 800;
+            if (maxWidth > Config.MaxWidth) {
+                maxWidth = Config.MaxWidth;
             } else {
                 maxWidth -= 20;
             }
@@ -8583,17 +8615,16 @@ $.title
                 let cssText = [
                     'border:solid 1px #ddd;border-radius:5px;',
                     'box-sizing:border-box;',
-                    'margin:0;padding:5px 5px;',
+                    'margin:0;padding:2px 7px;',
                     'background:#fff;color:#333;',
                     'opacity:0.98;z-index:', zindex, ';',
                     'font-size:14px;font-family:Arial,宋体;',
                     //指定最小宽度和最小高度
-                    'min-width:30px;min-height:30px;line-height:1.5em;',
+                    'min-width:30px;min-height:30px;line-height:22px;',
                     //边框灰色阴影
                     'box-shadow:0 0 6px 1px rgba(204, 204, 204, 0.5);',
                     (opt.style || ''),
                     'position:absolute;',
-                    //这里不再启用 pre
                     //'white-space:pre;',
                     'display:inline-block;',
                     'overflow:hidden;',
@@ -8605,7 +8636,7 @@ $.title
                 ];
 
                 if (title.indexOf('|') > -1 || title.startsWith('[img:')) {
-                    let arr = title.split('|'), img, url, css = [], txt = [], w = 0, h = 0;
+                    let arr = title.split('|'), url, css = [], w = 0, h = 0;
                     for (let i = 0; i < arr.length; i++) {
                         let s = arr[i];
                         if (s.startsWith('[') && s.endsWith(']')) {
@@ -8620,18 +8651,19 @@ $.title
                             } else if (s.startsWith('css:')) {
                                 css.push(s.substr(4));
                             } else {
-                                txt.push(s.replace(/[ ]/g, '&nbsp;').replace(/(\r\n|\n|\r)/g, '<br />'));
+                                txt.push(s.preHtml());
                             }
                         } else {
-                            txt.push(s.replace(/[ ]/g, '&nbsp;').replace(/(\r\n|\n|\r)/g, '<br />'));
+                            txt.push(s.preHtml());
                         }
                     }
+
                     let width = w || maxWidth - (img ? 20 : 0),
                         height = h || maxHeight - (img ? 20 : 0),
                         html = img ? [
-                            '<img class="oui-title-img" src="', url, '" style="',
-                            'max-width:', width, 'px;max-height:', height, 'px;margin:0;padding:0px;',
-                            'box-sizing:border-box;border:none;border-radius:5px;display:block;', css.join(';'),
+                            '<img class="oui-title-img" src="', url, '" style="display:block;padding:0px;',
+                            'max-width:', width, 'px;max-height:', height, 'px;margin:5px 0 ', txt.length > 0 ? 2 : 5, 'px;',
+                            'box-sizing:border-box;border:none;border-radius:5px;', css.join(';'),
                             '" />', txt.join('<br />')
                         ].join('') : txt.join('<br />');
 
@@ -8639,11 +8671,19 @@ $.title
                         css.push('max-width:' + width + 'px;max-height:' + height + 'px;');
                         cssText = cssText.concat(css);
                     }
-
                     elem.innerHTML = html;
                 } else {
-                    title = title.replace(/[ ]/g, '&nbsp;').replace(/(\r\n|\n|\r)/g, '<br />');
-                    elem.innerHTML = title;
+                    txt.push(title.preHtml());
+                    elem.innerHTML = txt.join('<br />');
+                }
+                if (!img) {
+                    let minSize = Factory.getMinWidth(txt.join('<br />')),
+                        minWidth = minSize.width;
+
+                    if (minWidth > Config.MaxWidth) {
+                        minWidth = Config.MaxWidth;
+                    }
+                    cssText.push('min-width:' + minWidth + 'px;');
                 }
                 elem.style.cssText = cssText.join('');
             }
