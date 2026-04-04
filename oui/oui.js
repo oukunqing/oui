@@ -8635,7 +8635,7 @@ $.title
                     'left:', left, 'px;',
                 ];
 
-                if (title.indexOf('|') > -1 || title.startsWith('[img:')) {
+                if (title.indexOf('|') > -1 || title.startsWith('[img:') || title.startsWith('[')) {
                     let arr = title.split('|'), url, css = [], w = 0, h = 0;
                     for (let i = 0; i < arr.length; i++) {
                         let s = arr[i];
@@ -8648,6 +8648,8 @@ $.title
                                 let sizes = s.substr(5).split(',');
                                 w = sizes[0].toInt();
                                 h = (sizes[1] || sizes[0]).toInt();
+                            } else if (s.startsWith('func:')) {
+                                txt.push(new Function('return ' + s.substr(5) + ';')());
                             } else if (s.startsWith('css:')) {
                                 css.push(s.substr(4));
                             } else {

@@ -111,6 +111,9 @@ select {height:30px;}
             <dd>
                 <a title="[css:border:solid 1px #f00;border-radius:0px;color:#00f;]|[这是一张抓拍    的图片，图片大小未知，图片来源于网络]|[A][B]限制大小400*300px|并且指定了边框颜色">这是一个提示信息，指定了边框颜色、文字颜色等一些样式</a>
             </dd>
+            <dd>
+                <a title="[func:module.toTimeDuration('2026-04-04 16:10:25');]">在线状态时间时长</a>
+            </dd>
         </dl>
         <div style="height:200px;"></div>
     </div>
@@ -132,6 +135,14 @@ select {height:30px;}
         }, 5000);
 
         $.console.log($I('ddl2').clientWidth);
+    };
+
+    var module = {
+        toTimeDuration: function (time) {
+            var dt = time.toDate();
+            $.console.log('time:', time, dt, new Date() - dt);
+            return ((new Date() - dt) / 1000).toTimeStr();
+        }
     };
 
     /*
