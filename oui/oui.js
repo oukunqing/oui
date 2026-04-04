@@ -8502,7 +8502,8 @@ $.title
     'use strict';
 
     const Config = {
-        MaxWidth: 800
+        MaxWidth: 800,
+        FontCss: 'font-size:14px;font-family:Arial,宋体;line-height:22px;margin:0;padding:2px 7px;'
     };
 
     const Cache = {
@@ -8566,8 +8567,8 @@ $.title
                     'position:absolute;left:-5000px;top:-5000px;',
                     'display:inline-block;overflow:hidden;',
                     'min-width:0;min-height:0;max-width:auto;max-height:auto;',
-                    'border:none;box-sizing:border-box;margin:0;padding:3px 10px;',
-                    'font-size:14px;line-height:22px;'
+                    'border:none;box-sizing:border-box;',
+                    Config.FontCss
                 ];
                 Cache.panels['text'] = div;
                 document.body.appendChild(div);
@@ -8615,12 +8616,11 @@ $.title
                 let cssText = [
                     'border:solid 1px #ddd;border-radius:5px;',
                     'box-sizing:border-box;',
-                    'margin:0;padding:2px 7px;',
                     'background:#fff;color:#333;',
                     'opacity:0.98;z-index:', zindex, ';',
-                    'font-size:14px;font-family:Arial,宋体;',
+                    Config.FontCss,
                     //指定最小宽度和最小高度
-                    'min-width:30px;min-height:30px;line-height:22px;',
+                    'min-width:30px;min-height:30px;',
                     //边框灰色阴影
                     'box-shadow:0 0 6px 1px rgba(204, 204, 204, 0.5);',
                     (opt.style || ''),
@@ -8883,7 +8883,7 @@ $.title
                 });
             });
 
-            $.addListener(document, 'keydown,mousedown', function (ev) {
+            $.addListener(document, 'keydown,mousedown,wheel', function (ev) {
                 Factory.hideTitle(that);
             });
             return this;
