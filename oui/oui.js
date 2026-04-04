@@ -8581,14 +8581,14 @@ $.title
 
             return size;
         },
-        showTitle: function(ev, title, that) {
+        showTitle: function(ev, title, that, obj) {
             let elem = that.element, 
                 bs = $.getBodySize(),
                 opt = that.options,
                 zindex = 2147483647,
                 maxWidth = bs.width,
                 maxHeight = bs.height,
-                img, txt = [];
+                img, txt = [], html = '';
 
             if (!opt.enabled) {
                 return this;
@@ -8638,12 +8638,16 @@ $.title
                 if (title.indexOf('|') > -1 || title.startsWith('[img:') || title.startsWith('[')) {
                     let arr = title.split('|'), url, css = [], w = 0, h = 0;
                     for (let i = 0; i < arr.length; i++) {
-                        let s = arr[i];
+                        let s = arr[i].trim();
                         if (s.startsWith('[') && s.endsWith(']')) {
                             s = s.substr(1, s.length - 2);
                             if (s.startsWith('img:')) {
                                 url = s.substr(4);
                                 img = true;
+                            } else if (s.startsWith('text:') || s.startsWith('once:')) {
+                                let str = new Function('return ' + s.substr(5) + ';')();
+                                obj.title = str || '';
+                                txt.push(str);
                             } else if (s.startsWith('size:')) {
                                 let sizes = s.substr(5).split(',');
                                 w = sizes[0].toInt();
@@ -8661,25 +8665,29 @@ $.title
                     }
 
                     let width = w || maxWidth - (img ? 20 : 0),
-                        height = h || maxHeight - (img ? 20 : 0),
-                        html = img ? [
-                            '<img class="oui-title-img" src="', url, '" style="display:block;padding:0px;',
-                            'max-width:', width, 'px;max-height:', height, 'px;margin:5px 0 ', txt.length > 0 ? 2 : 5, 'px;',
-                            'box-sizing:border-box;border:none;border-radius:5px;', css.join(';'),
-                            '" />', txt.join('<br />')
-                        ].join('') : txt.join('<br />');
+                        height = h || maxHeight - (img ? 20 : 0);
+                    html = img ? [
+                        '<img class="oui-title-img" src="', url, '" style="display:block;padding:0px;',
+                        'max-width:', width, 'px;max-height:', height, 'px;margin:5px 0 ', txt.length > 0 ? 2 : 5, 'px;',
+                        'box-sizing:border-box;border:none;border-radius:5px;', css.join(';'),
+                        '" />', txt.join('<br />')
+                    ].join('') : txt.join('<br />');
 
                     if (!img) {
                         css.push('max-width:' + width + 'px;max-height:' + height + 'px;');
                         cssText = cssText.concat(css);
                     }
-                    elem.innerHTML = html;
                 } else {
                     txt.push(title.preHtml());
-                    elem.innerHTML = txt.join('<br />');
+                    html = txt.join('<br />');
                 }
+                if (!html) {
+                    Factory.hideTitle(that);
+                    return this;
+                }
+
                 if (!img) {
-                    let minSize = Factory.getMinWidth(txt.join('<br />')),
+                    let minSize = Factory.getMinWidth(html),
                         minWidth = minSize.width;
 
                     if (minWidth > Config.MaxWidth) {
@@ -8688,6 +8696,7 @@ $.title
                     cssText.push('min-width:' + minWidth + 'px;');
                 }
                 elem.style.cssText = cssText.join('');
+                elem.innerHTML = html;
             }
 
             if (elem.offsetWidth + elem.offsetLeft > bs.width + scroll.left) {
@@ -8837,14 +8846,14 @@ $.title
                     }
 
                     if (that.target === elem) {
-                        Factory.showTitle(ev, null, that);
+                        Factory.showTitle(ev, null, that, elem);
                         return false;
                     }
 
                     that.target = elem;
                     that.attribute = tarAttr;
 
-                    Factory.showTitle(ev, title, that);
+                    Factory.showTitle(ev, title, that, elem);
                 }
                 if (that.target && that.target !== elem) {
                     //鼠标移出
