@@ -8590,9 +8590,8 @@ $.title
                 zindex = 2147483647,
                 maxWidth = bs.width,
                 maxHeight = bs.height,
-                list = [], img, move = true, html = [];
-
-            $.console.log('type:', ev.type);
+                list = [], html = [], 
+                img, url, move = true;
 
             if (!opt.enabled) {
                 return this;
@@ -8659,6 +8658,9 @@ $.title
                                 h = (sizes[1] || sizes[0]).toInt();
                             } else if (s.startsWith('css:')) {
                                 css.push(s.substr(4));
+                            } else if (s.startsWith('url:')) {
+                                url = true;
+                                list.push({ page: true, url: s.substr(4) });
                             } else if (s.startsWith('func:')) {
                                 list.push({ txt: new Function('return ' + s.substr(5) + ';')() });
                             } else {
@@ -8677,22 +8679,31 @@ $.title
                         if (dr.img) {
                             if (dr.url) {
                                 html.push([
-                                    '<img class="oui-title-img" src="', dr.url, '" style="display:inline-block;padding:0px;',
+                                    '<img class="oui-title-img" src="', dr.url, '" style="display:block;padding:0px;',
                                     'max-width:', width, 'px;max-height:', height, 'px;margin:5px 0px;float:left;',
                                     'box-sizing:border-box;border:none;border-radius:5px;', css.join(';'),
                                     '" />'
                                 ].join(''));
                             }
+                        } else if (dr.page) {
+                            html.push([
+                                '<iframe class="oui-title-page" src="', dr.url, '" style="display:block;',
+                                'width:', width, 'px;height:', height, 'px;margin:0px;padding:0px;',
+                                'box-sizing:border-box;border:none;', css.join(';'),
+                                '"></iframe>'
+                            ].join(''));
                         } else {
                             html.push(dr.txt);
                         }
                     }
                     html = html.join('<br />');
 
-                    if (!img) {
+                    if (url) {
+                        css.push('margin:0;padding:0;');
+                    } else if (!img) {
                         css.push('max-width:' + width + 'px;max-height:' + height + 'px;');
-                        cssText = cssText.concat(css);
                     }
+                    cssText = cssText.concat(css);
                 } else {
                     html = title.preHtml();
                 }
@@ -8700,7 +8711,7 @@ $.title
                     Factory.hideTitle(that);
                     return this;
                 }
-                if (!img) {
+                if (!img && !url) {
                     let minSize = Factory.getMinWidth(html),
                         minWidth = minSize.width;
 
