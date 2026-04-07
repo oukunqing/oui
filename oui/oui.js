@@ -8566,8 +8566,10 @@ $.title
                 div.style.cssText = [
                     'position:absolute;left:-5000px;top:-5000px;',
                     'display:inline-block;overflow:hidden;',
+                    'margin:0;padding:0;',
                     'min-width:0;min-height:0;max-width:auto;max-height:auto;',
                     'border:none;box-sizing:border-box;',
+                    //'border:soild 1px #fff;box-sizing:content-box;',
                     Config.FontCss
                 ];
                 Cache.panels['text'] = div;
@@ -8575,7 +8577,7 @@ $.title
             }
             div.innerHTML = content;
 
-            let size = { width: div.offsetWidth };
+            let size = { width: div.offsetWidth + 2 };
 
             div.innerHTML = '';
 
@@ -8588,7 +8590,9 @@ $.title
                 zindex = 2147483647,
                 maxWidth = bs.width,
                 maxHeight = bs.height,
-                img, txt = [], html = '';
+                list = [], img, move = true, html = [];
+
+            $.console.log('type:', ev.type);
 
             if (!opt.enabled) {
                 return this;
@@ -8636,56 +8640,66 @@ $.title
                 ];
 
                 if (title.indexOf('|') > -1 || title.startsWith('[img:') || title.startsWith('[')) {
-                    let arr = title.split('|'), url, css = [], w = 0, h = 0;
+                    let arr = title.split('|'), css = [], w = 0, h = 0;
                     for (let i = 0; i < arr.length; i++) {
                         let s = arr[i].trim();
                         if (s.startsWith('[') && s.endsWith(']')) {
                             s = s.substr(1, s.length - 2);
                             if (s.startsWith('img:')) {
-                                url = s.substr(4);
                                 img = true;
+                                list.push({ img: true, url: s.substr(4) });
                             } else if (s.startsWith('text:') || s.startsWith('once:')) {
                                 let str = new Function('return ' + s.substr(5) + ';')();
+                                //固定不变的内容，直接赋值给.title属性
                                 obj.title = str || '';
-                                txt.push(str);
+                                list.push({ txt: str });
                             } else if (s.startsWith('size:')) {
                                 let sizes = s.substr(5).split(',');
                                 w = sizes[0].toInt();
                                 h = (sizes[1] || sizes[0]).toInt();
-                            } else if (s.startsWith('func:')) {
-                                txt.push(new Function('return ' + s.substr(5) + ';')());
                             } else if (s.startsWith('css:')) {
                                 css.push(s.substr(4));
+                            } else if (s.startsWith('func:')) {
+                                list.push({ txt: new Function('return ' + s.substr(5) + ';')() });
                             } else {
-                                txt.push(s.preHtml());
+                                list.push({ txt: s.preHtml() });
                             }
                         } else {
-                            txt.push(s.preHtml());
+                            list.push({ txt: s.preHtml() });
                         }
                     }
 
                     let width = w || maxWidth - (img ? 20 : 0),
                         height = h || maxHeight - (img ? 20 : 0);
-                    html = img ? [
-                        '<img class="oui-title-img" src="', url, '" style="display:block;padding:0px;',
-                        'max-width:', width, 'px;max-height:', height, 'px;margin:5px 0 ', txt.length > 0 ? 2 : 5, 'px;',
-                        'box-sizing:border-box;border:none;border-radius:5px;', css.join(';'),
-                        '" />', txt.join('<br />')
-                    ].join('') : txt.join('<br />');
+
+                    for (let j = 0; j < list.length; j++) {
+                        let dr = list[j];
+                        if (dr.img) {
+                            if (dr.url) {
+                                html.push([
+                                    '<img class="oui-title-img" src="', dr.url, '" style="display:inline-block;padding:0px;',
+                                    'max-width:', width, 'px;max-height:', height, 'px;margin:5px 0px;float:left;',
+                                    'box-sizing:border-box;border:none;border-radius:5px;', css.join(';'),
+                                    '" />'
+                                ].join(''));
+                            }
+                        } else {
+                            html.push(dr.txt);
+                        }
+                    }
+                    html = html.join('<br />');
 
                     if (!img) {
                         css.push('max-width:' + width + 'px;max-height:' + height + 'px;');
                         cssText = cssText.concat(css);
                     }
                 } else {
-                    txt.push(title.preHtml());
-                    html = txt.join('<br />');
+                    html = title.preHtml();
                 }
                 if (!html) {
                     Factory.hideTitle(that);
                     return this;
                 }
-
                 if (!img) {
                     let minSize = Factory.getMinWidth(html),
                         minWidth = minSize.width;
@@ -8884,7 +8898,8 @@ $.title
                 return _show(elem, tarAttr, ev), true;
             }
 
-            $.addListener(opt.element, 'mouseover,mousemove', function (ev) {
+            let events = ['mouseover', opt.move ? 'mousemove' : ''];
+            $.addListener(opt.element, events, function (ev) {
                 $.debounce({
                     id: 'oui-title-debounce',
                     delay: 5,
@@ -8927,7 +8942,7 @@ $.title
         });
         if (!$.isTopWindow()) {
             $.addListener(document, 'keydown', function (e) {
-                //捕获F5键值
+                //捕获F5键，仅刷新当前页面，防止F5刷新整站
                 if ($.getKeyCode(e) === $.KEY_CODE.F5) {
                     $.cancelBubble();
                     location.href = location.href;
