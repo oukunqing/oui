@@ -8520,6 +8520,7 @@ $.title
     };
 
     const Factory = {
+        className: 'oui-title-panel-element',
         buildTitle: function (options) {
             let opt = $.extend({
                 id: '',
@@ -8550,16 +8551,16 @@ $.title
             }
             return elem;
         },
-        buildElement: function (that) {
+        buildElement: function (that, tip) {
             let elem = document.createElement('DIV'),
                 opt = that.options;
 
-            elem.className = 'oui-title-panel-element';
+            elem.className = Factory.className;
             that.element = elem;
 
             return document.body.appendChild(elem), elem;
         },
-        getMinWidth: function (content) {
+        getMinSize: function (content) {
             let div = Cache.panels['text'];
             if (!div) {
                 div = document.createElement('DIV');
@@ -8577,14 +8578,54 @@ $.title
             }
             div.innerHTML = content;
 
-            let size = { width: div.offsetWidth + 2 };
+            let size = { width: div.offsetWidth + 2, height: div.offsetHeight };
 
             div.innerHTML = '';
 
             return size;
         },
+        getTipPos: function (obj, elem, bs, pos) {
+            let tip = ['left', 'right'].indexOf(pos) > -1 ? pos : pos || 'top',
+                left, right, top, bottom,
+                op = $.getOffset(obj);
+
+            if (tip === 'left' || tip === 'right') {
+                left = op.left - elem.offsetWidth - 5;
+                right = op.left + op.width + 5;
+                top = op.top + op.height / 2 - elem.offsetHeight / 2;
+
+                if (tip === 'left') {
+                    if (left < bs.scrollLeft) {
+                        left = right;
+                        tip = 'right';
+                    }
+                } else if (right + elem.offsetWidth >= bs.scrollLeft + bs.width) {
+                    tip = 'left';
+                } else {
+                    left = right;
+                }
+            } else {
+                top = op.top - elem.offsetHeight - 5;
+                bottom = op.top + op.height + 5;
+                left = op.left + (op.width - elem.offsetWidth) / 2;
+
+                if (tip === 'bottom') {
+                    if (bottom + elem.offsetHeight <= bs.scrollTop + bs.height) {
+                        top = bottom;
+                    } else {
+                        tip = 'top';
+                    }
+                } else if (top < bs.scrollTop) {
+                    top = bottom;
+                    tip = 'bottom';
+                }
+            }
+            return { left: left, top: top, tip: tip };
+        },
         showTitle: function (ev, title, that, obj) {
-            let elem = that.element,
+            let p = (obj.getAttribute('data-mode') || '').split('-'),
+                tip = p[0] === 'tip',
+                elem = that.element,
                 bs = $.getBodySize(),
                 opt = that.options,
                 zindex = 2147483647,
@@ -8608,18 +8649,39 @@ $.title
             if (!elem) {
                 elem = Factory.buildElement(that);
             }
+            $.setClass(elem, 'oui-title-tip', tip);
+
+            if (tip) {
+                $.createCssStyle([
+                    '.oui-title-tip:after {transform:translateX(-50%) rotate(45deg);',
+                    'content:" ";position:absolute;left:50%;bottom:-4px;width:6px;height:6px;',
+                    'background:#000;border-left:1px solid #000;border-top:1px solid #000;}',
+                    '.oui-title-tip-top:after{top:unset;bottom:-4px;border-right:1px solid #000;border-bottom:1px solid #000;}',
+                    '.oui-title-tip-bottom:after{top:-4px;border-left:1px solid #000;border-top:1px solid #000;}',
+                    '.oui-title-tip-left:after{right:-4px;left:unset;top:50%;',
+                    'transform:translateY(-50%) rotate(45deg);border-top:1px solid #000;border-right:1px solid #000;}',
+                    '.oui-title-tip-right:after{left:-4px;top:50%;transform: translateY(-50%) rotate(45deg);',
+                    'border-left: 1px solid #000;border-top: 1px solid #000;}'
+                ].join(''), 'oui-title-tip-001');
+            }
+
             let scroll = $.getScrollPosition(),
                 left = scroll.left + ev.clientX + 10,
                 top = scroll.top + ev.clientY + 10;
 
             if (!title) {
+                if (tip) {
+                    let par = this.getTipPos(obj, elem, bs, p[1]);
+                    left = par.left;
+                    top = par.top;
+                    $.addClass(elem, 'oui-title-tip-' + par.tip);
+                }
                 elem.style.left = left + 'px';
                 elem.style.top = top + 'px';
             } else {
                 let cssText = [
-                    'border:solid 1px #ddd;border-radius:5px;',
-                    'box-sizing:border-box;',
-                    'background:#fff;color:#333;',
+                    tip ? 'border:solid 1px #000;background:#000;color:#fff;' : 'border:solid 1px #ddd;background:#fff;color:#333;',
+                    'box-sizing:border-box;border-radius:5px;',
                     'opacity:0.98;z-index:', zindex, ';',
                     Config.FontCss,
                     //指定最小宽度和最小高度
@@ -8630,7 +8692,7 @@ $.title
                     'position:absolute;',
                     //'white-space:pre;',
                     'display:inline-block;',
-                    'overflow:hidden;',
+                    //'overflow:hidden;',
                     'text-overflow:ellipsis;',
                     'max-width:', maxWidth, 'px;',
                     'max-height:', maxHeight, 'px;',
@@ -8639,7 +8701,7 @@ $.title
                 ];
 
                 if (title.indexOf('|') > -1 || title.startsWith('[img:') || title.startsWith('[')) {
-                    let arr = title.split('|'), css = [], w = 0, h = 0;
+                    let arr = title.split('|'), css = [], imgcss = [], w = 0, h = 0;
                     for (let i = 0; i < arr.length; i++) {
                         let s = arr[i].trim();
                         if (s.startsWith('[') && s.endsWith(']')) {
@@ -8647,6 +8709,8 @@ $.title
                             if (s.startsWith('img:')) {
                                 img = true;
                                 list.push({ img: true, url: s.substr(4) });
+                            } else if (s.startsWith('imgcss:')) {
+                                imgcss.push(s.substr(7));
                             } else if (s.startsWith('text:') || s.startsWith('once:')) {
                                 let str = new Function('return ' + s.substr(5) + ';')();
                                 //固定不变的内容，直接赋值给.title属性
@@ -8681,7 +8745,7 @@ $.title
                                 html.push([
                                     '<img class="oui-title-img" src="', dr.url, '" style="display:block;padding:0px;',
                                     'max-width:', width, 'px;max-height:', height, 'px;margin:5px 0px;float:left;',
-                                    'box-sizing:border-box;border:none;border-radius:5px;', css.join(';'),
+                                    'box-sizing:border-box;border:none;border-radius:5px;', imgcss.join(';'),
                                     '" />'
                                 ].join(''));
                             }
@@ -8712,24 +8776,34 @@ $.title
                     return this;
                 }
                 if (!img && !url) {
-                    let minSize = Factory.getMinWidth(html),
-                        minWidth = minSize.width;
+                    let ms = Factory.getMinSize(html),
+                        mw = ms.width;
 
-                    if (minWidth > Config.MaxWidth) {
-                        minWidth = Config.MaxWidth;
+                    if (mw > Config.MaxWidth) {
+                        mw = Config.MaxWidth;
                     }
-                    cssText.push('min-width:' + minWidth + 'px;');
+                    cssText.push('min-width:' + mw + 'px;');
                 }
                 elem.style.cssText = cssText.join('');
                 elem.innerHTML = html;
             }
 
-            if (elem.offsetWidth + elem.offsetLeft > bs.width + scroll.left) {
-                elem.style.left = (bs.width + scroll.left - elem.offsetWidth - 5) + 'px';
-            }
-            if (elem.offsetHeight + elem.offsetTop > bs.height + scroll.top) {
-                //elem.style.top = (bs.height + scroll.top - elem.offsetHeight - 5) + 'px';
-                elem.style.top = scroll.top + ev.clientY - elem.offsetHeight - 5 + 'px';
+            if (tip) {
+                let par = this.getTipPos(obj, elem, bs, p[1]);
+                left = par.left;
+                top = par.top;
+                $.addClass(elem, 'oui-title-tip-' + par.tip);
+
+                elem.style.left = left + 'px';
+                elem.style.top = top + 'px';
+            } else {                
+                if (elem.offsetWidth + elem.offsetLeft > bs.width + scroll.left) {
+                    elem.style.left = (bs.width + scroll.left - elem.offsetWidth - 5) + 'px';
+                }
+                if (elem.offsetHeight + elem.offsetTop > bs.height + scroll.top) {
+                    //elem.style.top = (bs.height + scroll.top - elem.offsetHeight - 5) + 'px';
+                    elem.style.top = scroll.top + ev.clientY - elem.offsetHeight - 5 + 'px';
+                }
             }
 
             if (opt.timeout) {
@@ -8752,11 +8826,13 @@ $.title
                     Cache.timers['hide-timer'] = window.setTimeout(function () {
                         if (that.element && that.element.style.display !== 'none') {
                             that.element.style.display = 'none';
+                            that.element.className = Factory.className;
                         }
                     }, delay);
                 } else {
                     if (that.element && that.element.style.display !== 'none') {
                         that.element.style.display = 'none';
+                        that.element.className = Factory.className;
                     }
                 }
             }

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>表单验证示例</title>
+    <title>自定义Title提示信息</title>
 <style type="text/css">
 body {font-size:14px;}
 .lbl {color:#999;font-size:14px;line-height:24px;display: inline-block; float:left;}
@@ -12,6 +12,20 @@ button {cursor: pointer; padding:3px 5px;float:left;margin-right:5px;}
 input {line-height: 24px;padding:0px 5px;float:left;margin-right:5px;}
 select {height:30px;}
 
+/* 向下箭头：最精致版本 */
+.oui-title-tip-top22:after,.oui-title-tip-top22:before {
+    content: " ";
+    position: absolute;
+    left: 50%;
+    bottom: -4px;
+    transform: translateX(-50%) rotate(45deg);
+    width: 6px;
+    height: 6px;
+    background: #000;
+    /* 关键：只画两条边，和主边框完全一致 */
+    border-right: 1px solid #000;
+    border-bottom: 1px solid #000;
+}
 
 </style>
 </head>
@@ -109,13 +123,13 @@ select {height:30px;}
                 <a title="网络图片提示信息|[img:http://112.54.97.178:81/pic/20260403/137279/20260403090150_01_137279_000_01.jpg]|[size:300,200]|这是一张抓拍的图片|图片大小未知|[img:http://112.54.97.178:81/pic/20260406/137279/20260406110124_01_137279_000_01.jpg]">这是网络图片的提示信息，限制大小300*200px</a>
             </dd>
             <dd>
-                <a title="[img:http://112.54.97.178:81/pic/20260403/137279/20260403090150_01_137279_000_01.jpg]|[size:400,300]|[css:border:solid 1px #f00;border-radius:5px]|这是一张抓拍的图片|图片大小未知|限制大小400*300px|并且指定了边框颜色">这是一张图片的提示信息，限制大小400*300px，并且指定了一些样式</a>
+                <a title="[img:http://112.54.97.178:81/pic/20260403/137279/20260403090150_01_137279_000_01.jpg]|[size:400,300]|[css:color:#00f;border-radius:5px]|[imgcss:border:solid 1px #00f;]|这是一张抓拍的图片|图片大小未知|限制大小400*300px|并且指定了边框颜色">这是一张图片的提示信息，限制大小400*300px，并且指定了一些样式</a>
             </dd>
             <dd>
-                <a title="[css:border:solid 1px #f00;border-radius:0px;color:#00f;]|[这是一张抓拍    的图片，图片大小未知，图片来源于网络]|[A][B]限制大小400*300px|并且指定了边框颜色">这是一个提示信息，指定了边框颜色、文字颜色等一些样式</a>
+                <a title="[css:border:solid 1px #f00;border-radius:0px;color:#00f;]|这是一个提示信息，这里留一些    空白|指定了边框的颜色和文字的颜色|">这是一个提示信息，指定了边框颜色、文字颜色等一些样式</a>
             </dd>
             <dd>
-                <a title="[func:module.toTimeDuration('2026-04-04 16:10:25');]">在线状态时间时长</a>
+                <a title="[func:module.toTimeDuration('2026-04-04 16:10:25');]" data-mode="tip-bottom" style="margin-left:500px;">在线状态时间时长</a>
             </dd>
             <dd>
                 <a title="[text:module.toTimeDuration('2026-04-04 16:10:25');]">在线状态时间时长2</a>
@@ -124,7 +138,7 @@ select {height:30px;}
                 <a title="[url:title_url.html]|[size:600,400]">URL页面提示信息，仅限同域（不能跨域）</a>
             </dd>
         </dl>
-        <div style="height:300px;"></div>
+        <div style="height:2300px;"></div>
     </div>
     </div>
 </body>
