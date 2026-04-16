@@ -26,7 +26,7 @@
             isArray = Array.isArray || function (a) { return Object.prototype.toString.call(a) === '[object Array]'; },
             isElement = function (o) {
                 return (
-                    typeof HTMLElement === 'object' ? o instanceof HTMLElement : //DOM2
+                    typeof HTMLElement === 'object' ? o instanceof HTMLElement :
                         o && isObject(o) && o.nodeType === 1 && isString(o.nodeName)
                 );
             },
@@ -181,8 +181,8 @@
             Esc: 27,
             Space: 32,
             Delete: 46,
-            F1: 112, F2: 113, F3: 114, F4: 115, 
-            F5: 116, F6: 117, F7: 118, F8: 119, 
+            F1: 112, F2: 113, F3: 114, F4: 115,
+            F5: 116, F6: 117, F7: 118, F8: 119,
             F9: 120, F10: 121, F11: 122, F12: 123,
             Arrow: {
                 Left: 37, Right: 39,
@@ -199,15 +199,15 @@
             },
             Num: { 0: 48, 1: 49, 2: 50, 3: 51, 4: 52, 5: 53, 6: 54, 7: 55, 8: 56, 9: 57 },
             NumList: [48, 49, 50, 51, 52, 53, 54, 55, 56, 57],
-            Symbol: { 
-                "*": 56, "+": 187, "-": 189, ".": 190, "/": 191, 
+            Symbol: {
+                "*": 56, "+": 187, "-": 189, ".": 190, "/": 191,
                 ":": 186, Minus: 189, Dot: 190
             },
             Min: {
                 Enter: 108,
-                0: 96, 1: 97, 2: 98, 3: 99, 4: 100, 
+                0: 96, 1: 97, 2: 98, 3: 99, 4: 100,
                 5: 101, 6: 102, 7: 103, 8: 104, 9: 105,
-                Symbol: { 
+                Symbol: {
                     "*": 106, "+": 107, "-": 109, ".": 110, "/": 111, Minus: 109, Dot: 110
                 },
                 Num: { 0: 96, 1: 97, 2: 98, 3: 99, 4: 100, 5: 101, 6: 102, 7: 103, 8: 104, 9: 105 },
@@ -215,7 +215,7 @@
             },
             // F1 F2 ... F12
             Func: {
-                1: 112, 2: 113, 3: 114, 4: 115, 5: 116, 6: 117, 
+                1: 112, 2: 113, 3: 114, 4: 115, 5: 116, 6: 117,
                 7: 118, 8: 119, 9: 120, 10: 121, 11: 122, 12: 123
             },
             // F1 F2 ... F12
@@ -240,7 +240,7 @@
         compress = function (s) { return sreplace(/[\s]/g, ''); },
         isUndefined = function (o) { return typeof o === 'undefined'; },
         isString = function (s, nonempty) { return typeof s === 'string' && (nonempty ? trim(s) !== '' : true); },
-        isNumber = function (n, min, max) { 
+        isNumber = function (n, min, max) {
             if (typeof n !== 'number') { return false; }
             var isMin = typeof min === 'number', isMax = typeof max === 'number';
             return isMin && isMax ? n >= min && n <= max : (isMin ? n >= min : isMax ? n <= max : true);
@@ -248,7 +248,7 @@
         checkNumber = function (n, min, max) {
             return isNumber(n, min, max);
         },
-        setNumber = function(n, min, max) {
+        setNumber = function (n, min, max) {
             if (typeof n !== 'number') { return n; }
             var isMin = isNumber(min), isMax = isNumber(max);
             if (isMin && isMax) { return n < min ? min : (n > max ? max : n); }
@@ -269,7 +269,7 @@
             判断变量是否为boolean
             b: 变量
             dv: 默认值，若dv为boolean，且b不为boolean，则返回dv；若dv不为boolean,则返回b === boolean
-        */        
+        */
         isBoolean = function (b, dv) {
             var bool = typeof b === 'boolean';
             return typeof dv === 'boolean' ? (bool ? b : dv) : bool;
@@ -341,7 +341,7 @@
             }
             if (isUndefined(o) || null === o) { return true; }
             else if (isString(o)) { return '' === trim(o); }
-            else if (isArray(o)) { return 0 === o.length  || 1 === o.length && '' === o[0]; }
+            else if (isArray(o)) { return 0 === o.length || 1 === o.length && '' === o[0]; }
             else if (isObject(o)) { for (var k in o) { return false; } return true; }
             return false;
         },
@@ -353,7 +353,7 @@
             return $.PATTERN.Ip.test(ip);
         },
         isIPv6 = function (ip) {
-            if($.PATTERN.IPv6.test(ip)) {
+            if ($.PATTERN.IPv6.test(ip)) {
                 return true;
             }
             var mc;
@@ -432,7 +432,7 @@
             }
             if (!isArray(numbers)) {
                 return [];
-            }            
+            }
             var list = [], num;
             for (var i = 0; i < numbers.length; i++) {
                 if (!isNaN(num = parseInt(numbers[i], 10))) {
@@ -454,7 +454,7 @@
             }
             if (!isArray(numbers)) {
                 return [];
-            }            
+            }
             var list = [], num;
             for (var i = 0; i < numbers.length; i++) {
                 if (!isNaN(num = parseInt(numbers[i], 10)) && num >= minVal) {
@@ -632,11 +632,11 @@
         },
         toJsonString = function (o, space) { return JSON.stringify(o, null, space || 0); },
         toJson = function (s) { return JSON.parse(s); },
-        tryToJson = function(s) {
+        tryToJson = function (s) {
             var result = {};
             try {
                 result = { result: 1, status: 1, json: JSON.parse(s) };
-            } catch(e) {
+            } catch (e) {
                 result = { result: 0, status: 0, json: null };
             }
             return result;
@@ -781,9 +781,9 @@
             var data = {};
             for (var k in formData) {
                 var dr = formData[k],
-                    key = caseType === $.CASE_TYPE.Pascal ? k.toPascalCase(true) : 
-                        caseType === $.CASE_TYPE.Underline ? k.toUnderlineCase(true) : 
-                        k.toCamelCase(true);
+                    key = caseType === $.CASE_TYPE.Pascal ? k.toPascalCase(true) :
+                        caseType === $.CASE_TYPE.Underline ? k.toUnderlineCase(true) :
+                            k.toCamelCase(true);
                 if (dr === null) {
                     data[key] = dr;
                 } else if ($.isArray(dr)) {
@@ -821,7 +821,7 @@
                 b = buildParam($.extend({}, param), null, false);
             return ($.isString(a, true) ? a + '&' : '') + b;
         },
-        buildApiData = function(formData, param, caseType) {
+        buildApiData = function (formData, param, caseType) {
             return buildAjaxData('', formData, param, caseType);
         },
         buildUrlParam = function (param, strict, url) {
@@ -879,10 +879,10 @@
             }
             return url;
         },
-        addQueryString = function(url, key, val) {
+        addQueryString = function (url, key, val) {
             return setQueryString(url, key, val, false);
         },
-        removeQueryString = function(url, key) {
+        removeQueryString = function (url, key) {
             var datas = getQueryString(url);
             for (var k in datas) {
                 if (k === key) {
@@ -899,7 +899,7 @@
                 pos1 = str.indexOf('/');
             return (prefix ? http : '') + (pos1 > -1 ? str.substr(0, pos1) : str);
         },
-        getUrlPage = function(url) {
+        getUrlPage = function (url) {
             var pos = url.indexOf('?'),
                 str = pos > -1 ? url.substr(0, pos) : url,
                 pos1 = str.lastIndexOf('/');
@@ -923,7 +923,7 @@
                     try {
                         debug = getQueryString(parent.location.href)[key || 'debug'];
                         result = !isNullOrUndefined(debug) && debug === '1'
-                    } catch (e) {}
+                    } catch (e) { }
                 }
                 return result || isDebugAction();
             } catch (e) {
@@ -1079,20 +1079,20 @@
             return dval;
         },
         //用于获取参数名重载（参数内容允许为null值）
-        getParamValue = function() {
-            for(var i = 0; i < arguments.length; i++) {
-                if(typeof arguments[i] !== 'undefined') {
+        getParamValue = function () {
+            for (var i = 0; i < arguments.length; i++) {
+                if (typeof arguments[i] !== 'undefined') {
                     return arguments[i];
                 }
             }
             return undefined;
         },
         //用于获取参数内容（仅获取有效的内容，不包含null和空字符串）
-        getParamCon = function() {
+        getParamCon = function () {
             var arg;
-            for(var i = 0; i < arguments.length; i++) {
+            for (var i = 0; i < arguments.length; i++) {
                 arg = arguments[i];
-                if(!$.isNullOrUndefined(arg)) {
+                if (!$.isNullOrUndefined(arg)) {
                     if ($.isString(arg)) {
                         if (arg.trim() !== '') {
                             return arg.trim();
@@ -1104,8 +1104,8 @@
             }
             return undefined;
         },
-        cleanSlash = function(urlpath) {
-            if(!urlpath || urlpath.indexOf('/') < 0) {
+        cleanSlash = function (urlpath) {
+            if (!urlpath || urlpath.indexOf('/') < 0) {
                 return urlpath;
             }
             return urlpath.replace(/[\/]{2,}/g, '/').replace(/(http:\/|https:\/)/ig, '$1/');
@@ -1150,7 +1150,7 @@
                     pid = tmp[0],
                     id = tmp[1];
 
-                if(pid && id) {
+                if (pid && id) {
                     if (hideSection) {
                         obj[id] = item;
                     } else {
@@ -1212,17 +1212,17 @@
                 pattern.push(k);
             }
             pattern = new RegExp('(' + pattern.join('|') + ')', 'ig');
-            
-            return str.replace(pattern, function (all, t) { 
-                return clear ? '' : prefix + (fixed || dic[t]) + postfix; 
+
+            return str.replace(pattern, function (all, t) {
+                return clear ? '' : prefix + (fixed || dic[t]) + postfix;
             });
         },
         buildTreeList = function (options) {
-            var list = [], node = {}, 
+            var list = [], node = {},
                 items = $.isArray(options) ? options : [options];
 
             for (var i = 0; i < items.length; i++) {
-                var dr = $.extend({}, items[i], {level: 0});
+                var dr = $.extend({}, items[i], { level: 0 });
                 if ($.isUndefinedOrNull(dr.pid) || !($.isString(dr.pid) || $.isNumber(dr.pid))) {
                     node = dr;
                     node.index = list.length;
@@ -1255,11 +1255,11 @@
 
             function _each(list, o, type) {
                 var len = list.length;
-                 for (var i = 0; i < len; i++) {
+                for (var i = 0; i < len; i++) {
                     o.p = list[i];
                     //找父节点 或 兄弟节点
                     //父节点已找到，当前非兄弟节点，循环结束（因为已经不是同一个父节点了）
-                    if(!(_find(o, type, true, true, i) || _find(o, type, false, true, i))) {
+                    if (!(_find(o, type, true, true, i) || _find(o, type, false, true, i))) {
                         if (o.pi > 0) {
                             break;
                         }
@@ -1343,7 +1343,7 @@
     $.extendNative($, {
         trim: trim, compress: compress, value: value,
         isUndefined: isUndefined, isUndef: isUndefined, isString: isString, isNumber: isNumber,
-        isFunction: isFunction, isFunc: isFunction, isObject: isObject, isArray: isArray, isDate: isDate, 
+        isFunction: isFunction, isFunc: isFunction, isObject: isObject, isArray: isArray, isDate: isDate,
         isDateString: isDateString, isDateStr: isDateString,
         isBoolean: isBoolean, isBool: isBool, isBooleans: isBooleans, isBools: isBools,
         isTrue: isTrue, isFalse: isFalse, isNull: isNull, isEmpty: isEmpty,
@@ -1361,7 +1361,7 @@
             return padLeft(s, totalWidth, paddingChar, true);
         },
         toDecimal: toDecimal, toFloat: toDecimal, checkNumber: checkNumber, setNumber: setNumber,
-        toInteger: toInteger, toInt: toInteger, toNumber: toNumber, 
+        toInteger: toInteger, toInt: toInteger, toNumber: toNumber,
         toNumberList: toNumberList, toIdList: toIdList, toIntList: toIntList,
         toBoolean: toBoolean, toBool: toBoolean, iniToJson: iniToJson, jsonToIni: jsonToIni, toIniJson: toIniJson,
         replaceKeys: replaceKeys,
@@ -1372,7 +1372,7 @@
         toAscii: toAscii, toAsciiHex: toAsciiHex, asciiToChar: asciiToChar, asciiToStr: asciiToChar,
         getArguments: getArguments, getArgs: getArguments, setFieldCase: setFieldCase,
         toFunction: toFunction, toFunc: toFunction, callFunction: callFunction, callFunc: callFunction,
-        param: buildParam, buildParam: buildParam, setUrlParam: setUrlParam, 
+        param: buildParam, buildParam: buildParam, setUrlParam: setUrlParam,
         buildAjaxData: buildAjaxData, buildUrlData: buildAjaxData, buildUrlParam: buildUrlParam,
         buildApiData: buildApiData,
         setQueryString: setQueryString, getQueryString: getQueryString, getUrlHost: getUrlHost, getUrlPage: getUrlPage,
@@ -1424,7 +1424,7 @@
             }
             return undefined;
         },
-        setPrefix: function(data, prefix) {
+        setPrefix: function (data, prefix) {
             if ($.isArray(data)) {
                 var arr = [];
                 for (var i = 0, c = data.length; i < c; i++) {
@@ -1456,7 +1456,7 @@
             if (plane) {
                 // 按平面算，1度所代表的距离，单位：米
                 var Ratio = earthRadius || 111320;
-                var w = lat2 > lat1 ? lat2 - lat1 : lat1 - lat2, 
+                var w = lat2 > lat1 ? lat2 - lat1 : lat1 - lat2,
                     h = lon2 > lon1 ? lon2 - lon1 : lon1 - lon2,
                     //d = Math.sqrt(w * w + h * h) * Ratio;
                     //d = Math.sqrt(w ** 2 + h ** 2) * Ratio;
@@ -1468,7 +1468,7 @@
             var EarthRadius = earthRadius || 6378137,
                 dLat = (lat2 - lat1) * Math.PI / 180,
                 dLng = (lon2 - lon1) * Math.PI / 180,
-                a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + 
+                a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
                     Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) * Math.sin(dLng / 2),
                 c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)),
                 d = EarthRadius * c;
@@ -1512,7 +1512,7 @@
          * @param {number} dist - 延长距离（两端各延长dist长度）
          * @returns {Array} 新的对角线顶点 [q1, q3]（q1是p1延长后，q3是p3延长后）
          */
-        extendDiagonal: function(p1, p3, dist) {
+        extendDiagonal: function (p1, p3, dist) {
             // 1. 计算原对角线的长度和单位向量（方向：p1→p3）
             const diagLen = Math.hypot(p3.x - p1.x, p3.y - p1.y);
             if (diagLen === 0) {
@@ -1690,7 +1690,7 @@
 
 // md5
 !function ($) {
-    function _filter (string) {
+    function _filter(string) {
         if (typeof string === 'string') {
             return string;
         }
@@ -2264,7 +2264,7 @@
             }
             return null;
         },
-        getYearStart: function(year) {
+        getYearStart: function (year) {
             var ds = $.getDateOptions(year);
             if (ds !== null) {
                 return '{0}-01-01 00:00:00'.format(ds.year);
@@ -2274,7 +2274,7 @@
                 return '{0}-01-01 00:00:00'.format(year);
             }
         },
-        getYearEnd: function(year) {
+        getYearEnd: function (year) {
             var ds = $.getDateOptions(year);
             if (ds !== null) {
                 return '{0}-12-31 23:59:59'.format(ds.year);
@@ -2385,7 +2385,7 @@
             var arr = [], a = this;
             for (var i = a.length - 1; i >= 0; i--) {
                 arr.push(a[i]);
-            } 
+            }
             return arr;
         }
     }, 'Array.prototype');
@@ -2407,7 +2407,7 @@
         startWith: function (s) { return this.startsWith(s); },
         endWith: function (s) { return this.endsWith(s); },
         len: function () { return this.replace(/([^\x00-\xff])/g, 'aa').length; },
-        uppercaseLen: function() { return (this.match(/[A-Z]/g) || '').length; },
+        uppercaseLen: function () { return (this.match(/[A-Z]/g) || '').length; },
         contains: function (obj) {
             if ($.isArray(obj)) {
                 return obj.indexOf(this) >= 0;
@@ -2533,7 +2533,7 @@
                     t = [s[j]];
                 } else {
                     t.push(s[j]);
-                }            
+                }
             }
             if (t.length > 0) {
                 list.push(t.join(''));
@@ -2553,7 +2553,7 @@
             }
             return (isPascal ? s.substr(0, 1).toUpperCase() : s.substr(0, 1).toLowerCase()) + (s.substr(1) || '');
         },
-        toPascalCase: function(strict) {
+        toPascalCase: function (strict) {
             return this.toCamelCase(strict, true);
         },
         toUnderlineCase: function () {
@@ -2761,7 +2761,7 @@
         },
         //lower: 是否小写
         //cutoff: 是否截断长度
-        toNumHex: function(len, lower, cutoff) {
+        toNumHex: function (len, lower, cutoff) {
             var num = parseInt(this, 10);
             if (!isNaN(num)) {
                 return num.toHex(len, lower, cutoff);
@@ -2794,7 +2794,7 @@
             }
             return s1 > s2 ? 1 : s1 < s2 ? -1 : 0;
         },
-        cleanSlash: function() {
+        cleanSlash: function () {
             return $.cleanSlash(this);
         },
         replaceKeys: function (keys, prefix, postfix, clear) {
@@ -2806,13 +2806,13 @@
         getQueryString: function (name) {
             return $.getQueryString(this, name);
         },
-        addQueryString: function(key, value) {
+        addQueryString: function (key, value) {
             return $.addQueryString(this, key, value);
         },
-        delQueryString: function(key) {
+        delQueryString: function (key) {
             return $.delQueryString(this, key);
         },
-        removeQueryString: function(key) {
+        removeQueryString: function (key) {
             return $.removeQueryString(this, key);
         },
         setUrlParam: function (data, value, nocache) {
@@ -2821,10 +2821,10 @@
         getUrlHost: function (prefix) {
             return $.getUrlHost(this, prefix);
         },
-        getUrlPage: function() {
+        getUrlPage: function () {
             return $.getUrlPage(this);
         },
-        getFilePath: function(currentPath) {
+        getFilePath: function (currentPath) {
             return $.getFilePath(this, currentPath);
         },
         getFileName: function (withoutExtension) {
@@ -2844,14 +2844,14 @@
                 regCon = /^data:image\/(jpg|jpeg|png|gif|bmp)+;base64,([0-9A-Z\+\-=\/]{32,})/i;
             return !s.trim() ? false : regCon.test(s) || regExt.test($.getExtension(s));
         },
-        getFullPath: function(hideHost) {
-        	return $.getFullPath(this, hideHost);
+        getFullPath: function (hideHost) {
+            return $.getFullPath(this, hideHost);
         },
-        getFileDir: function(showName) {
-        	return $.getFileDir(this, showName);
+        getFileDir: function (showName) {
+            return $.getFileDir(this, showName);
         },
-        getFileDirName: function() {
-			return $.getFileDirName(this);
+        getFileDirName: function () {
+            return $.getFileDirName(this);
         },
         getFileSize: function (callback) {
             return $.getFileSize(this, callback);
@@ -2913,7 +2913,7 @@
         checkFilePath: function () {
             return $.checkFilePath(this);
         },
-        checkPicPath: function() {
+        checkPicPath: function () {
             return $.checkFilePath(this);
         },
         toEvenLen: function () {
@@ -2924,7 +2924,7 @@
             return s;
         },
         reverseHex: function (reverse) {
-            if(!$.isBoolean(reverse, true)) {
+            if (!$.isBoolean(reverse, true)) {
                 return this;
             }
             var hex = this.toEvenLen(), arr = [], len = hex.length;
@@ -2995,32 +2995,32 @@
             var f = s * (1 + c) * Math.pow(2, e);
             return decimalLen > 0 ? f.round(decimalLen) : f;
         },
-        floatToHex: function(reverse) {
+        floatToHex: function (reverse) {
             var num = (this || '').trim(),
                 decVal = parseFloat(Math.abs(num), 10),
                 fraction, exponent;
 
-            if(decVal === 0) {
+            if (decVal === 0) {
                 fraction = 0;
                 exponent = 0;
             } else {
                 //偏置常数
                 exponent = 127;
-                if(decVal >= 2) {
-                    while(decVal >= 2) {
+                if (decVal >= 2) {
+                    while (decVal >= 2) {
                         exponent++;
                         decVal /= 2;
                     }
-                } else if(decVal < 1) {
-                    while(decVal < 1) {
+                } else if (decVal < 1) {
+                    while (decVal < 1) {
                         exponent--;
                         decVal *= 2;
-                        if(exponent === 0) {
+                        if (exponent === 0) {
                             break;
                         }
                     }
                 }
-                if(exponent !== 0) {
+                if (exponent !== 0) {
                     decVal -= 1;
                 } else {
                     decVal /= 2;
@@ -3151,17 +3151,17 @@
             var s = this;
             return s === 'false' || !strict && s === '0';
         },
-        iniToJson: function() {
+        iniToJson: function () {
             return $.iniToJson(this);
         },
-        jsonToIni: function() {
+        jsonToIni: function () {
             var rst = $.tryToJson(this);
             if (rst.status) {
                 return $.jsonToIni(rst.json || rst.data);
             }
             return '';
         },
-        addClass: function(className, append) {
+        addClass: function (className, append) {
             var s = this;
             if ($.isBoolean(append, true)) {
                 return s + (s ? ' ' : '') + className;
@@ -3231,10 +3231,10 @@
                 var arr = num.toString().split('.');
                 return arr[0].padLeft(totalWidth, paddingChar) + '.' + (arr[1] || '');
             }
-            return this.toString().padLeft(totalWidth, paddingChar); 
+            return this.toString().padLeft(totalWidth, paddingChar);
         },
-        padRight: function (totalWidth, paddingChar) { 
-            return this.toString().padRight(totalWidth, paddingChar); 
+        padRight: function (totalWidth, paddingChar) {
+            return this.toString().padRight(totalWidth, paddingChar);
         },
         isDecimal: function () { return $.isDecimal(this); },
         isInteger: function () { return $.isInteger(this); },
@@ -3280,7 +3280,7 @@
         toNum36: function (len, lower, cutoff) {
             return this.toRadixNumber(len, lower, cutoff, 36);
         },
-        floatToHex: function(reverse) {
+        floatToHex: function (reverse) {
             return this.toString().floatToHex(reverse);
         },
         toAsciiHex: function () { return $.toAsciiHex(this, true); },
@@ -3352,7 +3352,7 @@
                 dt = seconds.toTimeData(secondDecimalLen),
                 units = $.isArray(us) ? [us[0] || '时', us[1] || '分', us[2] || '秒'] : $.isBoolean(us, false) ? ['时', '分', '秒'] : [],
                 len = units.length;
-                
+
             //当daysUnit===200时，以小时代替天数
             if (daysUnit === 200) {
                 daysUnit = '';
@@ -3380,7 +3380,7 @@
 
             return (data.d ? data.d + (daysUnit || '天') : '') + time.join(':');
         },
-        toDurationStr: function(hideDays, timeUnits) {
+        toDurationStr: function (hideDays, timeUnits) {
             var seconds = this,
                 data = seconds.toTimeData(0, hideDays),
                 time = [
@@ -3392,12 +3392,12 @@
                 len = time.length,
                 html = [],
                 us = timeUnits,
-                units = $.isArray(us) ? [us[0] || '天', us[1] || '小时', us[2] || '分钟', us[2] || '秒'] 
+                units = $.isArray(us) ? [us[0] || '天', us[1] || '小时', us[2] || '分钟', us[2] || '秒']
                     : $.isBoolean(us, false) ? ['天', '小时', '分钟', '秒'] : [' ', ':', ':'],
                 complete = units.join('').replace(/[\s:]/g, '') === '',
                 none = true, u = ':';
 
-            for(var i = 0; i < len; i++) {
+            for (var i = 0; i < len; i++) {
                 if (time[i] || complete) {
                     if (i === 0 && hideDays) {
                         continue;
@@ -3534,12 +3534,12 @@
         totalSeconds: function (milliseconds) {
             milliseconds = $.isBoolean(milliseconds, true);
             var dt = this,
-                ts = dt.getHours() * 3600 + dt.getMinutes() * 60 + dt.getSeconds() + 
+                ts = dt.getHours() * 3600 + dt.getMinutes() * 60 + dt.getSeconds() +
                     (milliseconds ? dt.getMilliseconds() / 1000 : 0);
 
             return ts;
         },
-        dayStart: function(fmt) {
+        dayStart: function (fmt) {
             var dt = this,
                 ts = dt.getTime() / 1000 - dt.totalSeconds();
 
@@ -3548,7 +3548,7 @@
             }
             return ts;
         },
-        dayEnd: function(fmt) {
+        dayEnd: function (fmt) {
             var ts = this.dayStart() + 86400 - 1;
 
             if ($.isString(fmt)) {
@@ -3707,7 +3707,7 @@
     }, isCutOff = function (t) {
         return ['|'].indexOf(t) > -1;
     }, isLineSeparate = function (vs, t) {
-        if (['/','\\'].indexOf(t) > -1) {
+        if (['/', '\\'].indexOf(t) > -1) {
             vs.push(t === '\\' ? '\n' : '<br />');
             return true;
         }
@@ -3724,20 +3724,20 @@
             while (k < nc) {
                 pos0 = ns.indexOf('[');
                 if (pos0 < 0) {
-                    pushSeparateItem(arr, {type: 0, list: ns.split(''), loop: 0 });
+                    pushSeparateItem(arr, { type: 0, list: ns.split(''), loop: 0 });
                     break;
                 }
-                pr = {type: 0, list: ns.substr(0, pos0).split(''), loop: 0 };
+                pr = { type: 0, list: ns.substr(0, pos0).split(''), loop: 0 };
                 ns = ns.substr(pos0);
                 k += pos0;
                 pushSeparateItem(arr, pr);
 
                 pos1 = ns.indexOf(']');
                 if (pos1 < 0) {
-                    pushSeparateItem(arr, {type: 0, list: ns.split(''), loop: 0 });
+                    pushSeparateItem(arr, { type: 0, list: ns.split(''), loop: 0 });
                     break;
                 }
-                pr = {type: 1, list: ns.substr(1, pos1 - 1).split(''), loop: 0 };
+                pr = { type: 1, list: ns.substr(1, pos1 - 1).split(''), loop: 0 };
                 ns = ns.substr(pos1 + 1);
                 k += pos1;
 
@@ -3753,7 +3753,7 @@
                         ns = ns.substr(pos1 + 1);
                         k += pos1;
                     }
-                } else if(/([\d\/\|\[\\])/.test(ns[0]) || !ns) {
+                } else if (/([\d\/\|\[\\])/.test(ns[0]) || !ns) {
                     pr.loop = -1;
                     loop += 1;
                     loopIdx = arr.length;
@@ -3870,7 +3870,7 @@
                 //若没有指定循环体大小，默认为2
                 arrL = pos1 > 0 ? nv.substr(pos1 - 1, 1).split('') : [2];
                 arrE = nv.substr(pos1 + 1).split('');
-            }                    
+            }
             for (i = 0; i < arrE.length; i++) {
                 elen += arrE[i].num36ToInt();
             }
@@ -3948,9 +3948,9 @@
         return vs.join('');
     }, formatNumberSwitch = function (v, f, nv, dn, err, str, args, freedom, loop) {
         var fu = f.toUpperCase(),
-            numLen = dn[0].length, 
+            numLen = dn[0].length,
             decimalLen = (dn[1] || '').length,
-            n = $.isNumber(nv) || /[\d]+/g.test(nv) ? parseInt(nv, 10) : (/[A-Z]/gi.test(nv) ? nv.num36ToInt() : 
+            n = $.isNumber(nv) || /[\d]+/g.test(nv) ? parseInt(nv, 10) : (/[A-Z]/gi.test(nv) ? nv.num36ToInt() :
                 (fu === 'D' ? 0 : ['C', 'F', 'N'].indexOf(fu) > -1 && v === parseInt(v, 10) ? 0 : 2));
 
         if (isHexNumber(v) && regPattern.numberSymbol.test(fu)) {
@@ -4164,8 +4164,8 @@
             //格式说明符无效。
             '\u683c\u5f0f\u8bf4\u660e\u7b26\u65e0\u6548\u3002'
         ],
-        //是否抛出异常
-        formatException = String.isFormatError();
+            //是否抛出异常
+            formatException = String.isFormatError();
 
         if (arguments.length > 1) {
             for (var i = 0, c = arguments.length; i < c; i++) {
@@ -4205,11 +4205,11 @@
             faultTolerance = vc > mc && $.isBoolean(vals[vc - 1], false);
 
         for (var i = 0; i < mc; i++) {
-            var m = matchs[i], 
-                mv = m.replace(pattern, ''), 
-                p = s.indexOf(m), 
+            var m = matchs[i],
+                mv = m.replace(pattern, ''),
+                p = s.indexOf(m),
                 idx = parseInt(mv, 10),
-                c = /{/g.test(m) ? m.match(/{/g).length : 0, 
+                c = /{/g.test(m) ? m.match(/{/g).length : 0,
                 d = /}/g.test(m) ? m.match(/}/g).length : 0;
 
             if ((c + d) % 2 != 0) {
@@ -4228,8 +4228,8 @@
                     v = encodeURIComponent(v);
                     $.console.log('value encode: ', v);
                 }
-                if (/^-\d$/g.test(mv) && odd) { 
-                    v = throwError(err[0], s, vals, m); 
+                if (/^-\d$/g.test(mv) && odd) {
+                    v = throwError(err[0], s, vals, m);
                 } else if (idx >= vc && vc > 0) {
                     if (faultTolerance || !formatException) {
                         //容错机制：当只有1个字符格式时，匹配第1个参数
@@ -4237,7 +4237,7 @@
                         v = 1 === mc && vc <= (faultTolerance ? 2 : 1) ? vals[0] : m;
                         $.console.trace(err[1]);
                     } else {
-                        throwError(err[1], s, vals); 
+                        throwError(err[1], s, vals);
                     }
                 }
                 else if ($.isNullOrUndefined(v)) {
@@ -4422,7 +4422,7 @@
         },
         getFilePath = function (fullPath, currentPath) {
             var pos = fullPath.lastIndexOf('/'),
-            	prefix = currentPath || getLocationPath();
+                prefix = currentPath || getLocationPath();
             if (pos >= 0) {
                 var path = fullPath.substr(0, pos + 1);
                 //如果文件路径和当前页面处于同一目录层级，则不需要目录
@@ -4440,7 +4440,7 @@
             var path = filePath.replace(/(\\)/g, '/').split('?')[0],
                 p = path.lastIndexOf('/'),
                 name = p >= 0 ? path.substr(p + 1) : path;
-            
+
             if (withoutExtension) {
                 var pattern = /(\.tar)\.[a-z0-9]{0,}$/i;
                 if (pattern.test(name)) {
@@ -4465,26 +4465,26 @@
             }
             return '';
         },
-        getFullPath = function(filePath, hideHost) {
-        	var path = filePath.split('?')[0];
-        	if (hideHost) {
-        		path = path.replace(/^(http|https)(:\/\/)/i, '');
-        		path = path.substr(path.indexOf('/'));
-        	}
-        	return path;
+        getFullPath = function (filePath, hideHost) {
+            var path = filePath.split('?')[0];
+            if (hideHost) {
+                path = path.replace(/^(http|https)(:\/\/)/i, '');
+                path = path.substr(path.indexOf('/'));
+            }
+            return path;
         },
         getFileDir = function (filePath, showName) {
-        	var path = filePath.split('?')[0];
-        	path = path.replace(/^(http|https)(:\/\/)/i, '');
-        	var pos0 = path.indexOf('/'),
-        		pos1 = path.lastIndexOf('/');
-        	if (pos0 >= 0 && pos1 >= 0) {
-        		return showName ? path.substr(pos0) : path.substr(pos0, pos1 - pos0 + 1);
-        	}
-        	return showName ? path : '';
+            var path = filePath.split('?')[0];
+            path = path.replace(/^(http|https)(:\/\/)/i, '');
+            var pos0 = path.indexOf('/'),
+                pos1 = path.lastIndexOf('/');
+            if (pos0 >= 0 && pos1 >= 0) {
+                return showName ? path.substr(pos0) : path.substr(pos0, pos1 - pos0 + 1);
+            }
+            return showName ? path : '';
         },
         getFileDirName = function (filePath) {
-        	return getFileDir(filePath, true);
+            return getFileDir(filePath, true);
         },
         getExtension = function (filePath) {
             var name = getFileName(filePath, false);
@@ -4736,19 +4736,19 @@
             }
             return p;
         },
-        setCssAttrDefVal = function(attr) {
+        setCssAttrDefVal = function (attr) {
             var val = { width: 0, height: 0, top: 0, right: 0, bottom: 0, left: 0 };
-            switch(attr) {
-            case 'margin':
-            case 'padding':
-            case 'border':
-            case 'radius':
-                val[attr + 'Width'] = 0;
-                val[attr + 'Height'] = 0;
-                break;
-            default:
-                val = { width: 0, height: 0 };
-                break;
+            switch (attr) {
+                case 'margin':
+                case 'padding':
+                case 'border':
+                case 'radius':
+                    val[attr + 'Width'] = 0;
+                    val[attr + 'Height'] = 0;
+                    break;
+                default:
+                    val = { width: 0, height: 0 };
+                    break;
             }
             return val;
         },
@@ -4922,8 +4922,8 @@
             return $.extend(par, { left: left, top: top });
         },
         getClientSize = function (elem) {
-            return isElement(elem = $.toElement(elem)) ? { 
-                width: elem.clientWidth, height: elem.clientHeight 
+            return isElement(elem = $.toElement(elem)) ? {
+                width: elem.clientWidth, height: elem.clientHeight
             } : { width: 0, height: 0 };
         },
         getOuterSize = function (elem) {
@@ -4939,9 +4939,9 @@
         getScrollSize = function (elem) {
             if (isElement(elem = $.toElement(elem))) {
                 return {
-                    top: elem.scrollTop, 
-                    left: elem.scrollLeft, 
-                    width: elem.scrollWidth, 
+                    top: elem.scrollTop,
+                    left: elem.scrollLeft,
+                    width: elem.scrollWidth,
                     height: elem.scrollHeight,
                 };
             }
@@ -5000,10 +5000,10 @@
             var scrollLeft = window.scrollX || window.pageXOffset || doc.scrollLeft,
                 scrollTop = window.scrollY || window.pageYOffset || doc.scrollTop;
 
-            var size = { 
-                width: doc.clientWidth, height: doc.clientHeight, 
-                scrollTop: scrollTop, scrollLeft: scrollLeft, 
-                scrollWidth: doc.scrollWidth, scrollHeight: doc.scrollHeight 
+            var size = {
+                width: doc.clientWidth, height: doc.clientHeight,
+                scrollTop: scrollTop, scrollLeft: scrollLeft,
+                scrollWidth: doc.scrollWidth, scrollHeight: doc.scrollHeight
             }, zoom = getZoomRatio();
 
             if (zoom < 50) {
@@ -5034,9 +5034,9 @@
         //relativePosition: 相对位置(弹出层中的表单)
         setPanelPosition = function (elem, panel, config) {
             var cfg = $.extend({
-                    topPriority: false,
-                    relativePosition: null,
-                }, config),
+                topPriority: false,
+                relativePosition: null,
+            }, config),
                 bs = $.getBodySize(),
                 es = $.getOffset(elem, $.getParam(cfg, 'relativePosition,relative', false)),
                 //选项框显示位置：0-下方，1-上方，2-中间（横跨，窗口高度不够导致）
@@ -5044,7 +5044,7 @@
 
             panel.style.left = (es.left) + 'px';
             panel.style.width = (es.width) + 'px';
-            
+
             //清除选项框高度
             panel.style.height = 'auto';
             //先显示在目标控件的下方
@@ -5080,9 +5080,9 @@
                     }
                 }
             }
-            return { 
-                top: parseFloat(panel.style.top, 10).round(2), 
-                left: parseFloat(panel.style.left, 10).round(2), 
+            return {
+                top: parseFloat(panel.style.top, 10).round(2),
+                left: parseFloat(panel.style.left, 10).round(2),
                 width: (parseFloat('0' + panel.style.width, 10) || panel.offsetWidth).round(2),
                 height: (parseFloat('0' + panel.style.height, 10) || panel.offsetHeight).round(2),
                 position: pos
@@ -5356,7 +5356,7 @@
                                 cur = setClassValue(cur, css, action);
                             }
                         }
-                        
+
                         finalValue = stripAndCollapse(cur);
                         if (curValue != finalValue) {
                             obj.setAttribute('class', finalValue);
@@ -5448,7 +5448,7 @@
             if ($.isFunction(id) && !$.isFunction(callback)) {
                 postfix = callback;
                 callback = id,
-                id = null;
+                    id = null;
             }
             return loadStaticFile(path, id, callback, head, 'link', {
                 type: 'text/css', rel: 'stylesheet', href: $.setQueryString(path)
@@ -5935,12 +5935,12 @@
                 pos = { x: ev.x, y: ev.y };
             }
             var elems = $.isArray(elem) ? elem : [elem];
-            for(var i = 0; i < elems.length; i++) {
+            for (var i = 0; i < elems.length; i++) {
                 if (_onElement(elems[i], pos)) {
                     return true;
                 }
             }
-            function _onElement (elem, pos) {
+            function _onElement(elem, pos) {
                 if (!isElement(elem = toElement(elem))) {
                     return false;
                 }
@@ -5956,7 +5956,7 @@
                 return false;
             }
             var elems = $.isArray(elem) ? elem : [elem];
-            for(var i = 0; i < elems.length; i++) {
+            for (var i = 0; i < elems.length; i++) {
                 if (_inElement(elems[i], ev.target)) {
                     return true;
                 }
@@ -5965,7 +5965,7 @@
                 if (!isElement(p = toElement(p))) {
                     return false;
                 }
-                while(t && $.isElement(t)) {
+                while (t && $.isElement(t)) {
                     if (t === p) {
                         return true;
                     }
@@ -6251,7 +6251,7 @@
                     //console.log('getImgSize: ', par);
                 };
             }
-             var img = new Image();
+            var img = new Image();
             img.src = img_url;
 
             return getImgRealSize(img, callback);
@@ -6371,7 +6371,7 @@
         //$.buildTimeOptions
         //输出参数：[[],[]] 或 [{},{}]
         buildIntervalOptions = function (options) {
-            var list = [], i, c, val, txt, 
+            var list = [], i, c, val, txt,
                 args = arguments, obj = false,
                 // 最后1个参数：MS,Ms,ms,mS,S,s等。若最后为.(点) 则表示输出结构数组
                 /*
@@ -6395,7 +6395,7 @@
             }
 
             var mul = ['ms', 'mS'].indexOf(par) > -1 ? 1000 : 1,
-                ms = ['MS', 'Ms'].indexOf(par) > -1, 
+                ms = ['MS', 'Ms'].indexOf(par) > -1,
                 fixed = ['Ms', 'mS', 'S'].indexOf(par) > -1;
 
             if ($.isString(options, true)) {
@@ -6419,7 +6419,7 @@
                 }
             }
 
-            function _build (list, cfg, num) {
+            function _build(list, cfg, num) {
                 let d, h, m, s;
                 if (num >= cfg.days) {
                     d = parseInt(num.div(cfg.days), 10);
@@ -6444,11 +6444,11 @@
                 return num;
             }
 
-            function _getText (ms, mul, val, fixed) {
+            function _getText(ms, mul, val, fixed) {
                 let num = val.div(mul), unit = '秒', cfg = {
                     seconds: 1,
-                    minutes: 60, 
-                    hours: 60 * 60, 
+                    minutes: 60,
+                    hours: 60 * 60,
                     days: 60 * 60 * 24
                 }, list = [];
 
@@ -6515,7 +6515,7 @@
             }
             return rst;
         },
-        execFullScreen = function(evt, elem, full) {
+        execFullScreen = function (evt, elem, full) {
             if (typeof evt !== 'undefined' && evt) {
                 evt.call(elem);
                 if ($.isFunction(window.fullScreenCallback)) {
@@ -6538,20 +6538,20 @@
             if (!$.isDocument(elem) && !$.isElement(elem = $.toElement(elem))) {
                 return this;
             }
-            var rfs = elem.requestFullScreen || 
-                elem.webkitRequestFullScreen || 
-                elem.mozRequestFullScreen || 
+            var rfs = elem.requestFullScreen ||
+                elem.webkitRequestFullScreen ||
+                elem.mozRequestFullScreen ||
                 elem.msRequestFullScreen;
-            
+
             return execFullScreen(rfs, elem, true), this;
         },
         exitFullScreen = function () {
             var elem = document,
-                cfs = elem.cancelFullScreen || 
-                elem.webkitCancelFullScreen || 
-                elem.mozCancelFullScreen || 
-                elem.exitFullScreen;
-            
+                cfs = elem.cancelFullScreen ||
+                    elem.webkitCancelFullScreen ||
+                    elem.mozCancelFullScreen ||
+                    elem.exitFullScreen;
+
             return execFullScreen(cfs, elem, false), this;
         },
         getFullScreenElement = function () {
@@ -6568,19 +6568,19 @@
                 return this;
             }
             document.addEventListener('fullscreenchange', callback);
-            document.addEventListener('mozfullscreenchange', callback); 
+            document.addEventListener('mozfullscreenchange', callback);
             document.addEventListener('webkitfullscreenchange', callback);
             document.addEventListener('MSFullscreenChange', callback);
 
             return this;
         },
-        isSubWindow = function() {
+        isSubWindow = function () {
             return typeof window !== 'undefined' && window.location !== top.window.location;
         },
-        isTopWindow = function() {
+        isTopWindow = function () {
             return typeof window !== 'undefined' && window.location === top.window.location;
         },
-        setSelectValue = function(elem, value, append, text) {
+        setSelectValue = function (elem, value, append, text) {
             if (!$.isElement(elem = $.toElement(elem))) {
                 return this;
             }
@@ -6636,7 +6636,7 @@
             if (!str || (!$.isString(str, true) && !$.isObject(str))) {
                 return str;
             }
-            function _encode (s) {
+            function _encode(s) {
                 //if (!s || !/[&<>\s'"]/g.test(s)) {
                 if (!s || !/[&<>]/g.test(s)) {
                     return s;
@@ -6724,13 +6724,13 @@
             // 1. UA判断
             const isMobileUA = /mobile|android|webos|iphone|ipod|ipad|blackberry/i.test(ua);
 
-            if (typeof window !== 'undefined') {                
+            if (typeof window !== 'undefined') {
                 // 2. 屏幕尺寸判断（通常移动端屏幕宽度≤768px）
                 const isSmallScreen = window.innerWidth <= 768;
-                
+
                 // 3. 检测是否支持触摸事件（移动端核心特征）
                 const isTouchSupport = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-                
+
                 // 综合判断：UA匹配 或 （小屏幕+支持触摸）
                 return isMobileUA || (isSmallScreen && isTouchSupport);
 
@@ -7038,7 +7038,7 @@
             $I: function (id, parent) {
                 if ($.isElement(id)) {
                     return id;
-                } else if($.isString(id, true)) {
+                } else if ($.isString(id, true)) {
                     var elem;
                     id = (id.indexOf('#') > -1 ? id.replace(/[#]+/g, '') : id).trim();
                     if ((elem = doc.getElementById(id)) !== null) {
@@ -8053,25 +8053,25 @@
                 if ($.isFunction(func) && !$.isUndefined(id)) {
                     return func(id, param), this;
                 }
-            } catch (e) {}
+            } catch (e) { }
         }
         return $;
     },
-    closeParentMenu = function (moduleName, funcName) {
-        if ($.isSubWindow()) {
-            try {
-                var func = typeof parent.$[moduleName] !== 'undefined' ? parent.$[moduleName][funcName] : null;
-                if ($.isFunction(func)) {
-                    func();
-                }
-                if(typeof parent.$ !== 'undefined' && $.isFunction(parent.$[funcName])) {
-                    parent.$[funcName]();
-                }
-                return this;
-            } catch (e) {}
-        }        
-        return $;
-    };
+        closeParentMenu = function (moduleName, funcName) {
+            if ($.isSubWindow()) {
+                try {
+                    var func = typeof parent.$[moduleName] !== 'undefined' ? parent.$[moduleName][funcName] : null;
+                    if ($.isFunction(func)) {
+                        func();
+                    }
+                    if (typeof parent.$ !== 'undefined' && $.isFunction(parent.$[funcName])) {
+                        parent.$[funcName]();
+                    }
+                    return this;
+                } catch (e) { }
+            }
+            return $;
+        };
     $.extend($, {
         //通过子窗口关闭父窗口对话框(oui.dialog)
         closeParentDialog: function (param) {
@@ -8161,7 +8161,7 @@ $.debounce 防抖
             }
             return false;
         },
-        isChange: function(debounce, key) {
+        isChange: function (debounce, key) {
             if (key !== debounce.lastKey) {
                 debounce.lastKey = key;
                 return true;
@@ -8215,8 +8215,8 @@ $.debounce 防抖
             if (!$.isFunction(func)) {
                 return _;
             }
-            if (!opt.delay || !opt.timeout 
-                || Factory.isChange(_, opt.key) 
+            if (!opt.delay || !opt.timeout
+                || Factory.isChange(_, opt.key)
                 || Factory.isFirst(_, opt.timeout)) {
                 return func(), _;
             }
@@ -8365,8 +8365,8 @@ $.debounce 防抖
             return true;
         }
         let style = window.getComputedStyle(elem),
-            p = { 
-                overflow: style.overflow, x: style.overflowX, y: style.overflowY 
+            p = {
+                overflow: style.overflow, x: style.overflowX, y: style.overflowY
             };
 
         // 以下取值均可能导致子元素被裁剪
@@ -8550,7 +8550,7 @@ $.title
             }
             return elem;
         },
-        buildElement: function(that) {
+        buildElement: function (that) {
             let elem = document.createElement('DIV'),
                 opt = that.options;
 
@@ -8583,14 +8583,14 @@ $.title
 
             return size;
         },
-        showTitle: function(ev, title, that, obj) {
-            let elem = that.element, 
+        showTitle: function (ev, title, that, obj) {
+            let elem = that.element,
                 bs = $.getBodySize(),
                 opt = that.options,
                 zindex = 2147483647,
                 maxWidth = bs.width,
                 maxHeight = bs.height,
-                list = [], html = [], 
+                list = [], html = [],
                 img, url, move = true;
 
             if (!opt.enabled) {
@@ -8736,7 +8736,7 @@ $.title
                 if (that.timer) {
                     window.clearTimeout(that.timer);
                 }
-                that.timer = window.setTimeout(function() {
+                that.timer = window.setTimeout(function () {
                     Factory.hideTitle(that);
                 }, opt.timeout);
             }
@@ -8749,7 +8749,7 @@ $.title
                     if (Cache.timers['hide-timer']) {
                         window.clearTimeout(Cache.timers['hide-timer']);
                     }
-                    Cache.timers['hide-timer'] = window.setTimeout(function() {
+                    Cache.timers['hide-timer'] = window.setTimeout(function () {
                         if (that.element && that.element.style.display !== 'none') {
                             that.element.style.display = 'none';
                         }
@@ -8825,7 +8825,7 @@ $.title
             }
 
             function _show(elem, tarAttr, ev) {
-                let coverAttr = 'data-cover', 
+                let coverAttr = 'data-cover',
                     timeAttr = 'data-cover-ts',
                     curTs = new Date().getTime(),
                     update = Factory.convertTitle(elem, tarAttr),
@@ -8833,7 +8833,7 @@ $.title
 
                 if (title) {
                     let tag = (elem.tagName || '').toLowerCase();
-                    
+
                     if (tag !== 'body') {
                         const con = (tag !== 'select' ? Factory.getElementValue(elem) : Factory.getSelectedText(elem)) || '';
                         const p = {
@@ -8846,7 +8846,7 @@ $.title
                         if (p.con === p.str || p.con.indexOf(p.str) > -1) {
                             // 优化处理，减少重复检测
                             // 是否被遮挡：0-未设置，1-遮挡，2-显示
-                            const Config = { None: 0, Cover: 1, Show: 2};
+                            const Config = { None: 0, Cover: 1, Show: 2 };
                             let cover = parseInt('0' + elem.getAttribute(coverAttr), 10),
                                 time = parseInt('0' + elem.getAttribute(timeAttr), 10);
 
@@ -8889,7 +8889,7 @@ $.title
                     //Factory.hideTitle(that);
                 }
             }
-            
+
             function _title(ev, disabled) {
                 if (disabled) {
                     return false;
@@ -8940,13 +8940,13 @@ $.title
 
     /* 优化F5刷新(仅子页面有效) */
     if (typeof window !== 'undefined') {
-        $.addListener(window, 'load', function() {
+        $.addListener(window, 'load', function () {
             /* 优化Title */
             if (!$.isWap) {
                 if (typeof location !== 'undefined') {
                     // 若页面URL参数中加入origin-title=1，不启用$.title，还是用原生的title
                     if (parseInt('0' + $.getQueryString(location.href, 'origin-title'), 10) !== 1) {
-                        $.title({ id:'oui-title' });
+                        $.title({ id: 'oui-title' });
                     }
                 }
             }
