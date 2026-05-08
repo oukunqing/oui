@@ -90,6 +90,9 @@
                 curScale: curScale, boxScale: boxScale, minScale: minScale
             };
         },
+        getImgPath: function (opt) {
+            return $.getParam(opt, 'img,pic,path,url');
+        },
         showRange: function (p1, p2, div, box) {
             if ($.isNullOrUndefined(div)) {
                 div = document.createElement('DIV');
@@ -140,12 +143,12 @@
             that.img.style.top = that.cfg.top + 'px';
 
             //图片尺寸是否大于容器框
-            var bigImg = that.cfg.width > that.cfg.offset.width || that.cfg.height > that.cfg.offset.height;
+            //var bigImg = that.cfg.width > that.cfg.offset.width || that.cfg.height > that.cfg.offset.height;
 
             if (that.cfg.curScale >= 1) {
                 this.hideMagnifier(that);
             }
-            return bigImg;
+            return this;
         },
         getOffsetSize: function(elem) {
             if (elem === null) {
@@ -258,6 +261,246 @@
             const x = touches[1].clientX - touches[0].clientX;
             const y = touches[1].clientY - touches[0].clientY;
             return Math.sqrt(x * x + y * y); // 勾股定理计算距离
+        },
+        drag: function (that, update) {
+            $.addListener(that.img, 'pointerdown', function (ev) {
+                if (0 == ev.button) {
+                    $.cancelBubble(ev);
+                    that.cfg.pointerdown = true;
+                    that.img.setPointerCapture(ev.pointerId);
+                    that.cfg.lastpointer = $.getEventPos(ev);
+                    that.cfg.diffpointer = { x: 0, y: 0 };
+                }
+            });
+            $.addListener(that.img, 'pointermove', function (ev) {
+                if (that.cfg.pointerdown) {
+                    $.cancelBubble(ev);
+                    if (ev.target.className.indexOf('oui-picbox-img') < 0) {
+                        return false;
+                    }
+                    // 图片移动时隐藏放大镜
+                    Factory.hideMagnifier(that);
+
+                    var cur = $.getEventPos(ev);
+                    that.cfg.diffpointer.x = cur.x - that.cfg.lastpointer.x;
+                    that.cfg.diffpointer.y = cur.y - that.cfg.lastpointer.y;
+                    that.cfg.lastpointer = { x: cur.x, y: cur.y };
+
+                    that.cfg.x += that.cfg.diffpointer.x;
+                    that.cfg.y += that.cfg.diffpointer.y;
+
+                    var left = that.cfg.x - that.cfg.w / 2,
+                        top = that.cfg.y - that.cfg.h / 2;
+
+                    that.img.style.cursor = 'move';
+                    that.img.style.left = left + 'px';
+                    that.img.style.top = top + 'px';
+
+                    that.cfg.left = left;
+                    that.cfg.top = top;
+                }
+                ev.preventDefault();
+            });
+            if (!update && that.cfg.showMagnifier) {
+                $.addListener([that.box, document], 'pointermove', function (ev) {
+                    Factory.showMagnifier(ev, that);
+                });
+            }
+            $.addListener(that.img, 'pointerup', function (ev) {
+                if (that.cfg.pointerdown) {
+                    $.cancelBubble(ev);
+                    that.cfg.pointerdown = false;
+                }
+            });
+            $.addListener(that.img, 'pointerout', function (ev) {
+                if (that.cfg.pointerdown) {
+                    $.cancelBubble(ev);
+                    that.cfg.pointerdown = false;
+                } else {
+                    Factory.hideMagnifier(that);
+                }
+            });
+            $.addListener(that.img, 'pointercancel', function (ev) {
+                if (that.cfg.pointerdown) {
+                    $.cancelBubble(ev);
+                    that.cfg.pointerdown = false;
+                }
+            });
+
+            return this;
+        },
+        control: function (that, update) {
+            if (update) {
+                return this;
+            }
+            var titlebar = document.createElement('DIV');
+            titlebar.className = 'oui-picbox-title oui-picbox-unselect';
+            $.addListener(titlebar, 'dblclick,touchstart', function() {
+                $.cancelBubble();
+                that.scale(that.cfg.boxScale).center();
+            });
+            titlebar.oncontextmenu = function() {
+                that.scale(1).center();
+                return false;
+            };
+            that.titlebar = titlebar;
+            that.box.appendChild(titlebar);
+
+            var statusbar = document.createElement('DIV');
+            statusbar.className = 'oui-picbox-status oui-picbox-unselect';
+            $.addListener(statusbar, 'dblclick,touchstart', function() {
+                $.cancelBubble();
+                that.center();
+            });
+            that.statusbar = statusbar;
+            that.box.appendChild(statusbar);
+
+            if (!that.cfg.showTitle) {
+                statusbar.oncontextmenu = function() {
+                    that.scale(1).center();
+                    return false;
+                };
+            }
+
+            return this;
+        },
+        select: function (that, update) {
+            if (update) {
+                return this;
+            }
+            that.box.oncontextmenu = function(ev) {
+                //鼠标右键若有拖动动作，或者鼠标位置不在图片范围内，则不显示默认的右键菜单
+                if (that.cfg.selectdrag || !that.cfg.selectonpic || ev.target.nodeName !== 'IMG') {
+                    return false;
+                }
+            };
+            $.addListener(that.box, 'pointerdown', function (ev) {
+                if (2 == ev.button) {
+                    $.cancelBubble(ev);
+                    var pos = $.getEventPos(ev);
+                    that.cfg.selectdown = true;
+                    //鼠标右键是否有拖动动作
+                    that.cfg.selectdrag = false;
+                    that.cfg.startpointer = { x: pos.x - that.cfg.offset.left, y: pos.y - that.cfg.offset.top };
+                    that.cfg.selection = Factory.showRange(that.cfg.startpointer, null, that.cfg.selection, that.box);
+                    //鼠标位置是否在图片范围内
+                    that.cfg.selectonpic = that.onpicture(that.cfg.startpointer, that.cfg);
+                }
+            });
+            $.addListener(that.box, 'pointermove', function (ev) {
+                if (that.cfg.selectdown) {
+                    $.cancelBubble(ev);
+                    var pos = $.getEventPos(ev);
+                    that.cfg.endpointer = { x: pos.x - that.cfg.offset.left, y: pos.y - that.cfg.offset.top };
+                    that.cfg.selection = Factory.showRange(that.cfg.startpointer, that.cfg.endpointer, that.cfg.selection, that.box);
+                }
+                ev.preventDefault();
+            });
+            $.addListener(that.box, 'pointerup', function (ev) {
+                if (that.cfg.selectdown) {
+                    $.cancelBubble(ev);
+                    var pos = $.getEventPos(ev);
+                    that.cfg.selectdown = false;
+                    that.cfg.endpointer = { x: pos.x - that.cfg.offset.left, y: pos.y - that.cfg.offset.top };
+
+                    that.cfg.startpointer = Factory.checkRange(that.cfg.startpointer, that.cfg);
+                    that.cfg.endpointer = Factory.checkRange(that.cfg.endpointer, that.cfg);
+                    that.cfg.selection = Factory.hideRange(that.cfg.selection);
+                    that.rangeScale(that.cfg.startpointer, that.cfg.endpointer);
+                }
+            });
+            $.addListener(that.box, 'pointercancel', function (ev) {
+                if (that.cfg.selectdown) {
+                    $.cancelBubble(ev);
+                    that.cfg.selection = Factory.hideRange(that.cfg.selection);
+                    that.cfg.selectdown = false;
+                }
+            });
+
+            return this;
+        },
+        wheelZoom: function (that, update) {
+            $.addListener(that.img, 'dblclick', function (ev) {
+                $.cancelBubble(ev);
+                that.zoom(true, ev, 1.25);
+                ev.preventDefault();
+            });
+            if (update) {                
+                return this;
+            }
+            $.addListener(that.box, 'wheel', function (ev) {
+                $.cancelBubble(ev);
+                that.zoom(ev.deltaY < 0, ev);
+            });
+            $.addListener(that.box, 'dblclick', function (ev) {
+                $.cancelBubble(ev);
+                if (that.outside()) {
+                    that.center();
+                }
+                ev.preventDefault();
+            });
+            return this;
+        },
+        touchZoom: function(that, update) {
+            $.addListener(that.img, 'touchstart', function(e) {
+                if (e.touches.length === 1) {
+                    var x = Math.abs(e.touches[0].clientX );
+                    var y = Math.abs(e.touches[0].clientY);
+                    that.cfg.diffpointer = { x: 0, y: 0 };
+                    that.cfg.lastpointer = { x: x, y: y };
+                } else if (e.touches.length === 2) {
+                    that.cfg.startDistance = Factory.getTouchDistance(e.touches);
+                }
+            });
+
+            $.addListener(that.img, 'touchmove', function(e) {
+                if (e.touches.length === 1) {
+                    var cur = $.getEventPos(e);
+                    that.cfg.diffpointer.x = cur.x - that.cfg.lastpointer.x;
+                    that.cfg.diffpointer.y = cur.y - that.cfg.lastpointer.y;
+                    that.cfg.lastpointer = { x: cur.x, y: cur.y };
+
+                    that.cfg.x += that.cfg.diffpointer.x;
+                    that.cfg.y += that.cfg.diffpointer.y;
+
+                    var left = that.cfg.x - that.cfg.w / 2,
+                        top = that.cfg.y - that.cfg.h / 2;
+
+                    that.img.style.cursor = 'move';
+                    that.img.style.left = left + 'px';
+                    that.img.style.top = top + 'px';
+
+                    that.cfg.left = left;
+                    that.cfg.top = top;
+                } else if (e.touches.length === 2) {
+                    $.cancelBubble(e);
+                    e.preventDefault();
+                    var x = Math.abs(e.touches[0].clientX - e.touches[1].clientX);
+                    var y = Math.abs(e.touches[0].clientY - e.touches[1].clientY);
+                    var currentDistance = Math.sqrt(x * x + y * y),
+                        startDistance = that.cfg.startDistance,
+                        curScale = that.cfg.curScale,
+                        newScale = curScale * (currentDistance / startDistance);
+
+                    that.cfg.curScale = newScale;
+                    that.scale(newScale);
+                }
+            });
+            
+            $.addListener(that.img, 'touchend', function(e) {
+                if (e.touches.length === 2) {
+                    /*
+                    var x = Math.abs(e.changedTouches[0].clientX - e.changedTouches[1].clientX);
+                    var y = Math.abs(e.changedTouches[0].clientY - e.changedTouches[1].clientY);
+                    var endDistance = Math.sqrt(x * x + y * y),
+                        startDistance = that.cfg.startDistance,
+                        curScale = that.cfg.curScale;
+                        */
+
+                }
+            });
+            
+            return this;
         }
     };
 
@@ -291,6 +534,7 @@
                 that.box.removeChild(that.img);
                 $.extend(that.opt, opt);
                 update = true;
+                that.img = null;
             } else {
                 that.opt = opt;
             }
@@ -312,7 +556,7 @@
             }
 
             var img = document.createElement('IMG'),
-                picurl = that.opt.img || that.opt.pic;
+                picurl = Factory.getImgPath(that.opt);
 
             if (location.href.indexOf('http') === 0) {
                 //设置图片跨域
@@ -374,12 +618,18 @@
                     magnifierStyle: that.opt.magnifierStyle
                 };
 
-                Factory.setImgSize(that);
+                Factory.setImgSize(that).hideMagnifier(that);
+
+                Factory.drag(that, update)
+                    .select(that, update)
+                    .control(that, update)
+                    .wheelZoom(that, update)
+                    .touchZoom(that, update);
 
                 if(!update) {
-                    that.select().control();
-                }                    
-                that.drag().wheelZoom().touchZoom().status().title();
+                    that.status();
+                }
+                that.title();
                 
                 $.getFileSize(that.cfg.filePath, function(size) {
                     var fileSize = size >= 0 ? size : (opt.fileSize || 0);
@@ -392,20 +642,22 @@
                 }
             });
 
-            $.addListener(window, 'resize', function() {
-                //console.log('pic resize:', that.opt.fill, that.opt.margin);
-                that.resize(null, that.opt.fill, that.opt.margin);
-            });
+            if (!update) {
+                $.addListener(window, 'resize', function() {
+                    //console.log('pic resize:', that.opt.fill, that.opt.margin);
+                    that.resize(null, that.opt.fill, that.opt.margin);
+                });
 
-            if (that.opt.fullScreen) {
-                //Full Screen
-                $.addKeyListener(document, 'keyup', 'F', function (e, n) {
-                    $.fullScreen(that.box);
-                }, true);
-                //Quan Ping
-                $.addKeyListener(document, 'keyup', 'Q', function (e, n) {
-                    $.fullScreen(that.box);
-                }, true);
+                if (that.opt.fullScreen) {
+                    //Full Screen
+                    $.addKeyListener(document, 'keyup', 'F', function (e, n) {
+                        $.fullScreen(that.box);
+                    }, true);
+                    //Quan Ping
+                    $.addKeyListener(document, 'keyup', 'Q', function (e, n) {
+                        $.fullScreen(that.box);
+                    }, true);
+                }
             }
 
             return this;
@@ -413,42 +665,9 @@
         update: function (options) {
             let opt = Factory.checkOptions(options);
             if (opt) {
-                return this.initial(opt);
+                //this.img.src = Factory.getImgPath(opt);
+                return this.initial($.extend(this.opt, opt));
             }
-            return this;
-        },
-        control: function () {
-            var that = this;
-
-            var titlebar = document.createElement('DIV');
-            titlebar.className = 'oui-picbox-title oui-picbox-unselect';
-            $.addListener(titlebar, 'dblclick,touchstart', function() {
-                $.cancelBubble();
-                that.scale(that.cfg.boxScale).center();
-            });
-            titlebar.oncontextmenu = function() {
-                that.scale(1).center();
-                return false;
-            };
-            that.titlebar = titlebar;
-            that.box.appendChild(titlebar);
-
-            var statusbar = document.createElement('DIV');
-            statusbar.className = 'oui-picbox-status oui-picbox-unselect';
-            $.addListener(statusbar, 'dblclick,touchstart', function() {
-                $.cancelBubble();
-                that.center();
-            });
-            that.statusbar = statusbar;
-            that.box.appendChild(statusbar);
-
-            if (!that.cfg.showTitle) {
-                statusbar.oncontextmenu = function() {
-                    that.scale(1).center();
-                    return false;
-                };
-            }
-
             return this;
         },
         title: function (title, fileSize) {
@@ -462,8 +681,7 @@
                     '[', that.cfg.width, '×', that.cfg.height, '] ',
                     (fileSize ? '[' + fileSize + '] ' : ''), 
                     $.getFileName(that.img.src),
-                    '&nbsp;',
-                    ''
+                    '&nbsp;'
                 ];
                 that.titlebar.innerHTML = html.join('');
                 return that;
@@ -486,127 +704,6 @@
             }
 
             that.statusbar.innerHTML = '&nbsp;' + html.join('') + '&nbsp;';
-
-            return this;
-        },
-        drag: function () {
-            var that = this;
-            $.addListener(that.img, 'pointerdown', function (ev) {
-                if (0 == ev.button) {
-                    $.cancelBubble(ev);
-                    that.cfg.pointerdown = true;
-                    that.img.setPointerCapture(ev.pointerId);
-                    that.cfg.lastpointer = $.getEventPos(ev);
-                    that.cfg.diffpointer = { x: 0, y: 0 };
-                }
-            });
-            $.addListener(that.img, 'pointermove', function (ev) {
-                if (that.cfg.pointerdown) {
-                    $.cancelBubble(ev);
-                    if (ev.target.className.indexOf('oui-picbox-img') < 0) {
-                        return false;
-                    }
-                    // 图片移动时隐藏放大镜
-                    Factory.hideMagnifier(that);
-
-                    var cur = $.getEventPos(ev);
-                    that.cfg.diffpointer.x = cur.x - that.cfg.lastpointer.x;
-                    that.cfg.diffpointer.y = cur.y - that.cfg.lastpointer.y;
-                    that.cfg.lastpointer = { x: cur.x, y: cur.y };
-
-                    that.cfg.x += that.cfg.diffpointer.x;
-                    that.cfg.y += that.cfg.diffpointer.y;
-
-                    var left = that.cfg.x - that.cfg.w / 2,
-                        top = that.cfg.y - that.cfg.h / 2;
-
-                    that.img.style.cursor = 'move';
-                    that.img.style.left = left + 'px';
-                    that.img.style.top = top + 'px';
-
-                    that.cfg.left = left;
-                    that.cfg.top = top;
-                }
-                ev.preventDefault();
-            });
-            if (that.cfg.showMagnifier) {
-                $.addListener([that.box, document], 'pointermove', function (ev) {
-                    Factory.showMagnifier(ev, that);
-                });
-            }
-            $.addListener(that.img, 'pointerup', function (ev) {
-                if (that.cfg.pointerdown) {
-                    $.cancelBubble(ev);
-                    that.cfg.pointerdown = false;
-                }
-            });
-            $.addListener(that.img, 'pointerout', function (ev) {
-                if (that.cfg.pointerdown) {
-                    $.cancelBubble(ev);
-                    that.cfg.pointerdown = false;
-                } else {
-                    Factory.hideMagnifier(that);
-                }
-            });
-            $.addListener(that.img, 'pointercancel', function (ev) {
-                if (that.cfg.pointerdown) {
-                    $.cancelBubble(ev);
-                    that.cfg.pointerdown = false;
-                }
-            });
-
-            return this;
-        },
-        select: function () {
-            var that = this;
-            that.box.oncontextmenu = function(ev) {
-                //鼠标右键若有拖动动作，或者鼠标位置不在图片范围内，则不显示默认的右键菜单
-                if (that.cfg.selectdrag || !that.cfg.selectonpic || ev.target.nodeName !== 'IMG') {
-                    return false;
-                }
-            };
-            $.addListener(that.box, 'pointerdown', function (ev) {
-                if (2 == ev.button) {
-                    $.cancelBubble(ev);
-                    var pos = $.getEventPos(ev);
-                    that.cfg.selectdown = true;
-                    //鼠标右键是否有拖动动作
-                    that.cfg.selectdrag = false;
-                    that.cfg.startpointer = { x: pos.x - that.cfg.offset.left, y: pos.y - that.cfg.offset.top };
-                    that.cfg.selection = Factory.showRange(that.cfg.startpointer, null, that.cfg.selection, that.box);
-                    //鼠标位置是否在图片范围内
-                    that.cfg.selectonpic = that.onpicture(that.cfg.startpointer, that.cfg);
-                }
-            });
-            $.addListener(that.box, 'pointermove', function (ev) {
-                if (that.cfg.selectdown) {
-                    $.cancelBubble(ev);
-                    var pos = $.getEventPos(ev);
-                    that.cfg.endpointer = { x: pos.x - that.cfg.offset.left, y: pos.y - that.cfg.offset.top };
-                    that.cfg.selection = Factory.showRange(that.cfg.startpointer, that.cfg.endpointer, that.cfg.selection, that.box);
-                }
-                ev.preventDefault();
-            });
-            $.addListener(that.box, 'pointerup', function (ev) {
-                if (that.cfg.selectdown) {
-                    $.cancelBubble(ev);
-                    var pos = $.getEventPos(ev);
-                    that.cfg.selectdown = false;
-                    that.cfg.endpointer = { x: pos.x - that.cfg.offset.left, y: pos.y - that.cfg.offset.top };
-
-                    that.cfg.startpointer = Factory.checkRange(that.cfg.startpointer, that.cfg);
-                    that.cfg.endpointer = Factory.checkRange(that.cfg.endpointer, that.cfg);
-                    that.cfg.selection = Factory.hideRange(that.cfg.selection);
-                    that.rangeScale(that.cfg.startpointer, that.cfg.endpointer);
-                }
-            });
-            $.addListener(that.box, 'pointercancel', function (ev) {
-                if (that.cfg.selectdown) {
-                    $.cancelBubble(ev);
-                    that.cfg.selection = Factory.hideRange(that.cfg.selection);
-                    that.cfg.selectdown = false;
-                }
-            });
 
             return this;
         },
@@ -691,7 +788,7 @@
             if(!action) {
                 ratio = 1 / ratio;
             }
-            //计算缩放后的比率         
+            //计算缩放后的比率
             scale = Factory.setRatio(w * ratio / that.cfg.width);
 
             if(scale < that.cfg.minScale) {
@@ -764,89 +861,6 @@
                 return true;
             }
             return false;
-        },
-        wheelZoom: function () {
-            var that = this;
-            $.addListener(that.box, 'wheel', function (ev) {
-                $.cancelBubble(ev);
-                that.zoom(ev.deltaY < 0, ev);
-            });
-            $.addListener(that.box, 'dblclick', function (ev) {
-                $.cancelBubble(ev);
-                if (that.outside()) {
-                    that.center();
-                }
-                ev.preventDefault();
-            });
-            $.addListener(that.img, 'dblclick', function (ev) {
-                $.cancelBubble(ev);
-                that.zoom(true, ev, 1.25);
-                ev.preventDefault();
-            });
-            return that;
-        },
-        touchZoom: function() {
-            var that = this;
-            
-            $.addListener(that.img, 'touchstart', function(e) {
-                if (e.touches.length === 1) {
-                    var x = Math.abs(e.touches[0].clientX );
-                    var y = Math.abs(e.touches[0].clientY);
-                    that.cfg.diffpointer = { x: 0, y: 0 };
-                    that.cfg.lastpointer = { x: x, y: y };
-                } else if (e.touches.length === 2) {
-                    that.cfg.startDistance = Factory.getTouchDistance(e.touches);
-                }                
-            });
-
-            $.addListener(that.img, 'touchmove', function(e) {
-                if (e.touches.length === 1) {
-                    var cur = $.getEventPos(e);
-                    that.cfg.diffpointer.x = cur.x - that.cfg.lastpointer.x;
-                    that.cfg.diffpointer.y = cur.y - that.cfg.lastpointer.y;
-                    that.cfg.lastpointer = { x: cur.x, y: cur.y };
-
-                    that.cfg.x += that.cfg.diffpointer.x;
-                    that.cfg.y += that.cfg.diffpointer.y;
-
-                    var left = that.cfg.x - that.cfg.w / 2,
-                        top = that.cfg.y - that.cfg.h / 2;
-
-                    that.img.style.cursor = 'move';
-                    that.img.style.left = left + 'px';
-                    that.img.style.top = top + 'px';
-
-                    that.cfg.left = left;
-                    that.cfg.top = top;
-                } else if (e.touches.length === 2) {
-                    $.cancelBubble(e);
-                    e.preventDefault();
-                    var x = Math.abs(e.touches[0].clientX - e.touches[1].clientX);
-                    var y = Math.abs(e.touches[0].clientY - e.touches[1].clientY);
-                    var currentDistance = Math.sqrt(x * x + y * y),
-                        startDistance = that.cfg.startDistance,
-                        curScale = that.cfg.curScale,
-                        newScale = curScale * (currentDistance / startDistance);
-
-                    that.cfg.curScale = newScale;
-                    that.scale(newScale);
-                }
-            });
-            
-            $.addListener(that.img, 'touchend', function(e) {
-                if (e.touches.length === 2) {
-                    /*
-                    var x = Math.abs(e.changedTouches[0].clientX - e.changedTouches[1].clientX);
-                    var y = Math.abs(e.changedTouches[0].clientY - e.changedTouches[1].clientY);
-                    var endDistance = Math.sqrt(x * x + y * y),
-                        startDistance = that.cfg.startDistance,
-                        curScale = that.cfg.curScale;
-                        */
-
-                }
-            });
-            
-            return that;
         },
         resize: function(size, fill, margin) {
             var that = this, bs, ms;

@@ -8502,7 +8502,12 @@ $.title
     'use strict';
 
     const Config = {
+        MinWidth: 30,
+        MinHeight: 30,
         MaxWidth: 800,
+        ImgPadding: 10,
+        WinPadding: 10,
+        AutoCloseTimeout: 15 * 1000,
         FontCss: 'font-size:14px;font-family:Arial,宋体;line-height:22px;margin:0;padding:2px 7px;'
     };
 
@@ -8531,7 +8536,7 @@ $.title
                 // 是否跟随光标移动
                 move: true,
                 // 自动关闭的时间，单位：毫秒
-                timeout: 15 * 1000,
+                timeout: Config.AutoCloseTimeout,
                 //自定义样式
                 style: ''
             }, options);
@@ -8584,8 +8589,9 @@ $.title
 
             return size;
         },
-        getTipPos: function (obj, elem, bs, pos) {
-            let tip = ['left', 'right'].indexOf(pos) > -1 ? pos : pos || 'top',
+        getTipPar: function (obj, elem, bs, par) {
+            let pos = par[1], skin = par[2] || 'default',
+                tip = ['left', 'right'].indexOf(pos) > -1 ? pos : pos || 'top',
                 left, right, top, bottom,
                 op = $.getOffset(obj);
 
@@ -8620,7 +8626,7 @@ $.title
                     tip = 'bottom';
                 }
             }
-            return { left: left, top: top, tip: tip };
+            return { left: left, top: top, tip: tip, skin: skin };
         },
         showTitle: function (ev, title, that, obj) {
             let p = (obj.getAttribute('data-mode') || '').split('-'),
@@ -8640,7 +8646,7 @@ $.title
             if (maxWidth > Config.MaxWidth) {
                 maxWidth = Config.MaxWidth;
             } else {
-                maxWidth -= 20;
+                maxWidth -= Config.WinPadding * 2;
             }
             if (Cache.timers['hide-timer']) {
                 window.clearTimeout(Cache.timers['hide-timer']);
@@ -8653,51 +8659,68 @@ $.title
 
             if (tip) {
                 $.createCssStyle([
+                    '.oui-title-tip {}',
                     '.oui-title-tip:after {transform:translateX(-50%) rotate(45deg);',
-                    'content:" ";position:absolute;left:50%;bottom:-4px;width:6px;height:6px;',
-                    'background:#000;border-left:1px solid #000;border-top:1px solid #000;}',
-                    '.oui-title-tip-top:after{top:unset;bottom:-4px;border-right:1px solid #000;border-bottom:1px solid #000;}',
-                    '.oui-title-tip-bottom:after{top:-4px;border-left:1px solid #000;border-top:1px solid #000;}',
-                    '.oui-title-tip-left:after{right:-4px;left:unset;top:50%;',
-                    'transform:translateY(-50%) rotate(45deg);border-top:1px solid #000;border-right:1px solid #000;}',
-                    '.oui-title-tip-right:after{left:-4px;top:50%;transform: translateY(-50%) rotate(45deg);',
-                    'border-left: 1px solid #000;border-top: 1px solid #000;}'
+                    'content:" ";position:absolute;left:50%;bottom:-4px;width:6px;height:6px;}',
+
+                    '.oui-title-tip-top:after{top:unset;bottom:-4px;}',
+                    '.oui-title-tip-right:after{left:-4px;top:50%;transform: translateY(-50%) rotate(45deg);}',
+                    '.oui-title-tip-bottom:after{top:-4px;}',
+                    '.oui-title-tip-left:after{right:-4px;left:unset;top:50%;transform:translateY(-50%) rotate(45deg);}',
+
+                    '.oui-title-tip-default,.oui-title-tip-default:after {background:#000;border:solid 1px #000;color:#fff;}',
+                    '.oui-title-tip-green,.oui-title-tip-green:after {background:#008000;border:solid 1px #008000;color:#fff;}',
+                    //鲜绿色
+                    '.oui-title-tip-viridity,.oui-title-tip-viridity:after {background:#0f0;border:solid 1px #0f0;color:#000;}',
+                    '.oui-title-tip-blue,.oui-title-tip-blue:after {background:#00f;border:solid 1px #00f;color:#fff;}',
+                    //浅蓝色
+                    '.oui-title-tip-wathet,.oui-title-tip-wathet:after {background:#cae3ff;border:solid 1px #cae3ff;color:#333;}',
+                    '.oui-title-tip-gray,.oui-title-tip-gray:after {background:#808080;border:solid 1px #808080;color:#fff;}',
+                    '.oui-title-tip-red,.oui-title-tip-red:after {background:#f00;border:solid 1px #f00;color:#fff;}',
+                    '.oui-title-tip-yellow,.oui-title-tip-yellow:after {background:#ff0;border:solid 1px #ff0;color:#000;}',
+                    '.oui-title-tip-orange,.oui-title-tip-orange:after {background:#ffa500;border:solid 1px #ffa500;color:#333;}',
+                    '.oui-title-tip-white,.oui-title-tip-white:after {background:#fff;border:solid 1px #fff;color:#333;}',
+                    '.oui-title-tip-cyan,.oui-title-tip-cyan:after {background:#0ff;border:solid 1px #0ff;color:#333;}',
                 ].join(''), 'oui-title-tip-001');
             }
 
             let scroll = $.getScrollPosition(),
-                left = scroll.left + ev.clientX + 10,
-                top = scroll.top + ev.clientY + 10;
+                left = scroll.left + ev.clientX + Config.WinPadding,
+                top = scroll.top + ev.clientY + Config.WinPadding;
 
             if (!title) {
                 if (tip) {
-                    let par = this.getTipPos(obj, elem, bs, p[1]);
+                    let par = this.getTipPar(obj, elem, bs, p);
                     left = par.left;
                     top = par.top;
                     $.addClass(elem, 'oui-title-tip-' + par.tip);
+                    if (par.skin) {
+                        $.addClass(elem, 'oui-title-tip-' + par.skin);
+                    }
                 }
                 elem.style.left = left + 'px';
                 elem.style.top = top + 'px';
             } else {
                 let cssText = [
-                    tip ? 'border:solid 1px #000;background:#000;color:#fff;' : 'border:solid 1px #ddd;background:#fff;color:#333;',
+                    !tip ? 'border:solid 1px #ddd;background:#fff;color:#333;' : '',
                     'box-sizing:border-box;border-radius:5px;',
                     'opacity:0.98;z-index:', zindex, ';',
                     Config.FontCss,
                     //指定最小宽度和最小高度
-                    'min-width:30px;min-height:30px;',
+                    'min-width:', Config.MinWidth, 'px;min-height:', Config.MinHeight, 'px;',
                     //边框灰色阴影
-                    'box-shadow:0 0 6px 1px rgba(204, 204, 204, 0.5);',
+                    !tip ? 'box-shadow:0 0 6px 1px rgba(204, 204, 204, 0.5);' : '',
                     (opt.style || ''),
                     'position:absolute;',
-                    //'white-space:pre;',
                     'display:inline-block;',
+                    //'white-space:pre;',
                     //'overflow:hidden;',
                     'text-overflow:ellipsis;',
                     'max-width:', maxWidth, 'px;',
                     'max-height:', maxHeight, 'px;',
                     'top:', top, 'px;',
                     'left:', left, 'px;',
+                    'user-select:none;-moz-user-select:none;-khtml-user-select:none;'
                 ];
 
                 if (title.indexOf('|') > -1 || title.startsWith('[img:') || title.startsWith('[')) {
@@ -8735,8 +8758,8 @@ $.title
                         }
                     }
 
-                    let width = w || maxWidth - (img ? 20 : 0),
-                        height = h || maxHeight - (img ? 20 : 0);
+                    let width = w || maxWidth - (img ? Config.ImgPadding * 2 : 0),
+                        height = h || maxHeight - (img ? Config.ImgPadding * 2 : 0);
 
                     for (let j = 0; j < list.length; j++) {
                         let dr = list[j];
@@ -8783,13 +8806,17 @@ $.title
                         mw = Config.MaxWidth;
                     }
                     cssText.push('min-width:' + mw + 'px;');
+
+                    if (ms.height <= Config.MinHeight) {
+                        cssText.push('line-height:' + ms.height + 'px;');
+                    }
                 }
                 elem.style.cssText = cssText.join('');
                 elem.innerHTML = html;
             }
 
             if (tip) {
-                let par = this.getTipPos(obj, elem, bs, p[1]);
+                let par = this.getTipPar(obj, elem, bs, p);
                 left = par.left;
                 top = par.top;
                 $.addClass(elem, 'oui-title-tip-' + par.tip);
