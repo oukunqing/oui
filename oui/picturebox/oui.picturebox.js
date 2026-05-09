@@ -41,6 +41,8 @@
             }
             opt.id = opt.element.id;
 
+            opt.rotateAngle = $.getParam(opt, 'rotateAngle,angle');
+
             return opt;
         },
         buildPictureBox: function (options) {
@@ -333,6 +335,64 @@
             if (update) {
                 return this;
             }
+            var lang = {
+                zoomIn: '\u653e\u5927',     //放大
+                zoomOut: '\u7f29\u5c0f',    //缩小
+                zoomOri: '\u56fe\u7247\u5b9e\u9645\u5927\u5c0f',    //图片实际大小
+                zoomApt: '\u56fe\u7247\u9002\u5e94\u7a97\u53e3\u5927\u5c0f',    //图片适应窗口大小
+                zoomCer: '\u5c45\u4e2d\u663e\u793a',    //居中显示
+                rotateL: '\u5411\u5de6\u65cb\u8f6c',    //向左旋转
+                rotateR: '\u5411\u53f3\u65cb\u8f6c',    //向右旋转
+            };
+
+            var actionbar = document.createElement('DIV'), html = [
+                '<a class="zoom-in" title="', lang.zoomIn, '"></a>',
+                '<a class="zoom-out" title="', lang.zoomOut, '"></a>',
+                '<a class="zoom-ori" title="', lang.zoomOri, '"></a>',
+                '<a class="zoom-cer" title="', lang.zoomCer, '"></a>',
+            ];
+            console.log('that.opt:', that.opt);
+            if (that.opt.rotateAngle) {
+                html = html.concat([
+                    '<a class="rotate-left" title="', lang.rotateL, '"></a>',
+                    '<a class="rotate-right" title="', lang.rotateR, '"></a>'
+                ]);
+            }
+
+            actionbar.className = 'oui-picbox-action oui-picbox-unselect';
+            actionbar.innerHTML = html.join('');
+            that.actionbar = actionbar;
+            that.box.appendChild(actionbar);
+
+            var btns = actionbar.querySelectorAll('a');
+            for (var i = 0; i < btns.length; i++) {
+                $.addListener(btns[i], 'click', function() {
+                    let css = this.className;
+                    if (css.endsWith('zoom-in')) {
+                        that.zoom(true, null, 1.25);
+                    } else if (css.endsWith('zoom-out')) {
+                        that.zoom(false, null, 1.25);
+                    } else if (css.endsWith('zoom-cer')) {
+                        that.center();
+                    } else if (css.endsWith('zoom-ori')) {
+                        that.scale(1).center();
+                        $.addClass(this, 'zoom-apt');
+                        this.title = lang.zoomApt;
+                    } else if (css.endsWith('zoom-apt')) {
+                        that.scale(that.cfg.boxScale).center();
+                        $.removeClass(this, 'zoom-apt');
+                        this.title = lang.zoomOri;
+                    } else if (css.indexOf('rotate') > -1) {
+                        let rot = that.img.rot || 0;
+                        rot += that.opt.rotateAngle * (css.endsWith('rotate-right') ? 1 : -1);
+                        rot = rot >= 360 || rot <= -360 ? 0 : rot;
+                        $.console.log('rot:', rot);
+                        that.img.style.transform = 'rotate(' + rot + 'deg)';
+                        that.img.rot = rot;
+                    }
+                });
+            }
+
             var titlebar = document.createElement('DIV');
             titlebar.className = 'oui-picbox-title oui-picbox-unselect';
             $.addListener(titlebar, 'dblclick,touchstart', function() {
@@ -522,7 +582,8 @@
                     margin: 0,
                     fullScreen: true,
                     showMagnifier: true,
-                    magnifierStyle: null
+                    magnifierStyle: null,
+                    rotateAngle: 90
                 }, options),
                 update = false;
 

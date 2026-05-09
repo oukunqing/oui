@@ -8573,11 +8573,16 @@ $.title
                     'position:absolute;left:-5000px;top:-5000px;',
                     'display:inline-block;overflow:hidden;',
                     'margin:0;padding:0;',
-                    'min-width:0;min-height:0;max-width:auto;max-height:auto;',
+                    //'min-width:0;min-height:0;max-width:auto;max-height:auto;',
                     'border:none;box-sizing:border-box;',
                     //'border:soild 1px #fff;box-sizing:content-box;',
                     Config.FontCss
                 ];
+                div.style.minWidth = '0px';
+                div.style.minHeight = '0px';
+                div.style.maxWidth = 'auto';
+                div.style.maxHeight = 'auto';
+
                 Cache.panels['text'] = div;
                 document.body.appendChild(div);
             }
@@ -8801,6 +8806,8 @@ $.title
                 if (!img && !url) {
                     let ms = Factory.getMinSize(html),
                         mw = ms.width;
+
+                        $.console.log('ms:', ms, html);
 
                     if (mw > Config.MaxWidth) {
                         mw = Config.MaxWidth;
