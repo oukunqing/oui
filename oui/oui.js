@@ -8754,7 +8754,23 @@ $.title
                                 url = true;
                                 list.push({ page: true, url: s.substr(4) });
                             } else if (s.startsWith('func:')) {
-                                list.push({ txt: new Function('return ' + s.substr(5) + ';')() });
+                                let func = s.substr(5), 
+                                    txt = new Function('return ' + func + ';')(), 
+                                    eid = 'oui_title_time_duration_001';
+
+                                if (txt && func.toLowerCase().indexOf('timeduration') > -1) {
+                                    list.push({ 
+                                        txt: '<span id="' + eid + '" style="background:transparent;border:none;padding:0;margin:0;min-width:0;min-height:0;color:unset;">' + txt + '</span>' 
+                                    });
+                                    if (Cache.timers['duration-timer']) {
+                                        window.clearInterval(Cache.timers['duration-timer']);
+                                    }
+                                    Cache.timers['duration-timer'] = window.setInterval(function() {
+                                        $('#' + eid).html(new Function('return ' + func + ';')());
+                                    }, 1000);
+                                } else {
+                                    list.push({ txt: txt });
+                                }
                             } else {
                                 list.push({ txt: s.preHtml() });
                             }
@@ -8806,8 +8822,6 @@ $.title
                 if (!img && !url) {
                     let ms = Factory.getMinSize(html),
                         mw = ms.width;
-
-                        $.console.log('ms:', ms, html);
 
                     if (mw > Config.MaxWidth) {
                         mw = Config.MaxWidth;
@@ -8868,6 +8882,9 @@ $.title
                         that.element.style.display = 'none';
                         that.element.className = Factory.className;
                     }
+                }
+                if (Cache.timers['duration-timer']) {
+                    window.clearInterval(Cache.timers['duration-timer']);
                 }
             }
             return this;

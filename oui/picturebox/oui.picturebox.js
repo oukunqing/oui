@@ -386,7 +386,6 @@
                         let rot = that.img.rot || 0;
                         rot += that.opt.rotateAngle * (css.endsWith('rotate-right') ? 1 : -1);
                         rot = rot >= 360 || rot <= -360 ? 0 : rot;
-                        $.console.log('rot:', rot);
                         that.img.style.transform = 'rotate(' + rot + 'deg)';
                         that.img.rot = rot;
                     }
