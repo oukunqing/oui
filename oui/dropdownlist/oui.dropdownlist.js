@@ -1752,6 +1752,7 @@
 			tree: false,
 			//是否获取下拉列表元素原有的options，true-表示元素原有的选项+items
 			origin: undefined,
+			//origin: true,
 			//是否下拉框： true - 下拉框， false - 文本框
 			select: true,
 			//自定义样式名
@@ -2224,6 +2225,10 @@
 				opt.items = opt.items.concat(items);
 			} else {
 				opt.items = items;
+			}
+
+			if (opt.origin) {				
+				opt.items = that.cache['originOptions'].concat(opt.items);
 			}
 
 			if (opt.tree) {

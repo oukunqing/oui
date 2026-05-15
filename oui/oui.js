@@ -8756,11 +8756,12 @@ $.title
                             } else if (s.startsWith('func:')) {
                                 let func = s.substr(5), 
                                     txt = new Function('return ' + func + ';')(), 
-                                    eid = 'oui_title_time_duration_001';
+                                    eid = 'oui_title_time_duration_001',
+                                    css = 'background:transparent;border:none;padding:0;margin:0;min-width:0;min-height:0;color:unset;';
 
                                 if (txt && func.toLowerCase().indexOf('timeduration') > -1) {
                                     list.push({ 
-                                        txt: '<span id="' + eid + '" style="background:transparent;border:none;padding:0;margin:0;min-width:0;min-height:0;color:unset;">' + txt + '</span>' 
+                                        txt: '<span id="' + eid + '" style="' + css + '">' + txt + '</span>' 
                                     });
                                     if (Cache.timers['duration-timer']) {
                                         window.clearInterval(Cache.timers['duration-timer']);

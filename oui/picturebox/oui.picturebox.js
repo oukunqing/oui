@@ -305,7 +305,11 @@
             });
             if (!update && that.cfg.showMagnifier) {
                 $.addListener([that.box, document], 'pointermove', function (ev) {
-                    Factory.showMagnifier(ev, that);
+                    if (!that.cfg.pointerdown && !that.cfg.selectdown) {
+                        Factory.showMagnifier(ev, that);
+                    } else {
+                        Factory.hideMagnifier(that);
+                    }
                 });
             }
             $.addListener(that.img, 'pointerup', function (ev) {

@@ -117,6 +117,7 @@ select.oui-ddl-top,input.oui-ddl-top {
 	overflow: hidden;
 	height: 30px;
 	min-height: 30px;
+	min-width: 0;
 	border: none 0;
 }
 
@@ -146,6 +147,9 @@ select.oui-ddl-top,input.oui-ddl-top {
 	padding: 0;
 	margin: 5px 1px;
 	background: #e5e5e5;
+	min-height: 0;
+	min-width: 0;
+	box-sizing: border-box;
 	height: 1px;
 	line-height: 1px;
 	overflow: hidden;
