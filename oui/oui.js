@@ -8279,12 +8279,12 @@ $.debounce 防抖
         if (direction === 'horizontal') {
             // 水平滚动条判断：内容宽度 > 可视宽度，且overflow允许水平滚动
             const overflowX = style.overflowX || style.overflow;
-            const isScrollAllowed = ['auto', 'scroll'].includes(overflowX);
+            const isScrollAllowed = ['auto', 'scroll'].indexOf(overflowX) > -1;
             hasScroll = elem.scrollWidth > elem.clientWidth && isScrollAllowed;
         } else {
             // 垂直滚动条判断：内容高度 > 可视高度，且overflow允许垂直滚动
             const overflowY = style.overflowY || style.overflow;
-            const isScrollAllowed = ['auto', 'scroll'].includes(overflowY);
+            const isScrollAllowed = ['auto', 'scroll'].indexOf(overflowY) > -1;
             hasScroll = elem.scrollHeight > elem.clientHeight && isScrollAllowed;
         }
         return hasScroll;
@@ -8344,12 +8344,19 @@ $.debounce 防抖
         };
 
         // 返回标准化的DOMRect（兼容getBoundingClientRect返回格式）
-        return new DOMRect(
+        /*return new DOMRect(
             v.left,
             v.top,
             v.right - v.left,
             v.bottom - v.top
         );
+        */
+        return {
+            left: v.left,
+            top: v.top,
+            right: v.right - v.left,
+            bottom: v.bottom - v.top
+        };
     }
 
     /**
@@ -8371,7 +8378,8 @@ $.debounce 防抖
 
         // 以下取值均可能导致子元素被裁剪
         const clipValues = ["hidden", "scroll", "auto"];
-        return clipValues.includes(p.overflow) || clipValues.includes(p.x) || clipValues.includes(p.y);
+        //return clipValues.includes(p.overflow) || clipValues.includes(p.x) || clipValues.includes(p.y);
+        return clipValues.indexOf(p.overflow) > -1 || clipValues.indexOf(p.x) > -1 || clipValues.indexOf(p.y) > -1;
     }
 
     /**
@@ -8464,7 +8472,8 @@ $.debounce 防抖
 
         // 以下取值均可能导致子元素被裁剪
         const clipValues = ["hidden", "scroll", "auto"];
-        const isContentClipped = clipValues.includes(p.overflow) || clipValues.includes(p.x) || clipValues.includes(p.y);
+        //const isContentClipped = clipValues.includes(p.overflow) || clipValues.includes(p.x) || clipValues.includes(p.y);
+        const isContentClipped = clipValues.indexOf(p.overflow) > -1 || clipValues.indexOf(p.x) > -1 || clipValues.indexOf(p.y) > -1;
 
         // 6. 补充：文本不换行场景（nowrap），即使overflow为visible，视觉上也可能被父元素遮挡（可选增强）
         const isTextNoWrap = style.whiteSpace === "nowrap";
@@ -8556,11 +8565,37 @@ $.title
             }
             return elem;
         },
+        buildCover: function (that) {
+            //当页面中存在OCX控件，则需要iframe垫片，让div显示在OCX控制之上
+            return '<iframe id="oui-title-cover-1" src="about:blank"'
+                + ' style="position:absolute; visibility:visible; top:-1px; left:-1px;'
+                + ' width:100%; height:100%; border:none; z-index:1;-ms-behavior:none;'
+                + ' filter=\'progid:DXImageTransform.Microsoft.Alpha(style=0,opacity=0)\';'
+                //+ ' filter=\'none\';'
+                + '"></iframe>';
+        },
+        setCoverSize: function (that, elem) {
+            that.cover.style.width = elem.offsetWidth + 'px';
+            that.cover.style.height = elem.offsetHeight + 'px';
+            return this;
+        },
         buildElement: function (that, tip) {
             let elem = document.createElement('DIV'),
                 opt = that.options;
 
             elem.className = Factory.className;
+
+            let objects = document.querySelectorAll('object');
+            if (objects && objects.length > 0) {
+                elem.innerHTML = [
+                    '<div></div>',
+                    Factory.buildCover(that)
+                ].join('');
+                
+                that.panel = elem.childNodes[0];
+                that.cover = elem.childNodes[1];
+            }
+
             that.element = elem;
 
             return document.body.appendChild(elem), elem;
@@ -8718,6 +8753,7 @@ $.title
                     (opt.style || ''),
                     'position:absolute;',
                     'display:inline-block;',
+                    'transform:scale(1);',
                     //'white-space:pre;',
                     //'overflow:hidden;',
                     'text-overflow:ellipsis;',
@@ -8834,7 +8870,12 @@ $.title
                     }
                 }
                 elem.style.cssText = cssText.join('');
-                elem.innerHTML = html;
+                if (that.cover) {
+                    that.panel.innerHTML = html;
+                    Factory.setCoverSize(that, elem);
+                } else {
+                    elem.innerHTML = html;
+                }
             }
 
             if (tip) {
@@ -8846,10 +8887,10 @@ $.title
                 elem.style.left = left + 'px';
                 elem.style.top = top + 'px';
             } else {                
-                if (elem.offsetWidth + elem.offsetLeft > bs.width + scroll.left) {
-                    elem.style.left = (bs.width + scroll.left - elem.offsetWidth - 5) + 'px';
+                if (elem.offsetWidth + elem.offsetLeft >= bs.width + scroll.left) {
+                    elem.style.left = (bs.width + scroll.left - elem.offsetWidth - 5 - ($.isIE ? 16 : 0)) + 'px';
                 }
-                if (elem.offsetHeight + elem.offsetTop > bs.height + scroll.top) {
+                if (elem.offsetHeight + elem.offsetTop >= bs.height + scroll.top) {
                     //elem.style.top = (bs.height + scroll.top - elem.offsetHeight - 5) + 'px';
                     elem.style.top = scroll.top + ev.clientY - elem.offsetHeight - 5 + 'px';
                 }
