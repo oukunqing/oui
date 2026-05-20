@@ -432,7 +432,6 @@
                 return this;
             }
             that.box.oncontextmenu = function (ev) {
-                $.console.log('oncontextmenu', that.cfg.selectmove);
                 //鼠标右键若有拖动动作，或者鼠标位置不在图片范围内，则不显示默认的右键菜单
                 if (that.cfg.selectdrag || that.cfg.selectmove || !that.cfg.selectonpic || ev.target.nodeName !== 'IMG') {
                     //selectmove 主要是为了兼容IE浏览器：右键拖动画框时还会弹出右键菜单的问题

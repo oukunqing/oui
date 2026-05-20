@@ -29,7 +29,7 @@
     background: #fff;
     color: #333;
     opacity: 0.5;
-    border-top-right-radius: 5px;
+    border-top-left-radius: 5px;
 }
 .oui-picbox-action {
     height: 28px;
@@ -46,6 +46,7 @@
     background: #fff;
     color: #333;
     opacity: 0.6;
+    border-bottom-right-radius: 5px;
 }
 .oui-picbox-action a {
     margin: 0;
@@ -94,7 +95,7 @@
     color: #333;
     opacity: 0.6;
     box-sizing: border-box;
-    border-bottom-right-radius: 5px;
+    border-top-right-radius: 5px;
 }
 .oui-picbox-title a {
     margin: 0;
