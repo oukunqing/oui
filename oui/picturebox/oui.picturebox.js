@@ -355,7 +355,6 @@
                 '<a class="zoom-ori" title="', lang.zoomOri, '"></a>',
                 '<a class="zoom-cer" title="', lang.zoomCer, '"></a>',
             ];
-            console.log('that.opt:', that.opt);
             if (that.opt.rotateAngle) {
                 html = html.concat([
                     '<a class="rotate-left" title="', lang.rotateL, '"></a>',
@@ -390,8 +389,7 @@
                         let rot = that.img.rot || 0;
                         rot += that.opt.rotateAngle * (css.endsWith('rotate-right') ? 1 : -1);
                         rot = rot >= 360 || rot <= -360 ? 0 : rot;
-                        that.img.style.transform = 'rotate(' + rot + 'deg)';
-                        that.img.rot = rot;
+                        that.rotate(rot);
                     }
                 });
             }
@@ -635,6 +633,7 @@
             img.src = picurl.cleanSlash();
             that.box.appendChild(img);
             that.img = img;
+            that.img.rot = 0;
 
             var minZoom = $.isNumber(that.opt.minScale || that.opt.minZoom) ? (that.opt.minScale || that.opt.minZoom) : 1,
                 defZoom = $.isNumber(that.opt.defaultScale || that.opt.defScale || that.opt.defaultZoom || that.opt.defZoom) ? 
@@ -830,16 +829,30 @@
             } else if(scaleRatio > that.cfg.maxScale) {
                 scaleRatio = that.cfg.maxScale;
             }
+            var w = that.cfg.width, h = that.cfg.height;
+            if (scaleRatio !== 1 && (that.img.rot / 90) % 2) {
+                var t = w;
+                w = h;
+                h = t;
+            }
 
             that.cfg.curScale = Factory.setRatio(scaleRatio);
-            that.cfg.w = parseInt(that.cfg.width * scaleRatio, 10);
-            that.cfg.h = parseInt(that.cfg.height * scaleRatio, 10);
+            that.cfg.w = parseInt(w * scaleRatio, 10);
+            that.cfg.h = parseInt(h * scaleRatio, 10);
             that.cfg.x = that.cfg.left + that.cfg.w / 2;
             that.cfg.y = that.cfg.top + that.cfg.h / 2;
 
             Factory.setImgSize(that);
 
-            return that.status().move();
+            return that.status().move().rotate(0);
+        },
+        rotate: function (rotateAngle) {
+            var that = this;
+
+            that.img.style.transform = 'rotate(' + rotateAngle + 'deg)';
+            that.img.rot = rotateAngle;
+
+            return that;
         },
         zoom: function (action, ev, zoomratio) {
             var that = this,
