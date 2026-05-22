@@ -11,7 +11,8 @@
 
     const Config = {
         FilePath: $.getScriptSelfPath(true),
-        FileName: 'oui.picturebox.'
+        FileName: 'oui.picturebox.',
+        ImgItemSize: 70
     },
     Cache = {
         caches: {},
@@ -365,7 +366,7 @@
             actionbar.className = 'oui-picbox-action oui-picbox-unselect';
             actionbar.innerHTML = html.join('');
             that.actionbar = actionbar;
-            that.box.appendChild(actionbar);
+            that.body.appendChild(actionbar);
 
             var btns = actionbar.querySelectorAll('a');
             for (var i = 0; i < btns.length; i++) {
@@ -405,7 +406,7 @@
                 return false;
             };
             that.titlebar = titlebar;
-            that.box.appendChild(titlebar);
+            that.body.appendChild(titlebar);
 
             var statusbar = document.createElement('DIV');
             statusbar.className = 'oui-picbox-status oui-picbox-unselect';
@@ -414,7 +415,7 @@
                 that.center();
             });
             that.statusbar = statusbar;
-            that.box.appendChild(statusbar);
+            that.body.appendChild(statusbar);
 
             if (!that.cfg.showTitle) {
                 statusbar.oncontextmenu = function() {
@@ -423,6 +424,115 @@
                 };
             }
 
+            return this;
+        },
+        buildItem: function (that, curpath) {
+            var index = 0, html = [], opt = that.opt, i, path, thumb, files = [];
+
+            for (i = 0; i < opt.list.length; i++) {
+                path = opt.list[i];
+                if (path.startsWith('//')) {
+                    path = path.substr(1);
+                }
+
+                files.push(path);
+
+                thumb = opt.thumb ? $.addNamePostfix(path, '_thumb') : path;
+
+                if (curpath === path) {
+                    index = i;
+                }
+
+                html.push([
+                    '<a class="img-item', index === i ? ' img-cur' : '', '"',
+                    ' style="background-image:url(\'', thumb, '\');"',
+                    ' data-index="', i, '"',
+                    ' title="No.', i + 1, '" data-mode="tip-top"',
+                    '></a>'
+                ].join(''));
+            }
+
+            that.item.innerHTML = html.join('');
+
+            that.cache.files = files;
+            that.cache.items = that.item.querySelectorAll('.img-item');
+
+            $.addListener(that.item, 'click', function (ev) {
+                var elem = ev.target, css = elem.className, tag = elem.tagName;
+                $.console.log('ev:', ev.target, tag, css);
+                if (tag === 'A' && css.indexOf('img-item') > -1) {
+                    var idx = elem.getAttribute('data-index').toInt();
+                    Factory.showItem(that, idx);
+                }
+            });
+
+            Factory.buildBar(that).showItem(that, index);
+
+            return this;
+        },
+        showItem: function (that, index) {
+            var items = $.extend([], that.cache.items);
+
+            if (!items || index < 0 || index >= items.length) {
+                return this;
+            }
+            let cur = that.item.querySelector('.img-cur');
+            if (cur) {
+                $.removeClass(cur, 'img-cur');
+            }
+            $.addClass(items[index], 'img-cur');
+            $.scrollTo(items[index]);
+
+            that.cache.index = index;
+            that.cache.update = that.img !== null;
+
+            Factory.showBar(that);
+
+            var url = that.cache.files[index];
+            that.display(url).rotate(0);
+
+            return this;
+        },
+        buildBar: function (that) {
+            var bars = that.cache.bars;
+            if (!bars) {
+                bars = that.body.querySelectorAll('a.arrow');
+
+                for (var i = 0; i < bars.length; i++) {
+                    $.addListener(bars[i], 'click', function (ev) {
+                        $.console.log('bars:', this);
+                        var action = this.getAttribute('data-action').toInt(),
+                            index = that.cache.index + action;
+                        Factory.showItem(that, index);
+                    });
+                }
+                that.cache.bars = bars;
+            }
+            return this;
+        },
+        showBar: function (that) {
+            var idx = that.cache.index, len = that.cache.items.length;
+            if (!len || !that.cache.bars[0]) {
+                return this;
+            }
+            if (idx <= 0) {
+                that.cache.bars[0].style.display = 'none';
+            } else if (idx >= len - 1) {
+                that.cache.bars[1].style.display = 'none';
+            } else {
+                that.cache.bars[0].style.display = '';
+                that.cache.bars[1].style.display = '';
+            }
+            if ($.isIE) {
+                that.cache.bars[0].style.left = '3px';
+                that.cache.bars[1].style.right = '37px';
+                var top = that.body.offsetHeight / 2 - 25;
+                if (top > 0) {
+                    that.cache.bars[0].style.top = top + 'px';
+                    that.cache.bars[1].style.top = top + 'px';
+                }
+
+            }
             return this;
         },
         select: function (that, update) {
@@ -437,7 +547,7 @@
                     return false;
                 }
             };
-            $.addListener(that.box, 'pointerdown', function (ev) {
+            $.addListener(that.body, 'pointerdown', function (ev) {
                 if (2 === ev.button) {
                     $.cancelBubble(ev);
                     var pos = $.getEventPos(ev);
@@ -445,22 +555,22 @@
                     //鼠标右键是否有拖动动作
                     that.cfg.selectdrag = false;
                     that.cfg.startpointer = { x: pos.x - that.cfg.offset.left, y: pos.y - that.cfg.offset.top };
-                    that.cfg.selection = Factory.showRange(that.cfg.startpointer, null, that.cfg.selection, that.box);
+                    that.cfg.selection = Factory.showRange(that.cfg.startpointer, null, that.cfg.selection, that.body);
                     //鼠标位置是否在图片范围内
                     that.cfg.selectonpic = that.onpicture(that.cfg.startpointer, that.cfg);
                 }
             });
-            $.addListener(that.box, 'pointermove', function (ev) {
+            $.addListener(that.body, 'pointermove', function (ev) {
                 if (that.cfg.selectdown) {
                     $.cancelBubble(ev);
                     var pos = $.getEventPos(ev);
                     that.cfg.selectmove = true;
                     that.cfg.endpointer = { x: pos.x - that.cfg.offset.left, y: pos.y - that.cfg.offset.top };
-                    that.cfg.selection = Factory.showRange(that.cfg.startpointer, that.cfg.endpointer, that.cfg.selection, that.box);
+                    that.cfg.selection = Factory.showRange(that.cfg.startpointer, that.cfg.endpointer, that.cfg.selection, that.body);
                 }
                 ev.preventDefault();
             });
-            $.addListener(that.box, 'pointerup', function (ev) {
+            $.addListener(that.body, 'pointerup', function (ev) {
                 if (that.cfg.selectdown) {
                     $.cancelBubble(ev);
                     var pos = $.getEventPos(ev);
@@ -473,7 +583,7 @@
                     that.rangeScale(that.cfg.startpointer, that.cfg.endpointer);
                 }
             });
-            $.addListener(that.box, 'pointercancel', function (ev) {
+            $.addListener(that.body, 'pointercancel', function (ev) {
                 if (that.cfg.selectdown) {
                     $.cancelBubble(ev);
                     that.cfg.selection = Factory.hideRange(that.cfg.selection);
@@ -492,11 +602,11 @@
             if (update) {                
                 return this;
             }
-            $.addListener(that.box, 'wheel', function (ev) {
+            $.addListener(that.body, 'wheel', function (ev) {
                 $.cancelBubble(ev);
                 that.zoom(ev.deltaY < 0, ev);
             });
-            $.addListener(that.box, 'dblclick', function (ev) {
+            $.addListener(that.body, 'dblclick', function (ev) {
                 $.cancelBubble(ev);
                 if (that.outside()) {
                     that.center();
@@ -572,6 +682,12 @@
     Factory.loadCss();
 
     function PictureBox(options) {
+        this.img = null;
+        this.cache = {
+            update: false,
+            items: [],
+            index: 0
+        };
         return this.initial(options);
     }
 
@@ -579,6 +695,7 @@
         initial: function(options) {
             var that = this,
                 opt = $.extend({
+                    element: null,
                     showBorder: true,
                     showTitle: true,
                     showScale: true,
@@ -587,27 +704,40 @@
                     fullScreen: true,
                     showMagnifier: true,
                     magnifierStyle: null,
-                    rotateAngle: 90
-                }, options),
-                update = false;
+                    rotateAngle: 90,
+                    showList: false,
+                    list: [],
+                    position: 'right',
+                    thumb: false,
+                    //text: ['上一张','下一张']
+                    text: ['\u4e0a\u4e00\u5f20','\u4e0b\u4e00\u5f20']
+                }, options), box = that.box, path;
+
+            that.cache.update = that.img !== null;
 
             opt.magnifierStyle = $.extend({
                 width:150, height:150, scaleRatio: 1, cursor: 'crosshair', position:'custom' /*,opacity:0.95*/
             }, options.magnifierStyle);
 
-            if(that.img) {
-                that.box.removeChild(that.img);
-                $.extend(that.opt, opt);
-                update = true;
-                that.img = null;
-            } else {
-                that.opt = opt;
-            }
+            that.opt = $.extend({}, that.opt, opt);
 
-            var box = $.toElement(that.opt.element);
-            box.className += ' oui-picbox-box';
-            box.style.cssText += 'overflow:hidden;position:relative;' + (!opt.showBorder ? 'border:none;' : '');
-            that.box = box;
+            if (!that.cache.update) {
+                box = $.toElement(opt.element);
+                $.addClass(box, 'oui-picbox-box');
+                box.style.cssText += 'overflow:hidden;position:relative;' + (!opt.showBorder ? 'border:none;' : '');
+                that.box = box;
+
+                box.innerHTML = [
+                    '<div class="oui-picbox-body">',
+                    '<a class="arrow arrow-left" data-action="-1" title="', opt.text[0], '" style="display:none;"></a>',
+                    '<a class="arrow arrow-right" data-action="1" title="', opt.text[1], '" style="display:none;"></a>',
+                    '</div>',
+                    '<div class="oui-picbox-item oui-picbox-item-', opt.position, '" style="display:none;"></div>'
+                ].join('');
+
+                that.body = box.childNodes[0];
+                that.item = box.childNodes[1];
+            }
 
             if (that.opt.fill) {
                 that.resize(null, that.opt.fill, that.opt.margin)
@@ -620,20 +750,86 @@
                 }
             }
 
-            var img = document.createElement('IMG'),
-                picurl = Factory.getImgPath(that.opt);
+            path = Factory.getImgPath(that.opt);
 
-            if (location.href.indexOf('http') === 0) {
-                //设置图片跨域
-                //img.setAttribute('crossorigin', 'anonymous');
-                img.crossOrigin = 'anonymous';
+            if (opt.showList && opt.list && opt.list.length) {
+                Factory.buildItem(that, path);
+                that.item.style.display = '';
+            } else {
+                that.item.style.display = 'none';
             }
-            img.className = 'oui-picbox-img oui-picbox-unselect';
-            img.style.cssText = 'position:absolute;border:none;margin:0;padding:0;';
-            img.src = picurl.cleanSlash();
-            that.box.appendChild(img);
-            that.img = img;
-            that.img.rot = 0;
+
+            if(!that.cache.update) {
+                var img = document.createElement('IMG');
+                img.className = 'oui-picbox-img oui-picbox-unselect';
+                img.style.cssText = 'position:absolute;border:none;margin:0;padding:0;';
+
+                if (location.href.indexOf('http') === 0) {
+                    //设置图片跨域
+                    //img.setAttribute('crossorigin', 'anonymous');
+                    img.crossOrigin = 'anonymous';
+                }
+                that.img = img;
+
+                that.body.appendChild(img);
+
+                $.addListener(that.img, 'load', function(ev) {
+                    var bs = Factory.getOffsetSize(that.box),
+                        size = Factory.getSize(bs.width, bs.height, img.naturalWidth, img.naturalHeight, defZoom, minZoom),
+                        update = that.cache.update;
+         
+                    that.cfg = {
+                        filePath: that.img.src,
+                        width: img.naturalWidth,
+                        height: img.naturalHeight,
+                        imgRatio: size.imgRatio,
+                        boxScale: size.boxScale,
+                        curScale: size.curScale,
+                        minScale: size.minScale,
+                        maxScale: maxZoom,
+                        minZoom: minZoom,
+                        defaultZoom: defZoom,
+                        maxZoom: maxZoom,
+                        fill: that.opt.fill,
+                        margin: that.opt.margin,
+                        w: size.width,
+                        h: size.height,
+                        left: size.left,
+                        top: size.top,
+                        x: parseInt(size.width / 2 + size.left, 10),
+                        y: parseInt(size.height / 2 + size.top, 10),
+                        offset: {
+                            width: bs.width, height: bs.height,
+                            left: bs.left, top: bs.top
+                        },
+                        showScale: that.opt.showScale,
+                        showTitle: that.opt.showTitle,
+                        showMagnifier: that.opt.showMagnifier,
+                        magnifierStyle: that.opt.magnifierStyle
+                    };
+
+                    Factory.setImgSize(that).hideMagnifier(that);
+
+                    Factory.drag(that, update)
+                        .select(that, update)
+                        .control(that, update)
+                        .wheelZoom(that, update)
+                        .touchZoom(that, update);
+
+                    that.resize(null, that.opt.fill, that.opt.margin);
+                    that.title().center().status();
+                    
+                    $.getFileSize(that.cfg.filePath, function(size) {
+                        var fileSize = size >= 0 ? size : (opt.fileSize || 0);
+                        fileSize = fileSize > 0 ? fileSize.toFileSize(2) : '';
+                        that.title(null, fileSize);
+                    });
+
+                    if ($.isFunction(that.opt.callback)){
+                        that.opt.callback(that, that.cfg);
+                    }
+                });
+            }
 
             var minZoom = $.isNumber(that.opt.minScale || that.opt.minZoom) ? (that.opt.minScale || that.opt.minZoom) : 1,
                 defZoom = $.isNumber(that.opt.defaultScale || that.opt.defScale || that.opt.defaultZoom || that.opt.defZoom) ? 
@@ -648,67 +844,9 @@
             }
             if(maxZoom <= 0 || maxZoom > 5) {
                 maxZoom = 1;
-            }
+            }        
 
-            $.addListener(that.img, 'load', function(ev) {
-                var bs = Factory.getOffsetSize(that.box),
-                    size = Factory.getSize(bs.width, bs.height, img.naturalWidth, img.naturalHeight, defZoom, minZoom);
-     
-                that.cfg = {
-                    filePath: that.img.src,
-                    width: img.naturalWidth,
-                    height: img.naturalHeight,
-                    imgRatio: size.imgRatio,
-                    boxScale: size.boxScale,
-                    curScale: size.curScale,
-                    minScale: size.minScale,
-                    maxScale: maxZoom,
-                    minZoom: minZoom,
-                    defaultZoom: defZoom,
-                    maxZoom: maxZoom,
-                    fill: that.opt.fill,
-                    margin: that.opt.margin,
-                    w: size.width,
-                    h: size.height,
-                    left: size.left,
-                    top: size.top,
-                    x: parseInt(size.width / 2 + size.left, 10),
-                    y: parseInt(size.height / 2 + size.top, 10),
-                    offset: {
-                        width: bs.width, height: bs.height,
-                        left: bs.left, top: bs.top
-                    },
-                    showScale: that.opt.showScale,
-                    showTitle: that.opt.showTitle,
-                    showMagnifier: that.opt.showMagnifier,
-                    magnifierStyle: that.opt.magnifierStyle
-                };
-
-                Factory.setImgSize(that).hideMagnifier(that);
-
-                Factory.drag(that, update)
-                    .select(that, update)
-                    .control(that, update)
-                    .wheelZoom(that, update)
-                    .touchZoom(that, update);
-
-                if(!update) {
-                    that.status();
-                }
-                that.title();
-                
-                $.getFileSize(that.cfg.filePath, function(size) {
-                    var fileSize = size >= 0 ? size : (opt.fileSize || 0);
-                    fileSize = fileSize > 0 ? fileSize.toFileSize(2) : '';
-                    that.title(null, fileSize);
-                });
-
-                if ($.isFunction(that.opt.callback)){
-                    that.opt.callback(that, that.cfg);
-                }
-            });
-
-            if (!update) {
+            if (!that.cache.update) {
                 $.addListener(window, 'resize', function() {
                     //console.log('pic resize:', that.opt.fill, that.opt.margin);
                     that.resize(null, that.opt.fill, that.opt.margin);
@@ -726,12 +864,25 @@
                 }
             }
 
+            that.display(path);
+
+            return this;
+        },
+        display: function (path) {
+            var that = this, picurl = path;
+
+            if (!$.isString(picurl, true) || !that.img) {
+                return that;
+            }
+
+            that.img.src = picurl.cleanSlash();
+            that.img.rot = 0;
+
             return this;
         },
         update: function (options) {
             let opt = Factory.checkOptions(options);
             if (opt) {
-                //this.img.src = Factory.getImgPath(opt);
                 return this.initial($.extend(this.opt, opt));
             }
             return this;
@@ -848,6 +999,9 @@
         },
         rotate: function (rotateAngle) {
             var that = this;
+            if (!that.img) {
+                return that;
+            }
 
             that.img.style.transform = 'rotate(' + rotateAngle + 'deg)';
             that.img.rot = rotateAngle;
@@ -943,7 +1097,7 @@
             return false;
         },
         resize: function(size, fill, margin) {
-            var that = this, bs, ms;
+            var that = this, opt = that.opt, bs, ms;
             if (size && (size.width || size.height)) {
                 if (size.width) {
                     that.box.style.width = size.width + 'px';
@@ -951,14 +1105,40 @@
                 if (size.height) {
                     that.box.style.height = size.height + 'px';
                 }
+                bs = size;
             } else if (fill) {
                 bs = $.getBodySize();
                 ms = $.getMarginSize(margin);
                 that.box.style.width = bs.width - (ms ? ms.marginWidth : 0) + 'px';
                 that.box.style.height = bs.height - (ms ? ms.marginHeight : 0) + 'px';
             }
+
+            if (opt.showList && that.cache.items.length) {
+                switch(opt.position) {
+                case 'top':
+                case 'bottom':
+                    that.body.style.width = that.box.style.width;
+                    that.body.style.height = that.box.clientHeight - Config.ImgItemSize + 'px';
+                    if (opt.position === 'top') {
+                        that.body.style.top = Config.ImgItemSize + 'px';
+                    }
+                    break;
+                case 'right':
+                case 'left':
+                    that.body.style.height = that.box.style.height;
+                    that.body.style.width = that.box.clientWidth - Config.ImgItemSize + 'px';
+                    if (opt.position === 'left') {
+                        that.body.style.left = Config.ImgItemSize + 'px';
+                    }
+                    break;
+                }
+            } else {
+                that.body.style.width = that.box.style.width;
+                that.body.style.height = that.box.style.height;
+            }
+
             if(that.cfg) {
-                bs = Factory.getOffsetSize(that.box);
+                bs = Factory.getOffsetSize(that.body);
                 that.cfg.offset = {
                     width: bs.width, height: bs.height,
                     left: bs.left, top: bs.top
@@ -968,7 +1148,9 @@
                 that.cfg.boxScale = size.boxScale;
                 that.cfg.curScale = size.curScale;
                 that.cfg.minScale = size.minScale;
-            }            
+            }
+            Factory.showBar(that);
+
             return that;
         },
         //判断鼠标位置是否在图片范围内（图片位置不是固定的）

@@ -10,8 +10,8 @@
 </head>
 <body>
 <input type="button" value="换图" onclick="switchpic();" />
-<div id="box" style="border:none;display:block;margin:40px 0 0 200px;float:left;background: #f1f1f1;"></div>
-<div id="box2" style="border:none;margin:70px 100px 0 800px;float:right;background: #f1f1f1;"></div>
+<div id="box" style="border:solid 1px #ccc;box-sizing: border-box; display:block;margin:40px 0 0 200px;float:left;background: #fff;"></div>
+<div id="box2" style="border:solid 1px #ccc;box-sizing: border-box; margin:70px 100px 0 800px;float:right;background: #fff;"></div>
 <div style="height:100px;display:block;clear:both;"></div>
 </body>
 </html>
@@ -23,20 +23,35 @@
 //maxZoom(maxScale)是相对于图片本身的大小
 window.onload = function() {
 	$.picbox({
-		obj: 'box', img: 'imgs/map_bg.jpg', width: 800, height:500, defaultZoom: 0.5, minZoom: 0.5, maxScale: 2, showScale: true, showTitle: true,
+		obj: 'box', img: 'pics/pic1.jpg', width: 800, height:500, defaultZoom: 0.9, minZoom: 0.5, maxScale: 2, showScale: true, showTitle: true,
 		showMagnifier: true, magnifierStyle: { 
 			//position: 'custom', 
 			cssText: 'border:solid 1px #f00;'
-		},angle:90
+		},angle:90, showList: true, position: 'left', thumb: false, list: [
+			'pics/a.jpg',
+			'pics/pic1.jpg',
+			'pics/20260403090150_01_137279_000_01.jpg',
+			'pics/20260406110124_01_137279_000_01.jpg',
+			'pics/20260522082002_01_866663060823778_000_01.jpg',
+			'pics/20260522090151_01_137279_000_01.jpg',
+			'pics/20260522090059_01_201401_001_01.jpg',
+			'pics/20260522090125_01_137279_000_01.jpg',
+			'pics/20260522100000_01_866663060823117_000_01.jpg',
+			'pics/20260522095002_01_866663060821608_000_01.jpg',
+			'pics/20260522083002_01_866663060821608_000_01.jpg',
+			'pics/20260521110126_01_137279_000_01.jpg',
+			'pics/20260521110101_01_201401_001_01.jpg',
+			'pics/20260521105002_01_866663060823778_000_01.jpg',
+		]
 	});
 	//默认 showTitle: true, showScale: true,
 	//$.picbox({ obj: 'box2', img: 'imgs/a.jpg', width: 600, height: 400, showTitle: true, showScale: true, defScale: 0.5, minZoom: 0.25 });
-	$.picbox({ obj: 'box2', img: 'imgs/a.jpg', width: 600, height: 400, defScale: 0.5, minZoom: 0.25, showTitle: true, maxScale: 2 });
+	$.picbox({ obj: 'box2', img: 'imgs/map_bg.jpg', width: 600, height: 400, defScale: 0.5, minZoom: 0.25, showTitle: true, maxScale: 2, showList: true });
 };
 
 function switchpic() {
 	//picbox.initial({ obj: 'box', img: 'imgs/pic.jpg', width: 600, height: 400, defaultZoom: 0.5, minZoom: 0.5 });
 	//picbox.update({ img: 'imgs/pic.jpg' });
-	$.picbox({element:'box', img: 'imgs/pic.jpg'});
+	$.picbox({element:'box2', img: 'imgs/pic.jpg'});
 }
 </script>
