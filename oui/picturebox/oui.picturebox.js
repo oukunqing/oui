@@ -12,7 +12,18 @@
     const Config = {
         FilePath: $.getScriptSelfPath(true),
         FileName: 'oui.picturebox.',
-        ImgItemSize: 70
+        ImgItemSize: 70,
+        Lang: {
+            zoomIn: '\u653e\u5927',     //放大
+            zoomOut: '\u7f29\u5c0f',    //缩小
+            zoomOri: '\u56fe\u7247\u5b9e\u9645\u5927\u5c0f',    //图片实际大小
+            zoomApt: '\u56fe\u7247\u9002\u5e94\u7a97\u53e3\u5927\u5c0f',    //图片适应窗口大小
+            zoomCer: '\u5c45\u4e2d\u663e\u793a',    //居中显示
+            rotateL: '\u5411\u5de6\u65cb\u8f6c',    //向左旋转
+            rotateR: '\u5411\u53f3\u65cb\u8f6c',    //向右旋转
+            slidePlay: '\u64ad\u653e\u5e7b\u706f\u7247',    //播放幻灯片
+            slideStop: '\u505c\u6b62\u64ad\u653e',    //停止播放
+        }
     },
     Cache = {
         caches: {},
@@ -340,21 +351,14 @@
             if (update) {
                 return this;
             }
-            var lang = {
-                zoomIn: '\u653e\u5927',     //放大
-                zoomOut: '\u7f29\u5c0f',    //缩小
-                zoomOri: '\u56fe\u7247\u5b9e\u9645\u5927\u5c0f',    //图片实际大小
-                zoomApt: '\u56fe\u7247\u9002\u5e94\u7a97\u53e3\u5927\u5c0f',    //图片适应窗口大小
-                zoomCer: '\u5c45\u4e2d\u663e\u793a',    //居中显示
-                rotateL: '\u5411\u5de6\u65cb\u8f6c',    //向左旋转
-                rotateR: '\u5411\u53f3\u65cb\u8f6c',    //向右旋转
-            };
+            var lang = Config.Lang;
 
             var actionbar = document.createElement('DIV'), html = [
                 '<a class="zoom-in" title="', lang.zoomIn, '"></a>',
                 '<a class="zoom-out" title="', lang.zoomOut, '"></a>',
                 '<a class="zoom-ori" title="', lang.zoomOri, '"></a>',
                 '<a class="zoom-cer" title="', lang.zoomCer, '"></a>',
+                '<a class="slide-play" title="', lang.slidePlay, '"></a>',
             ];
             if (that.opt.rotateAngle) {
                 html = html.concat([
@@ -386,6 +390,10 @@
                         that.scale(that.cfg.boxScale).center();
                         $.removeClass(this, 'zoom-apt');
                         this.title = lang.zoomOri;
+                    } else if (css.endsWith('slide-play')) {
+                        Factory.setSlideIcon(that, true);
+                    } else if (css.endsWith('slide-stop')) {
+                        Factory.setSlideIcon(that, false);
                     } else if (css.indexOf('rotate') > -1) {
                         let rot = that.img.rot || 0;
                         rot += that.opt.rotateAngle * (css.endsWith('rotate-right') ? 1 : -1);
@@ -393,6 +401,9 @@
                         that.rotate(rot);
                     }
                 });
+                if (btns[i].className.indexOf('slide-play') > -1) {
+                    that.cache.slideButton = btns[i];
+                }
             }
 
             var titlebar = document.createElement('DIV');
@@ -459,7 +470,6 @@
 
             $.addListener(that.item, 'click', function (ev) {
                 var elem = ev.target, css = elem.className, tag = elem.tagName;
-                $.console.log('ev:', ev.target, tag, css);
                 if (tag === 'A' && css.indexOf('img-item') > -1) {
                     var idx = elem.getAttribute('data-index').toInt();
                     Factory.showItem(that, idx);
@@ -485,8 +495,9 @@
 
             that.cache.index = index;
             that.cache.update = that.img !== null;
+            //that.cache.playtime = new Date().getTime();
 
-            Factory.showBar(that);
+            Factory.showBar(that).showSlide(that);
 
             var url = that.cache.files[index];
             that.display(url).rotate(0);
@@ -500,7 +511,6 @@
 
                 for (var i = 0; i < bars.length; i++) {
                     $.addListener(bars[i], 'click', function (ev) {
-                        $.console.log('bars:', this);
                         var action = this.getAttribute('data-action').toInt(),
                             index = that.cache.index + action;
                         Factory.showItem(that, index);
@@ -531,8 +541,53 @@
                     that.cache.bars[0].style.top = top + 'px';
                     that.cache.bars[1].style.top = top + 'px';
                 }
-
             }
+            return this;
+        },
+        showSlide: function (that) {
+            var opt = that.opt;
+
+            if (that.cache.timer) {
+                window.clearInterval(that.cache.timer);
+            }
+            that.cache.timer = window.setInterval(function() {
+                let ts = new Date().getTime();
+                if (that.cache.slide && !that.cache.pause && ts - that.cache.playtime >= opt.timing) {
+                    let idx = that.cache.index, len = that.cache.items.length;
+                    idx += 1;
+                    if (idx >= len) {
+                        idx = 0;
+                    }
+                    Factory.showItem(that, idx);
+                    that.cache.playtime = ts;
+                }
+            }, 100);
+
+            return this;
+        },
+        setSlideIcon: function (that, play) {
+            that.cache.slide = play;
+            let btn = that.cache.slideButton, lang = Config.Lang;
+
+            if (!btn) {
+                return this;
+            }
+
+            if (!that.cache.items.length) {
+                btn.style.display = 'none';
+            } else {
+                btn.style.display = '';
+            }
+
+            if (play) {
+                $.addClass(btn, 'slide-stop');
+                btn.title = lang.slideStop;
+            } else {
+                $.removeClass(btn, 'slide-stop');
+                btn.title = lang.slidePlay;
+            }
+            that.cache.playtime = ts;
+
             return this;
         },
         select: function (that, update) {
@@ -684,9 +739,20 @@
     function PictureBox(options) {
         this.img = null;
         this.cache = {
+            //是否更新，若更新，则不重复创建控制元素
             update: false,
+            //图片列表元素数组
             items: [],
-            index: 0
+            //当前图片列表索引
+            index: 0,
+            //是否播放幻灯片
+            slide: false,
+            //是否暂停播放幻灯片
+            pause: false,
+            //幻灯片定时器
+            timer: null,
+            //播放的时间
+            playtime: 0
         };
         return this.initial(options);
     }
@@ -705,21 +771,32 @@
                     showMagnifier: true,
                     magnifierStyle: null,
                     rotateAngle: 90,
+                    //是否显示图片列表
                     showList: false,
+                    //图片地址列表
                     list: [],
+                    //图片列表显示的位置: top, right, bottom, left
                     position: 'right',
+                    //是否显示缩略图
                     thumb: false,
                     //text: ['上一张','下一张']
-                    text: ['\u4e0a\u4e00\u5f20','\u4e0b\u4e00\u5f20']
+                    text: ['\u4e0a\u4e00\u5f20','\u4e0b\u4e00\u5f20'],
+                    //是否播放幻灯片
+                    slide: false,
+                    //是否循环播放
+                    loop: true,
+                    //切换间隔时间，单位：毫秒
+                    timing: 5000
                 }, options), box = that.box, path;
-
-            that.cache.update = that.img !== null;
 
             opt.magnifierStyle = $.extend({
                 width:150, height:150, scaleRatio: 1, cursor: 'crosshair', position:'custom' /*,opacity:0.95*/
             }, options.magnifierStyle);
 
             that.opt = $.extend({}, that.opt, opt);
+
+            that.cache.update = that.img !== null;
+            that.cache.slide = opt.slide;
 
             if (!that.cache.update) {
                 box = $.toElement(opt.element);
@@ -827,6 +904,10 @@
 
                     if ($.isFunction(that.opt.callback)){
                         that.opt.callback(that, that.cfg);
+                    }
+
+                    if (!update) {
+                        Factory.setSlideIcon(that, that.cache.slide);
                     }
                 });
             }

@@ -5848,8 +5848,9 @@
                 return $;
             }
             var offset = $.getOffset(elem),
+                margin = $.getMarginSize(elem),
                 offsetP = $.getOffset(parent),
-                posH = offset.top - offsetP.top;
+                posH = offset.top - offsetP.top - margin.top;
 
             //$.console.log('scrollTo:', elem, parent, offset, offsetP, 'posH', posH);
 
