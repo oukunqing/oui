@@ -495,7 +495,7 @@
 
             that.cache.index = index;
             that.cache.update = that.img !== null;
-            //that.cache.playtime = new Date().getTime();
+            that.cache.playtime = new Date().getTime();
 
             Factory.showBar(that).showSlide(that);
 
@@ -586,7 +586,7 @@
                 $.removeClass(btn, 'slide-stop');
                 btn.title = lang.slidePlay;
             }
-            that.cache.playtime = ts;
+            that.cache.playtime = new Date().getTime();
 
             return this;
         },
