@@ -5852,8 +5852,6 @@
                 offsetP = $.getOffset(parent),
                 posH = offset.top - offsetP.top - margin.top;
 
-            //$.console.log('scrollTo:', elem, parent, offset, offsetP, 'posH', posH);
-
             parent.scrollTop += posH + (offsetY || 0);
 
             return $;

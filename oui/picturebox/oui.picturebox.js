@@ -104,8 +104,16 @@
                 curScale: curScale, boxScale: boxScale, minScale: minScale
             };
         },
+        setImgPath: function (path) {            
+            if (path.startsWith('//')) {
+                path = path.substr(1);
+            }
+            return path;
+        },
         getImgPath: function (opt) {
-            return $.getParam(opt, 'img,pic,path,url');
+            var path = $.getParam(opt, 'img,pic,path,url');
+
+            return Factory.setImgPath(path);
         },
         showRange: function (p1, p2, div, box) {
             if ($.isNullOrUndefined(div)) {
@@ -208,11 +216,12 @@
         showMagnifier: function (ev, that) {
             let cfg = that.cfg,
                 opt = cfg.magnifierStyle,
-                rect = that.box.getBoundingClientRect();
+                rect = that.body.getBoundingClientRect();
 
             if (!cfg.showMagnifier || cfg.curScale >= 1 || that.cfg.pointerdown 
                 || !this.isInRange(ev, that.img) 
-                || !this.isInRange(ev, that.box)) {
+                || !this.isInRange(ev, that.body)
+                || that.img.rot) {
                 this.hideMagnifier(that);
                 return this;
             }
@@ -232,7 +241,7 @@
                 ].join('') + opt.cssText;
 
                 div.innerHTML = '<img class="magnifier-img" src="' + that.img.src + '" />';
-                that.box.appendChild(div);
+                that.body.appendChild(div);
 
                 that.magnifier = div;
                 that.magnifierImg = div.childNodes[0];
@@ -316,7 +325,7 @@
                 ev.preventDefault();
             });
             if (!update && that.cfg.showMagnifier) {
-                $.addListener([that.box, document], 'pointermove', function (ev) {
+                $.addListener([that.body, document], 'pointermove', function (ev) {
                     if (!that.cfg.pointerdown && !that.cfg.selectdown) {
                         Factory.showMagnifier(ev, that);
                     } else {
@@ -438,13 +447,10 @@
             return this;
         },
         buildItem: function (that, curpath) {
-            var index = 0, html = [], opt = that.opt, i, path, thumb, files = [];
+            var index = -1, html = [], opt = that.opt, i, path, thumb, files = [];
 
             for (i = 0; i < opt.list.length; i++) {
-                path = opt.list[i];
-                if (path.startsWith('//')) {
-                    path = path.substr(1);
-                }
+                path = Factory.setImgPath(opt.list[i]);
 
                 files.push(path);
 
@@ -455,18 +461,29 @@
                 }
 
                 html.push([
-                    '<a class="img-item', index === i ? ' img-cur' : '', '"',
+                    '<a class="img-item"',
                     ' style="background-image:url(\'', thumb, '\');"',
                     ' data-index="', i, '"',
                     ' title="No.', i + 1, '" data-mode="tip-top"',
                     '></a>'
                 ].join(''));
             }
+            switch(opt.position) {
+            case 'top':
+            case 'bottom':
+                that.item.style.width = that.box.clientWidth + 'px';
+                break;
+            case 'right':
+            case 'left':
+                that.item.style.height = that.box.clientHeight + 'px';
+                break;
+            }
 
             that.item.innerHTML = html.join('');
 
             that.cache.files = files;
             that.cache.items = that.item.querySelectorAll('.img-item');
+            that.cache.index = index;
 
             $.addListener(that.item, 'click', function (ev) {
                 var elem = ev.target, css = elem.className, tag = elem.tagName;
@@ -476,7 +493,11 @@
                 }
             });
 
-            Factory.buildBar(that).showItem(that, index);
+            Factory.buildBar(that).showItem(that, that.cache.index);
+
+            window.setTimeout(function() {
+                Factory.showItem(that, that.cache.index);
+            }, 100);
 
             return this;
         },
@@ -486,6 +507,7 @@
             if (!items || index < 0 || index >= items.length) {
                 return this;
             }
+
             let cur = that.item.querySelector('.img-cur');
             if (cur) {
                 $.removeClass(cur, 'img-cur');
@@ -744,7 +766,7 @@
             //图片列表元素数组
             items: [],
             //当前图片列表索引
-            index: 0,
+            index: -1,
             //是否播放幻灯片
             slide: false,
             //是否暂停播放幻灯片
@@ -830,8 +852,8 @@
             path = Factory.getImgPath(that.opt);
 
             if (opt.showList && opt.list && opt.list.length) {
-                Factory.buildItem(that, path);
                 that.item.style.display = '';
+                Factory.buildItem(that, path);
             } else {
                 that.item.style.display = 'none';
             }
@@ -894,7 +916,7 @@
                         .touchZoom(that, update);
 
                     that.resize(null, that.opt.fill, that.opt.margin);
-                    that.title().center().status();
+                    that.title().center().status().zoom(true, null, 1);
                     
                     $.getFileSize(that.cfg.filePath, function(size) {
                         var fileSize = size >= 0 ? size : (opt.fileSize || 0);
@@ -1198,16 +1220,18 @@
                 switch(opt.position) {
                 case 'top':
                 case 'bottom':
-                    that.body.style.width = that.box.style.width;
+                    that.body.style.width = that.box.clientWidth + 'px';
                     that.body.style.height = that.box.clientHeight - Config.ImgItemSize + 'px';
+                    that.item.style.width = that.box.clientWidth + 'px';
                     if (opt.position === 'top') {
                         that.body.style.top = Config.ImgItemSize + 'px';
                     }
                     break;
                 case 'right':
                 case 'left':
-                    that.body.style.height = that.box.style.height;
+                    that.body.style.height = that.box.clientHeight + 'px';
                     that.body.style.width = that.box.clientWidth - Config.ImgItemSize + 'px';
+                    that.item.style.height = that.box.clientHeight + 'px';
                     if (opt.position === 'left') {
                         that.body.style.left = Config.ImgItemSize + 'px';
                     }
