@@ -5845,7 +5845,6 @@
 
             var parent = $.isElement(pnode = $.toElement(pnode)) ? pnode : elem.parentNode;
             if (!force && isInViewport(elem, parent, true)) {
-                $.console.log('scrollTo: nonono');
                 return $;
             }
             var offset = $.getOffset(elem),
@@ -5906,7 +5905,8 @@
             }
             div.style.cssText = css.join('');
             div.innerHTML = txt;
-            var size = { width: div.offsetWidth, height: div.offsetHeight };
+            //var size = { width: div.offsetWidth, height: div.offsetHeight };
+            var size = { width: div.clientWidth, height: div.clientHeight };
             return div.innerHTML = '', size;
         },
         getInnerText = function (elem) {
@@ -8609,7 +8609,7 @@ $.title
                 div.style.cssText = [
                     'position:absolute;left:-5000px;top:-5000px;',
                     'display:inline-block;overflow:hidden;',
-                    'margin:0;padding:0;',
+                    'margin:0;padding:0;font-size:14px;',
                     //'min-width:0;min-height:0;max-width:auto;max-height:auto;',
                     'border:none;box-sizing:border-box;',
                     //'border:soild 1px #fff;box-sizing:content-box;',
@@ -8625,7 +8625,7 @@ $.title
             }
             div.innerHTML = content;
 
-            let size = { width: div.offsetWidth + 2, height: div.offsetHeight };
+            let size = { width: div.clientWidth + 2, height: div.clientHeight };
 
             div.innerHTML = '';
 
