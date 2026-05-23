@@ -5824,8 +5824,8 @@
             var es = elem.getBoundingClientRect(),
                 bs = box.getBoundingClientRect();
 
-            //$.console.log('es:', es, ', bs:', bs);
-            return es.top >= bs.top && es.top + es.height <= bs.top + bs.height;
+            return (es.top >= bs.top && es.top + es.height <= bs.top + bs.height) && 
+                (es.left >= bs.left && es.left + es.width <= bs.left + bs.width);
         },
         scrollTo = function (elem, pnode, offsetY, force) {
             if ($.isString(elem, true)) {
@@ -5845,14 +5845,17 @@
 
             var parent = $.isElement(pnode = $.toElement(pnode)) ? pnode : elem.parentNode;
             if (!force && isInViewport(elem, parent, true)) {
+                $.console.log('scrollTo: nonono');
                 return $;
             }
             var offset = $.getOffset(elem),
                 margin = $.getMarginSize(elem),
                 offsetP = $.getOffset(parent),
-                posH = offset.top - offsetP.top - margin.top;
+                posH = offset.top - offsetP.top - margin.top,
+                posW = offset.left - offsetP.left - margin.left;
 
             parent.scrollTop += posH + (offsetY || 0);
+            parent.scrollLeft += posW;
 
             return $;
         },

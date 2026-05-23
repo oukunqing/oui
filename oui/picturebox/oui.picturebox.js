@@ -13,6 +13,8 @@
         FilePath: $.getScriptSelfPath(true),
         FileName: 'oui.picturebox.',
         ImgItemSize: 70,
+        SlideMinInterval: 500,
+        SlideMaxInterval: 900000,
         Lang: {
             zoomIn: '\u653e\u5927',     //放大
             zoomOut: '\u7f29\u5c0f',    //缩小
@@ -383,7 +385,7 @@
 
             var btns = actionbar.querySelectorAll('a');
             for (var i = 0; i < btns.length; i++) {
-                $.addListener(btns[i], 'click', function() {
+                $.addListener(btns[i], 'click', function(ev) {
                     let css = this.className;
                     if (css.endsWith('zoom-in')) {
                         that.zoom(true, null, 1.25);
@@ -412,6 +414,9 @@
                 });
                 if (btns[i].className.indexOf('slide-play') > -1) {
                     that.cache.slideButton = btns[i];
+                    $.addListener(btns[i], 'contextmenu', function (ev) {
+                        Factory.showSlideForm(that);
+                    });
                 }
             }
 
@@ -443,13 +448,12 @@
                     return false;
                 };
             }
-
             return this;
         },
         buildItem: function (that, curpath) {
-            var index = -1, html = [], opt = that.opt, i, path, thumb, files = [];
+            var index = -1, html = [], opt = that.opt, i, path, thumb, files = [], len = opt.list.length;
 
-            for (i = 0; i < opt.list.length; i++) {
+            for (i = 0; i < len; i++) {
                 path = Factory.setImgPath(opt.list[i]);
 
                 files.push(path);
@@ -472,14 +476,19 @@
             case 'top':
             case 'bottom':
                 that.item.style.width = that.box.clientWidth + 'px';
+                that.item.innerHTML = html.join('');
+
+                $.addListener(that.item, 'wheel', function (ev) {
+                    ev.preventDefault();
+                    that.item.scrollLeft += ev.deltaY;
+                });
                 break;
             case 'right':
             case 'left':
                 that.item.style.height = that.box.clientHeight + 'px';
+                that.item.innerHTML = html.join('');
                 break;
             }
-
-            that.item.innerHTML = html.join('');
 
             that.cache.files = files;
             that.cache.items = that.item.querySelectorAll('.img-item');
@@ -574,10 +583,10 @@
             }
             that.cache.timer = window.setInterval(function() {
                 let ts = new Date().getTime();
-                if (that.cache.slide && !that.cache.pause && ts - that.cache.playtime >= opt.timing) {
+                if (that.cache.slide && !that.cache.pause && ts - that.cache.playtime >= that.cache.timing) {
                     let idx = that.cache.index, len = that.cache.items.length;
                     idx += 1;
-                    if (idx >= len) {
+                    if (idx >= len && that.cache.loop) {
                         idx = 0;
                     }
                     Factory.showItem(that, idx);
@@ -609,6 +618,44 @@
                 btn.title = lang.slidePlay;
             }
             that.cache.playtime = new Date().getTime();
+
+            return this;
+        },
+        showSlideForm: function(that, hide) {
+            let div = that.cache.form;
+            if (!div) {
+                div = document.createElement('DIV');
+                div.className = 'oui-picbox-form';
+                div.style.display = 'none';
+                div.innerHTML = [
+                    '<label class="oui-picbox-lbl"><input type="checkbox" class="oui-picbox-chb" /><span>循环播放</span></label>',
+                    '<span>切换时长</span>',
+                    '<input type="text" placeholder="" class="oui-picbox-txt" maxlength="6" title="图片切换时间，以毫秒为单位" />',
+                    '<span>毫秒</span>',
+                    '<input type="button" class="oui-picbox-btn" value="确定" />',
+                ].join('');
+                that.box.appendChild(div);
+                that.cache.form = div;
+
+                $.addListener(div.querySelector('.oui-picbox-btn'), 'click', function (ev) {
+                    let ms = div.querySelector('.oui-picbox-txt').value.toInt();
+                    if (ms < Config.SlideMinInterval || ms > Config.SlideMaxInterval) {
+                        return false;
+                    }
+                    that.cache.timing = ms;
+                    let loop = div.querySelector('.oui-picbox-chb').checked;
+                    that.cache.loop = loop;
+
+                    div.style.display = 'none';
+                });
+            }
+            if (hide) {
+                div.style.display = 'none';
+                return this;
+            }
+            div.style.display = '';
+            div.querySelector('.oui-picbox-txt').value = that.cache.timing;
+            div.querySelector('.oui-picbox-chb').checked = that.cache.loop;
 
             return this;
         },
@@ -769,12 +816,18 @@
             index: -1,
             //是否播放幻灯片
             slide: false,
+            //是否循环播放
+            loop: true,
+            //幻灯片切换频率，单位：毫秒
+            timing: 4000,
             //是否暂停播放幻灯片
             pause: false,
             //幻灯片定时器
             timer: null,
             //播放的时间
-            playtime: 0
+            playtime: 0,
+            //幻灯片配置表单
+            form: null
         };
         return this.initial(options);
     }
@@ -819,6 +872,8 @@
 
             that.cache.update = that.img !== null;
             that.cache.slide = opt.slide;
+            that.cache.loop = opt.loop;
+            that.cache.timing = opt.timing;
 
             if (!that.cache.update) {
                 box = $.toElement(opt.element);

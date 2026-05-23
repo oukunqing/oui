@@ -79,7 +79,7 @@
     border: none;
     box-sizing:border-box;
     overflow: auto;
-    
+    display: block;
     -ms-overflow-style: none;
     scrollbar-width: none;    
 }
@@ -109,15 +109,32 @@
     top: 0;
 }
 
+.oui-picbox-box .oui-picbox-item-left,.oui-picbox-box .oui-picbox-item-right {
+}
+.oui-picbox-box .oui-picbox-item-top,.oui-picbox-box .oui-picbox-item-bottom {
+    white-space: nowrap !important;
+}
+
 .oui-picbox-box .oui-picbox-item .img-item {
     width:60px; height:60px; min-height:60px;min-height:60px;
-    display:block;float:left;overflow:hidden;background-repeat: no-repeat;
+    display:inline-block;
+    overflow:hidden;background-repeat: no-repeat;
     background-position: center center;background-size: cover;
     border: solid 1px #fff; box-sizing:border-box;
-    padding:1px; margin:5px 0 5px 5px; cursor:pointer; opacity: 0.75;
+    padding:1px; margin:5px 0 0 5px; cursor:pointer; opacity: 0.75;
+    white-space: nowrap !important;
 }
 .oui-picbox-box .oui-picbox-item-left .img-item,.oui-picbox-box .oui-picbox-item-right .img-item {
-    display:block; margin:5px 0 0 5px;
+    display:block;
+}
+.oui-picbox-box .oui-picbox-item-top .img-item,.oui-picbox-box .oui-picbox-item-bottom .img-item {
+    
+}
+.oui-picbox-box .oui-picbox-item-top .img-item:last-child,.oui-picbox-box .oui-picbox-item-bottom .img-item:last-child {
+    margin-right:5px;
+}
+.oui-picbox-box .oui-picbox-item-left .img-item:last-child,.oui-picbox-box .oui-picbox-item-right .img-item:last-child {
+    margin-bottom:5px;
 }
 
 .oui-picbox-box .oui-picbox-item .img-cur {
@@ -151,11 +168,12 @@
 }
 .oui-picbox-action {
     height: 30px;
+    width: auto;
     position: absolute;
     z-index: 10001;
     left: 0;
     top: 0;
-    min-height: 24px;min-width: 0;
+    min-height: 28px;min-width: 0;
     border: none;
     margin: 0;
     padding: 1px 3px 0 4px;
@@ -177,7 +195,8 @@
     overflow: hidden;
     width: 28px;
     height: 28px;
-    display: inline-block;
+    display: block;
+    float: left;
     border: none;
     cursor: pointer;
     box-sizing: border-box;
@@ -196,6 +215,107 @@
 .oui-picbox-action a.rotate-right {background-position-x: -182px;}
 .oui-picbox-action a.slide-play {background-position-x: -212px;}
 .oui-picbox-action a.slide-stop {background-position-x: -242px;}
+
+.oui-picbox-box .oui-picbox-form {
+    position: absolute;
+    top: 30px;
+    left: 6px;
+    min-height: 0;min-width: 0;
+    display: block;
+    float:left;
+    height: 30px;
+    width: auto;
+    background: #fff;
+    border:none;
+    border-radius: 5px;
+    z-index: 99999;
+    overflow: hidden;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    opacity: 0.95;
+}
+.oui-picbox-box .oui-picbox-form .oui-picbox-txt {
+    border: solid 1px #ccc;
+    box-sizing: border-box;
+    border-radius: 0;
+    margin: 0 0 0 0;
+    padding: 0 5px;
+    min-height: 0;
+    min-height: 0;
+    width: 60px;
+    height: 30px;
+    background: transparent;
+    outline: none;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    display: block;float: left;
+    font-size: 14px;
+    font-family: Arial;
+    text-align: center;
+}
+.oui-picbox-box .oui-picbox-form .oui-picbox-btn {
+    height: 30px;
+    line-height: 28px;
+    min-height: 0;
+    min-height: 0;
+    border: solid 1px #ccc;
+    box-sizing: border-box;
+    border-radius: 5px;
+    margin:0;
+    padding: 0 10px;
+    cursor: pointer;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    display: block;float: left;
+    font-size: 14px;
+    font-family: Arial,宋体;
+}
+.oui-picbox-box .oui-picbox-form .oui-picbox-lbl {
+    height: 30px;
+    line-height: 28px;
+    min-height: 0;
+    min-height: 0;
+    border: solid 1px #ccc;
+    box-sizing: border-box;
+    border-radius: 5px;
+    margin:0;
+    padding: 0 7px 0 3px;
+    cursor: pointer;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    display: block;float: left;
+    font-size: 14px;
+    font-family: Arial,宋体;
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    user-select: none;
+    -ms-user-select: none;
+}
+.oui-picbox-box .oui-picbox-form .oui-picbox-chb {
+    min-height: 0;min-width: 0;
+    margin:7px 3px 0 3px;
+    display: block;
+    float: left;
+}
+.oui-picbox-box .oui-picbox-form span {
+    float:left;
+    font-size: 14px;
+    font-family: Arial,宋体;
+    line-height: 28px;
+    overflow: hidden;
+    display: block;
+    border-top: solid 1px #ccc;
+    border-bottom: solid 1px #ccc;
+    box-sizing: border-box;
+    color: #999;
+    padding: 0 3px;
+}
+.oui-picbox-box .oui-picbox-form .oui-picbox-lbl span {
+    border: none;
+    padding: 0;
+    color: #000;
+}
 
 .oui-picbox-title {
     position: absolute;
