@@ -4512,12 +4512,14 @@
                 var host = $.getUrlHost(location.href, true),
                     url = fileUrl.trim();
                 //目前只能获取相同域的文件大小
-                if (url.toLowerCase().startsWith('http') && !url.startsWith(host)) {
+                if ((url.toLowerCase().startsWith('http') && !url.startsWith(host)) || url.startsWith('file://')) {
                     return -1;
                 }
                 var xhr = new XMLHttpRequest();
                 //异步方式
                 xhr.open('HEAD', url, true);
+                xhr.onerror = function() { };
+                xhr.onload  = function() { };
                 xhr.onreadystatechange = function () {
                     var size = -1;
                     if (xhr.readyState === 4) {
@@ -4534,7 +4536,9 @@
                         callback(size);
                     }
                 };
-                xhr.send(null);
+                try {
+                  xhr.send(null);
+                } catch (ee) {}
             } catch (e) {
                 if ($.isFunction(callback)) {
                     callback(-1);
