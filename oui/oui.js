@@ -8345,20 +8345,24 @@ $.debounce 防抖
             bottom: rect.bottom - p.bottom - getScrollbarSize(elem, 'horizontal')
         };
 
-        // 返回标准化的DOMRect（兼容getBoundingClientRect返回格式）
-        /*return new DOMRect(
-            v.left,
-            v.top,
-            v.right - v.left,
-            v.bottom - v.top
-        );
-        */
-        return {
-            left: v.left,
-            top: v.top,
-            right: v.right - v.left,
-            bottom: v.bottom - v.top
-        };
+        if ($.isIE) {
+            return {
+                left: v.left,
+                top: v.top,
+                right: v.right,
+                bottom: v.bottom,
+                width: v.right - v.left,
+                height: v.bottom - v.top
+            };
+        } else {
+            // 返回标准化的DOMRect（兼容getBoundingClientRect返回格式）
+            return new DOMRect(
+                v.left,
+                v.top,
+                v.right - v.left,
+                v.bottom - v.top
+            );
+        }
     }
 
     /**
