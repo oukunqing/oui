@@ -491,6 +491,36 @@
                 break;
             }
 
+            $.addListener(that.item, 'pointerdown', function (ev) {
+                if (0 == ev.button) {
+                    $.cancelBubble(ev);
+                    that.cfg.itemdown = true;
+                    that.cfg.itemlastpointer = $.getEventPos(ev);
+                    that.cfg.itemdiffpointer = { x: 0, y: 0 };
+                }
+            });
+            $.addListener(that.item, 'pointermove', function (ev) {
+                if (!that.cfg.itemdown) {
+                    return false;
+                }
+                $.cancelBubble(ev);
+
+                var cur = $.getEventPos(ev);
+                that.cfg.itemdiffpointer.x = cur.x - that.cfg.itemlastpointer.x;
+                that.cfg.itemdiffpointer.y = cur.y - that.cfg.itemlastpointer.y;
+                that.cfg.itemlastpointer = { x: cur.x, y: cur.y };
+
+                Factory.moveItem(that, that.cfg.itemdiffpointer);
+
+                ev.preventDefault();
+            });
+            $.addListener([that.item, document], 'pointerup', function (ev) {
+                if (that.cfg.itemdown) {
+                    $.cancelBubble(ev);
+                    that.cfg.itemdown = false;
+                }
+            });
+
             that.cache.files = files;
             that.cache.items = that.item.querySelectorAll('.img-item');
             that.cache.index = index;
@@ -534,6 +564,20 @@
             var url = that.cache.files[index];
             that.display(url).rotate(0);
 
+            return this;
+        },
+        moveItem: function (that, par) {
+            var opt = that.opt;
+            switch(opt.position) {
+                case 'top':
+                case 'bottom':
+                    that.item.scrollLeft -= par.x;
+                    break;
+                case 'right':
+                case 'left':
+                    that.item.scrollTop -= par.y;
+                    break;
+            }
             return this;
         },
         buildBar: function (that) {
@@ -631,11 +675,18 @@
                 div.className = 'oui-picbox-form';
                 div.style.display = 'none';
                 div.innerHTML = [
-                    '<label class="oui-picbox-lbl"><input type="checkbox" class="oui-picbox-chb" /><span>循环播放</span></label>',
+                    /*'<label class="oui-picbox-lbl"><input type="checkbox" class="oui-picbox-chb" /><span>循环播放</span></label>',
                     '<span>切换时长</span>',
                     '<input type="text" placeholder="" class="oui-picbox-txt" maxlength="6" title="图片切换时间，以毫秒为单位" />',
                     '<span>毫秒</span>',
                     '<input type="button" class="oui-picbox-btn" value="确定" />',
+                    */
+                    '<label class="oui-picbox-lbl"><input type="checkbox" class="oui-picbox-chb" /><span>\u5faa\u73af\u64ad\u653e</span></label>',
+                    '<span>\u5207\u6362\u65f6\u957f</span>',
+                    '<input type="text" placeholder="" class="oui-picbox-txt" maxlength="6"',
+                    ' title="\u56fe\u7247\u5207\u6362\u65f6\u95f4\uff0c\u4ee5\u6beb\u79d2\u4e3a\u5355\u4f4d\uff0c500 - 900000" />',
+                    '<span>\u6beb\u79d2</span>',
+                    '<input type="button" class="oui-picbox-btn" value="\u786e\u5b9a" />',
                 ].join('');
                 that.box.appendChild(div);
                 that.cache.form = div;

@@ -145,6 +145,38 @@
     opacity: 1;
 }
 
+.oui-picbox-title {
+    position: absolute;
+    z-index: 10001;
+    left: 0;
+    bottom: 0;
+    min-height: 24px;min-width: 0;
+    border: none;
+    margin: 0;
+    padding: 0;
+    text-indent: 0px;
+    font-size: 14px;
+    font-family: Arial;
+    height: 28px;
+    line-height: 28px;
+    background: #fff;
+    color: #333;
+    opacity: 0.6;
+    box-sizing: border-box;
+    border-top-right-radius: 5px;
+    display: none;
+}
+.oui-picbox-title a {
+    margin: 0;
+    padding: 0;
+    min-height: 0;min-width: 0;
+    border: none;
+    font-size: 14px;
+    text-decoration: none;
+    color: #333;
+    overflow: hidden;
+}
+
 .oui-picbox-status {
     position: absolute;
     z-index: 10001;
@@ -165,6 +197,7 @@
     color: #333;
     opacity: 0.5;
     border-top-left-radius: 5px;
+    display: none;
 }
 .oui-picbox-action {
     height: 30px;
@@ -183,6 +216,7 @@
     color: #333;
     opacity: 0.6;
     border-bottom-right-radius: 5px;
+    display: none;
 }
 .oui-picbox-action a {
     margin: 0;
@@ -215,6 +249,12 @@
 .oui-picbox-action a.rotate-right {background-position-x: -182px;}
 .oui-picbox-action a.slide-play {background-position-x: -212px;}
 .oui-picbox-action a.slide-stop {background-position-x: -242px;}
+
+.oui-picbox-box:hover .oui-picbox-title,
+.oui-picbox-box:hover .oui-picbox-action,
+.oui-picbox-box:hover .oui-picbox-status {
+    display: block;
+}
 
 .oui-picbox-box .oui-picbox-form {
     position: absolute;
@@ -315,37 +355,6 @@
     border: none;
     padding: 0;
     color: #000;
-}
-
-.oui-picbox-title {
-    position: absolute;
-    z-index: 10001;
-    left: 0;
-    bottom: 0;
-    min-height: 24px;min-width: 0;
-    border: none;
-    margin: 0;
-    padding: 0;
-    text-indent: 0px;
-    font-size: 14px;
-    font-family: Arial;
-    height: 28px;
-    line-height: 28px;
-    background: #fff;
-    color: #333;
-    opacity: 0.6;
-    box-sizing: border-box;
-    border-top-right-radius: 5px;
-}
-.oui-picbox-title a {
-    margin: 0;
-    padding: 0;
-    min-height: 0;min-width: 0;
-    border: none;
-    font-size: 14px;
-    text-decoration: none;
-    color: #333;
-    overflow: hidden;
 }
 
 .oui-picbox-unselect {
