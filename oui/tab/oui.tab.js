@@ -1031,6 +1031,46 @@
         hideParentTabMenu: function() {
             Util.hideAllContextMenu();
             return this;
+        },
+        setBoxEvent: function (that) {
+            $.addListener(that.box, 'wheel', function (ev) {
+                ev.preventDefault();
+                that.box.scrollLeft += ev.deltaY;
+            });
+
+            $.addListener(that.box, 'pointerdown', function (ev) {
+                if (0 == ev.button) {
+                    $.cancelBubble(ev);
+                    that.cfg.itemdown = true;
+                    that.cfg.itemlastpointer = $.getEventPos(ev);
+                    that.cfg.itemdiffpointer = { x: 0, y: 0 };
+                }
+            });
+            $.addListener(that.box, 'pointermove', function (ev) {
+                if (!that.cfg.itemdown) {
+                    return false;
+                }
+                $.cancelBubble(ev);
+
+                var cur = $.getEventPos(ev);
+                that.cfg.itemdiffpointer.x = cur.x - that.cfg.itemlastpointer.x;
+                that.cfg.itemdiffpointer.y = cur.y - that.cfg.itemlastpointer.y;
+                that.cfg.itemlastpointer = { x: cur.x, y: cur.y };
+
+                Factory.scrollItem(that, that.cfg.itemdiffpointer);
+
+                ev.preventDefault();
+            });
+            $.addListener([that.box, document], 'pointerup,pointerover', function (ev) {
+                if (that.cfg.itemdown) {
+                    $.cancelBubble(ev);
+                    that.cfg.itemdown = false;
+                }
+            });
+            return this;
+        },
+        scrollItem: function (that, par) {
+            that.box.scrollLeft -= par.x;
         }
     };
 
@@ -1087,6 +1127,7 @@
 
         that.id = opt.id || '';
         that.cur = '';
+        that.cfg = {};
 
         if (opt.skin !== Config.DefaultSkin) {
             cssTab = ' oui-tabs-' + opt.skin;
@@ -1122,6 +1163,8 @@
             $.addListener(document, 'mousedown', function(ev) {
                 Util.hideContextMenu(ev, that);
             });
+
+            Factory.setBoxEvent(that);
 
             if($.isArray(opt.items) && opt.items.length > 0) {
                 var showId = '';

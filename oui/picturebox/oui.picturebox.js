@@ -510,7 +510,7 @@
                 that.cfg.itemdiffpointer.y = cur.y - that.cfg.itemlastpointer.y;
                 that.cfg.itemlastpointer = { x: cur.x, y: cur.y };
 
-                Factory.moveItem(that, that.cfg.itemdiffpointer);
+                Factory.scrollItem(that, that.cfg.itemdiffpointer);
 
                 ev.preventDefault();
             });
@@ -566,7 +566,7 @@
 
             return this;
         },
-        moveItem: function (that, par) {
+        scrollItem: function (that, par) {
             var opt = that.opt;
             switch(opt.position) {
                 case 'top':
