@@ -601,14 +601,15 @@
             if (!len || !that.cache.bars[0]) {
                 return this;
             }
+            that.cache.bars[0].style.display = '';
+            that.cache.bars[1].style.display = '';
+
             if (idx <= 0) {
                 that.cache.bars[0].style.display = 'none';
             } else if (idx >= len - 1) {
                 that.cache.bars[1].style.display = 'none';
-            } else {
-                that.cache.bars[0].style.display = '';
-                that.cache.bars[1].style.display = '';
             }
+            /*s
             if ($.isIE) {
                 that.cache.bars[0].style.left = '3px';
                 that.cache.bars[1].style.right = '37px';
@@ -618,6 +619,7 @@
                     that.cache.bars[1].style.top = top + 'px';
                 }
             }
+            */
             return this;
         },
         showSlide: function (that) {

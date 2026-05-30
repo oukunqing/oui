@@ -8886,6 +8886,7 @@ $.title
                 } else {
                     elem.innerHTML = html;
                 }
+                elem.dataHtml = html;
             }
 
             if (tip) {
@@ -8910,9 +8911,16 @@ $.title
                 if (that.timer) {
                     window.clearTimeout(that.timer);
                 }
+                let timeout = opt.timeout, text = elem.dataHtml.replace(/(&nbsp;)/, '');
+                // 8个字以内的简单的纯文字提示或者图标的提示文字，缩短提示文字显示的时长
+                // 当提示文字信息内容较少时，减少提示信息的显示时长，以减少对于页面内容的遮挡时间
+                if (text.length <= 8 && $.isString(text) && (!obj.innerHTML || /^[\u4e00-\u9fa5]+$/.test(text))) {
+                    timeout = 2000 + (text.length - 2) * 500;
+                }
+
                 that.timer = window.setTimeout(function () {
                     Factory.hideTitle(that);
-                }, opt.timeout);
+                }, timeout);
             }
 
             return this;

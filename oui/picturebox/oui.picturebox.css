@@ -28,8 +28,8 @@
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    width: 50px;
-    height: 50px;
+    width: 28px;
+    height: 45px;
     background: transparent; /* 背景透明 */
     border: none;
     cursor: pointer;
@@ -44,25 +44,28 @@
     width: 28px;
     height: 28px;
     position: absolute;
-
+    top: 5px;
+    background: transparent;
     border-top: 6px solid #f1f1f1;   /* 箭头粗细 改这里 */
     border-right: 6px solid #f1f1f1;
 }
 
 /* 左箭头 */
 .oui-picbox-box .oui-picbox-body .arrow-left {
-    left: 20px;
+    left: 25px;
 }
 .oui-picbox-box .oui-picbox-body .arrow-left::after {
+    left: 6px;
     transform: rotate(-135deg);
 }
 
 /* 右箭头 */
 .oui-picbox-box .oui-picbox-body .arrow-right {
-    right: 20px;
+    right: 25px;
 
 }
 .oui-picbox-box .oui-picbox-body .arrow-right::after {
+    right: 6px;
     transform: rotate(45deg);
 }
 
