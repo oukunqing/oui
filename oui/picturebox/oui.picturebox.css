@@ -33,7 +33,7 @@
     background: transparent; /* 背景透明 */
     border: none;
     cursor: pointer;
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
     z-index: 99999999;
@@ -72,6 +72,13 @@
 /* 悬浮变暗效果 不影响透明背景 */
 .oui-picbox-box .oui-picbox-body .arrow:hover::after {
     border-color: #ccc;
+}
+
+.oui-picbox-box .oui-picbox-body:hover .arrow {
+    display: flex;
+}
+.oui-picbox-box .oui-picbox-body .arrow-hide,.oui-picbox-box .oui-picbox-body:hover .arrow-hide {
+    display: none;
 }
 
 .oui-picbox-box .oui-picbox-item {

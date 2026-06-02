@@ -454,6 +454,12 @@
         buildItem: function (that, curpath) {
             var index = -1, html = [], opt = that.opt, i, path, thumb, files = [], len = opt.list.length;
 
+            if (len <= 1) {
+                that.item.style.display = 'none';
+                return this;
+            }
+            that.item.style.display = '';
+
             for (i = 0; i < len; i++) {
                 path = Factory.setImgPath(opt.list[i]);
 
@@ -593,6 +599,9 @@
                     });
                 }
                 that.cache.bars = bars;
+
+                $.removeClass(that.cache.bars[0], 'arrow-hide');
+                $.removeClass(that.cache.bars[1], 'arrow-hide');
             }
             return this;
         },
@@ -601,6 +610,7 @@
             if (!len || !that.cache.bars[0]) {
                 return this;
             }
+            
             that.cache.bars[0].style.display = '';
             that.cache.bars[1].style.display = '';
 
@@ -609,6 +619,7 @@
             } else if (idx >= len - 1) {
                 that.cache.bars[1].style.display = 'none';
             }
+            
             /*s
             if ($.isIE) {
                 that.cache.bars[0].style.left = '3px';
@@ -940,8 +951,8 @@
 
                 box.innerHTML = [
                     '<div class="oui-picbox-body">',
-                    '<a class="arrow arrow-left" data-action="-1" title="', opt.text[0], '" style="display:none;"></a>',
-                    '<a class="arrow arrow-right" data-action="1" title="', opt.text[1], '" style="display:none;"></a>',
+                    '<a class="arrow arrow-left arrow-hide" data-action="-1" title="', opt.text[0], '"></a>',
+                    '<a class="arrow arrow-right arrow-hide" data-action="1" title="', opt.text[1], '"></a>',
                     '</div>',
                     '<div class="oui-picbox-item oui-picbox-item-', opt.position, '" style="display:none;"></div>'
                 ].join('');
@@ -964,7 +975,6 @@
             path = Factory.getImgPath(that.opt);
 
             if (opt.showList && opt.list && opt.list.length) {
-                that.item.style.display = '';
                 Factory.buildItem(that, path);
             } else {
                 that.item.style.display = 'none';

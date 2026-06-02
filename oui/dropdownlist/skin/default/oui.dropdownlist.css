@@ -11,11 +11,6 @@
     -ms-user-select: none;
 }
 
-.oui-ddl:focus::-ms-value,.oui-ddl-elem:focus::-ms-value {
-  	background: transparent !important; /* 去掉蓝色 */
-	color: #000 !important;
-}
-
 .oui-ddl ul,
 .oui-ddl li {
 	list-style:none;overflow:hidden;
@@ -54,8 +49,10 @@
     user-select: none;
     -ms-user-select: none;
 }
-.oui-ddl-txt:focus::-ms-value {
-	background: transparent !important; /* 去掉蓝色 */
+
+.oui-ddl:focus::-ms-value,.oui-ddl-elem:focus::-ms-value,.oui-ddl-txt:focus::-ms-value {
+	/*去掉IE11浏览器蓝色背景*/
+  	background: transparent !important;
 	color: #000 !important;
 }
 

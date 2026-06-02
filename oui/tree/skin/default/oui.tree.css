@@ -814,6 +814,11 @@
 	background-position-x:-270px;
 	outline: none;
 }
+.oui-tree-form .btn-search:active {
+	border: none;
+	border-radius: 0;
+	box-shadow: none;
+}
 
 .oui-tree-form .btn-cancel {
 	right: 36px;
