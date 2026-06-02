@@ -4,6 +4,16 @@
 	/*border-radius: 5px;*/
 	font-size:14px;
 	font-family:Arial,宋体,微软雅黑;
+
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    user-select: none;
+    -ms-user-select: none;
+}
+
+.oui-ddl:focus::-ms-value,.oui-ddl-elem:focus::-ms-value {
+  	background: transparent !important; /* 去掉蓝色 */
+	color: #000 !important;
 }
 
 .oui-ddl ul,
@@ -38,11 +48,15 @@
 	box-sizing: border-box;
 	background:#fff url('ddl_arrow_down.png?12') no-repeat right center;
 
+    outline: none;
     -moz-user-select: none;
     -khtml-user-select: none;
     user-select: none;
     -ms-user-select: none;
-    outline: none;
+}
+.oui-ddl-txt:focus::-ms-value {
+	background: transparent !important; /* 去掉蓝色 */
+	color: #000 !important;
 }
 
 .oui-ddl-panel {

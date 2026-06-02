@@ -8911,6 +8911,7 @@ $.title
                 if (that.timer) {
                     window.clearTimeout(that.timer);
                 }
+                // 空格(&nbsp;)需要清除掉，空格基本上不影响文字阅读的时间
                 let timeout = opt.timeout, text = elem.dataHtml.replace(/(&nbsp;)/, '');
                 // 8个字以内的简单的纯文字提示或者图标的提示文字，缩短提示文字显示的时长
                 // 当提示文字信息内容较少时，减少提示信息的显示时长，以减少对于页面内容的遮挡时间
