@@ -245,7 +245,7 @@
     cursor: pointer;
     box-sizing: border-box;
     opacity: 0.5;
-    background: url("picbox.png?23") no-repeat -2px center;
+    background: url("picbox.png?123") no-repeat -2px center;
 }
 .oui-picbox-action a:hover {
     opacity: 1;

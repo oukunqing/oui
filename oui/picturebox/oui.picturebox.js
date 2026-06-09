@@ -24,7 +24,7 @@
             rotateL: '\u5411\u5de6\u65cb\u8f6c',    //向左旋转
             rotateR: '\u5411\u53f3\u65cb\u8f6c',    //向右旋转
             slidePlay: '\u64ad\u653e\u5e7b\u706f\u7247',    //播放幻灯片
-            slideStop: '\u505c\u6b62\u64ad\u653e',    //停止播放
+            slideStop: '\u6682\u505c\u64ad\u653e',    //暂停播放
         }
     },
     Cache = {
