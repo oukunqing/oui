@@ -81,6 +81,7 @@
 
             switch (opt.position) {
             case 5:
+            case 'center':
                 left = ev.clientX - opt.width / 2;
                 top = ev.clientY - opt.height / 2;
                 break;
@@ -152,7 +153,6 @@
                 $.addListener(that.magnifierImg, 'pointermove', function(ev) {
                     Factory.initMagnifier(ev, that);
                 });
-
             } else if (that.magnifier.style.display === 'none') {
                 that.magnifier.style.display = 'block';
             }
@@ -192,6 +192,7 @@
             }
 
             img.style.cssText = css.join('');
+
             return this;
         },
         hideMagnifier: function (that) {
@@ -215,7 +216,10 @@
             imgClass: '',
             // 指定图片的鼠标样式：zoom-in - 放大镜, crosshair - 十字
             // 若为空表示不指定
-            cursor: 'zoom-in'
+            cursor: 'zoom-in',
+            //放大镜显示的位置
+            position: 'custom'
+            //position: 'center'
         }, options);
 
         if (!$.isNumber(opt.scaleRatio) || opt.scaleRatio < 1) {
@@ -223,6 +227,9 @@
         }
         if (!$.isString(opt.cursor)) {
             opt.cursor = '';
+        }
+        if ([5, 'center'].indexOf(opt.position) > -1) {
+            opt.cursor = 'crosshair';
         }
 
         this.options = opt;

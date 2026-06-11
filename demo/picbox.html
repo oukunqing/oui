@@ -24,8 +24,16 @@
 window.onload = function() {
 	$.picbox({
 		obj: 'box', img: 'pics/20260521110101_01_201401_001_01.jpg', width: 800, height:500, defaultZoom: 0.9, minZoom: 0.5, maxScale: 2, showScale: true, showTitle: true,
-		showMagnifier: true, magnifierStyle: { 
+		showMagnifier: true, magnifierStyle: {
+			//放大镜宽度高度
+			//width: 200, height: 200,
+			//放大镜圆角像素大小
+			//radius: 20,
+			//放大镜里面的图片的缩放比例，默认为1（即原图大小）
+			//ratio: 1,
+			//放大镜位置， custom 表示光标在放大镜角落位置，center 表示光标在放大镜中间位置
 			//position: 'custom', 
+			position: 'center', 
 			cssText: 'border:solid 1px #f00;'
 		},angle:90, showList: true, position: 'right', thumb: false, list: [
 			'pics/a.jpg',

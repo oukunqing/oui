@@ -220,13 +220,14 @@
                 opt = cfg.magnifierStyle,
                 rect = that.body.getBoundingClientRect();
 
-            if (!cfg.showMagnifier || cfg.curScale >= 1 || that.cfg.pointerdown 
+            if (!cfg.showMagnifier || cfg.curScale >= opt.scaleRatio || that.cfg.pointerdown 
                 || !this.isInRange(ev, that.img) 
                 || !this.isInRange(ev, that.body)
                 || that.img.rot) {
                 this.hideMagnifier(that);
                 return this;
             }
+
             that.img.style.cursor = opt.cursor;
 
             if (!that.magnifier) {
@@ -550,8 +551,15 @@
         showItem: function (that, index) {
             var items = $.extend([], that.cache.items);
 
-            if (!items || index < 0 || index >= items.length) {
+            if (!items) {
                 return this;
+            }
+            if (!that.cache.switch && (index < 0 || index >= items.length)) {
+                return this;
+            } else if (index < 0) {
+                index = items.length - 1;
+            } else if (index >= items.length) {
+                index = 0;
             }
 
             let cur = that.item.querySelector('.img-cur');
@@ -614,6 +622,9 @@
             that.cache.bars[0].style.display = '';
             that.cache.bars[1].style.display = '';
 
+            if (that.cache.switch) {
+                return this;
+            }
             if (idx <= 0) {
                 that.cache.bars[0].style.display = 'none';
             } else if (idx >= len - 1) {
@@ -895,7 +906,9 @@
             //播放的时间
             playtime: 0,
             //幻灯片配置表单
-            form: null
+            form: null,
+            //是否循环切换
+            switch: false
         };
         return this.initial(options);
     }
@@ -911,8 +924,11 @@
                     fill: false,
                     margin: 0,
                     fullScreen: true,
+                    //是否显示放大镜
                     showMagnifier: true,
+                    //放大镜样式设置
                     magnifierStyle: null,
+                    //每次旋转的角度幅度
                     rotateAngle: 90,
                     //是否显示图片列表
                     showList: false,
@@ -929,8 +945,13 @@
                     //是否循环播放
                     loop: true,
                     //切换间隔时间，单位：毫秒
-                    timing: 5000
+                    timing: 5000,
+                    //是否循环切换
+                    switch: false
                 }, options), box = that.box, path;
+
+            options.magnifierStyle = $.extend({}, options.magnifierStyle);
+            options.magnifierStyle.scaleRatio = $.getParam(options.magnifierStyle, 'scaleRatio,ratio');
 
             opt.magnifierStyle = $.extend({
                 width:150, height:150, scaleRatio: 1, cursor: 'crosshair', position:'custom' /*,opacity:0.95*/
@@ -942,6 +963,7 @@
             that.cache.slide = opt.slide;
             that.cache.loop = opt.loop;
             that.cache.timing = opt.timing;
+            that.cache.switch = opt.switch;
 
             if (!that.cache.update) {
                 box = $.toElement(opt.element);
@@ -1026,7 +1048,8 @@
                         showScale: that.opt.showScale,
                         showTitle: that.opt.showTitle,
                         showMagnifier: that.opt.showMagnifier,
-                        magnifierStyle: that.opt.magnifierStyle
+                        magnifierStyle: that.opt.magnifierStyle,
+                        magnifierRatio: that.opt.magnifierRatio
                     };
 
                     Factory.setImgSize(that).hideMagnifier(that);
