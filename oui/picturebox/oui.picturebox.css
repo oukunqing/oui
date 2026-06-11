@@ -245,7 +245,7 @@
     cursor: pointer;
     box-sizing: border-box;
     opacity: 0.5;
-    background: url("picbox.png?123") no-repeat -2px center;
+    background: url("picbox.png?11") no-repeat -2px center;
 }
 .oui-picbox-action a:hover {
     opacity: 1;
@@ -259,6 +259,9 @@
 .oui-picbox-action a.rotate-right {background-position-x: -182px;}
 .oui-picbox-action a.slide-play {background-position-x: -212px;}
 .oui-picbox-action a.slide-stop {background-position-x: -242px;}
+.oui-picbox-action a.magnifier {background-position-x: -272px;}
+.oui-picbox-action a.magnifier-center {background-position-x: -302px;}
+.oui-picbox-action a.magnifier-disabled {background-position-x: -332px;}
 
 .oui-picbox-box:hover .oui-picbox-title,
 .oui-picbox-box:hover .oui-picbox-action,

@@ -23,6 +23,8 @@
             zoomCer: '\u5c45\u4e2d\u663e\u793a',    //居中显示
             rotateL: '\u5411\u5de6\u65cb\u8f6c',    //向左旋转
             rotateR: '\u5411\u53f3\u65cb\u8f6c',    //向右旋转
+            magnifierOn: '\u542f\u7528\u653e\u5927\u955c', //启用放大镜
+            magnifierOff: '\u7981\u7528\u653e\u5927\u955c', //禁用放大镜
             slidePlay: '\u64ad\u653e\u5e7b\u706f\u7247',    //播放幻灯片
             slideStop: '\u6682\u505c\u64ad\u653e',    //暂停播放
         }
@@ -193,13 +195,13 @@
             }
             return Math.round(num * ratio) / ratio;
         },
-        getPosition: function (ev, opt, bs) {
+        getPosition: function (ev, opt, bs, position) {
             // 请注意，这里必须保留最少1个像素的间距留白，防止放大镜图像抖动
             let margin = 2,
                 left = ev.clientX - bs.left + margin,
                 top = ev.clientY - bs.top + margin;
 
-            switch (opt.position) {
+            switch (position) {
             case 'center':
                 left = ev.clientX - bs.left - opt.width / 2;
                 top = ev.clientY - bs.top - opt.height / 2;
@@ -220,7 +222,8 @@
                 opt = cfg.magnifierStyle,
                 rect = that.body.getBoundingClientRect();
 
-            if (!cfg.showMagnifier || cfg.curScale >= opt.scaleRatio || that.cfg.pointerdown 
+            if (!cfg.showMagnifier || that.cache.magnifier.disabled
+                || cfg.curScale >= opt.scaleRatio || that.cfg.pointerdown 
                 || !this.isInRange(ev, that.img) 
                 || !this.isInRange(ev, that.body)
                 || that.img.rot) {
@@ -257,8 +260,8 @@
             }
 
             let elem = that.magnifier, img = that.magnifierImg;
-            if (['custom', 'cursor', 'center'].indexOf(opt.position) > -1) {
-                let pos = Factory.getPosition(ev, opt, rect);
+            if (['custom', 'cursor', 'center'].indexOf(that.cache.magnifier.position) > -1) {
+                let pos = Factory.getPosition(ev, opt, rect, that.cache.magnifier.position);
                 elem.style.left = pos.left + 'px';
                 elem.style.top = pos.top + 'px';
             }
@@ -373,6 +376,11 @@
                 '<a class="zoom-cer" title="', lang.zoomCer, '"></a>',
                 '<a class="slide-play" title="', lang.slidePlay, '"></a>',
             ];
+            if (that.opt.showMagnifier) {
+                html = html.concat([
+                    '<a class="magnifier" title="', lang.magnifierOff, '"></a>'
+                ]);
+            }
             if (that.opt.rotateAngle) {
                 html = html.concat([
                     '<a class="rotate-left" title="', lang.rotateL, '"></a>',
@@ -407,6 +415,8 @@
                         Factory.setSlideIcon(that, true);
                     } else if (css.endsWith('slide-stop')) {
                         Factory.setSlideIcon(that, false);
+                    } else if (css.indexOf('magnifier') > -1) {
+                        Factory.setMagnifierOpt(that, 'disabled');
                     } else if (css.indexOf('rotate') > -1) {
                         let rot = that.img.rot || 0;
                         rot += that.opt.rotateAngle * (css.endsWith('rotate-right') ? 1 : -1);
@@ -418,6 +428,11 @@
                     that.cache.slideButton = btns[i];
                     $.addListener(btns[i], 'contextmenu', function (ev) {
                         Factory.showSlideForm(that);
+                    });
+                } else if (btns[i].className.indexOf('magnifier') > -1) {
+                    that.cache.magnifierButton = btns[i];
+                    $.addListener(btns[i], 'contextmenu', function (ev) {
+                        Factory.setMagnifierOpt(that, 'position');
                     });
                 }
             }
@@ -738,6 +753,34 @@
 
             return this;
         },
+        setMagnifierOpt: function (that, action) {
+            switch (action) {
+            case 'disabled':
+                that.cache.magnifier.disabled = !that.cache.magnifier.disabled;
+                $.removeClass(that.cache.magnifierButton, 'magnifier-disabled');
+                if (that.cache.magnifier.disabled) {
+                    $.addClass(that.cache.magnifierButton, 'magnifier-disabled');
+                    that.cache.magnifierButton.title = Config.Lang.magnifierOn; //启用放大镜
+                } else {
+                    that.cache.magnifierButton.title = Config.Lang.magnifierOff; //禁用放大镜
+                }
+                break;
+            case 'position':
+                that.cache.magnifier.position = that.cache.magnifier.position === 'center' ? 'custom' : 'center';
+                $.setClass(that.cache.magnifierButton, 'magnifier-center', that.cache.magnifier.position === 'center');
+                break;
+            default:
+                $.removeClass(that.cache.magnifierButton, 'magnifier-disabled');
+                if (that.cache.magnifier.disabled) {
+                    $.addClass(that.cache.magnifierButton, 'magnifier-disabled');
+                    that.cache.magnifierButton.title = Config.Lang.magnifierOn; //启用放大镜
+                } else {
+                    that.cache.magnifierButton.title = Config.Lang.magnifierOff; //禁用放大镜
+                }
+                break;
+            }
+            return this;
+        },
         select: function (that, update) {
             if (update) {
                 return this;
@@ -908,7 +951,9 @@
             //幻灯片配置表单
             form: null,
             //是否循环切换
-            switch: false
+            switch: false,
+            //放大镜参数
+            magnifier: {}
         };
         return this.initial(options);
     }
@@ -954,7 +999,7 @@
             options.magnifierStyle.scaleRatio = $.getParam(options.magnifierStyle, 'scaleRatio,ratio');
 
             opt.magnifierStyle = $.extend({
-                width:150, height:150, scaleRatio: 1, cursor: 'crosshair', position:'custom' /*,opacity:0.95*/
+                width:150, height:150, scaleRatio: 1, cursor: 'crosshair', position:'custom', disabled: false /*,opacity:0.95*/
             }, options.magnifierStyle);
 
             that.opt = $.extend({}, that.opt, opt);
@@ -964,6 +1009,7 @@
             that.cache.loop = opt.loop;
             that.cache.timing = opt.timing;
             that.cache.switch = opt.switch;
+            that.cache.magnifier = opt.magnifierStyle;
 
             if (!that.cache.update) {
                 box = $.toElement(opt.element);
@@ -1048,8 +1094,7 @@
                         showScale: that.opt.showScale,
                         showTitle: that.opt.showTitle,
                         showMagnifier: that.opt.showMagnifier,
-                        magnifierStyle: that.opt.magnifierStyle,
-                        magnifierRatio: that.opt.magnifierRatio
+                        magnifierStyle: that.opt.magnifierStyle
                     };
 
                     Factory.setImgSize(that).hideMagnifier(that);
