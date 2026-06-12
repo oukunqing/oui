@@ -27,7 +27,8 @@
             magnifierOff: '\u7981\u7528\u653e\u5927\u955c', //禁用放大镜
             slidePlay: '\u64ad\u653e\u5e7b\u706f\u7247',    //播放幻灯片
             slideStop: '\u6682\u505c\u64ad\u653e',    //暂停播放
-        }
+        },
+        ScaleRatio: 1.25
     },
     Cache = {
         caches: {},
@@ -261,9 +262,9 @@
 
             let elem = that.magnifier, img = that.magnifierImg;
             if (['custom', 'cursor', 'center'].indexOf(that.cache.magnifier.position) > -1) {
-                let pos = Factory.getPosition(ev, opt, rect, that.cache.magnifier.position);
-                elem.style.left = pos.left + 'px';
-                elem.style.top = pos.top + 'px';
+                let p = Factory.getPosition(ev, opt, rect, that.cache.magnifier.position);
+                elem.style.left = p.left + 'px';
+                elem.style.top = p.top + 'px';
             }
 
             let size = that.img.getBoundingClientRect(),
@@ -398,9 +399,9 @@
                 $.addListener(btns[i], 'click', function(ev) {
                     let css = this.className;
                     if (css.endsWith('zoom-in')) {
-                        that.zoom(true, null, 1.25);
+                        that.zoom(true, null, Config.ScaleRatio);
                     } else if (css.endsWith('zoom-out')) {
-                        that.zoom(false, null, 1.25);
+                        that.zoom(false, null, Config.ScaleRatio);
                     } else if (css.endsWith('zoom-cer')) {
                         that.center();
                     } else if (css.endsWith('zoom-ori')) {
@@ -416,7 +417,7 @@
                     } else if (css.endsWith('slide-stop')) {
                         Factory.setSlideIcon(that, false);
                     } else if (css.indexOf('magnifier') > -1) {
-                        Factory.setMagnifierOpt(that, 'disabled');
+                        Factory.setMagnifierOpt(that, 'disabled', ev);
                     } else if (css.indexOf('rotate') > -1) {
                         let rot = that.img.rot || 0;
                         rot += that.opt.rotateAngle * (css.endsWith('rotate-right') ? 1 : -1);
@@ -427,23 +428,26 @@
                 if (btns[i].className.indexOf('slide-play') > -1) {
                     that.cache.slideButton = btns[i];
                     $.addListener(btns[i], 'contextmenu', function (ev) {
-                        Factory.showSlideForm(that);
+                        Factory.showSlideForm(that, null, ev);
                     });
                 } else if (btns[i].className.indexOf('magnifier') > -1) {
                     that.cache.magnifierButton = btns[i];
                     $.addListener(btns[i], 'contextmenu', function (ev) {
-                        Factory.setMagnifierOpt(that, 'position');
+                        Factory.setMagnifierOpt(that, 'position', ev);
                     });
                 }
             }
 
             var titlebar = document.createElement('DIV');
             titlebar.className = 'oui-picbox-title oui-picbox-unselect';
-            $.addListener(titlebar, 'dblclick,touchstart', function() {
-                $.cancelBubble();
+            $.addListener(titlebar, 'dblclick,touchstart', function(ev) {
+                $.cancelBubble(ev);
                 that.scale(that.cfg.boxScale).center();
             });
-            titlebar.oncontextmenu = function() {
+            titlebar.oncontextmenu = function(ev) {
+                if ($.ieRepeatAction(ev)) {
+                    return false;
+                }
                 that.scale(1).center();
                 return false;
             };
@@ -461,6 +465,9 @@
 
             if (!that.cfg.showTitle) {
                 statusbar.oncontextmenu = function() {
+                    if ($.ieRepeatAction(ev)) {
+                        return false;
+                    }
                     that.scale(1).center();
                     return false;
                 };
@@ -707,7 +714,10 @@
 
             return this;
         },
-        showSlideForm: function(that, hide) {
+        showSlideForm: function(that, hide, ev) {
+            if ($.ieRepeatAction(ev)) {
+                return this;
+            }
             let div = that.cache.form;
             if (!div) {
                 div = document.createElement('DIV');
@@ -742,7 +752,7 @@
                     div.style.display = 'none';
                 });
             }
-            if (hide || (!$.isIE && div.style.display !== 'none')) {
+            if (hide || div.style.display !== 'none') {
                 div.style.display = 'none';
                 return this;
             } else {
@@ -753,7 +763,10 @@
 
             return this;
         },
-        setMagnifierOpt: function (that, action) {
+        setMagnifierOpt: function (that, action, ev) {
+            if ($.ieRepeatAction(ev)) {
+                return this;
+            }
             switch (action) {
             case 'disabled':
                 that.cache.magnifier.disabled = !that.cache.magnifier.disabled;
@@ -767,6 +780,7 @@
                 break;
             case 'position':
                 that.cache.magnifier.position = that.cache.magnifier.position === 'center' ? 'custom' : 'center';
+            $.console.log('setMagnifierOpt:', action, that.cache.magnifier.position, that.cache.magnifierButton);
                 $.setClass(that.cache.magnifierButton, 'magnifier-center', that.cache.magnifier.position === 'center');
                 break;
             default:
@@ -786,6 +800,10 @@
                 return this;
             }
             that.box.oncontextmenu = function (ev) {
+                if ($.ieRepeatAction(ev)) {
+                    return false;
+                }
+                $.console.log('box contextmenu');
                 //鼠标右键若有拖动动作，或者鼠标位置不在图片范围内，则不显示默认的右键菜单
                 if (that.cfg.selectdrag || that.cfg.selectmove || !that.cfg.selectonpic || ev.target.nodeName !== 'IMG') {
                     //selectmove 主要是为了兼容IE浏览器：右键拖动画框时还会弹出右键菜单的问题
@@ -842,7 +860,7 @@
         wheelZoom: function (that, update) {
             $.addListener(that.img, 'dblclick', function (ev) {
                 $.cancelBubble(ev);
-                that.zoom(true, ev, 1.25);
+                that.zoom(true, ev, Config.ScaleRatio);
                 ev.preventDefault();
             });
             if (update) {                

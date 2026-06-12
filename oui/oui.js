@@ -6162,6 +6162,47 @@
                 return false;
             }
         },
+        isPointerEvent = function (ev) {
+            if (typeof PointerEvent === 'undefined') {
+                return false;
+            }
+            return ev instanceof PointerEvent;
+        },
+        myRepeatCache = {},
+        repeatAction = function (key, timeout) {
+            var ms = new Date().getTime(), k = 'repeat-';
+            if (key === null || typeof key === 'undefined') {
+                return false;
+            }
+            if (isPointerEvent(key)) {
+                k += key.type;
+            } else if ($.isObject(key) || $.isArray(key)) {
+                k += $.crc.toCRC16($.toJsonStr(key));
+            } else {
+                k += key;
+            }
+            if (typeof myRepeatCache[k] === 'undefined') {
+                myRepeatCache[k] = ms;
+                return false;
+            } else {
+                if (!$.isNumber(timeout)) {
+                    timeout = 100;
+                }
+                if (timeout > 0) {
+                    if (ms - myRepeatCache[k] < timeout) {
+                        return true;
+                    }
+                    myRepeatCache[k] = ms;
+                }
+                return false;
+            }
+        },
+        ieRepeatAction = function (key, timeout) {
+            if (!$.isIE) {
+                return false;
+            }
+            return repeatAction(key, timeout);
+        },
         findParentElement = function (obj, tagName) {
             var tag = tagName;
             if (!$.isString(tag, true)) {
@@ -6907,6 +6948,9 @@
         disablecmenu: setContextmenu,
         firstLoad: firstLoad,
         firstload: firstLoad,
+        repeatAction: repeatAction,
+        repeataction: repeatAction,
+        ieRepeatAction: ieRepeatAction,
         findParentElement: findParentElement,
         findRow: findRow,
         findCell: findCell,
