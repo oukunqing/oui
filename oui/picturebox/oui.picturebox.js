@@ -780,7 +780,6 @@
                 break;
             case 'position':
                 that.cache.magnifier.position = that.cache.magnifier.position === 'center' ? 'custom' : 'center';
-            $.console.log('setMagnifierOpt:', action, that.cache.magnifier.position, that.cache.magnifierButton);
                 $.setClass(that.cache.magnifierButton, 'magnifier-center', that.cache.magnifier.position === 'center');
                 break;
             default:
@@ -803,7 +802,6 @@
                 if ($.ieRepeatAction(ev)) {
                     return false;
                 }
-                $.console.log('box contextmenu');
                 //鼠标右键若有拖动动作，或者鼠标位置不在图片范围内，则不显示默认的右键菜单
                 if (that.cfg.selectdrag || that.cfg.selectmove || !that.cfg.selectonpic || ev.target.nodeName !== 'IMG') {
                     //selectmove 主要是为了兼容IE浏览器：右键拖动画框时还会弹出右键菜单的问题

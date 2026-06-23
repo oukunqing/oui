@@ -9186,7 +9186,8 @@ $.title
         if (!$.isTopWindow()) {
             $.addListener(document, 'keydown', function (e) {
                 //捕获F5键，仅刷新当前页面，防止F5刷新整站
-                if ($.getKeyCode(e) === $.KEY_CODE.F5) {
+                //如果同时按住ctrl或shift，则不捕获
+                if ($.getKeyCode(e) === $.KEY_CODE.F5 && (!e.shiftKey && !e.ctrlKey)) {
                     $.cancelBubble();
                     location.href = location.href;
                     return false;

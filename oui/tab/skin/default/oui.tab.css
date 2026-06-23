@@ -173,6 +173,7 @@
     overflow: hidden;
     box-sizing: border-box;
 
+    outline: none;
     -moz-user-select: none;
     -khtml-user-select: none;
     user-select: none;
@@ -230,6 +231,7 @@
     font-family: Arial,'Courier New',宋体,微软雅黑;
     font-weight: normal;
     overflow: hidden;
+    outline: none;
     text-overflow: ellipsis;
     white-space: nowrap;
     -webkit-line-clamp: 2;

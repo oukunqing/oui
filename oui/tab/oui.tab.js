@@ -1039,6 +1039,7 @@
             });
 
             $.addListener(that.box, 'pointerdown', function (ev) {
+                Util.hideContextMenu(ev, that);
                 if (0 == ev.button) {
                     $.cancelBubble(ev);
                     that.cfg.itemdown = true;
@@ -1564,7 +1565,7 @@
                         }
                         elem.oncontextmenu = function(ev) {
                             return false;
-                        };                
+                        };
                         that.tabContainer.appendChild(elem);
                     });
                     if (opt.tabsep) {
