@@ -79,46 +79,46 @@
 }
 
 select.oui-ddl-bottom,input.oui-ddl-bottom {
-	border-bottom-left-radius: 0px;
-	border-bottom-right-radius: 0px;
+	border-bottom-left-radius: 0px !important;
+	border-bottom-right-radius: 0px !important;
 	border-bottom-color: #fff;
 }
 
 select.oui-ddl-top,input.oui-ddl-top {
-	border-top-left-radius: 0px;
-	border-top-right-radius: 0px;
+	border-top-left-radius: 0px !important;
+	border-top-right-radius: 0px !important;
 	padding: 1px 3px;
 }
 
 .oui-ddl-panel-bottom {
-	border-top-left-radius: 0px;
-	border-top-right-radius: 0px;
+	border-top-left-radius: 0px !important;
+	border-top-right-radius: 0px !important;
 	margin-top: -1px;
 }
 .oui-ddl-panel-bottom-left {
-	border-top-left-radius: 0px;
-	border-top-right-radius: 5px;
+	border-top-left-radius: 0px !important;
+	border-top-right-radius: 5px !important;
 	margin-top: -1px;
 }
 .oui-ddl-panel-bottom-right {
-	border-top-left-radius: 5px;
-	border-top-right-radius: 0px;
+	border-top-left-radius: 5px !important;
+	border-top-right-radius: 0px !important;
 	margin-top: -1px;
 }
 .oui-ddl-panel-top {
-	border-bottom-left-radius: 0px;
-	border-bottom-right-radius: 0px;
+	border-bottom-left-radius: 0px !important;
+	border-bottom-right-radius: 0px !important;
 	margin-top: 1px;
 	box-shadow: inset 1px 0 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);
 	-webkit-box-shadow: inset 1px 0 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);
 }
 .oui-ddl-panel-top-left {
-	border-bottom-left-radius: 0px;
-	border-bottom-right-radius: 5px;
+	border-bottom-left-radius: 0px !important;
+	border-bottom-right-radius: 5px !important;
 }
 .oui-ddl-panel-top-right {
-	border-bottom-left-radius: 5px;
-	border-bottom-right-radius: 0px;
+	border-bottom-left-radius: 5px !important;
+	border-bottom-right-radius: 0px !important;
 }
 
 .oui-ddl-panel li.oui-ddl-item, .oui-ddl-panel li.cur {
@@ -606,7 +606,7 @@ li.oui-ddl-item-disabled label.oui-ddl-label {
 	border-bottom:solid 1px #ddd;
 	width: 100%;
 	min-width: 0px;
-	height: 39px;
+	height: 40px;
 	min-height: 39px;
 	padding:0 4px;
 	margin:0;
@@ -616,7 +616,7 @@ li.oui-ddl-item-disabled label.oui-ddl-label {
 .oui-ddl-panel .oui-ddl-search input,
 .oui-ddl-panel .oui-ddl-search .btn {
 	float: left;
-	margin: 5px 0 0 0;
+	margin: 4px 0 0 0;
 	height: 30px;
 	min-height: 30px;
 	outline: none;
@@ -632,12 +632,12 @@ li.oui-ddl-item-disabled label.oui-ddl-label {
 	top: 0px;
 	border: none;
 	outline: none;
-	margin: 5px 0 0 0;
+	margin: 4px 0 0 0;
 	padding: 0;
 	border-radius: 4px;
 }
 .oui-ddl-panel .oui-ddl-search .btn:hover {
-	margin: 5px 0 0 0;
+	margin: 4px 0 0 0;
 	text-decoration: none;
 	background-color: transparent;
 	border: none;
@@ -667,7 +667,7 @@ li.oui-ddl-item-disabled label.oui-ddl-label {
 .oui-ddl-panel .oui-ddl-search .keywords {
 	width: 100%;
 	min-width: 0px;
-	height: 30px;
+	height: 32px;
 	min-height: 30px;
 	border: solid 1px #00f;
 	line-height: 26px;
