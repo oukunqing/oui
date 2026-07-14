@@ -81,35 +81,35 @@
 select.oui-ddl-bottom,input.oui-ddl-bottom {
 	border-bottom-left-radius: 0px !important;
 	border-bottom-right-radius: 0px !important;
-	border-bottom-color: #fff;
+	border-bottom-color: #fff !important;
 }
 
 select.oui-ddl-top,input.oui-ddl-top {
 	border-top-left-radius: 0px !important;
 	border-top-right-radius: 0px !important;
-	padding: 1px 3px;
+	padding: 1px 3px !important;
 }
 
 .oui-ddl-panel-bottom {
 	border-top-left-radius: 0px !important;
 	border-top-right-radius: 0px !important;
-	margin-top: -1px;
+	margin-top: -1px !important;
 }
 .oui-ddl-panel-bottom-left {
 	border-top-left-radius: 0px !important;
 	border-top-right-radius: 5px !important;
-	margin-top: -1px;
+	margin-top: -1px !important;
 }
 .oui-ddl-panel-bottom-right {
 	border-top-left-radius: 5px !important;
 	border-top-right-radius: 0px !important;
-	margin-top: -1px;
+	margin-top: -1px !important;
 }
 .oui-ddl-panel-top {
 	border-bottom-left-radius: 0px !important;
 	border-bottom-right-radius: 0px !important;
-	margin-top: 1px;
-	box-shadow: inset 1px 0 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);
+	margin-top: 1px !important;
+	box-shadow: inset 1px 0 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6) !important;
 	-webkit-box-shadow: inset 1px 0 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);
 }
 .oui-ddl-panel-top-left {
