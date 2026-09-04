@@ -28,7 +28,10 @@
             slidePlay: '\u64ad\u653e\u5e7b\u706f\u7247',    //播放幻灯片
             slideStop: '\u6682\u505c\u64ad\u653e',    //暂停播放
         },
-        ScaleRatio: 1.25
+        ScaleRatio: 1.25,
+        MagnifierMaxSize: 600,
+        MagnifierMinSize: 100,
+        MagnifierDefSize: 150
     },
     Cache = {
         caches: {},
@@ -234,15 +237,16 @@
 
             that.img.style.cursor = opt.cursor;
 
-            if (!that.magnifier) {
+            let elem = that.magnifier, width = opt.width, height = opt.height;
+
+            if (!elem) {
                 let div = document.createElement('DIV'), 
-                    zindex = $.getElementStyle(that.img, 'z-index'),
-                    radius = $.getParamCon(opt.radius, (opt.width + opt.height) / 4);
+                    zindex = $.getElementStyle(that.img, 'z-index');
 
                 div.className = 'oui-picbox-magnifier';
                 div.style.cssText = [
-                    'width:', opt.width, 'px;height:', opt.width, 'px;',
-                    'border-radius:', radius, 'px;',
+                    'width:', width, 'px;height:', height, 'px;',
+                    //'border-radius:', radius, 'px;',
                     $.isNumber(opt.opacity) ? 'opacity:' + opt.opacity + ';' : '',
                     'z-index:', (zindex + 1), ';'
                 ].join('') + opt.cssText;
@@ -252,27 +256,49 @@
 
                 that.magnifier = div;
                 that.magnifierImg = div.childNodes[0];
-            } else if (that.magnifier.style.display === 'none') {
+                elem = div;
+            } else if (elem.style.display === 'none') {
                 // 图片被修改后，放大镜中的图片也要更新
                 if (that.magnifierImg.src !== that.img.src) {
                     that.magnifierImg.src = that.img.src;
                 }
-                that.magnifier.style.display = 'block';
+                elem.style.display = 'block';
             }
 
-            let elem = that.magnifier, img = that.magnifierImg;
+            let size = that.img.getBoundingClientRect();
+            if (width > size.width * 2 / 3) {
+                width = parseInt(size.width * 2 / 3, 10);
+            }
+            if (height > size.height * 2 / 3) {
+                height = parseInt(size.height * 2 / 3, 10);
+            }
+
+            if (opt.equal && width !== height) {
+                if (width > height) {
+                    width = height;
+                } else if (height > width) {
+                    height = width;
+                }
+            }
+
+            let img = that.magnifierImg;
             if (['custom', 'cursor', 'center'].indexOf(that.cache.magnifier.position) > -1) {
-                let p = Factory.getPosition(ev, opt, rect, that.cache.magnifier.position);
+                let p = Factory.getPosition(ev, { width: width, height: height }, rect, that.cache.magnifier.position);
+                let radius = opt.type ? 10 : $.getParamCon(opt.radius, (width + height) / 4);
+
                 elem.style.left = p.left + 'px';
                 elem.style.top = p.top + 'px';
+
+                elem.style.width = width + 'px';
+                elem.style.height = height + 'px';
+                elem.style.borderRadius = radius + 'px';
             }
 
-            let size = that.img.getBoundingClientRect(),
-                pos = { x: ev.clientX - size.left, y:  ev.clientY - size.top },
+            let pos = { x: ev.clientX - size.left, y:  ev.clientY - size.top },
                 scaleRatio = cfg.curScale / opt.scaleRatio,
                 css = [
-                    'left:', -pos.x / scaleRatio + opt.width / 2, 'px;',
-                    'top:', -pos.y / scaleRatio + opt.height / 2, 'px;'
+                    'left:', -pos.x / scaleRatio + width / 2, 'px;',
+                    'top:', -pos.y / scaleRatio + height / 2, 'px;'
                 ];
 
             if (opt.scaleRatio > 1) {
@@ -433,7 +459,8 @@
                 } else if (btns[i].className.indexOf('magnifier') > -1) {
                     that.cache.magnifierButton = btns[i];
                     $.addListener(btns[i], 'contextmenu', function (ev) {
-                        Factory.setMagnifierOpt(that, 'position', ev);
+                        //Factory.setMagnifierOpt(that, 'position', ev);
+                        Factory.showMagnifierForm(that, null, ev);
                     });
                 }
             }
@@ -714,14 +741,22 @@
 
             return this;
         },
+        hideFormPanel: function (elem) {
+            if (elem) {
+                elem.style.display = 'none';
+            }
+            return this;
+        },
         showSlideForm: function(that, hide, ev) {
             if ($.ieRepeatAction(ev)) {
                 return this;
             }
+            this.hideFormPanel(that.cache.form_magnifier);
+
             let div = that.cache.form;
             if (!div) {
                 div = document.createElement('DIV');
-                div.className = 'oui-picbox-form';
+                div.className = 'oui-picbox-form oui-picbox-form-slide';
                 div.style.display = 'none';
                 div.innerHTML = [
                     /*'<label class="oui-picbox-lbl"><input type="checkbox" class="oui-picbox-chb" /><span>循环播放</span></label>',
@@ -763,6 +798,75 @@
 
             return this;
         },
+        showMagnifierForm: function(that, hide, ev) {
+            if ($.ieRepeatAction(ev)) {
+                return this;
+            }
+            let _this = this;
+            this.hideFormPanel(that.cache.form);
+            let opt = that.opt.magnifierStyle;
+
+            let div = that.cache.form_magnifier;
+            if (!div) {
+                div = document.createElement('DIV');
+                div.className = 'oui-picbox-form oui-picbox-form-magnifier';
+                div.style.display = 'none';
+                div.innerHTML = [
+                    '<label class="oui-picbox-lbl"><input type="radio" class="oui-picbox-chb oui-picbox-chb-type-0" name="oui-picbox-radio-type"', 
+                        !opt.type ? ' checked="checked"' : '', ' /><span>圆形</span></label>',
+                    '<label class="oui-picbox-lbl"><input type="radio" class="oui-picbox-chb oui-picbox-chb-type-1" name="oui-picbox-radio-type"', 
+                        opt.type ? ' checked="checked"' : '', ' /><span>方形</span></label>',
+                    '<label class="oui-picbox-lbl" style="border-left:solid 1px #ddd;border-top-left-radius:0;border-bottom-left-radius:0;">',
+                    '<input type="checkbox" class="oui-picbox-chb oui-picbox-chb-equal"', opt.equal ? ' checked="checked"' : '', ' /><span>等边</span>',
+                    '</label>',
+                    '<input type="text" placeholder="" class="oui-picbox-txt oui-picbox-txt-width" maxlength="3" title="宽度" value="', opt.width, '" placeholder="宽度" style="width:40px;" />',
+                    '<span>×</span>',
+                    '<input type="text" placeholder="" class="oui-picbox-txt oui-picbox-txt-height" maxlength="3" title="高度" value="', opt.height, '" placeholder="高度" style="width:40px;" />',
+                    '<label class="oui-picbox-lbl"><input type="radio" class="oui-picbox-chb oui-picbox-chb-pos-0" name="oui-picbox-radio-position"', 
+                        opt.position !== 'center' ? ' checked="checked"' : '', ' /><span>跟随</span></label>',
+                    '<label class="oui-picbox-lbl"><input type="radio" class="oui-picbox-chb oui-picbox-chb-pos-1" name="oui-picbox-radio-position"', 
+                        opt.position === 'center' ? ' checked="checked"' : '', ' /><span>居中</span></label>',
+                    '<input type="button" class="oui-picbox-btn" value="确定" />',
+                    
+                ].join('');
+                that.box.appendChild(div);
+                that.cache.form_magnifier = div;
+
+                $.addListener(div.querySelector('.oui-picbox-btn'), 'click', function (ev) {
+                    let type = div.querySelector('.oui-picbox-chb-type-1').checked ? 1 : 0,
+                        position = div.querySelector('.oui-picbox-chb-pos-1').checked ? 'center' : 'custom',
+                        equal = div.querySelector('.oui-picbox-chb-equal').checked ? 1 : 0,
+                        width = div.querySelector('.oui-picbox-txt-width').value.toInt(),
+                        height = div.querySelector('.oui-picbox-txt-height').value.toInt();
+
+                    if (width < Config.MagnifierMinSize || width > Config.MagnifierMaxSize) {
+                        width = width > Config.MagnifierMaxSize ? Config.MagnifierMaxSize : Config.MagnifierMinSize;
+                        div.querySelector('.oui-picbox-txt-width').value = width;
+                    }
+                    if (height < Config.MagnifierMinSize || height > Config.MagnifierMaxSize) {
+                        height = height > Config.MagnifierMaxSize ? Config.MagnifierMaxSize : Config.MagnifierMinSize;
+                        div.querySelector('.oui-picbox-txt-height').value = height;
+                    }
+
+                    let par = {type: type, position: position, equal: equal, width: width, height: height};
+
+                    $.extend(opt, par);
+                    $.extend(that.cache.magnifier, par);
+
+                    _this.setMagnifierOpt(that, 'position');
+
+                    div.style.display = 'none';
+                });
+            }
+            if (hide || div.style.display !== 'none') {
+                div.style.display = 'none';
+                return this;
+            } else {
+                div.style.display = '';
+            }
+
+            return this;
+        },
         setMagnifierOpt: function (that, action, ev) {
             if ($.ieRepeatAction(ev)) {
                 return this;
@@ -779,7 +883,7 @@
                 }
                 break;
             case 'position':
-                that.cache.magnifier.position = that.cache.magnifier.position === 'center' ? 'custom' : 'center';
+                //that.cache.magnifier.position = that.cache.magnifier.position === 'center' ? 'custom' : 'center';
                 $.setClass(that.cache.magnifierButton, 'magnifier-center', that.cache.magnifier.position === 'center');
                 break;
             default:
@@ -1015,7 +1119,13 @@
             options.magnifierStyle.scaleRatio = $.getParam(options.magnifierStyle, 'scaleRatio,ratio');
 
             opt.magnifierStyle = $.extend({
-                width:150, height:150, scaleRatio: 1, cursor: 'crosshair', position:'custom', disabled: false /*,opacity:0.95*/
+                width:150, height:150, scaleRatio: 1, cursor: 'crosshair',
+                // 形状：0 - 圆形，1 - 方形
+                type: 0, 
+                // 是否等边（即正方形）: 0 - 不等边，1 - 等边
+                equal: 1,
+                // 位置：custom - 边缘，center - 居中
+                position:'custom', disabled: false /*,opacity:0.95*/
             }, options.magnifierStyle);
 
             that.opt = $.extend({}, that.opt, opt);

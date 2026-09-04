@@ -370,6 +370,28 @@
     color: #000;
 }
 
+.oui-picbox-box .oui-picbox-form-magnifier {
+    border: solid 1px #ddd;
+}
+
+.oui-picbox-box .oui-picbox-form-magnifier .oui-picbox-lbl {
+    border: none;
+    border-top: none;
+    border-bottom: none;
+}
+.oui-picbox-box .oui-picbox-form-magnifier .oui-picbox-txt {
+    border: none;
+    border-left: solid 1px #ccc;
+    border-right: solid 1px #ccc;
+}
+.oui-picbox-box .oui-picbox-form-magnifier .oui-picbox-btn {
+    border: none;
+    border-left: solid 1px #ccc;
+}
+.oui-picbox-box .oui-picbox-form-magnifier span {
+    border: none;
+}
+
 .oui-picbox-unselect {
     -moz-user-select: none;
     -khtml-user-select: none;

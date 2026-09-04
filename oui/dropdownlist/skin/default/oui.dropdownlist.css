@@ -21,8 +21,8 @@
 
 .oui-ddl-cur {
 	outline:none;
-	border-color: #66afe9;
-	box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);
+	border-color: #66afe9 !important;
+	box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6) !important;
 	-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);
 }
 
@@ -196,7 +196,7 @@ label.oui-ddl-label span {
 
 .oui-ddl-panel li.oui-ddl-fixedwidth label span {
 	font-size: 15px;
-    font-family: Consolas;	
+    font-family: Consolas;
 }
 
 label.oui-ddl-label i {

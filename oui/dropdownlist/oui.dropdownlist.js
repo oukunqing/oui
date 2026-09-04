@@ -476,7 +476,7 @@
                     //items.splice(0, 0, {val: '', txt: opt.allowEmpty });
                 }
 
-                var    conWidth = Factory.getItemConWidth(items, opt.itemWidth, columns, opt.choose),
+                var conWidth = Factory.getItemConWidth(items, opt.itemWidth, columns, opt.choose),
                     minWidth = opt.layout === Config.Layout.Grid ? conWidth : 0,
                     key = Config.ItemPrefix + that.id,
                     len = items.length,
