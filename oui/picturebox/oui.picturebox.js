@@ -265,19 +265,29 @@
                 elem.style.display = 'block';
             }
 
-            let size = that.img.getBoundingClientRect();
+            let size = that.img.getBoundingClientRect(), over_limit = 0;
             if (width > size.width * 2 / 3) {
                 width = parseInt(size.width * 2 / 3, 10);
+                over_limit++;
             }
             if (height > size.height * 2 / 3) {
                 height = parseInt(size.height * 2 / 3, 10);
+                over_limit++;
             }
 
             if (opt.equal && width !== height) {
                 if (width > height) {
-                    width = height;
+                    if (over_limit || width > parseInt(size.height * 2 / 3, 10)) {
+                        width = height;
+                    } else {
+                        height = width;
+                    }
                 } else if (height > width) {
-                    height = width;
+                    if (over_limit || height > parseInt(size.width * 2 / 3, 10)) {
+                        height = width;
+                    } else {
+                        width = height;
+                    }
                 }
             }
 
@@ -812,6 +822,7 @@
                 div.className = 'oui-picbox-form oui-picbox-form-magnifier';
                 div.style.display = 'none';
                 div.innerHTML = [
+                    /*
                     '<label class="oui-picbox-lbl"><input type="radio" class="oui-picbox-chb oui-picbox-chb-type-0" name="oui-picbox-radio-type"', 
                         !opt.type ? ' checked="checked"' : '', ' /><span>圆形</span></label>',
                     '<label class="oui-picbox-lbl"><input type="radio" class="oui-picbox-chb oui-picbox-chb-type-1" name="oui-picbox-radio-type"', 
@@ -826,8 +837,23 @@
                         opt.position !== 'center' ? ' checked="checked"' : '', ' /><span>跟随</span></label>',
                     '<label class="oui-picbox-lbl"><input type="radio" class="oui-picbox-chb oui-picbox-chb-pos-1" name="oui-picbox-radio-position"', 
                         opt.position === 'center' ? ' checked="checked"' : '', ' /><span>居中</span></label>',
-                    '<input type="button" class="oui-picbox-btn" value="确定" />',
-                    
+                    '<input type="button" class="oui-picbox-btn" value="确定" />'
+                    */
+                    '<label class="oui-picbox-lbl"><input type="radio" class="oui-picbox-chb oui-picbox-chb-type-0" name="oui-picbox-radio-type"', 
+                        !opt.type ? ' checked="checked"' : '', ' /><span>\u5706\u5f62</span></label>',
+                    '<label class="oui-picbox-lbl"><input type="radio" class="oui-picbox-chb oui-picbox-chb-type-1" name="oui-picbox-radio-type"', 
+                        opt.type ? ' checked="checked"' : '', ' /><span>\u65b9\u5f62</span></label>',
+                    '<label class="oui-picbox-lbl" style="border-left:solid 1px #ddd;border-top-left-radius:0;border-bottom-left-radius:0;">',
+                    '<input type="checkbox" class="oui-picbox-chb oui-picbox-chb-equal"', opt.equal ? ' checked="checked"' : '', ' /><span>\u7b49\u8fb9</span>',
+                    '</label>',
+                    '<input type="text" placeholder="" class="oui-picbox-txt oui-picbox-txt-width" maxlength="3" title="\u5bbd\u5ea6" value="', opt.width, '" placeholder="\u5bbd\u5ea6" style="width:40px;" />',
+                    '<span>×</span>',
+                    '<input type="text" placeholder="" class="oui-picbox-txt oui-picbox-txt-height" maxlength="3" title="\u9ad8\u5ea6" value="', opt.height, '" placeholder="\u9ad8\u5ea6" style="width:40px;" />',
+                    '<label class="oui-picbox-lbl"><input type="radio" class="oui-picbox-chb oui-picbox-chb-pos-0" name="oui-picbox-radio-position"', 
+                        opt.position !== 'center' ? ' checked="checked"' : '', ' /><span>\u8ddf\u968f</span></label>',
+                    '<label class="oui-picbox-lbl"><input type="radio" class="oui-picbox-chb oui-picbox-chb-pos-1" name="oui-picbox-radio-position"', 
+                        opt.position === 'center' ? ' checked="checked"' : '', ' /><span>\u5c45\u4e2d</span></label>',
+                    '<input type="button" class="oui-picbox-btn" value="\u786e\u5b9a" />'
                 ].join('');
                 that.box.appendChild(div);
                 that.cache.form_magnifier = div;
