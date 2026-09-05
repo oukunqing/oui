@@ -37,6 +37,7 @@
         caches: {},
         timers: {},
         picbox: {},
+        panels: {},
         getCache: function (id) {
             return Cache.caches['picbox_' + id];
         },
@@ -112,7 +113,7 @@
                 curScale: curScale, boxScale: boxScale, minScale: minScale
             };
         },
-        setImgPath: function (path) {            
+        setImgPath: function (path) {
             if (path.startsWith('//')) {
                 path = path.substr(1);
             }
@@ -203,7 +204,8 @@
             // 请注意，这里必须保留最少1个像素的间距留白，防止放大镜图像抖动
             let margin = 2,
                 left = ev.clientX - bs.left + margin,
-                top = ev.clientY - bs.top + margin;
+                top = ev.clientY - bs.top + margin,
+                L = 'Left', T = 'Top';
 
             switch (position) {
             case 'center':
@@ -213,13 +215,15 @@
             default:
                 if (left + opt.width >= bs.width) {
                     left = ev.clientX - bs.left - opt.width - margin;
+                    L = 'Right';
                 }
                 if (top + opt.height >= bs.height) {
                     top = ev.clientY - bs.top - opt.height - margin;
+                    T = 'Bottom';
                 }
                 break;
             }
-            return { left: left, top: top };
+            return { left: left, top: top, L: L, T: T };
         },
         showMagnifier: function (ev, that) {
             let cfg = that.cfg,
@@ -227,7 +231,7 @@
                 rect = that.body.getBoundingClientRect();
 
             if (!cfg.showMagnifier || that.cache.magnifier.disabled
-                || cfg.curScale >= opt.scaleRatio || that.cfg.pointerdown 
+                || cfg.curScale >= opt.ratio || that.cfg.pointerdown 
                 || !this.isInRange(ev, that.img) 
                 || !this.isInRange(ev, that.body)
                 || that.img.rot) {
@@ -266,6 +270,7 @@
             }
 
             let size = that.img.getBoundingClientRect(), over_limit = 0;
+            // 放大镜宽度和高度不能超过图片框大小的三分之二
             if (width > size.width * 2 / 3) {
                 width = parseInt(size.width * 2 / 3, 10);
                 over_limit++;
@@ -276,6 +281,7 @@
             }
 
             if (opt.equal && width !== height) {
+                /*
                 if (width > height) {
                     if (over_limit || width > parseInt(size.height * 2 / 3, 10)) {
                         width = height;
@@ -289,11 +295,19 @@
                         width = height;
                     }
                 }
+                */
+                if ((width > height && (over_limit || width > parseInt(size.height * 2 / 3, 10))) || 
+                    (height > width && (!over_limit && height < parseInt(size.width * 2 / 3, 10)))) {
+                    width = height;
+                } else {
+                    height = width;
+                }
             }
 
             let img = that.magnifierImg;
             if (['custom', 'cursor', 'center'].indexOf(that.cache.magnifier.position) > -1) {
                 let p = Factory.getPosition(ev, { width: width, height: height }, rect, that.cache.magnifier.position);
+                //圆形或方形（倒一点圆角）圆角半径
                 let radius = opt.type ? 10 : $.getParamCon(opt.radius, (width + height) / 4);
 
                 elem.style.left = p.left + 'px';
@@ -302,17 +316,21 @@
                 elem.style.width = width + 'px';
                 elem.style.height = height + 'px';
                 elem.style.borderRadius = radius + 'px';
+                // 保留鼠标锚点
+                if (opt.point) {
+                    elem.style['border' + p.T + p.L + 'Radius'] = 0 + 'px';
+                }
             }
 
             let pos = { x: ev.clientX - size.left, y:  ev.clientY - size.top },
-                scaleRatio = cfg.curScale / opt.scaleRatio,
+                ratio = cfg.curScale / opt.ratio,
                 css = [
-                    'left:', -pos.x / scaleRatio + width / 2, 'px;',
-                    'top:', -pos.y / scaleRatio + height / 2, 'px;'
+                    'left:', -pos.x / ratio + width / 2, 'px;',
+                    'top:', -pos.y / ratio + height / 2, 'px;'
                 ];
 
-            if (opt.scaleRatio > 1) {
-                css.push('width:', cfg.width * opt.scaleRatio, 'px;');
+            if (opt.ratio > 1) {
+                css.push('width:', cfg.width * opt.ratio, 'px;');
             }
 
             img.style.cssText = css.join('');
@@ -364,6 +382,9 @@
 
                     that.cfg.left = left;
                     that.cfg.top = top;
+
+                    //拖动图片时，隐藏配置面板
+                    Factory.hideFormPanelAll(that);
                 }
                 ev.preventDefault();
             });
@@ -757,6 +778,45 @@
             }
             return this;
         },
+        hideFormPanelAll: function (that) {
+            if (that.cache.form) {
+                that.cache.form.style.display = 'none';
+            }
+            if (that.cache.form_magnifier) {
+                that.cache.form_magnifier.style.display = 'none';
+            }
+            return this;
+        },
+        hideFormPanelTiming: function (elem, key) {
+            /*
+            Cache.panels[key] = {
+                elem: elem, key: key, time: new Date().getTime()
+            };
+            let t = Cache.timers['hide'], timeout = 10 * 1000;
+            if (t) {
+                window.clearInterval(t);
+            }
+            Cache.timers['hide'] = window.setInterval(function() {
+                let ms = new Date().getTime(), c = 0, keys = [];
+                for (let k in Cache.panels) {
+                    let p = Cache.panels[k];
+                    $.console.log('ms:', ms, p.time, ms - p.time);
+                    if (ms - p.time > timeout) {
+                        keys.push(p.key);
+                    }
+                    c++;
+                }
+                for (let i in keys) {
+                    let k = keys[i];
+                    delete Cache.panels[k];
+                }
+                if (!c) {
+                    window.clearInterval(Cache.timers['hide']);
+                }
+            }, 1000);
+            */
+            return this;
+        },
         showSlideForm: function(that, hide, ev) {
             if ($.ieRepeatAction(ev)) {
                 return this;
@@ -802,6 +862,7 @@
                 return this;
             } else {
                 div.style.display = '';
+                //this.hideFormPanelTiming(div, 'slide');
             }
             div.querySelector('.oui-picbox-txt').value = that.cache.timing;
             div.querySelector('.oui-picbox-chb').checked = that.cache.loop;
@@ -825,34 +886,56 @@
                     /*
                     '<label class="oui-picbox-lbl"><input type="radio" class="oui-picbox-chb oui-picbox-chb-type-0" name="oui-picbox-radio-type"', 
                         !opt.type ? ' checked="checked"' : '', ' /><span>圆形</span></label>',
-                    '<label class="oui-picbox-lbl"><input type="radio" class="oui-picbox-chb oui-picbox-chb-type-1" name="oui-picbox-radio-type"', 
+                    '<label class="oui-picbox-lbl" style="border-right:solid 1px #ddd;"><input type="radio" class="oui-picbox-chb oui-picbox-chb-type-1" name="oui-picbox-radio-type"', 
                         opt.type ? ' checked="checked"' : '', ' /><span>方形</span></label>',
-                    '<label class="oui-picbox-lbl" style="border-left:solid 1px #ddd;border-top-left-radius:0;border-bottom-left-radius:0;">',
+                    '<label class="oui-picbox-lbl">',
                     '<input type="checkbox" class="oui-picbox-chb oui-picbox-chb-equal"', opt.equal ? ' checked="checked"' : '', ' /><span>等边</span>',
                     '</label>',
-                    '<input type="text" placeholder="" class="oui-picbox-txt oui-picbox-txt-width" maxlength="3" title="宽度" value="', opt.width, '" placeholder="宽度" style="width:40px;" />',
+                    '<input type="text" placeholder="" class="oui-picbox-txt oui-picbox-txt-width" maxlength="3" title="宽度" value="', 
+                        opt.width, '" placeholder="宽度" style="width:40px;" />',
                     '<span>×</span>',
-                    '<input type="text" placeholder="" class="oui-picbox-txt oui-picbox-txt-height" maxlength="3" title="高度" value="', opt.height, '" placeholder="高度" style="width:40px;" />',
+                    '<input type="text" placeholder="" class="oui-picbox-txt oui-picbox-txt-height" maxlength="3" title="高度" value="', 
+                        opt.height, '" placeholder="高度" style="width:40px;" />',
+                    '<label class="oui-picbox-lbl" style="border-left:solid 1px #ddd;border-top-left-radius:0;border-bottom-left-radius:0;">',
+                    '<input type="checkbox" class="oui-picbox-chb oui-picbox-chb-point"', opt.point ? ' checked="checked"' : '', ' /><span>锚点</span>',
+                    '</label>',
                     '<label class="oui-picbox-lbl"><input type="radio" class="oui-picbox-chb oui-picbox-chb-pos-0" name="oui-picbox-radio-position"', 
                         opt.position !== 'center' ? ' checked="checked"' : '', ' /><span>跟随</span></label>',
                     '<label class="oui-picbox-lbl"><input type="radio" class="oui-picbox-chb oui-picbox-chb-pos-1" name="oui-picbox-radio-position"', 
                         opt.position === 'center' ? ' checked="checked"' : '', ' /><span>居中</span></label>',
+                    '<label class="oui-picbox-lbl"><input type="radio" class="oui-picbox-chb oui-picbox-chb-ratio-0" name="oui-picbox-radio-ratio"', 
+                        opt.ratio === 1 ? ' checked="checked"' : '', ' value="1" /><span>1</span></label>',
+                    '<label class="oui-picbox-lbl"><input type="radio" class="oui-picbox-chb oui-picbox-chb-ratio-2" name="oui-picbox-radio-ratio"', 
+                        opt.ratio === 1.5 ? ' checked="checked"' : '', ' value="1.5" /><span>1.5</span></label>',
+                    '<label class="oui-picbox-lbl"><input type="radio" class="oui-picbox-chb oui-picbox-chb-ratio-2" name="oui-picbox-radio-ratio"', 
+                        opt.ratio === 2 ? ' checked="checked"' : '', ' value="2" /><span>2</span></label>',
                     '<input type="button" class="oui-picbox-btn" value="确定" />'
                     */
                     '<label class="oui-picbox-lbl"><input type="radio" class="oui-picbox-chb oui-picbox-chb-type-0" name="oui-picbox-radio-type"', 
                         !opt.type ? ' checked="checked"' : '', ' /><span>\u5706\u5f62</span></label>',
-                    '<label class="oui-picbox-lbl"><input type="radio" class="oui-picbox-chb oui-picbox-chb-type-1" name="oui-picbox-radio-type"', 
+                    '<label class="oui-picbox-lbl" style="border-right:solid 1px #ddd;"><input type="radio" class="oui-picbox-chb oui-picbox-chb-type-1" name="oui-picbox-radio-type"', 
                         opt.type ? ' checked="checked"' : '', ' /><span>\u65b9\u5f62</span></label>',
-                    '<label class="oui-picbox-lbl" style="border-left:solid 1px #ddd;border-top-left-radius:0;border-bottom-left-radius:0;">',
+                    '<label class="oui-picbox-lbl">',
                     '<input type="checkbox" class="oui-picbox-chb oui-picbox-chb-equal"', opt.equal ? ' checked="checked"' : '', ' /><span>\u7b49\u8fb9</span>',
                     '</label>',
-                    '<input type="text" placeholder="" class="oui-picbox-txt oui-picbox-txt-width" maxlength="3" title="\u5bbd\u5ea6" value="', opt.width, '" placeholder="\u5bbd\u5ea6" style="width:40px;" />',
+                    '<input type="text" placeholder="" class="oui-picbox-txt oui-picbox-txt-width" maxlength="3" title="\u5bbd\u5ea6" value="', 
+                        opt.width, '" placeholder="\u5bbd\u5ea6" style="width:38px;padding:0;" />',
                     '<span>×</span>',
-                    '<input type="text" placeholder="" class="oui-picbox-txt oui-picbox-txt-height" maxlength="3" title="\u9ad8\u5ea6" value="', opt.height, '" placeholder="\u9ad8\u5ea6" style="width:40px;" />',
+                    '<input type="text" placeholder="" class="oui-picbox-txt oui-picbox-txt-height" maxlength="3" title="\u9ad8\u5ea6" value="', 
+                        opt.height, '" placeholder="\u9ad8\u5ea6" style="width:38px;padding:0;" />',
+                    '<label class="oui-picbox-lbl" style="border-right:solid 1px #ddd;">',
+                    '<input type="checkbox" class="oui-picbox-chb oui-picbox-chb-point"', opt.point ? ' checked="checked"' : '', ' /><span>\u951a\u70b9</span>',
+                    '</label>',
                     '<label class="oui-picbox-lbl"><input type="radio" class="oui-picbox-chb oui-picbox-chb-pos-0" name="oui-picbox-radio-position"', 
                         opt.position !== 'center' ? ' checked="checked"' : '', ' /><span>\u8ddf\u968f</span></label>',
-                    '<label class="oui-picbox-lbl"><input type="radio" class="oui-picbox-chb oui-picbox-chb-pos-1" name="oui-picbox-radio-position"', 
+                    '<label class="oui-picbox-lbl" style="border-right:solid 1px #ddd;"><input type="radio" class="oui-picbox-chb oui-picbox-chb-pos-1" name="oui-picbox-radio-position"', 
                         opt.position === 'center' ? ' checked="checked"' : '', ' /><span>\u5c45\u4e2d</span></label>',
+                    '<label class="oui-picbox-lbl"><input type="radio" class="oui-picbox-chb oui-picbox-chb-ratio-0" name="oui-picbox-radio-ratio"', 
+                        opt.ratio === 1 ? ' checked="checked"' : '', ' value="1" /><span>1</span></label>',
+                    '<label class="oui-picbox-lbl"><input type="radio" class="oui-picbox-chb oui-picbox-chb-ratio-2" name="oui-picbox-radio-ratio"', 
+                        opt.ratio === 1.5 ? ' checked="checked"' : '', ' value="1.5" /><span>1.5</span></label>',
+                    '<label class="oui-picbox-lbl"><input type="radio" class="oui-picbox-chb oui-picbox-chb-ratio-2" name="oui-picbox-radio-ratio"', 
+                        opt.ratio === 2 ? ' checked="checked"' : '', ' value="2" /><span>2</span></label>',
                     '<input type="button" class="oui-picbox-btn" value="\u786e\u5b9a" />'
                 ].join('');
                 that.box.appendChild(div);
@@ -862,8 +945,10 @@
                     let type = div.querySelector('.oui-picbox-chb-type-1').checked ? 1 : 0,
                         position = div.querySelector('.oui-picbox-chb-pos-1').checked ? 'center' : 'custom',
                         equal = div.querySelector('.oui-picbox-chb-equal').checked ? 1 : 0,
+                        point = div.querySelector('.oui-picbox-chb-point').checked ? 1 : 0,
                         width = div.querySelector('.oui-picbox-txt-width').value.toInt(),
-                        height = div.querySelector('.oui-picbox-txt-height').value.toInt();
+                        height = div.querySelector('.oui-picbox-txt-height').value.toInt(),
+                        ratio = div.querySelector('input[name="oui-picbox-radio-ratio"]:checked').value.toFloat();
 
                     if (width < Config.MagnifierMinSize || width > Config.MagnifierMaxSize) {
                         width = width > Config.MagnifierMaxSize ? Config.MagnifierMaxSize : Config.MagnifierMinSize;
@@ -874,7 +959,11 @@
                         div.querySelector('.oui-picbox-txt-height').value = height;
                     }
 
-                    let par = {type: type, position: position, equal: equal, width: width, height: height};
+                    let par = {
+                        type: type, position: position, equal: equal, point: point, ratio: ratio, width: width, height: height
+                    };
+
+                    $.console.log('par:', par);
 
                     $.extend(opt, par);
                     $.extend(that.cache.magnifier, par);
@@ -889,6 +978,7 @@
                 return this;
             } else {
                 div.style.display = '';
+                //this.hideFormPanelTiming(div, 'magnifier');
             }
 
             return this;
@@ -991,12 +1081,15 @@
                 that.zoom(true, ev, Config.ScaleRatio);
                 ev.preventDefault();
             });
-            if (update) {                
+            if (update) {
                 return this;
             }
             $.addListener(that.body, 'wheel', function (ev) {
                 $.cancelBubble(ev);
                 that.zoom(ev.deltaY < 0, ev);
+
+                //鼠标滚轮缩放图片时，隐藏配置面板
+                Factory.hideFormPanelAll(that);
             });
             $.addListener(that.body, 'dblclick', function (ev) {
                 $.cancelBubble(ev);
@@ -1142,16 +1235,21 @@
                 }, options), box = that.box, path;
 
             options.magnifierStyle = $.extend({}, options.magnifierStyle);
-            options.magnifierStyle.scaleRatio = $.getParam(options.magnifierStyle, 'scaleRatio,ratio');
+            options.magnifierStyle.ratio = $.getParam(options.magnifierStyle, 'scaleRatio,ratio');
 
             opt.magnifierStyle = $.extend({
-                width:150, height:150, scaleRatio: 1, cursor: 'crosshair',
+                width:150, height:150, cursor: 'crosshair',
+                // 放大倍数：1, 1.5, 2
+                ratio: 1,                
                 // 形状：0 - 圆形，1 - 方形
                 type: 0, 
                 // 是否等边（即正方形）: 0 - 不等边，1 - 等边
                 equal: 1,
                 // 位置：custom - 边缘，center - 居中
-                position:'custom', disabled: false /*,opacity:0.95*/
+                position:'custom',
+                // 锚点：0 - 无锚点，1 - 显示锚点
+                point: 0,
+                disabled: false /*,opacity:0.95*/
             }, options.magnifierStyle);
 
             that.opt = $.extend({}, that.opt, opt);
