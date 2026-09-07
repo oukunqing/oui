@@ -316,8 +316,8 @@
                 elem.style.width = width + 'px';
                 elem.style.height = height + 'px';
                 elem.style.borderRadius = radius + 'px';
-                // 保留鼠标锚点
-                if (opt.point) {
+                // 保留鼠标锚点（居中模式时不启用）
+                if (opt.point && that.cache.magnifier.position !== 'center') {
                     elem.style['border' + p.T + p.L + 'Radius'] = 0 + 'px';
                 }
             }
