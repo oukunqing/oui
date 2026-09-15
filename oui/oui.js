@@ -4528,10 +4528,10 @@
                             size = parseInt(size, 10);
                         } else {
                             //获取文件信息失败
-                            console.log('getFileSize: ', 'ERROR');
+                            console.log('getFileSize[ERROR]: ', fileUrl);
                         }
                     }
-                    console.log('getFileSize: ', url, size);
+                    //console.log('getFileSize: ', url, size);
                     if ($.isFunction(callback)) {
                         callback(size);
                     }
@@ -5821,15 +5821,17 @@
         isInViewport = function (elem, box, strict) {
             if (!strict) {
                 if (!$.isElement(elem = $.toElement(elem))) {
-                    return null
+                    return false;
                 }
                 box = $.isElement(box = $.toElement(box)) ? box : elem.parentNode;
             }
             var es = elem.getBoundingClientRect(),
-                bs = box.getBoundingClientRect();
+                bs = box.getBoundingClientRect(),
+                //判断是否是表格的行或单元格，表格有时长度会超出，表格主要管控垂直的滚动条
+                isTrOrTd = ['TR', 'TD', 'TH'].indexOf(elem.tagName) > -1;
 
             return (es.top >= bs.top && es.top + es.height <= bs.top + bs.height) && 
-                (es.left >= bs.left && es.left + es.width <= bs.left + bs.width);
+                (isTrOrTd || (es.left >= bs.left && es.left + es.width <= bs.left + bs.width));
         },
         scrollTo = function (elem, pnode, offsetY, force) {
             if ($.isString(elem, true)) {
@@ -5847,7 +5849,17 @@
             }
             force = $.isBoolean(force, false);
 
-            var parent = $.isElement(pnode = $.toElement(pnode)) ? pnode : elem.parentNode;
+            var headHeight = 0, pNode = elem.parentNode;
+            if (elem.tagName === 'TR') {
+                headHeight = pNode.rows[0].offsetHeight;
+                pNode = pNode.parentNode;
+            } else if (elem.tagName === 'TD') {
+                headHeight = pNode.parentNode.rows[0].offsetHeight;
+                pNode = pNode.parentNode.parentNode;
+            }
+
+            var parent = $.isElement(pnode = $.toElement(pnode)) ? pnode : pNode;
+
             if (!force && isInViewport(elem, parent, true)) {
                 return $;
             }
@@ -5857,7 +5869,7 @@
                 posH = offset.top - offsetP.top - margin.top,
                 posW = offset.left - offsetP.left - margin.left;
 
-            parent.scrollTop += posH + (offsetY || 0);
+            parent.scrollTop += posH - headHeight + (offsetY || 0);
             parent.scrollLeft += posW;
 
             return $;
@@ -8442,8 +8454,8 @@ $.debounce 防抖
      * @param {DOMRect} rect 目标元素的视口矩形
      * @returns {boolean} 是否被上级元素遮挡/显示不全
      */
-    function checkParentClip(elem, rect) {
-        let parent = elem.parentNode;
+    function checkParentClip(elem, rect, pnode) {
+        let parent = pnode || elem.parentNode;
         // 递归终止条件：遍历至<body>或null
         //while (parent && parent.tagName !== 'BODY') {
         while (parent && parent.tagName) {
@@ -8478,14 +8490,14 @@ $.debounce 防抖
      * @param {HTMLElement} elem 目标DOM元素
      * @returns {boolean} true=被遮挡/显示不全，false=完全可见
      */
-    function isElementObscured(elem) {
+    function isElementObscured(elem, parent) {
         // 步骤1：获取目标元素矩形
         const rect = getElementRect(elem);
         if (!rect) {
             return true; // 元素本身不可见，视为"显示不全"
         }
         // 步骤2：检查所有上级父元素是否遮挡
-        return checkParentClip(elem, rect);
+        return checkParentClip(elem, rect, parent);
     }
 
     /**
@@ -8537,17 +8549,17 @@ $.debounce 防抖
     }
 
     $.extend($, {
-        isElementObscured: function (elem) {
-            return isElementObscured(elem);
+        isElementObscured: function (elem, parent) {
+            return isElementObscured(elem, parent);
         },
-        isElemObscured: function (elem) {
-            return isElementObscured(elem);
+        isElemObscured: function (elem, parent) {
+            return isElementObscured(elem, parent);
         },
-        isElementCovered: function (elem) {
-            return isElementObscured(elem);
+        isElementCovered: function (elem, parent) {
+            return isElementObscured(elem, parent);
         },
-        isElemCovered: function (elem) {
-            return isElementObscured(elem);
+        isElemCovered: function (elem, parent) {
+            return isElementObscured(elem, parent);
         },
         isContentObscured: function (elem, content) {
             return isElementWidthIncomplete(elem, content);

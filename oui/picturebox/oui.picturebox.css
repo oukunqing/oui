@@ -499,8 +499,13 @@
 .oui-picbox-txt-item .item {
     cursor: pointer;
     border: none;
+    border-radius: 0;
     background: transparent;
     min-height: 0;min-width: 0;
+    width: auto; height: auto;
+    line-height: 30px;
+    font-size: 14px;
+    font-family: Arial,宋体;
     margin:0;
     display: block;
     float: left;

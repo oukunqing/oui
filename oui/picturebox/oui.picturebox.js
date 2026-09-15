@@ -656,7 +656,7 @@
             Factory.showBar(that).showSlide(that);
 
             var url = that.cache.files[index];
-            that.display(url).rotate(0);
+            that.display(url, index).rotate(0);
 
             return this;
         },
@@ -733,6 +733,9 @@
                 window.clearInterval(that.cache.timer);
             }
             that.cache.timer = window.setInterval(function() {
+                if (that.disabled) {
+                    return false;
+                }
                 let ts = new Date().getTime();
                 if (that.cache.slide && !that.cache.pause && ts - that.cache.playtime >= that.cache.timing) {
                     let idx = that.cache.index, len = that.cache.items.length;
@@ -1236,7 +1239,7 @@
     }
 
     PictureBox.prototype = {
-        initial: function(options) {
+        initial: function(options, update) {
             var that = this,
                 opt = $.extend({
                     element: null,
@@ -1269,7 +1272,13 @@
                     //切换间隔时间，单位：毫秒
                     timing: 5000,
                     //是否循环切换
-                    switch: false
+                    switch: false,
+                    //回调函数
+                    callback: null,
+                    //显示函数，返回当前播放的图片序号和图片地址
+                    display: function (index, path) {
+
+                    }
                 }, options), box = that.box, path;
 
             options.magnifierStyle = $.extend({}, options.magnifierStyle);
@@ -1291,13 +1300,17 @@
             }, options.magnifierStyle);
 
             that.opt = $.extend({}, that.opt, opt);
+            that.disabled = false;
 
             that.cache.update = that.img !== null;
-            that.cache.slide = opt.slide;
-            that.cache.loop = opt.loop;
-            that.cache.timing = opt.timing;
-            that.cache.switch = opt.switch;
-            that.cache.magnifier = opt.magnifierStyle;
+
+            if (!update) {
+                that.cache.slide = opt.slide;
+                that.cache.loop = opt.loop;
+                that.cache.timing = opt.timing;
+                that.cache.switch = opt.switch;
+                that.cache.magnifier = opt.magnifierStyle;
+            }
 
             if (!that.cache.update) {
                 box = $.toElement(opt.element);
@@ -1445,26 +1458,30 @@
                 }
             }
 
-            that.display(path);
+            that.display(path, -1);
 
             return this;
         },
-        display: function (path) {
-            var that = this, picurl = path;
+        display: function (path, index) {
+            var that = this, opt = that.opt, picurl = path;
 
-            if (!$.isString(picurl, true) || !that.img) {
+            if (that.disabled || !$.isString(picurl, true) || !that.img) {
                 return that;
             }
 
             that.img.src = picurl.cleanSlash();
             that.img.rot = 0;
 
+            if (index >= 0 && typeof opt.display === 'function') {
+                opt.display(index, path);
+            }
+
             return this;
         },
         update: function (options) {
             let opt = Factory.checkOptions(options);
             if (opt) {
-                return this.initial($.extend(this.opt, opt));
+                return this.initial($.extend(this.opt, opt), true);
             }
             return this;
         },
@@ -1664,6 +1681,10 @@
             return that.move();
         },
         move: function () {
+            return this;
+        },
+        disable: function (disabled) {
+            this.disabled = $.isBoolean(disabled, true);
             return this;
         },
         outside: function () {
