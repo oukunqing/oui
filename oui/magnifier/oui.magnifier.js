@@ -239,8 +239,8 @@
     Magnifier.prototype = {
         initial: function (options) {
             let that = this, opt = options, elem = options.target;
+            $.console.log('magnifier initial, elem:', elem);
 
-            $.console.log('elem:', elem);
             if ($.isElement(elem)) {
                 $.addListener(elem, 'pointermove', function(ev) {
                     Factory.initMagnifier(ev, that);

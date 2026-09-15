@@ -57,11 +57,11 @@
             // 选项高度
             BoxItemHeight: $.isWap ? 40 : 32,
             // 复选框上边距
-            ChbMarginTop: $.isWap ? 11 : 7,
+            ChbMarginTop: $.isWap ? 11 : 8,
             // 选项底部高度
             BoxBarHeight: 42,
             // 空下拉框最小宽度
-            ElemMinWidth: 100,
+            ElemMinWidth: 86,
             // 选项默认显示行数
             ItemDisplayLines: 12,
             // 选项序号(单个数字)宽度
@@ -534,11 +534,11 @@
                             chbMargin = Config.ChbMarginTop;
 
                         if (itemHeight) {
-                            chbMargin += parseInt((itemHeight - Config.BoxItemHeight) / 2, 10) + 1;
-                            if (isBorder) {
-                                itemHeight -= 2;
-                                chbMargin -= 1;
-                            }
+                            chbMargin += parseInt((itemHeight - Config.BoxItemHeight) / 2, 10) + isBorder ? 0 : 1;
+                            //if (isBorder) {
+                                //itemHeight -= 2;
+                                //chbMargin -= 1;
+                            //}
                         }
 
                         html.push([
@@ -941,6 +941,7 @@
                     return false;
                 });
 
+                // 显示下拉列表
                 $.addListener(elem, 'mousedown,touchstart', function (ev) {
                     $.cancelBubble(ev);
                     that.show(this);
@@ -949,6 +950,7 @@
                     $.hidePopupPanel(that.box);
                     return true;
                 });
+
                 $.addListener(elem, 'keydown', function (ev) {
                     if (elem.tagName !== 'SELECT' && opt.dataType === 'string') {
                         return false;
@@ -1093,6 +1095,7 @@
                     set: function (val) {
                         $.console.log('set [property]', elem.id, val, typeof val);
                         if (val !== undefined) {
+                            //设置一个临时输入变量
                             elem.inputValue = val;
                             that.set(val, {edit: that.options.editable});
                             elem.inputValue = null;
@@ -1733,6 +1736,9 @@
         var opt = Factory.checkOptions($.extend({
             id: '',
             skin: Config.DefaultSkin,       //样式: default, blue等
+            //模式： true - 表示自动转换，false  - 表示人为指定
+            mode: false,
+            //指定的元素或元素ID
             element: undefined,
             //指定Id/Value字段，有时需要用别的字段当id字段来用，比如用 code 表示 id
             field: '',
@@ -1945,6 +1951,14 @@
             //保存原始的选项
             that.cache['originOptions'] = Factory.getElementOptionConfig(elem);
 
+            if (elem.tagName === 'SELECT' && opt.multi && opt.mode) {
+                var items = that.cache['originOptions'];
+                if (items.length > 0 && (items[0].val === '' || items[0].val === '-1')) {
+                    opt.title = opt.title || items[0].txt;
+                    that.cache['originOptions'] = items.slice(1);
+                }
+            }
+
             //如果没有配置选项，则尝试从元素属性中获取
             if (opt.origin || opt.items.length <= 0) {
                 opt.items = that.cache['originOptions'].concat(opt.items);
@@ -2086,7 +2100,6 @@
 
             if (opt.select) {
                 that.elem.options.length = 0;
-                //that.elem.options.add(new Option(opt.title || 'abcde', 'abc'));
                 that.elem.options.add(new Option(opt.title || '', ''));
             } else {
                 that.text.value = opt.title || '';
@@ -2229,7 +2242,7 @@
                 opt.items = items;
             }
 
-            if (opt.origin) {                
+            if (opt.origin) {
                 opt.items = that.cache['originOptions'].concat(opt.items);
             }
 
@@ -2715,7 +2728,6 @@
         hide: function () {
             var that = this,
                 opt = that.options;
-
             if ($.isElement(that.box) && that.box.style.display !== 'none') {
                 that.box.style.display = 'none';
                 that.box.show = false;
@@ -3315,7 +3327,7 @@
 !function ($) {
     'use strict';
 
-    /* 定制功能，获取 */
+    /* 定制功能，获取 data-mode 属性 */
     $.addListener(window, 'load', function() {
         let elements = document.querySelectorAll('select[data-mode="single"]');
         if (elements) {
@@ -3324,7 +3336,7 @@
         elements = document.querySelectorAll('select[data-mode="multi"]');
         if (elements) {
             $.dropdownlist(elements, { 
-                multi: true, layout: 'list', callbackLevel: 2, debounce: false, itemWidth: 'cell' 
+                multi: true, mode: true, layout: 'list', callbackLevel: 0, button: false, debounce: false, itemWidth: 'cell' 
             });
         }
         elements = document.querySelectorAll('select[data-mode="switchgroup"]');

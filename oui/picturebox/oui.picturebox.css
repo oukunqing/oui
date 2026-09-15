@@ -478,3 +478,35 @@
     user-select: none;
     -ms-user-select: none;
 }
+
+.oui-picbox-txt-item {
+    margin:0;padding: 0 3px 0 3px;
+    position: absolute;
+    display:block;
+    box-sizing: border-box;
+    border: solid 1px #ddd;
+    border-radius: 5px;
+    border-top-left-radius: 0;
+    min-height:0;height:30px;
+    line-height: 30px;
+    overflow:hidden;background:#fff;
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    user-select: none;
+    -ms-user-select: none;
+}
+
+.oui-picbox-txt-item .item {
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    min-height: 0;min-width: 0;
+    margin:0;
+    display: block;
+    float: left;
+    color: #666;
+    padding: 0 3px 0 3px;
+}
+.oui-picbox-txt-item .item:hover {
+    background: #f1f1f1;
+}

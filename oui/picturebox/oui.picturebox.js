@@ -785,6 +785,9 @@
             if (that.cache.form_magnifier) {
                 that.cache.form_magnifier.style.display = 'none';
             }
+            if (that.cache.form_options) {
+                that.cache.form_options.style.display = 'none';
+            }
             return this;
         },
         hideFormPanelTiming: function (elem, key) {
@@ -831,7 +834,7 @@
                 div.innerHTML = [
                     /*'<label class="oui-picbox-lbl"><input type="checkbox" class="oui-picbox-chb" /><span>循环播放</span></label>',
                     '<span>切换时长</span>',
-                    '<input type="text" placeholder="" class="oui-picbox-txt" maxlength="6" title="图片切换时间，以毫秒为单位" />',
+                    '<input type="text" placeholder="" class="oui-picbox-txt" maxlength="6" title="图片切换时间，以毫秒为单位，500-900000" />',
                     '<span>毫秒</span>',
                     '<input type="button" class="oui-picbox-btn" value="确定" />',
                     */
@@ -846,7 +849,7 @@
                 that.cache.form = div;
 
                 $.addListener(div.querySelector('.oui-picbox-btn'), 'click', function (ev) {
-                    let ms = div.querySelector('.oui-picbox-txt').value.toInt();
+                    let ms = div.querySelector('.oui-picbox-txt').value.replace(/[,]/,'').toInt();
                     if (ms < Config.SlideMinInterval || ms > Config.SlideMaxInterval) {
                         return false;
                     }
@@ -855,6 +858,41 @@
                     that.cache.loop = loop;
 
                     div.style.display = 'none';
+                });
+                $.addListener(div.querySelector('.oui-picbox-txt'), 'click', function (ev) {
+                    $.cancelBubble(ev);
+                    let panel = that.body.querySelector('.oui-picbox-txt-item'), txt = this;
+                    if (!panel) {
+                        panel = document.createElement('DIV');
+                        panel.className = 'oui-picbox-txt-item';
+                        panel.style.cssText = 'top:59px;left:149px;z-index:99999;display:none;';
+                        panel.innerHTML = [
+                            '<span class="item">500</span>',
+                            '<span class="item">1000</span>',
+                            '<span class="item">2000</span>',
+                            '<span class="item">3000</span>',
+                            '<span class="item">4000</span>',
+                            '<span class="item">5000</span>',
+                            '<span class="item">6000</span>',
+                            '<span class="item">8000</span>',
+                            '<span class="item">10000</span>'
+                        ].join('');
+                        that.body.appendChild(panel);
+
+                        that.cache.form_options = panel;
+                    }
+                    panel.style.display = panel.style.display !== 'none' ? 'none' : '';
+
+                    $.addListener(panel, 'click', function (ev) {
+                        $.cancelBubble(ev);
+                        let elem = ev.target;
+                        if (elem.tagName === 'SPAN' && elem.className === 'item') {
+                            txt.value = elem.innerHTML;
+                        }
+                    });
+                    $.addListener(document.body, 'click', function (ev) {
+                        panel.style.display = 'none';
+                    });
                 });
             }
             if (hide || div.style.display !== 'none') {

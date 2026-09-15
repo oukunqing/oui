@@ -8641,10 +8641,7 @@ $.title
 
             let objects = document.querySelectorAll('object');
             if (objects && objects.length > 0) {
-                elem.innerHTML = [
-                    '<div></div>',
-                    Factory.buildCover(that)
-                ].join('');
+                elem.innerHTML = [ '<div></div>', Factory.buildCover(that) ].join('');
                 
                 that.panel = elem.childNodes[0];
                 that.cover = elem.childNodes[1];
@@ -9025,9 +9022,11 @@ $.title
             return $.isContentCovered(elem, content) || $.isElemObscured(elem);
         },
         getSelectedText: function (elem) {
-            const selectedIndex = elem.selectedIndex; // 获取选中项索引
-            const selectedText = elem.options[selectedIndex].text; // 获取选中文本
-            return selectedText || '';
+            const selectedIndex = elem.selectedIndex;
+            if (selectedIndex < 0) {
+                return '';
+            }
+            return elem.options[selectedIndex].text || '';
         },
         getElementValue: function (elem) {
             return elem.value || elem.innerText || elem.innerHTML;
@@ -9170,7 +9169,6 @@ $.title
 !function ($) {
     'use strict';
 
-    /* 优化F5刷新(仅子页面有效) */
     if (typeof window !== 'undefined') {
         $.addListener(window, 'load', function () {
             /* 优化Title */
@@ -9183,6 +9181,7 @@ $.title
                 }
             }
         });
+        /* 优化F5刷新(仅子页面有效) */
         if (!$.isTopWindow()) {
             $.addListener(document, 'keydown', function (e) {
                 //捕获F5键，仅刷新当前页面，防止F5刷新整站
