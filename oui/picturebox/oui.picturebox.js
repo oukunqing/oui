@@ -631,7 +631,7 @@
         showItem: function (that, index) {
             var items = $.extend([], that.cache.items);
 
-            if (!items) {
+            if (!items || that.disabled()) {
                 return this;
             }
             if (!that.cache.switch && (index < 0 || index >= items.length)) {
@@ -733,7 +733,7 @@
                 window.clearInterval(that.cache.timer);
             }
             that.cache.timer = window.setInterval(function() {
-                if (that.disabled) {
+                if (that.cache.disabled) {
                     return false;
                 }
                 let ts = new Date().getTime();
@@ -1300,8 +1300,8 @@
             }, options.magnifierStyle);
 
             that.opt = $.extend({}, that.opt, opt);
-            that.disabled = false;
 
+            that.cache.disabled = false;
             that.cache.update = that.img !== null;
 
             if (!update) {
@@ -1465,7 +1465,7 @@
         display: function (path, index) {
             var that = this, opt = that.opt, picurl = path;
 
-            if (that.disabled || !$.isString(picurl, true) || !that.img) {
+            if (that.cache.disabled || !$.isString(picurl, true) || !that.img) {
                 return that;
             }
 
@@ -1683,9 +1683,14 @@
         move: function () {
             return this;
         },
-        disable: function (disabled) {
-            this.disabled = $.isBoolean(disabled, true);
-            return this;
+        disabled: function (disabled) {
+            var that = this;
+            if ($.isBoolean(disabled)) {
+                that.cache.disabled = disabled;
+            } else if (!that.box || that.box.style.display === 'none') {
+                that.cache.disabled = true;
+            }
+            return that.cache.disabled;
         },
         outside: function () {
             var that = this;
