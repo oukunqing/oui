@@ -107,7 +107,6 @@
             }
             Config.initCache(options, that.elem);
             var cache = Config.getCache(options);
-            $.console.log('initial:', cache);
 
             if ($.isFunction(options.callback)) {
                 cache.callback = options.callback;
@@ -309,13 +308,14 @@
                 size = dir === 'left' || dir === 'top' ? cache.size + value : cache.size - value;
 
             // 如果移动距离很小（或未移动），则不处理（也不再回调）
-            if (Math.abs(value) < 3 || size <= 0) {
+            if (Math.abs(value) <= 3 || size <= 0) {
                 return this;
             }
 
             if ($.isFunction(cache.options.callback)) {
+                var panel = $.toElement(cache.panel);
                 cache.callback({ 
-                    panel: cache.panel, size: size, start: start, end: end, value: value
+                    panel: panel, size: size, start: start, end: end, value: value
                 });
             }
             return this;
