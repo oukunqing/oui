@@ -1519,7 +1519,8 @@
                 '.input-opt-ul li a{margin:0;padding:0;font-size:14px;display:block;border:none;background:none;text-decoration:none;color:#000;cursor:default;}',
                 '.input-opt-ul li span{margin:0;padding:0;font-size:14px;border:none;margin:0;padding:0;}',
                 '.input-opt-ul li u{text-decoration:none;color:#999;font-size:14px;margin:03px;padding:0;border:0;background:none;}',
-                '.input-opt-ul li span.i-t{color:#999;margin:0 0 0 8px;padding:0;font-size:14px;border:none;background:none;}'
+                '.input-opt-ul li span.i-t{color:#999;margin:0 0 0 5px;padding:0;font-size:14px;border:none;background:none;min-width:0;min-height:0;}',
+                '.input-opt-ul li span.i-p{color:#999;margin:0 5px 0 0;padding:0;font-size:14px;border:none;background:none;min-width:0;min-height:0;}'
             ].join(''));
 
             return this;
@@ -1753,14 +1754,13 @@
                         }
                     }
                 }
-                return $.input.setWarnColor(elem, false);
+                return $.input.setWarnColor(opt, elem, false);
             },
             replaceValue: function (ev, elem, val, isCnAble, converts, optionValues) {
-                var replace = false;
+                var replace = false, pattern = /([。，、：；‘’“”！……~｛【《》】｝]|[\u3220-\uFA29]|[`·])+/ig;
                 //当没有选项并且也不允许中文输入的情况，清除中文（包括标点符号）
-                if (!$.input.isInOption(optionValues, val) && !isCnAble &&
-                    /([。，、：；‘’“”！……~｛【《》】｝]|[\u3220-\uFA29]|[`·])+/ig.test(val)) {
-                    val = val.replace(/([。，、：；‘’“”！……~｛【《》】｝]|[\u3220-\uFA29]|[`·])+/ig, '');
+                if (!$.input.isInOption(optionValues, val) && !isCnAble && pattern.test(val)) {
+                    val = val.replace(pattern, '');
                     elem.value = val;
                 }
                 var kc = $.getKeyCode(ev) || 0;
@@ -1787,6 +1787,9 @@
                 return { replace: replace, val: val };
             },
             setWarnColor: function (opt, elem, pass, focus) {
+                if (!$.isElement(elem)) {
+                    return pass;
+                }
                 if (!pass) {
                     if (!elem.oldColor) {
                         elem.oldColor = $.getElementStyle(elem, 'color');
@@ -1993,15 +1996,12 @@
                 return this;
             },
             buildOption: function (options) {
-                return $.isArray(options) ?
-                    options : $.isUndefinedOrNull(options) ?
-                        [] : $.isString(options, true) ?
-                            options.split(/[,;\|]/) : [options];
+                return $.isArray(options) ? options : ($.isUndefinedOrNull(options) ? [] : ($.isString(options, true) ? options.split(/[,;\|]/) : [options]));
             },
             //action: 0 - hide, 1 - toggle, 2 - show
-            setOption: function (elem, options, config, action) {
-                var cfg = $.extend({}, config),
-                    opt = $.input.buildOption(options),
+            setOption: function (elem, par, action) {
+                var cfg = $.extend({}, par.config),
+                    opt = $.input.buildOption(par.options),
                     show = true, display = '';
 
                 if (!$.isNumber(action)) {
@@ -2071,7 +2071,16 @@
                     if ($.isString(txt, true) || $.isNumber(txt) || $.isString(val, true) || $.isNumber(val)) {
                         idx++;
                         if (cfg.display && val.toString() !== '' && val.toString() !== txt.toString()) {
-                            con = val + '<span class="i-t">' + txt + '</span>';
+                            con = [
+                                par.prefix ? '<span class="i-p">' + par.prefix + '</span>' : '', 
+                                val, '<span class="i-t">', txt, '</span>'
+                            ].join('');
+                        } else {
+                            con = [
+                                par.prefix ? '<span class="i-p">' + par.prefix + '</span>' : '', 
+                                val, 
+                                par.postfix ? '<span class="i-t">' + par.postfix + '</span>' : ''
+                            ].join('');
                         }
                         if (cur) {
                             curIdx = idx;
@@ -2122,7 +2131,8 @@
                     window.inputOptionDocEventListener = 1;
                     $.addListener(document, 'mousedown', function (ev) {
                         if ((ev.target.tagName === 'LI' && ev.target.className.indexOf('input-opt-panel-item') > -1) ||
-                            (ev.target.tagName === 'SELECT' && ev.target.className.indexOf('input-opt-panel-select') > -1)) {
+                            (ev.target.tagName === 'SELECT' && ev.target.className.indexOf('input-opt-panel-select') > -1) ||
+                            (ev.target.tagName === 'DIV' && ev.target.className.indexOf('input-opt-panel-box') > -1)) {
                             return false;
                         }
                         $.input.hideOptionPanel();
@@ -2874,7 +2884,7 @@
                         function _showOption(ev, elem, opt, action) {
                             $.input.hideOptionPanel(elem.optbox);
                             //这里不能用options，因为options是select元素的自有属性
-                            elem.values = $.input.setOption(elem, opt.options, opt.config, action);
+                            elem.values = $.input.setOption(elem, opt, action);
                         }
                         function _haveOption(elem) {
                             var id = $.getAttribute(elem, 'opt-id');
@@ -3229,7 +3239,7 @@
                                 $.console.log('\u5185\u5bb9\u683c\u5f0f\u9519\u8bef', val);   //内容格式错误
                                 return $.input.setWarnColor(opt, this, false, true);
                             }
-                            if (len > 0 && opt.minVal && parseFloat('0' + val, 10) < opt.minVal) {
+                            if (len > 0 && $.isNumber(opt.minVal) && parseFloat('0' + val, 10) < opt.minVal) {
                                 return $.input.setWarnColor(opt, this, false, true);
                             }
                             return $.input.setWarnColor(opt, this, true);

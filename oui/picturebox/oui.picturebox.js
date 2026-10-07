@@ -1195,8 +1195,7 @@
                     var endDistance = Math.sqrt(x * x + y * y),
                         startDistance = that.cfg.startDistance,
                         curScale = that.cfg.curScale;
-                        */
-
+                    */
                 }
             });
             
@@ -1287,7 +1286,7 @@
             opt.magnifierStyle = $.extend({
                 width:150, height:150, cursor: 'crosshair',
                 // 放大倍数：1, 1.5, 2
-                ratio: 1,                
+                ratio: 1,
                 // 形状：0 - 圆形，1 - 方形
                 type: 0, 
                 // 是否等边（即正方形）: 0 - 不等边，1 - 等边
@@ -1688,6 +1687,8 @@
             if ($.isBoolean(disabled)) {
                 that.cache.disabled = disabled;
             } else if (!that.box || that.box.style.display === 'none') {
+                // 若图片框被删除或被隐藏，则禁用功能
+                // 禁用后，不再播放幻灯片也不再回调播放序号
                 that.cache.disabled = true;
             }
             return that.cache.disabled;

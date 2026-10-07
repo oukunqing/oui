@@ -310,6 +310,7 @@ button {width:120px;height:30px;}
         $.setInputFormat('fmt_num_hex', {
             types: ['hex', 'option'],
             options: ['a55a', '5aa5'],
+            prefix: '报头',
             //type: 'hex',
             maxLen: 4
         });
@@ -376,7 +377,8 @@ button {width:120px;height:30px;}
             }
         });
         $.setInputFormat('fmt_ipv4', {
-            types: ['ipv4']
+            types: ['ipv4','option'],
+            options: ['127.0.0.1'],
         });
         $.setInputFormat('fmt_ipv6', {
             types: ['ipv6']

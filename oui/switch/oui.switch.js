@@ -21,7 +21,7 @@
                 Config.id += 1;
             }
             var key = Config.buildKey(opt);
-            Config.caches[key] = {
+            Config.caches[key] = $.extend({
                 panel: panel,
                 bar: null,
                 first: true,
@@ -47,7 +47,7 @@
                     w: 0,
                     h: 0
                 }
-            };
+            }, opt);
             return this;
         },
         setCache: function (opt, par) {
@@ -75,7 +75,8 @@
                 break;
             case 2:
             case 'up':
-                val = 'up';
+            case 'top':
+                val = 'top';
                 break;
             case 3:
             case 'right':
@@ -83,7 +84,8 @@
                 break;
             case 4:
             case 'down':
-                val = 'down';
+            case 'bottom':
+                val = 'bottom';
                 break;
             default:
                 val = 'left';
@@ -105,6 +107,7 @@
             }
             Config.initCache(options, that.elem);
             var cache = Config.getCache(options);
+            $.console.log('initial:', cache);
 
             if ($.isFunction(options.callback)) {
                 cache.callback = options.callback;
@@ -256,13 +259,10 @@
         },
         mouseMove: function () {
             var cache = Config.cache;
-            if (cache.dragStart && !cache.dragAble) {
+            if (cache.dragStart) {
                 $('#' + cache.switch_shade_id).show();
                 cache.dragAble = true;
             } else {
-                cache.dragAble = false;
-            }
-            if (!cache.dragAble) {
                 return false;
             }
             var ev = $.getEventPosition(), pass = false, pos, border, wh, dir = cache.direction;
@@ -275,7 +275,7 @@
                 border = cache.bs.height;
                 wh = parseInt(cache.box.h, 10) / 2;
             }
-            if (dir === 'left' || dir === 'up') {
+            if (dir === 'left' || dir === 'top') {
                 pass = (pos > cache.min) && (!cache.max || pos < cache.max) && (pos < border - cache.minKeepSize);
             } else {
                 pass = (pos < border - cache.min) && (!cache.max || pos > border - cache.max) &&  (pos > cache.minKeepSize);
@@ -283,9 +283,9 @@
             if (pass) {
                 cache.end = pos;
                 $('#' + cache.switch_shade_id).css(cache.horizontal ? 'left' : 'top', cache.end - wh);
+                Factory.showValue(cache, cache.end);
             }
 
-            Factory.showValue(cache, cache.end);
             return this;
         },
         mouseUp: function () {
@@ -306,7 +306,12 @@
                 end = cache.end,
                 value = cache.end - cache.start,
                 dir = cache.direction,
-                size = dir === 'left' || dir === 'up' ? cache.size + value : cache.size - value;
+                size = dir === 'left' || dir === 'top' ? cache.size + value : cache.size - value;
+
+            // 如果移动距离很小（或未移动），则不处理（也不再回调）
+            if (Math.abs(value) < 3 || size <= 0) {
+                return this;
+            }
 
             if ($.isFunction(cache.options.callback)) {
                 cache.callback({ 
