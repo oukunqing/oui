@@ -268,11 +268,11 @@
             if (cache.horizontal) {
                 pos = ev.x;
                 border = cache.bs.width;
-                wh = parseInt(cache.box.w, 10) / 2;
+                wh = parseInt(cache.box.w / 2, 10);
             } else {
                 pos = ev.y;
                 border = cache.bs.height;
-                wh = parseInt(cache.box.h, 10) / 2;
+                wh = parseInt(cache.box.h / 2, 10);
             }
             if (dir === 'left' || dir === 'top') {
                 pass = (pos > cache.min) && (!cache.max || pos < cache.max) && (pos < border - cache.minKeepSize);
@@ -306,7 +306,7 @@
                 value = cache.end - cache.start,
                 dir = cache.direction,
                 size = dir === 'left' || dir === 'top' ? cache.size + value : cache.size - value;
-
+$.console.log('size:', size);
             // 如果移动距离很小（或未移动），则不处理（也不再回调）
             if (Math.abs(value) <= 3 || size <= 0) {
                 return this;

@@ -2213,10 +2213,29 @@
 
                 function _enter(elem, func) {
                     $.addListener(elem, 'keyup', function (ev) {
-                        var val = elem.value.trim(),
-                            kc = $.getKeyCode(ev);
-                        if (val.length > 0 && kc === $.KEY_CODE.Enter) {
-                            func(elem);
+                        var kc = $.getKeyCode(ev);
+                        if (kc === $.KEY_CODE.Enter) {
+                            // 判断内容是否为空，若内容为空则判断上一次的内容是否为空
+                            var val = elem.value.trim(),
+                                curTime = new Date().getTime(),
+                                lastTime = elem.lastCallTime || 0,
+                                lastValue = elem.lastCallValue,
+                                // 超时时间为5分钟，5分钟后即使内容为空，也可以提交一次
+                                timeout = 5 * 60 * 1000,
+                                // 判断是否要执行回调
+                                // 1.当输入框中的内容不为空
+                                // 2.或者是第一次执行
+                                // 3.或者上一次是有内容的（现在没有内容，是由上次的有内容变成空）
+                                // 4.或者距离上一次的提交已经过了超时时间（暂定为5分钟）
+                                pass = val.length > 0 || typeof lastValue === 'undefined' || lastValue !== '' || (curTime - lastTime >= timeout);
+
+                            //记录最后一次提交的内容和时间
+                            elem.lastCallValue = val;
+                            elem.lastCallTime = new Date().getTime();
+
+                            if (pass) {
+                                func(elem);
+                            }
                         }
                     });
                 }
@@ -2740,6 +2759,11 @@
                     } else if (types[0].inArray(['boolean', 'bool'])) {
                         opt.config.readonly = $.isBoolean(par.config.readonly, true);
                     }
+                } else if (types.length > 1) {
+                    var tmp = types.join(',');
+                    if (tmp.indexOf('option') > -1 && tmp.replace(/option[s]?|[,]/g, '') !== '') {
+                        opt.config.editable = true;
+                    }
                 }
                 var _minus = opt.minus ? '[-]?' : '';
 
@@ -2823,7 +2847,8 @@
                         //错误的IPv4输入格式
                         exceptions = exceptions.concat([/(\.\.)+|^([\d]{1,3}\.){4,}$|([\d]{4,})|(25[6-9]|(0|[3-9])[\d]{2})/]);
                         opt.maxLen = 15;
-                        converts = converts.concat([{ src: '127.', dest: '127.0.0.1' }, ['192.', '192.168.'], ['255.', '255.255.255.0']]);
+                        //converts = converts.concat([{ src: '127.0.0.10', dest: '127.0.0.1' }, { src: '127.0.0.11', dest: '127.0.0.1' }, { src: '127.', dest: '127.0.0.1' }, ['192.', '192.168.'], ['255.', '255.255.255.0']]);
+                        converts = converts.concat([{ src: '127.0.0.10', dest: '127.0.0.1' }, { src: '127.0.0.11', dest: '127.0.0.1' }, { src: '127.', dest: '127.0.0.1' }, ['255.', '255.255.255.0']]);
                     } else if (type === 'ipv6') {
                         keys = keys.concat([KC.Symbol[':']]);
                         isVal = true;

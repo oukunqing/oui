@@ -23,8 +23,18 @@
 //maxZoom(maxScale)是相对于图片本身的大小
 window.onload = function() {
 	$.picbox({
-		obj: 'box', img: 'pics/20260521110101_01_201401_001_01.jpg', width: 800, height:500, defaultZoom: 0.9, minZoom: 0.5, maxScale: 2, showScale: true, showTitle: true,
-		showMagnifier: true, magnifierStyle: {
+		obj: 'box', 
+		img: 'pics/20260521110101_01_201401_001_01.jpg', 
+		width: 800, 
+		height:500, 
+		defaultZoom: 0.9, 
+		minZoom: 0.5, 
+		maxScale: 2, 
+		showScale: true, 
+		showTitle: true,
+		magnifier: false, 
+		showMagnifier: true, 
+		magnifierStyle: {
 			//放大镜宽度高度
 			//width: 200, height: 200,
 			//放大镜圆角像素大小
@@ -35,7 +45,12 @@ window.onload = function() {
 			//position: 'custom', 
 			//position: 'center', 
 			cssText: 'border:solid 1px #f00;'
-		},angle:90, showList: true, position: 'right', thumb: false, list: [
+		},
+		angle:90, 
+		showList: true, 
+		position: 'right', 
+		thumb: false, 
+		list: [
 			'pics/a.jpg',
 			'pics/pic1.jpg',
 			'pics/20260403090150_01_137279_000_01.jpg',
@@ -50,11 +65,12 @@ window.onload = function() {
 			'pics/20260521110126_01_137279_000_01.jpg',
 			'pics/20260521110101_01_201401_001_01.jpg',
 			'pics/20260521105002_01_866663060823778_000_01.jpg',
-		], slide: false
+		], 
+		slide: false
 	});
 	//默认 showTitle: true, showScale: true,
 	//$.picbox({ obj: 'box2', img: 'imgs/a.jpg', width: 600, height: 400, showTitle: true, showScale: true, defScale: 0.5, minZoom: 0.25 });
-	$.picbox({ obj: 'box2', img: 'imgs/map_bg.jpg', width: 600, height: 400, defScale: 0.5, minZoom: 0.25, showTitle: true, maxScale: 2, showList: true });
+	$.picbox({ obj: 'box2', img: 'imgs/map_bg.jpg', width: 600, height: 400, defScale: 0.5, minZoom: 0.25, showTitle: true, maxScale: 2, showList: true, magnifier: false });
 };
 
 function switchpic() {

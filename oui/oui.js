@@ -1054,9 +1054,23 @@
             }
             return isBoolean ? true : val;
         },
+        getObjectKeys = function (opt) {
+            var keys = [];
+            for (var k in opt) {
+                keys.push(k);
+            }
+            return keys;
+        },
         //获取参数值（参数名重载）
         //notAllowEmpty - 不允许空值，默认为允许
         getParam = function (opt, key, dval, notAllowEmpty) {
+            if (arguments.length === 1 && $.isObject(opt)) {
+                key = opt.key;
+                dval = opt.val;
+                notAllowEmpty = $.isBoolean(opt.notAllowEmpty, false);
+                // 这个要放在最后
+                opt = opt.options; 
+            }
             if (!$.isObject(opt)) {
                 return dval;
             }
@@ -1077,6 +1091,46 @@
                 }
             }
             return dval;
+        },
+        getAlias = function (opt, key, dval, notAllowEmpty, fields) {
+            if (arguments.length === 1 && $.isObject(opt)) {
+                key = opt.key;
+                dval = opt.val;
+                notAllowEmpty = $.isBoolean(opt.notAllowEmpty, false);
+                fields = opt.fields;
+                // 这个要放在最后
+                opt = opt.options; 
+            }
+            if (!$.isObject(opt)) {
+                return dval;
+            }
+            if (!$.isArray(fields)) {
+                fields = getObjectKeys(opt);
+            }
+            var pos = 0, idx = 0;
+
+            var keys = toList(key, /[\|\,]/g), len = keys.length, result = dval;
+            for (var i = 0; i < keys.length; i++) {
+                var k = keys[i], val;
+                if (k) {
+                    val = opt[k];
+                }
+                if (!$.isNullOrUndefined(val)) {
+                    //获取当前字段的序号
+                    idx = fields.indexOf(k);
+                    if (idx >= pos) {
+                        pos = idx;
+                        if ($.isString(val)) {
+                            if (!notAllowEmpty || val.trim() !== '') {
+                                result = val.trim();
+                            }
+                        } else {
+                            result = val;
+                        }
+                    }
+                }
+            }
+            return result;
         },
         //用于获取参数名重载（参数内容允许为null值）
         getParamValue = function () {
@@ -1378,8 +1432,9 @@
         setQueryString: setQueryString, getQueryString: getQueryString, getUrlHost: getUrlHost, getUrlPage: getUrlPage,
         addQueryString: addQueryString, removeQueryString: removeQueryString, delQueryString: removeQueryString,
         setDebug: setDebug, isDebugAction: isDebugAction, isDebug: isDebug, isLocalhost: isLocalhost,
-        filterValue: filterValue, keywordOverload: keywordOverload, keyOverload: keywordOverload,
-        setValue: setValue, getValue: getValue, isValue: isValue, getParam: getParam,
+        filterValue: filterValue, keywordOverload: keywordOverload, keyOverload: keywordOverload, 
+        getObjectKeys: getObjectKeys, getKeys: getObjectKeys,
+        setValue: setValue, getValue: getValue, isValue: isValue, getParam: getParam, getAlias: getAlias,
         getParamValue: getParamValue, getParVal: getParamValue, cleanSlash: cleanSlash,
         getParamCon: getParamCon, getParamContent: getParamCon, getParCon: getParamCon,
         buildTreeList: buildTreeList, toTreeList: buildTreeList,

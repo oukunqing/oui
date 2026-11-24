@@ -2438,7 +2438,7 @@
                 var div = document.createElement('div'), first = box.childNodes[0];
                 div.className = 'form oui-tree-form';
                 div.innerHTML = [
-                    '<input type="text" class="keywords oui-tree-keywords" placeholder="',
+                    '<input type="text" class="keywords oui-tree-keywords empty" placeholder="',
                     //opt.searchPrompt || '请输入关键字',
                     opt.searchPrompt || '\u8bf7\u8f93\u5165\u5173\u952e\u5b57',
                     '" maxlength="', opt.keywordsLength, '" />',
@@ -2467,8 +2467,7 @@
                 });
                 $.addListener(no, 'mousedown,touchstart', function (ev) {
                     Factory.showSearchPanel(tree, false, true);
-                    txt.value = '';
-                    $.setElemClass(no, 'hide', true);
+                    that.showDelIcon(txt, no, true);
                 });
 
                 $.addListener(txt, 'mousedown,touchstart', function (ev) {
@@ -2494,22 +2493,24 @@
 
                 return that;
             },
-            showDelIcon: function (txt, btn) {
-                if (txt.value.trim()) {
-                    $.setElemClass(btn, 'hide', false);
-                } else {
-                    $.setElemClass(btn, 'hide', true);
+            showDelIcon: function (txt, btn, clear) {
+                if (!txt) {
+                    return this;
                 }
+                if (clear) {
+                    txt.value = '';
+                }
+                var hide = !txt.value.trim();
+                $.setElemClass(btn, 'hide', hide);
+                $.setElemClass(txt, 'empty', hide);
+
                 return this;
             },
             clearSearch: function (tree) {
                 var txt = tree.box.querySelector('input.keywords'),
                     no = tree.box.querySelector('a.btn-cancel');
 
-                if (txt) {
-                    txt.value = '';
-                }
-                $.setElemClass(no, 'hide', true);
+                Factory.showDelIcon(txt, no, true);
 
                 Factory.setSearchCache(tree, { search: false, key: '' }).showSearchPanel(tree, false);
 
@@ -2704,10 +2705,10 @@
                     div.style.width = cfg.elem.offsetWidth + 'px';
                     return this;
                 }
+                        $.console.log('cfg:', cfg);
                 if (!$.isBoolean(show, true) && force) {
                     if (cfg && cfg.elem) {
-                        cfg.elem.value = '';
-                        $.setElemClass(cfg.no, 'hide', true);
+                        Factory.showDelIcon(cfg.elem, cfg.no, true);
                     }
                     Factory.setSearchCache(tree, { search: false, key: '' });
                     // 清除搜索节点列表
@@ -2802,9 +2803,9 @@
                         css.push('icon-page');
                     }
                     html.push([
-                        '<li nid="', node.id, '" title="', title, '">',
+                        '<li nid="', node.id, '">',
                         '<span class="', css.join(' '), '"></span>',
-                        text.replaceKeys(keys, '<b>', '</b>'),
+                        '<span title="', title, '">', text.replaceKeys(keys, '<b>', '</b>'), '</span>',
                         '</li>'
                     ].join(''));
                 }
@@ -2813,10 +2814,8 @@
                 Factory.setSearchCache(tree, { search: true });
 
                 var height = c * Config.SearchResultItemHeight + Config.SearchResultTitleHeight + 2,
-                    //title = c > 0 ? '找到<b>' + c + '</b>个结果' : '没有找到结果',
-                    title = c > 0 ?
-                        '\u627e\u5230<b>' + c + '</b>\u4e2a\u7ed3\u679c'
-                        : '\u6ca1\u6709\u627e\u5230\u7ed3\u679c',
+                    //title = c > 0 ? '<b>' + c + '</b>项' : '无匹配项',
+                    title = c > 0 ? '<b>' + c + '</b>\u9879' : '<b>\u65e0\u5339\u914d\u9879</b>',
                     max = Config.SearchResultBoxHeight,
                     panelHeight = tree.panel.offsetHeight,
                     display = $.isBoolean(show, div.style.display === 'none');

@@ -31,7 +31,8 @@
         ScaleRatio: 1.25,
         MagnifierMaxSize: 600,
         MagnifierMinSize: 100,
-        MagnifierDefSize: 150
+        MagnifierDefSize: 150,
+        HostDenyList: ['58.49.115.110','221.235.53.198']
     },
     Cache = {
         caches: {},
@@ -1280,8 +1281,16 @@
                     }
                 }, options), box = that.box, path;
 
+            var optFields = $.getObjectKeys(options), host = window.location.hostname;
+
             options.magnifierStyle = $.extend({}, options.magnifierStyle);
-            options.magnifierStyle.ratio = $.getParam(options.magnifierStyle, 'scaleRatio,ratio');
+            options.magnifierStyle.ratio = $.getAlias({options: options.magnifierStyle, key: 'scaleRatio,ratio', fields: optFields });
+            
+            if (Config.HostDenyList.indexOf(host) > -1) {
+                opt.showMagnifier = false;
+            } else {
+                opt.showMagnifier = $.isBoolean($.getAlias({ options: options, key: 'showMagnifier,magnifier', fields: optFields }), true);
+            }
 
             opt.magnifierStyle = $.extend({
                 width:150, height:150, cursor: 'crosshair',
